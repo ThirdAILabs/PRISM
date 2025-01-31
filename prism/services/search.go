@@ -10,15 +10,19 @@ import (
 	"net/url"
 	"prism/api"
 	"prism/llms"
+	"prism/ndb"
 	"prism/services/utils"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/go-chi/chi/v5"
 )
 
-type SearchService struct{}
+type SearchService struct {
+	entityNdb ndb.NeuralDB
+}
 
 func (s *SearchService) Routes() chi.Router {
 	r := chi.NewRouter()
@@ -158,7 +162,7 @@ func findLinkInResponse(response string) (string, error) {
 	if start < 0 {
 		return "", fmt.Errorf("missing link in response")
 	}
-	return response[start:], nil // TODO(reliability): what happens if there's text after the link?
+	return response[start:], nil // TODO(question): what happens if there's text after the link?
 }
 
 func fetchLink(link string) (string, error) {
@@ -188,7 +192,7 @@ func fetchLink(link string) (string, error) {
 
 	const maxBytes = 300000
 
-	text := make([]byte, maxBytes) // TODO(reliability): this seems like a lot?
+	text := make([]byte, maxBytes) // TODO(question): this seems like a lot?
 	n, err := io.ReadFull(res.Body, text)
 	if err != nil && err != io.ErrUnexpectedEOF { // UnexpectedEOF is returned if < N bytes are read
 		return "", err
@@ -233,6 +237,7 @@ func (s *SearchService) FormalRelations(w http.ResponseWriter, r *http.Request) 
 
 	answer, err := llm.Generate(prompt)
 	if err != nil {
+		slog.Error("formal relations: initial llm generaton failed", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -260,6 +265,7 @@ func (s *SearchService) FormalRelations(w http.ResponseWriter, r *http.Request) 
 
 	verification, err := llm.Generate(verificationPrompt)
 	if err != nil {
+		slog.Error("formal relations: verification llm generaton failed", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -268,6 +274,70 @@ func (s *SearchService) FormalRelations(w http.ResponseWriter, r *http.Request) 
 	WriteJsonResponse(w, api.FormalRelationResponse{HasFormalRelation: hasRelation})
 }
 
-func (s *SearchService) MatchEntities(w http.ResponseWriter, r *http.Request) {
+func cleanEntry(id uint64, text string) string {
+	lines := strings.Split(text, "\n")
+	for i, line := range lines {
+		if strings.Contains(line, "[ADDRESS]") {
+			// TODO(question): this used split before, is Cut ok?
+			_, addr, _ := strings.Cut(line, "[ADDRESS]")
+			addr, _, _ = strings.Cut(addr, ";")
+			lines[i] = "[ADDRESS] " + addr
+		}
+	}
+	return fmt.Sprintf("[ID] %d\n", id) + strings.Join(lines, "\n")
+}
 
+const (
+	matchEntitiesPrompt = `I will give you a list of entities, each formatted as a '[ID] <id value> [ENTITY START] ... [ENTITY END]' block. Each block contains known aliases of the entity, the address, and some other information.
+    If "%s" in the list of entities, return the value of the [ID] tag of all blocks that contain the entity, formatting it in a CSV list like this:
+
+    <id1>,<id2>,<id3>
+
+    And so on. Otherwise return nothing.
+    It may not be a perfect string match, but you should not return entities that can be reasoned to be a mismatch.`
+)
+
+func (s *SearchService) MatchEntities(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("query")
+
+	results, err := s.entityNdb.Query(query, 15, nil)
+	if err != nil {
+		slog.Error("match entities: ndb search failed", "query", query, "error", err)
+		http.Error(w, "entity search failed", http.StatusInternalServerError)
+		return
+	}
+
+	idToText := make(map[uint64]string)
+
+	candidates := make([]string, 0, len(results))
+	for _, result := range results {
+		idToText[result.Id] = result.Text
+		candidates = append(candidates, cleanEntry(result.Id, result.Text))
+	}
+
+	// TODO(question): does the prompt make sense with the entities in front?
+	prompt := strings.Join(candidates, "\n") + "\n\n" + fmt.Sprintf(matchEntitiesPrompt, query)
+
+	response, err := llms.New().Generate(prompt)
+	if err != nil {
+		slog.Error("match entities: llm generaton failed", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	entities := make([]string, 0)
+	for _, id := range strings.Split(strings.Trim(response, "`"), ",") {
+		parsed, err := strconv.ParseUint(id, 10, 64)
+		if err == nil {
+			if entity, ok := idToText[parsed]; ok {
+				entities = append(entities, entity)
+			} else {
+				slog.Error("match entities: invalid id returned from llm")
+			}
+		} else {
+			slog.Error("match entities: malformed id returned from llm", "id", id, "error", err)
+		}
+	}
+
+	WriteJsonResponse(w, api.MatchEntitiesResponse{Entities: entities})
 }

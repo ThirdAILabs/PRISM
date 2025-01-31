@@ -55,3 +55,7 @@ type Institution struct {
 type FormalRelationResponse struct {
 	HasFormalRelation bool
 }
+
+type MatchEntitiesResponse struct {
+	Entities []string
+}
