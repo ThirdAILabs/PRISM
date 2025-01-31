@@ -51,3 +51,7 @@ type Author struct {
 type Institution struct {
 	DisplayName string
 }
+
+type FormalRelationResponse struct {
+	HasFormalRelation bool
+}

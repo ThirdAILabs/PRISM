@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
 	"prism/api"
+	"prism/llms"
+	"prism/services/utils"
 	"slices"
 	"strings"
 	"sync"
@@ -90,239 +93,6 @@ func (s *SearchService) SearchOpenAlex(w http.ResponseWriter, r *http.Request) {
 	WriteJsonResponse(w, authors)
 }
 
-const apiKey = "24e6015d3c452c7678abe92dd7e585b2cbcf2886b5b8ce7ed685d26e98d0930d"
-
-type gscholarProfile struct {
-	AuthorId      string  `json:"author_id"`
-	Name          string  `json:"name"`
-	Email         *string `json:"email"`
-	Affilliations string  `json:"affiliations"`
-}
-
-func profileToAuthor(profile gscholarProfile) api.Author {
-	return api.Author{
-		AuthorId:     profile.AuthorId,
-		DisplayName:  profile.Name,
-		Institutions: strings.Split(profile.Affilliations, ", "),
-		// TODO: should we use email?
-		Source: api.GoogleScholarSource,
-	}
-}
-
-type profilePageCrawler struct {
-	query         string
-	nextPageToken *string
-	results       chan []api.Author
-	successCnt    int
-	errorCnt      int
-}
-
-func (crawler *profilePageCrawler) nextPageFilter() string {
-	if crawler.nextPageToken != nil {
-		return fmt.Sprintf("&after_author=%s", *crawler.nextPageToken) // Should this be escaped?
-	}
-	return ""
-}
-
-const (
-	profilesUrlTemplate = `https://serpapi.com/search.json?engine=google_scholar_profiles&mauthors=%s&api_key=%s%s`
-)
-
-func (crawler *profilePageCrawler) nextPage() ([]api.Author, bool) {
-	url := fmt.Sprintf(profilesUrlTemplate, url.QueryEscape(crawler.query), apiKey, crawler.nextPageFilter())
-
-	res, err := http.Get(url)
-	if err != nil {
-		slog.Error("google scholar profile crawler: search failed", "query", crawler.query, "error", err)
-		crawler.errorCnt++
-		return nil, true
-	}
-
-	var results struct {
-		Profiles   []gscholarProfile `json:"profiles"`
-		Pagination struct {
-			NextPageToken *string `json:"next_page_token"`
-		} `json:"pagination"`
-	}
-
-	if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
-		slog.Error("google scholar profile crawler: error parsing reponse", "query", crawler.query, "error", err)
-		crawler.errorCnt++
-		return nil, true
-	}
-
-	authors := make([]api.Author, 0, len(results.Profiles))
-	for _, profile := range results.Profiles {
-		authors = append(authors, profileToAuthor(profile))
-	}
-
-	crawler.nextPageToken = results.Pagination.NextPageToken
-	crawler.successCnt++
-
-	return authors, crawler.nextPageToken == nil
-}
-
-func (crawler *profilePageCrawler) run() {
-	for {
-		authors, done := crawler.nextPage()
-		if len(authors) > 0 {
-			crawler.results <- authors
-		}
-		if done {
-			slog.Info("google scholar profile crawler: complete", "errors", crawler.errorCnt, "successes", crawler.successCnt)
-			return
-		}
-	}
-}
-
-func getAuthorDetails(authorId string) (api.Author, error) {
-	url := fmt.Sprintf("https://serpapi.com/search?engine=google_scholar_author&author_id=%s&num=0&start=0&sort=pubdate&api_key=%s", authorId, apiKey)
-
-	res, err := http.Get(url)
-	if err != nil {
-		slog.Error("google scholar author search failed", "author_id", authorId, "error", err)
-		return api.Author{}, ErrSearchFailed
-	}
-
-	var result struct {
-		Author gscholarProfile `json:"author"`
-	}
-
-	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
-		slog.Error("google scholar author search failed: error parsing reponse", "author_id", authorId, "error", err)
-		return api.Author{}, ErrSearchFailed
-	}
-
-	return profileToAuthor(result.Author), nil
-}
-
-type gscholarCrawler struct {
-	query      string
-	nextIdx    int
-	results    chan []api.Author
-	successCnt int
-	errorCnt   int
-	seen       map[string]bool
-}
-
-const (
-	nResultsPerPage     = 20
-	gscholarUrlTemplate = `https://serpapi.com/search.json?engine=google_scholar&q=%s&api_key=%s&start=%d&num=%d`
-)
-
-func getAuthorId(link string) string {
-	start := strings.Index(link, "user=")
-	end := strings.Index(link[start:], "&")
-	if start >= 0 && end >= 0 {
-		return link[start+5 : end]
-	}
-	return ""
-}
-
-func authorNameInQuery(name string, queryTokens []string) bool {
-	for _, part := range strings.Split(strings.ToLower(name), " ") {
-		if slices.Contains(queryTokens, part) {
-			return true
-		}
-	}
-	return false
-}
-
-func (crawler *gscholarCrawler) nextPage() ([]api.Author, bool) {
-	queryTokens := strings.Split(strings.ToLower(crawler.query), " ")
-
-	authorIds := make([]string, 0)
-
-	for i := 0; i < 5 && len(authorIds) == 0; i++ {
-		url := fmt.Sprintf(gscholarUrlTemplate, url.QueryEscape(crawler.query), apiKey, crawler.nextIdx, nResultsPerPage)
-		crawler.nextIdx += nResultsPerPage
-
-		res, err := http.Get(url)
-		if err != nil {
-			slog.Error("google scholar crawler: search failed", "query", crawler.query, "error", err)
-			crawler.errorCnt++
-			return nil, true
-		}
-
-		var results struct {
-			OrganicResults []struct {
-				PublicationInfo struct {
-					Authors []struct {
-						Name string `json:"name"`
-						Link string `json:"link"`
-					} `json:"authors"`
-				} `json:"publication_info"`
-			} `json:"organic_results"`
-		}
-
-		if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
-			slog.Error("google scholar crawler: error parsing reponse", "query", crawler.query, "error", err)
-			crawler.errorCnt++
-			return nil, true
-		}
-
-		for _, result := range results.OrganicResults {
-			for _, author := range result.PublicationInfo.Authors {
-				if authorNameInQuery(author.Name, queryTokens) {
-					if authorId := getAuthorId(author.Link); authorId != "" && !crawler.seen[authorId] {
-						crawler.seen[authorId] = true
-						authorIds = append(authorIds, authorId)
-					}
-				}
-			}
-		}
-	}
-
-	if len(authorIds) == 0 {
-		return nil, true
-	}
-
-	authorsCh := make(chan api.Author, len(authorIds))
-	wg := sync.WaitGroup{}
-	wg.Add(len(authorIds))
-
-	for _, id := range authorIds {
-		go func(authorId string) {
-			defer wg.Done()
-			details, err := getAuthorDetails(authorId)
-			if err != nil {
-				slog.Error("google scholar crawler: error getting author details", "author_id", authorId, "error", err)
-			} else {
-				authorsCh <- details
-			}
-		}(id)
-	}
-
-	wg.Wait()
-
-	authors := make([]api.Author, 0, len(authorsCh))
-	for author := range authorsCh {
-		authors = append(authors, author)
-	}
-
-	if len(authors) == len(authorIds) {
-		crawler.successCnt++
-	} else {
-		crawler.errorCnt++
-		slog.Error("google scholar crawler: could not get author details for all author ids", "expected_cnt", len(authorIds), "actual_cnt", len(authors))
-	}
-
-	return authors, false
-}
-
-func (crawler *gscholarCrawler) run() {
-	for {
-		authors, done := crawler.nextPage()
-		if len(authors) > 0 {
-			crawler.results <- authors
-		}
-		if done {
-			slog.Info("google scholar crawler: complete", "errors", crawler.errorCnt, "successes", crawler.successCnt)
-			return
-		}
-	}
-}
-
 func (s *SearchService) SearchGoogleScholar(w http.ResponseWriter, r *http.Request) {
 	query := strings.ReplaceAll(strings.ToLower(r.URL.Query().Get("query")), "@", " ")
 
@@ -336,22 +106,9 @@ func (s *SearchService) SearchGoogleScholar(w http.ResponseWriter, r *http.Reque
 
 	resultsCh := make(chan []api.Author, 10)
 
-	v1Crawler := profilePageCrawler{
-		query:         query,
-		nextPageToken: nil,
-		results:       resultsCh,
-		successCnt:    0,
-		errorCnt:      0,
-	}
+	v1Crawler := utils.NewProfilePageCrawler(query, resultsCh)
 
-	v2Crawler := gscholarCrawler{
-		query:      query,
-		nextIdx:    0,
-		results:    resultsCh,
-		successCnt: 0,
-		errorCnt:   0,
-		seen:       make(map[string]bool),
-	}
+	v2Crawler := utils.NewGScholarCrawler(query, resultsCh)
 
 	stop := make(chan bool)
 
@@ -385,19 +142,130 @@ func (s *SearchService) SearchGoogleScholar(w http.ResponseWriter, r *http.Reque
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		v1Crawler.run()
+		v1Crawler.Run()
 	}()
 	go func() {
 		defer wg.Done()
-		v2Crawler.run()
+		v2Crawler.Run()
 	}()
 
 	wg.Done()
 	close(stop)
 }
 
-func (s *SearchService) FormalRelations(w http.ResponseWriter, r *http.Request) {
+func findLinkInResponse(response string) (string, error) {
+	start := max(strings.Index(response, "https://"), strings.Index(response, "http://"))
+	if start < 0 {
+		return "", fmt.Errorf("missing link in response")
+	}
+	return response[start:], nil // TODO(reliability): what happens if there's text after the link?
+}
 
+func fetchLink(link string) (string, error) {
+	req, err := http.NewRequest("GET", link, nil)
+	if err != nil {
+		return "", err
+	}
+
+	headers := map[string]string{
+		"User-Agent":                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+		"Accept-Language":           "en-US,en;q=0.9",
+		"Connection":                "keep-alive",
+		"Accept":                    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+		"Referer":                   "https://www.google.com/",
+		"Upgrade-Insecure-Requests": "1",
+	}
+
+	for k, v := range headers {
+		req.Header.Add(k, v)
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+
+	const maxBytes = 300000
+
+	text := make([]byte, maxBytes) // TODO(reliability): this seems like a lot?
+	n, err := io.ReadFull(res.Body, text)
+	if err != nil && err != io.ErrUnexpectedEOF { // UnexpectedEOF is returned if < N bytes are read
+		return "", err
+	}
+
+	return string(text[:n]), nil
+}
+
+const (
+	formalRelationsInitalResultsPromptTemplate = "These are the results of a Google search, in JSON format:\n\n%s\n\n" +
+		"Based on the results above, infer whether %s has a formal position at %s. If there is not, strictly reply " +
+		"\"I cannot answer\" and nothing else. HOWEVER, if there is, use the results to draw a conclusion " +
+		"about the formal relationship between %s and %s. Answer briefly and INCLUDE THE LINK " +
+		"associated with the snippet that allowed you to make that conclusion IN A SEPARATE LINE."
+
+	formalRelationsVerficationPromptTemplate = "You previously thought %s has a formal position at %s based on this link %s\n\n" +
+		"This is an html snippet from the link:\n\n%s\n\n" +
+		"If you still agree with \"%s\", strictly answer \"yes\" and nothing else. Otherwise, strictly answer \"no\" and nothing else."
+)
+
+func (s *SearchService) FormalRelations(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	author, institution := query.Get("author"), query.Get("institution")
+
+	googleResults, err := utils.GoogleSearch(fmt.Sprintf(`"%s" "%s"`, author, institution))
+	if err != nil {
+		slog.Error("formal relations: google search error", "error", err)
+		http.Error(w, ErrSearchFailed.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	resultsJson, err := json.MarshalIndent(googleResults, "", "    ")
+	if err != nil {
+		slog.Error("formal relations: error serializing google search results", "error", err)
+		http.Error(w, ErrSearchFailed.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	prompt := fmt.Sprintf(formalRelationsInitalResultsPromptTemplate, string(resultsJson), author, institution, author, institution)
+
+	llm := llms.New()
+
+	answer, err := llm.Generate(prompt)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if strings.Contains(strings.ToLower(answer), "i cannot answer") {
+		WriteJsonResponse(w, api.FormalRelationResponse{HasFormalRelation: false})
+		return
+	}
+
+	link, err := findLinkInResponse(answer)
+	if err != nil {
+		slog.Error("formal relations: unable to find link in generated response", "error", err)
+		http.Error(w, "invalid response from llm", http.StatusInternalServerError)
+		return
+	}
+
+	content, err := fetchLink(link)
+	if err != nil {
+		slog.Error("formal relations: unable to fetch content from link", "link", link, "error", err)
+		http.Error(w, "error loading content from link", http.StatusInternalServerError)
+		return
+	}
+
+	verificationPrompt := fmt.Sprintf(formalRelationsVerficationPromptTemplate, author, institution, link, content, answer)
+
+	verification, err := llm.Generate(verificationPrompt)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	hasRelation := !strings.Contains(strings.ToLower(verification), "no")
+	WriteJsonResponse(w, api.FormalRelationResponse{HasFormalRelation: hasRelation})
 }
 
 func (s *SearchService) MatchEntities(w http.ResponseWriter, r *http.Request) {
