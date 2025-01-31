@@ -60,7 +60,7 @@ func (r *ReportManager) CreateReport(userId uuid.UUID, authorId, displayName, so
 }
 
 func (r *ReportManager) GetReport(userId, id uuid.UUID) (api.Report, error) {
-	report, err := getReport(r.db, id)
+	report, err := getReport(r.db, id, true)
 	if err != nil {
 		return api.Report{}, err
 	}
@@ -108,7 +108,7 @@ func (r *ReportManager) GetNextReport() (*api.Report, error) {
 
 func (r *ReportManager) UpdateReport(id uuid.UUID, status string, content []byte) error {
 	return r.db.Transaction(func(txn *gorm.DB) error {
-		report, err := getReport(txn, id)
+		report, err := getReport(txn, id, false)
 		if err != nil {
 			return err
 		}
@@ -126,10 +126,15 @@ func (r *ReportManager) UpdateReport(id uuid.UUID, status string, content []byte
 	})
 }
 
-func getReport(txn *gorm.DB, id uuid.UUID) (schema.Report, error) {
+func getReport(txn *gorm.DB, id uuid.UUID, withContent bool) (schema.Report, error) {
 	var report schema.Report
 
-	if err := txn.First(&report, "id = ?", id).Error; err != nil {
+	query := txn
+	if withContent {
+		query.Preload("Content")
+	}
+
+	if err := query.First(&report, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return schema.Report{}, ErrReportNotFound
 		}
@@ -141,7 +146,7 @@ func getReport(txn *gorm.DB, id uuid.UUID) (schema.Report, error) {
 }
 
 func convertReport(report schema.Report) api.Report {
-	return api.Report{
+	result := api.Report{
 		Id:          report.Id,
 		CreatedAt:   report.CreatedAt,
 		AuthorId:    report.AuthorId,
@@ -151,4 +156,10 @@ func convertReport(report schema.Report) api.Report {
 		EndYear:     report.EndYear,
 		Status:      report.Status,
 	}
+
+	if report.Content != nil {
+		result.Content = report.Content
+	}
+
+	return result
 }

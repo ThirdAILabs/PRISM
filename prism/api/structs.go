@@ -18,6 +18,8 @@ type Report struct {
 	EndYear     int
 
 	Status string
+
+	Content any `json:"omitempty"`
 }
 
 type CreateReportRequest struct {
