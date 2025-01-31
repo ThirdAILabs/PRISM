@@ -324,7 +324,7 @@ func (crawler *gscholarCrawler) run() {
 }
 
 func (s *SearchService) SearchGoogleScholar(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query().Get("query")
+	query := strings.ReplaceAll(strings.ToLower(r.URL.Query().Get("query")), "@", " ")
 
 	flusher, ok := w.(http.Flusher)
 	if !ok {
