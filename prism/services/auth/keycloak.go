@@ -19,10 +19,6 @@ const (
 	userIdContextKey = "user_id"
 )
 
-type KeycloakIdentityProvider struct {
-	keycloak *gocloak.GoCloak
-}
-
 func isConflict(err error) bool {
 	apiErr, ok := err.(*gocloak.APIError)
 	// Keycloak returns 409 if user/realm etc already exists when creating it.
@@ -243,7 +239,11 @@ type KeycloakArgs struct {
 	Verbose bool
 }
 
-func New(db *gorm.DB, args KeycloakArgs) (*KeycloakIdentityProvider, error) {
+type KeycloakAuth struct {
+	keycloak *gocloak.GoCloak
+}
+
+func New(db *gorm.DB, args KeycloakArgs) (*KeycloakAuth, error) {
 	realm := "PRISM"
 
 	client := gocloak.NewClient(args.KeycloakServerUrl)
@@ -312,7 +312,7 @@ func New(db *gorm.DB, args KeycloakArgs) (*KeycloakIdentityProvider, error) {
 	}
 	slog.Info("KEYCLOAK: client creation successful")
 
-	return &KeycloakIdentityProvider{keycloak: client}, nil
+	return &KeycloakAuth{keycloak: client}, nil
 }
 
 func getToken(r *http.Request) (string, error) {
@@ -325,7 +325,7 @@ func getToken(r *http.Request) (string, error) {
 	return "", fmt.Errorf("missing or invalid authorization header")
 }
 
-func (auth *KeycloakIdentityProvider) Middleware() func(http.Handler) http.Handler {
+func (auth *KeycloakAuth) Middleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		handler := func(w http.ResponseWriter, r *http.Request) {
 			token, err := getToken(r)

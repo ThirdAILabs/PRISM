@@ -16,6 +16,16 @@ type ReportService struct {
 	manager *reports.ReportManager
 }
 
+func (s *ReportService) Routes() chi.Router {
+	r := chi.NewRouter()
+
+	r.Get("/list", s.List)
+	r.Post("/new", s.NewReport)
+	r.Get("/{report_id}", s.GetReport)
+
+	return r
+}
+
 func (s *ReportService) List(w http.ResponseWriter, r *http.Request) {
 	userId, err := auth.GetUserId(r)
 	if err != nil {
@@ -32,7 +42,7 @@ func (s *ReportService) List(w http.ResponseWriter, r *http.Request) {
 	WriteJsonResponse(w, reports)
 }
 
-func (s *ReportService) Create(w http.ResponseWriter, r *http.Request) {
+func (s *ReportService) NewReport(w http.ResponseWriter, r *http.Request) {
 	userId, err := auth.GetUserId(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

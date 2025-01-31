@@ -11,9 +11,9 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-type AutocompletionService struct{}
+type AutocomplenService struct{}
 
-func (s *AutocompletionService) Routes() chi.Router {
+func (s *AutocomplenService) Routes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Get("/author", s.AutocompleteAuthor)
@@ -40,7 +40,7 @@ func openAlexAutocompletion(component, query string, dest interface{}) error {
 	return nil
 }
 
-func (s *AutocompletionService) AutocompleteAuthor(w http.ResponseWriter, r *http.Request) {
+func (s *AutocomplenService) AutocompleteAuthor(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("query")
 
 	var suggestions struct {
@@ -69,7 +69,7 @@ func (s *AutocompletionService) AutocompleteAuthor(w http.ResponseWriter, r *htt
 	WriteJsonResponse(w, authors)
 }
 
-func (s *AutocompletionService) AutocompleteInstitution(w http.ResponseWriter, r *http.Request) {
+func (s *AutocomplenService) AutocompleteInstitution(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("query")
 
 	var suggestions struct {
