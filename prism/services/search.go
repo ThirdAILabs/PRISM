@@ -27,17 +27,17 @@ type SearchService struct {
 func (s *SearchService) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/regular", s.SearchOpenAlex)
+	r.Get("/regular", WrapRestHandler(s.SearchOpenAlex))
 	r.Get("/advanced", s.SearchGoogleScholar)
-	r.Get("/formal-relations", s.FormalRelations)
-	r.Get("/match-entities", s.MatchEntities)
+	r.Get("/formal-relations", WrapRestHandler(s.FormalRelations))
+	r.Get("/match-entities", WrapRestHandler(s.MatchEntities))
 
 	return r
 }
 
 var ErrSearchFailed = errors.New("error performing search")
 
-func (s *SearchService) SearchOpenAlex(w http.ResponseWriter, r *http.Request) {
+func (s *SearchService) SearchOpenAlex(r *http.Request) (any, error) {
 	query := r.URL.Query()
 	author, institution := query.Get("author"), query.Get("institution")
 
@@ -49,8 +49,7 @@ func (s *SearchService) SearchOpenAlex(w http.ResponseWriter, r *http.Request) {
 	res, err := http.Get(url)
 	if err != nil {
 		slog.Error("open alex search failed", "author", author, "institution", institution, "error", err)
-		http.Error(w, ErrSearchFailed.Error(), http.StatusInternalServerError)
-		return
+		return nil, CodedError(ErrSearchFailed, http.StatusInternalServerError)
 	}
 	defer res.Body.Close()
 
@@ -70,8 +69,7 @@ func (s *SearchService) SearchOpenAlex(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
 		slog.Error("open alex search failed: error parsing reponse from", "query", query, "institution", institution, "error", err)
-		http.Error(w, ErrSearchFailed.Error(), http.StatusInternalServerError)
-		return
+		return nil, CodedError(ErrSearchFailed, http.StatusInternalServerError)
 	}
 
 	authors := make([]api.Author, 0, len(results.Results))
@@ -94,7 +92,7 @@ func (s *SearchService) SearchOpenAlex(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	WriteJsonResponse(w, authors)
+	return authors, nil
 }
 
 func (s *SearchService) SearchGoogleScholar(w http.ResponseWriter, r *http.Request) {
@@ -213,22 +211,21 @@ const (
 		"If you still agree with \"%s\", strictly answer \"yes\" and nothing else. Otherwise, strictly answer \"no\" and nothing else."
 )
 
-func (s *SearchService) FormalRelations(w http.ResponseWriter, r *http.Request) {
+func (s *SearchService) FormalRelations(r *http.Request) (any, error) {
 	query := r.URL.Query()
 	author, institution := query.Get("author"), query.Get("institution")
 
 	googleResults, err := utils.GoogleSearch(fmt.Sprintf(`"%s" "%s"`, author, institution))
 	if err != nil {
 		slog.Error("formal relations: google search error", "error", err)
-		http.Error(w, ErrSearchFailed.Error(), http.StatusInternalServerError)
-		return
+		return nil, CodedError(ErrSearchFailed, http.StatusInternalServerError)
+
 	}
 
 	resultsJson, err := json.MarshalIndent(googleResults, "", "    ")
 	if err != nil {
 		slog.Error("formal relations: error serializing google search results", "error", err)
-		http.Error(w, ErrSearchFailed.Error(), http.StatusInternalServerError)
-		return
+		return nil, CodedError(ErrSearchFailed, http.StatusInternalServerError)
 	}
 
 	prompt := fmt.Sprintf(formalRelationsInitalResultsPromptTemplate, string(resultsJson), author, institution, author, institution)
@@ -238,27 +235,24 @@ func (s *SearchService) FormalRelations(w http.ResponseWriter, r *http.Request) 
 	answer, err := llm.Generate(prompt)
 	if err != nil {
 		slog.Error("formal relations: initial llm generaton failed", "error", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, CodedError(err, http.StatusInternalServerError)
+
 	}
 
 	if strings.Contains(strings.ToLower(answer), "i cannot answer") {
-		WriteJsonResponse(w, api.FormalRelationResponse{HasFormalRelation: false})
-		return
+		return api.FormalRelationResponse{HasFormalRelation: false}, nil
 	}
 
 	link, err := findLinkInResponse(answer)
 	if err != nil {
 		slog.Error("formal relations: unable to find link in generated response", "error", err)
-		http.Error(w, "invalid response from llm", http.StatusInternalServerError)
-		return
+		return nil, CodedError(errors.New("invalid response from llm"), http.StatusInternalServerError)
 	}
 
 	content, err := fetchLink(link)
 	if err != nil {
 		slog.Error("formal relations: unable to fetch content from link", "link", link, "error", err)
-		http.Error(w, "error loading content from link", http.StatusInternalServerError)
-		return
+		return nil, CodedError(errors.New("error loading content from link"), http.StatusInternalServerError)
 	}
 
 	verificationPrompt := fmt.Sprintf(formalRelationsVerficationPromptTemplate, author, institution, link, content, answer)
@@ -266,12 +260,11 @@ func (s *SearchService) FormalRelations(w http.ResponseWriter, r *http.Request) 
 	verification, err := llm.Generate(verificationPrompt)
 	if err != nil {
 		slog.Error("formal relations: verification llm generaton failed", "error", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
 	hasRelation := !strings.Contains(strings.ToLower(verification), "no")
-	WriteJsonResponse(w, api.FormalRelationResponse{HasFormalRelation: hasRelation})
+	return api.FormalRelationResponse{HasFormalRelation: hasRelation}, nil
 }
 
 func cleanEntry(id uint64, text string) string {
@@ -297,14 +290,13 @@ const (
     It may not be a perfect string match, but you should not return entities that can be reasoned to be a mismatch.`
 )
 
-func (s *SearchService) MatchEntities(w http.ResponseWriter, r *http.Request) {
+func (s *SearchService) MatchEntities(r *http.Request) (any, error) {
 	query := r.URL.Query().Get("query")
 
 	results, err := s.entityNdb.Query(query, 15, nil)
 	if err != nil {
 		slog.Error("match entities: ndb search failed", "query", query, "error", err)
-		http.Error(w, "entity search failed", http.StatusInternalServerError)
-		return
+		return nil, CodedError(errors.New("entity search failed"), http.StatusInternalServerError)
 	}
 
 	idToText := make(map[uint64]string)
@@ -321,8 +313,7 @@ func (s *SearchService) MatchEntities(w http.ResponseWriter, r *http.Request) {
 	response, err := llms.New().Generate(prompt)
 	if err != nil {
 		slog.Error("match entities: llm generaton failed", "error", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
 	entities := make([]string, 0)
@@ -339,5 +330,5 @@ func (s *SearchService) MatchEntities(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	WriteJsonResponse(w, api.MatchEntitiesResponse{Entities: entities})
+	return api.MatchEntitiesResponse{Entities: entities}, nil
 }

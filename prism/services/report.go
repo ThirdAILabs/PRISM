@@ -19,77 +19,69 @@ type ReportService struct {
 func (s *ReportService) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/list", s.List)
-	r.Post("/new", s.NewReport)
-	r.Get("/{report_id}", s.GetReport)
+	r.Get("/list", WrapRestHandler(s.List))
+	r.Post("/new", WrapRestHandler(s.NewReport))
+	r.Get("/{report_id}", WrapRestHandler(s.GetReport))
 
 	return r
 }
 
-func (s *ReportService) List(w http.ResponseWriter, r *http.Request) {
+func (s *ReportService) List(r *http.Request) (any, error) {
 	userId, err := auth.GetUserId(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
 	reports, err := s.manager.ListReports(userId)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	WriteJsonResponse(w, reports)
+	return reports, nil
 }
 
-func (s *ReportService) NewReport(w http.ResponseWriter, r *http.Request) {
+func (s *ReportService) NewReport(r *http.Request) (any, error) {
 	userId, err := auth.GetUserId(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
 	params, err := ParseRequestBody[api.CreateReportRequest](r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return nil, CodedError(err, http.StatusBadRequest)
 	}
 
 	id, err := s.manager.CreateReport(userId, params.AuthorId, params.DisplayName, params.Source, params.StartYear, params.EndYear)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	WriteJsonResponse(w, api.CreateReportResponse{Id: id})
+	return api.CreateReportResponse{Id: id}, nil
 }
 
-func (s *ReportService) GetReport(w http.ResponseWriter, r *http.Request) {
+func (s *ReportService) GetReport(r *http.Request) (any, error) {
 	userId, err := auth.GetUserId(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
 	param := chi.URLParam(r, "report_id")
 	id, err := uuid.Parse(param)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("invalid uuid '%v' provided: %v", param, err), http.StatusBadRequest)
-		return
+		return nil, CodedError(fmt.Errorf("invalid uuid '%v' provided: %w", param, err), http.StatusBadRequest)
 	}
 
 	report, err := s.manager.GetReport(userId, id)
 	if err != nil {
 		switch {
 		case errors.Is(err, reports.ErrReportNotFound):
-			http.Error(w, err.Error(), http.StatusNotFound)
+			return nil, CodedError(err, http.StatusNotFound)
 		case errors.Is(err, reports.ErrUserCannotAccessReport):
-			http.Error(w, err.Error(), http.StatusForbidden)
+			return nil, CodedError(err, http.StatusForbidden)
 		default:
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return nil, CodedError(err, http.StatusInternalServerError)
 		}
-		return
 	}
 
-	WriteJsonResponse(w, report)
+	return report, nil
 }

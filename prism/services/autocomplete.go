@@ -16,8 +16,8 @@ type AutocomplenService struct{}
 func (s *AutocomplenService) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/author", s.AutocompleteAuthor)
-	r.Get("/institution", s.AutocompleteAuthor)
+	r.Get("/author", WrapRestHandler(s.AutocompleteAuthor))
+	r.Get("/institution", WrapRestHandler(s.AutocompleteAuthor))
 
 	return r
 }
@@ -40,7 +40,7 @@ func openAlexAutocompletion(component, query string, dest interface{}) error {
 	return nil
 }
 
-func (s *AutocomplenService) AutocompleteAuthor(w http.ResponseWriter, r *http.Request) {
+func (s *AutocomplenService) AutocompleteAuthor(r *http.Request) (any, error) {
 	query := r.URL.Query().Get("query")
 
 	var suggestions struct {
@@ -52,8 +52,7 @@ func (s *AutocomplenService) AutocompleteAuthor(w http.ResponseWriter, r *http.R
 	}
 
 	if err := openAlexAutocompletion("authors", query, &suggestions); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
 	authors := make([]api.Author, 0, len(suggestions.Results))
@@ -66,10 +65,10 @@ func (s *AutocomplenService) AutocompleteAuthor(w http.ResponseWriter, r *http.R
 		})
 	}
 
-	WriteJsonResponse(w, authors)
+	return authors, nil
 }
 
-func (s *AutocomplenService) AutocompleteInstitution(w http.ResponseWriter, r *http.Request) {
+func (s *AutocomplenService) AutocompleteInstitution(r *http.Request) (any, error) {
 	query := r.URL.Query().Get("query")
 
 	var suggestions struct {
@@ -78,17 +77,16 @@ func (s *AutocomplenService) AutocompleteInstitution(w http.ResponseWriter, r *h
 		} `json:"results"`
 	}
 
-	if err := openAlexAutocompletion("authors", query, &suggestions); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if err := openAlexAutocompletion("institutions", query, &suggestions); err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	authors := make([]api.Institution, 0, len(suggestions.Results))
-	for _, author := range suggestions.Results {
-		authors = append(authors, api.Institution{
-			DisplayName: author.DisplayName,
+	institutions := make([]api.Institution, 0, len(suggestions.Results))
+	for _, institution := range suggestions.Results {
+		institutions = append(institutions, api.Institution{
+			DisplayName: institution.DisplayName,
 		})
 	}
 
-	WriteJsonResponse(w, authors)
+	return institutions, nil
 }
