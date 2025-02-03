@@ -2,11 +2,11 @@ package ndb_test
 
 import (
 	"fmt"
+	"prism/ndb"
 	"slices"
 	"strconv"
 	"strings"
 	"testing"
-	"thirdai_platform/search/ndb"
 )
 
 func init() {
