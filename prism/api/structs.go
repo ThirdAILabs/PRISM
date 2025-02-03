@@ -59,3 +59,23 @@ type FormalRelationResponse struct {
 type MatchEntitiesResponse struct {
 	Entities []string
 }
+
+type CreateLicenseRequest struct {
+	Name       string
+	Expiration time.Time
+}
+
+type CreateLicenseResponse struct {
+	License string
+}
+
+type AddLicenseUserRequest struct {
+	License string
+}
+
+type License struct {
+	Id          uuid.UUID
+	Name        string
+	Expiration  time.Time
+	Deactivated bool
+}

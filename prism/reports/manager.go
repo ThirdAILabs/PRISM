@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"prism/api"
 	"prism/schema"
+	"prism/services/licensing"
 	"time"
 
 	"github.com/google/uuid"
@@ -51,8 +52,21 @@ func (r *ReportManager) CreateReport(userId uuid.UUID, authorId, displayName, so
 		Status:      schema.ReportQueued,
 	}
 
-	if err := r.db.Create(&report).Error; err != nil {
-		slog.Error("error creating new report", "error", err)
+	err := r.db.Transaction(func(txn *gorm.DB) error {
+		if err := licensing.VerifyLicenseForReport(txn, userId, report.Id); err != nil {
+			slog.Error("cannot create new report, unable to verify license", "error", err)
+			return err
+		}
+
+		if err := r.db.Create(&report).Error; err != nil {
+			slog.Error("error creating new report", "error", err)
+			return ErrReportAccessFailed
+		}
+
+		return nil
+	})
+
+	if err != nil {
 		return uuid.Nil, ErrReportAccessFailed
 	}
 

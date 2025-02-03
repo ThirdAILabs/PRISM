@@ -37,3 +37,25 @@ type ReportContent struct {
 
 	Content []byte
 }
+
+type License struct {
+	Id          uuid.UUID `gorm:"type:uuid;primaryKey"`
+	Secret      []byte
+	Name        string
+	Expiration  time.Time
+	Deactivated bool
+}
+
+type LicenseUser struct {
+	UserId    uuid.UUID `gorm:"type:uuid;primaryKey"`
+	LicenseId uuid.UUID `gorm:"type:uuid"`
+
+	License *License `gorm:"foreignKey:LicenseId"`
+}
+
+type LicenseUsage struct {
+	LicenseId uuid.UUID `gorm:"type:uuid;primaryKey"`
+	ReportId  uuid.UUID `gorm:"type:uuid;primaryKey"`
+	UserId    uuid.UUID
+	Timestamp time.Time
+}

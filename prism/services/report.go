@@ -7,6 +7,7 @@ import (
 	"prism/api"
 	"prism/reports"
 	"prism/services/auth"
+	"prism/services/licensing"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -53,7 +54,16 @@ func (s *ReportService) NewReport(r *http.Request) (any, error) {
 
 	id, err := s.manager.CreateReport(userId, params.AuthorId, params.DisplayName, params.Source, params.StartYear, params.EndYear)
 	if err != nil {
-		return nil, CodedError(err, http.StatusInternalServerError)
+		switch {
+		case errors.Is(err, licensing.ErrMissingLicense):
+			return nil, CodedError(err, http.StatusUnprocessableEntity)
+		case errors.Is(err, licensing.ErrExpiredLicense):
+			return nil, CodedError(err, http.StatusForbidden)
+		case errors.Is(err, licensing.ErrDeactivatedLicense):
+			return nil, CodedError(err, http.StatusForbidden)
+		default:
+			return nil, CodedError(err, http.StatusInternalServerError)
+		}
 	}
 
 	return api.CreateReportResponse{Id: id}, nil
