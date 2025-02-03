@@ -15,7 +15,6 @@ import (
 )
 
 const (
-	realm            = "PRISM"
 	userIdContextKey = "user_id"
 )
 
@@ -170,7 +169,7 @@ func createRealm(client *gocloak.GoCloak, adminToken, realmName string) error {
 }
 
 func createClient(client *gocloak.GoCloak, adminToken, realm string, redirectUrls []string, rootUrl string) error {
-	clientName := "prism-login"
+	clientName := realm + "-login"
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
@@ -241,11 +240,10 @@ type KeycloakArgs struct {
 
 type KeycloakAuth struct {
 	keycloak *gocloak.GoCloak
+	realm    string
 }
 
-func New(db *gorm.DB, args KeycloakArgs) (*KeycloakAuth, error) {
-	realm := "PRISM"
-
+func New(db *gorm.DB, realm string, args KeycloakArgs) (*KeycloakAuth, error) {
 	client := gocloak.NewClient(args.KeycloakServerUrl)
 	restyClient := client.RestyClient()
 	restyClient.SetDebug(args.Verbose) // Adds logging for every request
@@ -312,7 +310,7 @@ func New(db *gorm.DB, args KeycloakArgs) (*KeycloakAuth, error) {
 	}
 	slog.Info("KEYCLOAK: client creation successful")
 
-	return &KeycloakAuth{keycloak: client}, nil
+	return &KeycloakAuth{keycloak: client, realm: realm}, nil
 }
 
 func getToken(r *http.Request) (string, error) {
@@ -337,7 +335,7 @@ func (auth *KeycloakAuth) Middleware() func(http.Handler) http.Handler {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 
-			userInfo, err := auth.keycloak.GetUserInfo(ctx, token, realm)
+			userInfo, err := auth.keycloak.GetUserInfo(ctx, token, auth.realm)
 			if err != nil {
 				http.Error(w, fmt.Sprintf("unable to verify token with keycloak: %v", err), http.StatusUnauthorized)
 				return

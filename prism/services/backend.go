@@ -11,8 +11,10 @@ type BackendService struct {
 	report       ReportService
 	search       SearchService
 	autocomplete AutocomplenService
+	licensing    LicenseService
 
-	auth *auth.KeycloakAuth
+	userAuth  *auth.KeycloakAuth
+	adminAuth *auth.KeycloakAuth
 }
 
 func (s *BackendService) Routes() chi.Router {
@@ -21,11 +23,11 @@ func (s *BackendService) Routes() chi.Router {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	r.Use(s.auth.Middleware())
+	r.With(s.userAuth.Middleware()).Mount("/report", s.report.Routes())
+	r.With(s.userAuth.Middleware()).Mount("/search", s.search.Routes())
+	r.With(s.userAuth.Middleware()).Mount("/autocomplete", s.autocomplete.Routes())
 
-	r.Mount("/report", s.report.Routes())
-	r.Mount("/search", s.search.Routes())
-	r.Mount("/autocomplete", s.autocomplete.Routes())
+	r.With(s.adminAuth.Middleware()).Mount("/license", s.licensing.Routes())
 
 	return r
 }
