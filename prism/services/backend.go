@@ -10,7 +10,7 @@ import (
 type BackendService struct {
 	report       ReportService
 	search       SearchService
-	autocomplete AutocomplenService
+	autocomplete AutocompleteService
 	licensing    LicenseService
 
 	userAuth  *auth.KeycloakAuth
