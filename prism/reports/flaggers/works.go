@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log/slog"
 	"math"
-	"prism/api"
 	"prism/gscholar"
 	"prism/llms"
 	"prism/openalex"
@@ -14,11 +13,11 @@ import (
 	"github.com/agnivade/levenshtein"
 )
 
-func streamOpenAlexWorks(openalex openalex.KnowledgeBase, authorId string, startYear, endYear int) (chan api.WorkBatch, chan error) {
+func streamOpenAlexWorks(openalex openalex.KnowledgeBase, authorId string, startYear, endYear int) (chan openalex.WorkBatch, chan error) {
 	return openalex.StreamWorks(authorId, startYear, endYear)
 }
 
-func findOAAuthorId(work api.Work, targetAuthorName string) string {
+func findOAAuthorId(work openalex.Work, targetAuthorName string) string {
 	authorId := ""
 	minDist := math.MaxInt
 
@@ -37,7 +36,7 @@ func findOAAuthorId(work api.Work, targetAuthorName string) string {
 	return authorId
 }
 
-func findTargetAuthorIds(works []api.Work, targetAuthorName string) []string {
+func findTargetAuthorIds(works []openalex.Work, targetAuthorName string) []string {
 	targetAuthorIds := make([]string, 0)
 	for _, work := range works {
 		if oaId := findOAAuthorId(work, targetAuthorName); len(oaId) > 0 {
@@ -47,8 +46,8 @@ func findTargetAuthorIds(works []api.Work, targetAuthorName string) []string {
 	return targetAuthorIds
 }
 
-func streamGScholarWorks(openalex openalex.KnowledgeBase, authorName, gScholarAuthorId string, startYear, endYear int) (chan api.WorkBatch, chan error) {
-	workCh := make(chan api.WorkBatch, 10)
+func streamGScholarWorks(oa openalex.KnowledgeBase, authorName, gScholarAuthorId string, startYear, endYear int) (chan openalex.WorkBatch, chan error) {
+	workCh := make(chan openalex.WorkBatch, 10)
 	errorCh := make(chan error, 10)
 
 	go func() {
@@ -64,14 +63,14 @@ func streamGScholarWorks(openalex openalex.KnowledgeBase, authorName, gScholarAu
 				break
 			}
 
-			works, err := openalex.FindWorksByTitle(batch, startYear, endYear)
+			works, err := oa.FindWorksByTitle(batch, startYear, endYear)
 			if err != nil {
 				slog.Error("error getting works from openalex", "error", err)
 				errorCh <- err
 				break
 			}
 
-			workCh <- api.WorkBatch{Works: works, TargetAuthorIds: findTargetAuthorIds(works, authorName)}
+			workCh <- openalex.WorkBatch{Works: works, TargetAuthorIds: findTargetAuthorIds(works, authorName)}
 		}
 	}()
 
@@ -91,8 +90,8 @@ And so on. Here comes the snippet:
 %s
 `
 
-func streamUnstructuredWorks(openalex openalex.KnowledgeBase, authorName, text string, startYear, endYear int) (chan api.WorkBatch, chan error) {
-	workCh := make(chan api.WorkBatch, 10)
+func streamUnstructuredWorks(oa openalex.KnowledgeBase, authorName, text string, startYear, endYear int) (chan openalex.WorkBatch, chan error) {
+	workCh := make(chan openalex.WorkBatch, 10)
 	errorCh := make(chan error, 10)
 
 	go func() {
@@ -120,14 +119,14 @@ func streamUnstructuredWorks(openalex openalex.KnowledgeBase, authorName, text s
 
 		const batchSize = 20
 		for i := 0; i < len(titles); i += batchSize {
-			works, err := openalex.FindWorksByTitle(titles[i:min(len(titles), i+batchSize)], startYear, endYear)
+			works, err := oa.FindWorksByTitle(titles[i:min(len(titles), i+batchSize)], startYear, endYear)
 			if err != nil {
 				slog.Error("error finding works for titles", "error", err)
 				errorCh <- fmt.Errorf("error finding works: %w", err)
 				break
 			}
 
-			workCh <- api.WorkBatch{Works: works, TargetAuthorIds: findTargetAuthorIds(works, authorName)}
+			workCh <- openalex.WorkBatch{Works: works, TargetAuthorIds: findTargetAuthorIds(works, authorName)}
 
 		}
 
@@ -138,21 +137,21 @@ func streamUnstructuredWorks(openalex openalex.KnowledgeBase, authorName, text s
 	return workCh, errorCh
 }
 
-func streamScopusWorks(openalex openalex.KnowledgeBase, authorName string, titles []string, startYear, endYear int) (chan api.WorkBatch, chan error) {
-	workCh := make(chan api.WorkBatch, 10)
+func streamScopusWorks(oa openalex.KnowledgeBase, authorName string, titles []string, startYear, endYear int) (chan openalex.WorkBatch, chan error) {
+	workCh := make(chan openalex.WorkBatch, 10)
 	errorCh := make(chan error, 10)
 
 	go func() {
 		const batchSize = 20
 		for i := 0; i < len(titles); i += batchSize {
-			works, err := openalex.FindWorksByTitle(titles[i:min(len(titles), i+batchSize)], startYear, endYear)
+			works, err := oa.FindWorksByTitle(titles[i:min(len(titles), i+batchSize)], startYear, endYear)
 			if err != nil {
 				slog.Error("error finding works for titles", "error", err)
 				errorCh <- fmt.Errorf("error finding works: %w", err)
 				break
 			}
 
-			workCh <- api.WorkBatch{Works: works, TargetAuthorIds: findTargetAuthorIds(works, authorName)}
+			workCh <- openalex.WorkBatch{Works: works, TargetAuthorIds: findTargetAuthorIds(works, authorName)}
 		}
 
 		close(workCh)

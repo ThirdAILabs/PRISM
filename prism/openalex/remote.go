@@ -165,6 +165,8 @@ type oaWork struct {
 	BestOaLocation oaLocation `json:"best_oa_location"`
 
 	Authorships []oaAuthorship `json:"authorships"`
+
+	Grants []oaGrant `json:"grants"`
 }
 
 func (work *oaWork) getWorkUrl() string {
@@ -201,8 +203,19 @@ type oaAuthorship struct {
 }
 
 type oaLocation struct {
-	IsOA           bool   `json:"is_oa"`
-	LandingPageUrl string `json:"landing_page_url"`
+	IsOA           bool     `json:"is_oa"`
+	LandingPageUrl string   `json:"landing_page_url"`
+	Source         oaSource `json:"source"`
+}
+
+type oaSource struct {
+	DisplayName      string `json:"display_name"` // Should we be using "host_organization_name" instead
+	HostOrganization string `json:"host_organization"`
+}
+
+type oaGrant struct {
+	Funder            string `json:"funder"`
+	FunderDisplayName string `json:"funder_display_name"`
 }
 
 func getYearFilter(startYear, endYear int) string {
@@ -216,23 +229,41 @@ func getYearFilter(startYear, endYear int) string {
 	return yearFilter
 }
 
-func converOpenalexWork(work oaWork) api.Work {
-	authors := make([]api.Author, 0)
+func converOpenalexWork(work oaWork) Work {
+	authors := make([]Author, 0)
 	for _, author := range work.Authorships {
-		institutions := make([]string, 0)
+		institutions := make([]Institution, 0)
 		for _, institution := range author.Institutions {
-			institutions = append(institutions, institution.DisplayName)
+			institutions = append(institutions, Institution{
+				InstitutionName: institution.DisplayName,
+				InstitutionId:   institution.Id,
+			})
 		}
-		authors = append(authors, api.Author{
+		authors = append(authors, Author{
 			AuthorId:      author.Author.Id,
 			DisplayName:   author.Author.DisplayName,
 			RawAuthorName: &author.RawAuthorName,
 			Institutions:  institutions,
-			Source:        api.OpenAlexSource,
 		})
 	}
 
-	return api.Work{
+	grants := make([]Grant, 0, len(work.Grants))
+	for _, grant := range work.Grants {
+		grants = append(grants, Grant{
+			FunderId:   grant.Funder,
+			FunderName: grant.Funder,
+		})
+	}
+
+	locations := make([]Location, 0, len(work.Locations))
+	for _, loc := range work.Locations {
+		locations = append(locations, Location{
+			OrganizationId:   loc.Source.HostOrganization,
+			OrganizationName: loc.Source.DisplayName,
+		})
+	}
+
+	return Work{
 		DisplayName:     work.DisplayName,
 		WorkUrl:         work.getWorkUrl(),
 		OaUrl:           work.getOaUrl(),
@@ -241,8 +272,8 @@ func converOpenalexWork(work oaWork) api.Work {
 	}
 }
 
-func (oa *RemoteOpenAlex) StreamWorks(authorId string, startYear, endYear int) (chan api.WorkBatch, chan error) {
-	workCh := make(chan api.WorkBatch, 10)
+func (oa *RemoteOpenAlex) StreamWorks(authorId string, startYear, endYear int) (chan WorkBatch, chan error) {
+	workCh := make(chan WorkBatch, 10)
 	errorCh := make(chan error, 1)
 
 	cursor := "*"
@@ -266,12 +297,12 @@ func (oa *RemoteOpenAlex) StreamWorks(authorId string, startYear, endYear int) (
 				break
 			}
 
-			works := make([]api.Work, 0, len(results.Results))
+			works := make([]Work, 0, len(results.Results))
 			for _, work := range results.Results {
 				works = append(works, converOpenalexWork(work))
 			}
 
-			workCh <- api.WorkBatch{Works: works, TargetAuthorIds: []string{authorId}}
+			workCh <- WorkBatch{Works: works, TargetAuthorIds: []string{authorId}}
 		}
 		close(workCh)
 		close(errorCh)
@@ -280,8 +311,8 @@ func (oa *RemoteOpenAlex) StreamWorks(authorId string, startYear, endYear int) (
 	return workCh, errorCh
 }
 
-func (oa *RemoteOpenAlex) FindWorksByTitle(titles []string, startYear, endYear int) ([]api.Work, error) {
-	works := make([]api.Work, 0, len(titles))
+func (oa *RemoteOpenAlex) FindWorksByTitle(titles []string, startYear, endYear int) ([]Work, error) {
+	works := make([]Work, 0, len(titles))
 
 	yearFilter := getYearFilter(startYear, endYear)
 
