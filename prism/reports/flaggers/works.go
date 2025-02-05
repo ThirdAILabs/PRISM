@@ -3,24 +3,56 @@ package flaggers
 import (
 	"fmt"
 	"log/slog"
+	"math"
 	"prism/api"
 	"prism/gscholar"
 	"prism/llms"
 	"prism/openalex"
 	"regexp"
 	"strings"
+
+	"github.com/agnivade/levenshtein"
 )
 
-func streamOpenAlexWorks(openalex openalex.KnowledgeBase, authorId string, startYear, endYear int) (chan []api.Work, chan error) {
-	return openalex.FindWorks(authorId, startYear, endYear)
+func streamOpenAlexWorks(openalex openalex.KnowledgeBase, authorId string, startYear, endYear int) (chan api.WorkBatch, chan error) {
+	return openalex.StreamWorks(authorId, startYear, endYear)
 }
 
-func streamGScholarWorks(openalex openalex.KnowledgeBase, authorId string, startYear, endYear int) (chan []api.Work, chan error) {
-	workCh := make(chan []api.Work, 10)
+func findOAAuthorId(work api.Work, targetAuthorName string) string {
+	authorId := ""
+	minDist := math.MaxInt
+
+	for _, author := range work.Authors {
+		name := author.DisplayName
+		if len(name) == 0 && author.RawAuthorName != nil {
+			name = *author.RawAuthorName
+		}
+
+		if dist := levenshtein.ComputeDistance(name, targetAuthorName); dist < minDist {
+			minDist = dist
+			authorId = author.AuthorId
+		}
+	}
+
+	return authorId
+}
+
+func findTargetAuthorIds(works []api.Work, targetAuthorName string) []string {
+	targetAuthorIds := make([]string, 0)
+	for _, work := range works {
+		if oaId := findOAAuthorId(work, targetAuthorName); len(oaId) > 0 {
+			targetAuthorIds = append(targetAuthorIds, oaId)
+		}
+	}
+	return targetAuthorIds
+}
+
+func streamGScholarWorks(openalex openalex.KnowledgeBase, authorName, gScholarAuthorId string, startYear, endYear int) (chan api.WorkBatch, chan error) {
+	workCh := make(chan api.WorkBatch, 10)
 	errorCh := make(chan error, 10)
 
 	go func() {
-		workTitleIterator := gscholar.NewAuthorPaperIterator(authorId)
+		workTitleIterator := gscholar.NewAuthorPaperIterator(gScholarAuthorId)
 		for {
 			batch, err := workTitleIterator.Next()
 			if err != nil {
@@ -39,7 +71,7 @@ func streamGScholarWorks(openalex openalex.KnowledgeBase, authorId string, start
 				break
 			}
 
-			workCh <- works
+			workCh <- api.WorkBatch{Works: works, TargetAuthorIds: findTargetAuthorIds(works, authorName)}
 		}
 	}()
 
@@ -59,8 +91,8 @@ And so on. Here comes the snippet:
 %s
 `
 
-func streamUnstructuredWorks(openalex openalex.KnowledgeBase, text string, startYear, endYear int) (chan []api.Work, chan error) {
-	workCh := make(chan []api.Work, 10)
+func streamUnstructuredWorks(openalex openalex.KnowledgeBase, authorName, text string, startYear, endYear int) (chan api.WorkBatch, chan error) {
+	workCh := make(chan api.WorkBatch, 10)
 	errorCh := make(chan error, 10)
 
 	go func() {
@@ -95,7 +127,8 @@ func streamUnstructuredWorks(openalex openalex.KnowledgeBase, text string, start
 				break
 			}
 
-			workCh <- works
+			workCh <- api.WorkBatch{Works: works, TargetAuthorIds: findTargetAuthorIds(works, authorName)}
+
 		}
 
 		close(workCh)
@@ -105,8 +138,8 @@ func streamUnstructuredWorks(openalex openalex.KnowledgeBase, text string, start
 	return workCh, errorCh
 }
 
-func streamScopusWorks(openalex openalex.KnowledgeBase, titles []string, startYear, endYear int) (chan []api.Work, chan error) {
-	workCh := make(chan []api.Work, 10)
+func streamScopusWorks(openalex openalex.KnowledgeBase, authorName string, titles []string, startYear, endYear int) (chan api.WorkBatch, chan error) {
+	workCh := make(chan api.WorkBatch, 10)
 	errorCh := make(chan error, 10)
 
 	go func() {
@@ -119,7 +152,7 @@ func streamScopusWorks(openalex openalex.KnowledgeBase, titles []string, startYe
 				break
 			}
 
-			workCh <- works
+			workCh <- api.WorkBatch{Works: works, TargetAuthorIds: findTargetAuthorIds(works, authorName)}
 		}
 
 		close(workCh)

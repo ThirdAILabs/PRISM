@@ -9,7 +9,7 @@ type KnowledgeBase interface {
 
 	FindAuthors(author, institution string) ([]api.Author, error)
 
-	FindWorks(authorId string, startYear, endYear int) (chan []api.Work, chan error)
+	StreamWorks(authorId string, startYear, endYear int) (chan api.WorkBatch, chan error)
 
 	FindWorksByTitle(titles []string, startYear, endYear int) ([]api.Work, error)
 }

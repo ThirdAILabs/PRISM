@@ -195,8 +195,9 @@ type oaWorkAuthor struct {
 }
 
 type oaAuthorship struct {
-	Author       oaAuthor        `json:"author"`
-	Institutions []oaInstitution `json:"institutions"`
+	Author        oaAuthor        `json:"author"`
+	Institutions  []oaInstitution `json:"institutions"`
+	RawAuthorName string          `json:"raw_author_name"`
 }
 
 type oaLocation struct {
@@ -223,10 +224,11 @@ func converOpenalexWork(work oaWork) api.Work {
 			institutions = append(institutions, institution.DisplayName)
 		}
 		authors = append(authors, api.Author{
-			AuthorId:     author.Author.Id,
-			DisplayName:  author.Author.DisplayName,
-			Institutions: institutions,
-			Source:       api.OpenAlexSource,
+			AuthorId:      author.Author.Id,
+			DisplayName:   author.Author.DisplayName,
+			RawAuthorName: &author.RawAuthorName,
+			Institutions:  institutions,
+			Source:        api.OpenAlexSource,
 		})
 	}
 
@@ -239,8 +241,8 @@ func converOpenalexWork(work oaWork) api.Work {
 	}
 }
 
-func (oa *RemoteOpenAlex) FindWorks(authorId string, startYear, endYear int) (chan []api.Work, chan error) {
-	workCh := make(chan []api.Work, 10)
+func (oa *RemoteOpenAlex) StreamWorks(authorId string, startYear, endYear int) (chan api.WorkBatch, chan error) {
+	workCh := make(chan api.WorkBatch, 10)
 	errorCh := make(chan error, 1)
 
 	cursor := "*"
@@ -269,7 +271,7 @@ func (oa *RemoteOpenAlex) FindWorks(authorId string, startYear, endYear int) (ch
 				works = append(works, converOpenalexWork(work))
 			}
 
-			workCh <- works
+			workCh <- api.WorkBatch{Works: works, TargetAuthorIds: []string{authorId}}
 		}
 		close(workCh)
 		close(errorCh)

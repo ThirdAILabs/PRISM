@@ -41,11 +41,12 @@ const (
 )
 
 type Author struct {
-	AuthorId     string
-	DisplayName  string
-	Institutions []string
-	Source       string
-	WorksCount   int
+	AuthorId      string
+	DisplayName   string
+	RawAuthorName *string
+	Institutions  []string
+	Source        string
+	WorksCount    int
 }
 
 type Institution struct {
@@ -86,4 +87,10 @@ type Work struct {
 	OaUrl           string
 	PublicationYear int
 	Authors         []Author
+	RawAuthorName   string
+}
+
+type WorkBatch struct {
+	Works           []Work
+	TargetAuthorIds []string
 }
