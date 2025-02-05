@@ -20,27 +20,32 @@ func autocompleteHelper(component, query string, dest interface{}) error {
 
 	res, err := http.Get(url)
 	if err != nil {
-		slog.Error("autocompletion failed: open alex returned error", "query", query, "component", component, "error", err)
+		slog.Error("openalex: autocomplete failed", "query", query, "component", component, "error", err)
 		return fmt.Errorf("unable to get autocomplete suggestions")
 	}
 	defer res.Body.Close()
 
 	if err := json.NewDecoder(res.Body).Decode(dest); err != nil {
-		slog.Error("autocompletion failed: error parsing reponse from open alex", "query", query, "component", component, "error", err)
+		slog.Error("openalex: error parsing reponse from autocomplete", "query", query, "component", component, "error", err)
 		return fmt.Errorf("unable to get autocomplete suggestions")
 	}
 
 	return nil
 }
 
+type oaResults[T any] struct {
+	Results []T `json:"results"`
+}
+
+// Response Format: https://docs.openalex.org/how-to-use-the-api/get-lists-of-entities/autocomplete-entities#response-format
+type oaAutocompletion struct {
+	Id          string `json:"id"`
+	DisplayName string `json:"display_name"`
+	Hint        string `json:"hint"`
+}
+
 func (oa *RemoteOpenAlex) AutocompleteAuthor(query string) ([]api.Author, error) {
-	var suggestions struct {
-		Results []struct {
-			Id          string `json:"id"`
-			DisplayName string `json:"display_name"`
-			Hint        string `json:"hint"`
-		} `json:"results"`
-	}
+	var suggestions oaResults[oaAutocompletion]
 
 	if err := autocompleteHelper("authors", query, &suggestions); err != nil {
 		return nil, err
@@ -60,11 +65,7 @@ func (oa *RemoteOpenAlex) AutocompleteAuthor(query string) ([]api.Author, error)
 }
 
 func (oa *RemoteOpenAlex) AutocompleteInstitution(query string) ([]api.Institution, error) {
-	var suggestions struct {
-		Results []struct {
-			DisplayName string `json:"display_name"`
-		} `json:"results"`
-	}
+	var suggestions oaResults[oaAutocompletion]
 
 	if err := autocompleteHelper("institutions", query, &suggestions); err != nil {
 		return nil, err
@@ -80,6 +81,24 @@ func (oa *RemoteOpenAlex) AutocompleteInstitution(query string) ([]api.Instituti
 	return institutions, nil
 }
 
+// Response Format: https://docs.openalex.org/api-entities/authors/get-lists-of-authors
+type oaAuthor struct {
+	Id           string          `json:"id"`
+	DisplayName  string          `json:"diplay_name"`
+	WorksCount   int             `json:"works_count"`
+	Affiliations []oaAffiliation `json:"affiliations"`
+}
+
+type oaInstitution struct {
+	Id          string `json:"id"`
+	DisplayName string `json:"display_name"`
+	CountryCode string `json:"country_code"`
+}
+
+type oaAffiliation struct {
+	Institution oaInstitution `json:"institution"`
+}
+
 func (oa *RemoteOpenAlex) FindAuthors(author, institution string) ([]api.Author, error) {
 	url := fmt.Sprintf(
 		"https://api.openalex.org/authors?filter=display_name.search:%s,affiliations.institution.id:%s&mailto=kartik@thirdai.com",
@@ -88,27 +107,15 @@ func (oa *RemoteOpenAlex) FindAuthors(author, institution string) ([]api.Author,
 
 	res, err := http.Get(url)
 	if err != nil {
-		slog.Error("open alex search failed", "author", author, "institution", institution, "error", err)
+		slog.Error("openalex: author search failed", "author", author, "institution", institution, "error", err)
 		return nil, ErrSearchFailed
 	}
 	defer res.Body.Close()
 
-	var results struct {
-		Results []struct {
-			Id            string `json:"id"`
-			DisplayName   string `json:"diplay_name"`
-			WorksCount    int    `json:"works_count"`
-			Affilliations []struct {
-				Institution struct {
-					DisplayName string `json:"display_name"`
-					CountryCode string `json:"country_code"`
-				} `json:"institution"`
-			} `json:"affiliations"`
-		}
-	}
+	var results oaResults[oaAuthor]
 
 	if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
-		slog.Error("open alex search failed: error parsing reponse from author search", "author", author, "institution", institution, "error", err)
+		slog.Error("openalex: error parsing author search response", "author", author, "institution", institution, "error", err)
 		return nil, ErrSearchFailed
 	}
 
@@ -116,7 +123,7 @@ func (oa *RemoteOpenAlex) FindAuthors(author, institution string) ([]api.Author,
 	for _, result := range results.Results {
 		if result.WorksCount > 0 {
 			institutions := make([]string, 0)
-			for i, inst := range result.Affilliations {
+			for i, inst := range result.Affiliations {
 				if i < 3 || (inst.Institution.CountryCode == "US" && !slices.Contains(institutions, inst.Institution.DisplayName)) {
 					institutions = append(institutions, inst.Institution.DisplayName)
 				}
@@ -133,4 +140,167 @@ func (oa *RemoteOpenAlex) FindAuthors(author, institution string) ([]api.Author,
 	}
 
 	return authors, nil
+}
+
+type oaMetadata struct {
+	NextCursor string `json:"next_cursor"`
+}
+
+type oaWorkResults struct {
+	Meta    oaMetadata `json:"meta"`
+	Results []oaWork   `json:"results"`
+}
+
+// Response Format: https://docs.openalex.org/api-entities/works/get-lists-of-works
+type oaWork struct {
+	Id              string `json:"id"`
+	DisplayName     string `json:"display_name"`
+	PublicationYear int    `json:"publication_year"`
+
+	Ids oaWorkIds `json:"ids"`
+
+	PrimaryLocation oaLocation   `json:"primary_location"`
+	Locations       []oaLocation `json:"locations"`
+
+	BestOaLocation oaLocation `json:"best_oa_location"`
+
+	Authorships []oaAuthorship `json:"authorships"`
+}
+
+func (work *oaWork) getWorkUrl() string {
+	if len(work.PrimaryLocation.LandingPageUrl) > 0 {
+		return work.PrimaryLocation.LandingPageUrl
+	}
+	if len(work.Locations) > 0 && len(work.Locations[0].LandingPageUrl) > 0 {
+		return work.Locations[0].LandingPageUrl
+	}
+	return work.Ids.Openalex
+}
+
+func (work *oaWork) getOaUrl() string {
+	if work.BestOaLocation.IsOA {
+		return work.BestOaLocation.LandingPageUrl
+	}
+	return "none"
+}
+
+type oaWorkIds struct {
+	Openalex string `json:"openalex"`
+}
+
+// This is slightly different from the author above because here we have a subset of the fields
+type oaWorkAuthor struct {
+	Id          string `json:"id"`
+	DisplayName string `json:"display_name"`
+}
+
+type oaAuthorship struct {
+	Author       oaAuthor        `json:"author"`
+	Institutions []oaInstitution `json:"institutions"`
+}
+
+type oaLocation struct {
+	IsOA           bool   `json:"is_oa"`
+	LandingPageUrl string `json:"landing_page_url"`
+}
+
+func getYearFilter(startYear, endYear int) string {
+	yearFilter := ""
+	if startYear >= 0 {
+		yearFilter += fmt.Sprintf(",from_publication_date:%d-01-01", startYear)
+	}
+	if endYear >= 0 {
+		yearFilter += fmt.Sprintf(",to_publication_date:%d-12-31", endYear)
+	}
+	return yearFilter
+}
+
+func converOpenalexWork(work oaWork) api.Work {
+	authors := make([]api.Author, 0)
+	for _, author := range work.Authorships {
+		institutions := make([]string, 0)
+		for _, institution := range author.Institutions {
+			institutions = append(institutions, institution.DisplayName)
+		}
+		authors = append(authors, api.Author{
+			AuthorId:     author.Author.Id,
+			DisplayName:  author.Author.DisplayName,
+			Institutions: institutions,
+			Source:       api.OpenAlexSource,
+		})
+	}
+
+	return api.Work{
+		DisplayName:     work.DisplayName,
+		WorkUrl:         work.getWorkUrl(),
+		OaUrl:           work.getOaUrl(),
+		PublicationYear: work.PublicationYear,
+		Authors:         authors,
+	}
+}
+
+func (oa *RemoteOpenAlex) FindWorks(authorId string, startYear, endYear int) (chan []api.Work, chan error) {
+	workCh := make(chan []api.Work, 10)
+	errorCh := make(chan error, 1)
+
+	cursor := "*"
+
+	yearFilter := getYearFilter(startYear, endYear)
+
+	go func() {
+		for cursor != "" {
+			url := fmt.Sprintf("https://api.openalex.org/works?filter=authorships.author.id:%s%s&per-page=200&cursor=%s&mailto=kartik@thirdai.com", authorId, yearFilter, cursor)
+
+			res, err := http.Get(url)
+			if err != nil {
+				errorCh <- fmt.Errorf("openalex: work search failed: %w", err)
+				break
+			}
+
+			var results oaResults[oaWork]
+			if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
+				slog.Error("openalex: error parsing response from work search", "author_id", authorId, "start_year", startYear, "end_year", endYear, "error", err)
+				errorCh <- fmt.Errorf("error parsing response from open alex: %w", err)
+				break
+			}
+
+			works := make([]api.Work, 0, len(results.Results))
+			for _, work := range results.Results {
+				works = append(works, converOpenalexWork(work))
+			}
+
+			workCh <- works
+		}
+		close(workCh)
+		close(errorCh)
+	}()
+
+	return workCh, errorCh
+}
+
+func (oa *RemoteOpenAlex) FindWorksByTitle(titles []string, startYear, endYear int) ([]api.Work, error) {
+	works := make([]api.Work, 0, len(titles))
+
+	yearFilter := getYearFilter(startYear, endYear)
+
+	for _, title := range titles {
+		url := fmt.Sprintf("https://api.openalex.org/works?filter=title.search:%s%s&per-page=1&mailto=kartik@thirdai.com", url.QueryEscape(title), yearFilter)
+		res, err := http.Get(url)
+		if err != nil {
+			slog.Error("openalex: error searching for work by title", "title", title, "error", err)
+			return nil, fmt.Errorf("openalex work search failed: %w", err)
+		}
+
+		var results oaResults[oaWork]
+		if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
+			slog.Error("openalex: error parsing response from work search", "title", title, "start_year", startYear, "end_year", endYear, "error", err)
+			return nil, fmt.Errorf("error parsing response from open alex: %w", err)
+		}
+
+		if len(results.Results) > 0 {
+			works = append(works, converOpenalexWork(results.Results[0]))
+		}
+	}
+
+	return works, nil
 }

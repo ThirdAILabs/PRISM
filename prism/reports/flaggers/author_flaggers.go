@@ -81,7 +81,7 @@ type authorCnt struct {
 	cnt    int
 }
 
-func topCoauthors(works []Work) []authorCnt {
+func topCoauthors(works []api.Work) []authorCnt {
 	authors := make(map[string]int)
 	for _, work := range works {
 		for _, author := range work.Authors {
@@ -107,7 +107,7 @@ func topCoauthors(works []Work) []authorCnt {
 	return topAuthors[:min(len(topAuthors), 4)]
 }
 
-func (flagger *AuthorIsAssociatedWithEOC) findFirstSecondHopEntities(author api.Author, works []Work) ([]Flag, error) {
+func (flagger *AuthorIsAssociatedWithEOC) findFirstSecondHopEntities(author api.Author, works []api.Work) ([]Flag, error) {
 	flags := make([]Flag, 0)
 
 	seen := make(map[string]bool)
@@ -308,7 +308,7 @@ func (flagger *AuthorIsAssociatedWithEOC) findSecondThirdHopEntities(author api.
 	return flags, nil
 }
 
-func (flagger *AuthorIsAssociatedWithEOC) Flag(author api.Author, works []Work) ([]Flag, error) {
+func (flagger *AuthorIsAssociatedWithEOC) Flag(author api.Author, works []api.Work) ([]Flag, error) {
 	firstSecondLevelFlags, err := flagger.findFirstSecondHopEntities(author, works)
 	if err != nil {
 		return nil, err

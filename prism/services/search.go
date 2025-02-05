@@ -8,10 +8,10 @@ import (
 	"log/slog"
 	"net/http"
 	"prism/api"
+	"prism/gscholar"
 	"prism/llms"
 	"prism/ndb"
 	"prism/openalex"
-	"prism/services/utils"
 	"strconv"
 	"strings"
 	"sync"
@@ -63,9 +63,9 @@ func (s *SearchService) SearchGoogleScholar(w http.ResponseWriter, r *http.Reque
 
 	resultsCh := make(chan []api.Author, 10)
 
-	v1Crawler := utils.NewProfilePageCrawler(query, resultsCh)
+	v1Crawler := gscholar.NewProfilePageCrawler(query, resultsCh)
 
-	v2Crawler := utils.NewGScholarCrawler(query, resultsCh)
+	v2Crawler := gscholar.NewGScholarCrawler(query, resultsCh)
 
 	stop := make(chan bool)
 
@@ -170,7 +170,7 @@ func (s *SearchService) FormalRelations(r *http.Request) (any, error) {
 	query := r.URL.Query()
 	author, institution := query.Get("author"), query.Get("institution")
 
-	googleResults, err := utils.GoogleSearch(fmt.Sprintf(`"%s" "%s"`, author, institution))
+	googleResults, err := gscholar.GoogleSearch(fmt.Sprintf(`"%s" "%s"`, author, institution))
 	if err != nil {
 		slog.Error("formal relations: google search error", "error", err)
 		return nil, CodedError(ErrSearchFailed, http.StatusInternalServerError)

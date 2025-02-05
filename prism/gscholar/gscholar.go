@@ -1,4 +1,4 @@
-package utils
+package gscholar
 
 import (
 	"encoding/json"
@@ -19,28 +19,6 @@ var (
 	ErrGoogleSearchFailed        = errors.New("google search failed")
 	ErrGoogleScholarSearchFailed = errors.New("google scholar search failed")
 )
-
-func GoogleSearch(query string) (any, error) {
-	url := fmt.Sprintf("https://serpapi.com/search.json?engine=google&q=%s&api_key=%s'", url.QueryEscape(query), apiKey)
-
-	res, err := http.Get(url)
-	if err != nil {
-		slog.Error("google search failed", "query", query, "error", err)
-		return nil, ErrGoogleSearchFailed
-	}
-	defer res.Body.Close()
-
-	var results struct {
-		OrganicResults any `json:"organic_results"`
-	}
-
-	if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
-		slog.Error("google search failed: error parsing reponse", "query", query, "error", err)
-		return nil, ErrGoogleSearchFailed
-	}
-
-	return results.OrganicResults, nil
-}
 
 type gscholarProfile struct {
 	AuthorId      string  `json:"author_id"`
@@ -295,4 +273,55 @@ func (crawler *GScholarCrawler) Run() {
 			return
 		}
 	}
+}
+
+type gscholarPaper struct {
+	Title string `json:"title"`
+}
+
+type AuthorPaperIterator struct {
+	authorId string
+	start    int
+	stopped  bool
+}
+
+func NewAuthorPaperIterator(authorId string) *AuthorPaperIterator {
+	return &AuthorPaperIterator{authorId: authorId, start: 0, stopped: false}
+}
+
+func (iter *AuthorPaperIterator) Next() ([]string, error) {
+	if iter.stopped {
+		return nil, nil
+	}
+
+	const batchSize = 100
+
+	url := fmt.Sprintf("https://serpapi.com/search?engine=google_scholar_author&author_id=%s&num=%d&start=%d&sort=pubdate&api_key=%s", iter.authorId, batchSize, iter.start, apiKey)
+
+	res, err := http.Get(url)
+	if err != nil {
+		slog.Error("google scholar: error getting author papers", "author_id", iter.authorId, "error", err)
+		return nil, fmt.Errorf("google scholar error: %w", err)
+	}
+
+	var results struct {
+		Articles []gscholarPaper `json:"articles"`
+	}
+
+	if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
+		slog.Error("google scholar: error parsing papers reponse", "author_id", iter.authorId, "error", err)
+		return nil, fmt.Errorf("error parsing response from google scholar: %w", err)
+	}
+
+	titles := make([]string, 0, len(results.Articles))
+	for _, paper := range results.Articles {
+		titles = append(titles, paper.Title)
+	}
+
+	if len(results.Articles) < batchSize {
+		iter.stopped = true
+	}
+	iter.start += batchSize
+
+	return titles, nil
 }

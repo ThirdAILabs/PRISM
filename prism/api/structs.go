@@ -79,3 +79,11 @@ type License struct {
 	Expiration  time.Time
 	Deactivated bool
 }
+
+type Work struct {
+	DisplayName     string
+	WorkUrl         string
+	OaUrl           string
+	PublicationYear int
+	Authors         []Author
+}
