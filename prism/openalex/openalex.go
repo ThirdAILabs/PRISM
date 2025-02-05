@@ -33,9 +33,11 @@ type Location struct {
 }
 
 type Work struct {
+	WorkId          string
 	DisplayName     string
 	WorkUrl         string
 	OaUrl           string
+	DownloadUrl     string
 	PublicationYear int
 	Authors         []Author
 	RawAuthorName   string

@@ -186,6 +186,16 @@ func (work *oaWork) getOaUrl() string {
 	return "none"
 }
 
+func (work *oaWork) pdfUrl() string {
+	if work.PrimaryLocation.PdfUrl != nil {
+		return *work.PrimaryLocation.PdfUrl
+	}
+	if work.BestOaLocation.PdfUrl != nil {
+		return *work.BestOaLocation.PdfUrl
+	}
+	return ""
+}
+
 type oaWorkIds struct {
 	Openalex string `json:"openalex"`
 }
@@ -206,6 +216,7 @@ type oaLocation struct {
 	IsOA           bool     `json:"is_oa"`
 	LandingPageUrl string   `json:"landing_page_url"`
 	Source         oaSource `json:"source"`
+	PdfUrl         *string  `json:"pdf_url"`
 }
 
 type oaSource struct {
@@ -264,9 +275,11 @@ func converOpenalexWork(work oaWork) Work {
 	}
 
 	return Work{
+		WorkId:          work.Id,
 		DisplayName:     work.DisplayName,
 		WorkUrl:         work.getWorkUrl(),
 		OaUrl:           work.getOaUrl(),
+		DownloadUrl:     work.pdfUrl(),
 		PublicationYear: work.PublicationYear,
 		Authors:         authors,
 	}

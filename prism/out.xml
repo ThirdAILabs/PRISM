@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xml:space="preserve" xmlns="http://www.tei-c.org/ns/1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.tei-c.org/ns/1.0 https://raw.githubusercontent.com/kermitt2/grobid/master/grobid-home/schemas/xsd/Grobid.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+	<teiHeader xml:lang="en">
+		<fileDesc>
+			<titleStmt>
+				<title level="a" type="main">Graphene and Nanowire Transistors for Cellular Interfaces and Electrical Recording</title>
+				<funder ref="#_6xUHMpM">
+					<orgName type="full">Special Presidential Foundation of the Chinese Academy of Sciences, China</orgName>
+				</funder>
+				<funder ref="#_BKuZgyd">
+					<orgName type="full">National Natural Science Foundation of China</orgName>
+				</funder>
+				<funder ref="#_6BfKvTV">
+					<orgName type="full">National Institutes of Health</orgName>
+					<orgName type="abbreviated">NIH</orgName>
+				</funder>
+				<funder ref="#_D9gWnaR">
+					<orgName type="full">National Security Science and Engineering Faculty Fellow</orgName>
+					<orgName type="abbreviated">NSSEFF</orgName>
+				</funder>
+			</titleStmt>
+			<publicationStmt>
+				<publisher/>
+				<availability status="unknown"><licence/></availability>
+				<date type="published" when="2011-03-10">2011 March 10.</date>
+			</publicationStmt>
+			<sourceDesc>
+				<biblStruct>
+					<analytic>
+						<author>
+							<persName><forename type="first">Tzahi</forename><surname>Cohen-Karni</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="department">School of Engineering and Applied Science</orgName>
+								<orgName type="institution">Harvard University</orgName>
+								<address>
+									<postCode>02138</postCode>
+									<settlement>Cambridge</settlement>
+									<region>Massachusetts</region>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName><forename type="first">Quan</forename><surname>Qing</surname></persName>
+							<affiliation key="aff1">
+								<orgName type="department">Department of Chemistry and Chemical Biology</orgName>
+								<orgName type="institution">Harvard University</orgName>
+								<address>
+									<postCode>02138</postCode>
+									<settlement>Cambridge</settlement>
+									<region>Massachusetts</region>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName><forename type="first">Qiang</forename><surname>Li</surname></persName>
+							<affiliation key="aff2">
+								<orgName type="department">National Center for Nanoscience and Technology</orgName>
+								<address>
+									<addrLine>11 Beiyitiao Street</addrLine>
+									<postCode>100190</postCode>
+									<settlement>Zhongguancun, Beijing</settlement>
+									<country>People&apos;s Republic of China</country>
+								</address>
+							</affiliation>
+						</author>
+						<author role="corresp">
+							<persName><forename type="first">Ying</forename><surname>Fang</surname></persName>
+							<email>fangy@nanoctr.cn</email>
+							<affiliation key="aff2">
+								<orgName type="department">National Center for Nanoscience and Technology</orgName>
+								<address>
+									<addrLine>11 Beiyitiao Street</addrLine>
+									<postCode>100190</postCode>
+									<settlement>Zhongguancun, Beijing</settlement>
+									<country>People&apos;s Republic of China</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName><forename type="first">Charles</forename><forename type="middle">M</forename><surname>Lieber</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="department">School of Engineering and Applied Science</orgName>
+								<orgName type="institution">Harvard University</orgName>
+								<address>
+									<postCode>02138</postCode>
+									<settlement>Cambridge</settlement>
+									<region>Massachusetts</region>
+								</address>
+							</affiliation>
+							<affiliation key="aff1">
+								<orgName type="department">Department of Chemistry and Chemical Biology</orgName>
+								<orgName type="institution">Harvard University</orgName>
+								<address>
+									<postCode>02138</postCode>
+									<settlement>Cambridge</settlement>
+									<region>Massachusetts</region>
+								</address>
+							</affiliation>
+						</author>
+						<title level="a" type="main">Graphene and Nanowire Transistors for Cellular Interfaces and Electrical Recording</title>
+					</analytic>
+					<monogr>
+						<imprint>
+							<date type="published" when="2011-03-10">2011 March 10.</date>
+						</imprint>
+					</monogr>
+					<idno type="MD5">D398957414C4ABFC1315E20FB52136BC</idno>
+					<idno type="DOI">10.1021/nl1002608</idno>
+				</biblStruct>
+			</sourceDesc>
+		</fileDesc>
+		<encodingDesc>
+			<appInfo>
+				<application version="0.8.0" ident="GROBID" when="2025-02-05T23:22+0000">
+					<desc>GROBID - A machine learning software for extracting information from scholarly documents</desc>
+					<ref target="https://github.com/kermitt2/grobid"/>
+				</application>
+			</appInfo>
+		</encodingDesc>
+		<profileDesc>
+			<abstract>
+<div xmlns="http://www.tei-c.org/ns/1.0"><p>Nanowire field-effect transistors (NW-FETs) have been shown to be powerful building blocks for nanoscale bioelectronic interfaces with cells and tissue due to their excellent sensitivity and their capability to form strongly coupled interfaces with cell membranes. Graphene has also been shown to be an attractive building block for nanoscale electronic devices, although little is known about its interfaces with cells and tissue. Here we report the first studies of graphene field effect transistors (Gra-FETs) as well as combined Gra-and NW-FETs interfaced to electrogenic cells. Gra-FET conductance signals recorded from spontaneously beating embryonic chicken cardiomyocytes yield well-defined extracellular signals with signal-to-noise ratio routinely &gt;4. The conductance signal amplitude was tuned by varying the Gra-FET working region through changes in water gate potential, V wg . Signals recorded from cardiomyocytes for different V wg result in constant calibrated extracellular voltage, indicating a robust graphene/cell interface. Significantly, variations in V wg across the Dirac point demonstrate the expected signal polarity flip, thus allowing, for the first time, both n-and p-type recording to be achieved from the same Gra-FET simply by offsetting V wg . In addition, comparisons of peak-to-peak recorded signal widths made as a function of Gra-FET device sizes and versus NW-FETs allowed an assessment of relative resolution in extracellular recording. Specifically, peak-to-peak widths increased with the area of Gra-FET devices, indicating an averaged signal from different points across the outer membrane of the beating cells. One-dimensional silicon NW-FETs incorporated side by side with the two-dimensional Gra-FET devices further highlighted limits in both temporal resolution and multiplexed measurements from the same cell for the different types of devices. The distinct and complementary capabilities of Gra-and NW-FETs could open up unique opportunities in the field of bioelectronics in the future. Bioelectronic interfaces created with nanomaterials represents an exciting and growing field of research that exploits key nanomaterial properties to go well beyond the capabilities of conventional microfabricated electronics. 1-8 For example, several groups have recently reported electrical measurements from cells and tissue interfaced to NW-FETs, with results demonstrating high signal-to-noise recording from cultured neurons, muscle cells, embryonic chicken hearts and acute brain slices. 4-8 Unique features of these studies compared to conventional planar devices measurements, include (i) the exceptional small active area of the NW-FET devices and (ii) the fact that nanodevices protrude from the plane of the substrate.</p></div>
+			</abstract>
+		</profileDesc>
+	</teiHeader>
+	<text xml:lang="en">
+		<back>
+			<div type="acknowledgement">
+<div><head>Acknowledgments</head><p>We acknowledge helpful discussions and help with figure preparation from <rs type="person">B. Tian</rs>. Y.F. acknowledges support of this work by <rs type="funder">Special Presidential Foundation of the Chinese Academy of Sciences, China</rs> (<rs type="grantNumber">08172911ZX</rs>) and the <rs type="funder">National Natural Science Foundation of China</rs> (<rs type="grantNumber">20973045</rs>). C.M.L. acknowledges support of this research from a <rs type="funder">NIH</rs> <rs type="grantName">Director's Pioneer Award</rs> (<rs type="grantNumber">1DP1OD003900</rs>) and a <rs type="funder">National Security Science and Engineering Faculty Fellow (NSSEFF)</rs> award (<rs type="grantNumber">N00244-09-1-0078</rs>).</p></div>
+			</div>
+			<listOrg type="funding">
+				<org type="funding" xml:id="_6xUHMpM">
+					<idno type="grant-number">08172911ZX</idno>
+				</org>
+				<org type="funding" xml:id="_BKuZgyd">
+					<idno type="grant-number">20973045</idno>
+				</org>
+				<org type="funding" xml:id="_6BfKvTV">
+					<idno type="grant-number">1DP1OD003900</idno>
+					<orgName type="grant-name">Director&apos;s Pioneer Award</orgName>
+				</org>
+				<org type="funding" xml:id="_D9gWnaR">
+					<idno type="grant-number">N00244-09-1-0078</idno>
+				</org>
+			</listOrg>
+		</back>
+	</text>
+</TEI>
+
