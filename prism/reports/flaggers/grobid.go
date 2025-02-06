@@ -47,7 +47,7 @@ type Acknowledgements struct {
 	Acknowledgements []Acknowledgement
 }
 
-func (extractor *AcknowledgementsExtractor) GetAcknowledgements(works []openalex.Work) (chan Acknowledgements, chan error) {
+func (extractor *AcknowledgementsExtractor) GetAcknowledgements(works []openalex.Work) chan CompletedTask[Acknowledgements] {
 	outputCh := make(chan Acknowledgements, len(works))
 	errorCh := make(chan error, 10)
 
@@ -73,32 +73,22 @@ func (extractor *AcknowledgementsExtractor) GetAcknowledgements(works []openalex
 	close(queue)
 
 	nWorkers := min(len(queue), extractor.maxWorkers)
-	for i := 0; i < nWorkers; i++ {
-		go extractor.worker(queue, outputCh, errorCh)
-	}
 
-	return outputCh, errorCh
+	return RunInPool(extractor.worker, queue, nWorkers)
 }
 
-func (extractor *AcknowledgementsExtractor) worker(queue chan openalex.Work, outputCh chan Acknowledgements, errorCh chan error) {
-	for {
-		next, done := <-queue
-		if done {
-			return
-		}
+func (extractor *AcknowledgementsExtractor) worker(next openalex.Work) (Acknowledgements, error) {
+	id := parseOpenAlexId(next)
 
-		id := parseOpenAlexId(next)
-
-		acks, err := extractor.extractAcknowledgments(id, next)
-		if err != nil {
-			slog.Error("error extracting acknowledgements for work", "id", id, "name", next.DisplayName, "error", err)
-			errorCh <- fmt.Errorf("error extracting acknowledgments: %w", err)
-		} else {
-			outputCh <- acks
-		}
-
-		extractor.updateCache(id, acks)
+	acks, err := extractor.extractAcknowledgments(id, next)
+	if err != nil {
+		slog.Error("error extracting acknowledgements for work", "id", id, "name", next.DisplayName, "error", err)
+		return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments: %w", err)
 	}
+
+	extractor.updateCache(id, acks)
+
+	return acks, nil
 }
 
 func parseOpenAlexId(work openalex.Work) string {

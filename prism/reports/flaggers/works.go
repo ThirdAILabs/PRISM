@@ -97,7 +97,7 @@ func streamUnstructuredWorks(oa openalex.KnowledgeBase, authorName, text string,
 	go func() {
 		llm := llms.New() // TODO: should this be using gpt-o1-mini
 
-		answer, err := llm.Generate(fmt.Sprintf(extractTitlesPromptTemplate, text))
+		answer, err := llm.Generate(fmt.Sprintf(extractTitlesPromptTemplate, text), &llms.Options{Model: llms.GPT4oMini})
 		if err != nil {
 			slog.Error("error getting title extraction response", "error", err)
 			errorCh <- fmt.Errorf("error extracting titles: %w", err)

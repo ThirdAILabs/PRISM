@@ -187,7 +187,7 @@ func (s *SearchService) FormalRelations(r *http.Request) (any, error) {
 
 	llm := llms.New()
 
-	answer, err := llm.Generate(prompt)
+	answer, err := llm.Generate(prompt, nil)
 	if err != nil {
 		slog.Error("formal relations: initial llm generaton failed", "error", err)
 		return nil, CodedError(err, http.StatusInternalServerError)
@@ -212,7 +212,7 @@ func (s *SearchService) FormalRelations(r *http.Request) (any, error) {
 
 	verificationPrompt := fmt.Sprintf(formalRelationsVerficationPromptTemplate, author, institution, link, content, answer)
 
-	verification, err := llm.Generate(verificationPrompt)
+	verification, err := llm.Generate(verificationPrompt, nil)
 	if err != nil {
 		slog.Error("formal relations: verification llm generaton failed", "error", err)
 		return nil, CodedError(err, http.StatusInternalServerError)
@@ -265,7 +265,7 @@ func (s *SearchService) MatchEntities(r *http.Request) (any, error) {
 	// TODO(question): does the prompt make sense with the entities in front?
 	prompt := strings.Join(candidates, "\n") + "\n\n" + fmt.Sprintf(matchEntitiesPrompt, query)
 
-	response, err := llms.New().Generate(prompt)
+	response, err := llms.New().Generate(prompt, nil)
 	if err != nil {
 		slog.Error("match entities: llm generaton failed", "error", err)
 		return nil, CodedError(err, http.StatusInternalServerError)
