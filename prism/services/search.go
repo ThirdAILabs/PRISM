@@ -10,8 +10,8 @@ import (
 	"prism/api"
 	"prism/gscholar"
 	"prism/llms"
-	"prism/ndb"
 	"prism/openalex"
+	"prism/search"
 	"strconv"
 	"strings"
 	"sync"
@@ -22,7 +22,7 @@ import (
 type SearchService struct {
 	openalex openalex.KnowledgeBase
 
-	entityNdb ndb.NeuralDB
+	entityNdb search.NeuralDB
 }
 
 func (s *SearchService) Routes() chi.Router {

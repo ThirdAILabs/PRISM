@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"log/slog"
 	"prism/api"
-	"prism/ndb"
 	"prism/openalex"
+	"prism/search"
 	"slices"
 	"strings"
 )
 
 type AuthorIsFacultyAtEOCFlagger struct {
-	entityDB ndb.NeuralDB
+	entityDB search.NeuralDB
 }
 
 type nameMatcher struct {
@@ -73,8 +73,8 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(author api.Author) ([]Flag, err
 }
 
 type AuthorIsAssociatedWithEOCFlagger struct {
-	prDB  ndb.NeuralDB
-	auxDB ndb.NeuralDB
+	prDB  search.NeuralDB
+	auxDB search.NeuralDB
 }
 
 type authorCnt struct {
