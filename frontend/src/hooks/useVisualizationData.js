@@ -9,9 +9,9 @@ import {
     MULTI_AFFIL,
     UNI_FACULTY_EOC,
     DOJ_PRESS_RELEASES_EOC
-} from "./constants";
-import { talentPrograms, deniedEntities, fundingSources, institutions } from "./eoc_categories";
-  
+} from "../constants/constants";
+import { talentPrograms, deniedEntities, fundingSources, institutions } from "../eoc_categories";
+
 const FOREIGN_TALENT_PROGRAMS = "foreign_talent_programs";
 const DENIED_ENTITIES = "denied_entities";
 const HIGH_RISK_FUNDING_SOURCES = "high_risk_funding_sources";
@@ -37,7 +37,7 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
         // console.log(`workAffiliations -> ${workAffiliations}`);
         // If keys exist in prev, keep value from prev.
         setAffiliations(prev => {
-            const newAffils = {...prev};
+            const newAffils = { ...prev };
             for (const affil of workAffiliations) {
                 if (newAffils[affil]) {
                     const [count, show] = newAffils[affil];
@@ -46,7 +46,7 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
                     newAffils[affil] = [1, true];
                 }
             }
-           return newAffils;
+            return newAffils;
         });
     }
 
@@ -69,7 +69,7 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
         const highRiskFundingSourceFlags = [];
         const universityFacultyFlags = [];
         const dojPRFlags = [];
-        
+
         function fromList(list, flag) {
             return (
                 flag.metadata.entities
@@ -79,7 +79,7 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
         }
 
         for (const flag of (idToFlags[ACK_EOC] || [])) {
-           if (flag.message.toLowerCase().includes("talent") || fromList(talentPrograms, flag)) {
+            if (flag.message.toLowerCase().includes("talent") || fromList(talentPrograms, flag)) {
                 foreignTalentProgramFlags.push(flag);
             } else if (fromList(deniedEntities, flag)) {
                 deniedEntityFlags.push(flag);
@@ -92,7 +92,7 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
         for (const flag of (idToFlags[UNI_FACULTY_EOC] || [])) {
             if (flag.message.toLowerCase().includes("concerning entity")) {
                 const uniURL = flag.metadata?.url;
-                
+
                 if (!seenUniURLs.has(uniURL)) {
                     universityFacultyFlags.push(flag);
                     seenUniURLs.add(uniURL);
@@ -105,7 +105,7 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
             if (flag.message.toLowerCase().includes("press release")) {
                 // const dojURL = flag.metadata?.url;
                 const dojArticle = flag.metadata?.title;
-                
+
                 if (!seenDoJArticles.has(dojArticle)) {
                     dojPRFlags.push(flag);
                     seenDoJArticles.add(dojArticle);
@@ -114,9 +114,9 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
         }
 
         function withDisclosure(list) {
-            return list.map(elem => ({...elem, disclosed: true}));
+            return list.map(elem => ({ ...elem, disclosed: true }));
         }
-        
+
         return {
             [FOREIGN_TALENT_PROGRAMS]: withDisclosure(foreignTalentProgramFlags),
             [DENIED_ENTITIES]: withDisclosure(deniedEntityFlags),
@@ -133,11 +133,10 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
     const sortedAffiliations = Object.keys(affiliations).toSorted((a, b) => affiliations[b][0] - affiliations[a][0]);
     const showAffiliations = Object.fromEntries(sortedAffiliations.map(affil => [affil, affiliations[affil][1]]))
 
-    function toData(key, name, desc, num=undefined) {
+    function toData(key, name, desc, num = undefined) {
         flagByType[key].forEach(item => console.log(item))
         let flags;
-        if ((key === UNIVERSITY_FACULTY_APPOINTMENTS) || (key === DOJ_PRESS_RELEASES))
-        {
+        if ((key === UNIVERSITY_FACULTY_APPOINTMENTS) || (key === DOJ_PRESS_RELEASES)) {
             flags = flagByType[key];
         } else {
             flags = (
@@ -147,13 +146,13 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
                 // // Filter by affiliation
                 // .filter((flag) => (flag.affiliations || []).map(affil => showAffiliations[affil]).reduce((prev, curr) => prev || curr, false))
                 flagByType[key]
-                .filter((flag) => 
-                    !flag.affiliations?.length || 
-                    (flag.affiliations || []).map(affil => showAffiliations[affil]).reduce((prev, curr) => prev || curr, false)
-                  )
+                    .filter((flag) =>
+                        !flag.affiliations?.length ||
+                        (flag.affiliations || []).map(affil => showAffiliations[affil]).reduce((prev, curr) => prev || curr, false)
+                    )
             );
         }
-        
+
         flags.forEach(item => console.log(item));
         return {
             "display_name": name,
@@ -190,7 +189,7 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
             "Papers that list the current author as being affiliated with a high-risk foreign institution or web pages that showcase official appointments at high-risk foreign institutions",
             numHighRiskAppointments),
         [UNIVERSITY_FACULTY_APPOINTMENTS]: toData(
-            UNIVERSITY_FACULTY_APPOINTMENTS, 
+            UNIVERSITY_FACULTY_APPOINTMENTS,
             "Potential high-risk appointments at foreign institutions",
             "The author may be affiliated with high-risk foreign institutions"),
         [DOJ_PRESS_RELEASES]: toData(
@@ -200,26 +199,26 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
     }
 
     function AffiliationChecklist(props) {
-        return <div style={{fontSize: "14px", marginTop: "10px", display: 'flex', width: "300px", flexDirection: 'column', position: "absolute", padding: "10px", right: 0, backgroundColor: "#323232", borderRadius: "10px", zIndex:100}}>
+        return <div style={{ fontSize: "14px", marginTop: "10px", display: 'flex', width: "300px", flexDirection: 'column', position: "absolute", padding: "10px", right: 0, backgroundColor: "#323232", borderRadius: "10px", zIndex: 100 }}>
             <div style={{ maxHeight: "500px", overflowX: "scroll" }}>
-                {sortedAffiliations.map((affiliation, index) => <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '5px'}}>
-                    <input key={index} style={{height: "12px", width: "12px", marginRight: '3px', marginTop: '5px'}} type="checkbox" checked={affiliations[affiliation][1]} onClick={() => {
-                        setAffiliations(prev => ({...prev, [affiliation]: [prev[affiliation][0], !prev[affiliation][1]]}));
-                    }}/>
-                    <text style={{textAlign: "left", marginLeft: "10px"}}>
+                {sortedAffiliations.map((affiliation, index) => <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '5px' }}>
+                    <input key={index} style={{ height: "12px", width: "12px", marginRight: '3px', marginTop: '5px' }} type="checkbox" checked={affiliations[affiliation][1]} onClick={() => {
+                        setAffiliations(prev => ({ ...prev, [affiliation]: [prev[affiliation][0], !prev[affiliation][1]] }));
+                    }} />
+                    <text style={{ textAlign: "left", marginLeft: "10px" }}>
                         {affiliation}
                     </text>
                 </div>)}
             </div>
-            <button style={{marginTop: "15px", backgroundColor: "#444444", outline: "none", border: "none", padding: "5px", borderRadius: "5px", color: "white", fontWeight: 'bold'}} onClick={() => {setAffiliations(prev => Object.fromEntries(Object.keys(affiliations).map(affil => [affil, [affiliations[affil][0], false]])))}}>Clear selections</button>
-            <button style={{marginTop: "10px", backgroundColor: "#444444", outline: "none", border: "none", padding: "5px", borderRadius: "5px", color: "white", fontWeight: 'bold'}} onClick={() => {setAffiliations(prev => Object.fromEntries(Object.keys(affiliations).map(affil => [affil, [affiliations[affil][0], true]])))}}>Select all</button>
+            <button style={{ marginTop: "15px", backgroundColor: "#444444", outline: "none", border: "none", padding: "5px", borderRadius: "5px", color: "white", fontWeight: 'bold' }} onClick={() => { setAffiliations(prev => Object.fromEntries(Object.keys(affiliations).map(affil => [affil, [affiliations[affil][0], false]]))) }}>Clear selections</button>
+            <button style={{ marginTop: "10px", backgroundColor: "#444444", outline: "none", border: "none", padding: "5px", borderRadius: "5px", color: "white", fontWeight: 'bold' }} onClick={() => { setAffiliations(prev => Object.fromEntries(Object.keys(affiliations).map(affil => [affil, [affiliations[affil][0], true]]))) }}>Select all</button>
         </div>
     }
-    
+
     return {
         data,
         addAffiliations,
-        setWeight: (key, newWeight) => setWeights(prev => ({...prev, [key]: newWeight})),
+        setWeight: (key, newWeight) => setWeights(prev => ({ ...prev, [key]: newWeight })),
         AffiliationChecklist
     }
 }

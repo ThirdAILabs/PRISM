@@ -4,15 +4,15 @@ import {
   COAUTHOR_AFFIL_EOC,
   ACK_EOC,
   FORMAL_RELATIONS
-} from "./constants";
-import apiService from "./api/apiService";
+} from "./constants/constants";
+import apiService from "./services/apiService";
 
 
 export function useConclusions(author, flags, threshold) {
   const checkedInstitutions = useRef([]);
   const [formalRelations, setFormalRelations] = useState([]);
   const [numWaiting, setNumWaiting] = useState(0);
-  
+
   const institutionFrequencies = useMemo(() => {
     console.log("Calculating institution freqs");
     let frequencies = {};
@@ -28,7 +28,7 @@ export function useConclusions(author, flags, threshold) {
     }
     return frequencies;
   }, [flags]);
-  
+
   const foreignFundingFrequency = useMemo(() => (flags[ACK_EOC] || []).length, [flags]);
 
   const funderFrequencies = useMemo(() => {
@@ -75,7 +75,7 @@ export function useConclusions(author, flags, threshold) {
     });
     return messages;
   }, [institutionFrequencies, funderFrequencies, foreignFundingFrequency]);
-  
+
   return {
     conclusions: summary.concat(formalRelations.map(rel => rel.message)),
     formalRelations,

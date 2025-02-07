@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { API_BASE_URL } from './api/apiService';
+import { API_BASE_URL } from '../../../../services/apiService';
 import "./SearchBar.css";
 
 function EntityLookup() {
@@ -32,14 +32,14 @@ function EntityLookup() {
   };
 
   return (
-    <div className="basic-setup" style={{color: "white"}}>
+    <div className="basic-setup" style={{ color: "white" }}>
       <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
-        <Link 
+        <Link
           to="/"
-          className="author-institution-search-button" 
-          style={{ 
-            padding: '10px 15px', 
-            fontSize: '14px', 
+          className="author-institution-search-button"
+          style={{
+            padding: '10px 15px',
+            fontSize: '14px',
             whiteSpace: 'nowrap',
             textDecoration: 'none',
             display: 'inline-block'
@@ -50,7 +50,7 @@ function EntityLookup() {
       </div>
       <h1 style={{ marginTop: '50px', fontWeight: 'bold' }}>Entity Lookup</h1>
       <div className='d-flex justify-content-center align-items-center pt-5'>
-        <div style={{width: "80%"}}>
+        <div style={{ width: "80%" }}>
           <form onSubmit={handleSubmit} className="author-institution-search-bar">
             <div className='autocomplete-search-bar'>
               <input
@@ -61,8 +61,8 @@ function EntityLookup() {
                 className="search-bar"
               />
             </div>
-            <div style={{width: "20px"}} />
-            <div style={{width: "200px"}}>
+            <div style={{ width: "20px" }} />
+            <div style={{ width: "200px" }}>
               <button type="submit" disabled={isLoading} className="author-institution-search-button">
                 {isLoading ? 'Searching...' : 'Search'}
               </button>
@@ -70,7 +70,7 @@ function EntityLookup() {
           </form>
         </div>
       </div>
-      {isLoading && <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}} role="status"></div>}
+      {isLoading && <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status"></div>}
       <div className="results" style={{ marginTop: '30px' }}>
         {results.map((entity, index) => (
           <div key={index} className="detail-item">

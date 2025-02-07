@@ -11,19 +11,19 @@ import {
   MULTI_AFFIL,
   UNI_FACULTY_EOC,
   DOJ_PRESS_RELEASES_EOC
-} from "./constants";
-import { useConclusions } from './conclusions';
-import ConcernVisualizer from './components/ConcernVisualization.js'
+} from "../../constants/constants.js";
+import { useConclusions } from '../../conclusions.js';
+import ConcernVisualizer from '../../components/ConcernVisualization.js'
 import { useVisualizationData } from './useVisualizationData.js';
-import LoadedPapers from './components/LoadedPapers.js'
-import apiService from './api/apiService.jsx';
+import LoadedPapers from '../../components/LoadedPapers.js'
+import apiService from '../../services/apiService.jsx';
 // import RelationShipGraph from './components/Relation-Graph.js';
 import RelationShipGraph2 from './components/Relation-Graph2.js'
 import RelationShipGraph3 from './components/Relation-Graph3.js'
 import Tabs from './components/Tabs.js';
 import CustomCollapsible from './components/Collapsible.js';
 
-import { setStreamFlags } from './streamStore';
+import { setStreamFlags } from '../../streamStore.js';
 
 
 const FLAG_ID_ORDER = [
