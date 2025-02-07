@@ -98,7 +98,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 	close(flagsCh)
 }
 
-func (processor *ReportProcessor) ProcessReport(report api.Report) (any, error) {
+func (processor *ReportProcessor) ProcessReport(report api.Report) ([]Flag, error) {
 	logger := slog.With("report_id", report.Id)
 
 	logger.Info("starting report processing")
