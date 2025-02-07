@@ -20,7 +20,7 @@ type nameMatcher struct {
 
 func newNameMatcher(name string) nameMatcher {
 	return nameMatcher{
-		nameParts: strings.Split(strings.ToLower(name), " "),
+		nameParts: strings.Fields(strings.ToLower(name)),
 	}
 }
 
