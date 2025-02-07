@@ -11,11 +11,11 @@ type Report struct {
 
 	CreatedAt time.Time
 
-	AuthorId    string
-	DisplayName string
-	Source      string
-	StartYear   int
-	EndYear     int
+	AuthorId   string
+	AuthorName string
+	Source     string
+	StartYear  int
+	EndYear    int
 
 	Status string
 
@@ -23,11 +23,11 @@ type Report struct {
 }
 
 type CreateReportRequest struct {
-	AuthorId    string
-	DisplayName string
-	Source      string
-	StartYear   int
-	EndYear     int
+	AuthorId   string
+	AuthorName string
+	Source     string
+	StartYear  int
+	EndYear    int
 }
 
 type CreateReportResponse struct {
@@ -37,6 +37,7 @@ type CreateReportResponse struct {
 const (
 	OpenAlexSource      = "openalex"
 	GoogleScholarSource = "google-scholar"
+	UnstructuredSource  = "unstructured"
 	ScopusSource        = "scopus"
 )
 

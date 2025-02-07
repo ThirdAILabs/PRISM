@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func streamOpenAlexWorks(openalex openalex.KnowledgeBase, authorId string, startYear, endYear int) (chan openalex.WorkBatch, chan error) {
+func streamOpenAlexWorks(openalex openalex.KnowledgeBase, authorId string, startYear, endYear int) chan openalex.WorkBatch {
 	return openalex.StreamWorks(authorId, startYear, endYear)
 }
 
@@ -43,17 +43,18 @@ func findTargetAuthorIds(works []openalex.Work, targetAuthorName string) []strin
 	return targetAuthorIds
 }
 
-func streamGScholarWorks(oa openalex.KnowledgeBase, authorName, gScholarAuthorId string, startYear, endYear int) (chan openalex.WorkBatch, chan error) {
-	workCh := make(chan openalex.WorkBatch, 10)
-	errorCh := make(chan error, 10)
+func streamGScholarWorks(oa openalex.KnowledgeBase, authorName, gScholarAuthorId string, startYear, endYear int) chan openalex.WorkBatch {
+	outputCh := make(chan openalex.WorkBatch, 10)
 
 	go func() {
+		defer close(outputCh)
+
 		workTitleIterator := gscholar.NewAuthorPaperIterator(gScholarAuthorId)
 		for {
 			batch, err := workTitleIterator.Next()
 			if err != nil {
-				slog.Error("error iterating over work titles in google scholar", "erorr", err)
-				errorCh <- err
+				slog.Error("error iterating over work titles in google scholar", "error", err)
+				outputCh <- openalex.WorkBatch{Works: nil, TargetAuthorIds: nil, Error: err}
 				break
 			}
 			if batch == nil {
@@ -63,18 +64,15 @@ func streamGScholarWorks(oa openalex.KnowledgeBase, authorName, gScholarAuthorId
 			works, err := oa.FindWorksByTitle(batch, startYear, endYear)
 			if err != nil {
 				slog.Error("error getting works from openalex", "error", err)
-				errorCh <- err
+				outputCh <- openalex.WorkBatch{Works: nil, TargetAuthorIds: nil, Error: err}
 				break
 			}
 
-			workCh <- openalex.WorkBatch{Works: works, TargetAuthorIds: findTargetAuthorIds(works, authorName)}
+			outputCh <- openalex.WorkBatch{Works: works, TargetAuthorIds: findTargetAuthorIds(works, authorName)}
 		}
 	}()
 
-	close(workCh)
-	close(errorCh)
-
-	return workCh, errorCh
+	return outputCh
 }
 
 const extractTitlesPromptTemplate = `Extract all academic paper titles from this snippet. Return each title in a block like this:
@@ -87,19 +85,18 @@ And so on. Here comes the snippet:
 %s
 `
 
-func streamUnstructuredWorks(oa openalex.KnowledgeBase, authorName, text string, startYear, endYear int) (chan openalex.WorkBatch, chan error) {
-	workCh := make(chan openalex.WorkBatch, 10)
-	errorCh := make(chan error, 10)
+func streamUnstructuredWorks(oa openalex.KnowledgeBase, authorName, text string, startYear, endYear int) chan openalex.WorkBatch {
+	outputCh := make(chan openalex.WorkBatch, 10)
 
 	go func() {
-		llm := llms.New() // TODO: should this be using gpt-o1-mini
+		defer close(outputCh)
+
+		llm := llms.New()
 
 		answer, err := llm.Generate(fmt.Sprintf(extractTitlesPromptTemplate, text), &llms.Options{Model: llms.GPT4oMini})
 		if err != nil {
 			slog.Error("error getting title extraction response", "error", err)
-			errorCh <- fmt.Errorf("error extracting titles: %w", err)
-			close(workCh)
-			close(errorCh)
+			outputCh <- openalex.WorkBatch{Works: nil, TargetAuthorIds: nil, Error: fmt.Errorf("error extracting titles: %w", err)}
 			return
 		}
 
@@ -119,41 +116,35 @@ func streamUnstructuredWorks(oa openalex.KnowledgeBase, authorName, text string,
 			works, err := oa.FindWorksByTitle(titles[i:min(len(titles), i+batchSize)], startYear, endYear)
 			if err != nil {
 				slog.Error("error finding works for titles", "error", err)
-				errorCh <- fmt.Errorf("error finding works: %w", err)
+				outputCh <- openalex.WorkBatch{Works: nil, TargetAuthorIds: nil, Error: fmt.Errorf("error finding works: %w", err)}
 				break
 			}
 
-			workCh <- openalex.WorkBatch{Works: works, TargetAuthorIds: findTargetAuthorIds(works, authorName)}
-
+			outputCh <- openalex.WorkBatch{Works: works, TargetAuthorIds: findTargetAuthorIds(works, authorName), Error: nil}
 		}
-
-		close(workCh)
-		close(errorCh)
 	}()
 
-	return workCh, errorCh
+	return outputCh
 }
 
-func streamScopusWorks(oa openalex.KnowledgeBase, authorName string, titles []string, startYear, endYear int) (chan openalex.WorkBatch, chan error) {
-	workCh := make(chan openalex.WorkBatch, 10)
-	errorCh := make(chan error, 10)
+func streamScopusWorks(oa openalex.KnowledgeBase, authorName string, titles []string, startYear, endYear int) chan openalex.WorkBatch {
+	outputCh := make(chan openalex.WorkBatch, 10)
 
 	go func() {
+		defer close(outputCh)
+
 		const batchSize = 20
 		for i := 0; i < len(titles); i += batchSize {
 			works, err := oa.FindWorksByTitle(titles[i:min(len(titles), i+batchSize)], startYear, endYear)
 			if err != nil {
 				slog.Error("error finding works for titles", "error", err)
-				errorCh <- fmt.Errorf("error finding works: %w", err)
+				outputCh <- openalex.WorkBatch{Works: nil, TargetAuthorIds: nil, Error: fmt.Errorf("error finding works: %w", err)}
 				break
 			}
 
-			workCh <- openalex.WorkBatch{Works: works, TargetAuthorIds: findTargetAuthorIds(works, authorName)}
+			outputCh <- openalex.WorkBatch{Works: works, TargetAuthorIds: findTargetAuthorIds(works, authorName), Error: nil}
 		}
-
-		close(workCh)
-		close(errorCh)
 	}()
 
-	return workCh, errorCh
+	return outputCh
 }

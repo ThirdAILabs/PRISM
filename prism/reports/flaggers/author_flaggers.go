@@ -3,7 +3,6 @@ package flaggers
 import (
 	"fmt"
 	"log/slog"
-	"prism/api"
 	"prism/openalex"
 	"prism/search"
 	"slices"
@@ -34,13 +33,13 @@ func (n *nameMatcher) matches(candidate string) bool {
 	return true
 }
 
-func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(author api.Author) ([]Flag, error) {
-	results, err := flagger.entityDB.Query(author.DisplayName, 5, nil)
+func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(authorName string) ([]Flag, error) {
+	results, err := flagger.entityDB.Query(authorName, 5, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error querying ndb: %w", err)
 	}
 
-	matcher := newNameMatcher(author.DisplayName)
+	matcher := newNameMatcher(authorName)
 
 	flags := make([]Flag, 0)
 
@@ -57,7 +56,7 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(author api.Author) ([]Flag, err
 			flags = append(flags, Flag{
 				FlaggerType:   AuthorIsFacultyAtEOC,
 				Title:         "Person may be affiliated with this university",
-				Message:       fmt.Sprintf("The author %s may be associated with this concerning entity: %s\n", author.DisplayName, university),
+				Message:       fmt.Sprintf("The author %s may be associated with this concerning entity: %s\n", authorName, university),
 				UniversityUrl: url,
 				Affiliations:  []string{university},
 				Metadata: map[string]any{
@@ -108,12 +107,12 @@ func topCoauthors(works []openalex.Work) []authorCnt {
 	return topAuthors[:min(len(topAuthors), 4)]
 }
 
-func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(author api.Author, works []openalex.Work) ([]Flag, error) {
+func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(authorName string, works []openalex.Work) ([]Flag, error) {
 	flags := make([]Flag, 0)
 
 	seen := make(map[string]bool)
 
-	primaryMatcher := newNameMatcher(author.DisplayName)
+	primaryMatcher := newNameMatcher(authorName)
 
 	frequentAuthors := topCoauthors(works)
 	for _, author := range frequentAuthors {
@@ -190,14 +189,14 @@ type entityMetadata struct {
 	node2Url   string
 }
 
-func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(author api.Author) ([]Flag, error) {
+func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(authorName string) ([]Flag, error) {
 	seen := make(map[string]bool)
 
-	primaryMatcher := newNameMatcher(author.DisplayName)
+	primaryMatcher := newNameMatcher(authorName)
 
 	queryToEntities := make(map[string]entityMetadata)
 
-	results, err := flagger.auxDB.Query(author.DisplayName, 5, nil)
+	results, err := flagger.auxDB.Query(authorName, 5, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error querying ndb: %w", err)
 	}
@@ -309,13 +308,13 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(auth
 	return flags, nil
 }
 
-func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(author api.Author, works []openalex.Work) ([]Flag, error) {
-	firstSecondLevelFlags, err := flagger.findFirstSecondHopEntities(author, works)
+func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(authorName string, works []openalex.Work) ([]Flag, error) {
+	firstSecondLevelFlags, err := flagger.findFirstSecondHopEntities(authorName, works)
 	if err != nil {
 		return nil, err
 	}
 
-	secondThirdLevelFlags, err := flagger.findSecondThirdHopEntities(author)
+	secondThirdLevelFlags, err := flagger.findSecondThirdHopEntities(authorName)
 	if err != nil {
 		return nil, err
 	}

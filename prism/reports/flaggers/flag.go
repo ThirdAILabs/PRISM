@@ -57,6 +57,9 @@ type WorkFlag struct {
 	EOCAcknowledgemnts *EOCAcknowledgemntsFlag
 }
 
+/*
+ * Work Flags
+ */
 type MultipleAssociationsFlag struct {
 	AuthorName   string
 	Affiliations []string

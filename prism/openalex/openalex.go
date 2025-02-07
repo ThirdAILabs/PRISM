@@ -56,6 +56,7 @@ func (w *Work) GetDisplayName() string {
 type WorkBatch struct {
 	Works           []Work
 	TargetAuthorIds []string
+	Error           error
 }
 
 type KnowledgeBase interface {
@@ -65,7 +66,7 @@ type KnowledgeBase interface {
 
 	FindAuthors(author, institution string) ([]api.Author, error)
 
-	StreamWorks(authorId string, startYear, endYear int) (chan WorkBatch, chan error)
+	StreamWorks(authorId string, startYear, endYear int) chan WorkBatch
 
 	FindWorksByTitle(titles []string, startYear, endYear int) ([]Work, error)
 

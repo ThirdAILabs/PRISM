@@ -9,6 +9,12 @@ import (
 	"strings"
 )
 
+type WorkFlagger interface {
+	Flag(works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error)
+
+	Name() string
+}
+
 type OpenAlexMultipleAffiliationsFlagger struct{}
 
 func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
@@ -277,8 +283,8 @@ func (flagger *OpenAlexAcknowledgementIsEOC) getAuthorNames(authorIds []string) 
 
 var punctCleaningRe = regexp.MustCompile(`[.,()!?:"']`)
 
-func cleanAckText(ack Acknowledgement) string {
-	sortFunc := func(a, b Entity) int {
+func (flagger *OpenAlexAcknowledgementIsEOC) checkForSussyBaka(ack Acknowledgement) bool {
+	slices.SortFunc(ack.MiscEntities, func(a, b Entity) int {
 		if a.StartPosition < b.StartPosition {
 			return -1
 		}
@@ -286,10 +292,7 @@ func cleanAckText(ack Acknowledgement) string {
 			return 1
 		}
 		return 0
-	}
-
-	slices.SortFunc(ack.SearchableEntities, sortFunc)
-	slices.SortFunc(ack.MiscEntities, sortFunc)
+	})
 
 	prevEndPos := 0
 	newText := ""
@@ -305,7 +308,14 @@ func cleanAckText(ack Acknowledgement) string {
 
 	newText = strings.ToLower(strings.TrimSpace(newText))
 	newText = punctCleaningRe.ReplaceAllString(newText, " ")
-	return fmt.Sprintf(" %s ", newText)
+	newText = fmt.Sprintf(" %s ", newText)
+
+	for _, sussyBaka := range flagger.sussyBakas {
+		if strings.Contains(newText, fmt.Sprintf(" %s ", sussyBaka)) {
+			return true
+		}
+	}
+	return false
 }
 
 func flagCacheKey(workId string, targetAuthorIds []string) string {
@@ -366,8 +376,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(works []openalex.Work, targetA
 		flaggedEntities := make(map[string]SourceToAliases)
 
 		for _, ack := range acks.Result.Acknowledgements {
-			sussyBakaFlag, nameInAck := false, false
-
+			nameInAck := false
 			for _, name := range allAuthorNames {
 				if strings.Contains(ack.RawText, name) {
 					nameInAck = true
@@ -375,15 +384,8 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(works []openalex.Work, targetA
 				}
 			}
 
-			cleanedText := cleanAckText(ack)
-
-			for _, sussyBaka := range flagger.sussyBakas {
-				if strings.Contains(cleanedText, fmt.Sprintf(" %s ", sussyBaka)) {
-					sussyBakaFlag = true
-					flagged = true
-					break
-				}
-			}
+			sussyBakaFlag := flagger.checkForSussyBaka(ack)
+			flagged = flagged || sussyBakaFlag
 
 			entityQueries := make([]string, 0)
 			if sussyBakaFlag {
@@ -425,12 +427,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(works []openalex.Work, targetA
 
 			entities := make([]EOCAcknowledgementEntity, 0, len(flaggedEntities))
 			for entity, sourceToAliases := range flaggedEntities {
-				sources := make([]string, 0, len(sourceToAliases))
-				allAliases := make([]string, 0)
-				for source, aliases := range sourceToAliases {
-					sources = append(sources, source)
-					allAliases = append(allAliases, aliases...)
-				}
+				sources, allAliases := getAllSourcesAndAliases(sourceToAliases)
 				entities = append(entities, EOCAcknowledgementEntity{
 					Entity:  entity,
 					Sources: sources,
@@ -467,7 +464,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(works []openalex.Work, targetA
 	return flags, nil
 }
 
-func messageFromAcknowledgmentMatches(entity string, matches SourceToAliases) string {
+func getAllSourcesAndAliases(matches SourceToAliases) ([]string, []string) {
 	sources := make([]string, 0, len(matches))
 	aliases := make([]string, 0, len(matches))
 
@@ -475,6 +472,12 @@ func messageFromAcknowledgmentMatches(entity string, matches SourceToAliases) st
 		sources = append(sources, k)
 		aliases = append(aliases, v...)
 	}
+
+	return sources, aliases
+}
+
+func messageFromAcknowledgmentMatches(entity string, matches SourceToAliases) string {
+	sources, aliases := getAllSourcesAndAliases(matches)
 
 	return fmt.Sprintf("'%s' was in %s as %s\n", entity, strings.Join(sources, ", "), strings.Join(aliases, ", "))
 }

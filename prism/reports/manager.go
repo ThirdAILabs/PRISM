@@ -39,17 +39,17 @@ func (r *ReportManager) ListReports(userId uuid.UUID) ([]api.Report, error) {
 	return results, nil
 }
 
-func (r *ReportManager) CreateReport(userId uuid.UUID, authorId, displayName, source string, startYear, endYear int) (uuid.UUID, error) {
+func (r *ReportManager) CreateReport(userId uuid.UUID, authorId, authorName, source string, startYear, endYear int) (uuid.UUID, error) {
 	report := schema.Report{
-		Id:          uuid.New(),
-		UserId:      userId,
-		CreatedAt:   time.Now().UTC(),
-		AuthorId:    authorId,
-		DisplayName: displayName,
-		Source:      source,
-		StartYear:   startYear,
-		EndYear:     endYear,
-		Status:      schema.ReportQueued,
+		Id:         uuid.New(),
+		UserId:     userId,
+		CreatedAt:  time.Now().UTC(),
+		AuthorId:   authorId,
+		AuthorName: authorName,
+		Source:     source,
+		StartYear:  startYear,
+		EndYear:    endYear,
+		Status:     schema.ReportQueued,
 	}
 
 	err := r.db.Transaction(func(txn *gorm.DB) error {
@@ -161,14 +161,14 @@ func getReport(txn *gorm.DB, id uuid.UUID, withContent bool) (schema.Report, err
 
 func convertReport(report schema.Report) api.Report {
 	result := api.Report{
-		Id:          report.Id,
-		CreatedAt:   report.CreatedAt,
-		AuthorId:    report.AuthorId,
-		DisplayName: report.DisplayName,
-		Source:      report.Source,
-		StartYear:   report.StartYear,
-		EndYear:     report.EndYear,
-		Status:      report.Status,
+		Id:         report.Id,
+		CreatedAt:  report.CreatedAt,
+		AuthorId:   report.AuthorId,
+		AuthorName: report.AuthorName,
+		Source:     report.Source,
+		StartYear:  report.StartYear,
+		EndYear:    report.EndYear,
+		Status:     report.Status,
 	}
 
 	if report.Content != nil {

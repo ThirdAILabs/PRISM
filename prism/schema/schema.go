@@ -21,11 +21,11 @@ type Report struct {
 	CreatedAt time.Time
 
 	// Report params
-	AuthorId    string
-	DisplayName string
-	Source      string
-	StartYear   int
-	EndYear     int
+	AuthorId   string
+	AuthorName string
+	Source     string
+	StartYear  int
+	EndYear    int
 
 	Status string `gorm:"size:20;not null"`
 
