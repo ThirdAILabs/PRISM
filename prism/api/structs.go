@@ -46,7 +46,6 @@ type Author struct {
 	DisplayName  string
 	Institutions []string
 	Source       string
-	WorksCount   int
 }
 
 type Institution struct {

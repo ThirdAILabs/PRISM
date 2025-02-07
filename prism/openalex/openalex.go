@@ -1,7 +1,5 @@
 package openalex
 
-import "prism/api"
-
 type Institution struct {
 	InstitutionName string
 	InstitutionId   string
@@ -60,11 +58,11 @@ type WorkBatch struct {
 }
 
 type KnowledgeBase interface {
-	AutocompleteAuthor(query string) ([]api.Author, error)
+	AutocompleteAuthor(query string) ([]Author, error)
 
-	AutocompleteInstitution(query string) ([]api.Institution, error)
+	AutocompleteInstitution(query string) ([]Institution, error)
 
-	FindAuthors(author, institution string) ([]api.Author, error)
+	FindAuthors(author, institution string) ([]Author, error)
 
 	StreamWorks(authorId string, startYear, endYear int) chan WorkBatch
 

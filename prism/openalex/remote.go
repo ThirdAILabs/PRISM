@@ -7,8 +7,6 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
-	"prism/api"
-	"slices"
 )
 
 var ErrSearchFailed = errors.New("error performing openalex search")
@@ -44,37 +42,37 @@ type oaAutocompletion struct {
 	Hint        string `json:"hint"`
 }
 
-func (oa *RemoteOpenAlex) AutocompleteAuthor(query string) ([]api.Author, error) {
+func (oa *RemoteOpenAlex) AutocompleteAuthor(query string) ([]Author, error) {
 	var suggestions oaResults[oaAutocompletion]
 
 	if err := autocompleteHelper("authors", query, &suggestions); err != nil {
 		return nil, err
 	}
 
-	authors := make([]api.Author, 0, len(suggestions.Results))
+	authors := make([]Author, 0, len(suggestions.Results))
 	for _, author := range suggestions.Results {
-		authors = append(authors, api.Author{
+		authors = append(authors, Author{
 			AuthorId:     author.Id,
 			DisplayName:  author.DisplayName,
-			Institutions: []string{author.Hint},
-			Source:       api.OpenAlexSource,
+			Institutions: []Institution{{InstitutionName: author.Hint}},
 		})
 	}
 
 	return authors, nil
 }
 
-func (oa *RemoteOpenAlex) AutocompleteInstitution(query string) ([]api.Institution, error) {
+func (oa *RemoteOpenAlex) AutocompleteInstitution(query string) ([]Institution, error) {
 	var suggestions oaResults[oaAutocompletion]
 
 	if err := autocompleteHelper("institutions", query, &suggestions); err != nil {
 		return nil, err
 	}
 
-	institutions := make([]api.Institution, 0, len(suggestions.Results))
+	institutions := make([]Institution, 0, len(suggestions.Results))
 	for _, institution := range suggestions.Results {
-		institutions = append(institutions, api.Institution{
-			DisplayName: institution.DisplayName,
+		institutions = append(institutions, Institution{
+			InstitutionName: institution.DisplayName,
+			InstitutionId:   institution.Id,
 		})
 	}
 
@@ -100,7 +98,7 @@ type oaAffiliation struct {
 	Institution oaInstitution `json:"institution"`
 }
 
-func (oa *RemoteOpenAlex) FindAuthors(author, institution string) ([]api.Author, error) {
+func (oa *RemoteOpenAlex) FindAuthors(author, institution string) ([]Author, error) {
 	url := fmt.Sprintf(
 		"https://api.openalex.org/authors?filter=display_name.search:%s,affiliations.institution.id:%s&mailto=kartik@thirdai.com",
 		url.QueryEscape(author), url.QueryEscape(institution),
@@ -120,22 +118,25 @@ func (oa *RemoteOpenAlex) FindAuthors(author, institution string) ([]api.Author,
 		return nil, ErrSearchFailed
 	}
 
-	authors := make([]api.Author, 0, len(results.Results))
+	authors := make([]Author, 0, len(results.Results))
 	for _, result := range results.Results {
 		if result.WorksCount > 0 {
-			institutions := make([]string, 0)
+			institutions := make([]Institution, 0)
 			for i, inst := range result.Affiliations {
-				if i < 3 || (inst.Institution.CountryCode == "US" && !slices.Contains(institutions, inst.Institution.DisplayName)) {
-					institutions = append(institutions, inst.Institution.DisplayName)
+				if i < 3 || inst.Institution.CountryCode == "US" {
+					institutions = append(institutions, Institution{
+						InstitutionName: inst.Institution.DisplayName,
+						InstitutionId:   inst.Institution.Id,
+					})
 				}
 			}
 
-			authors = append(authors, api.Author{
-				AuthorId:     result.Id,
-				DisplayName:  result.DisplayName,
-				Source:       api.OpenAlexSource,
-				Institutions: institutions,
-				WorksCount:   result.WorksCount,
+			authors = append(authors, Author{
+				AuthorId:                result.Id,
+				DisplayName:             result.DisplayName,
+				DisplayNameAlternatives: result.DisplayNameAlternatives,
+				RawAuthorName:           nil,
+				Institutions:            institutions,
 			})
 		}
 	}
@@ -288,28 +289,29 @@ func converOpenalexWork(work oaWork) Work {
 	}
 }
 
-func (oa *RemoteOpenAlex) StreamWorks(authorId string, startYear, endYear int) (chan WorkBatch, chan error) {
-	workCh := make(chan WorkBatch, 10)
-	errorCh := make(chan error, 1)
+func (oa *RemoteOpenAlex) StreamWorks(authorId string, startYear, endYear int) chan WorkBatch {
+	outputCh := make(chan WorkBatch, 10)
 
 	cursor := "*"
 
 	yearFilter := getYearFilter(startYear, endYear)
 
 	go func() {
+		defer close(outputCh)
+
 		for cursor != "" {
 			url := fmt.Sprintf("https://api.openalex.org/works?filter=authorships.author.id:%s%s&per-page=200&cursor=%s&mailto=kartik@thirdai.com", authorId, yearFilter, cursor)
 
 			res, err := http.Get(url)
 			if err != nil {
-				errorCh <- fmt.Errorf("openalex: work search failed: %w", err)
+				outputCh <- WorkBatch{Works: nil, TargetAuthorIds: nil, Error: fmt.Errorf("openalex: work search failed: %w", err)}
 				break
 			}
 
 			var results oaResults[oaWork]
 			if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
 				slog.Error("openalex: error parsing response from work search", "author_id", authorId, "start_year", startYear, "end_year", endYear, "error", err)
-				errorCh <- fmt.Errorf("error parsing response from open alex: %w", err)
+				outputCh <- WorkBatch{Works: nil, TargetAuthorIds: nil, Error: fmt.Errorf("error parsing response from open alex: %w", err)}
 				break
 			}
 
@@ -318,13 +320,11 @@ func (oa *RemoteOpenAlex) StreamWorks(authorId string, startYear, endYear int) (
 				works = append(works, converOpenalexWork(work))
 			}
 
-			workCh <- WorkBatch{Works: works, TargetAuthorIds: []string{authorId}}
+			outputCh <- WorkBatch{Works: works, TargetAuthorIds: []string{authorId}, Error: nil}
 		}
-		close(workCh)
-		close(errorCh)
 	}()
 
-	return workCh, errorCh
+	return outputCh
 }
 
 func (oa *RemoteOpenAlex) FindWorksByTitle(titles []string, startYear, endYear int) ([]Work, error) {
