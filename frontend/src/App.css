@@ -1,0 +1,168 @@
+/* src/App.css */
+
+.App {
+  text-align: center;
+  padding: 0px;
+  margin: 0px;
+  background-color: rgb(17, 17, 17);
+}
+
+.custom-input {
+  width: 70%;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  background: transparent;
+  color: white;
+  outline: none;
+  padding: 5px 0;
+}
+
+.custom-input:focus {
+  border-bottom: 1px solid #004AA1;
+}
+
+.chart-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+.chart-wrapper {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+
+
+.detail-item {
+  margin: 10px;
+  background-color: rgb(28, 28, 28);
+  border: none;
+  color: white;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: start;
+}
+
+.detail-header {
+  background-color: rgb(28, 28, 28);
+  display: flex;
+  color: white;
+  padding: 20px;
+  justify-content: space-between;
+}
+
+.basic-setup {
+  width: 100vw;
+  height: 100vh;
+  overflow: auto;
+  background-color: rgb(17, 17, 17);
+  margin: 0;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    padding-top: 100px;
+  }
+  to {
+    opacity: 1;
+    padding-top: 0;
+  }
+}
+
+.result-item {
+  margin: 10px;
+  width: 35vw;
+  background-color: rgb(28, 28, 28);
+  border: none;
+  color: white;
+  border-radius: 10px;
+  padding: 20px;
+
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.result-item:hover {
+  background-color: rgba(255, 255, 255, 0.10);
+}
+
+.result-wrapper {
+  width: 75%;
+}
+
+.bulleted-list {
+  list-style-type: disc;
+  padding-left: 20px;
+  background-color: inherit; /* Ensures background is not styled like a button/card */
+}
+
+.bulleted-list li {
+  margin-bottom: 10px; /* Adds space between items */
+  background-color: inherit; /* Ensures background is not styled like a button/card */
+  border: none; /* Removes any borders */
+  padding: 0; /* Removes padding */
+}
+
+input {
+  margin: 5px;
+  padding: 10px;
+  width: 200px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  padding: 10px;
+  margin: 5px 0;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.popover-container {
+  position: relative;
+  display: inline-block;
+}
+
+.popover {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  background-color: #121212;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  border-radius: 0.3rem;
+  padding: 0.5rem;
+  width: 200px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.popover-body {
+  color: "white"
+}
+
+.popover-container:hover .popover {
+  opacity: 1;
+  visibility: visible;
+}

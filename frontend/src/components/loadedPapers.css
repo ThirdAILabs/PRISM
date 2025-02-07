@@ -1,0 +1,49 @@
+.LoadedPapers-card {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    width: 80vw;
+    background-color: rgb(28, 28, 28);
+    border-radius: 12px;
+}
+
+.LoadedPapers-message-container {
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    width: 100%;
+    text-align: left;
+}
+
+.LoadedPapers-titles-container {
+    max-height: 100px;
+    width: 100%;
+    position:relative;
+    overflow: hidden;
+}
+
+.LoadedPapers-titles-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 120%;
+    height: 120%;
+    box-shadow: inset -10px 10px 10px rgb(28, 28, 28); /* Inner shadow */
+    pointer-events: none; /* Allows text selection */
+    z-index: 1; /* Places it above the text */
+  }
+
+.LoadedPapers-titles-scrollable {
+    height: 100%;
+    position: relative;
+    display: flex;
+    overflow-y: scroll;
+    flex-direction: column-reverse;
+    text-align: left;
+}
+
+.LoadedPapers-title {
+    font-size: 14px;
+    color: white;
+}
