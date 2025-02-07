@@ -308,7 +308,10 @@ func cleanAckText(ack Acknowledgement) string {
 	return fmt.Sprintf(" %s ", newText)
 }
 
-/*
+func flagCacheKey(workId string, targetAuthorIds []string) string {
+	return fmt.Sprintf("%s;%v", workId, targetAuthorIds)
+}
+
 func (flagger *OpenAlexAcknowledgementIsEOC) Flag(works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
 	flags := make([]WorkFlag, 0)
 
@@ -317,14 +320,14 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(works []openalex.Work, targetA
 	workIdToWork := make(map[string]openalex.Work)
 
 	for _, work := range works {
-		id := parseOpenAlexId(work)
-		if id == "" {
+		workId := parseOpenAlexId(work)
+		if workId == "" {
 			continue
 		}
 
-		workIdToWork[id] = work
+		workIdToWork[workId] = work
 
-		if cacheEntry := flagger.flagCache.Lookup(id); cacheEntry != nil {
+		if cacheEntry := flagger.flagCache.Lookup(flagCacheKey(workId, targetAuthorIds)); cacheEntry != nil {
 			if cacheEntry.FlagData != nil {
 				flags = append(flags, WorkFlag{
 					FlaggerType:        OAAcknowledgementIsEOC,
@@ -359,6 +362,8 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(works []openalex.Work, targetA
 
 		var message string
 		flagged := false
+
+		flaggedEntities := make(map[string]SourceToAliases)
 
 		for _, ack := range acks.Result.Acknowledgements {
 			sussyBakaFlag, nameInAck := false, false
@@ -406,6 +411,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(works []openalex.Work, targetA
 					if sources, ok := matches[entity]; ok {
 						message += messageFromAcknowledgmentMatches(entity, sources)
 						flagged = true
+						flaggedEntities[entity] = sources
 					}
 				}
 			}
@@ -416,20 +422,50 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(works []openalex.Work, targetA
 			for _, ack := range acks.Result.Acknowledgements {
 				ackTexts = append(ackTexts, ack.RawText)
 			}
-			flag := WorkFlag{
-				FlaggerType:        OAAcknowledgementIsEOC,
-				Title:              "Acknowledgements are entities of concern",
-				Message:            fmt.Sprintf("%s\n%s", message, strings.Join(ackTexts, "\n")),
-				AuthorIds:          targetAuthorIds,
-				Work:               workIdToWork[acks.Result.WorkId],
-				EOCAcknowledgemnts: cacheEntry.FlagData,
-			}
-		}
 
+			entities := make([]EOCAcknowledgementEntity, 0, len(flaggedEntities))
+			for entity, sourceToAliases := range flaggedEntities {
+				sources := make([]string, 0, len(sourceToAliases))
+				allAliases := make([]string, 0)
+				for source, aliases := range sourceToAliases {
+					sources = append(sources, source)
+					allAliases = append(allAliases, aliases...)
+				}
+				entities = append(entities, EOCAcknowledgementEntity{
+					Entity:  entity,
+					Sources: sources,
+					Aliases: allAliases,
+				})
+			}
+
+			msg := fmt.Sprintf("%s\n%s", message, strings.Join(ackTexts, "\n"))
+			flag := WorkFlag{
+				FlaggerType: OAAcknowledgementIsEOC,
+				Title:       "Acknowledgements are entities of concern",
+				Message:     fmt.Sprintf("%s\n%s", message, strings.Join(ackTexts, "\n")),
+				AuthorIds:   targetAuthorIds,
+				Work:        workIdToWork[acks.Result.WorkId],
+				EOCAcknowledgemnts: &EOCAcknowledgemntsFlag{
+					Entities:           entities,
+					RawAcknowledements: ackTexts,
+				},
+			}
+
+			flagger.flagCache.Update(flagCacheKey(acks.Result.WorkId, targetAuthorIds), cachedAckFlag{
+				Message:  msg,
+				FlagData: flag.EOCAcknowledgemnts,
+			})
+
+			flags = append(flags, flag)
+		} else {
+			flagger.flagCache.Update(flagCacheKey(acks.Result.WorkId, targetAuthorIds), cachedAckFlag{
+				FlagData: nil,
+			})
+		}
 	}
 
+	return flags, nil
 }
-*/
 
 func messageFromAcknowledgmentMatches(entity string, matches SourceToAliases) string {
 	sources := make([]string, 0, len(matches))

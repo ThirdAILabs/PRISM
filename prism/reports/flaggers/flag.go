@@ -83,9 +83,13 @@ type EOCCoauthorAffiliationsFlag struct {
 	Authors      []string
 }
 
+type EOCAcknowledgementEntity struct {
+	Entity  string
+	Sources []string
+	Aliases []string
+}
+
 type EOCAcknowledgemntsFlag struct {
-	Entity             string
-	Sources            []string
-	Aliases            []string
+	Entities           []EOCAcknowledgementEntity
 	RawAcknowledements []string
 }
