@@ -17,6 +17,10 @@ type WorkFlagger interface {
 
 type OpenAlexMultipleAffiliationsFlagger struct{}
 
+func (flagger *OpenAlexMultipleAffiliationsFlagger) Name() string {
+	return OAMultipleAffiliations
+}
+
 func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(works []openalex.Work, targetAuthorIds []string) ([]Flag, error) {
 	flags := make([]Flag, 0)
 
@@ -55,6 +59,10 @@ type OpenAlexFunderIsEOC struct {
 	concerningEntities eocSet
 }
 
+func (flagger *OpenAlexFunderIsEOC) Name() string {
+	return OAFunderIsEOC
+}
+
 func (flagger *OpenAlexFunderIsEOC) Flag(works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
 	flags := make([]WorkFlag, 0)
 
@@ -85,6 +93,10 @@ func (flagger *OpenAlexFunderIsEOC) Flag(works []openalex.Work, targetAuthorIds 
 
 type OpenAlexPublisherIsEOC struct {
 	concerningPublishers eocSet
+}
+
+func (flagger *OpenAlexPublisherIsEOC) Name() string {
+	return OAPublisherIsEOC
 }
 
 func (flagger *OpenAlexPublisherIsEOC) Flag(works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
@@ -119,6 +131,10 @@ type OpenAlexCoauthorIsEOC struct {
 	concerningEntities eocSet
 }
 
+func (flagger *OpenAlexCoauthorIsEOC) Name() string {
+	return OACoauthorIsEOC
+}
+
 func (flagger *OpenAlexCoauthorIsEOC) Flag(works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
 	flags := make([]WorkFlag, 0)
 
@@ -132,7 +148,7 @@ func (flagger *OpenAlexCoauthorIsEOC) Flag(works []openalex.Work, targetAuthorId
 
 		if len(concerningAuthors) > 0 {
 			flags = append(flags, WorkFlag{
-				FlaggerType: OACoathorIsEOC,
+				FlaggerType: OACoauthorIsEOC,
 				Title:       "Co-author is Entity of Concern",
 				Message:     fmt.Sprintf("The following co-authors of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningAuthors, "\n")),
 				AuthorIds:   targetAuthorIds,
@@ -158,6 +174,10 @@ func getKeys(m map[string]bool) []string {
 type OpenAlexAuthorAffiliationIsEOC struct {
 	concerningEntities     eocSet
 	concerningInstitutions eocSet
+}
+
+func (flagger *OpenAlexAuthorAffiliationIsEOC) Name() string {
+	return OAAuthorAffiliationIsEOC
 }
 
 func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
@@ -198,6 +218,10 @@ func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(works []openalex.Work, targe
 type OpenAlexCoauthorAffiliationIsEOC struct {
 	concerningEntities     eocSet
 	concerningInstitutions eocSet
+}
+
+func (flagger *OpenAlexCoauthorAffiliationIsEOC) Name() string {
+	return OACoauthorAffiliationIsEOC
 }
 
 func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
@@ -251,6 +275,10 @@ type OpenAlexAcknowledgementIsEOC struct {
 	authorCache  DataCache[openalex.Author]
 	extractor    AcknowledgementsExtractor
 	sussyBakas   []string
+}
+
+func (flagger *OpenAlexAcknowledgementIsEOC) Name() string {
+	return OAAcknowledgementIsEOC
 }
 
 func (flagger *OpenAlexAcknowledgementIsEOC) getAuthorNames(authorIds []string) ([]string, error) {

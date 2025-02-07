@@ -13,7 +13,7 @@ const (
 	OAMultipleAffiliations     = "oa_multi_affil"
 	OAFunderIsEOC              = "oa_funder_eoc"
 	OAPublisherIsEOC           = "oa_publisher_eoc"
-	OACoathorIsEOC             = "oa_coather_eoc"
+	OACoauthorIsEOC            = "oa_coauther_eoc"
 	OAAuthorAffiliationIsEOC   = "oa_author_affiliation_eoc"
 	OACoauthorAffiliationIsEOC = "oa_coauthor_affiliation_eoc"
 	OAAcknowledgementIsEOC     = "oa_acknowledgement_eoc"
