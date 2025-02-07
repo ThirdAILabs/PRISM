@@ -3,14 +3,11 @@ package flaggers
 import (
 	"fmt"
 	"log/slog"
-	"math"
 	"prism/gscholar"
 	"prism/llms"
 	"prism/openalex"
 	"regexp"
 	"strings"
-
-	"github.com/agnivade/levenshtein"
 )
 
 func streamOpenAlexWorks(openalex openalex.KnowledgeBase, authorId string, startYear, endYear int) (chan openalex.WorkBatch, chan error) {
@@ -19,7 +16,7 @@ func streamOpenAlexWorks(openalex openalex.KnowledgeBase, authorId string, start
 
 func findOAAuthorId(work openalex.Work, targetAuthorName string) string {
 	authorId := ""
-	minDist := math.MaxInt
+	maxSim := 0.0
 
 	for _, author := range work.Authors {
 		name := author.DisplayName
@@ -27,8 +24,8 @@ func findOAAuthorId(work openalex.Work, targetAuthorName string) string {
 			name = *author.RawAuthorName
 		}
 
-		if dist := levenshtein.ComputeDistance(name, targetAuthorName); dist < minDist {
-			minDist = dist
+		if sim := IndelSimilarity(name, targetAuthorName); sim > maxSim {
+			maxSim = sim
 			authorId = author.AuthorId
 		}
 	}

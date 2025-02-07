@@ -14,6 +14,7 @@ import (
 
 const (
 	ndbScoreThreshold = 6.5
+	indelSimThreshold = 0.95
 	jaroSimThreshold  = 0.93
 	maxLLMWorkers     = 30
 )
@@ -40,13 +41,13 @@ type SourceRecord struct {
 	Link string
 }
 
-type dbEntityStore struct {
+type EntityStore struct {
 	db    *gorm.DB
 	ndb   search.NeuralDB
 	flash search.Flash
 }
 
-func (store *dbEntityStore) allAliases() ([]string, error) {
+func (store *EntityStore) allAliases() ([]string, error) {
 	var records []AliasRecord
 
 	if err := store.db.Find(&records).Error; err != nil {
@@ -63,7 +64,7 @@ func (store *dbEntityStore) allAliases() ([]string, error) {
 
 type SourceToAliases = map[string][]string
 
-func (store *dbEntityStore) exactLookup(queries []string) (SourceToAliases, error) {
+func (store *EntityStore) exactLookup(queries []string) (SourceToAliases, error) {
 	var records []AliasRecord
 
 	if err := store.db.Preload("Entity").Preload("Entity.Source").Find(&records, "alias IN ?", queries).Error; err != nil {
@@ -83,7 +84,7 @@ func (store *dbEntityStore) exactLookup(queries []string) (SourceToAliases, erro
 	return sourceToAliases, nil
 }
 
-func (store *dbEntityStore) ndbLookup(query string) ([]string, error) {
+func (store *EntityStore) ndbLookup(query string) ([]string, error) {
 	results, err := store.ndb.Query(query, 5, nil)
 	if err != nil {
 		return nil, fmt.Errorf("ndb entity lookup failed: %w", err)
@@ -105,7 +106,7 @@ func (store *dbEntityStore) ndbLookup(query string) ([]string, error) {
 	return matches, nil
 }
 
-func (store *dbEntityStore) flashLookup(query string) ([]string, error) {
+func (store *EntityStore) flashLookup(query string) ([]string, error) {
 	candidates, err := store.flash.Predict(query, 3)
 	if err != nil {
 		return nil, fmt.Errorf("flash lookup failed: %w", err)
@@ -113,7 +114,8 @@ func (store *dbEntityStore) flashLookup(query string) ([]string, error) {
 
 	filtered := make([]string, 0, len(candidates))
 	for _, candidate := range candidates {
-		if JaroWinklerSimilarity(query, candidate) >= jaroSimThreshold {
+		if IndelSimilarity(query, candidate) >= indelSimThreshold ||
+			JaroWinklerSimilarity(query, candidate) >= jaroSimThreshold {
 			filtered = append(filtered, candidate)
 		}
 	}
@@ -170,7 +172,7 @@ func filterMatchesWorker(task verificationTask) (verificationTask, error) {
 	return verificationTask{query: task.query, matches: filtered}, nil
 }
 
-func (store *dbEntityStore) SearchEntities(queries []string) (map[string]SourceToAliases, error) {
+func (store *EntityStore) SearchEntities(queries []string) (map[string]SourceToAliases, error) {
 	slog.Info("searching for entities queries", "queries", queries)
 
 	queue := make(chan verificationTask, len(queries))
@@ -193,11 +195,12 @@ func (store *dbEntityStore) SearchEntities(queries []string) (map[string]SourceT
 	close(queue)
 
 	nWorkers := min(maxLLMWorkers, len(queue))
-	completed := RunInPool(filterMatchesWorker, queue, nWorkers)
+	completed := make(chan CompletedTask[verificationTask], len(queue))
+	RunInPool(filterMatchesWorker, queue, completed, nWorkers)
 
 	results := make(map[string]SourceToAliases)
 	for task := range completed {
-		if task.Err != nil {
+		if task.Error != nil {
 			continue
 		}
 

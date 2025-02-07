@@ -5,7 +5,6 @@ go 1.23.2
 require (
 	github.com/Nerzal/gocloak/v13 v13.9.0
 	github.com/PuerkitoBio/goquery v1.10.1
-	github.com/agnivade/levenshtein v1.2.1
 	github.com/go-chi/chi/v5 v5.2.0
 	github.com/google/uuid v1.6.0
 	github.com/openai/openai-go v0.1.0-alpha.50

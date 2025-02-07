@@ -8,10 +8,11 @@ type Institution struct {
 }
 
 type Author struct {
-	AuthorId      string
-	DisplayName   string
-	RawAuthorName *string
-	Institutions  []Institution
+	AuthorId                string
+	DisplayName             string
+	DisplayNameAlternatives []string
+	RawAuthorName           *string
+	Institutions            []Institution
 }
 
 func (a *Author) InstitutionNames() []string {
@@ -67,4 +68,6 @@ type KnowledgeBase interface {
 	StreamWorks(authorId string, startYear, endYear int) (chan WorkBatch, chan error)
 
 	FindWorksByTitle(titles []string, startYear, endYear int) ([]Work, error)
+
+	GetAuthor(authorId string) (Author, error)
 }

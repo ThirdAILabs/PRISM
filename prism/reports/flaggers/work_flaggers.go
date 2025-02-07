@@ -2,7 +2,9 @@ package flaggers
 
 import (
 	"fmt"
+	"log/slog"
 	"prism/openalex"
+	"regexp"
 	"slices"
 	"strings"
 )
@@ -229,4 +231,214 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(works []openalex.Work, tar
 	}
 
 	return flags, nil
+}
+
+type cachedAckFlag struct {
+	Message  string
+	FlagData *EOCAcknowledgemntsFlag
+}
+
+type OpenAlexAcknowledgementIsEOC struct {
+	openalex     openalex.KnowledgeBase
+	entityLookup EntityStore
+	flagCache    DataCache[cachedAckFlag]
+	authorCache  DataCache[openalex.Author]
+	extractor    AcknowledgementsExtractor
+	sussyBakas   []string
+}
+
+func (flagger *OpenAlexAcknowledgementIsEOC) getAuthorNames(authorIds []string) ([]string, error) {
+	authorNames := make([]string, 0, len(authorIds))
+
+	for _, authorId := range authorIds {
+
+		if cachedAuthor := flagger.authorCache.Lookup(authorId); cachedAuthor != nil {
+			authorNames = append(authorNames, cachedAuthor.DisplayName)
+			authorNames = append(authorNames, cachedAuthor.DisplayNameAlternatives...)
+			authorNames = append(authorNames, getInitialsCombinations(cachedAuthor.DisplayName)...)
+			continue
+		}
+
+		authorInfo, err := flagger.openalex.GetAuthor(authorId)
+		if err != nil {
+			slog.Error("error getting author info from open alex", "author_id", authorId, "error", err)
+			return nil, fmt.Errorf("error retrieving author info: %w", err)
+		}
+
+		authorNames = append(authorNames, authorInfo.DisplayName)
+		authorNames = append(authorNames, authorInfo.DisplayNameAlternatives...)
+		authorNames = append(authorNames, getInitialsCombinations(authorInfo.DisplayName)...)
+
+		flagger.authorCache.Update(authorId, authorInfo)
+	}
+
+	return authorNames, nil
+}
+
+var punctCleaningRe = regexp.MustCompile(`[.,()!?:"']`)
+
+func cleanAckText(ack Acknowledgement) string {
+	sortFunc := func(a, b Entity) int {
+		if a.StartPosition < b.StartPosition {
+			return -1
+		}
+		if b.StartPosition > a.StartPosition {
+			return 1
+		}
+		return 0
+	}
+
+	slices.SortFunc(ack.SearchableEntities, sortFunc)
+	slices.SortFunc(ack.MiscEntities, sortFunc)
+
+	prevEndPos := 0
+	newText := ""
+	for _, entity := range ack.MiscEntities {
+		if entity.EntityType == "person" {
+			if entity.StartPosition >= prevEndPos {
+				newText += ack.RawText[prevEndPos:entity.StartPosition]
+				prevEndPos += entity.StartPosition + len(entity.EntityText)
+			}
+		}
+	}
+	newText += ack.RawText[prevEndPos:]
+
+	newText = strings.ToLower(strings.TrimSpace(newText))
+	newText = punctCleaningRe.ReplaceAllString(newText, " ")
+	return fmt.Sprintf(" %s ", newText)
+}
+
+/*
+func (flagger *OpenAlexAcknowledgementIsEOC) Flag(works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
+	flags := make([]WorkFlag, 0)
+
+	remaining := make([]openalex.Work, 0)
+
+	workIdToWork := make(map[string]openalex.Work)
+
+	for _, work := range works {
+		id := parseOpenAlexId(work)
+		if id == "" {
+			continue
+		}
+
+		workIdToWork[id] = work
+
+		if cacheEntry := flagger.flagCache.Lookup(id); cacheEntry != nil {
+			if cacheEntry.FlagData != nil {
+				flags = append(flags, WorkFlag{
+					FlaggerType:        OAAcknowledgementIsEOC,
+					Title:              "Acknowledgements are entities of concern",
+					Message:            cacheEntry.Message,
+					AuthorIds:          targetAuthorIds,
+					Work:               work,
+					EOCAcknowledgemnts: cacheEntry.FlagData,
+				})
+			}
+			continue
+		}
+
+		remaining = append(remaining, work)
+	}
+
+	allAuthorNames, err := flagger.getAuthorNames(targetAuthorIds)
+	if err != nil {
+		return nil, fmt.Errorf("error getting author infos: %w", err)
+	}
+
+	acknowledgementsStream := flagger.extractor.GetAcknowledgements(remaining)
+
+	for acks := range acknowledgementsStream {
+		if acks.Error != nil {
+			slog.Error("error retreiving acknowledgments for work", "error", acks.Error)
+			continue
+		}
+		if len(acks.Result.Acknowledgements) == 0 {
+			continue
+		}
+
+		var message string
+		flagged := false
+
+		for _, ack := range acks.Result.Acknowledgements {
+			sussyBakaFlag, nameInAck := false, false
+
+			for _, name := range allAuthorNames {
+				if strings.Contains(ack.RawText, name) {
+					nameInAck = true
+					break
+				}
+			}
+
+			cleanedText := cleanAckText(ack)
+
+			for _, sussyBaka := range flagger.sussyBakas {
+				if strings.Contains(cleanedText, fmt.Sprintf(" %s ", sussyBaka)) {
+					sussyBakaFlag = true
+					flagged = true
+					break
+				}
+			}
+
+			entityQueries := make([]string, 0)
+			if sussyBakaFlag {
+				for _, entity := range ack.SearchableEntities {
+					entityQueries = append(entityQueries, entity.EntityText)
+				}
+			}
+
+			if nameInAck && !flagged {
+				for _, entity := range ack.SearchableEntities {
+					entityQueries = append(entityQueries, entity.EntityText)
+				}
+				for _, entity := range ack.MiscEntities {
+					entityQueries = append(entityQueries, entity.EntityText)
+				}
+			}
+
+			if len(entityQueries) > 0 {
+				matches, err := flagger.entityLookup.SearchEntities(entityQueries)
+				if err != nil {
+					return nil, fmt.Errorf("error looking up entity matches: %w", err)
+				}
+
+				for _, entity := range entityQueries {
+					if sources, ok := matches[entity]; ok {
+						message += messageFromAcknowledgmentMatches(entity, sources)
+						flagged = true
+					}
+				}
+			}
+		}
+
+		if flagged {
+			ackTexts := make([]string, 0, len(acks.Result.Acknowledgements))
+			for _, ack := range acks.Result.Acknowledgements {
+				ackTexts = append(ackTexts, ack.RawText)
+			}
+			flag := WorkFlag{
+				FlaggerType:        OAAcknowledgementIsEOC,
+				Title:              "Acknowledgements are entities of concern",
+				Message:            fmt.Sprintf("%s\n%s", message, strings.Join(ackTexts, "\n")),
+				AuthorIds:          targetAuthorIds,
+				Work:               workIdToWork[acks.Result.WorkId],
+				EOCAcknowledgemnts: cacheEntry.FlagData,
+			}
+		}
+
+	}
+
+}
+*/
+
+func messageFromAcknowledgmentMatches(entity string, matches SourceToAliases) string {
+	sources := make([]string, 0, len(matches))
+	aliases := make([]string, 0, len(matches))
+
+	for k, v := range matches {
+		sources = append(sources, k)
+		aliases = append(aliases, v...)
+	}
+
+	return fmt.Sprintf("'%s' was in %s as %s\n", entity, strings.Join(sources, ", "), strings.Join(aliases, ", "))
 }

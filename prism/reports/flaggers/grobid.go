@@ -2,7 +2,6 @@ package flaggers
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -18,13 +17,10 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/google/uuid"
 	"github.com/playwright-community/playwright-go"
-	"go.etcd.io/bbolt"
 )
 
-var cacheBucket = []byte("ack-cache")
-
 type AcknowledgementsExtractor struct {
-	cache          *bbolt.DB
+	cache          DataCache[Acknowledgements]
 	maxWorkers     int
 	grobidEndpoint string
 	downloadDir    string
@@ -43,119 +39,58 @@ type Acknowledgement struct {
 }
 
 type Acknowledgements struct {
-	OpenAlexId       string
+	WorkId           string
 	Acknowledgements []Acknowledgement
 }
 
 func (extractor *AcknowledgementsExtractor) GetAcknowledgements(works []openalex.Work) chan CompletedTask[Acknowledgements] {
-	outputCh := make(chan Acknowledgements, len(works))
-	errorCh := make(chan error, 10)
+	outputCh := make(chan CompletedTask[Acknowledgements], len(works))
 
 	queue := make(chan openalex.Work, len(works))
 
 	for _, work := range works {
-		id := parseOpenAlexId(work)
-		if id == "" {
+		workId := parseOpenAlexId(work)
+		if workId == "" {
 			continue
 		}
 
-		cachedAck, err := extractor.checkCache(id)
-		if err != nil {
-			slog.Error("error checking cache for acknowledgement", "id", id, "error", err)
-			errorCh <- fmt.Errorf("error checking acknowledgment cache: %w", err)
-		} else if cachedAck != nil {
-			outputCh <- *cachedAck
-			continue
+		if cachedAck := extractor.cache.Lookup(workId); cachedAck != nil {
+			outputCh <- CompletedTask[Acknowledgements]{Result: *cachedAck, Error: nil}
+		} else {
+			queue <- work
 		}
 
-		queue <- work
 	}
 	close(queue)
 
 	nWorkers := min(len(queue), extractor.maxWorkers)
 
-	return RunInPool(extractor.worker, queue, nWorkers)
+	RunInPool(extractor.worker, queue, outputCh, nWorkers)
+
+	return outputCh
 }
 
 func (extractor *AcknowledgementsExtractor) worker(next openalex.Work) (Acknowledgements, error) {
-	id := parseOpenAlexId(next)
+	workId := parseOpenAlexId(next)
 
-	acks, err := extractor.extractAcknowledgments(id, next)
+	acks, err := extractor.extractAcknowledgments(workId, next)
 	if err != nil {
-		slog.Error("error extracting acknowledgements for work", "id", id, "name", next.DisplayName, "error", err)
+		slog.Error("error extracting acknowledgements for work", "work_id", workId, "name", next.DisplayName, "error", err)
 		return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments: %w", err)
 	}
 
-	extractor.updateCache(id, acks)
+	extractor.cache.Update(workId, acks)
 
 	return acks, nil
 }
 
-func parseOpenAlexId(work openalex.Work) string {
-	idx := strings.LastIndex(work.WorkId, "/")
-	if idx < 0 {
-		return ""
-	}
-	return work.WorkId[idx+1:]
-}
-
-func (extractor *AcknowledgementsExtractor) checkCache(id string) (*Acknowledgements, error) {
-	slog.Info("checking acknowledgement cache", "id", id)
-	var data []byte
-	err := extractor.cache.View(func(tx *bbolt.Tx) error {
-		bucket := tx.Bucket(cacheBucket)
-
-		data = bucket.Get([]byte(id))
-
-		return nil
-	})
-
-	if err != nil {
-		slog.Error("cache access failed", "id", id, "error", err)
-		return nil, fmt.Errorf("cache access failed: %w", err)
-	}
-
-	if data == nil {
-		slog.Info("no cached acknowledgements found", "id", id)
-		return nil, nil
-	}
-
-	var acks Acknowledgements
-	if err := json.Unmarshal(data, &acks); err != nil {
-		slog.Info("error parsing cache data", "id", id, "error", err)
-		return nil, fmt.Errorf("error parsing cache data: %w", err)
-	}
-
-	slog.Info("found cached acknowledgements", "id", id)
-
-	return &acks, nil
-}
-
-func (extractor *AcknowledgementsExtractor) updateCache(id string, acks Acknowledgements) {
-	slog.Info("updating acknowledgement cache", "id", id)
-
-	data, err := json.Marshal(acks)
-	if err != nil {
-		slog.Error("error updating acknowledgements cache: error serializing data", "id", id, "error", err)
-		return // No error since cache update isn't critical
-	}
-
-	if err := extractor.cache.Update(func(tx *bbolt.Tx) error {
-		return tx.Bucket(cacheBucket).Put([]byte(id), data)
-	}); err != nil {
-		slog.Error("error updating acknowledgements cache: bolt db error", "id", id, "error", err)
-	}
-
-	slog.Info("successfully updated acknowledgements cache", "id", id)
-}
-
-func (extractor *AcknowledgementsExtractor) extractAcknowledgments(id string, work openalex.Work) (Acknowledgements, error) {
-	slog.Info("extracting acknowledgments from", "id", work.WorkId, "name", work.DisplayName)
+func (extractor *AcknowledgementsExtractor) extractAcknowledgments(workId string, work openalex.Work) (Acknowledgements, error) {
+	slog.Info("extracting acknowledgments from", "work_id", work.WorkId, "name", work.DisplayName)
 
 	destPath := filepath.Join(extractor.downloadDir, uuid.NewString()+".pdf")
 	pdf, err := downloadPdf(work.DownloadUrl, destPath)
 	if err != nil {
-		slog.Error("error downloading pdf", "id", work.WorkId, "name", work.DisplayName, "error", err)
+		slog.Error("error downloading pdf", "work_id", work.WorkId, "name", work.DisplayName, "error", err)
 		return Acknowledgements{}, err
 	}
 	defer pdf.Close()
@@ -169,11 +104,11 @@ func (extractor *AcknowledgementsExtractor) extractAcknowledgments(id string, wo
 
 	acks, err := extractor.processPdfWithGrobid(pdf)
 	if err != nil {
-		slog.Error("error processing pdf with grobid", "id", work.WorkId, "name", work.DisplayName, "error", err)
+		slog.Error("error processing pdf with grobid", "work_id", work.WorkId, "name", work.DisplayName, "error", err)
 		return Acknowledgements{}, err
 	}
 
-	return Acknowledgements{OpenAlexId: id, Acknowledgements: acks}, nil
+	return Acknowledgements{WorkId: workId, Acknowledgements: acks}, nil
 }
 
 func downloadWithPlaywright(url, destPath string) (io.ReadCloser, error) {

@@ -83,10 +83,11 @@ func (oa *RemoteOpenAlex) AutocompleteInstitution(query string) ([]api.Instituti
 
 // Response Format: https://docs.openalex.org/api-entities/authors/get-lists-of-authors
 type oaAuthor struct {
-	Id           string          `json:"id"`
-	DisplayName  string          `json:"diplay_name"`
-	WorksCount   int             `json:"works_count"`
-	Affiliations []oaAffiliation `json:"affiliations"`
+	Id                      string          `json:"id"`
+	DisplayName             string          `json:"diplay_name"`
+	DisplayNameAlternatives []string        `json:"display_name_alternatives"`
+	WorksCount              int             `json:"works_count"`
+	Affiliations            []oaAffiliation `json:"affiliations"`
 }
 
 type oaInstitution struct {
@@ -244,6 +245,7 @@ func converOpenalexWork(work oaWork) Work {
 	authors := make([]Author, 0)
 	for _, author := range work.Authorships {
 		institutions := make([]Institution, 0)
+		// Here the author affiliations are not provided, so we use the authorship institutions field
 		for _, institution := range author.Institutions {
 			institutions = append(institutions, Institution{
 				InstitutionName: institution.DisplayName,
@@ -251,10 +253,11 @@ func converOpenalexWork(work oaWork) Work {
 			})
 		}
 		authors = append(authors, Author{
-			AuthorId:      author.Author.Id,
-			DisplayName:   author.Author.DisplayName,
-			RawAuthorName: &author.RawAuthorName,
-			Institutions:  institutions,
+			AuthorId:                author.Author.Id,
+			DisplayName:             author.Author.DisplayName,
+			DisplayNameAlternatives: author.Author.DisplayNameAlternatives,
+			RawAuthorName:           &author.RawAuthorName,
+			Institutions:            institutions,
 		})
 	}
 
@@ -349,4 +352,43 @@ func (oa *RemoteOpenAlex) FindWorksByTitle(titles []string, startYear, endYear i
 	}
 
 	return works, nil
+}
+
+func (oa *RemoteOpenAlex) GetAuthor(authorId string) (Author, error) {
+	url := "https://api.openalex.org/authors?filter=openalex:" + url.QueryEscape(authorId)
+
+	res, err := http.Get(url)
+	if err != nil {
+		slog.Error("openalex: get author failed", "author_id", authorId, "error", err)
+		return Author{}, ErrSearchFailed
+	}
+	defer res.Body.Close()
+
+	var results oaResults[oaAuthor]
+
+	if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
+		slog.Error("openalex: error parsing get author", "author_id", authorId, "error", err)
+		return Author{}, ErrSearchFailed
+	}
+
+	if len(results.Results) < 1 {
+		slog.Error("openalex: expected 1 author in get author, got 0", "author_id", authorId)
+		return Author{}, fmt.Errorf("no authors returned in get author")
+	}
+
+	institutions := make([]Institution, 0, len(results.Results[0].Affiliations))
+	for _, institution := range results.Results[0].Affiliations {
+		institutions = append(institutions, Institution{
+			InstitutionName: institution.Institution.DisplayName,
+			InstitutionId:   institution.Institution.Id,
+		})
+	}
+
+	return Author{
+		AuthorId:                results.Results[0].Id,
+		DisplayName:             results.Results[0].DisplayName,
+		DisplayNameAlternatives: results.Results[0].DisplayNameAlternatives,
+		RawAuthorName:           nil,
+		Institutions:            institutions,
+	}, nil
 }

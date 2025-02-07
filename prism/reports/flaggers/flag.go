@@ -16,6 +16,7 @@ const (
 	OACoathorIsEOC             = "oa_coather_eoc"
 	OAAuthorAffiliationIsEOC   = "oa_author_affiliation_eoc"
 	OACoauthorAffiliationIsEOC = "oa_coauthor_affiliation_eoc"
+	OAAcknowledgementIsEOC     = "oa_acknowledgement_eoc"
 )
 
 type Flag struct {
@@ -51,6 +52,9 @@ type WorkFlag struct {
 
 	// For OpenAlexCoauthorAffiliationIsEOC
 	EOCCoauthorAffiliations *EOCCoauthorAffiliationsFlag
+
+	// For OpenAlexAcknowledgementIsEOC
+	EOCAcknowledgemnts *EOCAcknowledgemntsFlag
 }
 
 type MultipleAssociationsFlag struct {
@@ -77,4 +81,11 @@ type EOCAuthorAffiliationsFlag struct {
 type EOCCoauthorAffiliationsFlag struct {
 	Institutions []string
 	Authors      []string
+}
+
+type EOCAcknowledgemntsFlag struct {
+	Entity             string
+	Sources            []string
+	Aliases            []string
+	RawAcknowledements []string
 }
