@@ -19,13 +19,60 @@ const (
 	OAAcknowledgementIsEOC     = "oa_acknowledgement_eoc"
 )
 
-type Flag struct {
-	FlaggerType   string
-	Title         string
-	Message       string
+type Flag interface {
+	GetType() string
+
+	GetTitle() string
+
+	GetMessage() string
+}
+
+/*
+ * Author Flags
+ */
+
+type AuthorFlag struct {
+	FlaggerType string
+	Title       string
+	Message     string
+
+	// For AuthorIsFacultyAtEOCFlagger
+	AuthorIsFacultyAtEOC *AuthorIsFacultyAtEOCFlag
+
+	// For AuthorIsAssociatedWithEOCFlagger
+	AuthorIsAssociatedWithEOC *AuthorIsAssociatedWithEOCFlag
+}
+
+type AuthorIsFacultyAtEOCFlag struct {
+	University    string
 	UniversityUrl string
-	Affiliations  []string
-	Metadata      map[string]any
+}
+
+type Node struct {
+	DocTitle string
+	DocUrl   string
+}
+
+type AuthorIsAssociatedWithEOCFlag struct {
+	DocTitle          string
+	DocUrl            string
+	DocEntities       []string
+	EntitiesMentioned []string
+	Connection        string
+	Nodes             []Node
+	FrequentCoauthor  *string
+}
+
+func (flag *AuthorFlag) GetType() string {
+	return flag.FlaggerType
+}
+
+func (flag *AuthorFlag) GetTitle() string {
+	return flag.Title
+}
+
+func (flag *AuthorFlag) GetMessage() string {
+	return flag.Message
 }
 
 type WorkFlag struct {
@@ -95,4 +142,16 @@ type EOCAcknowledgementEntity struct {
 type EOCAcknowledgemntsFlag struct {
 	Entities           []EOCAcknowledgementEntity
 	RawAcknowledements []string
+}
+
+func (flag *WorkFlag) GetType() string {
+	return flag.FlaggerType
+}
+
+func (flag *WorkFlag) GetTitle() string {
+	return flag.Title
+}
+
+func (flag *WorkFlag) GetMessage() string {
+	return flag.Message
 }

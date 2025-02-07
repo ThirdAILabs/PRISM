@@ -33,6 +33,10 @@ func (n *nameMatcher) matches(candidate string) bool {
 	return true
 }
 
+func (flagger *AuthorIsFacultyAtEOCFlagger) Name() string {
+	return AuthorIsFacultyAtEOC
+}
+
 func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(authorName string) ([]Flag, error) {
 	results, err := flagger.entityDB.Query(authorName, 5, nil)
 	if err != nil {
@@ -53,16 +57,13 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(authorName string) ([]Flag, err
 
 			url, _ := result.Metadata["url"].(string)
 
-			flags = append(flags, Flag{
-				FlaggerType:   AuthorIsFacultyAtEOC,
-				Title:         "Person may be affiliated with this university",
-				Message:       fmt.Sprintf("The author %s may be associated with this concerning entity: %s\n", authorName, university),
-				UniversityUrl: url,
-				Affiliations:  []string{university},
-				Metadata: map[string]any{
-					"university": university,
-					"url":        url,
-					"entities":   []string{university},
+			flags = append(flags, &AuthorFlag{
+				FlaggerType: AuthorIsFacultyAtEOC,
+				Title:       "Person may be affiliated with this university",
+				Message:     fmt.Sprintf("The author %s may be associated with this concerning entity: %s\n", authorName, university),
+				AuthorIsFacultyAtEOC: &AuthorIsFacultyAtEOCFlag{
+					University:    university,
+					UniversityUrl: url,
 				},
 			})
 		}
@@ -74,6 +75,10 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(authorName string) ([]Flag, err
 type AuthorIsAssociatedWithEOCFlagger struct {
 	prDB  search.NeuralDB
 	auxDB search.NeuralDB
+}
+
+func (flagger *AuthorIsAssociatedWithEOCFlagger) Name() string {
+	return AuthorIsAssociatedWithEOC
 }
 
 type authorCnt struct {
@@ -137,41 +142,36 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 
 			seen[url] = true
 
-			university, _ := result.Metadata["university"].(string)
+			title, _ := result.Metadata["title"].(string)
+			entities := result.Metadata["entities"].(string)
 
 			if primaryMatcher.matches(author.author) {
-				flags = append(flags, Flag{
-					FlaggerType:   AuthorIsAssociatedWithEOC,
-					Title:         "Person may be affiliated with someone mentioned in a press release.",
-					Message:       "The author or a frequent associate may be mentioned in a press release.",
-					UniversityUrl: url,
-					Affiliations:  []string{university},
-					Metadata: map[string]any{
-						"title":              result.Metadata["title"],
-						"connection":         "primary",
-						"url":                url,
-						"entities":           result.Metadata["entities"],
-						"entities_mentioned": []string{strings.ToTitle(author.author)},
+				flags = append(flags, &AuthorFlag{
+					FlaggerType: AuthorIsAssociatedWithEOC,
+					Title:       "Person may be affiliated with someone mentioned in a press release.",
+					Message:     "The author or a frequent associate may be mentioned in a press release.",
+					AuthorIsAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlag{
+						DocTitle:          title,
+						DocUrl:            url,
+						DocEntities:       strings.Split(entities, ";"),
+						EntitiesMentioned: []string{strings.ToTitle(author.author)},
+						Connection:        "primary",
 					},
 				})
 			} else {
-				flags = append(flags, Flag{
-					FlaggerType:   AuthorIsAssociatedWithEOC,
-					Title:         "The author's frequent coauthor may be mentioned in a press release.",
-					Message:       "The author or a frequent associate may be mentioned in a press release.",
-					UniversityUrl: "",
-					Affiliations:  []string{},
-					Metadata: map[string]any{
-						"title":              result.Metadata["title"],
-						"connection":         "secondary",
-						"url":                url,
-						"doj_url":            url,
-						"doj_title":          result.Metadata["title"],
-						"entities":           result.Metadata["entities"],
-						"entities_mentioned": []string{strings.ToTitle(author.author)},
-						"node1_title":        strings.ToTitle(author.author) + " (frequent coauthor)",
-						"node1_url":          "",
-						"frequent_coauthor":  strings.ToTitle(author.author),
+				coauthor := strings.ToTitle(author.author)
+				flags = append(flags, &AuthorFlag{
+					FlaggerType: AuthorIsAssociatedWithEOC,
+					Title:       "The author's frequent coauthor may be mentioned in a press release.",
+					Message:     "The author or a frequent associate may be mentioned in a press release.",
+					AuthorIsAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlag{
+						DocTitle:          title,
+						DocUrl:            url,
+						DocEntities:       strings.Split(entities, ";"),
+						EntitiesMentioned: []string{coauthor},
+						Connection:        "secondary",
+						Nodes:             []Node{{DocTitle: coauthor + " (frequent coauthor)", DocUrl: ""}},
+						FrequentCoauthor:  &coauthor,
 					},
 				})
 			}
@@ -274,31 +274,30 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(auth
 
 			title, _ := result.Metadata["title"].(string)
 			url, _ := result.Metadata["url"].(string)
-			entities, _ := result.Metadata["entities"].([]string)
+			entities, _ := result.Metadata["entities"].(string)
 
-			flag := Flag{
-				FlaggerType:   AuthorIsAssociatedWithEOC,
-				Title:         "Author may be affiliated with an entity whose associate may be mentioned in a press release.",
-				Message:       "The author may be associated be an entity who/which may be mentioned in a press release.\n",
-				UniversityUrl: "",
-				Affiliations:  []string{},
-				Metadata: map[string]any{
-					"title":              title,
-					"url":                url,
-					"doj_url":            url,
-					"doj_title":          title,
-					"entities":           entities,
-					"entities_mentioned": []string{query},
-					"node1_title":        entity.node1Title,
-					"node1_url":          entity.node1Url,
+			flag := &AuthorFlag{
+				FlaggerType: AuthorIsAssociatedWithEOC,
+				Title:       "Author may be affiliated with an entity whose associate may be mentioned in a press release.",
+				Message:     "The author may be associated be an entity who/which may be mentioned in a press release.\n",
+				AuthorIsAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlag{
+					DocTitle:          title,
+					DocUrl:            url,
+					DocEntities:       strings.Split(entities, ";"),
+					EntitiesMentioned: []string{query},
+					Nodes: []Node{
+						{DocTitle: entity.node1Title, DocUrl: entity.node1Url},
+					},
 				},
 			}
 			if entity.level == 1 {
-				flag.Metadata["connection"] = "secondary"
+				flag.AuthorIsAssociatedWithEOC.Connection = "secondary"
 			} else {
-				flag.Metadata["connection"] = "tertiary"
-				flag.Metadata["node2_title"] = entity.node2Title
-				flag.Metadata["node2_url"] = entity.node2Url
+				flag.AuthorIsAssociatedWithEOC.Connection = "tertiary"
+				flag.AuthorIsAssociatedWithEOC.Nodes = append(flag.AuthorIsAssociatedWithEOC.Nodes, Node{
+					DocTitle: entity.node2Title,
+					DocUrl:   entity.node2Url,
+				})
 			}
 
 			flags = append(flags, flag)

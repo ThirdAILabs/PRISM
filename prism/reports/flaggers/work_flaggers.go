@@ -10,21 +10,21 @@ import (
 )
 
 type WorkFlagger interface {
-	Flag(works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error)
+	Flag(works []openalex.Work, targetAuthorIds []string) ([]Flag, error)
 
 	Name() string
 }
 
 type OpenAlexMultipleAffiliationsFlagger struct{}
 
-func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
-	flags := make([]WorkFlag, 0)
+func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(works []openalex.Work, targetAuthorIds []string) ([]Flag, error) {
+	flags := make([]Flag, 0)
 
 	for _, work := range works {
 		for _, author := range work.Authors {
 			if len(author.Institutions) > 1 && slices.Contains(targetAuthorIds, author.AuthorId) {
 				institutionNames := author.InstitutionNames()
-				flags = append(flags, WorkFlag{
+				flags = append(flags, &WorkFlag{
 					FlaggerType: OAMultipleAffiliations,
 					Title:       "Multiple Affiliations",
 					Message:     fmt.Sprintf("%s has multiple affilitions in work '%s'\n%s", author.DisplayName, work.GetDisplayName(), strings.Join(institutionNames, "\n")),

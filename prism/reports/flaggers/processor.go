@@ -9,8 +9,10 @@ import (
 )
 
 type ReportProcessor struct {
-	openalex     openalex.KnowledgeBase
-	workFlaggers []WorkFlagger
+	openalex                openalex.KnowledgeBase
+	workFlaggers            []WorkFlagger
+	authorFacultyAtEOC      AuthorIsFacultyAtEOCFlagger
+	authorAssociatedWithEOC AuthorIsAssociatedWithEOCFlagger
 }
 
 func (processor *ReportProcessor) getWorkStream(report api.Report) (chan openalex.WorkBatch, error) {
@@ -28,7 +30,7 @@ func (processor *ReportProcessor) getWorkStream(report api.Report) (chan openale
 	}
 }
 
-func (processor *ReportProcessor) processWorks(logger *slog.Logger, workStream chan openalex.WorkBatch, flagsCh chan []WorkFlag) {
+func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName string, workStream chan openalex.WorkBatch, flagsCh chan []Flag) {
 	wg := sync.WaitGroup{}
 
 	batch := -1
@@ -55,7 +57,42 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, workStream c
 				}
 			}(batch, works.Works, works.TargetAuthorIds)
 		}
+
+		wg.Add(1)
+		go func(batch int, works []openalex.Work) {
+			defer wg.Done()
+
+			flagger := processor.authorAssociatedWithEOC
+
+			logger.Info("starting batch with flagger", "flagger", flagger.Name(), "batch", batch)
+
+			flags, err := flagger.Flag(authorName, works)
+			if err != nil {
+				logger.Error("flagger error", "flagger", flagger.Name(), "batch", batch, "error", err)
+			} else {
+				flagsCh <- flags
+				logger.Info("batch complete", "flagger", flagger.Name(), "batch", batch)
+			}
+
+		}(batch, works.Works)
 	}
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		flagger := processor.authorFacultyAtEOC
+
+		logger.Info("starting batch with flagger", "flagger", flagger.Name(), "batch", batch)
+
+		flags, err := flagger.Flag(authorName)
+		if err != nil {
+			logger.Error("flagger error", "flagger", flagger.Name(), "batch", batch, "error", err)
+		} else {
+			flagsCh <- flags
+			logger.Info("batch complete", "flagger", flagger.Name(), "batch", batch)
+		}
+	}()
 
 	wg.Wait()
 	close(flagsCh)
@@ -64,22 +101,24 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, workStream c
 func (processor *ReportProcessor) ProcessReport(report api.Report) (any, error) {
 	logger := slog.With("report_id", report.Id)
 
-	slog.Info("starting report processing")
+	logger.Info("starting report processing")
 
 	workStream, err := processor.getWorkStream(report)
 	if err != nil {
-		slog.Error("unable to get work stream", "error", err)
+		logger.Error("unable to get work stream", "error", err)
 		return nil, fmt.Errorf("unable to get works: %w", err)
 	}
 
-	flagsCh := make(chan []WorkFlag, 100)
+	flagsCh := make(chan []Flag, 100)
 
-	go processor.processWorks(logger, workStream, flagsCh)
+	go processor.processWorks(logger, report.AuthorName, workStream, flagsCh)
 
-	allFlags := make([]WorkFlag, 0)
+	allFlags := make([]Flag, 0)
 	for flags := range flagsCh {
 		allFlags = append(allFlags, flags...)
 	}
+
+	logger.Info("report complete", "n_flags", len(allFlags))
 
 	return allFlags, nil
 }
