@@ -38,7 +38,7 @@ func RunInPool[In any, Out any](worker func(In) (Out, error), queue chan In, com
 			}()
 		}
 
-		wg.Done()
+		wg.Wait()
 
 		close(completed)
 	}()
