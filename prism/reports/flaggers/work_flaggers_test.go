@@ -1,0 +1,168 @@
+package flaggers
+
+import (
+	"log/slog"
+	"prism/openalex"
+	"testing"
+)
+
+func TestMultipleAssociations(t *testing.T) {
+	flagger := OpenAlexMultipleAffiliationsFlagger{}
+
+	works := []openalex.Work{
+		{Authors: []openalex.Author{
+			{AuthorId: "1", Institutions: []openalex.Institution{{}, {}}},
+		}},
+		{Authors: []openalex.Author{
+			{AuthorId: "2", Institutions: []openalex.Institution{{}, {}}},
+			{AuthorId: "4", Institutions: []openalex.Institution{{}, {}}},
+		}},
+	}
+
+	flags, err := flagger.Flag(slog.Default(), works, []string{"2", "3"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(flags) != 1 {
+		t.Fatal("expected 1 flag")
+	}
+
+	noflags, err := flagger.Flag(slog.Default(), works, []string{"5", "6"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(noflags) != 0 {
+		t.Fatal("expected 0 flags")
+	}
+}
+
+func makeSet(entities ...string) eocSet {
+	set := make(eocSet)
+	for _, e := range entities {
+		set[e] = struct{}{}
+	}
+	return set
+}
+
+func TestFunderEOC(t *testing.T) {
+	flagger := OpenAlexFunderIsEOC{
+		concerningFunders:  makeSet("bad-abc", "bad-xyz"),
+		concerningEntities: makeSet("bad-123", "bad-456"),
+	}
+
+	for funder, nflags := range map[string]int{"bad-xyz": 1, "bad-456": 1, "abc": 0, "123": 0} {
+		works := []openalex.Work{
+			{Grants: []openalex.Grant{
+				{FunderId: "some funder"},
+				{FunderId: funder},
+			}},
+		}
+
+		flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(flags) != nflags {
+			t.Fatal("incorrect number of flags")
+		}
+	}
+}
+
+func TestPublisherEOC(t *testing.T) {
+	flagger := OpenAlexPublisherIsEOC{
+		concerningPublishers: makeSet("bad-abc", "bad-xyz"),
+	}
+
+	for publisher, nflags := range map[string]int{"abc": 0, "bad-xyz": 1} {
+		works := []openalex.Work{
+			{Locations: []openalex.Location{
+				{OrganizationId: "some publisher"},
+				{OrganizationId: publisher},
+			}},
+		}
+
+		flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(flags) != nflags {
+			t.Fatal("incorrect number of flags")
+		}
+	}
+}
+
+func TestCoauthorEOC(t *testing.T) {
+	flagger := OpenAlexCoauthorIsEOC{
+		concerningEntities: makeSet("bad-abc", "bad-xyz"),
+	}
+
+	for coauthor, nflags := range map[string]int{"abc": 0, "bad-xyz": 1} {
+		works := []openalex.Work{
+			{Authors: []openalex.Author{
+				{AuthorId: "some author"},
+				{AuthorId: coauthor},
+			}},
+		}
+
+		flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(flags) != nflags {
+			t.Fatal("incorrect number of flags")
+		}
+	}
+}
+
+func TestAuthorAffiliationEOC(t *testing.T) {
+	flagger := OpenAlexAuthorAffiliationIsEOC{
+		concerningEntities:     makeSet("bad-abc", "bad-xyz"),
+		concerningInstitutions: makeSet("bad-123", "bad-456"),
+	}
+
+	for author, isTarget := range map[string]int{"a": 1, "c": 0} {
+		for institution, isBad := range map[string]int{"abc": 0, "bad-xyz": 1, "bad-123": 1} {
+			works := []openalex.Work{
+				{Authors: []openalex.Author{
+					{AuthorId: "some author", Institutions: []openalex.Institution{{InstitutionId: "university"}}},
+					{AuthorId: author, Institutions: []openalex.Institution{{InstitutionId: institution}}},
+				}},
+			}
+
+			flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(flags) != isBad*isTarget {
+				t.Fatal("incorrect number of flags")
+			}
+		}
+	}
+}
+
+func TestCoauthorAffiliationEOC(t *testing.T) {
+	flagger := OpenAlexCoauthorAffiliationIsEOC{
+		concerningEntities:     makeSet("bad-abc", "bad-xyz"),
+		concerningInstitutions: makeSet("bad-123", "bad-456"),
+	}
+
+	for author, isTarget := range map[string]int{"a": 1, "c": 0} {
+		for institution, isBad := range map[string]int{"abc": 0, "bad-xyz": 1, "bad-123": 1} {
+			works := []openalex.Work{
+				{Authors: []openalex.Author{
+					{AuthorId: "some author", Institutions: []openalex.Institution{{InstitutionId: "university"}}},
+					{AuthorId: author, Institutions: []openalex.Institution{{InstitutionId: institution}}},
+				}},
+			}
+
+			flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(flags) != isBad*(1-isTarget) {
+				t.Fatal("incorrect number of flags")
+			}
+		}
+	}
+}
