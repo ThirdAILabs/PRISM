@@ -422,7 +422,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 		}
 
 		if len(entityQueries) > 0 {
-			matches, err := flagger.entityLookup.SearchEntities(entityQueries)
+			matches, err := flagger.entityLookup.SearchEntities(logger, entityQueries)
 			if err != nil {
 				return nil, "", fmt.Errorf("error looking up entity matches: %w", err)
 			}
@@ -489,7 +489,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 		return nil, fmt.Errorf("error getting author infos: %w", err)
 	}
 
-	acknowledgementsStream := flagger.extractor.GetAcknowledgements(remaining)
+	acknowledgementsStream := flagger.extractor.GetAcknowledgements(logger, remaining)
 
 	for acks := range acknowledgementsStream {
 		if acks.Error != nil {

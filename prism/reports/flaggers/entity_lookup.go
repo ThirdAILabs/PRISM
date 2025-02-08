@@ -166,28 +166,27 @@ type verificationTask struct {
 func filterMatchesWorker(task verificationTask) (verificationTask, error) {
 	filtered, err := filterMatchesWithLLM(task.query, task.matches)
 	if err != nil {
-		slog.Error("llm match verification error", "query", task.query, "matches", task.matches, "error", err)
 		return verificationTask{}, err
 	}
 	return verificationTask{query: task.query, matches: filtered}, nil
 }
 
-func (store *EntityStore) SearchEntities(queries []string) (map[string]SourceToAliases, error) {
-	slog.Info("searching for entities queries", "queries", queries)
+func (store *EntityStore) SearchEntities(logger *slog.Logger, queries []string) (map[string]SourceToAliases, error) {
+	logger.Info("searching for entities queries", "queries", queries)
 
 	queue := make(chan verificationTask, len(queries))
 	for _, query := range queries {
 		ndbMatches, err := store.ndbLookup(query)
 		if err != nil {
-			slog.Error("ndb entity lookup failed", "error", err)
+			logger.Error("ndb entity lookup failed", "error", err)
 		}
 		flashMatches, err := store.flashLookup(query)
 		if err != nil {
-			slog.Error("flash lookup failed", "error", err)
+			logger.Error("flash lookup failed", "error", err)
 		}
 
 		matches := slices.Concat(ndbMatches, flashMatches)
-		slog.Info("matches found for queries", "matches", matches)
+		logger.Info("matches found for queries", "matches", matches)
 		if len(matches) > 0 {
 			queue <- verificationTask{query: query, matches: matches}
 		}
@@ -201,12 +200,13 @@ func (store *EntityStore) SearchEntities(queries []string) (map[string]SourceToA
 	results := make(map[string]SourceToAliases)
 	for task := range completed {
 		if task.Error != nil {
+			logger.Error("llm match verification error", "error", task.Error)
 			continue
 		}
 
 		sourceToAliases, err := store.exactLookup(task.Result.matches)
 		if err != nil {
-			slog.Error("error completing exact entity lookup", "error", err)
+			logger.Error("error completing exact entity lookup", "error", err)
 		} else {
 			results[task.Result.query] = sourceToAliases
 		}

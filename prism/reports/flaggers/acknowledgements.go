@@ -43,7 +43,7 @@ type Acknowledgements struct {
 	Acknowledgements []Acknowledgement
 }
 
-func (extractor *AcknowledgementsExtractor) GetAcknowledgements(works []openalex.Work) chan CompletedTask[Acknowledgements] {
+func (extractor *AcknowledgementsExtractor) GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan CompletedTask[Acknowledgements] {
 	outputCh := make(chan CompletedTask[Acknowledgements], len(works))
 
 	queue := make(chan openalex.Work, len(works))
@@ -63,50 +63,52 @@ func (extractor *AcknowledgementsExtractor) GetAcknowledgements(works []openalex
 	}
 	close(queue)
 
+	worker := func(next openalex.Work) (Acknowledgements, error) {
+		workId := parseOpenAlexId(next)
+
+		acks, err := extractor.extractAcknowledgments(logger, workId, next)
+		if err != nil {
+			return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments: %w", err)
+		}
+
+		extractor.cache.Update(workId, acks)
+
+		return acks, nil
+	}
+
 	nWorkers := min(len(queue), extractor.maxWorkers)
 
-	RunInPool(extractor.worker, queue, outputCh, nWorkers)
+	RunInPool(worker, queue, outputCh, nWorkers)
 
 	return outputCh
 }
 
-func (extractor *AcknowledgementsExtractor) worker(next openalex.Work) (Acknowledgements, error) {
-	workId := parseOpenAlexId(next)
-
-	acks, err := extractor.extractAcknowledgments(workId, next)
-	if err != nil {
-		slog.Error("error extracting acknowledgements for work", "work_id", workId, "name", next.DisplayName, "error", err)
-		return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments: %w", err)
-	}
-
-	extractor.cache.Update(workId, acks)
-
-	return acks, nil
-}
-
-func (extractor *AcknowledgementsExtractor) extractAcknowledgments(workId string, work openalex.Work) (Acknowledgements, error) {
-	slog.Info("extracting acknowledgments from", "work_id", work.WorkId, "name", work.DisplayName)
+func (extractor *AcknowledgementsExtractor) extractAcknowledgments(logger *slog.Logger, workId string, work openalex.Work) (Acknowledgements, error) {
+	logger.Info("extracting acknowledgments from", "work_id", work.WorkId, "work_name", work.DisplayName)
 
 	destPath := filepath.Join(extractor.downloadDir, uuid.NewString()+".pdf")
 	pdf, err := downloadPdf(work.DownloadUrl, destPath)
 	if err != nil {
-		slog.Error("error downloading pdf", "work_id", work.WorkId, "name", work.DisplayName, "error", err)
+		logger.Error("error downloading pdf", "work_id", work.WorkId, "work_name", work.DisplayName, "error", err)
 		return Acknowledgements{}, err
 	}
 	defer pdf.Close()
 
+	logger.Info("pdf download completed", "work_id", work.WorkId, "work_name", work.DisplayName)
+
 	defer func() {
 		if err := os.Remove(destPath); err != nil && !errors.Is(err, os.ErrNotExist) {
-			slog.Error("error removing temp download file", "error", err)
+			logger.Error("error removing temp download file", "error", err)
 		}
-
 	}()
 
 	acks, err := extractor.processPdfWithGrobid(pdf)
 	if err != nil {
-		slog.Error("error processing pdf with grobid", "work_id", work.WorkId, "name", work.DisplayName, "error", err)
+		logger.Error("error processing pdf with grobid", "work_id", work.WorkId, "name", work.DisplayName, "error", err)
 		return Acknowledgements{}, err
 	}
+
+	logger.Info("processed pdf with grobid", "work_id", work.WorkId, "work_name", work.DisplayName)
 
 	return Acknowledgements{WorkId: workId, Acknowledgements: acks}, nil
 }
@@ -192,23 +194,19 @@ func downloadWithHttp(url string) (io.ReadCloser, error) {
 }
 
 func downloadPdf(url, destPath string) (io.ReadCloser, error) {
-	slog.Info("attempting to download pdf", "url", url)
-
 	attempt1, err1 := downloadWithHttp(url)
 	if err1 != nil {
-		slog.Error("basic download failed", "url", url, "error", err1)
 	} else {
 		return attempt1, nil
 	}
 
 	attempt2, err2 := downloadWithPlaywright(url, destPath)
 	if err2 != nil {
-		slog.Error("playwright download failed", "url", url, "error", err2)
 	} else {
 		return attempt2, nil
 	}
 
-	return nil, fmt.Errorf("unable to download pdf:\n%w\n%w", err1, err2)
+	return nil, fmt.Errorf("unable to download pdf, http error: %w, playwright error: %w", err1, err2)
 }
 
 var searchAbleEntityTypes = map[string]bool{
