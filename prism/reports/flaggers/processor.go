@@ -44,18 +44,20 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 		for _, flagger := range processor.workFlaggers {
 			wg.Add(1)
 
-			go func(batch int, works []openalex.Work, authorIds []string) {
+			go func(flagger WorkFlagger, works []openalex.Work, authorIds []string) {
 				defer wg.Done()
 
-				logger.Info("starting batch with flagger", "flagger", flagger.Name(), "batch", batch)
-				flags, err := flagger.Flag(works, authorIds)
+				logger := logger.With("flagger", flagger.Name(), "batch", batch)
+				logger.Info("starting batch with flagger")
+
+				flags, err := flagger.Flag(logger, works, authorIds)
 				if err != nil {
-					logger.Error("flagger error", "flagger", flagger.Name(), "batch", batch, "error", err)
+					logger.Error("flagger error", "error", err)
 				} else {
 					flagsCh <- flags
-					logger.Info("batch complete", "flagger", flagger.Name(), "batch", batch)
+					logger.Info("batch complete")
 				}
-			}(batch, works.Works, works.TargetAuthorIds)
+			}(flagger, works.Works, works.TargetAuthorIds)
 		}
 
 		wg.Add(1)
@@ -64,14 +66,15 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 
 			flagger := processor.authorAssociatedWithEOC
 
-			logger.Info("starting batch with flagger", "flagger", flagger.Name(), "batch", batch)
+			logger := logger.With("flagger", flagger.Name(), "batch", batch)
+			logger.Info("starting batch with flagger")
 
-			flags, err := flagger.Flag(authorName, works)
+			flags, err := flagger.Flag(logger, authorName, works)
 			if err != nil {
-				logger.Error("flagger error", "flagger", flagger.Name(), "batch", batch, "error", err)
+				logger.Error("flagger error", "error", err)
 			} else {
 				flagsCh <- flags
-				logger.Info("batch complete", "flagger", flagger.Name(), "batch", batch)
+				logger.Info("batch complete")
 			}
 
 		}(batch, works.Works)
@@ -83,14 +86,15 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 
 		flagger := processor.authorFacultyAtEOC
 
-		logger.Info("starting batch with flagger", "flagger", flagger.Name(), "batch", batch)
+		logger := logger.With("flagger", flagger.Name())
+		logger.Info("starting author faculty at eoc with flagger")
 
-		flags, err := flagger.Flag(authorName)
+		flags, err := flagger.Flag(logger, authorName)
 		if err != nil {
-			logger.Error("flagger error", "flagger", flagger.Name(), "batch", batch, "error", err)
+			logger.Error("flagger error", "error", err)
 		} else {
 			flagsCh <- flags
-			logger.Info("batch complete", "flagger", flagger.Name(), "batch", batch)
+			logger.Info("batch complete")
 		}
 	}()
 

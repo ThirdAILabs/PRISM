@@ -12,12 +12,17 @@ import (
 type DataCache[T any] struct {
 	db     *bbolt.DB
 	bucket []byte
+	logger *slog.Logger
 }
 
 func NewCache[T any](bucket, path string) (DataCache[T], error) {
+	logger := slog.With("bucket", bucket)
+
+	logger.Info("creating new cache", "path", path)
+
 	db, err := bbolt.Open(path, 0600, &bbolt.Options{Timeout: 20 * time.Second})
 	if err != nil {
-		slog.Error("error opening cache db", "bucket", bucket, "error", err)
+		logger.Error("error opening cache db", "error", err)
 		return DataCache[T]{}, fmt.Errorf("error creating cache: %w", err)
 	}
 
@@ -25,11 +30,13 @@ func NewCache[T any](bucket, path string) (DataCache[T], error) {
 		_, err := tx.CreateBucketIfNotExists([]byte(bucket))
 		return err
 	}); err != nil {
-		slog.Error("error creating cache bucket", "bucket", bucket, "error", err)
+		logger.Error("error creating cache bucket", "error", err)
 		return DataCache[T]{}, fmt.Errorf("error creating cache: %w", err)
 	}
 
-	return DataCache[T]{db: db, bucket: []byte(bucket)}, nil
+	logger.Info("cache initialized")
+
+	return DataCache[T]{db: db, bucket: []byte(bucket), logger: logger}, nil
 }
 
 func (cache *DataCache[T]) Close() error {
@@ -37,7 +44,7 @@ func (cache *DataCache[T]) Close() error {
 }
 
 func (cache *DataCache[T]) Lookup(key string) *T {
-	slog.Info("checking cache", "bucket", string(cache.bucket), "key", key)
+	cache.logger.Info("checking cache", "key", key)
 
 	var data []byte
 	err := cache.db.View(func(tx *bbolt.Tx) error {
@@ -48,40 +55,41 @@ func (cache *DataCache[T]) Lookup(key string) *T {
 		return nil
 	})
 	if err != nil {
-		slog.Error("cache access failed", "bucket", string(cache.bucket), "key", key, "error", err)
-		return nil
+		cache.logger.Error("cache access failed", "key", key, "error", err)
+		return nil // No error since cache update isn't critical
 	}
 
 	if data == nil {
-		slog.Info("no cached entry found", "bucket", string(cache.bucket), "key", key)
+		cache.logger.Info("no cached entry found", "key", key)
 		return nil
 	}
 
 	entry := new(T)
 	if err := json.Unmarshal(data, entry); err != nil {
-		slog.Info("error parsing cache data", "bucket", string(cache.bucket), "key", key, "error", err)
-		return nil
+		cache.logger.Info("error parsing cache data", "key", key, "error", err)
+		return nil // No error since cache update isn't critical
 	}
 
-	slog.Info("found cached entry", "bucket", string(cache.bucket), "key", key)
+	cache.logger.Info("found cached entry", "key", key)
 
 	return entry
 }
 
 func (cache *DataCache[T]) Update(key string, entry T) {
-	slog.Info("updating cache", "bucket", string(cache.bucket), "key", key)
+	cache.logger.Info("updating cache", "key", key)
 
 	data, err := json.Marshal(entry)
 	if err != nil {
-		slog.Error("error updating cache: error serializing data", "bucket", string(cache.bucket), "key", key, "error", err)
+		cache.logger.Error("error updating cache: error serializing data", "key", key, "error", err)
 		return // No error since cache update isn't critical
 	}
 
 	if err := cache.db.Update(func(tx *bbolt.Tx) error {
 		return tx.Bucket(cache.bucket).Put([]byte(key), data)
 	}); err != nil {
-		slog.Error("cache update failed", "bucket", string(cache.bucket), "key", key, "error", err)
+		cache.logger.Error("cache update failed", "key", key, "error", err)
+		return // No error since cache update isn't critical
 	}
 
-	slog.Info("successfully updated cache", "bucket", string(cache.bucket), "key", key)
+	cache.logger.Info("successfully updated cache", "key", key)
 }

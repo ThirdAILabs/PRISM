@@ -37,9 +37,12 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Name() string {
 	return AuthorIsFacultyAtEOC
 }
 
-func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(authorName string) ([]Flag, error) {
+func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName string) ([]Flag, error) {
+	logger.Info("checking if author is faculty at EOC", "author_name", authorName)
+
 	results, err := flagger.entityDB.Query(authorName, 5, nil)
 	if err != nil {
+		logger.Error("error querying ndb", "error", err)
 		return nil, fmt.Errorf("error querying ndb: %w", err)
 	}
 
@@ -51,7 +54,7 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(authorName string) ([]Flag, err
 		if matcher.matches(result.Text) {
 			university, _ := result.Metadata["university"].(string)
 			if university == "" {
-				slog.Error("missing university metadata", "result", result)
+				logger.Error("missing university metadata", "result", result)
 				continue
 			}
 
@@ -66,8 +69,12 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(authorName string) ([]Flag, err
 					UniversityUrl: url,
 				},
 			})
+
+			logger.Info("found author in listing for EOC university", "author_name", authorName, "university", university)
 		}
 	}
+
+	logger.Info("finished checking for faculty at EOC", "n_flags", len(flags))
 
 	return flags, nil
 }
@@ -112,7 +119,7 @@ func topCoauthors(works []openalex.Work) []authorCnt {
 	return topAuthors[:min(len(topAuthors), 4)]
 }
 
-func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(authorName string, works []openalex.Work) ([]Flag, error) {
+func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(logger *slog.Logger, authorName string, works []openalex.Work) ([]Flag, error) {
 	flags := make([]Flag, 0)
 
 	seen := make(map[string]bool)
@@ -158,6 +165,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 						Connection:        "primary",
 					},
 				})
+				logger.Info("author is assoiciated with EOC", "author", author.author, "doc", title, "entities", entities)
 			} else {
 				coauthor := strings.ToTitle(author.author)
 				flags = append(flags, &AuthorFlag{
@@ -174,9 +182,12 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 						FrequentCoauthor:  &coauthor,
 					},
 				})
+				logger.Info("frequent coauthor is assoiciated with EOC", "coauthor", author.author, "doc", title, "entities", entities)
 			}
 		}
 	}
+
+	logger.Info("first/second level flags", "n_flags", len(flags))
 
 	return flags, nil
 }
@@ -189,7 +200,7 @@ type entityMetadata struct {
 	node2Url   string
 }
 
-func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(authorName string) ([]Flag, error) {
+func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logger *slog.Logger, authorName string) ([]Flag, error) {
 	seen := make(map[string]bool)
 
 	primaryMatcher := newNameMatcher(authorName)
@@ -259,6 +270,8 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(auth
 		}
 	}
 
+	logger.Info("queries at first/second level", "n_queries", len(queryToEntities))
+
 	flags := make([]Flag, 0)
 
 	for query, entity := range queryToEntities {
@@ -304,19 +317,29 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(auth
 		}
 	}
 
+	logger.Info("second/third level flags", "n_flags", len(flags))
+
 	return flags, nil
 }
 
-func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(authorName string, works []openalex.Work) ([]Flag, error) {
-	firstSecondLevelFlags, err := flagger.findFirstSecondHopEntities(authorName, works)
+func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(logger *slog.Logger, authorName string, works []openalex.Work) ([]Flag, error) {
+	logger.Info("checking if author is associated with EOC", "author_name", authorName)
+
+	firstSecondLevelFlags, err := flagger.findFirstSecondHopEntities(logger, authorName, works)
 	if err != nil {
+		logger.Error("error checking first/second level flags", "error", err)
 		return nil, err
 	}
 
-	secondThirdLevelFlags, err := flagger.findSecondThirdHopEntities(authorName)
+	secondThirdLevelFlags, err := flagger.findSecondThirdHopEntities(logger, authorName)
 	if err != nil {
+		logger.Error("error checking second/third level flags", "error", err)
 		return nil, err
 	}
 
-	return slices.Concat(firstSecondLevelFlags, secondThirdLevelFlags), nil
+	flags := slices.Concat(firstSecondLevelFlags, secondThirdLevelFlags)
+
+	logger.Info("finished checking if author is associated with EOC", "n_flags", len(flags))
+
+	return flags, nil
 }

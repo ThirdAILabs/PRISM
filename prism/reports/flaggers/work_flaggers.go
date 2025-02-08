@@ -10,7 +10,7 @@ import (
 )
 
 type WorkFlagger interface {
-	Flag(works []openalex.Work, targetAuthorIds []string) ([]Flag, error)
+	Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]Flag, error)
 
 	Name() string
 }
@@ -21,10 +21,12 @@ func (flagger *OpenAlexMultipleAffiliationsFlagger) Name() string {
 	return OAMultipleAffiliations
 }
 
-func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(works []openalex.Work, targetAuthorIds []string) ([]Flag, error) {
+func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]Flag, error) {
 	flags := make([]Flag, 0)
 
 	for _, work := range works {
+		logger.Info("processing work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
+
 		for _, author := range work.Authors {
 			if len(author.Institutions) > 1 && slices.Contains(targetAuthorIds, author.AuthorId) {
 				institutionNames := author.InstitutionNames()
@@ -39,10 +41,14 @@ func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(works []openalex.Work, 
 						Affiliations: institutionNames,
 					},
 				})
+				logger.Info("found multiple affiliations", "author_id", author.AuthorId, "author_name", author.DisplayName, "institutions", institutionNames)
+				break
 			}
-			break
 		}
+		logger.Info("processed work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
 	}
+
+	logger.Info("flagger completed", "n_flags", len(flags))
 
 	return flags, nil
 }
@@ -63,10 +69,12 @@ func (flagger *OpenAlexFunderIsEOC) Name() string {
 	return OAFunderIsEOC
 }
 
-func (flagger *OpenAlexFunderIsEOC) Flag(works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
+func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
 	flags := make([]WorkFlag, 0)
 
 	for _, work := range works {
+		logger.Info("processing work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
+
 		concerningFunders := make([]string, 0)
 		for _, grant := range work.Grants {
 			if flagger.concerningEntities.contains(grant.FunderId) || flagger.concerningFunders.contains(grant.FunderId) {
@@ -85,8 +93,12 @@ func (flagger *OpenAlexFunderIsEOC) Flag(works []openalex.Work, targetAuthorIds 
 					Funders: concerningFunders,
 				},
 			})
+			logger.Info("found concerning funders", "funders", concerningFunders)
 		}
+		logger.Info("processed work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
 	}
+
+	logger.Info("flagger completed", "n_flags", len(flags))
 
 	return flags, nil
 }
@@ -99,10 +111,12 @@ func (flagger *OpenAlexPublisherIsEOC) Name() string {
 	return OAPublisherIsEOC
 }
 
-func (flagger *OpenAlexPublisherIsEOC) Flag(works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
+func (flagger *OpenAlexPublisherIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
 	flags := make([]WorkFlag, 0)
 
 	for _, work := range works {
+		logger.Info("processing work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
+
 		concerningPublishers := make([]string, 0)
 		for _, loc := range work.Locations {
 			if flagger.concerningPublishers.contains(loc.OrganizationId) {
@@ -121,8 +135,12 @@ func (flagger *OpenAlexPublisherIsEOC) Flag(works []openalex.Work, targetAuthorI
 					Publishers: concerningPublishers,
 				},
 			})
+			logger.Info("found concerning publishers", "publishers", concerningPublishers)
 		}
+		logger.Info("processed work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
 	}
+
+	logger.Info("flagger completed", "n_flags", len(flags))
 
 	return flags, nil
 }
@@ -135,10 +153,12 @@ func (flagger *OpenAlexCoauthorIsEOC) Name() string {
 	return OACoauthorIsEOC
 }
 
-func (flagger *OpenAlexCoauthorIsEOC) Flag(works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
+func (flagger *OpenAlexCoauthorIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
 	flags := make([]WorkFlag, 0)
 
 	for _, work := range works {
+		logger.Info("processing work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
+
 		concerningAuthors := make([]string, 0)
 		for _, author := range work.Authors {
 			if flagger.concerningEntities.contains(author.AuthorId) {
@@ -157,8 +177,12 @@ func (flagger *OpenAlexCoauthorIsEOC) Flag(works []openalex.Work, targetAuthorId
 					Coauthors: concerningAuthors,
 				},
 			})
+			logger.Info("found concerning coauthors", "coauthors", concerningAuthors)
 		}
+		logger.Info("processed work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
 	}
+
+	logger.Info("flagger completed", "n_flags", len(flags))
 
 	return flags, nil
 }
@@ -180,10 +204,12 @@ func (flagger *OpenAlexAuthorAffiliationIsEOC) Name() string {
 	return OAAuthorAffiliationIsEOC
 }
 
-func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
+func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
 	flags := make([]WorkFlag, 0)
 
 	for _, work := range works {
+		logger.Info("processing work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
+
 		concerningInstitutions := make(map[string]bool)
 		for _, author := range work.Authors {
 			if !slices.Contains(targetAuthorIds, author.AuthorId) {
@@ -209,8 +235,12 @@ func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(works []openalex.Work, targe
 					Institutions: concerningInstitutions,
 				},
 			})
+			logger.Info("found concerning affiliations", "institutions", concerningInstitutions)
 		}
+		logger.Info("processed work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
 	}
+
+	logger.Info("flagger completed", "n_flags", len(flags))
 
 	return flags, nil
 }
@@ -224,10 +254,12 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Name() string {
 	return OACoauthorAffiliationIsEOC
 }
 
-func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
+func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
 	flags := make([]WorkFlag, 0)
 
 	for _, work := range works {
+		logger.Info("processing work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
+
 		concerningInstitutions := make(map[string]bool)
 		concerningCoauthors := make(map[string]bool)
 		for _, author := range work.Authors {
@@ -257,8 +289,12 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(works []openalex.Work, tar
 					Authors:      concerningCoauthors,
 				},
 			})
+			logger.Info("found concerning coauthor affiliations", "institutions", concerningInstitutions, "coauthors", concerningCoauthors)
 		}
+		logger.Info("processed work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
 	}
+
+	logger.Info("flagger completed", "n_flags", len(flags))
 
 	return flags, nil
 }
@@ -295,7 +331,6 @@ func (flagger *OpenAlexAcknowledgementIsEOC) getAuthorNames(authorIds []string) 
 
 		authorInfo, err := flagger.openalex.GetAuthor(authorId)
 		if err != nil {
-			slog.Error("error getting author info from open alex", "author_id", authorId, "error", err)
 			return nil, fmt.Errorf("error retrieving author info: %w", err)
 		}
 
@@ -346,11 +381,71 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForSussyBaka(ack Acknowledgeme
 	return false
 }
 
+func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
+	logger *slog.Logger, acknowledgements []Acknowledgement, allAuthorNames []string,
+) (map[string]SourceToAliases, string, error) {
+	message := ""
+	flagged := false
+
+	flaggedEntities := make(map[string]SourceToAliases)
+
+	for _, ack := range acknowledgements {
+		nameInAck := false
+		for _, name := range allAuthorNames {
+			if strings.Contains(ack.RawText, name) {
+				logger.Info("author name detected in acknowledgements", "name", name)
+				nameInAck = true
+				break
+			}
+		}
+
+		sussyBakaFlag := flagger.checkForSussyBaka(ack)
+		if sussyBakaFlag {
+			logger.Info("sussy baka detected")
+			flagged = true
+		}
+
+		entityQueries := make([]string, 0)
+		if sussyBakaFlag {
+			for _, entity := range ack.SearchableEntities {
+				entityQueries = append(entityQueries, entity.EntityText)
+			}
+		}
+
+		if nameInAck && !flagged {
+			for _, entity := range ack.SearchableEntities {
+				entityQueries = append(entityQueries, entity.EntityText)
+			}
+			for _, entity := range ack.MiscEntities {
+				entityQueries = append(entityQueries, entity.EntityText)
+			}
+		}
+
+		if len(entityQueries) > 0 {
+			matches, err := flagger.entityLookup.SearchEntities(entityQueries)
+			if err != nil {
+				return nil, "", fmt.Errorf("error looking up entity matches: %w", err)
+			}
+
+			for _, entity := range entityQueries {
+				if sources, ok := matches[entity]; ok {
+					message += messageFromAcknowledgmentMatches(entity, sources)
+					flagged = true
+					flaggedEntities[entity] = sources
+				}
+			}
+		}
+	}
+
+	// TODO: flagged and len(flaggedEntities) > 0 could not be equivalent, I think this is ok?
+	return flaggedEntities, message, nil
+}
+
 func flagCacheKey(workId string, targetAuthorIds []string) string {
 	return fmt.Sprintf("%s;%v", workId, targetAuthorIds)
 }
 
-func (flagger *OpenAlexAcknowledgementIsEOC) Flag(works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
+func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]WorkFlag, error) {
 	flags := make([]WorkFlag, 0)
 
 	remaining := make([]openalex.Work, 0)
@@ -358,14 +453,18 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(works []openalex.Work, targetA
 	workIdToWork := make(map[string]openalex.Work)
 
 	for _, work := range works {
+		logger.Info("processing work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
+
 		workId := parseOpenAlexId(work)
 		if workId == "" {
+			logger.Error("unable to parse work id", "work_name", work.DisplayName, "work_id", work.WorkId)
 			continue
 		}
 
 		workIdToWork[workId] = work
 
 		if cacheEntry := flagger.flagCache.Lookup(flagCacheKey(workId, targetAuthorIds)); cacheEntry != nil {
+			logger.Info("found cached entry for work", "work_id", work.WorkId)
 			if cacheEntry.FlagData != nil {
 				flags = append(flags, WorkFlag{
 					FlaggerType:        OAAcknowledgementIsEOC,
@@ -375,15 +474,18 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(works []openalex.Work, targetA
 					Work:               work,
 					EOCAcknowledgemnts: cacheEntry.FlagData,
 				})
+				logger.Info("cached entry contains flag", "work_id", workId)
 			}
 			continue
 		}
 
+		logger.Info("queueing work for further processing", "work_id", workId)
 		remaining = append(remaining, work)
 	}
 
 	allAuthorNames, err := flagger.getAuthorNames(targetAuthorIds)
 	if err != nil {
+		logger.Error("error getting author names", "target_authors", targetAuthorIds, "error", err)
 		return nil, fmt.Errorf("error getting author infos: %w", err)
 	}
 
@@ -391,63 +493,28 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(works []openalex.Work, targetA
 
 	for acks := range acknowledgementsStream {
 		if acks.Error != nil {
-			slog.Error("error retreiving acknowledgments for work", "error", acks.Error)
+			logger.Error("error retreiving acknowledgments for work", "error", acks.Error)
 			continue
 		}
+
+		workLogger := logger.With("work_id", acks.Result.WorkId)
+		workLogger.Info("processing acknowledgments for work")
 		if len(acks.Result.Acknowledgements) == 0 {
+			workLogger.Info("work contains no acknowledgments: skipping work")
 			continue
 		}
 
-		var message string
-		flagged := false
-
-		flaggedEntities := make(map[string]SourceToAliases)
-
-		for _, ack := range acks.Result.Acknowledgements {
-			nameInAck := false
-			for _, name := range allAuthorNames {
-				if strings.Contains(ack.RawText, name) {
-					nameInAck = true
-					break
-				}
-			}
-
-			sussyBakaFlag := flagger.checkForSussyBaka(ack)
-			flagged = flagged || sussyBakaFlag
-
-			entityQueries := make([]string, 0)
-			if sussyBakaFlag {
-				for _, entity := range ack.SearchableEntities {
-					entityQueries = append(entityQueries, entity.EntityText)
-				}
-			}
-
-			if nameInAck && !flagged {
-				for _, entity := range ack.SearchableEntities {
-					entityQueries = append(entityQueries, entity.EntityText)
-				}
-				for _, entity := range ack.MiscEntities {
-					entityQueries = append(entityQueries, entity.EntityText)
-				}
-			}
-
-			if len(entityQueries) > 0 {
-				matches, err := flagger.entityLookup.SearchEntities(entityQueries)
-				if err != nil {
-					return nil, fmt.Errorf("error looking up entity matches: %w", err)
-				}
-
-				for _, entity := range entityQueries {
-					if sources, ok := matches[entity]; ok {
-						message += messageFromAcknowledgmentMatches(entity, sources)
-						flagged = true
-						flaggedEntities[entity] = sources
-					}
-				}
-			}
+		flaggedEntities, message, err := flagger.checkAcknowledgementEntities(
+			workLogger, acks.Result.Acknowledgements, allAuthorNames,
+		)
+		if err != nil {
+			workLogger.Error("error checking acknowledgements: skipping work", "error", err)
+			continue
 		}
 
-		if flagged {
+		workLogger.Info("found flagged entities in acknowledgements", "n_entities", len(flaggedEntities))
+
+		if len(flaggedEntities) > 0 {
 			ackTexts := make([]string, 0, len(acks.Result.Acknowledgements))
 			for _, ack := range acks.Result.Acknowledgements {
 				ackTexts = append(ackTexts, ack.RawText)
@@ -487,7 +554,11 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(works []openalex.Work, targetA
 				FlagData: nil,
 			})
 		}
+
+		workLogger.Info("processed acknowledgements for work")
 	}
+
+	logger.Info("flagger completed", "n_flags", len(flags))
 
 	return flags, nil
 }
