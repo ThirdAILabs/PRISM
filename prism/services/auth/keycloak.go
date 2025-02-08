@@ -11,7 +11,6 @@ import (
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 const (
@@ -139,7 +138,7 @@ func createRealm(client *gocloak.GoCloak, adminToken, realmName string) error {
 		Enabled:              boolArg(true),
 		IdentityProviders:    &[]interface{}{},
 		DefaultRoles:         &[]string{"user"},
-		RegistrationAllowed:  boolArg(true),
+		RegistrationAllowed:  boolArg(false),
 		ResetPasswordAllowed: boolArg(true),
 		AccessCodeLifespan:   intArg(1500),
 	}
@@ -243,7 +242,7 @@ type KeycloakAuth struct {
 	realm    string
 }
 
-func New(db *gorm.DB, realm string, args KeycloakArgs) (*KeycloakAuth, error) {
+func NewKeycloakAuth(realm string, args KeycloakArgs) (*KeycloakAuth, error) {
 	client := gocloak.NewClient(args.KeycloakServerUrl)
 	restyClient := client.RestyClient()
 	restyClient.SetDebug(args.Verbose) // Adds logging for every request

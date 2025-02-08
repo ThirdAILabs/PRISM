@@ -23,6 +23,10 @@ type ReportManager struct {
 	db *gorm.DB
 }
 
+func NewManager(db *gorm.DB) *ReportManager {
+	return &ReportManager{db: db}
+}
+
 func (r *ReportManager) ListReports(userId uuid.UUID) ([]api.Report, error) {
 	var reports []schema.Report
 

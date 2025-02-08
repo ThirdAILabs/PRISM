@@ -1,0 +1,24 @@
+# Uri for postgres db
+postgres_uri: ""
+
+# Path to entity NDB
+entity_ndb: ""
+
+# Args for setting up keycloak
+keycloak:
+    keycloakserverurl: ""
+    keycloakadminusername: ""
+    keycloakadminpassword: ""
+    adminusername: ""
+    adminemail: ""
+    adminpassword: ""
+    publichostname: ""
+    privatehostname: ""
+    ssllogin: false
+    verbose: false
+
+# Port to run backend server on
+port: 3000
+
+# Logfile for backend
+logfile: "./prism_backend.log"

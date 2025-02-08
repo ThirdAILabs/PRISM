@@ -11,7 +11,11 @@ import (
 
 var ErrSearchFailed = errors.New("error performing openalex search")
 
-type RemoteOpenAlex struct{}
+type RemoteKnowledgeBase struct{}
+
+func NewRemoteKnowledgeBase() KnowledgeBase {
+	return &RemoteKnowledgeBase{}
+}
 
 func autocompleteHelper(component, query string, dest interface{}) error {
 	url := fmt.Sprintf("https://api.openalex.org/autocomplete/%s?q=%s&mailto=kartik@thirdai.com", component, url.QueryEscape(query))
@@ -42,7 +46,7 @@ type oaAutocompletion struct {
 	Hint        string `json:"hint"`
 }
 
-func (oa *RemoteOpenAlex) AutocompleteAuthor(query string) ([]Author, error) {
+func (oa *RemoteKnowledgeBase) AutocompleteAuthor(query string) ([]Author, error) {
 	var suggestions oaResults[oaAutocompletion]
 
 	if err := autocompleteHelper("authors", query, &suggestions); err != nil {
@@ -61,7 +65,7 @@ func (oa *RemoteOpenAlex) AutocompleteAuthor(query string) ([]Author, error) {
 	return authors, nil
 }
 
-func (oa *RemoteOpenAlex) AutocompleteInstitution(query string) ([]Institution, error) {
+func (oa *RemoteKnowledgeBase) AutocompleteInstitution(query string) ([]Institution, error) {
 	var suggestions oaResults[oaAutocompletion]
 
 	if err := autocompleteHelper("institutions", query, &suggestions); err != nil {
@@ -98,7 +102,7 @@ type oaAffiliation struct {
 	Institution oaInstitution `json:"institution"`
 }
 
-func (oa *RemoteOpenAlex) FindAuthors(author, institution string) ([]Author, error) {
+func (oa *RemoteKnowledgeBase) FindAuthors(author, institution string) ([]Author, error) {
 	url := fmt.Sprintf(
 		"https://api.openalex.org/authors?filter=display_name.search:%s,affiliations.institution.id:%s&mailto=kartik@thirdai.com",
 		url.QueryEscape(author), url.QueryEscape(institution),
@@ -289,7 +293,7 @@ func converOpenalexWork(work oaWork) Work {
 	}
 }
 
-func (oa *RemoteOpenAlex) StreamWorks(authorId string, startYear, endYear int) chan WorkBatch {
+func (oa *RemoteKnowledgeBase) StreamWorks(authorId string, startYear, endYear int) chan WorkBatch {
 	outputCh := make(chan WorkBatch, 10)
 
 	cursor := "*"
@@ -327,7 +331,7 @@ func (oa *RemoteOpenAlex) StreamWorks(authorId string, startYear, endYear int) c
 	return outputCh
 }
 
-func (oa *RemoteOpenAlex) FindWorksByTitle(titles []string, startYear, endYear int) ([]Work, error) {
+func (oa *RemoteKnowledgeBase) FindWorksByTitle(titles []string, startYear, endYear int) ([]Work, error) {
 	works := make([]Work, 0, len(titles))
 
 	yearFilter := getYearFilter(startYear, endYear)
@@ -354,7 +358,7 @@ func (oa *RemoteOpenAlex) FindWorksByTitle(titles []string, startYear, endYear i
 	return works, nil
 }
 
-func (oa *RemoteOpenAlex) GetAuthor(authorId string) (Author, error) {
+func (oa *RemoteKnowledgeBase) GetAuthor(authorId string) (Author, error) {
 	url := "https://api.openalex.org/authors?filter=openalex:" + url.QueryEscape(authorId)
 
 	res, err := http.Get(url)
