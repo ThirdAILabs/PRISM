@@ -323,52 +323,26 @@ func getToken(r *http.Request) (string, error) {
 	return "", fmt.Errorf("missing or invalid authorization header")
 }
 
-func (auth *KeycloakAuth) Middleware() func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		handler := func(w http.ResponseWriter, r *http.Request) {
-			token, err := getToken(r)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusUnauthorized)
-				return
-			}
+func (auth *KeycloakAuth) VerifyToken(token string) (uuid.UUID, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-
-			userInfo, err := auth.keycloak.GetUserInfo(ctx, token, auth.realm)
-			if err != nil {
-				http.Error(w, fmt.Sprintf("unable to verify token with keycloak: %v", err), http.StatusUnauthorized)
-				return
-			}
-
-			if userInfo.Sub == nil {
-				http.Error(w, "user identifier missing in keycloak response", http.StatusInternalServerError)
-				return
-			}
-
-			userId, err := uuid.Parse(*userInfo.Sub)
-			if err != nil {
-				http.Error(w, fmt.Sprintf("invalid uuid '%v' returned from keycloak: %v", *userInfo.Sub, err), http.StatusInternalServerError)
-				return
-			}
-
-			reqCtx := r.Context()
-			reqCtx = context.WithValue(reqCtx, userIdContextKey, userId)
-			next.ServeHTTP(w, r.WithContext(reqCtx))
-		}
-
-		return http.HandlerFunc(handler)
+	userInfo, err := auth.keycloak.GetUserInfo(ctx, token, auth.realm)
+	if err != nil {
+		slog.Error("unable to verify token with keycloak", "error", err)
+		return uuid.Nil, fmt.Errorf("unable to verify access token: %w", err)
 	}
-}
 
-func GetUserId(r *http.Request) (uuid.UUID, error) {
-	userUntyped := r.Context().Value(userIdContextKey)
-	if userUntyped == nil {
-		return uuid.Nil, fmt.Errorf("user_id field not found in request context")
+	if userInfo.Sub == nil {
+		slog.Error("missing user identifier in keycloak response")
+		return uuid.Nil, fmt.Errorf("missing user identifier in keycloak response")
 	}
-	userId, ok := userUntyped.(uuid.UUID)
-	if !ok {
-		return uuid.Nil, fmt.Errorf("invalid value for user_id field")
+
+	userId, err := uuid.Parse(*userInfo.Sub)
+	if err != nil {
+		slog.Error("unable to parse user id from keycloak", "id", *userInfo.Sub, "error", err)
+		return uuid.Nil, fmt.Errorf("invalid uuid '%v' returned from keycloak: %v", *userInfo.Sub, err)
 	}
+
 	return userId, nil
 }
