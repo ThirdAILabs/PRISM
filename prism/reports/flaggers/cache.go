@@ -46,11 +46,17 @@ func (cache *DataCache[T]) Close() error {
 func (cache *DataCache[T]) Lookup(key string) *T {
 	cache.logger.Info("checking cache", "key", key)
 
-	var data []byte
+	var entry *T
 	err := cache.db.View(func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket(cache.bucket)
 
-		data = bucket.Get([]byte(key))
+		data := bucket.Get([]byte(key))
+		if data != nil {
+			entry = new(T)
+			if err := json.Unmarshal(data, entry); err != nil {
+				return fmt.Errorf("error parsing cache data: %w", err)
+			}
+		}
 
 		return nil
 	})
@@ -59,18 +65,11 @@ func (cache *DataCache[T]) Lookup(key string) *T {
 		return nil // No error since cache update isn't critical
 	}
 
-	if data == nil {
+	if entry != nil {
+		cache.logger.Info("found cached entry", "key", key)
+	} else {
 		cache.logger.Info("no cached entry found", "key", key)
-		return nil
 	}
-
-	entry := new(T)
-	if err := json.Unmarshal(data, entry); err != nil {
-		cache.logger.Info("error parsing cache data", "key", key, "error", err)
-		return nil // No error since cache update isn't critical
-	}
-
-	cache.logger.Info("found cached entry", "key", key)
 
 	return entry
 }
