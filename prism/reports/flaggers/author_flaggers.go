@@ -158,11 +158,11 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(logg
 					Title:       "Person may be affiliated with someone mentioned in a press release.",
 					Message:     "The author or a frequent associate may be mentioned in a press release.",
 					AuthorIsAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlag{
-						DocTitle:          title,
-						DocUrl:            url,
-						DocEntities:       strings.Split(entities, ";"),
-						EntitiesMentioned: []string{strings.ToTitle(author.author)},
-						Connection:        "primary",
+						DocTitle:        title,
+						DocUrl:          url,
+						DocEntities:     strings.Split(entities, ";"),
+						EntityMentioned: strings.ToTitle(author.author),
+						Connection:      "primary",
 					},
 				})
 				logger.Info("author is assoiciated with EOC", "author", author.author, "doc", title, "entities", entities)
@@ -173,13 +173,13 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(logg
 					Title:       "The author's frequent coauthor may be mentioned in a press release.",
 					Message:     "The author or a frequent associate may be mentioned in a press release.",
 					AuthorIsAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlag{
-						DocTitle:          title,
-						DocUrl:            url,
-						DocEntities:       strings.Split(entities, ";"),
-						EntitiesMentioned: []string{coauthor},
-						Connection:        "secondary",
-						Nodes:             []Node{{DocTitle: coauthor + " (frequent coauthor)", DocUrl: ""}},
-						FrequentCoauthor:  &coauthor,
+						DocTitle:         title,
+						DocUrl:           url,
+						DocEntities:      strings.Split(entities, ";"),
+						EntityMentioned:  coauthor,
+						Connection:       "secondary",
+						Nodes:            []Node{{DocTitle: coauthor + " (frequent coauthor)", DocUrl: ""}},
+						FrequentCoauthor: &coauthor,
 					},
 				})
 				logger.Info("frequent coauthor is assoiciated with EOC", "coauthor", author.author, "doc", title, "entities", entities)
@@ -193,11 +193,8 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(logg
 }
 
 type entityMetadata struct {
-	level      int
-	node1Title string
-	node1Url   string
-	node2Title string
-	node2Url   string
+	connection string
+	nodes      []Node
 }
 
 func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logger *slog.Logger, authorName string) ([]Flag, error) {
@@ -223,18 +220,20 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 		}
 		seen[url] = true
 
-		entities, _ := result.Metadata["entities"].([]string)
-		for _, entity := range entities {
+		entities, _ := result.Metadata["entities"].(string)
+		for _, entity := range strings.Split(entities, ";") {
 			if _, ok := queryToEntities[entity]; !ok {
 				title, _ := result.Metadata["title"].(string)
 				queryToEntities[entity] = entityMetadata{
-					level:      1,
-					node1Title: title,
-					node1Url:   url,
+					connection: "secondary",
+					nodes:      []Node{{DocTitle: title, DocUrl: url}},
 				}
 			}
 		}
 	}
+
+	// Second map to avoid mutating the original while iterating over it
+	level2Entities := make(map[string]entityMetadata)
 
 	for query, level1Entity := range queryToEntities {
 		results, err := flagger.auxDB.Query(query, 5, nil)
@@ -253,24 +252,23 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 			}
 			seen[url] = true
 
-			entities, _ := result.Metadata["entities"].([]string)
-			for _, entity := range entities {
-				if _, ok := queryToEntities[entity]; !ok {
+			entities, _ := result.Metadata["entities"].(string)
+			for _, entity := range strings.Split(entities, ";") {
+				if _, ok := level2Entities[entity]; !ok {
 					title, _ := result.Metadata["title"].(string)
 
-					queryToEntities[entity] = entityMetadata{
-						level:      2,
-						node1Title: level1Entity.node1Title,
-						node1Url:   level1Entity.node1Url,
-						node2Title: title,
-						node2Url:   url,
+					level2Entities[entity] = entityMetadata{
+						connection: "tertiary",
+						nodes:      append(level1Entity.nodes, Node{DocTitle: title, DocUrl: url}),
 					}
 				}
 			}
 		}
 	}
 
-	logger.Info("queries at first/second level", "n_queries", len(queryToEntities))
+	for k, v := range level2Entities {
+		queryToEntities[k] = v
+	}
 
 	flags := make([]Flag, 0)
 
@@ -294,23 +292,13 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 				Title:       "Author may be affiliated with an entity whose associate may be mentioned in a press release.",
 				Message:     "The author may be associated be an entity who/which may be mentioned in a press release.\n",
 				AuthorIsAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlag{
-					DocTitle:          title,
-					DocUrl:            url,
-					DocEntities:       strings.Split(entities, ";"),
-					EntitiesMentioned: []string{query},
-					Nodes: []Node{
-						{DocTitle: entity.node1Title, DocUrl: entity.node1Url},
-					},
+					DocTitle:        title,
+					DocUrl:          url,
+					DocEntities:     strings.Split(entities, ";"),
+					EntityMentioned: query,
+					Connection:      entity.connection,
+					Nodes:           entity.nodes,
 				},
-			}
-			if entity.level == 1 {
-				flag.AuthorIsAssociatedWithEOC.Connection = "secondary"
-			} else {
-				flag.AuthorIsAssociatedWithEOC.Connection = "tertiary"
-				flag.AuthorIsAssociatedWithEOC.Nodes = append(flag.AuthorIsAssociatedWithEOC.Nodes, Node{
-					DocTitle: entity.node2Title,
-					DocUrl:   entity.node2Url,
-				})
 			}
 
 			flags = append(flags, flag)

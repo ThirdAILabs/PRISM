@@ -54,13 +54,13 @@ type Node struct {
 }
 
 type AuthorIsAssociatedWithEOCFlag struct {
-	DocTitle          string
-	DocUrl            string
-	DocEntities       []string
-	EntitiesMentioned []string
-	Connection        string
-	Nodes             []Node
-	FrequentCoauthor  *string
+	DocTitle         string
+	DocUrl           string
+	DocEntities      []string
+	EntityMentioned  string
+	Connection       string
+	Nodes            []Node
+	FrequentCoauthor *string
 }
 
 func (flag *AuthorFlag) GetType() string {
