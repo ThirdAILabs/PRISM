@@ -6,15 +6,12 @@ entity_ndb: ""
 
 # Args for setting up keycloak
 keycloak:
-    keycloakserverurl: ""
-    keycloakadminusername: ""
-    keycloakadminpassword: ""
-    adminusername: ""
-    adminemail: ""
-    adminpassword: ""
-    publichostname: ""
-    privatehostname: ""
-    ssllogin: false
+    keycloak_server_url: ""
+    keycloak_admin_username: ""
+    keycloak_admin_password: ""
+    public_hostname: ""
+    private_hostname: ""
+    ssl_login: false
     verbose: false
 
 # Port to run backend server on

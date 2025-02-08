@@ -60,70 +60,6 @@ func getUserID(ctx context.Context, client *gocloak.GoCloak, adminToken, usernam
 	return nil, nil
 }
 
-func createAdminIfNotExists(client *gocloak.GoCloak, adminToken, username, email, password string) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	existingUserId, err := getUserID(ctx, client, adminToken, username)
-	if err != nil {
-		return "", fmt.Errorf("error checking for existing admin : %w", err)
-	}
-	if existingUserId != nil {
-		slog.Info("KEYCLOAK: admin user has already been created")
-		return *existingUserId, nil
-	}
-
-	userId, err := client.CreateUser(ctx, adminToken, "master", gocloak.User{
-		Username:      &username,
-		Email:         &email,
-		Enabled:       boolArg(true),
-		EmailVerified: boolArg(true),
-		Credentials: &[]gocloak.CredentialRepresentation{
-			{
-				Type:      strArg("password"),
-				Value:     &password,
-				Temporary: boolArg(false),
-			},
-		},
-	})
-
-	if err != nil {
-		if isConflict(err) {
-			userId, err := getUserID(ctx, client, adminToken, username)
-			slog.Info("KEYCLOAK: admin user has already been created")
-			if err != nil {
-				return "", fmt.Errorf("error retrieving existing admin after conflict creating admin: %w", err)
-			}
-			if userId == nil {
-				return "", fmt.Errorf("no user found after conflict creating admin")
-			}
-			return *userId, nil
-		}
-		return "", fmt.Errorf("error creating new admin: %w", err)
-	}
-
-	return userId, nil
-}
-
-func assignAdminRole(client *gocloak.GoCloak, adminToken, userId string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	roles, err := client.GetRealmRoles(ctx, adminToken, "master", gocloak.GetRoleParams{})
-	if err != nil {
-		return fmt.Errorf("error getting keycloak roles: %w", err)
-	}
-	for _, role := range roles {
-		if *role.Name == "admin" {
-			err := client.AddRealmRoleToUser(ctx, adminToken, "master", userId, []gocloak.Role{*role})
-			if err != nil {
-				return fmt.Errorf("error assigning admin role: %w", err)
-			}
-		}
-	}
-	return nil
-}
-
 func createRealm(client *gocloak.GoCloak, adminToken, realmName string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
@@ -220,19 +156,15 @@ func createClient(client *gocloak.GoCloak, adminToken, realm string, redirectUrl
 }
 
 type KeycloakArgs struct {
-	KeycloakServerUrl string
+	KeycloakServerUrl string `yaml:"keycloak_server_url"`
 
-	KeycloakAdminUsername string
-	KeycloakAdminPassword string
+	KeycloakAdminUsername string `yaml:"keycloak_admin_username"`
+	KeycloakAdminPassword string `yaml:"keycloak_admin_password"`
 
-	AdminUsername string
-	AdminEmail    string
-	AdminPassword string
+	PublicHostname  string `yaml:"public_hostname"`
+	PrivateHostname string `yaml:"private_hostname"`
 
-	PublicHostname  string
-	PrivateHostname string
-
-	SslLogin bool
+	SslLogin bool `yaml:"ssl_login"`
 
 	Verbose bool
 }
@@ -263,20 +195,6 @@ func NewKeycloakAuth(realm string, args KeycloakArgs) (*KeycloakAuth, error) {
 		return nil, err
 	}
 	slog.Info("KEYCLOAK: admin login successful")
-
-	userId, err := createAdminIfNotExists(client, adminToken, args.AdminUsername, args.AdminEmail, args.AdminPassword)
-	if err != nil {
-		slog.Error("KEYCLOAK: new admin creation failed", "error", err)
-		return nil, err
-	}
-	slog.Info("KEYCLOAK: new admin creation successful")
-
-	err = assignAdminRole(client, adminToken, userId)
-	if err != nil {
-		slog.Error("KEYCLOAK: admin role assignment failed", "error", err)
-		return nil, err
-	}
-	slog.Info("KEYCLOAK: admin role assignment successful")
 
 	err = createRealm(client, adminToken, realm)
 	if err != nil {
