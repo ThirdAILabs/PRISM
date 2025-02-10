@@ -12,7 +12,7 @@ import {
   UNI_FACULTY_EOC,
   DOJ_PRESS_RELEASES_EOC
 } from "../../constants/constants.js";
-import { useConclusions } from '../../conclusions.js';
+import { useConclusions } from '../../hooks/useConclusions.js';
 import ConcernVisualizer from '../../components/ConcernVisualization.js'
 import { useVisualizationData } from './useVisualizationData.js';
 import LoadedPapers from '../../components/LoadedPapers.js'

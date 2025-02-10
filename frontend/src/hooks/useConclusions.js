@@ -4,8 +4,8 @@ import {
   COAUTHOR_AFFIL_EOC,
   ACK_EOC,
   FORMAL_RELATIONS
-} from "./constants/constants";
-import apiService from "./services/apiService";
+} from "../constants/constants";
+import apiService from "../services/apiService";
 
 
 export function useConclusions(author, flags, threshold) {

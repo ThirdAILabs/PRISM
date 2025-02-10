@@ -10,7 +10,7 @@ import {
     UNI_FACULTY_EOC,
     DOJ_PRESS_RELEASES_EOC
 } from "../constants/constants";
-import { talentPrograms, deniedEntities, fundingSources, institutions } from "../eoc_categories";
+import { talentPrograms, deniedEntities, fundingSources, institutions } from "../constants/eoc_categories";
 
 const FOREIGN_TALENT_PROGRAMS = "foreign_talent_programs";
 const DENIED_ENTITIES = "denied_entities";
