@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { Speedometer } from './Speedometer';
+import { Speedometer } from './common/tools/Speedometer';
 import "../App.css";
 
-const Hover = ({text}) => {
+const Hover = ({ text }) => {
   return (
     <div className="popover-container">
       <button
@@ -58,34 +58,35 @@ export default function ConcernVisualizer({
 
   return (
     <div className='chart-wrapper' style={{
-    position: 'relative' }}>
+      position: 'relative'
+    }}>
       <Speedometer scale={scale || [0, 1, 2, 3, 5, 10, 20]} value={value} />
-        
-        <div className='mt-3 mb-4 text-light' style={{height: "50px"}} >
-            {title} <Hover text={hoverText} />
-        </div>
-        
-        <div className='mb-3'>
-            <input type='field' className='btn btn-dark rounded rounded-5' style={{height: '50px', width: '50px'}} value={weightString}
-            onChange={(e) => {
-              if (e.target.value == "") {
-                setWeightString("");
-              }
-              const parsed = parseFloat(e.target.value);
-              if (parsed != NaN) {
-                setWeightString(e.target.value);
-              }
-            }}
-            onKeyDown={(e) => {
-              if(e.key == "Enter"){
-                updateWeight();
-                e.target.blur();
-             }
-            }}
-            onBlur={updateWeight} />
-        </div>
 
-        <button className='btn btn-dark rounded rounded-5 px-4' onClick={onReview}>Review</button>
+      <div className='mt-3 mb-4 text-light' style={{ height: "50px" }} >
+        {title} <Hover text={hoverText} />
+      </div>
+
+      <div className='mb-3'>
+        <input type='field' className='btn btn-dark rounded rounded-5' style={{ height: '50px', width: '50px' }} value={weightString}
+          onChange={(e) => {
+            if (e.target.value == "") {
+              setWeightString("");
+            }
+            const parsed = parseFloat(e.target.value);
+            if (parsed != NaN) {
+              setWeightString(e.target.value);
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key == "Enter") {
+              updateWeight();
+              e.target.blur();
+            }
+          }}
+          onBlur={updateWeight} />
+      </div>
+
+      <button className='btn btn-dark rounded rounded-5 px-4' onClick={onReview}>Review</button>
 
     </div>
   );

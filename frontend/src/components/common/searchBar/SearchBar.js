@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import "./SearchBar.css";
-import apiService from './api/apiService';
+import apiService from '../../../services/apiService';
 
-function AutocompleteSearchBar({title, autocomplete, onSelect}) {
+function AutocompleteSearchBar({ title, autocomplete, onSelect }) {
     const [suggestions, setSuggestions] = useState([]);
     const [query, setQuery] = useState("");
 
@@ -24,10 +24,10 @@ function AutocompleteSearchBar({title, autocomplete, onSelect}) {
         <div className='autocomplete-search-bar'>
             {/* Header 2 or 3, bold */}
             <div className='autocomplete-search-bar-title'>{title}</div>
-            
+
             {/* Search bar */}
-            <input type='text' className='search-bar' value={query} onChange={handleInputChange}/>
-            
+            <input type='text' className='search-bar' value={query} onChange={handleInputChange} />
+
             {
                 suggestions && suggestions.length > 0 &&
                 // Autocomplete suggestion container. Column.
@@ -42,12 +42,12 @@ function AutocompleteSearchBar({title, autocomplete, onSelect}) {
     );
 }
 
-export function AuthorInstiutionSearchBar({onSearch}) {
+export function AuthorInstiutionSearchBar({ onSearch }) {
     const [author, setAuthor] = useState();
     const [institution, setInstitution] = useState();
 
     function autocompleteAuthor(query) {
-        return apiService.autocomplete(query).then(res => Array.from(new Set(res.profiles.map(p => p.display_name))).map(n => ({display_name: n})));
+        return apiService.autocomplete(query).then(res => Array.from(new Set(res.profiles.map(p => p.display_name))).map(n => ({ display_name: n })));
     }
 
     function autocompleteInstitution(query) {
@@ -67,7 +67,7 @@ export function AuthorInstiutionSearchBar({onSearch}) {
         <div className='author-institution-search-bar-container'>
             <AutocompleteSearchBar title="Author" autocomplete={autocompleteAuthor} onSelect={setAuthor} />
         </div>
-        
+
         <div className='author-institution-search-bar-container'>
             <AutocompleteSearchBar title="Institution" autocomplete={autocompleteInstitution} onSelect={setInstitution} />
         </div>

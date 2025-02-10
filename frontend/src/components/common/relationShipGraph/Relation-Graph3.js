@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { onFlagsUpdate } from '../streamStore';
+import { onFlagsUpdate } from '../../../streamStore.js';
 
 function generateGraphData(data, parentId = null, level = 0) {
     console.log(`${data}`)

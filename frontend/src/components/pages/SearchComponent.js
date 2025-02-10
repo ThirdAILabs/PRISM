@@ -1,12 +1,12 @@
 // src/SearchComponent.js
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import apiService from './api/apiService';
-import TodoListComponent from './TodoListComponent';
-import { AuthorInstiutionSearchBar } from './SearchBar';
-import Logo from "./assets/logo.png"
-import "./SearchBar.css";
-import { levenshteinDistance, makeVariations } from './api/nameUtils';
+import apiService from '../../services/apiService';
+import TodoListComponent from '../TodoListComponent';
+import { AuthorInstiutionSearchBar } from '../common/searchBar/SearchBar';
+import Logo from "../../assets/images/logo.png";
+import "../common/searchBar/SearchBar.css";
+import { levenshteinDistance, makeVariations } from '../../utils/nameUtils';
 
 const SearchComponent = () => {
   const [query, setQuery] = useState('');
@@ -124,24 +124,6 @@ const SearchComponent = () => {
   };
 
   console.log(results);
-
-  // const handleSearchResult = (profiles) => {
-  //   setTriedDp(false);
-  //   setResults(profiles);
-  // };
-
-
-  // const loadMore = async () => {
-  //   if (loadMoreCount === 0) {
-  //     return await apiService.search(author.display_name, institution.id).then(result => {
-  //       setResults(prev => [...prev, ...result.profiles]);
-  //       setLoadMoreCount(prev => prev + 1);
-  //     });
-  //   }
-
-  //   return await handleDeepSearch(query, nextToken);
-  // }
-
 
   const handleDeepSearch = async (query, ntoken, reset = false) => {
     if (reset) {

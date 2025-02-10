@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import SearchComponent from './SearchComponent';
-import ItemDetails from './features/dashboard/page';
-import EntityLookup from './features/dashboard/component/entityLookup/EntityLookup';
+import SearchComponent from './components/pages/SearchComponent';
+import ItemDetails from './components/pages/itemDetails/page';
+import EntityLookup from './components/pages/entityLookup/page';
 
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.bundle.js";

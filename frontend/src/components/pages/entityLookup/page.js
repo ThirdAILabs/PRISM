@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { API_BASE_URL } from '../../../../services/apiService';
-import "./SearchBar.css";
+import { API_BASE_URL } from '../../../services/apiService';
+import "../../common/searchBar/SearchBar.css";
 
 function EntityLookup() {
   const [query, setQuery] = useState('');
