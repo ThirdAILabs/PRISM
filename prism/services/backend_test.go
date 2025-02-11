@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"path/filepath"
 	"prism/api"
 	"prism/openalex"
@@ -427,4 +428,62 @@ func TestReportEndpoints(t *testing.T) {
 
 	checkListReports(t, backend, user1, []string{"report1", "report3"})
 	checkListReports(t, backend, user2, []string{"report2"})
+}
+
+func TestAutocompleteAuthor(t *testing.T) {
+	backend := createBackend(t)
+
+	user := newUser()
+
+	var results []api.Author
+	err := mockRequest(backend, "GET", "/autocomplete/author?query="+url.QueryEscape("anshumali shriva"), user, nil, &results)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(results) == 0 {
+		t.Fatal("should have some results")
+	}
+
+	found := false
+	for _, res := range results {
+		if !strings.HasPrefix(res.AuthorId, "https://openalex.org/") ||
+			!strings.EqualFold(res.AuthorName, "Anshumali Shrivastava") ||
+			res.Source != "openalex" {
+			t.Fatal("invalid result")
+		}
+
+		for _, inst := range res.Institutions {
+			if strings.EqualFold(inst, "Rice University, USA") {
+				found = true
+				break
+			}
+		}
+	}
+
+	if !found {
+		t.Fatal("didn't find correct result")
+	}
+}
+
+func TestAutocompleteInstution(t *testing.T) {
+	backend := createBackend(t)
+
+	user := newUser()
+
+	var results []api.Institution
+	err := mockRequest(backend, "GET", "/autocomplete/institution?query="+url.QueryEscape("rice univer"), user, nil, &results)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(results) == 0 {
+		t.Fatal("should have some results")
+	}
+
+	for _, res := range results {
+		if strings.EqualFold(res.InstitutionName, "Rice University, USA") {
+			t.Fatal("invalid result")
+		}
+	}
 }

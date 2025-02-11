@@ -196,3 +196,60 @@ __Example Response__:
 ```
 No response body
 ```
+
+# Autocomplete 
+
+## Autocomplete Authors
+
+| Method | Path | Auth Required | Permissions |
+| ------ | ---- | ------------- | ----------  |
+| `GET` | `/api/v1/autocomplete/author?query=<start of author name>` | Yes | Token for Keycloak User Realm |
+
+Generates autocompletion suggestions for the given author name. The author name is specified in the `query` url query parameter.
+
+__Example Request__: 
+```
+GET http://example.com/autocomplete/author?query=anshumali+shriva
+```
+__Example Response__:
+```json
+[
+    {
+        "AuthorId": "https://openalex.org/A5108903505",
+        "AuthorName": "Anshumali Shrivastava",
+        "Institutions": [
+            ""
+        ],
+        "Source": "openalex"
+    },
+    {
+        "AuthorId": "https://openalex.org/A5024993683",
+        "AuthorName": "Anshumali Shrivastava",
+        "Institutions": [
+            "Rice University, USA"
+        ],
+        "Source": "openalex"
+    }
+]
+```
+
+## Autocomplete Authors
+
+| Method | Path | Auth Required | Permissions |
+| ------ | ---- | ------------- | ----------  |
+| `GET` | `/api/v1/autocomplete/institution?query=<start of institution name>` | Yes | Token for Keycloak User Realm |
+
+Generates autocompletion suggestions for the given institution name. The institution name is specified in the `query` url query parameter.
+
+__Example Request__: 
+```
+GET http://example.com/autocomplete/institution?query=rice+univer
+```
+__Example Response__:
+```json
+[
+    {
+        "InstitutionName": "Rice University"
+    }
+]
+```

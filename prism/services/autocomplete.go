@@ -16,7 +16,7 @@ func (s *AutocompleteService) Routes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Get("/author", WrapRestHandler(s.AutocompleteAuthor))
-	r.Get("/institution", WrapRestHandler(s.AutocompleteAuthor))
+	r.Get("/institution", WrapRestHandler(s.AutocompleteInstitution))
 
 	return r
 }
@@ -43,7 +43,7 @@ func (s *AutocompleteService) AutocompleteAuthor(r *http.Request) (any, error) {
 		})
 	}
 
-	return authors, nil
+	return results, nil
 }
 
 func (s *AutocompleteService) AutocompleteInstitution(r *http.Request) (any, error) {
@@ -61,5 +61,5 @@ func (s *AutocompleteService) AutocompleteInstitution(r *http.Request) (any, err
 		})
 	}
 
-	return institutions, nil
+	return results, nil
 }
