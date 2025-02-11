@@ -14,6 +14,7 @@ import (
 	"prism/schema"
 	"prism/search"
 	"prism/services"
+	"prism/services/licensing"
 	"slices"
 	"strings"
 	"testing"
@@ -198,9 +199,13 @@ func createReport(backend http.Handler, user, name string) (api.CreateReportResp
 }
 
 func createLicense(backend http.Handler, name, user string) (api.CreateLicenseResponse, error) {
+	return createLicenseWithExp(backend, name, user, time.Now().UTC().Add(5*time.Minute))
+}
+
+func createLicenseWithExp(backend http.Handler, name, user string, exp time.Time) (api.CreateLicenseResponse, error) {
 	req := api.CreateLicenseRequest{
 		Name:       name,
-		Expiration: time.Now().UTC().Add(5 * time.Minute),
+		Expiration: exp,
 	}
 	var res api.CreateLicenseResponse
 	err := Post(backend, "/license/create", user, req, &res)
@@ -303,6 +308,68 @@ func TestLicenseEndpoints(t *testing.T) {
 
 	if _, err := createReport(backend, user1, "report1"); err == nil || !strings.Contains(err.Error(), "license is deactivated") {
 		t.Fatal("cannot use deactivated license")
+	}
+}
+
+func TestLicenseExpiration(t *testing.T) {
+	backend := createBackend(t)
+
+	admin := newAdmin()
+	user1, user2 := newUser(), newUser()
+
+	license, err := createLicenseWithExp(backend, "xyz", admin, time.Now().UTC().Add(500*time.Millisecond))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := useLicense(backend, user1, license.License); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := createReport(backend, user1, "report1"); err != nil {
+		t.Fatal(err)
+	}
+
+	time.Sleep(500 * time.Millisecond)
+
+	if _, err := createReport(backend, user1, "report1"); err == nil || !strings.Contains(err.Error(), "expired license") {
+		t.Fatal(err)
+	}
+
+	if err := useLicense(backend, user2, license.License); err == nil || !strings.Contains(err.Error(), "expired license") {
+		t.Fatal(err)
+	}
+}
+
+func TestLicenseInvalidLicense(t *testing.T) {
+	backend := createBackend(t)
+
+	admin := newAdmin()
+	user := newUser()
+
+	license, err := createLicense(backend, "xyz", admin)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	badSecretLicense := licensing.LicensePayload{Id: license.Id, Secret: []byte("invalid secret")}
+	badSecretKey, err := badSecretLicense.Serialize()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := useLicense(backend, user, badSecretKey); !strings.Contains(err.Error(), "invalid license") {
+		t.Fatal(err)
+	}
+
+	badIdLicense := licensing.LicensePayload{Id: uuid.New(), Secret: []byte("invalid secret")}
+	badIdKey, err := badIdLicense.Serialize()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := useLicense(backend, user, badIdKey); !strings.Contains(err.Error(), "license not found") {
+		t.Fatal(err)
 	}
 }
 

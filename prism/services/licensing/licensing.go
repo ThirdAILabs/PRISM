@@ -27,7 +27,7 @@ var (
 	ErrMissingLicense         = errors.New("user does not have registered license")
 )
 
-type licensePayload struct {
+type LicensePayload struct { // This is only exported to use to create a malformed license for a test.
 	Id     uuid.UUID
 	Secret []byte
 }
@@ -36,7 +36,7 @@ const (
 	versionPrefix = "V1-"
 )
 
-func (l *licensePayload) serialize() (string, error) {
+func (l *LicensePayload) Serialize() (string, error) {
 	buf := new(bytes.Buffer)
 	if err := gob.NewEncoder(buf).Encode(l); err != nil {
 		slog.Error("error serializing license", "error", err)
@@ -46,7 +46,7 @@ func (l *licensePayload) serialize() (string, error) {
 	return versionPrefix + base64.StdEncoding.EncodeToString(buf.Bytes()), nil
 }
 
-func parseLicense(licenseKey string) (*licensePayload, error) {
+func parseLicense(licenseKey string) (*LicensePayload, error) {
 	if !strings.HasPrefix(licenseKey, versionPrefix) {
 		slog.Error("license is invalid, missing version prefix")
 		return nil, ErrInvalidLicense
@@ -58,7 +58,7 @@ func parseLicense(licenseKey string) (*licensePayload, error) {
 		return nil, ErrInvalidLicense
 	}
 
-	var license licensePayload
+	var license LicensePayload
 	if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&license); err != nil {
 		slog.Error("error parsing license bytes", "error", err)
 		return nil, ErrInvalidLicense
@@ -67,7 +67,7 @@ func parseLicense(licenseKey string) (*licensePayload, error) {
 	return &license, nil
 }
 
-func (l *licensePayload) verifySecret(hashedSecret []byte) error {
+func (l *LicensePayload) verifySecret(hashedSecret []byte) error {
 	err := bcrypt.CompareHashAndPassword(hashedSecret, l.Secret)
 	if err != nil {
 		slog.Info("license verification failed", "error", err)
@@ -83,9 +83,9 @@ func CreateLicense(txn *gorm.DB, name string, expiration time.Time) (api.CreateL
 		return api.CreateLicenseResponse{}, ErrLicenseCreationFailed
 	}
 
-	license := licensePayload{Id: uuid.New(), Secret: secret}
+	license := LicensePayload{Id: uuid.New(), Secret: secret}
 
-	licenseKey, err := license.serialize()
+	licenseKey, err := license.Serialize()
 	if err != nil {
 		return api.CreateLicenseResponse{}, err
 	}
