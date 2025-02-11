@@ -249,12 +249,75 @@ __Example Response__:
 ```json
 [
     {
+        "InstitutionId": "https://openalex.org/I74775410",
         "InstitutionName": "Rice University"
     }
 ]
 ```
 
 # Search Endpoints
+
+## Search Openalex Authors
+
+| Method | Path | Auth Required | Permissions |
+| ------ | ---- | ------------- | ----------  |
+| `GET` | `/api/v1/search/regular?author_name=<author name>&institution_id=<institution_id>` | Yes | Token for Keycloak User Realm |
+
+Searches for authors on openalex matching the given name and institution id. The `institution_id` and `author_name` are passed as url query parameters. The institution id can come from the `InstitutionId` field returned from the institution autocompletion endpoint.
+
+__Example Request__: 
+```
+GET http://example.com/search/regular?author_name=anshumali+shrivastava&institution_id=https%3A%2F%2Fopenalex.org%2FI74775410
+```
+__Example Response__:
+```json
+[
+    {
+        "AuthorId": "https://openalex.org/A5024993683",
+        "AuthorName": "Anshumali Shrivastava",
+        "Institutions": [
+            "Rice University",
+            "Third Way",
+            "Amazon (United States)",
+            "Search",
+            "University of Houston",
+            "Duke University",
+            "Cornell University"
+        ],
+        "Source": "openalex"
+    }
+]
+```
+
+## Search Google Scholar Authors
+
+| Method | Path | Auth Required | Permissions |
+| ------ | ---- | ------------- | ----------  |
+| `GET` | `/api/v1/search/advanced?query=<query>&cursor=<cursor>` | Yes | Token for Keycloak User Realm |
+
+Searches for authors matching the given query on google scholar. The cursor url query parameter is optional. If provided it allows for the query to return the next page of results after a first page. The reponse object contains a cursor that can be passed to the next query. 
+
+__Example Request__: 
+```
+GET http://example.com/search/advanced?query=anshumali+shrivastava
+```
+__Example Response__:
+```json
+{
+    "Authors": [
+        {
+            "AuthorId": "SGT23RAAAAAJ",
+            "AuthorName": "Anshumali Shrivastava",
+            "Institutions": [
+                "Rice University",
+                "ThirdAI Corp."
+            ],
+            "Source": "google-scholar"
+        }
+    ],
+    "Cursor": "eyJWMUN1cnNvciI6bnVsbCwiVjJDdXJzb3IiOjIwLCJTZWVuIjpbIlNHVDIzUkFBQUFBSiJdfQ=="
+}
+```
 
 ## Match Entities
 

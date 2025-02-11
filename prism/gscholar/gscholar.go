@@ -119,6 +119,7 @@ func getAuthorDetails(authorId string) (api.Author, error) {
 		slog.Error("google scholar author search failed: error parsing reponse", "author_id", authorId, "error", err)
 		return api.Author{}, ErrGoogleScholarSearchFailed
 	}
+	result.Author.AuthorId = authorId // For some reason this isn't part of the response from the endpoint
 
 	return profileToAuthor(result.Author), nil
 }
@@ -130,10 +131,11 @@ const (
 
 func getAuthorId(link string) string {
 	start := strings.Index(link, "user=")
-	end := strings.Index(link[start:], "&")
-	if start >= 0 && end >= 0 {
-		return link[start+5 : end]
+	distToEnd := strings.Index(link[start:], "&")
+	if start >= 0 && distToEnd >= 0 {
+		return link[start+5 : start+distToEnd]
 	}
+
 	return ""
 }
 
@@ -226,6 +228,7 @@ func nextGScholarPageV2(query string, nextIdx *int, seen map[string]bool) ([]api
 	}
 
 	wg.Wait()
+	close(authorsCh)
 
 	authors := make([]api.Author, 0, len(authorsCh))
 	for author := range authorsCh {

@@ -104,7 +104,7 @@ func (oa *RemoteKnowledgeBase) AutocompleteInstitution(query string) ([]Institut
 // Response Format: https://docs.openalex.org/api-entities/authors/get-lists-of-authors
 type oaAuthor struct {
 	Id                      string          `json:"id"`
-	DisplayName             string          `json:"diplay_name"`
+	DisplayName             string          `json:"display_name"`
 	DisplayNameAlternatives []string        `json:"display_name_alternatives"`
 	WorksCount              int             `json:"works_count"`
 	Affiliations            []oaAffiliation `json:"affiliations"`

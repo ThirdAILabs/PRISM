@@ -106,9 +106,6 @@ func mockRequest(backend http.Handler, method, endpoint, token string, jsonBody 
 			return fmt.Errorf("error encoding json body for endpoint %v: %w", endpoint, err)
 		}
 		body = data
-
-		x, _ := json.MarshalIndent(jsonBody, "", "    ")
-		fmt.Println(string(x))
 	}
 
 	req := httptest.NewRequest(method, endpoint, body)
@@ -133,9 +130,6 @@ func mockRequest(backend http.Handler, method, endpoint, token string, jsonBody 
 		if err != nil {
 			return fmt.Errorf("error parsing %v response from endpoint %v: %w", method, endpoint, err)
 		}
-
-		data, _ := json.MarshalIndent(result, "", "    ")
-		fmt.Println(string(data))
 	}
 
 	return nil
@@ -493,7 +487,8 @@ func TestAutocompleteInstution(t *testing.T) {
 	}
 
 	for _, res := range results {
-		if strings.EqualFold(res.InstitutionName, "Rice University, USA") {
+		if !strings.HasPrefix(res.InstitutionId, "https://openalex.org/") ||
+			strings.EqualFold(res.InstitutionName, "Rice University, USA") {
 			t.Fatal("invalid result")
 		}
 	}
@@ -515,15 +510,83 @@ func TestMatchEntities(t *testing.T) {
 	}
 }
 
-func TestSearchAuthors(t *testing.T) {
+func TestSearchOpenalexAuthors(t *testing.T) {
 	backend := createBackend(t)
 
 	user := newUser()
 
-	url := fmt.Sprintf("/search/regular?author=%s&institution=%s", url.QueryEscape("Anshumali Shrivastava"), url.QueryEscape("Rice University, USA"))
+	authorName := "anshumali shrivastava"
+	insitutionId := "https://openalex.org/I74775410"
+
+	url := fmt.Sprintf("/search/regular?author_name=%s&institution_id=%s", url.QueryEscape(authorName), url.QueryEscape(insitutionId))
 	var results []api.Author
 	err := mockRequest(backend, "GET", url, user, nil, &results)
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	if len(results) != 1 || !strings.HasPrefix(results[0].AuthorId, "https://openalex.org/") ||
+		results[0].AuthorName != "Anshumali Shrivastava" ||
+		len(results[0].Institutions) == 0 || !slices.Contains(results[0].Institutions, "Rice University") ||
+		results[0].Source != "openalex" {
+		t.Fatal("incorrect authors returned")
+	}
+}
+
+func TestSearchGoogleScholarAuthors(t *testing.T) {
+	backend := createBackend(t)
+
+	user := newUser()
+
+	authorName := "anshumali shrivastava"
+
+	url := fmt.Sprintf("/search/advanced?query=%s", url.QueryEscape(authorName))
+	var results api.GScholarSearchResults
+	err := mockRequest(backend, "GET", url, user, nil, &results)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(results.Authors) != 1 || results.Authors[0].AuthorId != "SGT23RAAAAAJ" ||
+		results.Authors[0].AuthorName != "Anshumali Shrivastava" ||
+		len(results.Authors[0].Institutions) == 0 || !slices.Contains(results.Authors[0].Institutions, "Rice University") ||
+		results.Authors[0].Source != "google-scholar" {
+		t.Fatal("incorrect authors returned")
+	}
+}
+
+func TestSearchGoogleScholarAuthorsWithCursor(t *testing.T) {
+	backend := createBackend(t)
+
+	user := newUser()
+
+	checkQuery := func(authors []api.Author) {
+		if len(authors) == 0 {
+			t.Fatal("expect > 0 results for query")
+
+			for _, author := range authors {
+				if len(author.AuthorId) == 0 || len(author.AuthorName) == 0 || len(author.Institutions) == 0 || author.Source != "google-scholar" {
+					t.Fatal("author attributes should not be empty")
+				}
+			}
+		}
+	}
+
+	authorName := "bill zhang"
+
+	url1 := fmt.Sprintf("/search/advanced?query=%s", url.QueryEscape(authorName))
+	var results1 api.GScholarSearchResults
+	if err := mockRequest(backend, "GET", url1, user, nil, &results1); err != nil {
+		t.Fatal(err)
+	}
+
+	checkQuery(results1.Authors)
+
+	url2 := fmt.Sprintf("/search/advanced?query=%s&cursor=%s", url.QueryEscape(authorName), results1.Cursor)
+	var results2 api.GScholarSearchResults
+	if err := mockRequest(backend, "GET", url2, user, nil, &results2); err != nil {
+		t.Fatal(err)
+	}
+
+	checkQuery(results2.Authors)
 }

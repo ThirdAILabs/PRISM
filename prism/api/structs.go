@@ -54,6 +54,7 @@ type GScholarSearchResults struct {
 }
 
 type Institution struct {
+	InstitutionId   string
 	InstitutionName string
 }
 

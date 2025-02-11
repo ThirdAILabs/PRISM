@@ -36,7 +36,7 @@ var ErrSearchFailed = errors.New("error performing search")
 
 func (s *SearchService) SearchOpenAlex(r *http.Request) (any, error) {
 	query := r.URL.Query()
-	author, institution := query.Get("author"), query.Get("institution")
+	author, institution := query.Get("author_name"), query.Get("institution_id")
 
 	authors, err := s.openalex.FindAuthors(author, institution)
 	if err != nil {

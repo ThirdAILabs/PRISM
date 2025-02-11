@@ -53,6 +53,7 @@ func (s *AutocompleteService) AutocompleteInstitution(r *http.Request) (any, err
 	results := make([]api.Institution, 0, len(institutions))
 	for _, inst := range institutions {
 		results = append(results, api.Institution{
+			InstitutionId:   inst.InstitutionId,
 			InstitutionName: inst.InstitutionName,
 		})
 	}
