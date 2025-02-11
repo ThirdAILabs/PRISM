@@ -31,14 +31,10 @@ func (s *AutocompleteService) AutocompleteAuthor(r *http.Request) (any, error) {
 
 	results := make([]api.Author, 0, len(authors))
 	for _, author := range authors {
-		institutionNames := make([]string, 0, len(author.Institutions))
-		for _, inst := range author.Institutions {
-			institutionNames = append(institutionNames, inst.InstitutionName)
-		}
 		results = append(results, api.Author{
 			AuthorId:     author.AuthorId,
 			AuthorName:   author.DisplayName,
-			Institutions: institutionNames,
+			Institutions: author.InstitutionNames(),
 			Source:       api.OpenAlexSource,
 		})
 	}

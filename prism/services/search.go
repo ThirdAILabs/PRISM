@@ -43,7 +43,17 @@ func (s *SearchService) SearchOpenAlex(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	return authors, nil
+	results := make([]api.Author, 0, len(authors))
+	for _, author := range authors {
+		results = append(results, api.Author{
+			AuthorId:     author.AuthorId,
+			AuthorName:   author.DisplayName,
+			Institutions: author.InstitutionNames(),
+			Source:       api.OpenAlexSource,
+		})
+	}
+
+	return results, nil
 }
 
 func (s *SearchService) SearchGoogleScholar(r *http.Request) (any, error) {

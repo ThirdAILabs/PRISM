@@ -190,6 +190,10 @@ func downloadWithHttp(url string) (io.ReadCloser, error) {
 		return nil, fmt.Errorf("error downloading pdf: %w", err)
 	}
 
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("error downloading pdf: recieved status_code=%d", res.StatusCode)
+	}
+
 	return res.Body, nil
 }
 
@@ -280,6 +284,10 @@ func (extractor *AcknowledgementsExtractor) processPdfWithGrobid(pdf io.Reader) 
 		return nil, fmt.Errorf("error making request to grobid: %w", err)
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("grobid returned error, status_code=%d", res.StatusCode)
+	}
 
 	return parseGrobidReponse(res.Body)
 }

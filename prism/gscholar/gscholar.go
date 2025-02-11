@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -21,6 +22,19 @@ var (
 	ErrInvalidCursor             = errors.New("invalid cursor")
 	ErrCursorCreationFailed      = errors.New("cursor creation failed")
 )
+
+func checkStatus(res *http.Response) error {
+	if res.StatusCode != http.StatusOK {
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			slog.Error("google scholar: recieved reponse error", "method", res.Request.Method, "endpoint", res.Request.URL.String(), "status_code", res.StatusCode)
+		} else {
+			slog.Error("google scholar: recieved reponse error", "method", res.Request.Method, "endpoint", res.Request.URL.String(), "status_code", res.StatusCode, "body", string(body))
+		}
+		return fmt.Errorf("google scholar returned status=%d", res.StatusCode)
+	}
+	return nil
+}
 
 type gscholarProfile struct {
 	AuthorId      string  `json:"author_id"`
@@ -59,6 +73,10 @@ func nextGScholarPageV1(query string, nextPageToken *string) ([]api.Author, *str
 	}
 	defer res.Body.Close()
 
+	if err := checkStatus(res); err != nil {
+		return nil, nil, ErrGoogleScholarSearchFailed
+	}
+
 	var results struct {
 		Profiles   []gscholarProfile `json:"profiles"`
 		Pagination struct {
@@ -88,6 +106,10 @@ func getAuthorDetails(authorId string) (api.Author, error) {
 		return api.Author{}, ErrGoogleScholarSearchFailed
 	}
 	defer res.Body.Close()
+
+	if err := checkStatus(res); err != nil {
+		return api.Author{}, ErrGoogleScholarSearchFailed
+	}
 
 	var result struct {
 		Author gscholarProfile `json:"author"`
@@ -146,6 +168,10 @@ func nextGScholarPageV2(query string, nextIdx *int, seen map[string]bool) ([]api
 			return nil, nil, ErrGoogleScholarSearchFailed
 		}
 		defer res.Body.Close()
+
+		if err := checkStatus(res); err != nil {
+			return nil, nil, ErrGoogleScholarSearchFailed
+		}
 
 		var results struct {
 			OrganicResults []struct {
@@ -348,6 +374,10 @@ func (iter *AuthorPaperIterator) Next() ([]string, error) {
 	if err != nil {
 		slog.Error("google scholar: error getting author papers", "author_id", iter.authorId, "error", err)
 		return nil, fmt.Errorf("google scholar error: %w", err)
+	}
+
+	if err := checkStatus(res); err != nil {
+		return nil, err
 	}
 
 	var results struct {

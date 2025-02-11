@@ -106,6 +106,9 @@ func mockRequest(backend http.Handler, method, endpoint, token string, jsonBody 
 			return fmt.Errorf("error encoding json body for endpoint %v: %w", endpoint, err)
 		}
 		body = data
+
+		x, _ := json.MarshalIndent(jsonBody, "", "    ")
+		fmt.Println(string(x))
 	}
 
 	req := httptest.NewRequest(method, endpoint, body)
@@ -130,6 +133,9 @@ func mockRequest(backend http.Handler, method, endpoint, token string, jsonBody 
 		if err != nil {
 			return fmt.Errorf("error parsing %v response from endpoint %v: %w", method, endpoint, err)
 		}
+
+		data, _ := json.MarshalIndent(result, "", "    ")
+		fmt.Println(string(data))
 	}
 
 	return nil
@@ -506,5 +512,18 @@ func TestMatchEntities(t *testing.T) {
 
 	if len(results.Entities) != 1 || results.Entities[0] != "institute of xyz" {
 		t.Fatalf("incorrect entities matched: %v", results.Entities)
+	}
+}
+
+func TestSearchAuthors(t *testing.T) {
+	backend := createBackend(t)
+
+	user := newUser()
+
+	url := fmt.Sprintf("/search/regular?author=%s&institution=%s", url.QueryEscape("Anshumali Shrivastava"), url.QueryEscape("Rice University, USA"))
+	var results []api.Author
+	err := mockRequest(backend, "GET", url, user, nil, &results)
+	if err != nil {
+		t.Fatal(err)
 	}
 }

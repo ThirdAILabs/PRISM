@@ -29,6 +29,10 @@ func GoogleSearch(query string) (any, error) {
 	}
 	defer res.Body.Close()
 
+	if res.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("request returned status: %d", res.StatusCode)
+	}
+
 	var results struct {
 		OrganicResults any `json:"organic_results"`
 	}
@@ -73,6 +77,10 @@ func fetchLink(link string) (string, error) {
 		return "", err
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("request returned status: %d", res.StatusCode)
+	}
 
 	const maxBytes = 300000
 
