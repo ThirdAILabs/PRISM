@@ -55,9 +55,9 @@ go run cmd/backend/main.go --config "./cmd/backend/config.yaml"
 7. The username and password can now be used to login as a user with keycloak.
 
 
-## Building ThirdAI Libraries
+## Building ThirdAI Libraries (Optional: Should not be needed for M1 mac)
 
-The following is for building the thirdai libraries needed for the neural db and flash bindings. 
+The following is for building the thirdai libraries needed for the neural db and flash bindings. This is an optional step, the repo has libraries built for m1 mac already in it.
 
 1. Clone Universe:
 ```bash
