@@ -21,6 +21,8 @@ Note: Right now this assumes you are running on an m1 mac. This repo has thirdai
 
 Note: For macos the wheels assume that you have libomp installed in `/opt/homebrew/opt/libomp/lib/`, which should be the default if you install with homebrew. You will also need to have openssl3 installed at `/opt/homebrew/Cellar/openssl@3/3.4.0/lib/`. This should also be the default if you install with homebrew.
 
+Ensure that you have a postgres database for PRISM to use if you don't already, this is needed for the backend. If you don't have one you can create one with the command `psql -U postgres` followed by `create database prism;`. This only needs to be done once.
+
 1. Clone the PRISM repo:
 ```bash
 git clone https://github.com/ThirdAILabs/PRISM
