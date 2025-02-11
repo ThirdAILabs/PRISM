@@ -28,6 +28,7 @@ type Config struct {
 	Keycloak      auth.KeycloakArgs
 	Port          int
 	Logfile       string
+	NdbLicense    string `yaml:"ndb_license"`
 }
 
 func (c *Config) logfile() string {
@@ -64,7 +65,6 @@ func loadConfig() Config {
 		log.Fatalf("error parsing config: %v", err)
 	}
 
-	os.Exit(0)
 	return config
 }
 
@@ -114,6 +114,18 @@ func main() {
 
 	openalex := openalex.NewRemoteKnowledgeBase()
 
+	if strings.HasPrefix(config.NdbLicense, "file ") {
+		err := search.SetLicensePath(strings.TrimPrefix(config.NdbLicense, "file "))
+		if err != nil {
+			log.Fatalf("error activating license at path '%s': %v", config.NdbLicense, err)
+		}
+	} else {
+		err := search.SetLicenseKey(config.NdbLicense)
+		if err != nil {
+			log.Fatalf("error activating license: %v", err)
+		}
+	}
+
 	entityNdb, err := search.NewNeuralDB(config.EntityNdbPath)
 	if err != nil {
 		log.Fatalf("unable to load entity ndb: %v", err)
@@ -121,12 +133,12 @@ func main() {
 
 	db := initDb(config.PostgresUri)
 
-	userAuth, err := auth.NewKeycloakAuth("users", config.Keycloak)
+	userAuth, err := auth.NewKeycloakAuth("prism-user", config.Keycloak)
 	if err != nil {
 		log.Fatalf("error initializing keycloak user auth: %v", err)
 	}
 
-	adminAuth, err := auth.NewKeycloakAuth("admins", config.Keycloak)
+	adminAuth, err := auth.NewKeycloakAuth("prism-admin", config.Keycloak)
 	if err != nil {
 		log.Fatalf("error initializing keycloak admin auth: %v", err)
 	}

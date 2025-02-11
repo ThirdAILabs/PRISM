@@ -34,7 +34,7 @@ var intArg = pArg[int]
 var strArg = pArg[string]
 
 func adminLogin(client *gocloak.GoCloak, adminUsername, adminPassword string) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	// The "master" realm is the default admin realm in Keycloak.
@@ -61,7 +61,7 @@ func getUserID(ctx context.Context, client *gocloak.GoCloak, adminToken, usernam
 }
 
 func createRealm(client *gocloak.GoCloak, adminToken, realmName string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	serverInfo, err := client.GetServerInfo(ctx, adminToken)
@@ -74,7 +74,7 @@ func createRealm(client *gocloak.GoCloak, adminToken, realmName string) error {
 		Enabled:              boolArg(true),
 		IdentityProviders:    &[]interface{}{},
 		DefaultRoles:         &[]string{"user"},
-		RegistrationAllowed:  boolArg(false),
+		RegistrationAllowed:  boolArg(true),
 		ResetPasswordAllowed: boolArg(true),
 		AccessCodeLifespan:   intArg(1500),
 	}
@@ -104,9 +104,9 @@ func createRealm(client *gocloak.GoCloak, adminToken, realmName string) error {
 }
 
 func createClient(client *gocloak.GoCloak, adminToken, realm string, redirectUrls []string, rootUrl string) error {
-	clientName := realm + "-login"
+	clientName := realm + "-login-client"
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	clients, err := client.GetClients(ctx, adminToken, realm, gocloak.GetClientsParams{
@@ -127,7 +127,7 @@ func createClient(client *gocloak.GoCloak, adminToken, realm string, redirectUrl
 		RedirectURIs:              &redirectUrls,    // URIs where the client will redirect after authentication.
 		RootURL:                   &rootUrl,         // Root URL for the client application.
 		BaseURL:                   strArg("/login"), // Base URL for the client application.
-		DirectAccessGrantsEnabled: boolArg(false),   // Direct grants like password flow are disabled.
+		DirectAccessGrantsEnabled: boolArg(true),    // Direct grants like password flow are disabled.
 		ServiceAccountsEnabled:    boolArg(false),   // Service accounts are disabled.
 		StandardFlowEnabled:       boolArg(true),    // Standard authorization code flow is enabled.
 		ImplicitFlowEnabled:       boolArg(false),   // Implicit flow is disabled.
@@ -241,7 +241,7 @@ func getToken(r *http.Request) (string, error) {
 }
 
 func (auth *KeycloakAuth) VerifyToken(token string) (uuid.UUID, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	userInfo, err := auth.keycloak.GetUserInfo(ctx, token, auth.realm)
