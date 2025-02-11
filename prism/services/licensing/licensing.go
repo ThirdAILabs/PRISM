@@ -28,8 +28,8 @@ var (
 )
 
 type licensePayload struct {
-	id     uuid.UUID
-	secret []byte
+	Id     uuid.UUID
+	Secret []byte
 }
 
 const (
@@ -68,7 +68,7 @@ func parseLicense(licenseKey string) (*licensePayload, error) {
 }
 
 func (l *licensePayload) verifySecret(hashedSecret []byte) error {
-	err := bcrypt.CompareHashAndPassword(hashedSecret, l.secret)
+	err := bcrypt.CompareHashAndPassword(hashedSecret, l.Secret)
 	if err != nil {
 		slog.Info("license verification failed", "error", err)
 		return ErrInvalidLicense
@@ -83,21 +83,21 @@ func CreateLicense(txn *gorm.DB, name string, expiration time.Time) (string, err
 		return "", ErrLicenseCreationFailed
 	}
 
-	license := licensePayload{id: uuid.New(), secret: secret}
+	license := licensePayload{Id: uuid.New(), Secret: secret}
 
 	licenseKey, err := license.serialize()
 	if err != nil {
 		return "", err
 	}
 
-	hashedSecret, err := bcrypt.GenerateFromPassword(license.secret, bcrypt.DefaultCost)
+	hashedSecret, err := bcrypt.GenerateFromPassword(license.Secret, bcrypt.DefaultCost)
 	if err != nil {
 		slog.Error("error hashing license secret", "error", err)
 		return "", ErrLicenseCreationFailed
 	}
 
 	licenseEntry := schema.License{
-		Id:          license.id,
+		Id:          license.Id,
 		Secret:      hashedSecret,
 		Name:        name,
 		Expiration:  expiration,
@@ -146,7 +146,7 @@ func AddLicenseUser(txn *gorm.DB, licenseKey string, userId uuid.UUID) error {
 		return err
 	}
 
-	license, err := getLicense(txn, licenseData.id)
+	license, err := getLicense(txn, licenseData.Id)
 	if err != nil {
 		return err
 	}

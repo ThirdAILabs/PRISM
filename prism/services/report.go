@@ -11,10 +11,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type ReportService struct {
 	manager *reports.ReportManager
+	db      *gorm.DB
 }
 
 func (s *ReportService) Routes() chi.Router {
@@ -23,6 +25,8 @@ func (s *ReportService) Routes() chi.Router {
 	r.Get("/list", WrapRestHandler(s.List))
 	r.Post("/create", WrapRestHandler(s.CreateReport))
 	r.Get("/{report_id}", WrapRestHandler(s.GetReport))
+
+	r.Post("/use-license", WrapRestHandler(s.UseLicense))
 
 	return r
 }
@@ -94,4 +98,35 @@ func (s *ReportService) GetReport(r *http.Request) (any, error) {
 	}
 
 	return report, nil
+}
+
+func (s *ReportService) UseLicense(r *http.Request) (any, error) {
+	userId, err := auth.GetUserId(r)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	params, err := ParseRequestBody[api.AddLicenseUserRequest](r)
+	if err != nil {
+		return nil, CodedError(err, http.StatusBadRequest)
+	}
+
+	if err := s.db.Transaction(func(txn *gorm.DB) error {
+		return licensing.AddLicenseUser(txn, params.License, userId)
+	}); err != nil {
+		switch {
+		case errors.Is(err, licensing.ErrLicenseNotFound):
+			return nil, CodedError(err, http.StatusNotFound)
+		case errors.Is(err, licensing.ErrInvalidLicense):
+			return nil, CodedError(err, http.StatusUnprocessableEntity)
+		case errors.Is(err, licensing.ErrExpiredLicense):
+			return nil, CodedError(err, http.StatusForbidden)
+		case errors.Is(err, licensing.ErrDeactivatedLicense):
+			return nil, CodedError(err, http.StatusForbidden)
+		default:
+			return nil, CodedError(err, http.StatusInternalServerError)
+		}
+	}
+
+	return nil, nil
 }

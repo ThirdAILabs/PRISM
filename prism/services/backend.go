@@ -26,6 +26,7 @@ func NewBackend(db *gorm.DB, oa openalex.KnowledgeBase, entityNdb search.NeuralD
 	return &BackendService{
 		report: ReportService{
 			manager: reports.NewManager(db),
+			db:      db,
 		},
 		search: SearchService{
 			openalex:  oa,

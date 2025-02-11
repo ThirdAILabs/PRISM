@@ -62,7 +62,7 @@ func (r *ReportManager) CreateReport(userId uuid.UUID, authorId, authorName, sou
 			return err
 		}
 
-		if err := r.db.Create(&report).Error; err != nil {
+		if err := txn.Create(&report).Error; err != nil {
 			slog.Error("error creating new report", "error", err)
 			return ErrReportAccessFailed
 		}
@@ -71,7 +71,7 @@ func (r *ReportManager) CreateReport(userId uuid.UUID, authorId, authorName, sou
 	})
 
 	if err != nil {
-		return uuid.Nil, ErrReportAccessFailed
+		return uuid.Nil, err
 	}
 
 	return report.Id, nil
