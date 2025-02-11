@@ -43,7 +43,7 @@ func (l *LicensePayload) Serialize() (string, error) {
 		return "", ErrLicenseCreationFailed
 	}
 
-	return versionPrefix + base64.StdEncoding.EncodeToString(buf.Bytes()), nil
+	return versionPrefix + base64.URLEncoding.EncodeToString(buf.Bytes()), nil
 }
 
 func parseLicense(licenseKey string) (*LicensePayload, error) {
@@ -52,7 +52,7 @@ func parseLicense(licenseKey string) (*LicensePayload, error) {
 		return nil, ErrInvalidLicense
 	}
 
-	data, err := base64.StdEncoding.DecodeString(licenseKey[len(versionPrefix):])
+	data, err := base64.URLEncoding.DecodeString(licenseKey[len(versionPrefix):])
 	if err != nil {
 		slog.Error("error decoding base64 encoding of license", "error", err)
 		return nil, ErrInvalidLicense
@@ -100,7 +100,7 @@ func CreateLicense(txn *gorm.DB, name string, expiration time.Time) (api.CreateL
 		Id:          license.Id,
 		Secret:      hashedSecret,
 		Name:        name,
-		Expiration:  expiration,
+		Expiration:  expiration.UTC(),
 		Deactivated: false,
 	}
 

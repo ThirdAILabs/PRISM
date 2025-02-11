@@ -26,7 +26,7 @@ func (s *ReportService) Routes() chi.Router {
 	r.Post("/create", WrapRestHandler(s.CreateReport))
 	r.Get("/{report_id}", WrapRestHandler(s.GetReport))
 
-	r.Post("/use-license", WrapRestHandler(s.UseLicense))
+	r.Post("/activate-license", WrapRestHandler(s.UseLicense))
 
 	return r
 }

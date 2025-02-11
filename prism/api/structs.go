@@ -19,7 +19,7 @@ type Report struct {
 
 	Status string
 
-	Content any `json:"omitempty"`
+	Content any `json:"Content,omitempty"`
 }
 
 type CreateReportRequest struct {

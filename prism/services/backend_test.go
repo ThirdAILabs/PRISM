@@ -232,11 +232,11 @@ func listLicenses(backend http.Handler, user string) ([]api.License, error) {
 	return res, nil
 }
 
-func useLicense(backend http.Handler, user, license string) error {
+func activateLicense(backend http.Handler, user, license string) error {
 	req := api.AddLicenseUserRequest{
 		License: license,
 	}
-	return Post(backend, "/report/use-license", user, req, nil)
+	return Post(backend, "/report/activate-license", user, req, nil)
 }
 
 func deactivateLicense(backend http.Handler, user string, id uuid.UUID) error {
@@ -278,7 +278,7 @@ func TestLicenseEndpoints(t *testing.T) {
 		t.Fatalf("incorrect licenses: %v", licenses)
 	}
 
-	if err := useLicense(backend, user1, license1.License); err != nil {
+	if err := activateLicense(backend, user1, license1.License); err != nil {
 		t.Fatal(err)
 	}
 
@@ -286,7 +286,7 @@ func TestLicenseEndpoints(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := useLicense(backend, user2, license2.License); err == nil || !strings.Contains(err.Error(), "license is deactivated") {
+	if err := activateLicense(backend, user2, license2.License); err == nil || !strings.Contains(err.Error(), "license is deactivated") {
 		t.Fatal("cannot use deactivated license")
 	}
 
@@ -322,7 +322,7 @@ func TestLicenseExpiration(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := useLicense(backend, user1, license.License); err != nil {
+	if err := activateLicense(backend, user1, license.License); err != nil {
 		t.Fatal(err)
 	}
 
@@ -336,7 +336,7 @@ func TestLicenseExpiration(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := useLicense(backend, user2, license.License); err == nil || !strings.Contains(err.Error(), "expired license") {
+	if err := activateLicense(backend, user2, license.License); err == nil || !strings.Contains(err.Error(), "expired license") {
 		t.Fatal(err)
 	}
 }
@@ -358,7 +358,7 @@ func TestLicenseInvalidLicense(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := useLicense(backend, user, badSecretKey); !strings.Contains(err.Error(), "invalid license") {
+	if err := activateLicense(backend, user, badSecretKey); !strings.Contains(err.Error(), "invalid license") {
 		t.Fatal(err)
 	}
 
@@ -368,7 +368,7 @@ func TestLicenseInvalidLicense(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := useLicense(backend, user, badIdKey); !strings.Contains(err.Error(), "license not found") {
+	if err := activateLicense(backend, user, badIdKey); !strings.Contains(err.Error(), "license not found") {
 		t.Fatal(err)
 	}
 }
@@ -391,10 +391,10 @@ func TestReportEndpoints(t *testing.T) {
 		t.Fatalf("report should fail %v", err)
 	}
 
-	if err := useLicense(backend, user1, license.License); err != nil {
+	if err := activateLicense(backend, user1, license.License); err != nil {
 		t.Fatal(err)
 	}
-	if err := useLicense(backend, user2, license.License); err != nil {
+	if err := activateLicense(backend, user2, license.License); err != nil {
 		t.Fatal(err)
 	}
 
