@@ -30,7 +30,6 @@ func (s *SearchService) Routes() chi.Router {
 
 	r.Get("/regular", WrapRestHandler(s.SearchOpenAlex))
 	r.Get("/advanced", s.SearchGoogleScholar)
-	r.Get("/formal-relations", WrapRestHandler(s.FormalRelations))
 	r.Get("/match-entities", WrapRestHandler(s.MatchEntities))
 
 	return r
@@ -154,6 +153,8 @@ func fetchLink(link string) (string, error) {
 	return string(text[:n]), nil
 }
 
+/*
+// This is currently unused, but keeping the code in case we decide to use it in the future.
 const (
 	formalRelationsInitalResultsPromptTemplate = "These are the results of a Google search, in JSON format:\n\n%s\n\n" +
 		"Based on the results above, infer whether %s has a formal position at %s. If there is not, strictly reply " +
@@ -221,6 +222,7 @@ func (s *SearchService) FormalRelations(r *http.Request) (any, error) {
 	hasRelation := !strings.Contains(strings.ToLower(verification), "no")
 	return api.FormalRelationResponse{HasFormalRelation: hasRelation}, nil
 }
+*/
 
 func cleanEntry(id uint64, text string) string {
 	lines := strings.Split(text, "\n")
