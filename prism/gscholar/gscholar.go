@@ -1,6 +1,7 @@
 package gscholar
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -17,6 +18,8 @@ const ApiKey = "24e6015d3c452c7678abe92dd7e585b2cbcf2886b5b8ce7ed685d26e98d0930d
 
 var (
 	ErrGoogleScholarSearchFailed = errors.New("google scholar search failed")
+	ErrInvalidCursor             = errors.New("invalid cursor")
+	ErrCursorCreationFailed      = errors.New("cursor creation failed")
 )
 
 type gscholarProfile struct {
@@ -35,27 +38,9 @@ func profileToAuthor(profile gscholarProfile) api.Author {
 	}
 }
 
-type ProfilePageCrawler struct {
-	query         string
-	nextPageToken *string
-	results       chan []api.Author
-	successCnt    int
-	errorCnt      int
-}
-
-func NewProfilePageCrawler(query string, results chan []api.Author) *ProfilePageCrawler {
-	return &ProfilePageCrawler{
-		query:         query,
-		nextPageToken: nil,
-		results:       results,
-		successCnt:    0,
-		errorCnt:      0,
-	}
-}
-
-func (crawler *ProfilePageCrawler) nextPageFilter() string {
-	if crawler.nextPageToken != nil {
-		return fmt.Sprintf("&after_author=%s", *crawler.nextPageToken) // Should this be escaped?
+func nextPageFilter(nextPageToken *string) string {
+	if nextPageToken != nil {
+		return fmt.Sprintf("&after_author=%s", *nextPageToken) // Should this be escaped?
 	}
 	return ""
 }
@@ -64,14 +49,13 @@ const (
 	profilesUrlTemplate = `https://serpapi.com/search.json?engine=google_scholar_profiles&mauthors=%s&api_key=%s%s`
 )
 
-func (crawler *ProfilePageCrawler) nextPage() ([]api.Author, bool) {
-	url := fmt.Sprintf(profilesUrlTemplate, url.QueryEscape(crawler.query), ApiKey, crawler.nextPageFilter())
+func nextGScholarPageV1(query string, nextPageToken *string) ([]api.Author, *string, error) {
+	url := fmt.Sprintf(profilesUrlTemplate, url.QueryEscape(query), ApiKey, nextPageFilter(nextPageToken))
 
 	res, err := http.Get(url)
 	if err != nil {
-		slog.Error("google scholar profile crawler: search failed", "query", crawler.query, "error", err)
-		crawler.errorCnt++
-		return nil, true
+		slog.Error("google scholar profile search: search failed", "query", query, "error", err)
+		return nil, nil, ErrGoogleScholarSearchFailed
 	}
 	defer res.Body.Close()
 
@@ -83,9 +67,8 @@ func (crawler *ProfilePageCrawler) nextPage() ([]api.Author, bool) {
 	}
 
 	if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
-		slog.Error("google scholar profile crawler: error parsing reponse", "query", crawler.query, "error", err)
-		crawler.errorCnt++
-		return nil, true
+		slog.Error("google scholar profile search: error parsing reponse", "query", query, "error", err)
+		return nil, nil, ErrGoogleScholarSearchFailed
 	}
 
 	authors := make([]api.Author, 0, len(results.Profiles))
@@ -93,23 +76,7 @@ func (crawler *ProfilePageCrawler) nextPage() ([]api.Author, bool) {
 		authors = append(authors, profileToAuthor(profile))
 	}
 
-	crawler.nextPageToken = results.Pagination.NextPageToken
-	crawler.successCnt++
-
-	return authors, crawler.nextPageToken == nil
-}
-
-func (crawler *ProfilePageCrawler) Run() {
-	for {
-		authors, done := crawler.nextPage()
-		if len(authors) > 0 {
-			crawler.results <- authors
-		}
-		if done {
-			slog.Info("google scholar profile crawler: complete", "errors", crawler.errorCnt, "successes", crawler.successCnt)
-			return
-		}
-	}
+	return authors, results.Pagination.NextPageToken, nil
 }
 
 func getAuthorDetails(authorId string) (api.Author, error) {
@@ -132,26 +99,6 @@ func getAuthorDetails(authorId string) (api.Author, error) {
 	}
 
 	return profileToAuthor(result.Author), nil
-}
-
-type GScholarCrawler struct {
-	query      string
-	nextIdx    int
-	results    chan []api.Author
-	successCnt int
-	errorCnt   int
-	seen       map[string]bool
-}
-
-func NewGScholarCrawler(query string, results chan []api.Author) *GScholarCrawler {
-	return &GScholarCrawler{
-		query:      query,
-		nextIdx:    0,
-		results:    results,
-		successCnt: 0,
-		errorCnt:   0,
-		seen:       make(map[string]bool),
-	}
 }
 
 const (
@@ -177,20 +124,26 @@ func authorNameInQuery(name string, queryTokens []string) bool {
 	return false
 }
 
-func (crawler *GScholarCrawler) nextPage() ([]api.Author, bool) {
-	queryTokens := strings.Split(strings.ToLower(crawler.query), " ")
+func nextGScholarPageV2(query string, nextIdx *int, seen map[string]bool) ([]api.Author, *int, error) {
+	queryTokens := strings.Split(strings.ToLower(query), " ")
 
 	authorIds := make([]string, 0)
 
+	startIdx := 0
+	if nextIdx != nil {
+		startIdx = *nextIdx
+	}
+
+	seenInbatch := make(map[string]bool)
+
 	for i := 0; i < 5 && len(authorIds) == 0; i++ {
-		url := fmt.Sprintf(gscholarUrlTemplate, url.QueryEscape(crawler.query), ApiKey, crawler.nextIdx, nResultsPerPage)
-		crawler.nextIdx += nResultsPerPage
+		url := fmt.Sprintf(gscholarUrlTemplate, url.QueryEscape(query), ApiKey, startIdx, nResultsPerPage)
+		startIdx += nResultsPerPage
 
 		res, err := http.Get(url)
 		if err != nil {
-			slog.Error("google scholar crawler: search failed", "query", crawler.query, "error", err)
-			crawler.errorCnt++
-			return nil, true
+			slog.Error("google scholar search: search failed", "query", query, "error", err)
+			return nil, nil, ErrGoogleScholarSearchFailed
 		}
 		defer res.Body.Close()
 
@@ -206,25 +159,28 @@ func (crawler *GScholarCrawler) nextPage() ([]api.Author, bool) {
 		}
 
 		if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
-			slog.Error("google scholar crawler: error parsing reponse", "query", crawler.query, "error", err)
-			crawler.errorCnt++
-			return nil, true
+			slog.Error("google scholar search: error parsing reponse", "query", query, "error", err)
+			return nil, nil, ErrGoogleScholarSearchFailed
 		}
 
 		for _, result := range results.OrganicResults {
 			for _, author := range result.PublicationInfo.Authors {
 				if authorNameInQuery(author.Name, queryTokens) {
-					if authorId := getAuthorId(author.Link); authorId != "" && !crawler.seen[authorId] {
-						crawler.seen[authorId] = true
+					if authorId := getAuthorId(author.Link); authorId != "" && !seen[authorId] && !seenInbatch[authorId] {
+						seenInbatch[authorId] = true
 						authorIds = append(authorIds, authorId)
 					}
 				}
 			}
 		}
+
+		if len(authorIds) > 0 {
+			break
+		}
 	}
 
 	if len(authorIds) == 0 {
-		return nil, true
+		return nil, nil, nil
 	}
 
 	authorsCh := make(chan api.Author, len(authorIds))
@@ -236,7 +192,7 @@ func (crawler *GScholarCrawler) nextPage() ([]api.Author, bool) {
 			defer wg.Done()
 			details, err := getAuthorDetails(authorId)
 			if err != nil {
-				slog.Error("google scholar crawler: error getting author details", "author_id", authorId, "error", err)
+				slog.Error("google scholar search: error getting author details", "author_id", authorId, "error", err)
 			} else {
 				authorsCh <- details
 			}
@@ -250,27 +206,119 @@ func (crawler *GScholarCrawler) nextPage() ([]api.Author, bool) {
 		authors = append(authors, author)
 	}
 
-	if len(authors) == len(authorIds) {
-		crawler.successCnt++
-	} else {
-		crawler.errorCnt++
-		slog.Error("google scholar crawler: could not get author details for all author ids", "expected_cnt", len(authorIds), "actual_cnt", len(authors))
+	if len(authors) != len(authorIds) {
+		slog.Error("google scholar search: could not get author details for all author ids", "expected_cnt", len(authorIds), "actual_cnt", len(authors))
+		if len(authors) == 0 {
+			// If some of the calls succeed we long the errors and return success. If they all fail we return an error.
+			return nil, nil, ErrGoogleScholarSearchFailed
+		}
 	}
 
-	return authors, false
+	return authors, &startIdx, nil
 }
 
-func (crawler *GScholarCrawler) Run() {
-	for {
-		authors, done := crawler.nextPage()
-		if len(authors) > 0 {
-			crawler.results <- authors
-		}
-		if done {
-			slog.Info("google scholar crawler: complete", "errors", crawler.errorCnt, "successes", crawler.successCnt)
-			return
+type cursorPayload struct {
+	V1Cursor *string
+	V2Cursor *int
+	Seen     []string
+}
+
+func parseCursor(token string) (cursorPayload, error) {
+	if token == "" {
+		return cursorPayload{}, nil
+	}
+
+	bytes, err := base64.URLEncoding.DecodeString(token)
+	if err != nil {
+		slog.Error("unable to decode cursor token", "error", err)
+		return cursorPayload{}, ErrInvalidCursor
+	}
+
+	var payload cursorPayload
+	if err := json.Unmarshal(bytes, &payload); err != nil {
+		slog.Error("unable to parse cursor token", "error", err)
+		return cursorPayload{}, ErrInvalidCursor
+	}
+
+	return payload, nil
+}
+
+func encodeCursor(payload cursorPayload) (string, error) {
+	bytes, err := json.Marshal(payload)
+	if err != nil {
+		slog.Error("error encoding cursor to token", "error", err)
+		return "", ErrCursorCreationFailed
+	}
+	return base64.URLEncoding.EncodeToString(bytes), nil
+}
+
+func NextGScholarPage(query, cursorToken string) ([]api.Author, string, error) {
+	cursor, err := parseCursor(cursorToken)
+	if err != nil {
+		return nil, "", err
+	}
+
+	seen := make(map[string]bool)
+	for _, x := range cursor.Seen {
+		seen[x] = true
+	}
+
+	var v1Results, v2Results []api.Author
+	var v1Cursor *string
+	var v2Cursor *int
+	var v1Err, v2Err error
+
+	wg := sync.WaitGroup{}
+
+	if len(seen) == 0 || cursor.V1Cursor != nil {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			v1Results, v1Cursor, v1Err = nextGScholarPageV1(query, cursor.V1Cursor)
+		}()
+	}
+
+	if len(seen) == 0 || cursor.V2Cursor != nil {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			v2Results, v2Cursor, v2Err = nextGScholarPageV2(query, cursor.V2Cursor, seen)
+		}()
+	}
+
+	wg.Wait()
+
+	if v1Err != nil {
+		slog.Error("v1 gscholar search failed", "error", v1Err)
+	}
+
+	if v2Err != nil {
+		slog.Error("v2 gscholar search failed", "error", v2Err)
+	}
+
+	if v1Err != nil && v2Err != nil {
+		err := errors.Join(v1Err, v2Err)
+		slog.Error("both v1 and v2 next page failed", "error", err)
+		return nil, "", err
+	}
+
+	newCursor := cursorPayload{V1Cursor: v1Cursor, V2Cursor: v2Cursor, Seen: cursor.Seen}
+
+	results := make([]api.Author, 0, len(v1Results)+len(v2Results))
+	for _, res := range slices.Concat(v1Results, v2Results) {
+		if !seen[res.AuthorId] {
+			results = append(results, res)
+			seen[res.AuthorId] = true
+			newCursor.Seen = append(newCursor.Seen, res.AuthorId)
 		}
 	}
+
+	newCursorToken, err := encodeCursor(newCursor)
+	if err != nil {
+		return nil, "", err
+	}
+
+	return results, newCursorToken, nil
 }
 
 type gscholarPaper struct {

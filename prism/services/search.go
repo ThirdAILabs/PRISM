@@ -1,7 +1,6 @@
 package services
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -13,7 +12,6 @@ import (
 	"prism/search"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -28,7 +26,7 @@ func (s *SearchService) Routes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Get("/regular", WrapRestHandler(s.SearchOpenAlex))
-	r.Get("/advanced", s.SearchGoogleScholar)
+	r.Get("/advanced", WrapRestHandler(s.SearchGoogleScholar))
 	r.Get("/match-entities", WrapRestHandler(s.MatchEntities))
 
 	return r
@@ -48,64 +46,19 @@ func (s *SearchService) SearchOpenAlex(r *http.Request) (any, error) {
 	return authors, nil
 }
 
-func (s *SearchService) SearchGoogleScholar(w http.ResponseWriter, r *http.Request) {
+func (s *SearchService) SearchGoogleScholar(r *http.Request) (any, error) {
 	query := strings.ReplaceAll(strings.ToLower(r.URL.Query().Get("query")), "@", " ")
+	cursor := r.URL.Query().Get("cursor")
 
-	flusher, ok := w.(http.Flusher)
-	if !ok {
-		http.Error(w, "http response does not support chunking", http.StatusInternalServerError)
-		return
+	results, nextCursor, err := gscholar.NextGScholarPage(query, cursor)
+	if err != nil {
+		if errors.Is(err, gscholar.ErrInvalidCursor) {
+			return nil, CodedError(err, http.StatusBadRequest)
+		}
+		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	seen := make(map[string]bool)
-
-	resultsCh := make(chan []api.Author, 10)
-
-	v1Crawler := gscholar.NewProfilePageCrawler(query, resultsCh)
-
-	v2Crawler := gscholar.NewGScholarCrawler(query, resultsCh)
-
-	stop := make(chan bool)
-
-	go func() {
-		for {
-			select {
-			case authors := <-resultsCh:
-				unseenAuthors := make([]api.Author, 0)
-				for _, author := range authors {
-					if !seen[author.AuthorId] {
-						seen[author.AuthorId] = true
-						unseenAuthors = append(unseenAuthors, author)
-					}
-				}
-
-				if len(unseenAuthors) > 0 {
-					if err := json.NewEncoder(w).Encode(unseenAuthors); err != nil {
-						slog.Error("error sending authors chunk", "error", err)
-						http.Error(w, "error sending response chunk", http.StatusInternalServerError)
-						return
-					}
-					flusher.Flush()
-				}
-			case <-stop:
-				break
-			}
-		}
-	}()
-
-	wg := sync.WaitGroup{}
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		v1Crawler.Run()
-	}()
-	go func() {
-		defer wg.Done()
-		v2Crawler.Run()
-	}()
-
-	wg.Done()
-	close(stop)
+	return api.GScholarSearchResults{Authors: results, Cursor: nextCursor}, nil
 }
 
 func cleanEntry(id uint64, text string) string {

@@ -48,6 +48,11 @@ type Author struct {
 	Source       string
 }
 
+type GScholarSearchResults struct {
+	Authors []Author
+	Cursor  string
+}
+
 type Institution struct {
 	InstitutionName string
 }
