@@ -13,10 +13,9 @@ import (
 	"sync"
 )
 
-const apiKey = "24e6015d3c452c7678abe92dd7e585b2cbcf2886b5b8ce7ed685d26e98d0930d"
+const ApiKey = "24e6015d3c452c7678abe92dd7e585b2cbcf2886b5b8ce7ed685d26e98d0930d"
 
 var (
-	ErrGoogleSearchFailed        = errors.New("google search failed")
 	ErrGoogleScholarSearchFailed = errors.New("google scholar search failed")
 )
 
@@ -67,7 +66,7 @@ const (
 )
 
 func (crawler *ProfilePageCrawler) nextPage() ([]api.Author, bool) {
-	url := fmt.Sprintf(profilesUrlTemplate, url.QueryEscape(crawler.query), apiKey, crawler.nextPageFilter())
+	url := fmt.Sprintf(profilesUrlTemplate, url.QueryEscape(crawler.query), ApiKey, crawler.nextPageFilter())
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -115,7 +114,7 @@ func (crawler *ProfilePageCrawler) Run() {
 }
 
 func getAuthorDetails(authorId string) (api.Author, error) {
-	url := fmt.Sprintf("https://serpapi.com/search?engine=google_scholar_author&author_id=%s&num=0&start=0&sort=pubdate&api_key=%s", authorId, apiKey)
+	url := fmt.Sprintf("https://serpapi.com/search?engine=google_scholar_author&author_id=%s&num=0&start=0&sort=pubdate&api_key=%s", authorId, ApiKey)
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -185,7 +184,7 @@ func (crawler *GScholarCrawler) nextPage() ([]api.Author, bool) {
 	authorIds := make([]string, 0)
 
 	for i := 0; i < 5 && len(authorIds) == 0; i++ {
-		url := fmt.Sprintf(gscholarUrlTemplate, url.QueryEscape(crawler.query), apiKey, crawler.nextIdx, nResultsPerPage)
+		url := fmt.Sprintf(gscholarUrlTemplate, url.QueryEscape(crawler.query), ApiKey, crawler.nextIdx, nResultsPerPage)
 		crawler.nextIdx += nResultsPerPage
 
 		res, err := http.Get(url)
@@ -296,7 +295,7 @@ func (iter *AuthorPaperIterator) Next() ([]string, error) {
 
 	const batchSize = 100
 
-	url := fmt.Sprintf("https://serpapi.com/search?engine=google_scholar_author&author_id=%s&num=%d&start=%d&sort=pubdate&api_key=%s", iter.authorId, batchSize, iter.start, apiKey)
+	url := fmt.Sprintf("https://serpapi.com/search?engine=google_scholar_author&author_id=%s&num=%d&start=%d&sort=pubdate&api_key=%s", iter.authorId, batchSize, iter.start, ApiKey)
 
 	res, err := http.Get(url)
 	if err != nil {
