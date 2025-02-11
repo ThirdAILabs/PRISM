@@ -29,10 +29,9 @@ type gscholarProfile struct {
 func profileToAuthor(profile gscholarProfile) api.Author {
 	return api.Author{
 		AuthorId:     profile.AuthorId,
-		DisplayName:  profile.Name,
+		AuthorName:   profile.Name,
 		Institutions: strings.Split(profile.Affilliations, ", "),
-		// TODO: should we use email?
-		Source: api.GoogleScholarSource,
+		Source:       api.GoogleScholarSource,
 	}
 }
 

@@ -43,13 +43,13 @@ const (
 
 type Author struct {
 	AuthorId     string
-	DisplayName  string
+	AuthorName   string
 	Institutions []string
 	Source       string
 }
 
 type Institution struct {
-	DisplayName string
+	InstitutionName string
 }
 
 type FormalRelationResponse struct {
