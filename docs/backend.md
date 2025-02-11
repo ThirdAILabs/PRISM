@@ -7,7 +7,7 @@ Unless stated otherwise, the following apply to all endpoints.
 - If the status code is >= 400 and < 500 then it means that the error was the result of something in the user's request. For example an expired license, report id that doesn't exist, etc. These messages may need to be relayed to the user so they use can resolve the issue. 
 - If the status code is >= 500 then the error was due to a server error the user cannot control. This is an issue that we would need to look into on the backend side. We should still tell the user that the error occurred, but the message may not provide many details since the user cannot resolve the issue themselves and we don't want to leak implementation details.
 
-# Reports
+# Report Endpoints
 
 ## List Reports
 
@@ -125,7 +125,7 @@ __Example Response__:
 No response body
 ```
 
-# Licensing
+# License Endpoints
 
 ## List licenses
 
@@ -197,7 +197,7 @@ __Example Response__:
 No response body
 ```
 
-# Autocomplete 
+# Autocomplete Endpoints
 
 ## Autocomplete Authors
 
@@ -252,4 +252,27 @@ __Example Response__:
         "InstitutionName": "Rice University"
     }
 ]
+```
+
+# Search Endpoints
+
+## Match Entities
+
+| Method | Path | Auth Required | Permissions |
+| ------ | ---- | ------------- | ----------  |
+| `GET` | `/api/v1/search/match-entities?query=<searched entity name>` | Yes | Token for Keycloak User Realm |
+
+Attempts to match the given query against known entities of concern. Returns a list of possible matches. The query is specified in the `query` url query parameter.
+
+__Example Request__: 
+```
+GET http://example.com/search/match-entities?query=xyz
+```
+__Example Response__:
+```json
+{
+    "Entities": [
+        "institute of xyz"
+    ]
+}
 ```

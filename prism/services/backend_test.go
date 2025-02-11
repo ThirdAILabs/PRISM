@@ -83,6 +83,11 @@ func createBackend(t *testing.T) http.Handler {
 		ndb.Free()
 	})
 
+	entities := []string{"abc university", "institute of xyz", "123 org"}
+	if err := ndb.Insert("doc", "id", entities, nil, nil); err != nil {
+		t.Fatal(err)
+	}
+
 	backend := services.NewBackend(
 		db, openalex.NewRemoteKnowledgeBase(), ndb, &MockTokenVerifier{prefix: userPrefix}, &MockTokenVerifier{prefix: adminPrefix},
 	)
@@ -485,5 +490,21 @@ func TestAutocompleteInstution(t *testing.T) {
 		if strings.EqualFold(res.InstitutionName, "Rice University, USA") {
 			t.Fatal("invalid result")
 		}
+	}
+}
+
+func TestMatchEntities(t *testing.T) {
+	backend := createBackend(t)
+
+	user := newUser()
+
+	var results api.MatchEntitiesResponse
+	err := mockRequest(backend, "GET", "/search/match-entities?query="+url.QueryEscape("xyz"), user, nil, &results)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(results.Entities) != 1 || results.Entities[0] != "institute of xyz" {
+		t.Fatalf("incorrect entities matched: %v", results.Entities)
 	}
 }
