@@ -76,24 +76,24 @@ func (l *licensePayload) verifySecret(hashedSecret []byte) error {
 	return nil
 }
 
-func CreateLicense(txn *gorm.DB, name string, expiration time.Time) (string, error) {
+func CreateLicense(txn *gorm.DB, name string, expiration time.Time) (api.CreateLicenseResponse, error) {
 	secret := make([]byte, 48)
 	if _, err := rand.Read(secret); err != nil {
 		slog.Error("error generating license secret", "error", err)
-		return "", ErrLicenseCreationFailed
+		return api.CreateLicenseResponse{}, ErrLicenseCreationFailed
 	}
 
 	license := licensePayload{Id: uuid.New(), Secret: secret}
 
 	licenseKey, err := license.serialize()
 	if err != nil {
-		return "", err
+		return api.CreateLicenseResponse{}, err
 	}
 
 	hashedSecret, err := bcrypt.GenerateFromPassword(license.Secret, bcrypt.DefaultCost)
 	if err != nil {
 		slog.Error("error hashing license secret", "error", err)
-		return "", ErrLicenseCreationFailed
+		return api.CreateLicenseResponse{}, ErrLicenseCreationFailed
 	}
 
 	licenseEntry := schema.License{
@@ -106,10 +106,10 @@ func CreateLicense(txn *gorm.DB, name string, expiration time.Time) (string, err
 
 	if err := txn.Create(&licenseEntry).Error; err != nil {
 		slog.Error("error saving license entry to db", "error", err)
-		return "", ErrLicenseCreationFailed
+		return api.CreateLicenseResponse{}, ErrLicenseCreationFailed
 	}
 
-	return licenseKey, nil
+	return api.CreateLicenseResponse{Id: licenseEntry.Id, License: licenseKey}, nil
 }
 
 func getLicense(txn *gorm.DB, id uuid.UUID) (schema.License, error) {

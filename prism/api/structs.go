@@ -71,6 +71,7 @@ type CreateLicenseRequest struct {
 }
 
 type CreateLicenseResponse struct {
+	Id      uuid.UUID
 	License string
 }
 

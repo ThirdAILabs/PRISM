@@ -77,6 +77,9 @@ func createBackend(t *testing.T) http.Handler {
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() {
+		ndb.Free()
+	})
 
 	backend := services.NewBackend(
 		db, openalex.NewRemoteKnowledgeBase(), ndb, &MockTokenVerifier{prefix: userPrefix}, &MockTokenVerifier{prefix: adminPrefix},
@@ -194,14 +197,34 @@ func createReport(backend http.Handler, user, name string) (api.CreateReportResp
 	return res, err
 }
 
-func createLicense(backend http.Handler, user string) (string, error) {
+func createLicense(backend http.Handler, name, user string) (api.CreateLicenseResponse, error) {
 	req := api.CreateLicenseRequest{
-		Name:       "test-license",
+		Name:       name,
 		Expiration: time.Now().UTC().Add(5 * time.Minute),
 	}
 	var res api.CreateLicenseResponse
 	err := Post(backend, "/license/create", user, req, &res)
-	return res.License, err
+	return res, err
+}
+
+func listLicenses(backend http.Handler, user string) ([]api.License, error) {
+	var res []api.License
+	err := Get(backend, "/license/list", user, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	slices.SortFunc(res, func(a, b api.License) int {
+		if a.Name < b.Name {
+			return -1
+		}
+		if a.Name > b.Name {
+			return 1
+		}
+		return 0
+	})
+
+	return res, nil
 }
 
 func useLicense(backend http.Handler, user, license string) error {
@@ -209,6 +232,78 @@ func useLicense(backend http.Handler, user, license string) error {
 		License: license,
 	}
 	return Post(backend, "/report/use-license", user, req, nil)
+}
+
+func deactivateLicense(backend http.Handler, user string, id uuid.UUID) error {
+	return Delete(backend, "/license/"+id.String(), user)
+}
+
+func TestLicenseEndpoints(t *testing.T) {
+	backend := createBackend(t)
+
+	admin := newAdmin()
+	user1, user2 := newUser(), newUser()
+
+	if _, err := createLicense(backend, "license-0", user1); !errors.Is(err, ErrUnauthorized) {
+		t.Fatal("users cannot create licenses")
+	}
+
+	license1, err := createLicense(backend, "xyz", admin)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	license2, err := createLicense(backend, "abc", admin)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := listLicenses(backend, user1); !errors.Is(err, ErrUnauthorized) {
+		t.Fatal("users cannot list licenses")
+	}
+
+	licenses, err := listLicenses(backend, admin)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(licenses) != 2 ||
+		licenses[0].Name != "abc" || licenses[0].Id != license2.Id ||
+		licenses[1].Name != "xyz" || licenses[1].Id != license1.Id {
+		t.Fatalf("incorrect licenses: %v", licenses)
+	}
+
+	if err := useLicense(backend, user1, license1.License); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := deactivateLicense(backend, admin, license2.Id); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := useLicense(backend, user2, license2.License); err == nil || !strings.Contains(err.Error(), "license is deactivated") {
+		t.Fatal("cannot use deactivated license")
+	}
+
+	if _, err := createReport(backend, user1, "report1"); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := deactivateLicense(backend, user2, license1.Id); !errors.Is(err, ErrUnauthorized) {
+		t.Fatal("users cannot deactivate licenses")
+	}
+
+	if _, err := createReport(backend, user1, "report1"); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := deactivateLicense(backend, admin, license1.Id); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := createReport(backend, user1, "report1"); err == nil || !strings.Contains(err.Error(), "license is deactivated") {
+		t.Fatal("cannot use deactivated license")
+	}
 }
 
 func TestReportEndpoints(t *testing.T) {
@@ -220,7 +315,7 @@ func TestReportEndpoints(t *testing.T) {
 	checkListReports(t, backend, user1, []string{})
 	checkListReports(t, backend, user2, []string{})
 
-	license, err := createLicense(backend, admin)
+	license, err := createLicense(backend, "test-license", admin)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -229,10 +324,10 @@ func TestReportEndpoints(t *testing.T) {
 		t.Fatalf("report should fail %v", err)
 	}
 
-	if err := useLicense(backend, user1, license); err != nil {
+	if err := useLicense(backend, user1, license.License); err != nil {
 		t.Fatal(err)
 	}
-	if err := useLicense(backend, user2, license); err != nil {
+	if err := useLicense(backend, user2, license.License); err != nil {
 		t.Fatal(err)
 	}
 
@@ -254,4 +349,15 @@ func TestReportEndpoints(t *testing.T) {
 	}
 
 	compareReport(t, reportData, "report1")
+
+	if _, err := createReport(backend, user2, "report2"); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := createReport(backend, user1, "report3"); err != nil {
+		t.Fatal(err)
+	}
+
+	checkListReports(t, backend, user1, []string{"report1", "report3"})
+	checkListReports(t, backend, user2, []string{"report2"})
 }

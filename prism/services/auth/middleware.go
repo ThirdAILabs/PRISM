@@ -24,6 +24,7 @@ func Middleware(verifier TokenVerifier) func(http.Handler) http.Handler {
 			userId, err := verifier.VerifyToken(token)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusUnauthorized)
+				return
 			}
 
 			reqCtx := r.Context()
