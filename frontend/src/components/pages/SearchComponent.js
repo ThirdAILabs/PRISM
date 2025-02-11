@@ -7,6 +7,7 @@ import { AuthorInstiutionSearchBar } from '../common/searchBar/SearchBar';
 import Logo from "../../assets/images/logo.png";
 import "../common/searchBar/SearchBar.css";
 import { levenshteinDistance, makeVariations } from '../../utils/nameUtils';
+import UserService from '../../services/userService';
 
 const SearchComponent = () => {
   const [query, setQuery] = useState('');
@@ -181,6 +182,7 @@ const SearchComponent = () => {
         >
           Go To Entity Lookup
         </Link>
+        <button onClick={UserService.doLogout}>logout</button>
       </div>
       <img src={Logo} style={{ width: "100px", marginTop: "12%", animation: "fade-in 0.5s" }} />
       <h1 style={{ fontWeight: "bold", marginTop: 50, animation: "fade-in 0.75s" }}>Welcome to Prism</h1>

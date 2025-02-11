@@ -20,7 +20,7 @@ import apiService from '../../../services/apiService.jsx';
 import RelationShipGraph3 from '../../common/relationShipGraph/Relation-Graph3.js';
 import Tabs from '../../common/tools/Tabs.js';
 
-import { setStreamFlags } from '../../../streamStore.js';
+import { setStreamFlags } from '../../../services/streamStore.js';
 
 
 const FLAG_ID_ORDER = [
