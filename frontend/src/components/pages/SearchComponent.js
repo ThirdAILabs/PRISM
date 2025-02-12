@@ -8,6 +8,7 @@ import Logo from "../../assets/images/logo.png";
 import "../common/searchBar/SearchBar.css";
 import { levenshteinDistance, makeVariations } from '../../utils/nameUtils';
 import UserService from '../../services/userService';
+import { searchService } from '../../api/search';
 
 const SearchComponent = () => {
   const [query, setQuery] = useState('');
@@ -27,8 +28,8 @@ const SearchComponent = () => {
   const [showResultHeaders, setShowResultHeaders] = useState(false);
 
   const search = async (author, institution) => {
-    setShowResultHeaders(true);
-    handleDeepSearch(`${author.display_name} ${institution.display_name}`, nextToken, /* reset= */ false);
+    // setShowResultHeaders(true);
+    // handleDeepSearch(`${author.display_name} ${institution.display_name}`, nextToken, /* reset= */ false);
     searchOpenAlex(author, institution);
     setIsLoadingScopus(true);
     setAuthor(author);
@@ -37,88 +38,56 @@ const SearchComponent = () => {
     setQuery(`${author.display_name} ${institution ? institution.display_name : ''}`);
     setResults([]);
 
-    for (const authorName of makeVariations(author.display_name)) {
-      await new Promise(resolve => setTimeout(resolve, /* ms= */ 300));
-      try {
-        await apiService.search(authorName, institution ? institution.display_name : '').then(result => {
-          console.log(result.profiles);
-          setResults(prev => {
-            let newResults = [...prev];
-            for (const profile of result.profiles) {
-              let seen = false;
-              console.log("profile", profile);
-              console.log("new results", newResults);
-              for (const otherProfile of newResults) {
-                if (otherProfile.id === profile.id) {
-                  seen = true;
-                }
-              }
-              if (!seen) {
-                newResults.push(profile);
-              }
-            }
-            newResults = newResults.map(x => [x, levenshteinDistance(x.display_name, author.display_name)])
-            console.log(newResults);
-            newResults.sort((a, b) => a[1] - b[1]);
-            console.log(newResults);
-            newResults = newResults.map(x => x[0]);
-            return newResults;
-          });
-        });
-        setResultHeader('Scopus Results');
+    // for (const authorName of makeVariations(author.display_name)) {
+    //   await new Promise(resolve => setTimeout(resolve, /* ms= */ 300));
+    //   try {
+    //     await apiService.search(authorName, institution ? institution.display_name : '').then(result => {
+    //       console.log(result.profiles);
+    //       setResults(prev => {
+    //         let newResults = [...prev];
+    //         for (const profile of result.profiles) {
+    //           let seen = false;
+    //           console.log("profile", profile);
+    //           console.log("new results", newResults);
+    //           for (const otherProfile of newResults) {
+    //             if (otherProfile.id === profile.id) {
+    //               seen = true;
+    //             }
+    //           }
+    //           if (!seen) {
+    //             newResults.push(profile);
+    //           }
+    //         }
+    //         newResults = newResults.map(x => [x, levenshteinDistance(x.display_name, author.display_name)])
+    //         console.log(newResults);
+    //         newResults.sort((a, b) => a[1] - b[1]);
+    //         console.log(newResults);
+    //         newResults = newResults.map(x => x[0]);
+    //         return newResults;
+    //       });
+    //     });
+    //     setResultHeader('Scopus Results');
 
-      } catch (error) {
-        console.log('Unable to fetch Scopus results.')
-      }
-    }
+    //   } catch (error) {
+    //     console.log('Unable to fetch Scopus results.')
+    //   }
+    // }
     setIsLoadingScopus(false);
     setLoadMoreCount(0);
     setHasSearched(true);
   };
 
   const searchOpenAlex = async (author, institution) => {
-    // handleDeepSearch(`${author.display_name} ${institution.display_name}`, nextToken, /* reset= */ false);
+
     setIsOALoading(true);
     setAuthor(author);
     setInstitution(institution);
     setHasSearched(false);
-    setQuery(`${author.display_name} ${institution ? institution.display_name : ''}`);
+    setQuery(`${author.AuthorName} ${institution ? institution.InstitutionName : ''}`);
     setResults([]);
 
-    for (const authorName of makeVariations(author.display_name)) {
-      await new Promise(resolve => setTimeout(resolve, /* ms= */ 300));
-
-      try {
-        await apiService.searchOpenAlex(authorName, institution ? institution.display_name : '').then(result => {
-          console.log(result.profiles);
-          setOpenAlexResults(prev => {
-            let newResults = [...prev];
-            for (const profile of result.profiles) {
-              let seen = false;
-              console.log("profile", profile);
-              console.log("new results", newResults);
-              for (const otherProfile of newResults) {
-                if (otherProfile.id === profile.id) {
-                  seen = true;
-                }
-              }
-              if (!seen) {
-                newResults.push(profile);
-              }
-            }
-            newResults = newResults.map(x => [x, levenshteinDistance(x.display_name, author.display_name)])
-            console.log(newResults);
-            newResults.sort((a, b) => a[1] - b[1]);
-            console.log(newResults);
-            newResults = newResults.map(x => x[0]);
-            return newResults;
-          });
-        });
-      } catch (error) {
-        console.log('Unable to fetch from OpenAlex: ', error);
-      }
-
-    }
+    const result = await searchService.searchOpenalexAuthors("anshumali shrivastava", "https://openalex.org/I74775410");
+    console.log("result in openAlex", result);
     setIsOALoading(false);
     setLoadMoreCount(0);
     setHasSearched(true);
@@ -222,7 +191,7 @@ const SearchComponent = () => {
         />
       }
 
-      {/* {showResultHeaders && <div style={{paddingTop: "30px", textAlign: "center", fontSize: "24px", fontWeight: "bold"}}>Scopus Results</div>} */}
+      {/* {showResultHeaders && <div style={{paddingTop: "30px", textAlign: "center", fontSize: "24px", fontWeight: "bold"}}>Scopus Results</div>}
       {showResultHeaders && (<div style={{ paddingTop: "30px", textAlign: "center", fontSize: "24px", fontWeight: "bold" }}>{resultHeader}</div>)}
       {isLoadingScopus && <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status"></div>}
       {
@@ -232,7 +201,7 @@ const SearchComponent = () => {
           canLoadMore={false}
           loadMore={() => { }}
         />
-      }
+      } */}
     </div>
   );
 

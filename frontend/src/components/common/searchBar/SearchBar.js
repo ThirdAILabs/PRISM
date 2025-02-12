@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { autocompleteService } from '../../../api/autocomplete';
 import "./SearchBar.css";
-import apiService from '../../../services/apiService';
 
-function AutocompleteSearchBar({ title, autocomplete, onSelect }) {
+
+function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
     const [suggestions, setSuggestions] = useState([]);
     const [query, setQuery] = useState("");
 
@@ -14,7 +15,7 @@ function AutocompleteSearchBar({ title, autocomplete, onSelect }) {
     function handleSelectSuggestion(suggestion) {
         return () => {
             setSuggestions([]);
-            setQuery(suggestion.display_name);
+            setQuery(suggestion.AuthorName);
             onSelect(suggestion);
         }
     }
@@ -29,12 +30,15 @@ function AutocompleteSearchBar({ title, autocomplete, onSelect }) {
             <input type='text' className='search-bar' value={query} onChange={handleInputChange} />
 
             {
-                suggestions && suggestions.length > 0 &&
+                query && query.length && suggestions && suggestions.length > 0 &&
                 // Autocomplete suggestion container. Column.
                 <div className='suggestion-container'>
                     {suggestions.map((suggestion, index) => (
                         // Clickable suggestion
-                        <div className='suggestion' key={index} onClick={handleSelectSuggestion(suggestion)}>{suggestion.display_name}</div>
+                        type === "author" ?
+                            <div className='suggestion' key={index} onClick={handleSelectSuggestion(suggestion)}>{suggestion.AuthorName}</div>
+                            :
+                            <div className='suggestion' key={index} onClick={handleSelectSuggestion(suggestion)}>{suggestion.InstitutionName}</div>
                     ))}
                 </div>
             }
@@ -46,30 +50,31 @@ export function AuthorInstiutionSearchBar({ onSearch }) {
     const [author, setAuthor] = useState();
     const [institution, setInstitution] = useState();
 
-    function autocompleteAuthor(query) {
-        return apiService.autocomplete(query).then(res => Array.from(new Set(res.profiles.map(p => p.display_name))).map(n => ({ display_name: n })));
+    async function autocompleteAuthor(query) {
+        const res = await autocompleteService.autocompleteAuthors(query);
+        return res;
     }
 
-    function autocompleteInstitution(query) {
-        return apiService.autocompleteInstitution(query).then(res => res.profiles);
+    async function autocompleteInstitution(query) {
+        const res = await autocompleteService.autocompleteInstitutions(query);
+        return res;
     }
 
     function search() {
-        onSearch(author, institution);
-        // if (author && institution) {
-        //     onSearch(author, institution);
-        // } else {
-        //     alert("Please select an author and institution.");
-        // }
+        if (author && institution) {
+            onSearch(author, institution);
+        } else {
+            alert("Please select an author and institution.");
+        }
     }
 
     return <div className='author-institution-search-bar'>
         <div className='author-institution-search-bar-container'>
-            <AutocompleteSearchBar title="Author" autocomplete={autocompleteAuthor} onSelect={setAuthor} />
+            <AutocompleteSearchBar title="Author" autocomplete={autocompleteAuthor} onSelect={setAuthor} type={"author"} />
         </div>
 
         <div className='author-institution-search-bar-container'>
-            <AutocompleteSearchBar title="Institution" autocomplete={autocompleteInstitution} onSelect={setInstitution} />
+            <AutocompleteSearchBar title="Institution" autocomplete={autocompleteInstitution} onSelect={setInstitution} type={"institute"} />
         </div>
 
         <div className='author-institution-search-button-container'>

@@ -3,13 +3,15 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE_URL } from '../../../services/apiService';
 import "../../common/searchBar/SearchBar.css";
-
+import { useUser } from '../../../store/userContext';
 function EntityLookup() {
+
+  const { userInfo } = useUser();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [backendUrl, setBackendUrl] = useState('');
-
+  console.log("User info in entity lookup", userInfo);
   useEffect(() => {
     setBackendUrl(API_BASE_URL);
   }, []);
