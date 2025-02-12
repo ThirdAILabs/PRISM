@@ -504,6 +504,8 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 			continue
 		}
 
+		workLogger.Info("found acknowledgements", "n_acks", len(acks.Result.Acknowledgements))
+
 		flaggedEntities, message, err := flagger.checkAcknowledgementEntities(
 			workLogger, acks.Result.Acknowledgements, allAuthorNames,
 		)

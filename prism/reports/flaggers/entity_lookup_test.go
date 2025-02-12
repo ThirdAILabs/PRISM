@@ -45,7 +45,7 @@ func TestEntityLookup(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	entityStore, err := flaggers.NewEntityStore(db)
+	entityStore, err := flaggers.NewEntityStore(t.TempDir(), db)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -2,7 +2,6 @@ package flaggers
 
 import (
 	"encoding/csv"
-	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -50,12 +49,10 @@ type EntityStore struct {
 	flash search.Flash
 }
 
-const ndbPath = "./entity_store.ndb"
-
-func createNdb(aliases []string) (search.NeuralDB, error) {
+func createNdb(ndbPath string, aliases []string) (search.NeuralDB, error) {
 	ndb, err := search.NewNeuralDB(ndbPath)
 	if err != nil {
-		return search.NeuralDB{}, fmt.Errorf("error creating ndb")
+		return search.NeuralDB{}, fmt.Errorf("error creating ndb: %w", err)
 	}
 
 	if err := ndb.Insert("aliases", "aliases", aliases, nil, nil); err != nil {
@@ -109,7 +106,7 @@ func createFlash(aliases []string) (search.Flash, error) {
 	return flash, nil
 }
 
-func NewEntityStore(db *gorm.DB) (*EntityStore, error) {
+func NewEntityStore(ndbPath string, db *gorm.DB) (*EntityStore, error) {
 	store := &EntityStore{db: db}
 
 	aliases, err := store.allAliases()
@@ -117,13 +114,7 @@ func NewEntityStore(db *gorm.DB) (*EntityStore, error) {
 		return nil, err
 	}
 
-	if err := os.RemoveAll(ndbPath); err != nil {
-		if !errors.Is(err, os.ErrNotExist) {
-			return nil, fmt.Errorf("error cleaning up existing ndb: %w", err)
-		}
-	}
-
-	ndb, err := createNdb(aliases)
+	ndb, err := createNdb(ndbPath, aliases)
 	if err != nil {
 		return nil, fmt.Errorf("error creating entity ndb: %w", err)
 	}
