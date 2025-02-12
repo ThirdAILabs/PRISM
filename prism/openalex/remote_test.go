@@ -1,7 +1,6 @@
 package openalex_test
 
 import (
-	"fmt"
 	"prism/openalex"
 	"slices"
 	"strings"
@@ -19,8 +18,6 @@ func TestAutocompleteAuthor(t *testing.T) {
 	if len(results) == 0 {
 		t.Fatal("should have some results")
 	}
-
-	fmt.Println(results)
 
 	found := false
 	for _, res := range results {
@@ -107,7 +104,6 @@ func TestStreamWorks(t *testing.T) {
 		t.Fatal("expected > 1 results")
 	}
 
-	nonEmptyDownloadUrl := false
 	found := false
 	for _, work := range results {
 		if !strings.HasPrefix(work.WorkId, "https://openalex.org/") ||
@@ -116,10 +112,10 @@ func TestStreamWorks(t *testing.T) {
 			work.OaUrl == "" ||
 			work.DownloadUrl == "" ||
 			work.PublicationYear != 2024 ||
-			len(work.Authors) == 0 {
+			len(work.Authors) == 0 ||
+			len(work.Locations) == 0 {
 			t.Fatal("invalid work")
 		}
-		nonEmptyDownloadUrl = nonEmptyDownloadUrl || work.DownloadUrl != ""
 
 		for _, author := range work.Authors {
 			if !strings.HasPrefix(author.AuthorId, "https://openalex.org/") ||
@@ -146,9 +142,6 @@ func TestStreamWorks(t *testing.T) {
 	if !found {
 		t.Fatal("missing work")
 	}
-	if !nonEmptyDownloadUrl {
-		t.Fatal("no valid download urls found")
-	}
 }
 
 func TestFindWorksByTitle(t *testing.T) {
@@ -172,7 +165,9 @@ func TestFindWorksByTitle(t *testing.T) {
 	for i, work := range results {
 		if !strings.HasPrefix(work.WorkId, "https://openalex.org/") ||
 			work.DisplayName != titles[i] ||
-			work.WorkUrl == "" || work.OaUrl == "" || len(work.Authors) == 0 {
+			work.WorkUrl == "" || work.OaUrl == "" ||
+			len(work.Authors) == 0 ||
+			len(work.Locations) == 0 {
 			t.Fatal("invalid work")
 		}
 

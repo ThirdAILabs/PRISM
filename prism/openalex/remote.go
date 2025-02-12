@@ -312,6 +312,8 @@ func converOpenalexWork(work oaWork) Work {
 		DownloadUrl:     work.pdfUrl(),
 		PublicationYear: work.PublicationYear,
 		Authors:         authors,
+		Grants:          grants,
+		Locations:       locations,
 	}
 }
 
