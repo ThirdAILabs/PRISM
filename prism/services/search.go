@@ -38,6 +38,8 @@ func (s *SearchService) SearchOpenAlex(r *http.Request) (any, error) {
 	query := r.URL.Query()
 	author, institution := query.Get("author_name"), query.Get("institution_id")
 
+	slog.Info("searching openalex", "author_name", author, "institution_id", institution)
+
 	authors, err := s.openalex.FindAuthors(author, institution)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
@@ -59,6 +61,8 @@ func (s *SearchService) SearchOpenAlex(r *http.Request) (any, error) {
 func (s *SearchService) SearchGoogleScholar(r *http.Request) (any, error) {
 	query := strings.ReplaceAll(strings.ToLower(r.URL.Query().Get("query")), "@", " ")
 	cursor := r.URL.Query().Get("cursor")
+
+	slog.Info("searching google scholar", "query", query, "cursor", cursor)
 
 	results, nextCursor, err := gscholar.NextGScholarPage(query, cursor)
 	if err != nil {
