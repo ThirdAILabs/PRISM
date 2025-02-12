@@ -1,12 +1,125 @@
 package reports
 
-import "prism/reports/flaggers"
+import (
+	"prism/reports/flaggers"
+	"strings"
+)
 
+type ConnectionField struct {
+	Title       string                `json:"title"`
+	Count       int                   `json:"count"`
+	Connections []flaggers.Connection `json:"connections"`
+}
+
+// TODO(Anyone): This format is should be simplified and cleaned, doing it like this now for compatability
 type ReportContent struct {
-}	
+	AuthorName  string            `json:"name"`
+	RiskScore   int               `json:"risk_score"`
+	Connections []ConnectionField `json:"connections"`
+}
 
+func hasForeignTalentProgram(flag *flaggers.EOCAcknowledgemntsFlag) bool {
+	if strings.Contains(flag.FlagMessage, "talent") {
+		return true
+	}
 
-func FormatReport(flags []flaggers.Flag) (ReportContent, error) {
+	for _, entity := range flag.Entities {
+		for _, source := range entity.Sources {
+			if strings.Contains(strings.ToLower(source), "foreign talent") {
+				return true
+			}
+		}
+	}
+	return false
+}
 
-	
+func hasDeniedEntity(flag *flaggers.EOCAcknowledgemntsFlag) bool {
+	for _, entity := range flag.Entities {
+		for _, source := range entity.Sources {
+			if strings.Contains(strings.ToLower(source), "chinese military") {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func FormatReport(authorname string, flags []flaggers.Flag) ReportContent {
+	papersWithForeignTalentPrograms := make([]flaggers.Connection, 0)
+	papersWithDeniedEntities := make([]flaggers.Connection, 0)
+	papersWithHighRiskFunding := make([]flaggers.Connection, 0)
+	papersWithHighRiskInstitutions := make([]flaggers.Connection, 0)
+	highRiskApptsAtInstitutions := make([]flaggers.Connection, 0)
+	potentialHighRiskApptsAtInstitutions := make([]flaggers.Connection, 0)
+	miscPotentialHighRiskAssoc := make([]flaggers.Connection, 0)
+
+	for _, flag := range flags {
+		switch flag := flag.(type) {
+		case *flaggers.AuthorIsAssociatedWithEOCFlag:
+			miscPotentialHighRiskAssoc = append(miscPotentialHighRiskAssoc, flag.Connection())
+
+		case *flaggers.EOCCoauthorAffiliationsFlag:
+			papersWithHighRiskInstitutions = append(papersWithHighRiskInstitutions, flag.Connection())
+
+		case *flaggers.AuthorIsFacultyAtEOCFlag:
+			potentialHighRiskApptsAtInstitutions = append(potentialHighRiskApptsAtInstitutions, flag.Connection())
+
+		case *flaggers.EOCAcknowledgemntsFlag:
+			if hasForeignTalentProgram(flag) {
+				papersWithForeignTalentPrograms = append(papersWithForeignTalentPrograms, flag.Connection())
+			} else if hasDeniedEntity(flag) {
+				papersWithDeniedEntities = append(papersWithDeniedEntities, flag.Connection())
+			} else {
+				papersWithHighRiskFunding = append(papersWithHighRiskFunding, flag.Connection())
+			}
+		case *flaggers.EOCAuthorAffiliationsFlag:
+			highRiskApptsAtInstitutions = append(highRiskApptsAtInstitutions, flag.Connection())
+
+		case *flaggers.EOCFundersFlag:
+			papersWithHighRiskFunding = append(papersWithHighRiskFunding, flag.Connection())
+		}
+	}
+
+	connections := []ConnectionField{
+		{
+			Title:       "Papers with foreign talent programs",
+			Connections: papersWithForeignTalentPrograms,
+		},
+		{
+			Title:       "Papers with denied entities",
+			Connections: papersWithDeniedEntities,
+		},
+		{
+			Title:       "Papers with high-risk funding sources",
+			Connections: papersWithHighRiskFunding,
+		},
+		{
+			Title:       "Papers with high-risk foreign institutions",
+			Connections: papersWithHighRiskInstitutions,
+		},
+		{
+			Title:       "High-risk appointments at foreign institutions",
+			Connections: highRiskApptsAtInstitutions,
+		},
+		{
+			Title:       "Potential high-risk appointments at foreign institutions",
+			Connections: potentialHighRiskApptsAtInstitutions,
+		},
+		{
+			Title:       "Miscellaneous potential high-risk associations",
+			Connections: miscPotentialHighRiskAssoc,
+		},
+	}
+
+	totalScore := 0
+	for i, conn := range connections {
+		connections[i].Count = len(conn.Connections)
+		totalScore += len(conn.Connections)
+	}
+
+	return ReportContent{
+		AuthorName:  authorname,
+		RiskScore:   totalScore,
+		Connections: connections,
+	}
 }

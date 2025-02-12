@@ -1,51 +1,62 @@
 package flaggers
 
-import "prism/openalex"
+import (
+	"prism/openalex"
+	"strings"
+)
+
+type flagType string
 
 // Author Flagger Types
 const (
-	AuthorIsFacultyAtEOC      = "uni_faculty_eoc"
-	AuthorIsAssociatedWithEOC = "doj_press_release_eoc"
+	AuthorIsFacultyAtEOC      flagType = "uni_faculty_eoc"
+	AuthorIsAssociatedWithEOC flagType = "doj_press_release_eoc"
 )
 
 // Work Flagger Types
 const (
-	OAMultipleAffiliations     = "oa_multi_affil"
-	OAFunderIsEOC              = "oa_funder_eoc"
-	OAPublisherIsEOC           = "oa_publisher_eoc"
-	OACoauthorIsEOC            = "oa_coauther_eoc"
-	OAAuthorAffiliationIsEOC   = "oa_author_affiliation_eoc"
-	OACoauthorAffiliationIsEOC = "oa_coauthor_affiliation_eoc"
-	OAAcknowledgementIsEOC     = "oa_acknowledgement_eoc"
+	OAMultipleAffiliations     flagType = "oa_multi_affil" // Not used right now
+	OAFunderIsEOC              flagType = "oa_funder_eoc"
+	OAPublisherIsEOC           flagType = "oa_publisher_eoc" // Not used right now
+	OACoauthorIsEOC            flagType = "oa_coauther_eoc"  // Not used right now
+	OAAuthorAffiliationIsEOC   flagType = "oa_author_affiliation_eoc"
+	OACoauthorAffiliationIsEOC flagType = "oa_coauthor_affiliation_eoc"
+	OAAcknowledgementIsEOC     flagType = "oa_acknowledgement_eoc"
 )
 
+type Connection struct {
+	Title       string       `json:"title"`
+	Url         string       `json:"url"`
+	Connections []Connection `json:"connections"`
+}
+
 type Flag interface {
-	GetType() string
+	Type() flagType
 
-	GetTitle() string
-
-	GetMessage() string
+	Connection() Connection
 }
 
 /*
  * Author Flags
  */
 
-type AuthorFlag struct {
-	FlaggerType string
-	Title       string
-	Message     string
-
-	// For AuthorIsFacultyAtEOCFlagger
-	AuthorIsFacultyAtEOC *AuthorIsFacultyAtEOCFlag
-
-	// For AuthorIsAssociatedWithEOCFlagger
-	AuthorIsAssociatedWithEOC *AuthorIsAssociatedWithEOCFlag
-}
-
 type AuthorIsFacultyAtEOCFlag struct {
+	FlagTitle   string // Do we still need this?
+	FlagMessage string // Do we still need this?
+
 	University    string
 	UniversityUrl string
+}
+
+func (flag *AuthorIsFacultyAtEOCFlag) Type() flagType {
+	return AuthorIsFacultyAtEOC
+}
+
+func (flag *AuthorIsFacultyAtEOCFlag) Connection() Connection {
+	return Connection{
+		Title: flag.University,
+		Url:   flag.UniversityUrl,
+	}
 }
 
 type Node struct {
@@ -54,83 +65,159 @@ type Node struct {
 }
 
 type AuthorIsAssociatedWithEOCFlag struct {
+	FlagTitle   string // Do we still need this?
+	FlagMessage string // Do we still need this?
+
 	DocTitle         string
 	DocUrl           string
 	DocEntities      []string
 	EntityMentioned  string
-	Connection       string
+	ConnectionLevel  string
 	Nodes            []Node
 	FrequentCoauthor *string
 }
 
-func (flag *AuthorFlag) GetType() string {
-	return flag.FlaggerType
+func (flag *AuthorIsAssociatedWithEOCFlag) Type() flagType {
+	return AuthorIsAssociatedWithEOC
 }
 
-func (flag *AuthorFlag) GetTitle() string {
-	return flag.Title
-}
+func (flag *AuthorIsAssociatedWithEOCFlag) Connection() Connection {
+	connection := Connection{
+		Title: flag.DocTitle,
+		Url:   flag.DocUrl,
+	}
 
-func (flag *AuthorFlag) GetMessage() string {
-	return flag.Message
-}
+	for i := len(flag.Nodes) - 1; i >= 0; i-- {
+		connection = Connection{
+			Title:       flag.Nodes[i].DocTitle,
+			Url:         flag.Nodes[i].DocUrl,
+			Connections: []Connection{connection},
+		}
+	}
 
-type WorkFlag struct {
-	FlaggerType string
-	Title       string
-	Message     string
-	AuthorIds   []string
-	Work        openalex.Work
-
-	// For OpenAlexMultipleAffiliationsFlagger
-	MultipleAssociations *MultipleAssociationsFlag
-
-	// For OpenAlexFunderIsEOC
-	EOCFunders *EOCFundersFlag
-
-	// For OpenAlexPublisherIsEOC
-	EOCPublishers *EOCPublishersFlag
-
-	// For OpenAlexCoauthorIsEOC
-	EOCCoauthors *EOCCoauthorsFlag
-
-	// For OpenAlexAuthorAffiliationIsEOC
-	EOCAuthorAffiliations *EOCAuthorAffiliationsFlag
-
-	// For OpenAlexCoauthorAffiliationIsEOC
-	EOCCoauthorAffiliations *EOCCoauthorAffiliationsFlag
-
-	// For OpenAlexAcknowledgementIsEOC
-	EOCAcknowledgemnts *EOCAcknowledgemntsFlag
+	return connection
 }
 
 /*
  * Work Flags
  */
-type MultipleAssociationsFlag struct {
+type MultipleAssociationsFlag struct { // This flag is deprecated
+	FlagTitle   string // Do we still need this?
+	FlagMessage string // Do we still need this?
+
 	AuthorName   string
 	Affiliations []string
 }
 
+func (flag *MultipleAssociationsFlag) Type() flagType {
+	return OAMultipleAffiliations
+}
+
+func (flag *MultipleAssociationsFlag) Connection() Connection {
+	return Connection{
+		Title: flag.FlagMessage,
+	}
+}
+
 type EOCFundersFlag struct {
+	FlagTitle   string // Do we still need this?
+	FlagMessage string // Do we still need this?
+
+	Work openalex.Work
+
 	Funders []string
 }
 
+func (flag *EOCFundersFlag) Type() flagType {
+	return OAFunderIsEOC
+}
+
+func (flag *EOCFundersFlag) Connection() Connection {
+	return Connection{
+		Title: flag.Work.DisplayName,
+		Url:   flag.Work.WorkUrl,
+	}
+}
+
 type EOCPublishersFlag struct {
+	FlagTitle   string // Do we still need this?
+	FlagMessage string // Do we still need this?
+
+	Work openalex.Work
+
 	Publishers []string
 }
 
+func (flag *EOCPublishersFlag) Type() flagType {
+	return OAPublisherIsEOC
+}
+
+func (flag *EOCPublishersFlag) Connection() Connection {
+	return Connection{
+		Title: flag.Work.DisplayName,
+		Url:   flag.Work.WorkUrl,
+	}
+}
+
 type EOCCoauthorsFlag struct {
+	FlagTitle   string // Do we still need this?
+	FlagMessage string // Do we still need this?
+
+	Work openalex.Work
+
 	Coauthors []string
 }
 
+func (flag *EOCCoauthorsFlag) Type() flagType {
+	return OACoauthorIsEOC
+}
+
+func (flag *EOCCoauthorsFlag) Connection() Connection {
+	return Connection{
+		Title: flag.Work.DisplayName,
+		Url:   flag.Work.WorkUrl,
+	}
+}
+
 type EOCAuthorAffiliationsFlag struct {
+	FlagTitle   string // Do we still need this?
+	FlagMessage string // Do we still need this?
+
+	Work openalex.Work
+
 	Institutions []string
 }
 
+func (flag *EOCAuthorAffiliationsFlag) Type() flagType {
+	return OAAuthorAffiliationIsEOC
+}
+
+func (flag *EOCAuthorAffiliationsFlag) Connection() Connection {
+	return Connection{
+		Title: strings.Join(flag.Institutions, " "),
+		Url:   flag.Work.WorkUrl,
+	}
+}
+
 type EOCCoauthorAffiliationsFlag struct {
+	FlagTitle   string // Do we still need this?
+	FlagMessage string // Do we still need this?
+
+	Work openalex.Work
+
 	Institutions []string
 	Authors      []string
+}
+
+func (flag *EOCCoauthorAffiliationsFlag) Type() flagType {
+	return OACoauthorAffiliationIsEOC
+}
+
+func (flag *EOCCoauthorAffiliationsFlag) Connection() Connection {
+	return Connection{
+		Title: flag.Work.DisplayName,
+		Url:   flag.Work.WorkUrl,
+	}
 }
 
 type EOCAcknowledgementEntity struct {
@@ -140,18 +227,22 @@ type EOCAcknowledgementEntity struct {
 }
 
 type EOCAcknowledgemntsFlag struct {
+	FlagTitle   string // Do we still need this?
+	FlagMessage string // Do we still need this?
+
+	Work openalex.Work
+
 	Entities           []EOCAcknowledgementEntity
 	RawAcknowledements []string
 }
 
-func (flag *WorkFlag) GetType() string {
-	return flag.FlaggerType
+func (flag *EOCAcknowledgemntsFlag) Type() flagType {
+	return OAAcknowledgementIsEOC
 }
 
-func (flag *WorkFlag) GetTitle() string {
-	return flag.Title
-}
-
-func (flag *WorkFlag) GetMessage() string {
-	return flag.Message
+func (flag *EOCAcknowledgemntsFlag) Connection() Connection {
+	return Connection{
+		Title: flag.Work.DisplayName,
+		Url:   flag.Work.WorkUrl,
+	}
 }

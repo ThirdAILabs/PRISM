@@ -40,7 +40,7 @@ func main() {
 
 	processor, err := flaggers.NewReportProcessor(opts)
 	if err != nil {
-		log.Fatalf("error creating work processor: %w", err)
+		log.Fatalf("error creating work processor: %v", err)
 	}
 
 	db := cmd.InitDb(config.PostgresUri)
@@ -69,19 +69,11 @@ func main() {
 			continue
 		}
 
-		content, err := reports.FormatReport(flags)
-		if err != nil {
-			slog.Error("error formatting report: %w", err)
-
-			if err := reportManager.UpdateReport(nextReport.Id, "failed", []byte(err.Error())); err != nil {
-				slog.Error("error updating report status to failed", "error", err)
-			}
-			continue
-		}
+		content := reports.FormatReport(nextReport.AuthorName, flags)
 
 		contentBytes, err := json.Marshal(content)
 		if err != nil {
-			slog.Error("error serializing report: %w", err)
+			slog.Error("error serializing report", "error", err)
 
 			if err := reportManager.UpdateReport(nextReport.Id, "failed", []byte(err.Error())); err != nil {
 				slog.Error("error updating report status to failed", "error", err)
