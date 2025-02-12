@@ -1,6 +1,7 @@
 package reports
 
 import (
+	"encoding/json"
 	"errors"
 	"log/slog"
 	"prism/api"
@@ -36,7 +37,11 @@ func (r *ReportManager) ListReports(userId uuid.UUID) ([]api.Report, error) {
 
 	results := make([]api.Report, 0, len(reports))
 	for _, report := range reports {
-		results = append(results, convertReport(report))
+		res, err := convertReport(report)
+		if err != nil {
+			return nil, ErrReportAccessFailed
+		}
+		results = append(results, res)
 	}
 
 	return results, nil
@@ -92,7 +97,7 @@ func (r *ReportManager) GetReport(userId, id uuid.UUID) (api.Report, error) {
 		return api.Report{}, ErrUserCannotAccessReport
 	}
 
-	return convertReport(report), nil
+	return convertReport(report)
 }
 
 func (r *ReportManager) GetNextReport() (*api.Report, error) {
@@ -124,7 +129,10 @@ func (r *ReportManager) GetNextReport() (*api.Report, error) {
 	}
 
 	if found {
-		result := convertReport(report)
+		result, err := convertReport(report)
+		if err != nil {
+			return nil, err
+		}
 		return &result, nil
 	}
 
@@ -170,7 +178,7 @@ func getReport(txn *gorm.DB, id uuid.UUID, withContent bool) (schema.Report, err
 	return report, nil
 }
 
-func convertReport(report schema.Report) api.Report {
+func convertReport(report schema.Report) (api.Report, error) {
 	result := api.Report{
 		Id:         report.Id,
 		CreatedAt:  report.CreatedAt,
@@ -183,8 +191,14 @@ func convertReport(report schema.Report) api.Report {
 	}
 
 	if report.Content != nil {
-		result.Content = report.Content.Content
+		var content ReportContent
+		err := json.Unmarshal(report.Content.Content, &content)
+		if err != nil {
+			slog.Error("error parsing report content", "error", err)
+			return api.Report{}, ErrReportAccessFailed
+		}
+		result.Content = content
 	}
 
-	return result
+	return result, nil
 }
