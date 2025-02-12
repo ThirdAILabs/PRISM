@@ -17,6 +17,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"gopkg.in/yaml.v3"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -146,6 +147,16 @@ func main() {
 	backend := services.NewBackend(db, openalex, entityNdb, userAuth, adminAuth)
 
 	r := chi.NewRouter()
+
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"},                                       // Allow all origins
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}, // Allow all HTTP methods
+		AllowedHeaders:   []string{"*"},                                       // Allow all headers
+		ExposedHeaders:   []string{"*"},                                       // Expose all headers
+		AllowCredentials: true,                                                // Allow cookies/auth headers
+		MaxAge:           300,                                                 // Cache preflight response for 5 minutes
+	}))
+
 	r.Mount("/api/v1", backend.Routes())
 
 	slog.Info("starting server", "port", config.port())
