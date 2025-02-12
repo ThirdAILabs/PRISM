@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"prism/api"
 	"prism/reports"
@@ -56,8 +57,9 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusBadRequest)
 	}
 
-	id, err := s.manager.CreateReport(userId, params.AuthorId, params.AuthorName, params.Source, params.StartYear, params.EndYear)
+	licenseId, err := licensing.VerifyLicenseForReport(s.db, userId)
 	if err != nil {
+		slog.Error("cannot create new report, unable to verify license", "error", err)
 		switch {
 		case errors.Is(err, licensing.ErrMissingLicense):
 			return nil, CodedError(err, http.StatusUnprocessableEntity)
@@ -68,6 +70,11 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 		default:
 			return nil, CodedError(err, http.StatusInternalServerError)
 		}
+	}
+
+	id, err := s.manager.CreateReport(licenseId, userId, params.AuthorId, params.AuthorName, params.Source, params.StartYear, params.EndYear)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
 	return api.CreateReportResponse{Id: id}, nil

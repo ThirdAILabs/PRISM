@@ -174,39 +174,28 @@ func AddLicenseUser(txn *gorm.DB, licenseKey string, userId uuid.UUID) error {
 	return nil
 }
 
-func VerifyLicenseForReport(txn *gorm.DB, userId, reportId uuid.UUID) error {
+func VerifyLicenseForReport(txn *gorm.DB, userId uuid.UUID) (uuid.UUID, error) {
 	var licenseUser schema.LicenseUser
 
 	if err := txn.Preload("License").First(&licenseUser, "user_id = ?", userId).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return ErrMissingLicense
+			return uuid.Nil, ErrMissingLicense
 		}
 		slog.Error("error retreiving user license from db", "error", err)
-		return ErrLicenseRetrievalFailed
+		return uuid.Nil, ErrLicenseRetrievalFailed
 	}
 
 	if licenseUser.License.Expiration.Before(time.Now().UTC()) {
 		slog.Info("license is expired")
-		return ErrExpiredLicense
+		return uuid.Nil, ErrExpiredLicense
 	}
 
 	if licenseUser.License.Deactivated {
 		slog.Info("license is deactivated")
-		return ErrDeactivatedLicense
+		return uuid.Nil, ErrDeactivatedLicense
 	}
 
-	usage := schema.LicenseUsage{
-		LicenseId: licenseUser.License.Id,
-		ReportId:  reportId,
-		UserId:    userId,
-		Timestamp: time.Now().UTC()}
-
-	if err := txn.Create(&usage).Error; err != nil {
-		slog.Error("error logging license usage", "error", err)
-		return errors.New("error updating license usage")
-	}
-
-	return nil
+	return licenseUser.LicenseId, nil
 }
 
 func ListLicenses(txn *gorm.DB) ([]api.License, error) {

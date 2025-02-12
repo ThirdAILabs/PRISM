@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"prism/api"
 	"prism/schema"
-	"prism/services/licensing"
 	"time"
 
 	"github.com/google/uuid"
@@ -30,7 +29,7 @@ func NewManager(db *gorm.DB) *ReportManager {
 func (r *ReportManager) ListReports(userId uuid.UUID) ([]api.Report, error) {
 	var reports []schema.Report
 
-	if err := r.db.Find(&reports, "user_id = ?", userId).Error; err != nil {
+	if err := r.db.Order("created_at ASC").Find(&reports, "user_id = ?", userId).Error; err != nil {
 		slog.Error("error finding list of reports ")
 		return nil, ErrReportAccessFailed
 	}
@@ -43,7 +42,7 @@ func (r *ReportManager) ListReports(userId uuid.UUID) ([]api.Report, error) {
 	return results, nil
 }
 
-func (r *ReportManager) CreateReport(userId uuid.UUID, authorId, authorName, source string, startYear, endYear int) (uuid.UUID, error) {
+func (r *ReportManager) CreateReport(licenseId, userId uuid.UUID, authorId, authorName, source string, startYear, endYear int) (uuid.UUID, error) {
 	report := schema.Report{
 		Id:         uuid.New(),
 		UserId:     userId,
@@ -57,14 +56,20 @@ func (r *ReportManager) CreateReport(userId uuid.UUID, authorId, authorName, sou
 	}
 
 	err := r.db.Transaction(func(txn *gorm.DB) error {
-		if err := licensing.VerifyLicenseForReport(txn, userId, report.Id); err != nil {
-			slog.Error("cannot create new report, unable to verify license", "error", err)
-			return err
-		}
-
 		if err := txn.Create(&report).Error; err != nil {
 			slog.Error("error creating new report", "error", err)
 			return ErrReportAccessFailed
+		}
+
+		usage := schema.LicenseUsage{
+			LicenseId: licenseId,
+			ReportId:  report.Id,
+			UserId:    userId,
+			Timestamp: time.Now().UTC(),
+		}
+		if err := txn.Create(&usage).Error; err != nil {
+			slog.Error("error logging license usage", "error", err)
+			return errors.New("error updating license usage")
 		}
 
 		return nil
@@ -95,12 +100,14 @@ func (r *ReportManager) GetNextReport() (*api.Report, error) {
 	var report schema.Report
 
 	err := r.db.Transaction(func(txn *gorm.DB) error {
-		if err := txn.First(&report, "status = ?", schema.ReportQueued).Order("created_at ASC").Error; err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return nil
-			}
-			slog.Error("error getting next report from queue", "error", err)
+		result := txn.Limit(1).Order("created_at ASC").Find(&report, "status = ?", schema.ReportQueued)
+		if result.Error != nil {
+			slog.Error("error getting next report from queue", "error", result.Error)
 			return ErrReportAccessFailed
+		}
+
+		if result.RowsAffected != 1 {
+			return nil
 		}
 
 		if err := txn.Model(&report).Update("status", schema.ReportInProgress).Error; err != nil {
@@ -149,7 +156,7 @@ func getReport(txn *gorm.DB, id uuid.UUID, withContent bool) (schema.Report, err
 
 	query := txn
 	if withContent {
-		query.Preload("Content")
+		query = query.Preload("Content")
 	}
 
 	if err := query.First(&report, "id = ?", id).Error; err != nil {
@@ -176,7 +183,7 @@ func convertReport(report schema.Report) api.Report {
 	}
 
 	if report.Content != nil {
-		result.Content = report.Content
+		result.Content = report.Content.Content
 	}
 
 	return result
