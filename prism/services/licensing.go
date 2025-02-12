@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 	"prism/api"
 	"prism/services/licensing"
@@ -30,28 +31,38 @@ func (s *LicenseService) CreateLicense(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusBadRequest)
 	}
 
+	slog.Info("creating license", "name", params.Name)
+
 	license, err := licensing.CreateLicense(s.db, params.Name, params.Expiration)
 	if err != nil {
+		slog.Error("error creating license", "name", params.Name, "error", err)
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	return api.CreateLicenseResponse{License: license}, nil
+	slog.Info("license created", "name", params.Name, "license_id", license.Id)
+
+	return license, nil
 }
 
 func (s *LicenseService) DeactivateLicense(r *http.Request) (any, error) {
-	licenseId, err := URLParamUUID(r, "license_key")
+	licenseId, err := URLParamUUID(r, "license_id")
 	if err != nil {
 		return nil, CodedError(err, http.StatusBadRequest)
 	}
 
+	slog.Info("deactivating license", "license_id", licenseId)
+
 	if err := s.db.Transaction(func(txn *gorm.DB) error {
 		return licensing.DeactivateLicense(txn, licenseId)
 	}); err != nil {
+		slog.Error("error deleting license", "license_id", licenseId, "error", err)
 		if errors.Is(err, licensing.ErrLicenseNotFound) {
 			return nil, CodedError(err, http.StatusNotFound)
 		}
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
+
+	slog.Info("license deactivated", "license_id", licenseId)
 
 	return nil, nil
 }

@@ -306,7 +306,7 @@ type cachedAckFlag struct {
 
 type OpenAlexAcknowledgementIsEOC struct {
 	openalex     openalex.KnowledgeBase
-	entityLookup EntityStore
+	entityLookup *EntityStore
 	flagCache    DataCache[cachedAckFlag]
 	authorCache  DataCache[openalex.Author]
 	extractor    AcknowledgementsExtractor
@@ -503,6 +503,8 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 			workLogger.Info("work contains no acknowledgments: skipping work")
 			continue
 		}
+
+		workLogger.Info("found acknowledgements", "n_acks", len(acks.Result.Acknowledgements))
 
 		flaggedEntities, message, err := flagger.checkAcknowledgementEntities(
 			workLogger, acks.Result.Acknowledgements, allAuthorNames,

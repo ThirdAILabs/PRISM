@@ -27,7 +27,7 @@ var (
 	ErrMissingLicense         = errors.New("user does not have registered license")
 )
 
-type licensePayload struct {
+type LicensePayload struct { // This is only exported to use to create a malformed license for a test.
 	Id     uuid.UUID
 	Secret []byte
 }
@@ -36,29 +36,29 @@ const (
 	versionPrefix = "V1-"
 )
 
-func (l *licensePayload) serialize() (string, error) {
+func (l *LicensePayload) Serialize() (string, error) {
 	buf := new(bytes.Buffer)
 	if err := gob.NewEncoder(buf).Encode(l); err != nil {
 		slog.Error("error serializing license", "error", err)
 		return "", ErrLicenseCreationFailed
 	}
 
-	return versionPrefix + base64.StdEncoding.EncodeToString(buf.Bytes()), nil
+	return versionPrefix + base64.URLEncoding.EncodeToString(buf.Bytes()), nil
 }
 
-func parseLicense(licenseKey string) (*licensePayload, error) {
+func parseLicense(licenseKey string) (*LicensePayload, error) {
 	if !strings.HasPrefix(licenseKey, versionPrefix) {
 		slog.Error("license is invalid, missing version prefix")
 		return nil, ErrInvalidLicense
 	}
 
-	data, err := base64.StdEncoding.DecodeString(licenseKey[len(versionPrefix):])
+	data, err := base64.URLEncoding.DecodeString(licenseKey[len(versionPrefix):])
 	if err != nil {
 		slog.Error("error decoding base64 encoding of license", "error", err)
 		return nil, ErrInvalidLicense
 	}
 
-	var license licensePayload
+	var license LicensePayload
 	if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&license); err != nil {
 		slog.Error("error parsing license bytes", "error", err)
 		return nil, ErrInvalidLicense
@@ -67,7 +67,7 @@ func parseLicense(licenseKey string) (*licensePayload, error) {
 	return &license, nil
 }
 
-func (l *licensePayload) verifySecret(hashedSecret []byte) error {
+func (l *LicensePayload) verifySecret(hashedSecret []byte) error {
 	err := bcrypt.CompareHashAndPassword(hashedSecret, l.Secret)
 	if err != nil {
 		slog.Info("license verification failed", "error", err)
@@ -76,40 +76,40 @@ func (l *licensePayload) verifySecret(hashedSecret []byte) error {
 	return nil
 }
 
-func CreateLicense(txn *gorm.DB, name string, expiration time.Time) (string, error) {
+func CreateLicense(txn *gorm.DB, name string, expiration time.Time) (api.CreateLicenseResponse, error) {
 	secret := make([]byte, 48)
 	if _, err := rand.Read(secret); err != nil {
 		slog.Error("error generating license secret", "error", err)
-		return "", ErrLicenseCreationFailed
+		return api.CreateLicenseResponse{}, ErrLicenseCreationFailed
 	}
 
-	license := licensePayload{Id: uuid.New(), Secret: secret}
+	license := LicensePayload{Id: uuid.New(), Secret: secret}
 
-	licenseKey, err := license.serialize()
+	licenseKey, err := license.Serialize()
 	if err != nil {
-		return "", err
+		return api.CreateLicenseResponse{}, err
 	}
 
 	hashedSecret, err := bcrypt.GenerateFromPassword(license.Secret, bcrypt.DefaultCost)
 	if err != nil {
 		slog.Error("error hashing license secret", "error", err)
-		return "", ErrLicenseCreationFailed
+		return api.CreateLicenseResponse{}, ErrLicenseCreationFailed
 	}
 
 	licenseEntry := schema.License{
 		Id:          license.Id,
 		Secret:      hashedSecret,
 		Name:        name,
-		Expiration:  expiration,
+		Expiration:  expiration.UTC(),
 		Deactivated: false,
 	}
 
 	if err := txn.Create(&licenseEntry).Error; err != nil {
 		slog.Error("error saving license entry to db", "error", err)
-		return "", ErrLicenseCreationFailed
+		return api.CreateLicenseResponse{}, ErrLicenseCreationFailed
 	}
 
-	return licenseKey, nil
+	return api.CreateLicenseResponse{Id: licenseEntry.Id, License: licenseKey}, nil
 }
 
 func getLicense(txn *gorm.DB, id uuid.UUID) (schema.License, error) {
@@ -174,39 +174,28 @@ func AddLicenseUser(txn *gorm.DB, licenseKey string, userId uuid.UUID) error {
 	return nil
 }
 
-func VerifyLicenseForReport(txn *gorm.DB, userId, reportId uuid.UUID) error {
+func VerifyLicenseForReport(txn *gorm.DB, userId uuid.UUID) (uuid.UUID, error) {
 	var licenseUser schema.LicenseUser
 
 	if err := txn.Preload("License").First(&licenseUser, "user_id = ?", userId).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return ErrMissingLicense
+			return uuid.Nil, ErrMissingLicense
 		}
 		slog.Error("error retreiving user license from db", "error", err)
-		return ErrLicenseRetrievalFailed
+		return uuid.Nil, ErrLicenseRetrievalFailed
 	}
 
 	if licenseUser.License.Expiration.Before(time.Now().UTC()) {
 		slog.Info("license is expired")
-		return ErrExpiredLicense
+		return uuid.Nil, ErrExpiredLicense
 	}
 
 	if licenseUser.License.Deactivated {
 		slog.Info("license is deactivated")
-		return ErrDeactivatedLicense
+		return uuid.Nil, ErrDeactivatedLicense
 	}
 
-	usage := schema.LicenseUsage{
-		LicenseId: licenseUser.License.Id,
-		ReportId:  reportId,
-		UserId:    userId,
-		Timestamp: time.Now().UTC()}
-
-	if err := txn.Create(&usage).Error; err != nil {
-		slog.Error("error logging license usage", "error", err)
-		return errors.New("error updating license usage")
-	}
-
-	return nil
+	return licenseUser.LicenseId, nil
 }
 
 func ListLicenses(txn *gorm.DB) ([]api.License, error) {

@@ -19,7 +19,11 @@ import (
 	"github.com/playwright-community/playwright-go"
 )
 
-type AcknowledgementsExtractor struct {
+type AcknowledgementsExtractor interface {
+	GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan CompletedTask[Acknowledgements]
+}
+
+type GrobidAcknowledgementsExtractor struct {
 	cache          DataCache[Acknowledgements]
 	maxWorkers     int
 	grobidEndpoint string
@@ -43,7 +47,7 @@ type Acknowledgements struct {
 	Acknowledgements []Acknowledgement
 }
 
-func (extractor *AcknowledgementsExtractor) GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan CompletedTask[Acknowledgements] {
+func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan CompletedTask[Acknowledgements] {
 	outputCh := make(chan CompletedTask[Acknowledgements], len(works))
 
 	queue := make(chan openalex.Work, len(works))
@@ -83,7 +87,7 @@ func (extractor *AcknowledgementsExtractor) GetAcknowledgements(logger *slog.Log
 	return outputCh
 }
 
-func (extractor *AcknowledgementsExtractor) extractAcknowledgments(logger *slog.Logger, workId string, work openalex.Work) (Acknowledgements, error) {
+func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(logger *slog.Logger, workId string, work openalex.Work) (Acknowledgements, error) {
 	logger.Info("extracting acknowledgments from", "work_id", work.WorkId, "work_name", work.DisplayName)
 
 	destPath := filepath.Join(extractor.downloadDir, uuid.NewString()+".pdf")
@@ -190,6 +194,10 @@ func downloadWithHttp(url string) (io.ReadCloser, error) {
 		return nil, fmt.Errorf("error downloading pdf: %w", err)
 	}
 
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("error downloading pdf: recieved status_code=%d", res.StatusCode)
+	}
+
 	return res.Body, nil
 }
 
@@ -257,7 +265,7 @@ func parseGrobidReponse(data io.Reader) ([]Acknowledgement, error) {
 	return acks, nil
 }
 
-func (extractor *AcknowledgementsExtractor) processPdfWithGrobid(pdf io.Reader) ([]Acknowledgement, error) {
+func (extractor *GrobidAcknowledgementsExtractor) processPdfWithGrobid(pdf io.Reader) ([]Acknowledgement, error) {
 	body := new(bytes.Buffer)
 	writer := multipart.NewWriter(body)
 
@@ -280,6 +288,10 @@ func (extractor *AcknowledgementsExtractor) processPdfWithGrobid(pdf io.Reader) 
 		return nil, fmt.Errorf("error making request to grobid: %w", err)
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("grobid returned error, status_code=%d", res.StatusCode)
+	}
 
 	return parseGrobidReponse(res.Body)
 }

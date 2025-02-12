@@ -16,7 +16,7 @@ func (s *AutocompleteService) Routes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Get("/author", WrapRestHandler(s.AutocompleteAuthor))
-	r.Get("/institution", WrapRestHandler(s.AutocompleteAuthor))
+	r.Get("/institution", WrapRestHandler(s.AutocompleteInstitution))
 
 	return r
 }
@@ -29,21 +29,21 @@ func (s *AutocompleteService) AutocompleteAuthor(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
+	seen := make(map[string]bool)
 	results := make([]api.Author, 0, len(authors))
 	for _, author := range authors {
-		institutionNames := make([]string, 0, len(author.Institutions))
-		for _, inst := range author.Institutions {
-			institutionNames = append(institutionNames, inst.InstitutionName)
+		if !seen[author.DisplayName] {
+			results = append(results, api.Author{
+				AuthorId:     author.AuthorId,
+				AuthorName:   author.DisplayName,
+				Institutions: author.InstitutionNames(),
+				Source:       api.OpenAlexSource,
+			})
+			seen[author.DisplayName] = true
 		}
-		results = append(results, api.Author{
-			AuthorId:     author.AuthorId,
-			DisplayName:  author.DisplayName,
-			Institutions: institutionNames,
-			Source:       api.OpenAlexSource,
-		})
 	}
 
-	return authors, nil
+	return results, nil
 }
 
 func (s *AutocompleteService) AutocompleteInstitution(r *http.Request) (any, error) {
@@ -54,12 +54,17 @@ func (s *AutocompleteService) AutocompleteInstitution(r *http.Request) (any, err
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
+	seen := make(map[string]bool)
 	results := make([]api.Institution, 0, len(institutions))
 	for _, inst := range institutions {
-		results = append(results, api.Institution{
-			DisplayName: inst.InstitutionName,
-		})
+		if !seen[inst.InstitutionName] {
+			results = append(results, api.Institution{
+				InstitutionId:   inst.InstitutionId,
+				InstitutionName: inst.InstitutionName,
+			})
+			seen[inst.InstitutionName] = true
+		}
 	}
 
-	return institutions, nil
+	return results, nil
 }

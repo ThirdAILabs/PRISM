@@ -19,7 +19,7 @@ type Report struct {
 
 	Status string
 
-	Content any `json:"omitempty"`
+	Content any `json:"Content,omitempty"`
 }
 
 type CreateReportRequest struct {
@@ -43,13 +43,19 @@ const (
 
 type Author struct {
 	AuthorId     string
-	DisplayName  string
+	AuthorName   string
 	Institutions []string
 	Source       string
 }
 
+type GScholarSearchResults struct {
+	Authors []Author
+	Cursor  string
+}
+
 type Institution struct {
-	DisplayName string
+	InstitutionId   string
+	InstitutionName string
 }
 
 type FormalRelationResponse struct {
@@ -66,6 +72,7 @@ type CreateLicenseRequest struct {
 }
 
 type CreateLicenseResponse struct {
+	Id      uuid.UUID
 	License string
 }
 

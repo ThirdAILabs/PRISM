@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -17,6 +18,19 @@ func NewRemoteKnowledgeBase() KnowledgeBase {
 	return &RemoteKnowledgeBase{}
 }
 
+func checkStatus(res *http.Response) error {
+	if res.StatusCode != http.StatusOK {
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			slog.Error("openalex: recieved reponse error", "method", res.Request.Method, "endpoint", res.Request.URL.String(), "status_code", res.StatusCode)
+		} else {
+			slog.Error("openalex: recieved reponse error", "method", res.Request.Method, "endpoint", res.Request.URL.String(), "status_code", res.StatusCode, "body", string(body))
+		}
+		return fmt.Errorf("openalex returned status=%d", res.StatusCode)
+	}
+	return nil
+}
+
 func autocompleteHelper(component, query string, dest interface{}) error {
 	url := fmt.Sprintf("https://api.openalex.org/autocomplete/%s?q=%s&mailto=kartik@thirdai.com", component, url.QueryEscape(query))
 
@@ -26,6 +40,10 @@ func autocompleteHelper(component, query string, dest interface{}) error {
 		return fmt.Errorf("unable to get autocomplete suggestions")
 	}
 	defer res.Body.Close()
+
+	if err := checkStatus(res); err != nil {
+		return fmt.Errorf("unable to get autocomplete suggestions")
+	}
 
 	if err := json.NewDecoder(res.Body).Decode(dest); err != nil {
 		slog.Error("openalex: error parsing reponse from autocomplete", "query", query, "component", component, "error", err)
@@ -86,7 +104,7 @@ func (oa *RemoteKnowledgeBase) AutocompleteInstitution(query string) ([]Institut
 // Response Format: https://docs.openalex.org/api-entities/authors/get-lists-of-authors
 type oaAuthor struct {
 	Id                      string          `json:"id"`
-	DisplayName             string          `json:"diplay_name"`
+	DisplayName             string          `json:"display_name"`
 	DisplayNameAlternatives []string        `json:"display_name_alternatives"`
 	WorksCount              int             `json:"works_count"`
 	Affiliations            []oaAffiliation `json:"affiliations"`
@@ -102,23 +120,27 @@ type oaAffiliation struct {
 	Institution oaInstitution `json:"institution"`
 }
 
-func (oa *RemoteKnowledgeBase) FindAuthors(author, institution string) ([]Author, error) {
+func (oa *RemoteKnowledgeBase) FindAuthors(authorName, institutionId string) ([]Author, error) {
 	url := fmt.Sprintf(
 		"https://api.openalex.org/authors?filter=display_name.search:%s,affiliations.institution.id:%s&mailto=kartik@thirdai.com",
-		url.QueryEscape(author), url.QueryEscape(institution),
+		url.QueryEscape(authorName), url.QueryEscape(institutionId),
 	)
 
 	res, err := http.Get(url)
 	if err != nil {
-		slog.Error("openalex: author search failed", "author", author, "institution", institution, "error", err)
+		slog.Error("openalex: author search failed", "author", authorName, "institution", institutionId, "error", err)
 		return nil, ErrSearchFailed
 	}
 	defer res.Body.Close()
 
+	if err := checkStatus(res); err != nil {
+		return nil, ErrSearchFailed
+	}
+
 	var results oaResults[oaAuthor]
 
 	if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
-		slog.Error("openalex: error parsing author search response", "author", author, "institution", institution, "error", err)
+		slog.Error("openalex: error parsing author search response", "author", authorName, "institution", institutionId, "error", err)
 		return nil, ErrSearchFailed
 	}
 
@@ -290,6 +312,8 @@ func converOpenalexWork(work oaWork) Work {
 		DownloadUrl:     work.pdfUrl(),
 		PublicationYear: work.PublicationYear,
 		Authors:         authors,
+		Grants:          grants,
+		Locations:       locations,
 	}
 }
 
@@ -312,7 +336,12 @@ func (oa *RemoteKnowledgeBase) StreamWorks(authorId string, startYear, endYear i
 				break
 			}
 
-			var results oaResults[oaWork]
+			if err := checkStatus(res); err != nil {
+				outputCh <- WorkBatch{Works: nil, TargetAuthorIds: nil, Error: fmt.Errorf("openalex: work search failed: %w", err)}
+				break
+			}
+
+			var results oaWorkResults
 			if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
 				slog.Error("openalex: error parsing response from work search", "author_id", authorId, "start_year", startYear, "end_year", endYear, "error", err)
 				outputCh <- WorkBatch{Works: nil, TargetAuthorIds: nil, Error: fmt.Errorf("error parsing response from open alex: %w", err)}
@@ -325,6 +354,8 @@ func (oa *RemoteKnowledgeBase) StreamWorks(authorId string, startYear, endYear i
 			}
 
 			outputCh <- WorkBatch{Works: works, TargetAuthorIds: []string{authorId}, Error: nil}
+
+			cursor = results.Meta.NextCursor
 		}
 	}()
 
@@ -341,6 +372,10 @@ func (oa *RemoteKnowledgeBase) FindWorksByTitle(titles []string, startYear, endY
 		res, err := http.Get(url)
 		if err != nil {
 			slog.Error("openalex: error searching for work by title", "title", title, "error", err)
+			return nil, fmt.Errorf("openalex work search failed: %w", err)
+		}
+
+		if err := checkStatus(res); err != nil {
 			return nil, fmt.Errorf("openalex work search failed: %w", err)
 		}
 
@@ -367,6 +402,10 @@ func (oa *RemoteKnowledgeBase) GetAuthor(authorId string) (Author, error) {
 		return Author{}, ErrSearchFailed
 	}
 	defer res.Body.Close()
+
+	if err := checkStatus(res); err != nil {
+		return Author{}, ErrSearchFailed
+	}
 
 	var results oaResults[oaAuthor]
 

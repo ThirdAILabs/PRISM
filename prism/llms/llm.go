@@ -22,7 +22,7 @@ type LLM interface {
 }
 
 func New() LLM {
-	return &OpenAI{}
+	return NewOpenAI()
 }
 
 const (
@@ -30,14 +30,18 @@ const (
 )
 
 type OpenAI struct {
-	client openai.Client
+	client *openai.Client
+}
+
+func NewOpenAI() LLM {
+	return &OpenAI{client: openai.NewClient()}
 }
 
 func (o *OpenAI) Generate(prompt string, opts *Options) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
 
-	messages := make([]openai.ChatCompletionMessageParamUnion, 2)
+	messages := make([]openai.ChatCompletionMessageParamUnion, 0, 2)
 
 	if opts != nil && len(opts.SystemPrompt) > 0 {
 		messages = append(messages, openai.SystemMessage(opts.SystemPrompt))

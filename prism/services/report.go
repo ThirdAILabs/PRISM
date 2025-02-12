@@ -3,11 +3,13 @@ package services
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"prism/api"
 	"prism/reports"
 	"prism/services/auth"
 	"prism/services/licensing"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -26,7 +28,7 @@ func (s *ReportService) Routes() chi.Router {
 	r.Post("/create", WrapRestHandler(s.CreateReport))
 	r.Get("/{report_id}", WrapRestHandler(s.GetReport))
 
-	r.Post("/use-license", WrapRestHandler(s.UseLicense))
+	r.Post("/activate-license", WrapRestHandler(s.UseLicense))
 
 	return r
 }
@@ -56,8 +58,32 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusBadRequest)
 	}
 
-	id, err := s.manager.CreateReport(userId, params.AuthorId, params.AuthorName, params.Source, params.StartYear, params.EndYear)
+	if params.AuthorId == "" {
+		return nil, CodedError(errors.New("AuthorId must be specified"), http.StatusUnprocessableEntity)
+	}
+
+	if params.AuthorId == "" {
+		return nil, CodedError(errors.New("AuthorName must be specified"), http.StatusUnprocessableEntity)
+	}
+
+	switch params.Source {
+	case api.OpenAlexSource, api.GoogleScholarSource, api.ScopusSource, api.UnstructuredSource:
+		// ok
+	default:
+		return nil, CodedError(errors.New("invalid Source"), http.StatusUnprocessableEntity)
+	}
+
+	if params.StartYear == 0 {
+		params.StartYear = time.Now().Year() - 4
+	}
+
+	if params.EndYear == 0 {
+		params.StartYear = time.Now().Year()
+	}
+
+	licenseId, err := licensing.VerifyLicenseForReport(s.db, userId)
 	if err != nil {
+		slog.Error("cannot create new report, unable to verify license", "error", err)
 		switch {
 		case errors.Is(err, licensing.ErrMissingLicense):
 			return nil, CodedError(err, http.StatusUnprocessableEntity)
@@ -68,6 +94,11 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 		default:
 			return nil, CodedError(err, http.StatusInternalServerError)
 		}
+	}
+
+	id, err := s.manager.CreateReport(licenseId, userId, params.AuthorId, params.AuthorName, params.Source, params.StartYear, params.EndYear)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
 	return api.CreateReportResponse{Id: id}, nil

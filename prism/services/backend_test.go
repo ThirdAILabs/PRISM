@@ -8,12 +8,14 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"path/filepath"
 	"prism/api"
 	"prism/openalex"
 	"prism/schema"
 	"prism/search"
 	"prism/services"
+	"prism/services/licensing"
 	"slices"
 	"strings"
 	"testing"
@@ -75,6 +77,14 @@ func createBackend(t *testing.T) http.Handler {
 	ndbPath := filepath.Join(t.TempDir(), "entity.ndb")
 	ndb, err := search.NewNeuralDB(ndbPath)
 	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		ndb.Free()
+	})
+
+	entities := []string{"abc university", "institute of xyz", "123 org"}
+	if err := ndb.Insert("doc", "id", entities, nil, nil); err != nil {
 		t.Fatal(err)
 	}
 
@@ -194,21 +204,179 @@ func createReport(backend http.Handler, user, name string) (api.CreateReportResp
 	return res, err
 }
 
-func createLicense(backend http.Handler, user string) (string, error) {
+func createLicense(backend http.Handler, name, user string) (api.CreateLicenseResponse, error) {
+	return createLicenseWithExp(backend, name, user, time.Now().UTC().Add(5*time.Minute))
+}
+
+func createLicenseWithExp(backend http.Handler, name, user string, exp time.Time) (api.CreateLicenseResponse, error) {
 	req := api.CreateLicenseRequest{
-		Name:       "test-license",
-		Expiration: time.Now().UTC().Add(5 * time.Minute),
+		Name:       name,
+		Expiration: exp,
 	}
 	var res api.CreateLicenseResponse
 	err := Post(backend, "/license/create", user, req, &res)
-	return res.License, err
+	return res, err
 }
 
-func useLicense(backend http.Handler, user, license string) error {
+func listLicenses(backend http.Handler, user string) ([]api.License, error) {
+	var res []api.License
+	err := Get(backend, "/license/list", user, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	slices.SortFunc(res, func(a, b api.License) int {
+		if a.Name < b.Name {
+			return -1
+		}
+		if a.Name > b.Name {
+			return 1
+		}
+		return 0
+	})
+
+	return res, nil
+}
+
+func activateLicense(backend http.Handler, user, license string) error {
 	req := api.AddLicenseUserRequest{
 		License: license,
 	}
-	return Post(backend, "/report/use-license", user, req, nil)
+	return Post(backend, "/report/activate-license", user, req, nil)
+}
+
+func deactivateLicense(backend http.Handler, user string, id uuid.UUID) error {
+	return Delete(backend, "/license/"+id.String(), user)
+}
+
+func TestLicenseEndpoints(t *testing.T) {
+	backend := createBackend(t)
+
+	admin := newAdmin()
+	user1, user2 := newUser(), newUser()
+
+	if _, err := createLicense(backend, "license-0", user1); !errors.Is(err, ErrUnauthorized) {
+		t.Fatal("users cannot create licenses")
+	}
+
+	license1, err := createLicense(backend, "xyz", admin)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	license2, err := createLicense(backend, "abc", admin)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := listLicenses(backend, user1); !errors.Is(err, ErrUnauthorized) {
+		t.Fatal("users cannot list licenses")
+	}
+
+	licenses, err := listLicenses(backend, admin)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(licenses) != 2 ||
+		licenses[0].Name != "abc" || licenses[0].Id != license2.Id ||
+		licenses[1].Name != "xyz" || licenses[1].Id != license1.Id {
+		t.Fatalf("incorrect licenses: %v", licenses)
+	}
+
+	if err := activateLicense(backend, user1, license1.License); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := deactivateLicense(backend, admin, license2.Id); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := activateLicense(backend, user2, license2.License); err == nil || !strings.Contains(err.Error(), "license is deactivated") {
+		t.Fatal("cannot use deactivated license")
+	}
+
+	if _, err := createReport(backend, user1, "report1"); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := deactivateLicense(backend, user2, license1.Id); !errors.Is(err, ErrUnauthorized) {
+		t.Fatal("users cannot deactivate licenses")
+	}
+
+	if _, err := createReport(backend, user1, "report1"); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := deactivateLicense(backend, admin, license1.Id); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := createReport(backend, user1, "report1"); err == nil || !strings.Contains(err.Error(), "license is deactivated") {
+		t.Fatal("cannot use deactivated license")
+	}
+}
+
+func TestLicenseExpiration(t *testing.T) {
+	backend := createBackend(t)
+
+	admin := newAdmin()
+	user1, user2 := newUser(), newUser()
+
+	license, err := createLicenseWithExp(backend, "xyz", admin, time.Now().UTC().Add(500*time.Millisecond))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := activateLicense(backend, user1, license.License); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := createReport(backend, user1, "report1"); err != nil {
+		t.Fatal(err)
+	}
+
+	time.Sleep(500 * time.Millisecond)
+
+	if _, err := createReport(backend, user1, "report1"); err == nil || !strings.Contains(err.Error(), "expired license") {
+		t.Fatal(err)
+	}
+
+	if err := activateLicense(backend, user2, license.License); err == nil || !strings.Contains(err.Error(), "expired license") {
+		t.Fatal(err)
+	}
+}
+
+func TestLicenseInvalidLicense(t *testing.T) {
+	backend := createBackend(t)
+
+	admin := newAdmin()
+	user := newUser()
+
+	license, err := createLicense(backend, "xyz", admin)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	badSecretLicense := licensing.LicensePayload{Id: license.Id, Secret: []byte("invalid secret")}
+	badSecretKey, err := badSecretLicense.Serialize()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := activateLicense(backend, user, badSecretKey); !strings.Contains(err.Error(), "invalid license") {
+		t.Fatal(err)
+	}
+
+	badIdLicense := licensing.LicensePayload{Id: uuid.New(), Secret: []byte("invalid secret")}
+	badIdKey, err := badIdLicense.Serialize()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := activateLicense(backend, user, badIdKey); !strings.Contains(err.Error(), "license not found") {
+		t.Fatal(err)
+	}
 }
 
 func TestReportEndpoints(t *testing.T) {
@@ -220,7 +388,7 @@ func TestReportEndpoints(t *testing.T) {
 	checkListReports(t, backend, user1, []string{})
 	checkListReports(t, backend, user2, []string{})
 
-	license, err := createLicense(backend, admin)
+	license, err := createLicense(backend, "test-license", admin)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -229,10 +397,10 @@ func TestReportEndpoints(t *testing.T) {
 		t.Fatalf("report should fail %v", err)
 	}
 
-	if err := useLicense(backend, user1, license); err != nil {
+	if err := activateLicense(backend, user1, license.License); err != nil {
 		t.Fatal(err)
 	}
-	if err := useLicense(backend, user2, license); err != nil {
+	if err := activateLicense(backend, user2, license.License); err != nil {
 		t.Fatal(err)
 	}
 
@@ -254,4 +422,159 @@ func TestReportEndpoints(t *testing.T) {
 	}
 
 	compareReport(t, reportData, "report1")
+
+	if _, err := createReport(backend, user2, "report2"); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := createReport(backend, user1, "report3"); err != nil {
+		t.Fatal(err)
+	}
+
+	checkListReports(t, backend, user1, []string{"report1", "report3"})
+	checkListReports(t, backend, user2, []string{"report2"})
+}
+
+func TestAutocompleteAuthor(t *testing.T) {
+	backend := createBackend(t)
+
+	user := newUser()
+
+	var results []api.Author
+	err := mockRequest(backend, "GET", "/autocomplete/author?query="+url.QueryEscape("anshumali shriva"), user, nil, &results)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(results) == 0 {
+		t.Fatal("should have some results")
+	}
+
+	for _, res := range results {
+		if !strings.HasPrefix(res.AuthorId, "https://openalex.org/") ||
+			!strings.EqualFold(res.AuthorName, "Anshumali Shrivastava") ||
+			res.Source != "openalex" {
+			t.Fatal("invalid result")
+		}
+	}
+}
+
+func TestAutocompleteInstution(t *testing.T) {
+	backend := createBackend(t)
+
+	user := newUser()
+
+	var results []api.Institution
+	err := mockRequest(backend, "GET", "/autocomplete/institution?query="+url.QueryEscape("rice univer"), user, nil, &results)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(results) == 0 {
+		t.Fatal("should have some results")
+	}
+
+	for _, res := range results {
+		if !strings.HasPrefix(res.InstitutionId, "https://openalex.org/") ||
+			strings.EqualFold(res.InstitutionName, "Rice University, USA") {
+			t.Fatal("invalid result")
+		}
+	}
+}
+
+func TestMatchEntities(t *testing.T) {
+	backend := createBackend(t)
+
+	user := newUser()
+
+	var results api.MatchEntitiesResponse
+	err := mockRequest(backend, "GET", "/search/match-entities?query="+url.QueryEscape("xyz"), user, nil, &results)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(results.Entities) != 1 || results.Entities[0] != "institute of xyz" {
+		t.Fatalf("incorrect entities matched: %v", results.Entities)
+	}
+}
+
+func TestSearchOpenalexAuthors(t *testing.T) {
+	backend := createBackend(t)
+
+	user := newUser()
+
+	authorName := "anshumali shrivastava"
+	insitutionId := "https://openalex.org/I74775410"
+
+	url := fmt.Sprintf("/search/regular?author_name=%s&institution_id=%s", url.QueryEscape(authorName), url.QueryEscape(insitutionId))
+	var results []api.Author
+	err := mockRequest(backend, "GET", url, user, nil, &results)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(results) != 1 || !strings.HasPrefix(results[0].AuthorId, "https://openalex.org/") ||
+		results[0].AuthorName != "Anshumali Shrivastava" ||
+		len(results[0].Institutions) == 0 || !slices.Contains(results[0].Institutions, "Rice University") ||
+		results[0].Source != "openalex" {
+		t.Fatal("incorrect authors returned")
+	}
+}
+
+func TestSearchGoogleScholarAuthors(t *testing.T) {
+	backend := createBackend(t)
+
+	user := newUser()
+
+	authorName := "anshumali shrivastava"
+
+	url := fmt.Sprintf("/search/advanced?query=%s", url.QueryEscape(authorName))
+	var results api.GScholarSearchResults
+	err := mockRequest(backend, "GET", url, user, nil, &results)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(results.Authors) != 1 || results.Authors[0].AuthorId != "SGT23RAAAAAJ" ||
+		results.Authors[0].AuthorName != "Anshumali Shrivastava" ||
+		len(results.Authors[0].Institutions) == 0 || !slices.Contains(results.Authors[0].Institutions, "Rice University") ||
+		results.Authors[0].Source != "google-scholar" {
+		t.Fatal("incorrect authors returned")
+	}
+}
+
+func TestSearchGoogleScholarAuthorsWithCursor(t *testing.T) {
+	backend := createBackend(t)
+
+	user := newUser()
+
+	checkQuery := func(authors []api.Author) {
+		if len(authors) == 0 {
+			t.Fatal("expect > 0 results for query")
+		}
+
+		for _, author := range authors {
+			if len(author.AuthorId) == 0 || len(author.AuthorName) == 0 || len(author.Institutions) == 0 || author.Source != "google-scholar" {
+				t.Fatal("author attributes should not be empty")
+			}
+		}
+	}
+
+	authorName := "bill zhang"
+
+	url1 := fmt.Sprintf("/search/advanced?query=%s", url.QueryEscape(authorName))
+	var results1 api.GScholarSearchResults
+	if err := mockRequest(backend, "GET", url1, user, nil, &results1); err != nil {
+		t.Fatal(err)
+	}
+
+	checkQuery(results1.Authors)
+
+	url2 := fmt.Sprintf("/search/advanced?query=%s&cursor=%s", url.QueryEscape(authorName), results1.Cursor)
+	var results2 api.GScholarSearchResults
+	if err := mockRequest(backend, "GET", url2, user, nil, &results2); err != nil {
+		t.Fatal(err)
+	}
+
+	checkQuery(results2.Authors)
 }

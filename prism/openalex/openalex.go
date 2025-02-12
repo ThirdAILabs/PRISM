@@ -8,8 +8,8 @@ type Institution struct {
 type Author struct {
 	AuthorId                string
 	DisplayName             string
-	DisplayNameAlternatives []string
-	RawAuthorName           *string
+	DisplayNameAlternatives []string // Only set when calling GetAuthor
+	RawAuthorName           *string  // Only set when getting author via works
 	Institutions            []Institution
 }
 
@@ -62,7 +62,7 @@ type KnowledgeBase interface {
 
 	AutocompleteInstitution(query string) ([]Institution, error)
 
-	FindAuthors(author, institution string) ([]Author, error)
+	FindAuthors(authorName, institutionId string) ([]Author, error)
 
 	StreamWorks(authorId string, startYear, endYear int) chan WorkBatch
 

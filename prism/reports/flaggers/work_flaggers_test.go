@@ -2,8 +2,13 @@ package flaggers
 
 import (
 	"log/slog"
+	"path/filepath"
 	"prism/openalex"
 	"testing"
+
+	"github.com/google/uuid"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 func TestMultipleAssociations(t *testing.T) {
@@ -164,5 +169,101 @@ func TestCoauthorAffiliationEOC(t *testing.T) {
 				t.Fatal("incorrect number of flags")
 			}
 		}
+	}
+}
+
+type mockAcknowledgmentExtractor struct{}
+
+func (m *mockAcknowledgmentExtractor) GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan CompletedTask[Acknowledgements] {
+	output := make(chan CompletedTask[Acknowledgements], 1)
+
+	output <- CompletedTask[Acknowledgements]{
+		Result: Acknowledgements{
+			WorkId: works[0].WorkId,
+			Acknowledgements: []Acknowledgement{{
+				RawText: "special thanks to bad entity xyz",
+				SearchableEntities: []Entity{
+					{"bad entity xyz", "", 0},
+				},
+			}},
+		},
+	}
+
+	close(output)
+
+	return output
+}
+
+func entityLookupDB(t *testing.T) *gorm.DB {
+	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := db.AutoMigrate(&AliasRecord{}, &EntityRecord{}, &SourceRecord{}); err != nil {
+		t.Fatal(err)
+	}
+
+	source1 := uuid.New()
+	if err := db.Create([]SourceRecord{
+		{Id: source1, Name: "source_a", Link: "a.com"},
+	}).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	entity1 := uuid.New()
+	if err := db.Create([]EntityRecord{
+		{Id: entity1, Name: "entity_a", SourceId: source1},
+	}).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	if err := db.Create([]AliasRecord{
+		{Id: uuid.New(), Alias: "bad entity xyz", EntityId: entity1},
+		{Id: uuid.New(), Alias: "a worse entity", EntityId: entity1},
+	}).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	return db
+}
+
+func TestAcknowledgementEOC(t *testing.T) {
+	testDir := t.TempDir()
+
+	flagCache, err := NewCache[cachedAckFlag]("flags", filepath.Join(testDir, "flag.cache"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer flagCache.Close()
+
+	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(testDir, "author.cache"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer authorCache.Close()
+
+	entityStore, err := NewEntityStore(t.TempDir(), entityLookupDB(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer entityStore.Free()
+
+	flagger := OpenAlexAcknowledgementIsEOC{
+		openalex:     openalex.NewRemoteKnowledgeBase(),
+		entityLookup: entityStore,
+		flagCache:    flagCache,
+		authorCache:  authorCache,
+		extractor:    &mockAcknowledgmentExtractor{},
+		sussyBakas:   []string{"bad entity xyz"},
+	}
+
+	flags, err := flagger.Flag(slog.Default(), []openalex.Work{{WorkId: "a/b"}}, []string{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(flags) != 1 {
+		t.Fatal("expected 1 flag")
 	}
 }
