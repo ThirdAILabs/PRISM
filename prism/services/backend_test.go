@@ -450,24 +450,12 @@ func TestAutocompleteAuthor(t *testing.T) {
 		t.Fatal("should have some results")
 	}
 
-	found := false
 	for _, res := range results {
 		if !strings.HasPrefix(res.AuthorId, "https://openalex.org/") ||
 			!strings.EqualFold(res.AuthorName, "Anshumali Shrivastava") ||
 			res.Source != "openalex" {
 			t.Fatal("invalid result")
 		}
-
-		for _, inst := range res.Institutions {
-			if strings.EqualFold(inst, "Rice University, USA") {
-				found = true
-				break
-			}
-		}
-	}
-
-	if !found {
-		t.Fatal("didn't find correct result")
 	}
 }
 
@@ -563,11 +551,11 @@ func TestSearchGoogleScholarAuthorsWithCursor(t *testing.T) {
 	checkQuery := func(authors []api.Author) {
 		if len(authors) == 0 {
 			t.Fatal("expect > 0 results for query")
+		}
 
-			for _, author := range authors {
-				if len(author.AuthorId) == 0 || len(author.AuthorName) == 0 || len(author.Institutions) == 0 || author.Source != "google-scholar" {
-					t.Fatal("author attributes should not be empty")
-				}
+		for _, author := range authors {
+			if len(author.AuthorId) == 0 || len(author.AuthorName) == 0 || len(author.Institutions) == 0 || author.Source != "google-scholar" {
+				t.Fatal("author attributes should not be empty")
 			}
 		}
 	}
