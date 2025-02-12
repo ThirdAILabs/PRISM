@@ -9,6 +9,7 @@ import (
 	"prism/reports"
 	"prism/services/auth"
 	"prism/services/licensing"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -55,6 +56,29 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 	params, err := ParseRequestBody[api.CreateReportRequest](r)
 	if err != nil {
 		return nil, CodedError(err, http.StatusBadRequest)
+	}
+
+	if params.AuthorId == "" {
+		return nil, CodedError(errors.New("AuthorId must be specified"), http.StatusUnprocessableEntity)
+	}
+
+	if params.AuthorId == "" {
+		return nil, CodedError(errors.New("AuthorName must be specified"), http.StatusUnprocessableEntity)
+	}
+
+	switch params.Source {
+	case api.OpenAlexSource, api.GoogleScholarSource, api.ScopusSource, api.UnstructuredSource:
+		// ok
+	default:
+		return nil, CodedError(errors.New("invalid Source"), http.StatusUnprocessableEntity)
+	}
+
+	if params.StartYear == 0 {
+		params.StartYear = time.Now().Year() - 4
+	}
+
+	if params.EndYear == 0 {
+		params.StartYear = time.Now().Year()
 	}
 
 	licenseId, err := licensing.VerifyLicenseForReport(s.db, userId)
