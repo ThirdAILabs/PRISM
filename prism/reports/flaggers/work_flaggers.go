@@ -306,7 +306,7 @@ type cachedAckFlag struct {
 
 type OpenAlexAcknowledgementIsEOC struct {
 	openalex     openalex.KnowledgeBase
-	entityLookup EntityStore
+	entityLookup *EntityStore
 	flagCache    DataCache[cachedAckFlag]
 	authorCache  DataCache[openalex.Author]
 	extractor    AcknowledgementsExtractor

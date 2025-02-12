@@ -1,8 +1,11 @@
 package flaggers
 
 import (
+	"encoding/csv"
+	"errors"
 	"fmt"
 	"log/slog"
+	"os"
 	"prism/llms"
 	"prism/search"
 	"slices"
@@ -47,6 +50,100 @@ type EntityStore struct {
 	flash search.Flash
 }
 
+const ndbPath = "./entity_store.ndb"
+
+func createNdb(aliases []string) (search.NeuralDB, error) {
+	ndb, err := search.NewNeuralDB(ndbPath)
+	if err != nil {
+		return search.NeuralDB{}, fmt.Errorf("error creating ndb")
+	}
+
+	if err := ndb.Insert("aliases", "aliases", aliases, nil, nil); err != nil {
+		ndb.Free()
+		return search.NeuralDB{}, fmt.Errorf("ndb insertion failed: %w", err)
+	}
+
+	return ndb, nil
+}
+
+func createCsv(aliases []string) (string, error) {
+	filename := "entities.csv"
+
+	file, err := os.OpenFile(filename, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0666)
+	if err != nil {
+		return "", fmt.Errorf("error creating csv file for training: %w", err)
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+
+	rows := make([][]string, 0, len(aliases)+1)
+	rows = append(rows, []string{"entity"})
+	for _, alias := range aliases {
+		rows = append(rows, []string{alias})
+	}
+
+	if err := writer.WriteAll(rows); err != nil {
+		return "", fmt.Errorf("error writing rows: %w", err)
+	}
+
+	return filename, nil
+}
+
+func createFlash(aliases []string) (search.Flash, error) {
+	csv, err := createCsv(aliases)
+	if err != nil {
+		return search.Flash{}, fmt.Errorf("error creating csv: %w", err)
+	}
+
+	flash, err := search.NewFlash()
+	if err != nil {
+		return search.Flash{}, fmt.Errorf("error creating flash")
+	}
+
+	if err := flash.Train(csv); err != nil {
+		flash.Free()
+		return search.Flash{}, fmt.Errorf("error training flash: %w", err)
+	}
+
+	return flash, nil
+}
+
+func NewEntityStore(db *gorm.DB) (*EntityStore, error) {
+	store := &EntityStore{db: db}
+
+	aliases, err := store.allAliases()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := os.RemoveAll(ndbPath); err != nil {
+		if !errors.Is(err, os.ErrNotExist) {
+			return nil, fmt.Errorf("error cleaning up existing ndb: %w", err)
+		}
+	}
+
+	ndb, err := createNdb(aliases)
+	if err != nil {
+		return nil, fmt.Errorf("error creating entity ndb: %w", err)
+	}
+
+	flash, err := createFlash(aliases)
+	if err != nil {
+		return nil, fmt.Errorf("error creating entity flash: %w", err)
+	}
+
+	store.ndb = ndb
+	store.flash = flash
+
+	return store, nil
+}
+
+func (store *EntityStore) Free() {
+	store.ndb.Free()
+	store.flash.Free()
+}
+
 func (store *EntityStore) allAliases() ([]string, error) {
 	var records []AliasRecord
 
@@ -76,7 +173,7 @@ func (store *EntityStore) exactLookup(queries []string) (SourceToAliases, error)
 		source := record.Entity.Source.Name
 		aliases, ok := sourceToAliases[source]
 		if !ok {
-			aliases = make([]string, 1)
+			aliases = make([]string, 0, 1)
 		}
 		sourceToAliases[source] = append(aliases, record.Alias)
 	}
