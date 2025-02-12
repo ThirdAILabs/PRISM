@@ -120,15 +120,15 @@ type oaAffiliation struct {
 	Institution oaInstitution `json:"institution"`
 }
 
-func (oa *RemoteKnowledgeBase) FindAuthors(author, institution string) ([]Author, error) {
+func (oa *RemoteKnowledgeBase) FindAuthors(authorName, institutionId string) ([]Author, error) {
 	url := fmt.Sprintf(
 		"https://api.openalex.org/authors?filter=display_name.search:%s,affiliations.institution.id:%s&mailto=kartik@thirdai.com",
-		url.QueryEscape(author), url.QueryEscape(institution),
+		url.QueryEscape(authorName), url.QueryEscape(institutionId),
 	)
 
 	res, err := http.Get(url)
 	if err != nil {
-		slog.Error("openalex: author search failed", "author", author, "institution", institution, "error", err)
+		slog.Error("openalex: author search failed", "author", authorName, "institution", institutionId, "error", err)
 		return nil, ErrSearchFailed
 	}
 	defer res.Body.Close()
@@ -140,7 +140,7 @@ func (oa *RemoteKnowledgeBase) FindAuthors(author, institution string) ([]Author
 	var results oaResults[oaAuthor]
 
 	if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
-		slog.Error("openalex: error parsing author search response", "author", author, "institution", institution, "error", err)
+		slog.Error("openalex: error parsing author search response", "author", authorName, "institution", institutionId, "error", err)
 		return nil, ErrSearchFailed
 	}
 
@@ -339,7 +339,7 @@ func (oa *RemoteKnowledgeBase) StreamWorks(authorId string, startYear, endYear i
 				break
 			}
 
-			var results oaResults[oaWork]
+			var results oaWorkResults
 			if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
 				slog.Error("openalex: error parsing response from work search", "author_id", authorId, "start_year", startYear, "end_year", endYear, "error", err)
 				outputCh <- WorkBatch{Works: nil, TargetAuthorIds: nil, Error: fmt.Errorf("error parsing response from open alex: %w", err)}
@@ -352,6 +352,8 @@ func (oa *RemoteKnowledgeBase) StreamWorks(authorId string, startYear, endYear i
 			}
 
 			outputCh <- WorkBatch{Works: works, TargetAuthorIds: []string{authorId}, Error: nil}
+
+			cursor = results.Meta.NextCursor
 		}
 	}()
 
