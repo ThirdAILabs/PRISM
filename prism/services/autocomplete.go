@@ -29,14 +29,18 @@ func (s *AutocompleteService) AutocompleteAuthor(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
+	seen := make(map[string]bool)
 	results := make([]api.Author, 0, len(authors))
 	for _, author := range authors {
-		results = append(results, api.Author{
-			AuthorId:     author.AuthorId,
-			AuthorName:   author.DisplayName,
-			Institutions: author.InstitutionNames(),
-			Source:       api.OpenAlexSource,
-		})
+		if !seen[author.DisplayName] {
+			results = append(results, api.Author{
+				AuthorId:     author.AuthorId,
+				AuthorName:   author.DisplayName,
+				Institutions: author.InstitutionNames(),
+				Source:       api.OpenAlexSource,
+			})
+			seen[author.DisplayName] = true
+		}
 	}
 
 	return results, nil
@@ -50,12 +54,16 @@ func (s *AutocompleteService) AutocompleteInstitution(r *http.Request) (any, err
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
+	seen := make(map[string]bool)
 	results := make([]api.Institution, 0, len(institutions))
 	for _, inst := range institutions {
-		results = append(results, api.Institution{
-			InstitutionId:   inst.InstitutionId,
-			InstitutionName: inst.InstitutionName,
-		})
+		if !seen[inst.InstitutionName] {
+			results = append(results, api.Institution{
+				InstitutionId:   inst.InstitutionId,
+				InstitutionName: inst.InstitutionName,
+			})
+			seen[inst.InstitutionName] = true
+		}
 	}
 
 	return results, nil
