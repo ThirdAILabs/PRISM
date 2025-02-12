@@ -3,6 +3,7 @@ package openalex
 type Institution struct {
 	InstitutionName string
 	InstitutionId   string
+	Location        string
 }
 
 type Author struct {

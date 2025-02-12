@@ -61,6 +61,7 @@ func (s *AutocompleteService) AutocompleteInstitution(r *http.Request) (any, err
 			results = append(results, api.Institution{
 				InstitutionId:   inst.InstitutionId,
 				InstitutionName: inst.InstitutionName,
+				Location:        inst.Location,
 			})
 			seen[inst.InstitutionName] = true
 		}
