@@ -132,11 +132,11 @@ func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
 			},
 		},
 		authorFacultyAtEOC: AuthorIsFacultyAtEOCFlagger{
-			entityDB: entityNdb,
+			universityNDB: entityNdb,
 		},
 		authorAssociatedWithEOC: AuthorIsAssociatedWithEOCFlagger{
-			prDB:  docNdb,
-			auxDB: auxNdb,
+			docNDB: docNdb,
+			auxNDB: auxNdb,
 		},
 	}, nil
 }
