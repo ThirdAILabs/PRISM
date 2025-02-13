@@ -85,6 +85,7 @@ And so on. Here comes the snippet:
 %s
 `
 
+//lint:ignore U1000 streamUnstructuredWorks
 func streamUnstructuredWorks(oa openalex.KnowledgeBase, authorName, text string, startYear, endYear int) chan openalex.WorkBatch {
 	outputCh := make(chan openalex.WorkBatch, 10)
 
@@ -127,6 +128,7 @@ func streamUnstructuredWorks(oa openalex.KnowledgeBase, authorName, text string,
 	return outputCh
 }
 
+//lint:ignore U1000 streamScopusWorks
 func streamScopusWorks(oa openalex.KnowledgeBase, authorName string, titles []string, startYear, endYear int) chan openalex.WorkBatch {
 	outputCh := make(chan openalex.WorkBatch, 10)
 

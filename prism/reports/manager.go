@@ -197,6 +197,10 @@ func convertReport(report schema.Report) (api.Report, error) {
 			slog.Error("error parsing report content", "error", err)
 			return api.Report{}, ErrReportAccessFailed
 		}
+		for i := range content.Connections {
+			content.Connections[i].Details = nil
+		}
+
 		result.Content = content
 	}
 

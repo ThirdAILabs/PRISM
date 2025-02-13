@@ -9,6 +9,7 @@ type ConnectionField struct {
 	Title       string                `json:"title"`
 	Count       int                   `json:"count"`
 	Connections []flaggers.Connection `json:"connections"`
+	Details     []interface{}         `json:"details"`
 }
 
 // TODO(Anyone): This format is should be simplified and cleaned, doing it like this now for compatability
@@ -46,37 +47,59 @@ func hasDeniedEntity(flag *flaggers.EOCAcknowledgemntsFlag) bool {
 
 func FormatReport(authorname string, flags []flaggers.Flag) ReportContent {
 	papersWithForeignTalentPrograms := make([]flaggers.Connection, 0)
+	papersWithForeignTalentProgramsDetails := make([]interface{}, 0)
+
 	papersWithDeniedEntities := make([]flaggers.Connection, 0)
+	papersWithDeniedEntitiesDetails := make([]interface{}, 0)
+
 	papersWithHighRiskFunding := make([]flaggers.Connection, 0)
+	papersWithHighRiskFundingDetails := make([]interface{}, 0)
+
 	papersWithHighRiskInstitutions := make([]flaggers.Connection, 0)
+	papersWithHighRiskInstitutionsDetails := make([]interface{}, 0)
+
 	highRiskApptsAtInstitutions := make([]flaggers.Connection, 0)
+	highRiskApptsAtInstitutionsDetails := make([]interface{}, 0)
+
 	potentialHighRiskApptsAtInstitutions := make([]flaggers.Connection, 0)
+	potentialHighRiskApptsAtInstitutionsDetails := make([]interface{}, 0)
+
 	miscPotentialHighRiskAssoc := make([]flaggers.Connection, 0)
+	miscPotentialHighRiskAssocDetails := make([]interface{}, 0)
 
 	for _, flag := range flags {
-		switch flag := flag.(type) {
+		switch f := flag.(type) {
 		case *flaggers.AuthorIsAssociatedWithEOCFlag:
-			miscPotentialHighRiskAssoc = append(miscPotentialHighRiskAssoc, flag.Connection())
+			miscPotentialHighRiskAssoc = append(miscPotentialHighRiskAssoc, f.Connection())
+			miscPotentialHighRiskAssocDetails = append(miscPotentialHighRiskAssocDetails, f.Details())
 
 		case *flaggers.EOCCoauthorAffiliationsFlag:
-			papersWithHighRiskInstitutions = append(papersWithHighRiskInstitutions, flag.Connection())
+			papersWithHighRiskInstitutions = append(papersWithHighRiskInstitutions, f.Connection())
+			papersWithHighRiskInstitutionsDetails = append(papersWithHighRiskInstitutionsDetails, f.Details())
 
 		case *flaggers.AuthorIsFacultyAtEOCFlag:
-			potentialHighRiskApptsAtInstitutions = append(potentialHighRiskApptsAtInstitutions, flag.Connection())
+			potentialHighRiskApptsAtInstitutions = append(potentialHighRiskApptsAtInstitutions, f.Connection())
+			potentialHighRiskApptsAtInstitutionsDetails = append(potentialHighRiskApptsAtInstitutionsDetails, f.Details())
 
 		case *flaggers.EOCAcknowledgemntsFlag:
-			if hasForeignTalentProgram(flag) {
-				papersWithForeignTalentPrograms = append(papersWithForeignTalentPrograms, flag.Connection())
-			} else if hasDeniedEntity(flag) {
-				papersWithDeniedEntities = append(papersWithDeniedEntities, flag.Connection())
+			if hasForeignTalentProgram(f) {
+				papersWithForeignTalentPrograms = append(papersWithForeignTalentPrograms, f.Connection())
+				papersWithForeignTalentProgramsDetails = append(papersWithForeignTalentProgramsDetails, f.Details())
+			} else if hasDeniedEntity(f) {
+				papersWithDeniedEntities = append(papersWithDeniedEntities, f.Connection())
+				papersWithDeniedEntitiesDetails = append(papersWithDeniedEntitiesDetails, f.Details())
 			} else {
-				papersWithHighRiskFunding = append(papersWithHighRiskFunding, flag.Connection())
+				papersWithHighRiskFunding = append(papersWithHighRiskFunding, f.Connection())
+				papersWithHighRiskFundingDetails = append(papersWithHighRiskFundingDetails, f.Details())
 			}
+
 		case *flaggers.EOCAuthorAffiliationsFlag:
-			highRiskApptsAtInstitutions = append(highRiskApptsAtInstitutions, flag.Connection())
+			highRiskApptsAtInstitutions = append(highRiskApptsAtInstitutions, f.Connection())
+			highRiskApptsAtInstitutionsDetails = append(highRiskApptsAtInstitutionsDetails, f.Details())
 
 		case *flaggers.EOCFundersFlag:
-			papersWithHighRiskFunding = append(papersWithHighRiskFunding, flag.Connection())
+			papersWithHighRiskFunding = append(papersWithHighRiskFunding, f.Connection())
+			papersWithHighRiskFundingDetails = append(papersWithHighRiskFundingDetails, f.Details())
 		}
 	}
 
@@ -84,30 +107,37 @@ func FormatReport(authorname string, flags []flaggers.Flag) ReportContent {
 		{
 			Title:       "Papers with foreign talent programs",
 			Connections: papersWithForeignTalentPrograms,
+			Details:     papersWithForeignTalentProgramsDetails,
 		},
 		{
 			Title:       "Papers with denied entities",
 			Connections: papersWithDeniedEntities,
+			Details:     papersWithDeniedEntitiesDetails,
 		},
 		{
 			Title:       "Papers with high-risk funding sources",
 			Connections: papersWithHighRiskFunding,
+			Details:     papersWithHighRiskFundingDetails,
 		},
 		{
 			Title:       "Papers with high-risk foreign institutions",
 			Connections: papersWithHighRiskInstitutions,
+			Details:     papersWithHighRiskInstitutionsDetails,
 		},
 		{
 			Title:       "High-risk appointments at foreign institutions",
 			Connections: highRiskApptsAtInstitutions,
+			Details:     highRiskApptsAtInstitutionsDetails,
 		},
 		{
 			Title:       "Potential high-risk appointments at foreign institutions",
 			Connections: potentialHighRiskApptsAtInstitutions,
+			Details:     potentialHighRiskApptsAtInstitutionsDetails,
 		},
 		{
 			Title:       "Miscellaneous potential high-risk associations",
 			Connections: miscPotentialHighRiskAssoc,
+			Details:     miscPotentialHighRiskAssocDetails,
 		},
 	}
 
