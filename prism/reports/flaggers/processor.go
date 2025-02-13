@@ -8,10 +8,6 @@ import (
 	"prism/openalex"
 	"prism/search"
 	"sync"
-
-	"github.com/google/uuid"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 )
 
 type ReportProcessor struct {
@@ -22,11 +18,11 @@ type ReportProcessor struct {
 }
 
 type ReportProcessorOptions struct {
-	EntityNDBPath string
-	DocNDBPath    string
-	AuxNDBPath    string
+	UniversityNDB search.NeuralDB
+	DocNDB        search.NeuralDB
+	AuxNDB        search.NeuralDB
 
-	EntityLookupDBPath string
+	EntityLookup *EntityStore
 
 	ConcerningEntities     []string
 	ConcerningInstitutions []string
@@ -37,9 +33,7 @@ type ReportProcessorOptions struct {
 
 	GrobidEndpoint string
 
-	CacheDir string
-
-	ScratchDir string
+	WorkDir string
 }
 
 func convertToSet(list []string) eocSet {
@@ -52,30 +46,15 @@ func convertToSet(list []string) eocSet {
 
 // TODO(Nicholas): How to do cleanup for this, or just let it get cleaned up at the end of the process?
 func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
-	entityNdb, err := search.NewNeuralDB(opts.EntityNDBPath)
-	if err != nil {
-		return nil, fmt.Errorf("error loading entity ndb: %w", err)
-	}
-
-	docNdb, err := search.NewNeuralDB(opts.DocNDBPath)
-	if err != nil {
-		return nil, fmt.Errorf("error loading doc ndb: %w", err)
-	}
-
-	auxNdb, err := search.NewNeuralDB(opts.AuxNDBPath)
-	if err != nil {
-		return nil, fmt.Errorf("error loading aux ndb: %w", err)
-	}
-
-	ackFlagCache, err := NewCache[cachedAckFlag]("ack_flags", filepath.Join(opts.CacheDir, "ack_flags.cache"))
+	ackFlagCache, err := NewCache[cachedAckFlag]("ack_flags", filepath.Join(opts.WorkDir, "ack_flags.cache"))
 	if err != nil {
 		return nil, fmt.Errorf("error loading ack flag cache: %w", err)
 	}
-	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(opts.CacheDir, "authors.cache"))
+	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(opts.WorkDir, "authors.cache"))
 	if err != nil {
 		return nil, fmt.Errorf("error loading author cache: %w", err)
 	}
-	ackCache, err := NewCache[Acknowledgements]("acks", filepath.Join(opts.CacheDir, "acks.cache"))
+	ackCache, err := NewCache[Acknowledgements]("acks", filepath.Join(opts.WorkDir, "acks.cache"))
 	if err != nil {
 		return nil, fmt.Errorf("error loading ack cache: %w", err)
 	}
@@ -84,16 +63,6 @@ func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
 	concerningInstitutions := convertToSet(opts.ConcerningInstitutions)
 	concerningFunders := convertToSet(opts.ConcerningFunders)
 	concerningPublishers := convertToSet(opts.ConcerningPublishers)
-
-	db, err := gorm.Open(sqlite.Open(opts.EntityLookupDBPath), &gorm.Config{})
-	if err != nil {
-		return nil, fmt.Errorf("error opening entity lookup db: %w", err)
-	}
-
-	entityStore, err := NewEntityStore(filepath.Join(opts.ScratchDir, fmt.Sprintf("entity_lookup_%s.ndb", uuid.NewString())), db)
-	if err != nil {
-		return nil, fmt.Errorf("error constructing entity store: %w", err)
-	}
 
 	return &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
@@ -119,24 +88,24 @@ func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
 			},
 			&OpenAlexAcknowledgementIsEOC{
 				openalex:     openalex.NewRemoteKnowledgeBase(),
-				entityLookup: entityStore,
+				entityLookup: opts.EntityLookup,
 				flagCache:    ackFlagCache,
 				authorCache:  authorCache,
 				extractor: &GrobidAcknowledgementsExtractor{
 					cache:          ackCache,
 					maxWorkers:     10,
 					grobidEndpoint: opts.GrobidEndpoint,
-					downloadDir:    opts.ScratchDir,
+					downloadDir:    opts.WorkDir,
 				},
 				sussyBakas: opts.SussyBakas,
 			},
 		},
 		authorFacultyAtEOC: AuthorIsFacultyAtEOCFlagger{
-			entityDB: entityNdb,
+			universityNDB: opts.UniversityNDB,
 		},
 		authorAssociatedWithEOC: AuthorIsAssociatedWithEOCFlagger{
-			prDB:  docNdb,
-			auxDB: auxNdb,
+			docNDB: opts.DocNDB,
+			auxNDB: opts.AuxNDB,
 		},
 	}, nil
 }

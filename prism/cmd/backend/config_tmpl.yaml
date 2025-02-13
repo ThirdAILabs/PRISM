@@ -19,3 +19,6 @@ port: 3000
 
 # Logfile for backend
 logfile: "./prism_backend.log"
+
+# License for NDB
+ndb_license: "license path or key"

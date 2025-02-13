@@ -1,0 +1,23 @@
+# Uri for postgres db
+postgres_uri: ""
+
+# Logfile for backend
+logfile: "./worker.log"
+
+# License for NDB
+ndb_license: "license path or key"
+
+# Work dir for worker, will store ndbs and caches etc.
+work_dir: ""
+
+# Path to load data to construct ndbs for author flaggers
+ndb_data:
+    university: ""
+    doc: ""
+    aux: ""
+
+# Path to entity DB for acknowledgement matching
+entity_lookup_db: ""
+
+# Endpoint for grobid
+grobid_endpoint: ""

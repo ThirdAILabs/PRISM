@@ -31,7 +31,7 @@ func TestAuthorIsFacultyAtEOC(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	flagger := AuthorIsFacultyAtEOCFlagger{entityDB: ndb}
+	flagger := AuthorIsFacultyAtEOCFlagger{universityNDB: ndb}
 
 	flags, err := flagger.Flag(slog.Default(), "7 9")
 	if err != nil {
@@ -86,13 +86,13 @@ var (
 )
 
 func TestAuthorAssociationIsEOC(t *testing.T) {
-	prNdb, err := search.NewNeuralDB(t.TempDir())
+	docNdb, err := search.NewNeuralDB(t.TempDir())
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer prNdb.Free()
+	defer docNdb.Free()
 
-	if err := prNdb.Insert("doc", "id", mockPressReleases, mockPressReleaseMetadata, nil); err != nil {
+	if err := docNdb.Insert("doc", "id", mockPressReleases, mockPressReleaseMetadata, nil); err != nil {
 		t.Fatal(err)
 	}
 
@@ -106,7 +106,7 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	flagger := AuthorIsAssociatedWithEOCFlagger{prDB: prNdb, auxDB: auxNdb}
+	flagger := AuthorIsAssociatedWithEOCFlagger{docNDB: docNdb, auxNDB: auxNdb}
 
 	t.Run("test primary connection", func(t *testing.T) {
 		works := []openalex.Work{ // Only the author names are used in this flagger
