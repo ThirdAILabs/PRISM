@@ -1,5 +1,5 @@
-const { useState, useEffect } = require('react');
-const { listReports } = require('../api/reports');
+import { useState, useEffect } from 'react';
+import { listReports } from '../api/reports';
 
 const useReports = () => {
     const [reports, setReports] = useState([]);
@@ -24,4 +24,4 @@ const useReports = () => {
     return { reports, loading, error };
 };
 
-module.exports = useReports;
+export default useReports;

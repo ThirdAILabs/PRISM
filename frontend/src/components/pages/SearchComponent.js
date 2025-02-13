@@ -9,7 +9,7 @@ import "../common/searchBar/SearchBar.css";
 import { levenshteinDistance, makeVariations } from '../../utils/nameUtils';
 import UserService from '../../services/userService';
 import { searchService } from '../../api/search';
-
+import { reportService } from '../../api/reports';
 const SearchComponent = () => {
   const [query, setQuery] = useState('');
   const [author, setAuthor] = useState();
@@ -86,8 +86,9 @@ const SearchComponent = () => {
     setQuery(`${author.AuthorName} ${institution ? institution.InstitutionName : ''}`);
     setResults([]);
 
-    const result = await searchService.searchOpenalexAuthors("anshumali shrivastava", "https://openalex.org/I74775410");
+    const result = await searchService.searchOpenalexAuthors(author.AuthorName, institution.InstitutionId);
     console.log("result in openAlex", result);
+    setOpenAlexResults(result);
     setIsOALoading(false);
     setLoadMoreCount(0);
     setHasSearched(true);
@@ -115,15 +116,7 @@ const SearchComponent = () => {
         console.log("Got results", results);
       }
 
-      setScholarResults((prevResults) => {
-        let newResults = reset ? result.profiles : [...prevResults, ...result.profiles];
-        newResults = newResults.map(x => [x, levenshteinDistance(x.display_name, query)]);
-        console.log(newResults);
-        newResults.sort((a, b) => a[1] - b[1]);
-        console.log(newResults);
-        newResults = newResults.map(x => x[0]);
-        return newResults;
-      });
+      setScholarResults(result.Authors);
 
       setNextToken(result.next_page_token)
 
@@ -135,7 +128,11 @@ const SearchComponent = () => {
   };
 
   console.log(nextToken);
-
+  async function abc() {
+    const responseGetReport = await reportService.getReport("6e56e7e4-15a9-4945-9513-378bef00d2d6");
+    console.log("Response Get Report", responseGetReport);
+  }
+  abc();
   return (
     <div className='basic-setup' style={{ color: "white" }}>
       <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
