@@ -9,9 +9,6 @@ import (
 	"prism/search"
 	"slices"
 	"strings"
-
-	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 const (
@@ -21,32 +18,10 @@ const (
 	maxLLMWorkers     = 30
 )
 
-type AliasRecord struct {
-	Id    uuid.UUID `gorm:"type:uuid;primaryKey"`
-	Alias string    `gorm:"not null"`
-
-	EntityId uuid.UUID
-	Entity   *EntityRecord `gorm:"foreignKey:EntityId;constraint:OnDelete:CASCADE"`
-}
-
-type EntityRecord struct {
-	Id   uuid.UUID `gorm:"type:uuid;primaryKey"`
-	Name string    `gorm:"not null"`
-
-	SourceId uuid.UUID
-	Source   *SourceRecord `gorm:"foreignKey:SourceId;constraint:OnDelete:CASCADE"`
-}
-
-type SourceRecord struct {
-	Id   uuid.UUID `gorm:"type:uuid;primaryKey"`
-	Name string    `gorm:"not null"`
-	Link string
-}
-
 type EntityStore struct {
-	db    *gorm.DB
-	ndb   search.NeuralDB
-	flash search.Flash
+	aliasToSource map[string]string
+	ndb           search.NeuralDB
+	flash         search.Flash
 }
 
 func createNdb(ndbPath string, aliases []string) (search.NeuralDB, error) {
@@ -106,8 +81,8 @@ func createFlash(aliases []string) (search.Flash, error) {
 	return flash, nil
 }
 
-func NewEntityStore(ndbPath string, db *gorm.DB) (*EntityStore, error) {
-	store := &EntityStore{db: db}
+func NewEntityStore(ndbPath string, aliasToSource map[string]string) (*EntityStore, error) {
+	store := &EntityStore{aliasToSource: aliasToSource}
 
 	aliases, err := store.allAliases()
 	if err != nil {
@@ -136,15 +111,9 @@ func (store *EntityStore) Free() {
 }
 
 func (store *EntityStore) allAliases() ([]string, error) {
-	var records []AliasRecord
-
-	if err := store.db.Find(&records).Error; err != nil {
-		return nil, fmt.Errorf("db alias lookup failed: %w", err)
-	}
-
-	data := make([]string, 0, len(records))
-	for _, record := range records {
-		data = append(data, record.Alias)
+	data := make([]string, 0, len(store.aliasToSource))
+	for k := range store.aliasToSource {
+		data = append(data, k)
 	}
 
 	return data, nil
@@ -153,20 +122,12 @@ func (store *EntityStore) allAliases() ([]string, error) {
 type SourceToAliases = map[string][]string
 
 func (store *EntityStore) exactLookup(queries []string) (SourceToAliases, error) {
-	var records []AliasRecord
-
-	if err := store.db.Preload("Entity").Preload("Entity.Source").Find(&records, "alias IN ?", queries).Error; err != nil {
-		return nil, fmt.Errorf("db entity lookup failed: %w", err)
-	}
-
 	sourceToAliases := make(map[string][]string)
-	for _, record := range records {
-		source := record.Entity.Source.Name
-		aliases, ok := sourceToAliases[source]
-		if !ok {
-			aliases = make([]string, 0, 1)
+	for _, query := range queries {
+		source, ok := store.aliasToSource[query]
+		if ok {
+			sourceToAliases[source] = append(sourceToAliases[source], query)
 		}
-		sourceToAliases[source] = append(aliases, record.Alias)
 	}
 
 	return sourceToAliases, nil
