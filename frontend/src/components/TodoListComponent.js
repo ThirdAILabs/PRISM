@@ -43,7 +43,7 @@ const TodoListComponent = ({ results, canLoadMore, loadMore }) => {
               style={{maxHeight: '45px'}}>Deep Search</button>
             } */}
 
-        {
+        {/* {
           canLoadMore
             ?
             <button onClick={loadMore}
@@ -51,7 +51,7 @@ const TodoListComponent = ({ results, canLoadMore, loadMore }) => {
               style={{ maxHeight: '45px' }}>Load more</button>
             :
             <button className='btn bg-opacity-25 text-light rounded-5 border-primary p-4 d-flex justify-content-center align-items-center bg-primary mx-2 mt-1' disabled style={{ maxHeight: '45px' }}>Search Exhausted</button>
-        }
+        } */}
         {/* {
               isLoading && <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}} role="status"></div>
             } */}

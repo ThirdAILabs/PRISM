@@ -29,13 +29,13 @@ const SearchComponent = () => {
 
   const search = async (author, institution) => {
     // setShowResultHeaders(true);
-    // handleDeepSearch(`${author.display_name} ${institution.display_name}`, nextToken, /* reset= */ false);
+    handleDeepSearch(`${author.AuthorName} ${institution.InstitutionName}`, nextToken, /* reset= */ false);
     searchOpenAlex(author, institution);
-    setIsLoadingScopus(true);
+    // setIsLoadingScopus(true);
     setAuthor(author);
     setInstitution(institution);
     setHasSearched(false);
-    setQuery(`${author.display_name} ${institution ? institution.display_name : ''}`);
+    setQuery(`${author.AuthorName} ${institution ? institution.InstitutionName : ''}`);
     setResults([]);
 
     // for (const authorName of makeVariations(author.display_name)) {
@@ -72,7 +72,7 @@ const SearchComponent = () => {
     //     console.log('Unable to fetch Scopus results.')
     //   }
     // }
-    setIsLoadingScopus(false);
+    // setIsLoadingScopus(false);
     setLoadMoreCount(0);
     setHasSearched(true);
   };
@@ -107,10 +107,11 @@ const SearchComponent = () => {
 
       console.log("N token is", ntoken);
       if (ntoken !== null) {
-        result = await apiService.deepSearch(query, ntoken);
+        result = await searchService.searchGoogleScholarAuthors(query, ntoken);
+        console.log("Old deep search with query", query);
       } else {
         console.log("New deep search with query", query);
-        result = await apiService.deepSearch(query);
+        result = await searchService.searchGoogleScholarAuthors(query, ntoken);
         console.log("Got results", results);
       }
 
