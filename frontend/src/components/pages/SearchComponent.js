@@ -1,15 +1,14 @@
 // src/SearchComponent.js
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import apiService from '../../services/apiService';
 import TodoListComponent from '../TodoListComponent';
 import { AuthorInstiutionSearchBar } from '../common/searchBar/SearchBar';
 import Logo from "../../assets/images/logo.png";
 import "../common/searchBar/SearchBar.css";
-import { levenshteinDistance, makeVariations } from '../../utils/nameUtils';
 import UserService from '../../services/userService';
 import { searchService } from '../../api/search';
 import { reportService } from '../../api/reports';
+
 const SearchComponent = () => {
   const [query, setQuery] = useState('');
   const [author, setAuthor] = useState();
@@ -37,42 +36,6 @@ const SearchComponent = () => {
     setHasSearched(false);
     setQuery(`${author.AuthorName} ${institution ? institution.InstitutionName : ''}`);
     setResults([]);
-
-    // for (const authorName of makeVariations(author.display_name)) {
-    //   await new Promise(resolve => setTimeout(resolve, /* ms= */ 300));
-    //   try {
-    //     await apiService.search(authorName, institution ? institution.display_name : '').then(result => {
-    //       console.log(result.profiles);
-    //       setResults(prev => {
-    //         let newResults = [...prev];
-    //         for (const profile of result.profiles) {
-    //           let seen = false;
-    //           console.log("profile", profile);
-    //           console.log("new results", newResults);
-    //           for (const otherProfile of newResults) {
-    //             if (otherProfile.id === profile.id) {
-    //               seen = true;
-    //             }
-    //           }
-    //           if (!seen) {
-    //             newResults.push(profile);
-    //           }
-    //         }
-    //         newResults = newResults.map(x => [x, levenshteinDistance(x.display_name, author.display_name)])
-    //         console.log(newResults);
-    //         newResults.sort((a, b) => a[1] - b[1]);
-    //         console.log(newResults);
-    //         newResults = newResults.map(x => x[0]);
-    //         return newResults;
-    //       });
-    //     });
-    //     setResultHeader('Scopus Results');
-
-    //   } catch (error) {
-    //     console.log('Unable to fetch Scopus results.')
-    //   }
-    // }
-    // setIsLoadingScopus(false);
     setLoadMoreCount(0);
     setHasSearched(true);
   };
@@ -188,18 +151,6 @@ const SearchComponent = () => {
           loadMore={() => { }}
         />
       }
-
-      {/* {showResultHeaders && <div style={{paddingTop: "30px", textAlign: "center", fontSize: "24px", fontWeight: "bold"}}>Scopus Results</div>}
-      {showResultHeaders && (<div style={{ paddingTop: "30px", textAlign: "center", fontSize: "24px", fontWeight: "bold" }}>{resultHeader}</div>)}
-      {isLoadingScopus && <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status"></div>}
-      {
-        hasSearched &&
-        <TodoListComponent
-          results={results}
-          canLoadMore={false}
-          loadMore={() => { }}
-        />
-      } */}
     </div>
   );
 
