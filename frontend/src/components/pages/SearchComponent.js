@@ -98,7 +98,14 @@ const SearchComponent = () => {
   abc();
   return (
     <div className='basic-setup' style={{ color: "white" }}>
-      <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+        padding: '20px',
+        position: 'relative'
+      }}>
         <Link
           to="/entity-lookup"
           className="author-institution-search-button"
@@ -107,12 +114,21 @@ const SearchComponent = () => {
             fontSize: '14px',
             whiteSpace: 'nowrap',
             textDecoration: 'none',
-            display: 'inline-block'
+            display: 'inline-block',
+            width: '25%'
           }}
         >
           Go To Entity Lookup
         </Link>
-        <button onClick={UserService.doLogout}>logout</button>
+        <button className="author-institution-search-button"
+          style={{
+            padding: '10px 15px',
+            fontSize: '14px',
+            whiteSpace: 'nowrap',
+            textDecoration: 'none',
+            display: 'inline-block',
+            width: '10%'
+          }} onClick={UserService.doLogout}>logout</button>
       </div>
       <img src={Logo} style={{ width: "100px", marginTop: "12%", animation: "fade-in 0.5s" }} />
       <h1 style={{ fontWeight: "bold", marginTop: 50, animation: "fade-in 0.75s" }}>Welcome to Prism</h1>

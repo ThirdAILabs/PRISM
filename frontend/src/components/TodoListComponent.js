@@ -8,13 +8,16 @@ const TodoListComponent = ({ results, canLoadMore, loadMore }) => {
   const navigate = useNavigate();
 
   const handleItemClick = async (result) => {
+
     const response = await reportService.createReport({
       "AuthorId": result.AuthorId,
       "AuthorName": result.AuthorName,
       "Source": result.Source,
     });
+    const resultReport = await reportService.getReport(response.id);
     console.log("Response", response);
-    // navigate(`/item`, { state: { response } });
+
+    navigate(`/item`, { state: { resultReport } });
     return;
   };
 
