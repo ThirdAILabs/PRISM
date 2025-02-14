@@ -1,26 +1,19 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"io"
 	"log"
 	"log/slog"
 	"net/http"
-	"net/url"
 	"os"
+	"prism/cmd"
 	"prism/openalex"
-	"prism/schema"
 	"prism/search"
 	"prism/services"
 	"prism/services/auth"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/cors"
-	"gopkg.in/yaml.v3"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 type Config struct {
@@ -46,64 +39,9 @@ func (c *Config) port() int {
 	return c.Port
 }
 
-func loadConfig() Config {
-	var configPath string
-
-	flag.StringVar(&configPath, "config", "", "path to load config from")
-	flag.Parse()
-
-	if configPath == "" {
-		log.Fatal("must specify config path")
-	}
-
-	file, err := os.Open(configPath)
-	if err != nil {
-		log.Fatalf("unable to open config file: %v", err)
-	}
-
-	var config Config
-	if err := yaml.NewDecoder(file).Decode(&config); err != nil {
-		log.Fatalf("error parsing config: %v", err)
-	}
-
-	return config
-}
-
-func uriToDsn(uri string) string {
-	parts, err := url.Parse(uri)
-	if err != nil {
-		log.Fatalf("error parsing db uri: %v", err)
-	}
-	pwd, _ := parts.User.Password()
-	dbname := strings.TrimPrefix(parts.Path, "/")
-	return fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v", parts.Hostname(), parts.User.Username(), pwd, dbname, parts.Port())
-}
-
-func initDb(uri string) *gorm.DB {
-	db, err := gorm.Open(postgres.Open(uriToDsn(uri)), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("error opening database connection: %v", err)
-	}
-
-	err = db.AutoMigrate(
-		&schema.Report{}, &schema.ReportContent{}, &schema.License{},
-		&schema.LicenseUser{}, &schema.LicenseUsage{},
-	)
-	if err != nil {
-		log.Fatalf("error migrating db schema: %v", err)
-	}
-
-	return db
-}
-
-func initLogging(logFile *os.File) {
-	log.SetFlags(log.Lshortfile | log.Ltime | log.Ldate)
-	log.SetOutput(io.MultiWriter(logFile, os.Stderr))
-	slog.Info("logging initialized", "log_file", logFile.Name())
-}
-
 func main() {
-	config := loadConfig()
+	var config Config
+	cmd.LoadConfig(&config)
 
 	logFile, err := os.OpenFile(config.logfile(), os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 	if err != nil {
@@ -111,7 +49,7 @@ func main() {
 	}
 	defer logFile.Close()
 
-	initLogging(logFile)
+	cmd.InitLogging(logFile)
 
 	openalex := openalex.NewRemoteKnowledgeBase()
 
@@ -132,7 +70,7 @@ func main() {
 		log.Fatalf("unable to load entity ndb: %v", err)
 	}
 
-	db := initDb(config.PostgresUri)
+	db := cmd.InitDb(config.PostgresUri)
 
 	userAuth, err := auth.NewKeycloakAuth("prism-user", config.Keycloak)
 	if err != nil {
@@ -147,16 +85,6 @@ func main() {
 	backend := services.NewBackend(db, openalex, entityNdb, userAuth, adminAuth)
 
 	r := chi.NewRouter()
-
-	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"*"},                                       // Allow all origins
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}, // Allow all HTTP methods
-		AllowedHeaders:   []string{"*"},                                       // Allow all headers
-		ExposedHeaders:   []string{"*"},                                       // Expose all headers
-		AllowCredentials: true,                                                // Allow cookies/auth headers
-		MaxAge:           300,                                                 // Cache preflight response for 5 minutes
-	}))
-
 	r.Mount("/api/v1", backend.Routes())
 
 	slog.Info("starting server", "port", config.port())

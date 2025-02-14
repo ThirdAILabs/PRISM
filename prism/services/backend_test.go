@@ -476,7 +476,8 @@ func TestAutocompleteInstution(t *testing.T) {
 
 	for _, res := range results {
 		if !strings.HasPrefix(res.InstitutionId, "https://openalex.org/") ||
-			strings.EqualFold(res.InstitutionName, "Rice University, USA") {
+			!strings.EqualFold(res.InstitutionName, "Rice University") ||
+			!strings.EqualFold(res.Location, "Houston, USA") {
 			t.Fatal("invalid result")
 		}
 	}

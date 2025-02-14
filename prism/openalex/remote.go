@@ -95,6 +95,7 @@ func (oa *RemoteKnowledgeBase) AutocompleteInstitution(query string) ([]Institut
 		institutions = append(institutions, Institution{
 			InstitutionName: institution.DisplayName,
 			InstitutionId:   institution.Id,
+			Location:        institution.Hint,
 		})
 	}
 
@@ -153,6 +154,7 @@ func (oa *RemoteKnowledgeBase) FindAuthors(authorName, institutionId string) ([]
 					institutions = append(institutions, Institution{
 						InstitutionName: inst.Institution.DisplayName,
 						InstitutionId:   inst.Institution.Id,
+						Location:        inst.Institution.CountryCode,
 					})
 				}
 			}
@@ -277,6 +279,7 @@ func converOpenalexWork(work oaWork) Work {
 			institutions = append(institutions, Institution{
 				InstitutionName: institution.DisplayName,
 				InstitutionId:   institution.Id,
+				Location:        institution.CountryCode,
 			})
 		}
 		authors = append(authors, Author{
@@ -424,6 +427,7 @@ func (oa *RemoteKnowledgeBase) GetAuthor(authorId string) (Author, error) {
 		institutions = append(institutions, Institution{
 			InstitutionName: institution.Institution.DisplayName,
 			InstitutionId:   institution.Institution.Id,
+			Location:        institution.Institution.CountryCode,
 		})
 	}
 

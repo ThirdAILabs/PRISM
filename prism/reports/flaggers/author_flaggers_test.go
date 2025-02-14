@@ -31,7 +31,7 @@ func TestAuthorIsFacultyAtEOC(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	flagger := AuthorIsFacultyAtEOCFlagger{entityDB: ndb}
+	flagger := AuthorIsFacultyAtEOCFlagger{universityNDB: ndb}
 
 	flags, err := flagger.Flag(slog.Default(), "7 9")
 	if err != nil {
@@ -42,7 +42,7 @@ func TestAuthorIsFacultyAtEOC(t *testing.T) {
 		t.Fatal("expected flag")
 	}
 
-	flag := flags[0].(*AuthorFlag).AuthorIsFacultyAtEOC
+	flag := flags[0].(*AuthorIsFacultyAtEOCFlag)
 	if flag.University != "xyz" || flag.UniversityUrl != "xyz.com" {
 		t.Fatal("incorrect flag")
 	}
@@ -86,13 +86,13 @@ var (
 )
 
 func TestAuthorAssociationIsEOC(t *testing.T) {
-	prNdb, err := search.NewNeuralDB(t.TempDir())
+	docNdb, err := search.NewNeuralDB(t.TempDir())
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer prNdb.Free()
+	defer docNdb.Free()
 
-	if err := prNdb.Insert("doc", "id", mockPressReleases, mockPressReleaseMetadata, nil); err != nil {
+	if err := docNdb.Insert("doc", "id", mockPressReleases, mockPressReleaseMetadata, nil); err != nil {
 		t.Fatal(err)
 	}
 
@@ -106,7 +106,7 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	flagger := AuthorIsAssociatedWithEOCFlagger{prDB: prNdb, auxDB: auxNdb}
+	flagger := AuthorIsAssociatedWithEOCFlagger{docNDB: docNdb, auxNDB: auxNdb}
 
 	t.Run("test primary connection", func(t *testing.T) {
 		works := []openalex.Work{ // Only the author names are used in this flagger
@@ -122,10 +122,10 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			t.Fatal("expected 1 flag")
 		}
 
-		flag := flags[0].(*AuthorFlag).AuthorIsAssociatedWithEOC
+		flag := flags[0].(*AuthorIsAssociatedWithEOCFlag)
 
-		if flags[0].GetTitle() != "Person may be affiliated with someone mentioned in a press release." ||
-			flag.Connection != "primary" ||
+		if flag.FlagTitle != "Person may be affiliated with someone mentioned in a press release." ||
+			flag.ConnectionLevel != "primary" ||
 			flag.DocTitle != "indicted" ||
 			flag.DocUrl != "indicted.com" ||
 			!slices.Equal(flag.DocEntities, []string{"abc", "xyz"}) ||
@@ -148,10 +148,10 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			t.Fatal("expected 1 flag")
 		}
 
-		flag := flags[0].(*AuthorFlag).AuthorIsAssociatedWithEOC
+		flag := flags[0].(*AuthorIsAssociatedWithEOCFlag)
 
-		if flags[0].GetTitle() != "The author's frequent coauthor may be mentioned in a press release." ||
-			flag.Connection != "secondary" ||
+		if flag.FlagTitle != "The author's frequent coauthor may be mentioned in a press release." ||
+			flag.ConnectionLevel != "secondary" ||
 			flag.DocTitle != "indicted" ||
 			flag.DocUrl != "indicted.com" ||
 			!slices.Equal(flag.DocEntities, []string{"abc", "xyz"}) ||
@@ -174,10 +174,10 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			t.Fatal("expected 1 flag")
 		}
 
-		flag := flags[0].(*AuthorFlag).AuthorIsAssociatedWithEOC
+		flag := flags[0].(*AuthorIsAssociatedWithEOCFlag)
 
-		if flags[0].GetTitle() != "Author may be affiliated with an entity whose associate may be mentioned in a press release." ||
-			flag.Connection != "secondary" ||
+		if flag.FlagTitle != "Author may be affiliated with an entity whose associate may be mentioned in a press release." ||
+			flag.ConnectionLevel != "secondary" ||
 			flag.DocTitle != "indicted" ||
 			flag.DocUrl != "indicted.com" ||
 			!slices.Equal(flag.DocEntities, []string{"abc", "xyz"}) ||
@@ -200,10 +200,10 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			t.Fatal("expected 1 flag")
 		}
 
-		flag := flags[0].(*AuthorFlag).AuthorIsAssociatedWithEOC
+		flag := flags[0].(*AuthorIsAssociatedWithEOCFlag)
 
-		if flags[0].GetTitle() != "Author may be affiliated with an entity whose associate may be mentioned in a press release." ||
-			flag.Connection != "tertiary" ||
+		if flag.FlagTitle != "Author may be affiliated with an entity whose associate may be mentioned in a press release." ||
+			flag.ConnectionLevel != "tertiary" ||
 			flag.DocTitle != "leaked docs" ||
 			flag.DocUrl != "leakeddocs.com" ||
 			!slices.Equal(flag.DocEntities, []string{"qrs"}) ||
