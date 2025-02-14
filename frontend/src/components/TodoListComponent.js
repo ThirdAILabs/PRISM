@@ -10,7 +10,6 @@ const TodoListComponent = ({ results, canLoadMore, loadMore }) => {
   const handleItemClick = async (result) => {
     const response = await reportService.createReport({
       "AuthorId": result.AuthorId, "AuthorName": result.AuthorName, "Source": result.Source,
-      "StartYear": -1, "EndYear": 3000,
     });
     console.log("Response", response);
     // navigate(`/item`, { state: { response } });

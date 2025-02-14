@@ -9,7 +9,6 @@ import { useUser } from './store/userContext';
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.bundle.js";
 import './App.css';
-import AuthorSearch from './components/pages/author';
 
 
 
