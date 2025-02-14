@@ -1,0 +1,1219 @@
+[
+    {
+        "name": "China Telecom Corporation Limited",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "CHINA TELECOM",
+            "CHINA TELECOM CO., LTD",
+            "CHINA TELECOM CORP LTD"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4387153335",
+            "name": "China Telecom",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Aero Engine Corporation of China",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "Aero Engine Corp of China",
+            "AECC",
+            "CHINA AVIATION ENGINE GROUP CO., LTD"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210156095",
+            "name": "Aero Engine Corporation of China (China)",
+            "type": "institutions"
+        },
+        "score": 0.96
+    },
+    {
+        "name": "AVIATION INDUSTRY CORPORATION OF CHINA, LTD.",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "AVIATION INDUSTRY CORP OF CHINA",
+            "AVIATION INDUSTRY OF CHINA",
+            "AVIC"
+        ],
+        "match": {
+            "id": "https://openalex.org/I11838497",
+            "name": "Aviation Industry Corporation of China (China)",
+            "type": "institutions"
+        },
+        "score": 0.9468379446640316
+    },
+    {
+        "name": "China Academy of Launch Vehicle Technology",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "CALT"
+        ],
+        "match": {
+            "id": "https://openalex.org/I68581759",
+            "name": "China Academy of Launch Vehicle Technology",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "China Aerospace Science and Industry Corporation Limited",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "China Aerospace Science and Industry Corporation",
+            "CASIC"
+        ],
+        "match": {
+            "id": "https://openalex.org/I15089104",
+            "name": "China Aerospace Science and Industry Corporation (China)",
+            "type": "institutions"
+        },
+        "score": 0.9714285714285714
+    },
+    {
+        "name": "China Aerospace Science and Technology Corporation",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "CASC"
+        ],
+        "match": {
+            "id": "https://openalex.org/I2802615301",
+            "name": "China Aerospace Science and Technology Corporation",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "China Communications Construction Company Limited",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "China Communications Construction Co Ltd",
+            "China Communications Construction Company Ltd",
+            "China Communications Constr Co Ltd",
+            "CCCC"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210130035",
+            "name": "China Communications Construction Company (China)",
+            "type": "institutions"
+        },
+        "score": 0.958095238095238
+    },
+    {
+        "name": "China Electronics Corporation",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "CEC"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210104233",
+            "name": "China Electronics Corporation (China)",
+            "type": "institutions"
+        },
+        "score": 0.9567567567567568
+    },
+    {
+        "name": "China South Industries Group Corporation",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "China South Industries Group Co., Ltd.",
+            "CSIGC",
+            "CSGC"
+        ],
+        "match": {
+            "id": "https://openalex.org/I3174185376",
+            "name": "China South Industries Group (China)",
+            "type": "institutions"
+        },
+        "score": 0.9422727272727273
+    },
+    {
+        "name": "China Electronics Technology Group Corporation",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "CETC"
+        ],
+        "match": {
+            "id": "https://openalex.org/I2800372957",
+            "name": "China Electronics Technology Group Corporation",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "CHINA GENERAL NUCLEAR POWER CORPORATION",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "China General Nuclear Power Corp",
+            "CGN"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210097777",
+            "name": "China General Nuclear Power Corporation (China)",
+            "type": "institutions"
+        },
+        "score": 0.9659574468085106
+    },
+    {
+        "name": "CHINA STATE SHIPBUILDING CORPORATION LIMITED",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "China State Shipbuilding Corporation",
+            "China Shipbuilding Corporation",
+            "CSSC",
+            "CSC",
+            "China State Shipbuilding Corporation Co. Ltd"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210157899",
+            "name": "China State Shipbuilding (China)",
+            "type": "institutions"
+        },
+        "score": 0.9354645593869731
+    },
+    {
+        "name": "China Telecommunications Corporation",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "China Telecom",
+            "China Telecom Group Co., Ltd."
+        ],
+        "match": {
+            "id": "https://openalex.org/I4387153335",
+            "name": "China Telecom",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "China United Network Communications Group Co., Ltd.",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "China United Network Communications Group Company Limited",
+            "CHINA UNICOM",
+            "CHINA UNITED TELECOMMUNICATIONS CORPORATION"
+        ],
+        "match": {
+            "id": "https://openalex.org/I6507939",
+            "name": "China United Network Communications Group (China)",
+            "type": "institutions"
+        },
+        "score": 0.9448107847257896
+    },
+    {
+        "name": "China Mobile Communications Group Co., Ltd.",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "China Mobile"
+        ],
+        "match": {
+            "id": "https://openalex.org/I180662265",
+            "name": "China Mobile (China)",
+            "type": "institutions"
+        },
+        "score": 0.92
+    },
+    {
+        "name": "Semiconductor Manufacturing International Corporation",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "Semiconductor Mfg Intl Corp",
+            "Semiconductor Manufacturing International Corporation Limited",
+            "SEMICONDUCTOR MANUFACTURING INTERNATIONAL CORPORATION Co., Ltd",
+            "SMIC"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210142504",
+            "name": "Semiconductor Manufacturing International (China)",
+            "type": "institutions"
+        },
+        "score": 0.9569921816142372
+    },
+    {
+        "name": "CHINA NATIONAL NUCLEAR CORPORATION",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "China National Nuclear Corp",
+            "CNNC"
+        ],
+        "match": {
+            "id": "https://openalex.org/I157771985",
+            "name": "China National Nuclear Corporation",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "China National Offshore Oil Corporation",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "China National Offshore Oil Corp.",
+            "CNOOC"
+        ],
+        "match": {
+            "id": "https://openalex.org/I158108717",
+            "name": "China National Offshore Oil Corporation (China)",
+            "type": "institutions"
+        },
+        "score": 0.9659574468085106
+    },
+    {
+        "name": "China North Industries Group Corporation Limited",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "Norinco",
+            "China North Industries Group Corporation",
+            "NORINCO Group",
+            "CNIGC",
+            "China North Industries Group Co. Ltd"
+        ],
+        "match": {
+            "id": "https://openalex.org/I3017770710",
+            "name": "China North Industries Group Corporation (China)",
+            "type": "institutions"
+        },
+        "score": 0.9666666666666667
+    },
+    {
+        "name": "China Railway Construction Corporation Limited",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "CRCC"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210133882",
+            "name": "China Railway Construction Corporation (China)",
+            "type": "institutions"
+        },
+        "score": 0.9478260869565217
+    },
+    {
+        "name": "CSSC OFFSHORE & MARINE ENGINEERING (GROUP) COMPANY LIMITED",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "COMEC",
+            "Guangzhou Shipyard International Company Limited"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210167198",
+            "name": "CSSC Offshore & Marine Engineering Company (China)",
+            "type": "institutions"
+        },
+        "score": 0.9208815592203898
+    },
+    {
+        "name": "Public Joint Stock Company Gazprom",
+        "source": "Non-SDN Menu-Based Sanctions List (NS-MBS List) - Treasury Department",
+        "aliases": [
+            "Gazprom PAO",
+            "PJSC Gazprom",
+            "Gazprom"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210123809",
+            "name": "Gazprombank",
+            "type": "institutions"
+        },
+        "score": 0.9272727272727272
+    },
+    {
+        "name": "Central Bank of the Russian Federation",
+        "source": "Non-SDN Menu-Based Sanctions List (NS-MBS List) - Treasury Department",
+        "aliases": [
+            "Bank Rossi, Federal State Budgetary Institution",
+            "Bank of Russia",
+            "Bank of Russia, Central Bank",
+            "Tsentralny Bank Rossiskoi Federatsii",
+            "Central Bank of Russia"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210148609",
+            "name": "Central Bank of the Russian Federation",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "OPEN JOINT STOCK COMPANY RUSSIAN RAILWAYS",
+        "source": "Non-SDN Menu-Based Sanctions List (NS-MBS List) - Treasury Department",
+        "aliases": [
+            "JSC Russian Railways",
+            "Russian Railways JSC",
+            "Russian Railways",
+            "JSC RZD",
+            "RZhD"
+        ],
+        "match": {
+            "id": "https://openalex.org/I2799351582",
+            "name": "Russian Railways",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "SHINING PATH",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "SENDERO LUMINOSO",
+            "SL",
+            "PARTIDO COMUNISTA DEL PERU EN EL SENDERO LUMINOSO DE JOSE CARLOS MARIATEGUI (COMMUNIST PARTY OF PERU ON THE SHINING PATH OF JOSE CARLOS MARIATEGUI)",
+            "PARTIDO COMUNISTA DEL PERU (COMMUNIST PARTY OF PERU)",
+            "PCP",
+            "SOCORRO POPULAR DEL PERU",
+            "SPP",
+            "EJERCITO GUERRILLERO POPULAR",
+            "EGP",
+            "EJERCITO POPULAR DE LIBERACION",
+            "EPL",
+            "COMMUNIST PARTY OF PERU ON THE SHINING PATH OF JOSE CARLOS MARIATEGUI",
+            "COMMUNIST PARTY OF PERU",
+            "PEOPLE'S AID OF PERU",
+            "PEOPLE'S GUERRILLA ARMY",
+            "PEOPLE'S LIBERATION ARMY"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210104439",
+            "name": "People's Liberation Army 401 Hospital",
+            "type": "institutions"
+        },
+        "score": 0.9297297297297297
+    },
+    {
+        "name": "HIGHER INSTITUTE OF APPLIED SCIENCE AND TECHNOLOGY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "HIAST",
+            "INSTITUT SUPERIEUR DES SCIENCES APPLIQUEES ET DE TECHNOLOGIE",
+            "INSTITUT DES SCIENCES APPLIQUEES ET DE TECHNOLOGIE",
+            "ISSAT",
+            "ISAT"
+        ],
+        "match": {
+            "id": "https://openalex.org/I99731219",
+            "name": "Higher Institute for Applied Sciences and Technology",
+            "type": "institutions"
+        },
+        "score": 0.9883076923076923
+    },
+    {
+        "name": "NATIONAL STANDARDS AND CALIBRATION LABORATORY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "NSCL",
+            "NATIONAL CALIBRATION CENTRE"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4387152465",
+            "name": "National Standards and Calibration Laboratory",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "TAMILS REHABILITATION ORGANISATION",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "TAMILS REHABILITATION ORGANIZATION",
+            "TAMIL REHABILITATION ORGANIZATION",
+            "WHITE PIGEON",
+            "WHITEPIGEON",
+            "ORGANISATION DE REHABILITATION TAMOULE",
+            "ORGANIZZAZIONE PER LA RIABILITAZIONE DEI TAMIL",
+            "ORGANISATION PRE LA REHABILITATION TAMIL",
+            "TAMIL REHABILITERINGS ORGANISASJONEN",
+            "TAMILSK REHABILITERINGS ORGANISASJON",
+            "TAMILISCHE REHABILITATION ORGANISATION",
+            "TRO",
+            "ORT FRANCE",
+            "TRO ITALIA",
+            "TRO NORGE",
+            "TRO DANMARK",
+            "TRO SCHWEIZ",
+            "TSUNAMI RELIEF FUND -- COLOMBO, SRI LANKA"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210118531",
+            "name": "ORT France",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "NATIONAL IRANIAN OIL COMPANY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "NIOC"
+        ],
+        "match": {
+            "id": "https://openalex.org/I126467225",
+            "name": "National Iranian Oil Company (Iran)",
+            "type": "institutions"
+        },
+        "score": 0.96
+    },
+    {
+        "name": "MALEK ASHTAR UNIVERSITY OF TECHNOLOGY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "DANESHGAH-E SANA'TI-YE MALEK-E ASHTAR",
+            "MALEK ASHTAR UNIVERSITY",
+            "MALEK-E ASHTAR UNIVERSITY",
+            "MALEK ASHTAR INDUSTRIAL UNIVERSITY",
+            "MALEK-E ASHTAR TECHNICAL UNIVERSITY",
+            "MALEK ASHTAR AVIATION UNIVERSTIY COMPLEX",
+            "MALEK ASHTAR UNIVERSITY OF DEFENSE TECHNOLOGY"
+        ],
+        "match": {
+            "id": "https://openalex.org/I78323350",
+            "name": "Malek Ashtar University of Technology",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "BAQIYATTALLAH UNIVERSITY OF MEDICAL SCIENCES",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "BAGHYATOLLAH MEDICAL SCIENCES UNIVERSITY",
+            "BAGIATOLLAH MEDICAL SCIENCES UNIVERSITY",
+            "BAGHIATOLLAH MEDICAL SCIENCES UNIVERSITY",
+            "BAQYATOLLAH MEDICAL SCIENCES UNIVERSITY",
+            "BAQIYATALLAH MEDICAL SCIENCES UNIVERSITY",
+            "BAQIYATALLAH UNIVERSITY OF MEDICAL SCIENCES",
+            "BAQIATOLLAH MEDICAL SCIENCES UNIVERSITY"
+        ],
+        "match": {
+            "id": "https://openalex.org/I120514687",
+            "name": "Baqiyatallah University of Medical Sciences",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "IMAM HOSSEIN UNIVERSITY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "IMAM HUSSEIN UNIVERSITY",
+            "IHU",
+            "IMAAM HOSSEIN UNIVERSITY",
+            "IMAM HOSEYN UNIVERSITY",
+            "IMAM HOSSEIN UNIVERSITY COMPLEX",
+            "EMAM HOSEYN COMPREHENSIVE UNIVERSITY",
+            "UNIVERSITY OF IMAM HOSEYN"
+        ],
+        "match": {
+            "id": "https://openalex.org/I120234788",
+            "name": "Imam Hossein University",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "KONSTRUKTORSKOE BYURO PRIBOROSTROENIYA OTKRYTOE AKTSIONERNOE OBSHCHESTVO",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "INSTRUMENT DESIGN BUREAU",
+            "KBP OAO",
+            "KBP INSTRUMENT DESIGN BUREAU",
+            "JSC KBP INSTRUMENT DESIGN BUREAU",
+            "KBP INSTRUMENT DESIGN BUREAU JOINT STOCK COMPANY"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210156815",
+            "name": "KBP Instrument Design Bureau",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "VATECH SARL",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "VATECH",
+            "VATECH LEBANON",
+            "VATECH VIDEO AND PRO AUDIO"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210147631",
+            "name": "Vatech (South Korea)",
+            "type": "institutions"
+        },
+        "score": 0.86
+    },
+    {
+        "name": "MINISTRY OF PEOPLE'S SECURITY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "MPS",
+            "MINISTRY OF PUBLIC SECURITY"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210097510",
+            "name": "Ministry of Public Security",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "SAFARI CLUB",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "CENTRE DE LOISIR SAFARI CLUB",
+            "SAFARI BEACH"
+        ],
+        "match": {
+            "id": "https://openalex.org/I2801282509",
+            "name": "Safari Club International",
+            "type": "institutions"
+        },
+        "score": 0.888
+    },
+    {
+        "name": "MINISTRY OF LABOR",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [],
+        "match": {
+            "id": "https://openalex.org/I4210142732",
+            "name": "Ministry of Labor and Employment",
+            "type": "institutions"
+        },
+        "score": 0.90625
+    },
+    {
+        "name": "ATOMIC ENERGY ORGANIZATION OF IRAN",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "AEOI"
+        ],
+        "match": {
+            "id": "https://openalex.org/I102962589",
+            "name": "Atomic Energy Organization of Iran",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "ADVANCED TECHNOLOGIES COMPANY OF IRAN",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "ADVANCED TECHNOLOGIES HOLDING COMPANY",
+            "ADVANCED TECHNOLOGIES COMPANY",
+            "ADVANCED TECHNOLOGIES",
+            "IRANIAN ENRICHMENT COMPANY",
+            "GHANI SAZI ENRICHMENT",
+            "IATC",
+            "IRAN ADVANCED TECHNOLOGIES COMPANY",
+            "IRAN URANIUM ENRICHMENT COMPANY"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210095957",
+            "name": "Advanced Technologies Application Center",
+            "type": "institutions"
+        },
+        "score": 0.9063920817369093
+    },
+    {
+        "name": "NUCLEAR SCIENCE AND TECHNOLOGY RESEARCH INSTITUTE",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "NUCLEAR SCIENCES AND TECHNOLOGIES RESEARCH INSTITUTE",
+            "NSTRI",
+            "RESEARCH INSTITUTE OF NUCLEAR SCIENCE AND TECHNOLOGY",
+            "NUCLEAR SCIENCE AND TECHNOLOGY RESEARCH CENTER"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4392738327",
+            "name": "Nuclear Science and Technology Research Institute",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "PETROLEOS DE VENEZUELA, S.A.",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "PDVSA",
+            "PETROLEOS DE VENEZUELA S.A",
+            "REFINERIA EL PALITO",
+            "PETROLEOS DE VENEZUELA S A"
+        ],
+        "match": {
+            "id": "https://openalex.org/I158183117",
+            "name": "Petroleum of Venezuela (Venezuela)",
+            "type": "institutions"
+        },
+        "score": 0.8713698066639244
+    },
+    {
+        "name": "BANCO CENTRAL DE VENEZUELA",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "CENTRAL BANK OF VENEZUELA"
+        ],
+        "match": {
+            "id": "https://openalex.org/I1317542632",
+            "name": "Central Bank of Venezuela",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "ASTRONAUTICS RESEARCH INSTITUTE",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "ASTRONAUTICS SYSTEMS RESEARCH CENTER",
+            "AEROSPACE RESEARCH INSTITUTE"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210086765",
+            "name": "Aerospace Research Institute",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "XINJIANG PRODUCTION AND CONSTRUCTION CORPS",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [],
+        "match": {
+            "id": "https://openalex.org/I2801312332",
+            "name": "Xinjiang Production and Construction Corps",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "SOLTECH INDUSTRY CO., LTD.",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "SOLTECH INDUSTRIES",
+            "SOLTECH INDUSTRIES COMPANY LTD.",
+            "SOLTECH INDUSTRY CO.",
+            "SOLTECH INDUSTRY COMPANY",
+            "SOLTECH INDUSTRY COMPANY, LTD",
+            "SOLTECH"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210134702",
+            "name": "Soltech (Belgium)",
+            "type": "institutions"
+        },
+        "score": 0.8823529411764706
+    },
+    {
+        "name": "AL-MUSTAFA INTERNATIONAL UNIVERSITY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "AL-MUSTAFA UNIVERSITY"
+        ],
+        "match": {
+            "id": "https://openalex.org/I2800359231",
+            "name": "Al-Mustafa International University",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "STATE SCIENTIFIC RESEARCH INSTITUTE OF ORGANIC CHEMISTRY AND TECHNOLOGY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "GOSNIIOKHT"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210109537",
+            "name": "State Research Institute of Organic Chemistry and Technology",
+            "type": "institutions"
+        },
+        "score": 0.8890140845070422
+    },
+    {
+        "name": "MINISTRY OF INTERIOR",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "MINISTERIO DEL INTERIOR",
+            "MININT"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210145083",
+            "name": "Ministry of Interior",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "MYANMA TIMBER ENTERPRISE",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "MYANMAR TIMBER ENTERPRISE",
+            "STATE TIMBER BOARD",
+            "TIMBER CORPORATION"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210132121",
+            "name": "Myanmar Timber Enterprise",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "LIMITED LIABILITY COMPANY RVC MANAGEMENT COMPANY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "OBSHCHESTVO S OGRANICHENNOY OTVETSTVENNOSTYU UPRAVLYAYUSHCHAYA KOMPANIYA RVK",
+            "RVC MANAGEMENT COMPANY LLC",
+            "LLC MC RVC",
+            "LLC UK RVK",
+            "OOO UK RVK",
+            "RUSSIAN VENTURE COMPANY"
+        ],
+        "match": {
+            "id": "https://openalex.org/I2799480299",
+            "name": "Russian Venture Company",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "VSEROSSISKIY INSTITUT AVIATSIONNYKH MATERIALOV",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "VIAM",
+            "ALL-RUSSIAN SCIENTIFIC RESEARCH INSTITUTE OF AVIATION MATERIALS",
+            "VSEROSSIYSKIY NAUCHNO-ISSLEDOVATELSKIY INSTITUT AVIATSIONNYKH MATERIALOV",
+            "FEDERAL STATE UNITARY ENTERPRISE ALL-RUSSIAN SCIENTIFIC RESEARCH INSTITUTE OF AVIATION MATERIALS OF THE NATIONAL RESEARCH CENTER KURCHATOV INSTITUTE STATE RESEARCH CENTER OF THE RUSSIAN FEDERATION",
+            "NRC KURCHATOV INSTITUTE - VIAM"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210086972",
+            "name": "All Russian Scientific Research Institute of Aviation Materials",
+            "type": "institutions"
+        },
+        "score": 0.9022700119474313
+    },
+    {
+        "name": "JSC CENTRAL RESEARCH INSTITUTE OF AUTOMATION AND HYDRAULICS",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "FEDERAL RESEARCH AND PRODUCTION CENTER CENTRAL RESEARCH INSTITUTE OF AUTOMATION AND HYDRAULICS",
+            "CENTRAL SCIENTIFIC RESEARCH INSTITUTE OF AUTOMATION AND HYDRAULICS",
+            "TSNIIAG",
+            "TSENTRALNYY NAUCHNOISSLEDOVATELSKIY INSTITUT AVTOMATIKI I GIDRAVLIKI"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210092389",
+            "name": "Central Research Institute of Automation and Hydraulics",
+            "type": "institutions"
+        },
+        "score": 0.8866666666666667
+    },
+    {
+        "name": "LIMITED LIABILITY CORPORATION GELIOS",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "HELIOS"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210138940",
+            "name": "Helios Kliniken",
+            "type": "institutions"
+        },
+        "score": 0.88
+    },
+    {
+        "name": "JOINT STOCK COMPANY CORPORATION MOSCOW INSTITUTE OF HEAT TECHNOLOGY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "JSC CORPORATION MIHT",
+            "MOSCOW INSTITUTE OF THERMAL TECHNOLOGY",
+            "JOINT STOCK COMPANY CORPORATION MOSCOW INSTITUTE OF THERMAL TECHNOLOGY"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210109586",
+            "name": "Moscow Institute of Thermal Technology",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "KRYLOV STATE SCIENTIFIC CENTER FEDERAL STATE UNITARY ENTERPRISE",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "FEDERAL STATE UNITARY ENTERPRISE KRYLOVSKY STATE RESEARCH CENTER",
+            "KRYLOV STATE CENTER",
+            "KRYLOV STATE RESEARCH CENTER"
+        ],
+        "match": {
+            "id": "https://openalex.org/I310941836",
+            "name": "Krylov State Research Center",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "SKOLKOVO FOUNDATION",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "FOUNDATION FOR DEVELOPMENT OF THE CENTER FOR ELABORATION AND COMMERCIALIZATION OF NEW TECHNOLOGIES"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210165827",
+            "name": "Skolkovo Foundation",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "SKOLKOVO INSTITUTE OF SCIENCE AND TECHNOLOGY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "SKOLTECH"
+        ],
+        "match": {
+            "id": "https://openalex.org/I125989756",
+            "name": "Skolkovo Institute of Science and Technology",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "LIMITED LIABILITY COMPANY GROUP OF COMPANIES AKVARIUS",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "LLC GRUPPA AKVARIUS",
+            "AQUARIUS",
+            "LLC PRODUCTION COMPANY AQUARIUS"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210130809",
+            "name": "Aquarius (Slovenia)",
+            "type": "institutions"
+        },
+        "score": 0.8842105263157894
+    },
+    {
+        "name": "FEDERAL STATE FINANCED INSTITUTION OF SCIENCE HIGHER EDUCATION INSTITUTION SPECTROSCOPY OF THE RUSSIAN FEDERATION ACADEMY OF SCIENCES",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "ISAN",
+            "INSTITUTE OF SPECTROSCOPY OF THE RUSSIAN ACADEMY OF SCIENCES"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210107303",
+            "name": "Institute of Spectroscopy",
+            "type": "institutions"
+        },
+        "score": 0.8833333333333334
+    },
+    {
+        "name": "FEDERAL STATE FINANCED INSTITUTION OF SCIENCE PHYSICS AND TECHNOLOGY INSTITUTE NAMED AFTER A. F. IOFFE OF THE RUSSIAN FEDERATION ACADEMY OF SCIENCES",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "IOFFE INSTITUTE"
+        ],
+        "match": {
+            "id": "https://openalex.org/I95568926",
+            "name": "Ioffe Institute",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "INTERNATIONAL CENTER FOR QUANTUM OPTICS AND QUANTUM TECHNOLOGIES LIMITED LIABILITY COMPANY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "RUSSIAN QUANTUM CENTER",
+            "RQC",
+            "OOO MTSKT"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210139586",
+            "name": "Russian Quantum Center",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "FEDERAL STATE UNITARY ENTERPRISE DUKHOV AUTOMATICS RESEARCH INSTITUTE",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "VNIIA",
+            "ALL-RUSSIA RESEARCH INSTITUTE OF AUTOMATICS",
+            "FEDERAL STATE UNITARY ENTERPRISE ALL-RUSSIAN AUTOMATICS RESEARCH INSTITUTE NAMED AFTER N.L. DUKHOV"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210106534",
+            "name": "All Russia Research Institute of Automatics",
+            "type": "institutions"
+        },
+        "score": 0.9113695090439276
+    },
+    {
+        "name": "INTERNATIONAL INVESTMENT BANK",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "IIB",
+            "MEZHDUNARODNY INVESTITSIONNY BANK"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210120260",
+            "name": "International Investment Bank",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "JSC NAUCHNO ISSLEDOVATELSKY I KONSTRUKTORSKY INSTITUT MONTAZHNOY TECHNOLOGY ATOMSTROY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "JSC NAUCHNO ISSLEDOVATELSKY I KONSTRUKTORSKY INSTITUT MONTAZHNOY TEKHNOLOGII ATOMSTROY",
+            "NIKIMT ATOMSTROY",
+            "NIKIMT ATOMSTROY JSC"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210121603",
+            "name": "NIKIMT-Atomstroy",
+            "type": "institutions"
+        },
+        "score": 0.975
+    },
+    {
+        "name": "FEDERAL STATE BUDGETARY EDUCATIONAL INSTITUTION OF HIGHER EDUCATION GROZNY STATE OIL TECHNICAL UNIVERSITY NAMED AFTER ACADEMICIAN M.D. MILLIONSHCHIKOV",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "FEDERALNOE GOSUDARSTVENNOE BYUDZHETNOE OBRAZOVATELNOE UCHREZHDENIE VYSSHEGO OBRAZOVANIYA GROZNENSKI GOSUDARSTVENNY NEFTYANOI TEKHNICHESKI UNIVERSITET IMENI AKADEMIKA M.D. MILLIONSHCHIKOVA",
+            "GROZNY STATE OIL TECHNICAL UNIVERSITY",
+            "GROZNY STATE OIL TECHNICAL UNIVERSITY NAMED AFTER M.D. MILLIONSHIKOVA",
+            "GGNTU IM. AKAD. M.D. MILLIONSHCHIKOVA FGBOU VO GGNTU IM. AKAD. M. D. MILLIONSHCHIKOVA FGBU"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210122798",
+            "name": "Grozny State Oil Technical University named after Academician MD Millionshtchikov",
+            "type": "institutions"
+        },
+        "score": 0.938739474928097
+    },
+    {
+        "name": "FEDERAL STATE BUDGET EDUCATIONAL INSTITUTION OF HIGHER EDUCATION SAINT PETERSBURG MINING UNIVERSITY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "FEDERALNOE GOSUDARSTVENNOE BYUDZHETNOE OBRAZOVATELNOE UCHREZHDENIE VYSSHEGO OBRAZOVANIYA SANKT PETERBURGSKI GORNY UNIVERSITET",
+            "SPGU GORNY UNIVERSITET FGBU",
+            "NATIONAL MINERAL RESOURCES UNIVERSITY",
+            "SAINT PETERSBURG MINING UNIVERSITY",
+            "SPMI",
+            "NATSIONALNY MINERALNOSYREVOI UNIVERSITET GORNY, UCH"
+        ],
+        "match": {
+            "id": "https://openalex.org/I3018660459",
+            "name": "Saint Petersburg Mining University",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "STATE BUDGETARY EDUCATIONAL INSTITUTION OF HIGHER EDUCATION ALMETYEVSK STATE OIL INSTITUTE",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "ALMETYEVSK STATE OIL INSTITUTE",
+            "GBOU VO AGNI"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210098210",
+            "name": "Almetyevsk State Oil Institute",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "INSTITUTE OF PETROLEUM CHEMISTRY SIBERIAN BRANCH OF THE RUSSIAN ACADEMY OF SCIENCES",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "IPC SB RAS",
+            "IPCH SB RAS"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210112221",
+            "name": "Institute of Petroleum Chemistry",
+            "type": "institutions"
+        },
+        "score": 0.8771084337349397
+    },
+    {
+        "name": "PYONGYANG UNIVERSITY OF AUTOMATION",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "UNIVERSITY OF AUTOMATION",
+            "MIRIM COLLEGE",
+            "MIRIM UNIVERSITY",
+            "MILITARY CAMP 144 OF THE KOREAN PEOPLE'S ARMY",
+            "KIM IL-SUNG UNIVERSITY AUTOMATION UNIVERSITY",
+            "KIM IL SUNG MILITARY UNIVERSITY",
+            "COMMAND AUTOMATION COLLEGE OF THE CHOSUN PEOPLE'S ARMY",
+            "KIM IL MILITARY UNIVERSITY",
+            "KIM IL POLITICAL MILITARY UNIVERSITY",
+            "NO. 144 MILITARY CAMP OF THE CHOSUN PEOPLE'S ARMY"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210163787",
+            "name": "Kim Il-Sung Military University",
+            "type": "institutions"
+        },
+        "score": 0.9305017921146953
+    },
+    {
+        "name": "OSIPYAN INSTITUTE OF SOLID STATE PHYSICS OF THE RUSSIAN ACADEMY OF SCIENCES",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "ISSP RAS",
+            "IFTT RAN",
+            "INSTITUTE OF SOLID STATE PHYSICS OF THE ACADEMY OF SCIENCES SSSR",
+            "FEDERAL STATE BUDGETARY INSTITUTION OF SCIENCE INSTITUTE OF SOLID STATE PHYSICS N.A. YU. A. OSIPYAN OF THE RUSSIAN ACADEMY OF SCIENCES",
+            "FEDERALNOE GOSUDARSTVENNOE BYUDZHETNOE UCHREZHDENIE NAUKI INSTITUT FIZIKI TVERDOGO TELA ROSSISKOI AKADEMII NAUK FGBU",
+            "FEDERALNOE GOSUDARSTVENNOE BYUDZHETNOE UCHREZHDENIE NAUKI INSTITUT FIZIKI TVERDOGO TELA ROSSISKOI AKADEMII NAUK BU"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210091470",
+            "name": "Institute of Solid State Physics",
+            "type": "institutions"
+        },
+        "score": 0.9
+    },
+    {
+        "name": "A.M. PROKHOROV GENERAL PHYSICS INSTITUTE RUSSIAN ACADEMY OF SCIENCES",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "PROKHOROV GENERAL PHYSICS INSTITUTE OF THE RUSSIAN ACADEMY OF SCIENCES",
+            "PROKHOROV GENERAL PHYSICS INSTITUTE OF RAS",
+            "FEDERALNOE GOSUDARSTVENNOE BYUDZHETNOE UCHREZHDENNIE NAUKI FEDERALNY ISSLEDOVATELSKI TSENTR INSTITUT OBSHCHEI FIZIKI IM. A.M. PROKHOROVA ROSSISKOI AKADEMII NAUK",
+            "RUSSIAN ACADEMY OF SCIENCES - ALEXANDR MIKHAILOVICH PROKHOROV GENERAL PHYSICS INSTITUTE",
+            "GPI RAS",
+            "IOF RAN FGBU",
+            "IOF RAN"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210153510",
+            "name": "Prokhorov General Physics Institute",
+            "type": "institutions"
+        },
+        "score": 0.9666666666666667
+    },
+    {
+        "name": "BAIKOV INSTITUTE OF METALLURGY AND MATERIALS SCIENCE, RUSSIAN ACADEMY OF SCIENCES",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "IMET RAS"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210105338",
+            "name": "Baikov Institute of Metallurgy and Materials Science",
+            "type": "institutions"
+        },
+        "score": 0.9283950617283951
+    },
+    {
+        "name": "MOSCOW STATE TECHNICAL UNIVERSITY NAMED AFTER NE BAUMAN",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "FEDERAL STATE BUDGETARY EDUCATIONAL INSTITUTION OF HIGHER EDUCATION MOSCOW STATE TECHNICAL UNIVERSITY NAMED AFTER NE BAUMAN NATIONAL RESEARCH UNIVERSITY",
+            "BAUMAN MOSCOW STATE TECHNICAL UNIVERSITY"
+        ],
+        "match": {
+            "id": "https://openalex.org/I177537411",
+            "name": "Bauman Moscow State Technical University",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "ZENIT 3D",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "ZENIT"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210137104",
+            "name": "Zenit (Poland)",
+            "type": "institutions"
+        },
+        "score": 0.875
+    },
+    {
+        "name": "KELDYSH INSTITUTE OF APPLIED MATHEMATICS",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "KIAM",
+            "KELDYSH INSTITUTE OF APPLIED MATHEMATICS OF THE RUSSIAN ACADEMY OF SCIENCES"
+        ],
+        "match": {
+            "id": "https://openalex.org/I86427540",
+            "name": "Keldysh Institute of Applied Mathematics",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "JSC ROSGEOLOGIA",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "ROSGEO",
+            "ROSGEOLOGIYA OAO",
+            "ROSGEOLOGY",
+            "AO ROSGEO"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210101540",
+            "name": "Rosgeo (Russia)",
+            "type": "institutions"
+        },
+        "score": 0.88
+    },
+    {
+        "name": "Open Joint-Stock Company Rosneft Oil Company",
+        "source": "Sectoral Sanctions Identifications List (SSI) - Treasury Department",
+        "aliases": [
+            "OJSC Rosneft Oil Company",
+            "Rosneft Oil Company",
+            "OAO Rosneft Oil Company",
+            "Oil Company Rosneft",
+            "Rosneft"
+        ],
+        "match": {
+            "id": "https://openalex.org/I147309818",
+            "name": "Rosneft (Russia)",
+            "type": "institutions"
+        },
+        "score": 0.8875
+    },
+    {
+        "name": "LUKOIL OAO",
+        "source": "Sectoral Sanctions Identifications List (SSI) - Treasury Department",
+        "aliases": [
+            "Lukoil Oil Company",
+            "Lukoil",
+            "NK Lukoil OAO",
+            "Neftyanaya Kompaniya Lukoil OOO"
+        ],
+        "match": {
+            "id": "https://openalex.org/I140963716",
+            "name": "Lukoil (Russia)",
+            "type": "institutions"
+        },
+        "score": 0.88
+    },
+    {
+        "name": "Public Joint Stock Company Gazprom",
+        "source": "Sectoral Sanctions Identifications List (SSI) - Treasury Department",
+        "aliases": [
+            "Gazprom PAO",
+            "PJSC Gazprom",
+            "Gazprom"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210123809",
+            "name": "Gazprombank",
+            "type": "institutions"
+        },
+        "score": 0.9272727272727272
+    }
+]

@@ -1,0 +1,345 @@
+[
+    {
+        "name": "China Aerospace Science and Technology Corporation",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "CASC"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320327471",
+            "name": "China Aerospace Science and Technology Corporation",
+            "type": "funders"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "China Electronics Technology Group Corporation",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "CETC"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320328844",
+            "name": "China Electronics Technology Group Corporation",
+            "type": "funders"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "China Mobile Communications Group Co., Ltd.",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "China Mobile"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320329515",
+            "name": "China Mobile Research Institute",
+            "type": "funders"
+        },
+        "score": 0.8774193548387097
+    },
+    {
+        "name": "CHINA NATIONAL NUCLEAR CORPORATION",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "China National Nuclear Corp",
+            "CNNC"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320328717",
+            "name": "China National Nuclear Corporation",
+            "type": "funders"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "China National Offshore Oil Corporation",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "China National Offshore Oil Corp.",
+            "CNOOC"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320322143",
+            "name": "China National Offshore Oil Corporation",
+            "type": "funders"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "SHINING PATH",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "SENDERO LUMINOSO",
+            "SL",
+            "PARTIDO COMUNISTA DEL PERU EN EL SENDERO LUMINOSO DE JOSE CARLOS MARIATEGUI (COMMUNIST PARTY OF PERU ON THE SHINING PATH OF JOSE CARLOS MARIATEGUI)",
+            "PARTIDO COMUNISTA DEL PERU (COMMUNIST PARTY OF PERU)",
+            "PCP",
+            "SOCORRO POPULAR DEL PERU",
+            "SPP",
+            "EJERCITO GUERRILLERO POPULAR",
+            "EGP",
+            "EJERCITO POPULAR DE LIBERACION",
+            "EPL",
+            "COMMUNIST PARTY OF PERU ON THE SHINING PATH OF JOSE CARLOS MARIATEGUI",
+            "COMMUNIST PARTY OF PERU",
+            "PEOPLE'S AID OF PERU",
+            "PEOPLE'S GUERRILLA ARMY",
+            "PEOPLE'S LIBERATION ARMY"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320325883",
+            "name": "People's Liberation Army University of Science and Technology",
+            "type": "funders"
+        },
+        "score": 0.8786885245901639
+    },
+    {
+        "name": "IRANIAN MINES AND MINING INDUSTRIES DEVELOPMENT AND RENOVATION ORGANIZATION",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "IMIDRO",
+            "IRAN MINING INDUSTRIES DEVELOPMENT AND RENOVATION ORGANIZATION",
+            "IRANIAN MINES AND MINERAL INDUSTRIES DEVELOPMENT AND RENOVATION"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320319382",
+            "name": "Iranian Mines and Mining Industries Development and Renovation Organization",
+            "type": "funders"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "MALEK ASHTAR UNIVERSITY OF TECHNOLOGY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "DANESHGAH-E SANA'TI-YE MALEK-E ASHTAR",
+            "MALEK ASHTAR UNIVERSITY",
+            "MALEK-E ASHTAR UNIVERSITY",
+            "MALEK ASHTAR INDUSTRIAL UNIVERSITY",
+            "MALEK-E ASHTAR TECHNICAL UNIVERSITY",
+            "MALEK ASHTAR AVIATION UNIVERSTIY COMPLEX",
+            "MALEK ASHTAR UNIVERSITY OF DEFENSE TECHNOLOGY"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320329032",
+            "name": "Malek-Ashtar University of Technology",
+            "type": "funders"
+        },
+        "score": 0.9336336336336337
+    },
+    {
+        "name": "ADVANCED INFORMATION AND COMMUNICATION TECHNOLOGY CENTER",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "AICTC"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320335182",
+            "name": "Advanced Information and Communication Technology Center, Sharif University of Technology",
+            "type": "funders"
+        },
+        "score": 0.9258426966292135
+    },
+    {
+        "name": "BAQIYATTALLAH UNIVERSITY OF MEDICAL SCIENCES",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "BAGHYATOLLAH MEDICAL SCIENCES UNIVERSITY",
+            "BAGIATOLLAH MEDICAL SCIENCES UNIVERSITY",
+            "BAGHIATOLLAH MEDICAL SCIENCES UNIVERSITY",
+            "BAQYATOLLAH MEDICAL SCIENCES UNIVERSITY",
+            "BAQIYATALLAH MEDICAL SCIENCES UNIVERSITY",
+            "BAQIYATALLAH UNIVERSITY OF MEDICAL SCIENCES",
+            "BAQIATOLLAH MEDICAL SCIENCES UNIVERSITY"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320323455",
+            "name": "Baqiyatallah University of Medical Sciences",
+            "type": "funders"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "MINISTRY OF PEOPLE'S SECURITY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "MPS",
+            "MINISTRY OF PUBLIC SECURITY"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320326699",
+            "name": "Ministry of Public Security of the People's Republic of China",
+            "type": "funders"
+        },
+        "score": 0.8885245901639344
+    },
+    {
+        "name": "SAFARI CLUB",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "CENTRE DE LOISIR SAFARI CLUB",
+            "SAFARI BEACH"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320311190",
+            "name": "Safari Club International Foundation",
+            "type": "funders"
+        },
+        "score": 0.8611111111111112
+    },
+    {
+        "name": "EQUIPMENT DEVELOPMENT DEPARTMENT",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "GENERAL ARMAMENT DEPARTMENT"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320336430",
+            "name": "Equipment Development Department of the Central Military Commission",
+            "type": "funders"
+        },
+        "score": 0.8955223880597015
+    },
+    {
+        "name": "ATOMIC ENERGY ORGANIZATION OF IRAN",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "AEOI"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320326521",
+            "name": "Atomic Energy Organization of Iran",
+            "type": "funders"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "NUCLEAR SCIENCE AND TECHNOLOGY RESEARCH INSTITUTE",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "NUCLEAR SCIENCES AND TECHNOLOGIES RESEARCH INSTITUTE",
+            "NSTRI",
+            "RESEARCH INSTITUTE OF NUCLEAR SCIENCE AND TECHNOLOGY",
+            "NUCLEAR SCIENCE AND TECHNOLOGY RESEARCH CENTER"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320326522",
+            "name": "Nuclear Science and Technology Research Institute",
+            "type": "funders"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "BANCO CORPORATIVO SA",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "BANCORP",
+            "BANCO NACIONAL",
+            "BANCO NATIONAL",
+            "NATIONAL BANK"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320329820",
+            "name": "Banco Nacional de Desenvolvimento Econ\u00f4mico e Social",
+            "type": "funders"
+        },
+        "score": 0.8538461538461538
+    },
+    {
+        "name": "BANCO CENTRAL DE VENEZUELA",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "CENTRAL BANK OF VENEZUELA"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320310015",
+            "name": "Banco Central de Venezuela",
+            "type": "funders"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "XINJIANG PRODUCTION AND CONSTRUCTION CORPS",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [],
+        "match": {
+            "id": "https://openalex.org/F4320326153",
+            "name": "Xinjiang Production and Construction Corps",
+            "type": "funders"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "LIMITED LIABILITY CORPORATION GELIOS",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "HELIOS"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320311782",
+            "name": "HELIOS Kliniken",
+            "type": "funders"
+        },
+        "score": 0.88
+    },
+    {
+        "name": "SKOLKOVO INSTITUTE OF SCIENCE AND TECHNOLOGY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "SKOLTECH"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320324442",
+            "name": "Skolkovo Institute of Science and Technology",
+            "type": "funders"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "FEDERAL STATE FINANCED INSTITUTION OF SCIENCE PHYSICS AND TECHNOLOGY INSTITUTE NAMED AFTER A. F. IOFFE OF THE RUSSIAN FEDERATION ACADEMY OF SCIENCES",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "IOFFE INSTITUTE"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320329067",
+            "name": "Ioffe Institute",
+            "type": "funders"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "A.M. PROKHOROV GENERAL PHYSICS INSTITUTE RUSSIAN ACADEMY OF SCIENCES",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "PROKHOROV GENERAL PHYSICS INSTITUTE OF THE RUSSIAN ACADEMY OF SCIENCES",
+            "PROKHOROV GENERAL PHYSICS INSTITUTE OF RAS",
+            "FEDERALNOE GOSUDARSTVENNOE BYUDZHETNOE UCHREZHDENNIE NAUKI FEDERALNY ISSLEDOVATELSKI TSENTR INSTITUT OBSHCHEI FIZIKI IM. A.M. PROKHOROVA ROSSISKOI AKADEMII NAUK",
+            "RUSSIAN ACADEMY OF SCIENCES - ALEXANDR MIKHAILOVICH PROKHOROV GENERAL PHYSICS INSTITUTE",
+            "GPI RAS",
+            "IOF RAN FGBU",
+            "IOF RAN"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320329280",
+            "name": "Prokhorov General Physics Institute of the Russian Academy of Sciences",
+            "type": "funders"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "MOSCOW STATE TECHNICAL UNIVERSITY NAMED AFTER NE BAUMAN",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "FEDERAL STATE BUDGETARY EDUCATIONAL INSTITUTION OF HIGHER EDUCATION MOSCOW STATE TECHNICAL UNIVERSITY NAMED AFTER NE BAUMAN NATIONAL RESEARCH UNIVERSITY",
+            "BAUMAN MOSCOW STATE TECHNICAL UNIVERSITY"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320324087",
+            "name": "Bauman Moscow State Technical University",
+            "type": "funders"
+        },
+        "score": 1.0
+    }
+]

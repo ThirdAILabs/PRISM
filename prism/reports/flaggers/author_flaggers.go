@@ -10,7 +10,7 @@ import (
 )
 
 type AuthorIsFacultyAtEOCFlagger struct {
-	entityDB search.NeuralDB
+	universityNDB search.NeuralDB
 }
 
 type nameMatcher struct {
@@ -40,7 +40,7 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Name() flagType {
 func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName string) ([]Flag, error) {
 	logger.Info("checking if author is faculty at EOC", "author_name", authorName)
 
-	results, err := flagger.entityDB.Query(authorName, 5, nil)
+	results, err := flagger.universityNDB.Query(authorName, 5, nil)
 	if err != nil {
 		logger.Error("error querying ndb", "error", err)
 		return nil, fmt.Errorf("error querying ndb: %w", err)
@@ -77,8 +77,8 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 }
 
 type AuthorIsAssociatedWithEOCFlagger struct {
-	prDB  search.NeuralDB
-	auxDB search.NeuralDB
+	docNDB search.NeuralDB
+	auxNDB search.NeuralDB
 }
 
 func (flagger *AuthorIsAssociatedWithEOCFlagger) Name() flagType {
@@ -129,7 +129,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(logg
 		matcher := newNameMatcher(author.author)
 
 		// TODO(question): do we need to use the name combinations, since the tokenizer will split on whitespace and lowercase?
-		results, err := flagger.prDB.Query(author.author, 5, nil)
+		results, err := flagger.docNDB.Query(author.author, 5, nil)
 		if err != nil {
 			return nil, fmt.Errorf("error querying ndb: %w", err)
 		}
@@ -195,7 +195,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 
 	queryToEntities := make(map[string]entityMetadata)
 
-	results, err := flagger.auxDB.Query(authorName, 5, nil)
+	results, err := flagger.auxNDB.Query(authorName, 5, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error querying ndb: %w", err)
 	}
@@ -227,7 +227,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 	level2Entities := make(map[string]entityMetadata)
 
 	for query, level1Entity := range queryToEntities {
-		results, err := flagger.auxDB.Query(query, 5, nil)
+		results, err := flagger.auxNDB.Query(query, 5, nil)
 		if err != nil {
 			return nil, fmt.Errorf("error querying ndb: %w", err)
 		}
@@ -264,7 +264,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 	flags := make([]Flag, 0)
 
 	for query, entity := range queryToEntities {
-		results, err := flagger.prDB.Query(query, 5, nil)
+		results, err := flagger.docNDB.Query(query, 5, nil)
 		if err != nil {
 			return nil, fmt.Errorf("error querying ndb: %w", err)
 		}

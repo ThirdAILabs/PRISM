@@ -5,10 +5,6 @@ import (
 	"path/filepath"
 	"prism/openalex"
 	"testing"
-
-	"github.com/google/uuid"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 )
 
 func TestMultipleAssociations(t *testing.T) {
@@ -194,40 +190,6 @@ func (m *mockAcknowledgmentExtractor) GetAcknowledgements(logger *slog.Logger, w
 	return output
 }
 
-func entityLookupDB(t *testing.T) *gorm.DB {
-	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := db.AutoMigrate(&AliasRecord{}, &EntityRecord{}, &SourceRecord{}); err != nil {
-		t.Fatal(err)
-	}
-
-	source1 := uuid.New()
-	if err := db.Create([]SourceRecord{
-		{Id: source1, Name: "source_a", Link: "a.com"},
-	}).Error; err != nil {
-		t.Fatal(err)
-	}
-
-	entity1 := uuid.New()
-	if err := db.Create([]EntityRecord{
-		{Id: entity1, Name: "entity_a", SourceId: source1},
-	}).Error; err != nil {
-		t.Fatal(err)
-	}
-
-	if err := db.Create([]AliasRecord{
-		{Id: uuid.New(), Alias: "bad entity xyz", EntityId: entity1},
-		{Id: uuid.New(), Alias: "a worse entity", EntityId: entity1},
-	}).Error; err != nil {
-		t.Fatal(err)
-	}
-
-	return db
-}
-
 func TestAcknowledgementEOC(t *testing.T) {
 	testDir := t.TempDir()
 
@@ -243,7 +205,11 @@ func TestAcknowledgementEOC(t *testing.T) {
 	}
 	defer authorCache.Close()
 
-	entityStore, err := NewEntityStore(t.TempDir(), entityLookupDB(t))
+	aliasToSource := map[string]string{
+		"bad entity xzy": "source_a", "a worse entity": "source_b",
+	}
+
+	entityStore, err := NewEntityStore(t.TempDir(), aliasToSource)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1,0 +1,184 @@
+[
+    {
+        "name": "China Aerospace Science and Industry Corporation Limited",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "China Aerospace Science and Industry Corporation",
+            "CASIC"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4320800557",
+            "name": "China Aerospace Science and Industry Corporation",
+            "type": "publishers"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "China Electronics Technology Group Corporation",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "CETC"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4383694720",
+            "name": "China Electronics Technology Group Corporation",
+            "type": "publishers"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "SHINING PATH",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "SENDERO LUMINOSO",
+            "SL",
+            "PARTIDO COMUNISTA DEL PERU EN EL SENDERO LUMINOSO DE JOSE CARLOS MARIATEGUI (COMMUNIST PARTY OF PERU ON THE SHINING PATH OF JOSE CARLOS MARIATEGUI)",
+            "PARTIDO COMUNISTA DEL PERU (COMMUNIST PARTY OF PERU)",
+            "PCP",
+            "SOCORRO POPULAR DEL PERU",
+            "SPP",
+            "EJERCITO GUERRILLERO POPULAR",
+            "EGP",
+            "EJERCITO POPULAR DE LIBERACION",
+            "EPL",
+            "COMMUNIST PARTY OF PERU ON THE SHINING PATH OF JOSE CARLOS MARIATEGUI",
+            "COMMUNIST PARTY OF PERU",
+            "PEOPLE'S AID OF PERU",
+            "PEOPLE'S GUERRILLA ARMY",
+            "PEOPLE'S LIBERATION ARMY"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4361185547",
+            "name": "People's Liberation Army Institute of Foreign Languages",
+            "type": "publishers"
+        },
+        "score": 0.8872727272727273
+    },
+    {
+        "name": "NATIONAL IRANIAN OIL COMPANY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "NIOC"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4310319081",
+            "name": "National Iranian Oil Company (NIOC) Health Organization",
+            "type": "publishers"
+        },
+        "score": 0.9018181818181817
+    },
+    {
+        "name": "BAQIYATTALLAH UNIVERSITY OF MEDICAL SCIENCES",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "BAGHYATOLLAH MEDICAL SCIENCES UNIVERSITY",
+            "BAGIATOLLAH MEDICAL SCIENCES UNIVERSITY",
+            "BAGHIATOLLAH MEDICAL SCIENCES UNIVERSITY",
+            "BAQYATOLLAH MEDICAL SCIENCES UNIVERSITY",
+            "BAQIYATALLAH MEDICAL SCIENCES UNIVERSITY",
+            "BAQIYATALLAH UNIVERSITY OF MEDICAL SCIENCES",
+            "BAQIATOLLAH MEDICAL SCIENCES UNIVERSITY"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4310319099",
+            "name": "Baqiyatallah University of Medical Sciences",
+            "type": "publishers"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "IZHEVSKY MEKHANICHESKY ZAVOD JSC",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "BAIKAL"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4310312830",
+            "name": "Baikal State University",
+            "type": "publishers"
+        },
+        "score": 0.8521739130434783
+    },
+    {
+        "name": "NOCTURNUM INC, S. DE R.L. DE C.V.",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "NOCTURN INC, S. DE R.L. DE C.V.",
+            "CORTEZ",
+            "CORTEZ COCINA AUTENTICA",
+            "EL CORTEZ",
+            "RESTAURANT CORTEZ",
+            "RESTAURANTE CORTEZ"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4310312586",
+            "name": "Cortez Editora Ltda",
+            "type": "publishers"
+        },
+        "score": 0.8631578947368421
+    },
+    {
+        "name": "GREEN WAVE TELECOMMUNICATION",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "GREEN WAVE TELECOMMUNICATION SDN BHD",
+            "GWT",
+            "GREEN WAVE TECHNOLOGIES",
+            "GREEN WAVE",
+            "GREENWAVE TELECOM",
+            "GREEN WAVE COMPANY"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4310312959",
+            "name": "Green Wave Publishing of Canada",
+            "type": "publishers"
+        },
+        "score": 0.864516129032258
+    },
+    {
+        "name": "KRYLOV STATE SCIENTIFIC CENTER FEDERAL STATE UNITARY ENTERPRISE",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "FEDERAL STATE UNITARY ENTERPRISE KRYLOVSKY STATE RESEARCH CENTER",
+            "KRYLOV STATE CENTER",
+            "KRYLOV STATE RESEARCH CENTER"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4310312642",
+            "name": "Krylov State Research Center",
+            "type": "publishers"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "FEDERAL STATE FINANCED INSTITUTION OF SCIENCE PHYSICS AND TECHNOLOGY INSTITUTE NAMED AFTER A. F. IOFFE OF THE RUSSIAN FEDERATION ACADEMY OF SCIENCES",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "IOFFE INSTITUTE"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4310321811",
+            "name": "Ioffe Institute",
+            "type": "publishers"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "FEDERAL STATE BUDGET EDUCATIONAL INSTITUTION OF HIGHER EDUCATION SAINT PETERSBURG MINING UNIVERSITY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "FEDERALNOE GOSUDARSTVENNOE BYUDZHETNOE OBRAZOVATELNOE UCHREZHDENIE VYSSHEGO OBRAZOVANIYA SANKT PETERBURGSKI GORNY UNIVERSITET",
+            "SPGU GORNY UNIVERSITET FGBU",
+            "NATIONAL MINERAL RESOURCES UNIVERSITY",
+            "SAINT PETERSBURG MINING UNIVERSITY",
+            "SPMI",
+            "NATSIONALNY MINERALNOSYREVOI UNIVERSITET GORNY, UCH"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4310312695",
+            "name": "Saint Petersburg Mining University",
+            "type": "publishers"
+        },
+        "score": 1.0
+    }
+]
