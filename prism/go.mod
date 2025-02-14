@@ -20,6 +20,7 @@ require (
 require (
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/deckarep/golang-set/v2 v2.7.0 // indirect
+	github.com/go-chi/cors v1.2.1 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.3 // indirect
 	github.com/go-resty/resty/v2 v2.7.0 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
