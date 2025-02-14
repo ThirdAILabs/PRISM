@@ -20,6 +20,14 @@ function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
         }
     }
 
+    function handleSelectSuggestionInstitute(suggestion) {
+        return () => {
+            setSuggestions([]);
+            setQuery(suggestion.InstitutionName);
+            onSelect(suggestion);
+        }
+    }
+
     return (
         // Column
         <div className='autocomplete-search-bar'>
@@ -38,7 +46,7 @@ function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
                         type === "author" ?
                             <div className='suggestion' key={index} onClick={handleSelectSuggestion(suggestion)}>{suggestion.AuthorName}</div>
                             :
-                            <div className='suggestion' key={index} onClick={handleSelectSuggestion(suggestion)}>{suggestion.InstitutionName}</div>
+                            <div className='suggestion' key={index} onClick={handleSelectSuggestionInstitute(suggestion)}>{suggestion.InstitutionName}</div>
                     ))}
                 </div>
             }

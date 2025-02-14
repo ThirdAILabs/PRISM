@@ -31,7 +31,6 @@ function App() {
         <Routes>
           <Route path="/" element={<SearchComponent />} />
           <Route path="/item" element={<ItemDetails />} />
-          <Route path="/auto" element={<AuthorSearch />} />
           <Route path="/entity-lookup" element={<EntityLookup />} />
         </Routes>
       </Router>
