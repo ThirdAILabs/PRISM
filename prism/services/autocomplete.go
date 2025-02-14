@@ -57,12 +57,14 @@ func (s *AutocompleteService) AutocompleteInstitution(r *http.Request) (any, err
 	seen := make(map[string]bool)
 	results := make([]api.Institution, 0, len(institutions))
 	for _, inst := range institutions {
-		if !seen[inst.InstitutionName] {
+		key := inst.InstitutionName + ";;" + inst.Location
+		if !seen[key] {
 			results = append(results, api.Institution{
 				InstitutionId:   inst.InstitutionId,
 				InstitutionName: inst.InstitutionName,
+				Location:        inst.Location,
 			})
-			seen[inst.InstitutionName] = true
+			seen[key] = true
 		}
 	}
 

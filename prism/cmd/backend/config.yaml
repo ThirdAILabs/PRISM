@@ -15,7 +15,7 @@ keycloak:
     verbose: false
 
 # Port to run backend server on
-port: 3000
+port: 8082
 
 # Logfile for backend
 logfile: "./prism_backend.log"

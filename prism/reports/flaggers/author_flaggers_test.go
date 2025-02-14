@@ -42,7 +42,7 @@ func TestAuthorIsFacultyAtEOC(t *testing.T) {
 		t.Fatal("expected flag")
 	}
 
-	flag := flags[0].(*AuthorFlag).AuthorIsFacultyAtEOC
+	flag := flags[0].(*AuthorIsFacultyAtEOCFlag)
 	if flag.University != "xyz" || flag.UniversityUrl != "xyz.com" {
 		t.Fatal("incorrect flag")
 	}
@@ -122,10 +122,10 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			t.Fatal("expected 1 flag")
 		}
 
-		flag := flags[0].(*AuthorFlag).AuthorIsAssociatedWithEOC
+		flag := flags[0].(*AuthorIsAssociatedWithEOCFlag)
 
-		if flags[0].GetTitle() != "Person may be affiliated with someone mentioned in a press release." ||
-			flag.Connection != "primary" ||
+		if flag.FlagTitle != "Person may be affiliated with someone mentioned in a press release." ||
+			flag.ConnectionLevel != "primary" ||
 			flag.DocTitle != "indicted" ||
 			flag.DocUrl != "indicted.com" ||
 			!slices.Equal(flag.DocEntities, []string{"abc", "xyz"}) ||
@@ -148,10 +148,10 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			t.Fatal("expected 1 flag")
 		}
 
-		flag := flags[0].(*AuthorFlag).AuthorIsAssociatedWithEOC
+		flag := flags[0].(*AuthorIsAssociatedWithEOCFlag)
 
-		if flags[0].GetTitle() != "The author's frequent coauthor may be mentioned in a press release." ||
-			flag.Connection != "secondary" ||
+		if flag.FlagTitle != "The author's frequent coauthor may be mentioned in a press release." ||
+			flag.ConnectionLevel != "secondary" ||
 			flag.DocTitle != "indicted" ||
 			flag.DocUrl != "indicted.com" ||
 			!slices.Equal(flag.DocEntities, []string{"abc", "xyz"}) ||
@@ -174,10 +174,10 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			t.Fatal("expected 1 flag")
 		}
 
-		flag := flags[0].(*AuthorFlag).AuthorIsAssociatedWithEOC
+		flag := flags[0].(*AuthorIsAssociatedWithEOCFlag)
 
-		if flags[0].GetTitle() != "Author may be affiliated with an entity whose associate may be mentioned in a press release." ||
-			flag.Connection != "secondary" ||
+		if flag.FlagTitle != "Author may be affiliated with an entity whose associate may be mentioned in a press release." ||
+			flag.ConnectionLevel != "secondary" ||
 			flag.DocTitle != "indicted" ||
 			flag.DocUrl != "indicted.com" ||
 			!slices.Equal(flag.DocEntities, []string{"abc", "xyz"}) ||
@@ -200,10 +200,10 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			t.Fatal("expected 1 flag")
 		}
 
-		flag := flags[0].(*AuthorFlag).AuthorIsAssociatedWithEOC
+		flag := flags[0].(*AuthorIsAssociatedWithEOCFlag)
 
-		if flags[0].GetTitle() != "Author may be affiliated with an entity whose associate may be mentioned in a press release." ||
-			flag.Connection != "tertiary" ||
+		if flag.FlagTitle != "Author may be affiliated with an entity whose associate may be mentioned in a press release." ||
+			flag.ConnectionLevel != "tertiary" ||
 			flag.DocTitle != "leaked docs" ||
 			flag.DocUrl != "leakeddocs.com" ||
 			!slices.Equal(flag.DocEntities, []string{"qrs"}) ||

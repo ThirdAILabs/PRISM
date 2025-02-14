@@ -3,9 +3,15 @@ package flaggers
 import (
 	"fmt"
 	"log/slog"
+	"path/filepath"
 	"prism/api"
 	"prism/openalex"
+	"prism/search"
 	"sync"
+
+	"github.com/google/uuid"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 type ReportProcessor struct {
@@ -13,6 +19,126 @@ type ReportProcessor struct {
 	workFlaggers            []WorkFlagger
 	authorFacultyAtEOC      AuthorIsFacultyAtEOCFlagger
 	authorAssociatedWithEOC AuthorIsAssociatedWithEOCFlagger
+}
+
+type ReportProcessorOptions struct {
+	EntityNDBPath string
+	DocNDBPath    string
+	AuxNDBPath    string
+
+	EntityLookupDBPath string
+
+	ConcerningEntities     []string
+	ConcerningInstitutions []string
+	ConcerningFunders      []string
+	ConcerningPublishers   []string
+
+	SussyBakas []string
+
+	GrobidEndpoint string
+
+	CacheDir string
+
+	ScratchDir string
+}
+
+func convertToSet(list []string) eocSet {
+	set := make(eocSet)
+	for _, item := range list {
+		set[item] = struct{}{}
+	}
+	return set
+}
+
+// TODO(Nicholas): How to do cleanup for this, or just let it get cleaned up at the end of the process?
+func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
+	entityNdb, err := search.NewNeuralDB(opts.EntityNDBPath)
+	if err != nil {
+		return nil, fmt.Errorf("error loading entity ndb: %w", err)
+	}
+
+	docNdb, err := search.NewNeuralDB(opts.DocNDBPath)
+	if err != nil {
+		return nil, fmt.Errorf("error loading doc ndb: %w", err)
+	}
+
+	auxNdb, err := search.NewNeuralDB(opts.AuxNDBPath)
+	if err != nil {
+		return nil, fmt.Errorf("error loading aux ndb: %w", err)
+	}
+
+	ackFlagCache, err := NewCache[cachedAckFlag]("ack_flags", filepath.Join(opts.CacheDir, "ack_flags.cache"))
+	if err != nil {
+		return nil, fmt.Errorf("error loading ack flag cache: %w", err)
+	}
+	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(opts.CacheDir, "authors.cache"))
+	if err != nil {
+		return nil, fmt.Errorf("error loading author cache: %w", err)
+	}
+	ackCache, err := NewCache[Acknowledgements]("acks", filepath.Join(opts.CacheDir, "acks.cache"))
+	if err != nil {
+		return nil, fmt.Errorf("error loading ack cache: %w", err)
+	}
+
+	concerningEntities := convertToSet(opts.ConcerningEntities)
+	concerningInstitutions := convertToSet(opts.ConcerningInstitutions)
+	concerningFunders := convertToSet(opts.ConcerningFunders)
+	concerningPublishers := convertToSet(opts.ConcerningPublishers)
+
+	db, err := gorm.Open(sqlite.Open(opts.EntityLookupDBPath), &gorm.Config{})
+	if err != nil {
+		return nil, fmt.Errorf("error opening entity lookup db: %w", err)
+	}
+
+	entityStore, err := NewEntityStore(filepath.Join(opts.ScratchDir, fmt.Sprintf("entity_lookup_%s.ndb", uuid.NewString())), db)
+	if err != nil {
+		return nil, fmt.Errorf("error constructing entity store: %w", err)
+	}
+
+	return &ReportProcessor{
+		openalex: openalex.NewRemoteKnowledgeBase(),
+		workFlaggers: []WorkFlagger{
+			&OpenAlexMultipleAffiliationsFlagger{},
+			&OpenAlexFunderIsEOC{
+				concerningFunders:  concerningFunders,
+				concerningEntities: concerningEntities,
+			},
+			&OpenAlexPublisherIsEOC{
+				concerningPublishers: concerningPublishers,
+			},
+			&OpenAlexCoauthorIsEOC{
+				concerningEntities: concerningEntities,
+			},
+			&OpenAlexAuthorAffiliationIsEOC{
+				concerningEntities:     concerningEntities,
+				concerningInstitutions: concerningInstitutions,
+			},
+			&OpenAlexCoauthorAffiliationIsEOC{
+				concerningEntities:     concerningEntities,
+				concerningInstitutions: concerningInstitutions,
+			},
+			&OpenAlexAcknowledgementIsEOC{
+				openalex:     openalex.NewRemoteKnowledgeBase(),
+				entityLookup: entityStore,
+				flagCache:    ackFlagCache,
+				authorCache:  authorCache,
+				extractor: &GrobidAcknowledgementsExtractor{
+					cache:          ackCache,
+					maxWorkers:     10,
+					grobidEndpoint: opts.GrobidEndpoint,
+					downloadDir:    opts.ScratchDir,
+				},
+				sussyBakas: opts.SussyBakas,
+			},
+		},
+		authorFacultyAtEOC: AuthorIsFacultyAtEOCFlagger{
+			entityDB: entityNdb,
+		},
+		authorAssociatedWithEOC: AuthorIsAssociatedWithEOCFlagger{
+			prDB:  docNdb,
+			auxDB: auxNdb,
+		},
+	}, nil
 }
 
 func (processor *ReportProcessor) getWorkStream(report api.Report) (chan openalex.WorkBatch, error) {
