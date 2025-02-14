@@ -20,16 +20,34 @@ const _kc = new Keycloak({
 
 const initKeycloak = (onAuthenticatedCallback) => {
     _kc.init({
-        onLoad: 'login-required',  // force login if not already authenticated
+        onLoad: 'login-required',
         pkceMethod: 'S256',
-        checkLoginIframe: false // Essential for modern browsers
+        checkLoginIframe: false,
+        // Token timeouts in seconds
+        timeSkew: 0,
+        tokenMinValidity: 30, // Start refreshing 30 seconds before expiry
+        refreshToken: true,
+        // Token lifetimes
+        sessionTimeOutInSeconds: 1800, // 30 minutes
+        refreshTokenTimeoutInSeconds: 259200, // 3 days
+        // Silent refresh
+        silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
+        enableLogging: true,
+        // Token refresh interval
+        refreshTokenPeriod: 60 // Refresh token every minute if needed
     })
         .then((authenticated) => {
             if (!authenticated) {
                 console.log("User is not authenticated..!");
             } else {
                 console.log("User is authenticated");
-                console.log("Token is", _kc.token); // Token is now available here
+                // Set up token refresh
+                setInterval(() => {
+                    _kc.updateToken(70).catch(() => {
+                        console.log('Failed to refresh token');
+                    });
+                }, 60000); // Check every minute
+
                 onAuthenticatedCallback();
             }
         })
