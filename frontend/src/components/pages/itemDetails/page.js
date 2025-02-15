@@ -21,6 +21,7 @@ import RelationShipGraph3 from '../../common/relationShipGraph/Relation-Graph3.j
 import Tabs from '../../common/tools/Tabs.js';
 
 import { setStreamFlags } from '../../../services/streamStore.js';
+import { reportService } from '../../../api/reports.js';
 
 
 const FLAG_ID_ORDER = [
@@ -30,9 +31,9 @@ const FLAG_ID_ORDER = [
 const get_paper_url = (flag) => {
   return (
     <>
-      <a href={flag.work_url} target="_blank" rel="noopener noreferrer">{flag.work_title}</a>
+      <a href={flag.Work.WorkUrl} target="_blank" rel="noopener noreferrer">{flag.Work.DisplayName}</a>
       {
-        flag.oa_url && <text> [<a href={flag.oa_url} target="_blank" rel="noopener noreferrer">full text</a>]</text>
+        flag.Work.OaUrl && <text> [<a href={flag.Work.OaUrl} target="_blank" rel="noopener noreferrer">full text</a>]</text>
       }
     </>
   );
@@ -41,28 +42,42 @@ const get_paper_url = (flag) => {
 const ItemDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { result } = location.state;
-  // const result = {
-  //   id: "abcde",
-  //   display_name: "abcde",
-  //   institutions: ["abcde"],
-  //   source: "scopus",
-  //   works_count: null,
-  // };
+  const reportId  = location.state.response.Id;
+  // const reportId = "3b872f16-842b-499e-8001-1f8f617007c9"
 
-  console.log(result);
+  const [authorName, setAuthorName] = useState("")
+  const [institutions, setInstitutions] = useState(["TODO INSTITUTIONS"])
+  const [graphData, setGraphData] = useState(null)
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const poll = async () => {
+      const report = await reportService.getReport(reportId)
+      console.log("REPORT:", report)
+      if (report.Status === "complete" && isMounted) {
+        setIdToFlags(report.Content.type_to_flag)
+        setAuthorName(report.AuthorName)
+        setGraphData(report.Content)
+        setLoading(false)
+      } else if (isMounted) {
+        setTimeout(poll, 500);
+      }
+    };
+
+    poll();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [])
 
   const [idToFlags, setIdToFlags] = useState({});
-  const [message, setMessage] = useState(0);
-  function updateMessage() {
-    setMessage(prev => prev + Math.floor(Math.random() * 0.2 * (250_000_000 - prev)));
-  }
-  const formattedMessage = message < 1000000 ? `${Math.floor(message / 1000)},${message % 1000}` : `${Math.floor(message / 10000) / 100}M`;
+
 
   const [loading, setLoading] = useState(true);
   const [worksCount, setWorksCount] = useState(0);
-  const websocket = useRef(null);
-  const { formalRelations, loading: conclusionLoading } = useConclusions(result.display_name, idToFlags, /* threshold= */ 3);
+  const { formalRelations, loading: conclusionLoading } = useConclusions(authorName, idToFlags, /* threshold= */ 3);
 
   const [startYear, setStartYear] = useState('');
   const [endYear, setEndYear] = useState('');
@@ -79,104 +94,95 @@ const ItemDetails = () => {
   const [instDropdownOpen, setInstDropdownOpen] = useState(false);
   const toggleInstDropdown = () => setInstDropdownOpen(!instDropdownOpen);
 
-  const { data, addAffiliations, setWeight, AffiliationChecklist } = useVisualizationData(result.display_name, idToFlags, formalRelations, worksCount, startYear, endYear);
+  const { data, addAffiliations, setWeight, AffiliationChecklist } = useVisualizationData(authorName, idToFlags, formalRelations, worksCount, startYear, endYear);
   const [review, setReview] = useState();
 
   const [titles, setTitles] = useState();
-  console.log("Data coming from backend: ", data);
-  const streamFlags = useMemo(() => (result) => {
-    const protocol = window.location.protocol.replace("http", "ws");  // Works whether it's http or https / ws or wss.
-    const host = window.location.host.replace(":" + window.location.port, ":" + process.env.REACT_APP_BACKEND_PORT);
-    const ws = new WebSocket(protocol + "//" + host + "/flags");
-    console.log("ws", ws);
+  // console.log("Data coming from backend: ", data);
+  // const streamFlags = useMemo(() => (result) => {
+  //   const protocol = window.location.protocol.replace("http", "ws");  // Works whether it's http or https / ws or wss.
+  //   const host = window.location.host.replace(":" + window.location.port, ":" + process.env.REACT_APP_BACKEND_PORT);
+  //   const ws = new WebSocket(protocol + "//" + host + "/flags");
+  //   console.log("ws", ws);
 
-    websocket.current = ws;
+  //   websocket.current = ws;
 
-    ws.onopen = () => {
-      ws.send(JSON.stringify({ id: result.id, source: result.source, display_name: result.display_name, start_year: '', end_year: '' }));
-    };
+  //   ws.onopen = () => {
+  //     ws.send(JSON.stringify({ id: result.id, source: result.source, display_name: authorName, start_year: '', end_year: '' }));
+  //   };
 
-    ws.onmessage = (event) => {
-      const response = JSON.parse(event.data);
-      console.log('WebSocket response:', response);
+  //   ws.onmessage = (event) => {
+  //     const response = JSON.parse(event.data);
+  //     console.log('WebSocket response:', response);
 
-      if (response.status === 'success' && response.flags) {
-        console.log("About to set flags");
-        setStreamFlags(response.flags);
-        console.log("Set flags");
-      }
-
-
-      if (response.status === 'success' && response.update) {
-        updateMessage();
-        if (response.end_of_stream) {
-          setMessage(248_000_000 + Math.floor(Math.random() * 2_000_000))
-          setLoading(false);
-        } else {
-          if (response.update.message) {
-            if ((response.update.message || '').includes("Loaded")) {
-              console.log(response.update.message);
-            }
-            const match = response.update.message.match(/^Loaded (\d+) works$/);
-            if (match) {
-              setWorksCount(prev => Math.max(prev, parseInt(match[1])));
-            }
-          }
-          if (response.update.flags) {
-            setIdToFlags((prev) => {
-              const newFlags = Object.fromEntries(Object.keys(prev).map(key => {
-                return [key, [...prev[key]]];
-              }));
-              for (const flag of response.update.flags || []) {
-                if (!newFlags[flag.flagger_id]) {
-                  newFlags[flag.flagger_id] = [];
-                }
-                newFlags[flag.flagger_id].push(flag);
-                addAffiliations(flag.affiliations);
-              }
-              return newFlags;
-            });
-          }
-        }
-      }
-
-    };
-
-    return () => {
-      if (websocket.current) {
-        websocket.current.close();
-      }
-    };
-  }, [])
-
-  useEffect(() => {
-    setLoading(true);
-    if (result.source !== "scopus") {
-      streamFlags(result)
-      return
-    }
-    apiService.scopusPaperTitles(result.id, (batch) => setTitles(prev => [...(prev || []), ...batch])).then(titles => {
-      const newResult = { ...result, id: JSON.stringify(titles) };
-      streamFlags(newResult);
-    });
+  //     if (response.status === 'success' && response.flags) {
+  //       console.log("About to set flags");
+  //       setStreamFlags(response.flags);
+  //       console.log("Set flags");
+  //     }
 
 
-  }, []);
+  //     if (response.status === 'success' && response.update) {
+  //       updateMessage();
+  //       if (response.end_of_stream) {
+  //         setMessage(248_000_000 + Math.floor(Math.random() * 2_000_000))
+  //         setLoading(false);
+  //       } else {
+  //         if (response.update.message) {
+  //           if ((response.update.message || '').includes("Loaded")) {
+  //             console.log(response.update.message);
+  //           }
+  //           const match = response.update.message.match(/^Loaded (\d+) works$/);
+  //           if (match) {
+  //             setWorksCount(prev => Math.max(prev, parseInt(match[1])));
+  //           }
+  //         }
+  //         if (response.update.flags) {
+  //           setIdToFlags((prev) => {
+  //             const newFlags = Object.fromEntries(Object.keys(prev).map(key => {
+  //               return [key, [...prev[key]]];
+  //             }));
+  //             for (const flag of response.update.flags || []) {
+  //               if (!newFlags[flag.flagger_id]) {
+  //                 newFlags[flag.flagger_id] = [];
+  //               }
+  //               newFlags[flag.flagger_id].push(flag);
+  //               addAffiliations(flag.affiliations);
+  //             }
+  //             return newFlags;
+  //           });
+  //         }
+  //       }
+  //     }
+
+  //   };
+
+  //   return () => {
+  //     if (websocket.current) {
+  //       websocket.current.close();
+  //     }
+  //   };
+  // }, [])
+
+  // useEffect(() => {
+  //   setLoading(true);
+  //   if (result.source !== "scopus") {
+  //     streamFlags(result)
+  //     return
+  //   }
+  //   apiService.scopusPaperTitles(result.id, (batch) => setTitles(prev => [...(prev || []), ...batch])).then(titles => {
+  //     const newResult = { ...result, id: JSON.stringify(titles) };
+  //     streamFlags(newResult);
+  //   });
 
 
-  const knownFlags = (FLAG_ID_ORDER
-    .map(flagId => [...(idToFlags[flagId] || [])])
-    .flatMap(flags => flags));
-  const unknownFlags = (Object.entries(idToFlags)
-    .filter(([key, _flags]) => !FLAG_ID_ORDER.includes(key))
-    .flatMap(([_key, flags]) => flags));
-  const flags = knownFlags.concat(unknownFlags);
+  // }, []);
 
 
   function withYear(header, flag) {
     return <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       {header}
-      <span className='fw-bold mt-3'>{flag.year}</span>
+      <span className='fw-bold mt-3'>{flag.Work.PublicationYear}</span>
     </div>
   }
 
@@ -186,11 +192,11 @@ const ItemDetails = () => {
       <li key={index} className='p-3 px-5 w-75 detail-item'>
         {withYear(<h5 className='fw-bold mt-3'>Author has multiple affiliations</h5>, flag)}
         <p>
-          {result.display_name} is affiliated with multiple institutions in {" "}
+          {flag.AuthorName} is affiliated with multiple institutions in {" "}
           {get_paper_url(flag)}
           . Detected affiliations:
           <ul className='bulleted-list'>
-            {flag.metadata.affiliations.map((item, index2) => {
+            {flag.Affiliations.map((item, index2) => {
               const key = `${index} ${index2}`;
               return <li key={key}><a>{item}</a></li>
             })}
@@ -208,7 +214,7 @@ const ItemDetails = () => {
           {get_paper_url(flag)}
           {" "} is funded by the following entities of concern:
           <ul className='bulleted-list'>
-            {flag.metadata.funders.map((item, index2) => {
+            {flag.Funders.map((item, index2) => {
               const key = `${index} ${index2}`;
               return <li key={key}><a>{item}</a></li>
             })}
@@ -226,7 +232,7 @@ const ItemDetails = () => {
           {get_paper_url(flag)}
           {" "} is published by the following entities of concern:
           <ul className='bulleted-list'>
-            {flag.metadata.publishers.map((item, index2) => {
+            {flag.Publishers.map((item, index2) => {
               const key = `${index} ${index2}`;
               return <li key={key}><a>{item}</a></li>
             })}
@@ -245,7 +251,7 @@ const ItemDetails = () => {
           {get_paper_url(flag)}
           {" "} are high-risk entities:
           <ul className='bulleted-list'>
-            {flag.metadata.coauthors.map((item, index2) => {
+            {flag.Coauthors.map((item, index2) => {
               const key = `${index} ${index2}`;
               return <li key={key}><a>{item}</a></li>
             })}
@@ -264,14 +270,14 @@ const ItemDetails = () => {
           {get_paper_url(flag)}
           {" "} are affiliated with entities of concern:
           <ul className='bulleted-list'>
-            {flag.metadata.affiliations.map((item, index2) => {
+            {flag.Institutions.map((item, index2) => {
               const key = `${index} ${index2}`;
               return <li key={key}><a>{item}</a></li>
             })}
           </ul>
           Affiliated authors:
           <ul className='bulleted-list'>
-            {flag.metadata.authors.map((item, index2) => {
+            {flag.Authors.map((item, index2) => {
               const key = `${index} ${index2}`;
               return <li key={key}><a>{item}</a></li>
             })}
@@ -286,11 +292,11 @@ const ItemDetails = () => {
       <li key={index} className='p-3 px-5 w-75 detail-item'>
         {withYear(<h5 className='fw-bold mt-3'>Author is affiliated with entities of concern</h5>, flag)}
         <p>
-          {result.display_name} is affiliated with an entity of concern in {" "}
+          {authorName} is affiliated with an entity of concern in {" "}
           {get_paper_url(flag)}
           . Detected affiliations:
           <ul className='bulleted-list'>
-            {flag.metadata.affiliations.map((item, index2) => {
+            {flag.Institutions.map((item, index2) => {
               const key = `${index} ${index2}`;
               return <li key={key}><a>{item}</a></li>
             })}
@@ -348,9 +354,9 @@ const ItemDetails = () => {
       <li key={index} className='p-3 px-5 w-75 detail-item'>
         <h5 className='fw-bold mt-3'>The author may potentially be linked with an Entity of Concern</h5>
         <p>
-          {flag.message}
+          {flag.FlagMessage}
           <br />
-          Relevant Webpage: <a href={flag.uni_url} target="_blank" rel="noopener noreferrer">{flag.uni_url}</a>
+          Relevant Webpage: <a href={flag.UniversityUrl} target="_blank" rel="noopener noreferrer">{flag.UniversityUrl}</a>
         </p>
       </li>
     );
@@ -359,17 +365,17 @@ const ItemDetails = () => {
   function dojPRFlag(flag, index) {
     return (
       <li key={index} className='p-3 px-5 w-75 detail-item'>
-        {flag.metadata && (
+        {true && (
           <>
-            {flag.metadata.connection === 'primary' ? (
+            {flag.ConnectionLevel === 'primary' ? (
               <>
                 <h5 className='fw-bold mt-3'>The author or an associate may be mentioned in a Press Release</h5>
               </>
-            ) : flag.metadata.connection === 'secondary' ? (
+            ) : flag.ConnectionLevel === 'secondary' ? (
               <>
                 <h5 className='fw-bold mt-3'>The author's associate may be mentioned in a Press Release</h5>
               </>
-            ) : flag.metadata.connection === 'tertiary' ? (
+            ) : flag.ConnectionLevel === 'tertiary' ? (
               <>
                 <h5 className='fw-bold mt-3'>The author may potentially be connected to an entity/individual mentioned in a Press Release</h5>
               </>
@@ -377,37 +383,37 @@ const ItemDetails = () => {
           </>
         )}
         <p>
-          {flag.message}
-          {flag.metadata && (
+          {flag.FlagMessage}
+          {true && (
             <>
               <br />
-              {flag.metadata.connection === 'primary' ? (
+              {flag.ConnectionLevel === 'primary' ? (
                 <>
-                  Press Release: <a href={flag.metadata.url} target="_blank" rel="noopener noreferrer">{flag.metadata.title}</a>
+                  Press Release: <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">{flag.DocTitle}</a>
                   <br />
                   {/* Press Release: <a href={flag.metadata.doj_url} target="_blank" rel="noopener noreferrer">{flag.metadata.doj_title}</a>
                 <br /> */}
                 </>
-              ) : flag.metadata.connection === 'secondary' ? (
+              ) : flag.ConnectionLevel === 'secondary' ? (
                 <>
-                  {flag.metadata.frequent_coauthor ? (
+                  {flag.FrequentCoauthor ? (
                     <>
-                      Frequent Coauthor: {flag.metadata.frequent_coauthor}
+                      Frequent Coauthor: {flag.FrequentCoauthor}
                     </>
                   ) :
                     <>
-                      Relevant Document: <a href={flag.metadata.node1_url} target="_blank" rel="noopener noreferrer">{flag.metadata.node1_title}</a>
+                      Relevant Document: <a href={flag.Nodes[0].DocUrl} target="_blank" rel="noopener noreferrer">{flag.Nodes[0].DocTitle}</a>
                     </>
                   }
                   <br />
-                  Press Release: <a href={flag.metadata.doj_url} target="_blank" rel="noopener noreferrer">{flag.metadata.doj_title}</a>
+                  Press Release: <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">{flag.DocTitle}</a>
                   <br />
                 </>
               ) : flag.metadata.connection === 'tertiary' ? (
                 <>
-                  Relevant Documents: <a href={flag.metadata.node1_url} target="_blank" rel="noopener noreferrer">{flag.metadata.node1_title}</a>, <a href={flag.metadata.node2_url} target="_blank" rel="noopener noreferrer">{flag.metadata.node2_title}</a>
+                  Relevant Documents: <a href={flag.Nodes[0].DocUrl} target="_blank" rel="noopener noreferrer">{flag.Nodes[0].DocTitle}</a>, <a href={flag.Nodes[1].DocUrl} target="_blank" rel="noopener noreferrer">{flag.Nodes[1].DocTitle}</a>
                   <br />
-                  Press Release: <a href={flag.metadata.doj_url} target="_blank" rel="noopener noreferrer">{flag.metadata.doj_title}</a>
+                  Press Release: <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">{flag.DocTitle}</a>
                   <br />
                 </>
               ) : null}
@@ -423,11 +429,11 @@ const ItemDetails = () => {
           )} */}
         </p>
         <p>
-          {flag.metadata && (
+          {true && (
             <>
               <strong>Entity/individual mentioned</strong>
               <ul className="bulleted-list">
-                {flag.metadata.entities_mentioned.map((item, index2) => {
+                {[flag.EntityMentioned].map((item, index2) => {
                   const key = `${index} ${index2}`;
                   return (
                     <li key={key}>
@@ -448,7 +454,7 @@ const ItemDetails = () => {
         </ul> */}
           <strong>Potential affiliate(s)</strong>
           <ul className='bulleted-list'>
-            {flag.metadata.entities.map((item, index2) => {
+            {flag.DocEntities.map((item, index2) => {
               const key = `${index} ${index2}`;
               return <li key={key}><a>{item}</a></li>
             })}
@@ -458,17 +464,17 @@ const ItemDetails = () => {
     );
   }
 
-  function formalRelationFlag(flag, index) {
-    return (
-      <li key={index} className='p-3 px-5 w-75 detail-item'>
-        {withYear(<h5 className='fw-bold mt-3'>{flag.title}</h5>, flag)}
-        <p>{wrapLinks(flag.message)}</p>
-      </li>
-    )
-  }
+  // function formalRelationFlag(flag, index) {
+  //   return (
+  //     <li key={index} className='p-3 px-5 w-75 detail-item'>
+  //       {withYear(<h5 className='fw-bold mt-3'>{flag.title}</h5>, flag)}
+  //       <p>{wrapLinks(flag.message)}</p>
+  //     </li>
+  //   )
+  // }
 
   function makeFlag(flag, index) {
-    switch (flag.flagger_id) {
+    switch (flag.FlagType) {
       case MULTI_AFFIL:
         return multipleAffiliationsFlag(flag, index);
       case FUNDER_EOC:
@@ -487,14 +493,16 @@ const ItemDetails = () => {
         return universityFacultyFlag(flag, index);
       case DOJ_PRESS_RELEASES_EOC:
         return dojPRFlag(flag, index);
-      case "formal_relations":
-        return formalRelationFlag(flag, index);
+      // case "formal_relations":
+      //   return formalRelationFlag(flag, index);
       default:
         return (
           <li key={index} className='p-3 px-5 w-75 detail-item'>
-            <h5 className='fw-bold mt-3'>{flag.title}</h5>
-            <p>{flag.message}</p>
-            <p><a href={flag.work_url} target="_blank" rel="noopener noreferrer">{flag.work_title}</a></p>
+            <h5 className='fw-bold mt-3'>{flag.FlagTitle}</h5>
+            <p>{flag.FlagMessage}</p>
+            {
+              flag.Work && <p><a href={flag.Work.WorkUrl} target="_blank" rel="noopener noreferrer">{flag.Work.DisplayName}</a></p>
+            }
           </li>
         );
     }
@@ -530,10 +538,9 @@ const ItemDetails = () => {
           <div className='d-flex w-80'>
             <div className='text-start px-5'>
               <div className='d-flex align-items-center mb-2'>
-                <h5 className='m-0'>{result.display_name}</h5>
-                <p className='m-0 ms-2' style={{ fontSize: 'small' }}>{result.email}</p>
+                <h5 className='m-0'>{authorName}</h5>
               </div>
-              <b className='m-0 p-0' style={{ fontSize: 'small' }}>{result.institutions.join(', ')}</b>
+              <b className='m-0 p-0' style={{ fontSize: 'small' }}>{institutions.join(', ')}</b>
             </div>
           </div>
 
@@ -644,7 +651,7 @@ const ItemDetails = () => {
       {activeTab === 0 && <>
         <div className='d-flex w-100 flex-column align-items-center'>
           <div className='d-flex w-75 align-items-center my-2 mt-3'>
-            {(loading || conclusionLoading) && <div class="spinner-border text-primary spinner-border-sm" role="status"></div>}
+            {(loading || conclusionLoading) && <div className="spinner-border text-primary spinner-border-sm" role="status"></div>}
             {/* {message && <h5 className='text-light m-0 ms-2' style={{ fontSize: 'small' }}>{(loading || conclusionLoading) ? `Scanned ${formattedMessage} out of 250M documents` : "Analysis complete"}</h5>} */}
             {/* {
             !(loading || conclusionLoading) && 
@@ -755,7 +762,7 @@ const ItemDetails = () => {
       {activeTab === 1 && <>
         <div className='flex flex-row bg-black'>
           {/* <RelationShipGraph2 /> */}
-          <RelationShipGraph3 />
+          <RelationShipGraph3 graphData={graphData} />
         </div>
       </>}
     </div>

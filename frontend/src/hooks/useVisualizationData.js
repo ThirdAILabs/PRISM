@@ -79,7 +79,7 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
         }
 
         for (const flag of (idToFlags[ACK_EOC] || [])) {
-            if (flag.message.toLowerCase().includes("talent") || fromList(talentPrograms, flag)) {
+            if (flag.FlagMessage.toLowerCase().includes("talent") || fromList(talentPrograms, flag)) {
                 foreignTalentProgramFlags.push(flag);
             } else if (fromList(deniedEntities, flag)) {
                 deniedEntityFlags.push(flag);
@@ -90,7 +90,7 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
 
         const seenUniURLs = new Set();
         for (const flag of (idToFlags[UNI_FACULTY_EOC] || [])) {
-            if (flag.message.toLowerCase().includes("concerning entity")) {
+            if (flag.FlagMessage.toLowerCase().includes("concerning entity")) {
                 const uniURL = flag.metadata?.url;
 
                 if (!seenUniURLs.has(uniURL)) {
@@ -102,7 +102,7 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
 
         const seenDoJArticles = new Set();
         for (const flag of (idToFlags[DOJ_PRESS_RELEASES_EOC] || [])) {
-            if (flag.message.toLowerCase().includes("press release")) {
+            if (flag.FlagMessage.toLowerCase().includes("press release")) {
                 // const dojURL = flag.metadata?.url;
                 const dojArticle = flag.metadata?.title;
 

@@ -31,8 +31,10 @@ func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(logger *slog.Logger, wo
 			if len(author.Institutions) > 1 && slices.Contains(targetAuthorIds, author.AuthorId) {
 				institutionNames := author.InstitutionNames()
 				flags = append(flags, &MultipleAssociationsFlag{
+					FlagType:     OAMultipleAffiliations,
 					FlagTitle:    "Multiple Affiliations",
 					FlagMessage:  fmt.Sprintf("%s has multiple affilitions in work '%s'\n%s", author.DisplayName, work.GetDisplayName(), strings.Join(institutionNames, "\n")),
+					Work:         work,
 					AuthorName:   author.DisplayName,
 					Affiliations: institutionNames,
 				})
@@ -79,6 +81,7 @@ func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.W
 
 		if len(concerningFunders) > 0 {
 			flags = append(flags, &EOCFundersFlag{
+				FlagType:    OAFunderIsEOC,
 				FlagTitle:   "Funder is Entity of Concern",
 				FlagMessage: fmt.Sprintf("The following funders of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningFunders, "\n")),
 				Work:        work,
@@ -117,6 +120,7 @@ func (flagger *OpenAlexPublisherIsEOC) Flag(logger *slog.Logger, works []openale
 
 		if len(concerningPublishers) > 0 {
 			flags = append(flags, &EOCPublishersFlag{
+				FlagType:    OAPublisherIsEOC,
 				FlagTitle:   "Publisher is Entity of Concern",
 				FlagMessage: fmt.Sprintf("The following publishers of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningPublishers, "\n")),
 				Work:        work,
@@ -155,6 +159,7 @@ func (flagger *OpenAlexCoauthorIsEOC) Flag(logger *slog.Logger, works []openalex
 
 		if len(concerningAuthors) > 0 {
 			flags = append(flags, &EOCCoauthorsFlag{
+				FlagType:    OACoauthorIsEOC,
 				FlagTitle:   "Co-author is Entity of Concern",
 				FlagMessage: fmt.Sprintf("The following co-authors of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningAuthors, "\n")),
 				Work:        work,
@@ -209,6 +214,7 @@ func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works [
 		if len(concerningInstitutions) > 0 {
 			concerningInstitutions := getKeys(concerningInstitutions)
 			flags = append(flags, &EOCAuthorAffiliationsFlag{
+				FlagType:     OAAuthorAffiliationIsEOC,
 				FlagTitle:    "This author is affiliated with entities of concern",
 				FlagMessage:  fmt.Sprintf("In '%s', this author is affiliated with entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningInstitutions, "\n")),
 				Work:         work,
@@ -258,6 +264,7 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works
 			concerningCoauthors := getKeys(concerningCoauthors)
 			concerningInstitutions := getKeys(concerningInstitutions)
 			flags = append(flags, &EOCCoauthorAffiliationsFlag{
+				FlagType:     OACoauthorAffiliationIsEOC,
 				FlagTitle:    "This co-authors of work are affiliated with entities of concern",
 				FlagMessage:  fmt.Sprintf("In '%s', some of the co-authors are affiliated with entities of concern:\n%s\n\nAffiliated authors:\n%s", work.GetDisplayName(), strings.Join(concerningInstitutions, "\n"), strings.Join(concerningCoauthors, "\n")),
 				Work:         work,
@@ -442,6 +449,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 			logger.Info("found cached entry for work", "work_id", work.WorkId)
 			if cacheEntry.FlagData != nil {
 				flags = append(flags, &EOCAcknowledgemntsFlag{
+					FlagType:           OAAcknowledgementIsEOC,
 					FlagTitle:          "Acknowledgements are entities of concern",
 					FlagMessage:        cacheEntry.Message,
 					Work:               work,
@@ -508,6 +516,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 
 			msg := fmt.Sprintf("%s\n%s", message, strings.Join(ackTexts, "\n"))
 			flag := &EOCAcknowledgemntsFlag{
+				FlagType: OAAcknowledgementIsEOC,
 				FlagTitle:          "Acknowledgements are entities of concern",
 				FlagMessage:        fmt.Sprintf("%s\n%s", message, strings.Join(ackTexts, "\n")),
 				Work:               workIdToWork[acks.Result.WorkId],

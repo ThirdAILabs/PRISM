@@ -13,6 +13,8 @@ export function useConclusions(author, flags, threshold) {
   const [formalRelations, setFormalRelations] = useState([]);
   const [numWaiting, setNumWaiting] = useState(0);
 
+  console.log(author, flags)
+
   const institutionFrequencies = useMemo(() => {
     console.log("Calculating institution freqs");
     let frequencies = {};

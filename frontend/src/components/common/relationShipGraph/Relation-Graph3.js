@@ -153,7 +153,7 @@ function generateGraphData(data, parentId = null, level = 0) {
     return { nodes, lines, rootId: 'a' };
 }
 
-const Demo = () => {
+const Demo = (graphData) => {
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedNode, setSelectedNode] = useState(null);
@@ -164,20 +164,20 @@ const Demo = () => {
         // Here you can refer to the parameters in "Graph Graph" for settings
     };
 
-    const [graphData, setGraphData] = useState(null);
+    // const [graphData, setGraphData] = useState(null);
     let nodes = [], lines = [], rootId = null;
 
-    useEffect(() => {
-        const unsubscribe = onFlagsUpdate((flags) => {
-            setGraphData(flags);
-        });
-        return () => unsubscribe();
-    }, []);
+    // useEffect(() => {
+    //     const unsubscribe = onFlagsUpdate((flags) => {
+    //         setGraphData(flags);
+    //     });
+    //     return () => unsubscribe();
+    // }, []);
 
     useEffect(() => {
         if (graphData) {
-            console.log("GraphData: ", graphData);
-            const elements = generateGraphData(graphData);
+            console.log("GraphData: ", graphData.graphData);
+            const elements = generateGraphData(graphData.graphData);
             nodes = elements.nodes;
             lines = elements.lines;
             rootId = elements.rootId;

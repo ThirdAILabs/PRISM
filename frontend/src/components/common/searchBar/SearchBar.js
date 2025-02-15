@@ -15,7 +15,7 @@ function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
     function handleSelectSuggestion(suggestion) {
         return () => {
             setSuggestions([]);
-            setQuery(suggestion.AuthorName);
+            setQuery(type === "author" ? suggestion.AuthorName : suggestion.InstitutionName);
             onSelect(suggestion);
         }
     }

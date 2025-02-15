@@ -191,7 +191,7 @@ func convertReport(report schema.Report) (api.Report, error) {
 	}
 
 	if report.Content != nil {
-		var content ReportContent
+		var content any
 		err := json.Unmarshal(report.Content.Content, &content)
 		if err != nil {
 			slog.Error("error parsing report content", "error", err)

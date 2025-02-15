@@ -78,7 +78,7 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 	}
 
 	if params.EndYear == 0 {
-		params.StartYear = time.Now().Year()
+		params.EndYear = time.Now().Year()
 	}
 
 	licenseId, err := licensing.VerifyLicenseForReport(s.db, userId)

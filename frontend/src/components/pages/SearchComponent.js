@@ -128,11 +128,7 @@ const SearchComponent = () => {
   };
 
   console.log(nextToken);
-  async function abc() {
-    const responseGetReport = await reportService.getReport("6e56e7e4-15a9-4945-9513-378bef00d2d6");
-    console.log("Response Get Report", responseGetReport);
-  }
-  abc();
+
   return (
     <div className='basic-setup' style={{ color: "white" }}>
       <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
