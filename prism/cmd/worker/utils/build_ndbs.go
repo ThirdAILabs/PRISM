@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"prism/search"
+	"prism/prism/search"
 	"strings"
 	"time"
 )

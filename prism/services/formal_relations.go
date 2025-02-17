@@ -9,9 +9,9 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
-	"prism/api"
-	"prism/gscholar"
-	"prism/llms"
+	"prism/prism/api"
+	"prism/prism/gscholar"
+	"prism/prism/llms"
 	"strings"
 )
 

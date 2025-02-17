@@ -1,8 +1,8 @@
 package reports_test
 
 import (
-	"prism/reports"
-	"prism/schema"
+	"prism/prism/reports"
+	"prism/prism/schema"
 	"testing"
 
 	"github.com/google/uuid"

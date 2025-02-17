@@ -4,8 +4,8 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"prism/api"
-	"prism/services/licensing"
+	"prism/prism/api"
+	"prism/prism/services/licensing"
 
 	"github.com/go-chi/chi/v5"
 	"gorm.io/gorm"

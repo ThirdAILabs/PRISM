@@ -7,8 +7,8 @@ import (
 	"encoding/gob"
 	"errors"
 	"log/slog"
-	"prism/api"
-	"prism/schema"
+	"prism/prism/api"
+	"prism/prism/schema"
 	"strings"
 	"time"
 

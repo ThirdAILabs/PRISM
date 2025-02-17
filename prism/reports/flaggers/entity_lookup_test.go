@@ -2,7 +2,7 @@ package flaggers_test
 
 import (
 	"log/slog"
-	"prism/reports/flaggers"
+	"prism/prism/reports/flaggers"
 	"testing"
 )
 

@@ -2,7 +2,7 @@ package search_test
 
 import (
 	"fmt"
-	"prism/search"
+	"prism/prism/search"
 	"slices"
 	"strconv"
 	"strings"

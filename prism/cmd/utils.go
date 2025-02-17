@@ -8,7 +8,7 @@ import (
 	"log/slog"
 	"net/url"
 	"os"
-	"prism/schema"
+	"prism/prism/schema"
 	"strings"
 
 	"gopkg.in/yaml.v3"

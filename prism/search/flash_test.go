@@ -4,7 +4,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"prism/search"
+	"prism/prism/search"
 	"strings"
 	"testing"
 )

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"log/slog"
-	"prism/api"
-	"prism/schema"
+	"prism/prism/api"
+	"prism/prism/schema"
 	"time"
 
 	"github.com/google/uuid"
@@ -191,7 +191,7 @@ func convertReport(report schema.Report, withDetails bool) (api.Report, error) {
 	}
 
 	if report.Content != nil {
-		var content ReportContent
+		var content any
 		err := json.Unmarshal(report.Content.Content, &content)
 		if err != nil {
 			slog.Error("error parsing report content", "error", err)

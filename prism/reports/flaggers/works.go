@@ -3,9 +3,9 @@ package flaggers
 import (
 	"fmt"
 	"log/slog"
-	"prism/gscholar"
-	"prism/llms"
-	"prism/openalex"
+	"prism/prism/gscholar"
+	"prism/prism/llms"
+	"prism/prism/openalex"
 	"regexp"
 	"strings"
 )

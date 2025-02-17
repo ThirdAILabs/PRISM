@@ -1,7 +1,7 @@
 package flaggers
 
 import (
-	"prism/openalex"
+	"prism/prism/openalex"
 	"strings"
 	"sync"
 )

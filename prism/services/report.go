@@ -9,10 +9,10 @@ import (
 	"log/slog"
 	"net/http"
 	"path/filepath"
-	"prism/api"
-	"prism/reports"
-	"prism/services/auth"
-	"prism/services/licensing"
+	"prism/prism/api"
+	"prism/prism/reports"
+	"prism/prism/services/auth"
+	"prism/prism/services/licensing"
 	"strings"
 	"time"
 
@@ -85,7 +85,7 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 	}
 
 	if params.EndYear == 0 {
-		params.StartYear = time.Now().Year()
+		params.EndYear = time.Now().Year()
 	}
 
 	licenseId, err := licensing.VerifyLicenseForReport(s.db, userId)
