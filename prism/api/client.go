@@ -110,7 +110,7 @@ func (client *UserClient) CreateReport(report CreateReportRequest) (uuid.UUID, e
 func (client *UserClient) GetReport(reportId uuid.UUID) (*Report, error) {
 	res, err := client.backend.R().
 		SetResult(&Report{}).
-		SetQueryParam("report_id", reportId.String()).
+		SetPathParam("report_id", reportId.String()).
 		Get("/api/v1/report/{report_id}")
 	if err != nil {
 		return nil, fmt.Errorf("get report request failed: %w", err)

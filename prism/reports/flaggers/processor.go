@@ -64,11 +64,6 @@ func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
 	concerningFunders := convertToSet(opts.ConcerningFunders)
 	concerningPublishers := convertToSet(opts.ConcerningPublishers)
 
-	grobid, err := NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.WorkDir)
-	if err != nil {
-		return nil, err
-	}
-
 	return &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
 		workFlaggers: []WorkFlagger{
@@ -96,7 +91,7 @@ func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
 				entityLookup: opts.EntityLookup,
 				flagCache:    ackFlagCache,
 				authorCache:  authorCache,
-				extractor:    grobid,
+				extractor:    NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.WorkDir),
 				sussyBakas:   opts.SussyBakas,
 			},
 		},
