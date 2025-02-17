@@ -123,6 +123,25 @@ func (client *UserClient) GetReport(reportId uuid.UUID) (*Report, error) {
 	return res.Result().(*Report), nil
 }
 
+func (client *UserClient) WaitForReport(reportId uuid.UUID, timeout time.Duration) (*Report, error) {
+	interval := time.Tick(time.Second)
+	stop := time.After(timeout)
+	for {
+		select {
+		case <-interval:
+			report, err := client.GetReport(reportId)
+			if err != nil {
+				return nil, err
+			}
+			if report.Status == "complete" || report.Status == "failed" {
+				return report, nil
+			}
+		case <-stop:
+			return nil, fmt.Errorf("timeout reached before report completed")
+		}
+	}
+}
+
 func (client *UserClient) ActivateLicense(license string) error {
 	res, err := client.backend.R().
 		SetBody(ActivateLicenseRequest{

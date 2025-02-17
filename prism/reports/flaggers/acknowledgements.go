@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"prism/prism/openalex"
@@ -28,6 +29,20 @@ type GrobidAcknowledgementsExtractor struct {
 	maxWorkers     int
 	grobidEndpoint string
 	downloadDir    string
+}
+
+func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downloadDir string) (*GrobidAcknowledgementsExtractor, error) {
+	endpoint, err := url.JoinPath(grobidEndpoint, "/processHeaderFundingDocument")
+	if err != nil {
+		return nil, fmt.Errorf("error constructing grobid endpoint: %w", err)
+	}
+
+	return &GrobidAcknowledgementsExtractor{
+		cache:          cache,
+		maxWorkers:     10,
+		grobidEndpoint: endpoint,
+		downloadDir:    downloadDir,
+	}, nil
 }
 
 type Entity struct {
