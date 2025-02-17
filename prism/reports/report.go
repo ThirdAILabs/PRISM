@@ -19,7 +19,7 @@ type ReportContent struct {
 	RiskScore   int               `json:"risk_score"`
 	Connections []ConnectionField `json:"connections"`
 
-	TypeToFlags map[string][]flaggers.Flag `json:"type_to_flag"`
+	// TypeToFlags map[string][]flaggers.Flag `json:"type_to_flag"`
 }
 
 func hasForeignTalentProgram(flag *flaggers.EOCAcknowledgemntsFlag) bool {
@@ -70,10 +70,10 @@ func FormatReport(authorname string, flags []flaggers.Flag) ReportContent {
 	miscPotentialHighRiskAssoc := make([]flaggers.Connection, 0)
 	miscPotentialHighRiskAssocDetails := make([]interface{}, 0)
 
-	typeToFlags := make(map[string][]flaggers.Flag)
+	// typeToFlags := make(map[string][]flaggers.Flag)
 
 	for _, flag := range flags {
-		typeToFlags[string(flag.Type())] = append(typeToFlags[string(flag.Type())], flag)
+		// typeToFlags[string(flag.Type())] = append(typeToFlags[string(flag.Type())], flag)
 		switch f := flag.(type) {
 		case *flaggers.AuthorIsAssociatedWithEOCFlag:
 			miscPotentialHighRiskAssoc = append(miscPotentialHighRiskAssoc, f.Connection())
@@ -157,6 +157,6 @@ func FormatReport(authorname string, flags []flaggers.Flag) ReportContent {
 		AuthorName:  authorname,
 		RiskScore:   totalScore,
 		Connections: connections,
-		TypeToFlags: typeToFlags,
+		// TypeToFlags: typeToFlags,
 	}
 }
