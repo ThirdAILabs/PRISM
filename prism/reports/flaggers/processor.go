@@ -91,13 +91,8 @@ func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
 				entityLookup: opts.EntityLookup,
 				flagCache:    ackFlagCache,
 				authorCache:  authorCache,
-				extractor: &GrobidAcknowledgementsExtractor{
-					cache:          ackCache,
-					maxWorkers:     10,
-					grobidEndpoint: opts.GrobidEndpoint,
-					downloadDir:    opts.WorkDir,
-				},
-				sussyBakas: opts.SussyBakas,
+				extractor:    NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.WorkDir),
+				sussyBakas:   opts.SussyBakas,
 			},
 		},
 		authorFacultyAtEOC: AuthorIsFacultyAtEOCFlagger{

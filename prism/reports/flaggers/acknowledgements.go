@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -15,6 +14,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/go-resty/resty/v2"
 	"github.com/google/uuid"
 	"github.com/playwright-community/playwright-go"
 )
@@ -24,10 +24,19 @@ type AcknowledgementsExtractor interface {
 }
 
 type GrobidAcknowledgementsExtractor struct {
-	cache          DataCache[Acknowledgements]
-	maxWorkers     int
-	grobidEndpoint string
-	downloadDir    string
+	cache       DataCache[Acknowledgements]
+	maxWorkers  int
+	grobid      *resty.Client
+	downloadDir string
+}
+
+func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downloadDir string) *GrobidAcknowledgementsExtractor {
+	return &GrobidAcknowledgementsExtractor{
+		cache:       cache,
+		maxWorkers:  10,
+		grobid:      resty.New().SetBaseURL(grobidEndpoint),
+		downloadDir: downloadDir,
+	}
 }
 
 type Entity struct {
@@ -266,32 +275,18 @@ func parseGrobidReponse(data io.Reader) ([]Acknowledgement, error) {
 }
 
 func (extractor *GrobidAcknowledgementsExtractor) processPdfWithGrobid(pdf io.Reader) ([]Acknowledgement, error) {
-	body := new(bytes.Buffer)
-	writer := multipart.NewWriter(body)
-
-	part, err := writer.CreateFormFile("input", "filename.pdf")
-	if err != nil {
-		return nil, fmt.Errorf("error creating multipart request: %w", err)
-	}
-
-	if _, err := io.Copy(part, pdf); err != nil {
-		return nil, fmt.Errorf("error copying data to multipart request: %w", err)
-	}
-
-	if err := writer.Close(); err != nil {
-		return nil, fmt.Errorf("error finalizing multipart request: %w", err)
-	}
-
-	// TODO: add backoff/retry
-	res, err := http.Post(extractor.grobidEndpoint, writer.FormDataContentType(), body)
+	res, err := extractor.grobid.R().
+		SetMultipartField("input", "filename.pdf", "application/pdf", pdf).
+		Post("/api/processHeaderFundingDocument")
 	if err != nil {
 		return nil, fmt.Errorf("error making request to grobid: %w", err)
 	}
-	defer res.Body.Close()
 
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("grobid returned error, status_code=%d", res.StatusCode)
+	if !res.IsSuccess() {
+		return nil, fmt.Errorf("grobid '%s' returned status=%d, error=%v", res.Request.URL, res.StatusCode(), string(res.Body()))
 	}
 
-	return parseGrobidReponse(res.Body)
+	body := res.Body()
+
+	return parseGrobidReponse(bytes.NewReader(body))
 }

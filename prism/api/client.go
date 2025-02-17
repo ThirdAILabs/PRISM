@@ -110,7 +110,7 @@ func (client *UserClient) CreateReport(report CreateReportRequest) (uuid.UUID, e
 func (client *UserClient) GetReport(reportId uuid.UUID) (*Report, error) {
 	res, err := client.backend.R().
 		SetResult(&Report{}).
-		SetQueryParam("report_id", reportId.String()).
+		SetPathParam("report_id", reportId.String()).
 		Get("/api/v1/report/{report_id}")
 	if err != nil {
 		return nil, fmt.Errorf("get report request failed: %w", err)
@@ -121,6 +121,25 @@ func (client *UserClient) GetReport(reportId uuid.UUID) (*Report, error) {
 	}
 
 	return res.Result().(*Report), nil
+}
+
+func (client *UserClient) WaitForReport(reportId uuid.UUID, timeout time.Duration) (*Report, error) {
+	interval := time.Tick(time.Second)
+	stop := time.After(timeout)
+	for {
+		select {
+		case <-interval:
+			report, err := client.GetReport(reportId)
+			if err != nil {
+				return nil, err
+			}
+			if report.Status == "complete" || report.Status == "failed" {
+				return report, nil
+			}
+		case <-stop:
+			return nil, fmt.Errorf("timeout reached before report completed")
+		}
+	}
 }
 
 func (client *UserClient) ActivateLicense(license string) error {
