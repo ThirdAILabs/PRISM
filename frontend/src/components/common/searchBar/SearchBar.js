@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { autocompleteService } from '../../../api/autocomplete';
 import "./SearchBar.css";
-
+import useCallOnPause from '../../../hooks/useCallOnPause';
 
 function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
     const [suggestions, setSuggestions] = useState([]);
@@ -16,6 +16,14 @@ function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
         return () => {
             setSuggestions([]);
             setQuery(type === "author" ? suggestion.AuthorName : suggestion.InstitutionName);
+            onSelect(suggestion);
+        }
+    }
+
+    function handleSelectSuggestionInstitute(suggestion) {
+        return () => {
+            setSuggestions([]);
+            setQuery(suggestion.InstitutionName);
             onSelect(suggestion);
         }
     }
@@ -38,7 +46,7 @@ function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
                         type === "author" ?
                             <div className='suggestion' key={index} onClick={handleSelectSuggestion(suggestion)}>{suggestion.AuthorName}</div>
                             :
-                            <div className='suggestion' key={index} onClick={handleSelectSuggestion(suggestion)}>{suggestion.InstitutionName}</div>
+                            <div className='suggestion' key={index} onClick={handleSelectSuggestionInstitute(suggestion)}>{suggestion.InstitutionName}</div>
                     ))}
                 </div>
             }
@@ -49,19 +57,41 @@ function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
 export function AuthorInstiutionSearchBar({ onSearch }) {
     const [author, setAuthor] = useState();
     const [institution, setInstitution] = useState();
+    const [results, setResults] = useState([]);
+    const debouncedSearch = useCallOnPause(300); // 300ms delay
 
-    async function autocompleteAuthor(query) {
-        const res = await autocompleteService.autocompleteAuthors(query);
-        return res;
-    }
+    const autocompleteInstitution = useCallback((query) => {
+        return new Promise((resolve) => {
+            debouncedSearch(async () => {
+                try {
+                    const res = await autocompleteService.autocompleteInstitutions(query);
+                    resolve(res);
+                    return res;
+                } catch (error) {
+                    console.error('Autocomplete error:', error);
+                    resolve([]);
+                }
+            });
+        });
+    }, [debouncedSearch]);
 
-    async function autocompleteInstitution(query) {
-        const res = await autocompleteService.autocompleteInstitutions(query);
-        return res;
-    }
+    const autocompleteAuthor = useCallback((query) => {
+        return new Promise((resolve) => {
+            debouncedSearch(async () => {
+                try {
+                    const res = await autocompleteService.autocompleteAuthors(query);
+                    resolve(res);
+                    return res;
+                } catch (error) {
+                    console.error('Autocomplete error:', error);
+                    resolve([]);
+                }
+            });
+        });
+    }, [debouncedSearch]);
 
     function search() {
-        if (author && institution) {
+        if (author) {
             onSearch(author, institution);
         } else {
             alert("Please select an author and institution.");

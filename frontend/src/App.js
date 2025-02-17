@@ -9,7 +9,6 @@ import { useUser } from './store/userContext';
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.bundle.js";
 import './App.css';
-import AuthorSearch from './components/pages/author';
 
 
 
@@ -32,7 +31,6 @@ function App() {
         <Routes>
           <Route path="/" element={<SearchComponent />} />
           <Route path="/item" element={<ItemDetails />} />
-          <Route path="/auto" element={<AuthorSearch />} />
           <Route path="/entity-lookup" element={<EntityLookup />} />
         </Routes>
       </Router>

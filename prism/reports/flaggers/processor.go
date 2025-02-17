@@ -3,6 +3,7 @@ package flaggers
 import (
 	"fmt"
 	"log/slog"
+	"path/filepath"
 	"prism/api"
 	"prism/openalex"
 	"prism/search"

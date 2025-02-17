@@ -233,7 +233,7 @@ __Example Response__:
 ]
 ```
 
-## Autocomplete Authors
+## Autocomplete Institutions
 
 | Method | Path | Auth Required | Permissions |
 | ------ | ---- | ------------- | ----------  |
@@ -250,7 +250,8 @@ __Example Response__:
 [
     {
         "InstitutionId": "https://openalex.org/I74775410",
-        "InstitutionName": "Rice University"
+        "InstitutionName": "Rice University",
+        "Location": "Houston, USA"
     }
 ]
 ```
