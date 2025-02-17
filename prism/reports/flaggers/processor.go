@@ -3,6 +3,7 @@ package flaggers
 import (
 	"fmt"
 	"log/slog"
+	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/openalex"
 	"prism/prism/search"
@@ -45,18 +46,18 @@ func convertToSet(list []string) eocSet {
 
 // TODO(Nicholas): How to do cleanup for this, or just let it get cleaned up at the end of the process?
 func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
-	// ackFlagCache, err := NewCache[cachedAckFlag]("ack_flags", filepath.Join(opts.WorkDir, "ack_flags.cache"))
-	// if err != nil {
-	// 	return nil, fmt.Errorf("error loading ack flag cache: %w", err)
-	// }
-	// authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(opts.WorkDir, "authors.cache"))
-	// if err != nil {
-	// 	return nil, fmt.Errorf("error loading author cache: %w", err)
-	// }
-	// ackCache, err := NewCache[Acknowledgements]("acks", filepath.Join(opts.WorkDir, "acks.cache"))
-	// if err != nil {
-	// 	return nil, fmt.Errorf("error loading ack cache: %w", err)
-	// }
+	ackFlagCache, err := NewCache[cachedAckFlag]("ack_flags", filepath.Join(opts.WorkDir, "ack_flags.cache"))
+	if err != nil {
+		return nil, fmt.Errorf("error loading ack flag cache: %w", err)
+	}
+	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(opts.WorkDir, "authors.cache"))
+	if err != nil {
+		return nil, fmt.Errorf("error loading author cache: %w", err)
+	}
+	ackCache, err := NewCache[Acknowledgements]("acks", filepath.Join(opts.WorkDir, "acks.cache"))
+	if err != nil {
+		return nil, fmt.Errorf("error loading ack cache: %w", err)
+	}
 
 	concerningEntities := convertToSet(opts.ConcerningEntities)
 	concerningInstitutions := convertToSet(opts.ConcerningInstitutions)
@@ -85,19 +86,19 @@ func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
 				concerningEntities:     concerningEntities,
 				concerningInstitutions: concerningInstitutions,
 			},
-			// &OpenAlexAcknowledgementIsEOC{
-			// 	openalex:     openalex.NewRemoteKnowledgeBase(),
-			// 	entityLookup: opts.EntityLookup,
-			// 	flagCache:    ackFlagCache,
-			// 	authorCache:  authorCache,
-			// 	extractor: &GrobidAcknowledgementsExtractor{
-			// 		cache:          ackCache,
-			// 		maxWorkers:     10,
-			// 		grobidEndpoint: opts.GrobidEndpoint,
-			// 		downloadDir:    opts.WorkDir,
-			// 	},
-			// 	sussyBakas: opts.SussyBakas,
-			// },
+			&OpenAlexAcknowledgementIsEOC{
+				openalex:     openalex.NewRemoteKnowledgeBase(),
+				entityLookup: opts.EntityLookup,
+				flagCache:    ackFlagCache,
+				authorCache:  authorCache,
+				extractor: &GrobidAcknowledgementsExtractor{
+					cache:          ackCache,
+					maxWorkers:     10,
+					grobidEndpoint: opts.GrobidEndpoint,
+					downloadDir:    opts.WorkDir,
+				},
+				sussyBakas: opts.SussyBakas,
+			},
 		},
 		authorFacultyAtEOC: AuthorIsFacultyAtEOCFlagger{
 			universityNDB: opts.UniversityNDB,
