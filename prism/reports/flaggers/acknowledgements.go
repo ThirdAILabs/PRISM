@@ -133,7 +133,7 @@ func downloadWithPlaywright(url, destPath string) (io.ReadCloser, error) {
 	}
 	defer pw.Stop()
 
-	browser, err := pw.Firefox.Launch()
+	browser, err := pw.Firefox.Launch(playwright.BrowserTypeLaunchOptions{Headless: playwright.Bool(true)})
 	if err != nil {
 		return nil, fmt.Errorf("error launching browser: %w", err)
 	}
@@ -154,22 +154,23 @@ func downloadWithPlaywright(url, destPath string) (io.ReadCloser, error) {
 	}
 	// context.Close() closes pages in the context
 
-	download, err := page.ExpectDownload(nil)
-	if err != nil {
-		return nil, fmt.Errorf("error creating download handler: %w", err)
-	}
+	download, err := page.ExpectDownload(func() error {
+		// Page.Goto returns an error saying that the download is starting, so we ignore the error
+		page.Goto(url, playwright.PageGotoOptions{WaitUntil: playwright.WaitUntilStateNetworkidle})
 
-	if _, err := page.Goto(url, playwright.PageGotoOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}); err != nil {
-		return nil, fmt.Errorf("error accessing download url: %w", err)
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error downloading pdf '%s': %w", url, err)
 	}
 
 	if err := download.SaveAs(destPath); err != nil {
-		return nil, fmt.Errorf("error downloading paper: %w", err)
+		return nil, fmt.Errorf("error saving downloaded paper: %w", err)
 	}
 
 	file, err := os.Open(destPath)
 	if err != nil {
-		return nil, fmt.Errorf("error opening downloaded file: %w", err)
+		return nil, fmt.Errorf("error opening downloaded paper: %w", err)
 	}
 
 	return file, nil
