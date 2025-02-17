@@ -239,7 +239,7 @@ func listLicenses(backend http.Handler, user string) ([]api.License, error) {
 }
 
 func activateLicense(backend http.Handler, user, license string) error {
-	req := api.AddLicenseUserRequest{
+	req := api.ActivateLicenseRequest{
 		License: license,
 	}
 	return Post(backend, "/report/activate-license", user, req, nil)

@@ -137,7 +137,7 @@ func (s *ReportService) UseLicense(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	params, err := ParseRequestBody[api.AddLicenseUserRequest](r)
+	params, err := ParseRequestBody[api.ActivateLicenseRequest](r)
 	if err != nil {
 		return nil, CodedError(err, http.StatusBadRequest)
 	}

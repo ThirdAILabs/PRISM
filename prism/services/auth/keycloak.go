@@ -207,35 +207,6 @@ func (auth *KeycloakAuth) createClient(adminToken string, redirectUrls []string,
 	return nil
 }
 
-func (auth *KeycloakAuth) CreateUser(adminToken, username, email, password string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	auth.logger.Info("creating user", "user", username)
-
-	userId, err := auth.keycloak.CreateUser(ctx, adminToken, auth.realm, gocloak.User{
-		Username: gocloak.StringP(username),
-		Email:    gocloak.StringP(email),
-	})
-	if err != nil {
-		if isConflict(err) {
-			auth.logger.Info("user already exists", "user", username)
-			return nil
-		}
-		auth.logger.Error("error creating user", "user", username, "error", err)
-		return fmt.Errorf("error creating user '%s' in realm '%s': %w", username, auth.realm, err)
-	}
-
-	if err := auth.keycloak.SetPassword(ctx, adminToken, userId, auth.realm, password, false); err != nil {
-		auth.logger.Error("error creating user", "user", username, "error", err)
-		return fmt.Errorf("error creating user '%s' in realm '%s': %w", username, auth.realm, err)
-	}
-
-	auth.logger.Info("user created successfully", "user", username)
-
-	return nil
-}
-
 func getToken(r *http.Request) (string, error) {
 	header := r.Header.Get("Authorization")
 
@@ -268,4 +239,39 @@ func (auth *KeycloakAuth) VerifyToken(token string) (uuid.UUID, error) {
 	}
 
 	return userId, nil
+}
+
+// This is just for the purpose of integration tests. It is used to create users
+// that can be used for the tests. It is not used in the backend
+func (auth *KeycloakAuth) CreateUser(adminToken, username, email, password string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	auth.logger.Info("creating user", "user", username)
+
+	userId, err := auth.keycloak.CreateUser(ctx, adminToken, auth.realm, gocloak.User{
+		Username:      gocloak.StringP(username),
+		Email:         gocloak.StringP(email),
+		FirstName:     gocloak.StringP(username),
+		LastName:      gocloak.StringP(username),
+		Enabled:       gocloak.BoolP(true),
+		EmailVerified: gocloak.BoolP(true),
+	})
+	if err != nil {
+		if isConflict(err) {
+			auth.logger.Info("user already exists", "user", username)
+			return nil
+		}
+		auth.logger.Error("error creating user", "user", username, "error", err)
+		return fmt.Errorf("error creating user '%s' in realm '%s': %w", username, auth.realm, err)
+	}
+
+	if err := auth.keycloak.SetPassword(ctx, adminToken, userId, auth.realm, password, false); err != nil {
+		auth.logger.Error("error creating user", "user", username, "error", err)
+		return fmt.Errorf("error creating user '%s' in realm '%s': %w", username, auth.realm, err)
+	}
+
+	auth.logger.Info("user created successfully", "user", username)
+
+	return nil
 }
