@@ -3,8 +3,8 @@ package flaggers
 import (
 	"fmt"
 	"log/slog"
-	"prism/openalex"
-	"prism/search"
+	"prism/prism/openalex"
+	"prism/prism/search"
 	"slices"
 	"strings"
 )

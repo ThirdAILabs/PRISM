@@ -3,7 +3,7 @@ package flaggers
 import (
 	"fmt"
 	"log/slog"
-	"prism/openalex"
+	"prism/prism/openalex"
 	"regexp"
 	"slices"
 	"strings"
@@ -516,7 +516,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 
 			msg := fmt.Sprintf("%s\n%s", message, strings.Join(ackTexts, "\n"))
 			flag := &EOCAcknowledgemntsFlag{
-				FlagType: OAAcknowledgementIsEOC,
+				FlagType:           OAAcknowledgementIsEOC,
 				FlagTitle:          "Acknowledgements are entities of concern",
 				FlagMessage:        fmt.Sprintf("%s\n%s", message, strings.Join(ackTexts, "\n")),
 				Work:               workIdToWork[acks.Result.WorkId],

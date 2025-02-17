@@ -2,10 +2,10 @@ package services
 
 import (
 	"net/http"
-	"prism/openalex"
-	"prism/reports"
-	"prism/search"
-	"prism/services/auth"
+	"prism/prism/openalex"
+	"prism/prism/reports"
+	"prism/prism/search"
+	"prism/prism/services/auth"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"

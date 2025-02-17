@@ -9,7 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
-	"prism/api"
+	"prism/prism/api"
 	"slices"
 	"strings"
 	"sync"

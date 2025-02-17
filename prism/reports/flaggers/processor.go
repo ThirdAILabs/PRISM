@@ -3,9 +3,9 @@ package flaggers
 import (
 	"fmt"
 	"log/slog"
-	"prism/api"
-	"prism/openalex"
-	"prism/search"
+	"prism/prism/api"
+	"prism/prism/openalex"
+	"prism/prism/search"
 	"sync"
 )
 

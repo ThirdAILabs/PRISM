@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"log/slog"
-	"prism/api"
-	"prism/schema"
+	"prism/prism/api"
+	"prism/prism/schema"
 	"time"
 
 	"github.com/google/uuid"

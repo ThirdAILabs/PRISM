@@ -1,7 +1,7 @@
 package reports
 
 import (
-	"prism/reports/flaggers"
+	"prism/prism/reports/flaggers"
 	"strings"
 )
 

@@ -1,7 +1,7 @@
 package openalex_test
 
 import (
-	"prism/openalex"
+	"prism/prism/openalex"
 	"slices"
 	"strings"
 	"testing"

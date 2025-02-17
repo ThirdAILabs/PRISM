@@ -2,7 +2,7 @@ package flaggers
 
 import (
 	"fmt"
-	"prism/openalex"
+	"prism/prism/openalex"
 	"strings"
 )
 

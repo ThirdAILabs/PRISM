@@ -23,6 +23,20 @@ type KeycloakAuth struct {
 	logger   *slog.Logger
 }
 
+type KeycloakArgs struct {
+	KeycloakServerUrl string `yaml:"keycloak_server_url"`
+
+	KeycloakAdminUsername string `yaml:"keycloak_admin_username"`
+	KeycloakAdminPassword string `yaml:"keycloak_admin_password"`
+
+	PublicHostname  string `yaml:"public_hostname"`
+	PrivateHostname string `yaml:"private_hostname"`
+
+	SslLogin bool `yaml:"ssl_login"`
+
+	Verbose bool
+}
+
 func NewKeycloakAuth(realm string, args KeycloakArgs) (*KeycloakAuth, error) {
 	client := gocloak.NewClient(args.KeycloakServerUrl)
 	restyClient := client.RestyClient()
@@ -40,7 +54,7 @@ func NewKeycloakAuth(realm string, args KeycloakArgs) (*KeycloakAuth, error) {
 
 	auth := &KeycloakAuth{keycloak: client, realm: realm, logger: slog.With("logger", "keycloak", "realm", realm)}
 
-	adminToken, err := auth.adminLogin(args.KeycloakAdminUsername, args.KeycloakAdminPassword)
+	adminToken, err := auth.AdminLogin(args.KeycloakAdminUsername, args.KeycloakAdminPassword)
 	if err != nil {
 		auth.logger.Error("admin login failed", "error", err)
 		return nil, err
@@ -86,7 +100,7 @@ func isConflict(err error) bool {
 	return ok && apiErr.Code == http.StatusConflict
 }
 
-func (auth *KeycloakAuth) adminLogin(adminUsername, adminPassword string) (string, error) {
+func (auth *KeycloakAuth) AdminLogin(adminUsername, adminPassword string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -193,18 +207,33 @@ func (auth *KeycloakAuth) createClient(adminToken string, redirectUrls []string,
 	return nil
 }
 
-type KeycloakArgs struct {
-	KeycloakServerUrl string `yaml:"keycloak_server_url"`
+func (auth *KeycloakAuth) CreateUser(adminToken, username, email, password string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-	KeycloakAdminUsername string `yaml:"keycloak_admin_username"`
-	KeycloakAdminPassword string `yaml:"keycloak_admin_password"`
+	auth.logger.Info("creating user", "user", username)
 
-	PublicHostname  string `yaml:"public_hostname"`
-	PrivateHostname string `yaml:"private_hostname"`
+	userId, err := auth.keycloak.CreateUser(ctx, adminToken, auth.realm, gocloak.User{
+		Username: gocloak.StringP(username),
+		Email:    gocloak.StringP(email),
+	})
+	if err != nil {
+		if isConflict(err) {
+			auth.logger.Info("user already exists", "user", username)
+			return nil
+		}
+		auth.logger.Error("error creating user", "user", username, "error", err)
+		return fmt.Errorf("error creating user '%s' in realm '%s': %w", username, auth.realm, err)
+	}
 
-	SslLogin bool `yaml:"ssl_login"`
+	if err := auth.keycloak.SetPassword(ctx, adminToken, userId, auth.realm, password, false); err != nil {
+		auth.logger.Error("error creating user", "user", username, "error", err)
+		return fmt.Errorf("error creating user '%s' in realm '%s': %w", username, auth.realm, err)
+	}
 
-	Verbose bool
+	auth.logger.Info("user created successfully", "user", username)
+
+	return nil
 }
 
 func getToken(r *http.Request) (string, error) {

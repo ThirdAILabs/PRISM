@@ -1,8 +1,8 @@
 package gscholar_test
 
 import (
-	"prism/api"
-	"prism/gscholar"
+	"prism/prism/api"
+	"prism/prism/gscholar"
 	"slices"
 	"testing"
 )

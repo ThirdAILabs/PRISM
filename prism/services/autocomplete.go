@@ -2,8 +2,8 @@ package services
 
 import (
 	"net/http"
-	"prism/api"
-	"prism/openalex"
+	"prism/prism/api"
+	"prism/prism/openalex"
 
 	"github.com/go-chi/chi/v5"
 )

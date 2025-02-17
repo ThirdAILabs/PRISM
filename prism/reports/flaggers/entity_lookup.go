@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"prism/llms"
-	"prism/search"
+	"prism/prism/llms"
+	"prism/prism/search"
 	"slices"
 	"strings"
 )

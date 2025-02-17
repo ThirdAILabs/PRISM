@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"prism/openalex"
+	"prism/prism/openalex"
 	"strings"
 	"time"
 

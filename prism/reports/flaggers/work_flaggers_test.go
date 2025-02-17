@@ -3,7 +3,7 @@ package flaggers
 import (
 	"log/slog"
 	"path/filepath"
-	"prism/openalex"
+	"prism/prism/openalex"
 	"testing"
 )
 
