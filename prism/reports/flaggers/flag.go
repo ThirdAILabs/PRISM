@@ -1,6 +1,7 @@
 package flaggers
 
 import (
+	"fmt"
 	"prism/openalex"
 	"strings"
 )
@@ -34,6 +35,12 @@ type Flag interface {
 	Type() flagType
 
 	Connection() Connection
+
+	// This is used to deduplicate flags. Primarily for author flags, it is
+	// possible to have the same flag created for multiple works, for instance by
+	// finding the author is faculty at an EOC. For work flags, the key is just
+	// the flagger type and work id since we can only have 1 flag for a given work.
+	Key() string
 }
 
 /*
@@ -58,6 +65,10 @@ func (flag *AuthorIsFacultyAtEOCFlag) Connection() Connection {
 		Title: flag.University,
 		Url:   flag.UniversityUrl,
 	}
+}
+
+func (flag *AuthorIsFacultyAtEOCFlag) Key() string {
+	return fmt.Sprintf("%v-%s-%s", flag.FlagType, flag.University, flag.UniversityUrl)
 }
 
 type Node struct {
@@ -100,9 +111,20 @@ func (flag *AuthorIsAssociatedWithEOCFlag) Connection() Connection {
 	return connection
 }
 
+func (flag *AuthorIsAssociatedWithEOCFlag) Key() string {
+	return fmt.Sprintf("%v-%s-%s-%v", flag.FlagType, flag.DocTitle, flag.EntityMentioned, flag.Nodes)
+}
+
 /*
  * Work Flags
  */
+
+func workFlagKey(flagType flagType, workId string) string {
+	// Note: this assumes that only 1 flag of a given type is created per work.
+	// If that changes this should be updated.
+	return fmt.Sprintf("%v-%s", flagType, workId)
+}
+
 type MultipleAssociationsFlag struct { // This flag is deprecated
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
@@ -122,6 +144,10 @@ func (flag *MultipleAssociationsFlag) Connection() Connection {
 	return Connection{
 		Title: flag.FlagMessage,
 	}
+}
+
+func (flag *MultipleAssociationsFlag) Key() string {
+	return workFlagKey(flag.FlagType, flag.Work.WorkId)
 }
 
 type EOCFundersFlag struct {
@@ -145,6 +171,10 @@ func (flag *EOCFundersFlag) Connection() Connection {
 	}
 }
 
+func (flag *EOCFundersFlag) Key() string {
+	return workFlagKey(flag.FlagType, flag.Work.WorkId)
+}
+
 type EOCPublishersFlag struct {
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
@@ -164,6 +194,10 @@ func (flag *EOCPublishersFlag) Connection() Connection {
 		Title: flag.Work.DisplayName,
 		Url:   flag.Work.WorkUrl,
 	}
+}
+
+func (flag *EOCPublishersFlag) Key() string {
+	return workFlagKey(flag.FlagType, flag.Work.WorkId)
 }
 
 type EOCCoauthorsFlag struct {
@@ -187,6 +221,10 @@ func (flag *EOCCoauthorsFlag) Connection() Connection {
 	}
 }
 
+func (flag *EOCCoauthorsFlag) Key() string {
+	return workFlagKey(flag.FlagType, flag.Work.WorkId)
+}
+
 type EOCAuthorAffiliationsFlag struct {
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
@@ -206,6 +244,10 @@ func (flag *EOCAuthorAffiliationsFlag) Connection() Connection {
 		Title: strings.Join(flag.Institutions, " "),
 		Url:   flag.Work.WorkUrl,
 	}
+}
+
+func (flag *EOCAuthorAffiliationsFlag) Key() string {
+	return workFlagKey(flag.FlagType, flag.Work.WorkId)
 }
 
 type EOCCoauthorAffiliationsFlag struct {
@@ -228,6 +270,10 @@ func (flag *EOCCoauthorAffiliationsFlag) Connection() Connection {
 		Title: flag.Work.DisplayName,
 		Url:   flag.Work.WorkUrl,
 	}
+}
+
+func (flag *EOCCoauthorAffiliationsFlag) Key() string {
+	return workFlagKey(flag.FlagType, flag.Work.WorkId)
 }
 
 type EOCAcknowledgementEntity struct {
@@ -256,4 +302,8 @@ func (flag *EOCAcknowledgemntsFlag) Connection() Connection {
 		Title: flag.Work.DisplayName,
 		Url:   flag.Work.WorkUrl,
 	}
+}
+
+func (flag *EOCAcknowledgemntsFlag) Key() string {
+	return workFlagKey(flag.FlagType, flag.Work.WorkId)
 }

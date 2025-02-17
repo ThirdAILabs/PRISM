@@ -3,7 +3,6 @@ package flaggers
 import (
 	"fmt"
 	"log/slog"
-	"path/filepath"
 	"prism/api"
 	"prism/openalex"
 	"prism/search"
@@ -208,13 +207,19 @@ func (processor *ReportProcessor) ProcessReport(report api.Report) ([]Flag, erro
 		return nil, fmt.Errorf("unable to get works: %w", err)
 	}
 
+	flagsSeen := make(map[string]bool)
 	flagsCh := make(chan []Flag, 100)
 
 	go processor.processWorks(logger, report.AuthorName, workStream, flagsCh)
 
 	allFlags := make([]Flag, 0)
 	for flags := range flagsCh {
-		allFlags = append(allFlags, flags...)
+		for _, flag := range flags {
+			if key := flag.Key(); !flagsSeen[key] {
+				flagsSeen[key] = true
+				allFlags = append(allFlags, flag)
+			}
+		}
 	}
 
 	logger.Info("report complete", "n_flags", len(allFlags))
