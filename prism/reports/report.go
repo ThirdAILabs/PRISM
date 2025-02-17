@@ -10,6 +10,7 @@ type ConnectionField struct {
 	Count       int                   `json:"count"`
 	Connections []flaggers.Connection `json:"connections"`
 	Details     []interface{}         `json:"details"`
+	Disclosed   []bool                `json:"disclosed"`
 }
 
 // TODO(Anyone): This format is should be simplified and cleaned, doing it like this now for compatability

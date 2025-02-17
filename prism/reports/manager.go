@@ -37,7 +37,7 @@ func (r *ReportManager) ListReports(userId uuid.UUID) ([]api.Report, error) {
 
 	results := make([]api.Report, 0, len(reports))
 	for _, report := range reports {
-		res, err := convertReport(report)
+		res, err := convertReport(report, false)
 		if err != nil {
 			return nil, ErrReportAccessFailed
 		}
@@ -87,7 +87,7 @@ func (r *ReportManager) CreateReport(licenseId, userId uuid.UUID, authorId, auth
 	return report.Id, nil
 }
 
-func (r *ReportManager) GetReport(userId, id uuid.UUID) (api.Report, error) {
+func (r *ReportManager) GetReport(userId, id uuid.UUID, withDetails bool) (api.Report, error) {
 	report, err := getReport(r.db, id, true)
 	if err != nil {
 		return api.Report{}, err
@@ -97,7 +97,7 @@ func (r *ReportManager) GetReport(userId, id uuid.UUID) (api.Report, error) {
 		return api.Report{}, ErrUserCannotAccessReport
 	}
 
-	return convertReport(report)
+	return convertReport(report, withDetails)
 }
 
 func (r *ReportManager) GetNextReport() (*api.Report, error) {
@@ -129,7 +129,7 @@ func (r *ReportManager) GetNextReport() (*api.Report, error) {
 	}
 
 	if found {
-		result, err := convertReport(report)
+		result, err := convertReport(report, false)
 		if err != nil {
 			return nil, err
 		}
@@ -178,7 +178,7 @@ func getReport(txn *gorm.DB, id uuid.UUID, withContent bool) (schema.Report, err
 	return report, nil
 }
 
-func convertReport(report schema.Report) (api.Report, error) {
+func convertReport(report schema.Report, withDetails bool) (api.Report, error) {
 	result := api.Report{
 		Id:         report.Id,
 		CreatedAt:  report.CreatedAt,
@@ -197,8 +197,10 @@ func convertReport(report schema.Report) (api.Report, error) {
 			slog.Error("error parsing report content", "error", err)
 			return api.Report{}, ErrReportAccessFailed
 		}
-		for i := range content.Connections {
-			content.Connections[i].Details = nil
+		if !withDetails {
+			for i := range content.Connections {
+				content.Connections[i].Details = nil
+			}
 		}
 
 		result.Content = content

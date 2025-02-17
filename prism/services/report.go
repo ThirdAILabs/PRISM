@@ -1,18 +1,24 @@
 package services
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
+	"path/filepath"
 	"prism/api"
 	"prism/reports"
 	"prism/services/auth"
 	"prism/services/licensing"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/ledongthuc/pdf"
 	"gorm.io/gorm"
 )
 
@@ -27,6 +33,7 @@ func (s *ReportService) Routes() chi.Router {
 	r.Get("/list", WrapRestHandler(s.List))
 	r.Post("/create", WrapRestHandler(s.CreateReport))
 	r.Get("/{report_id}", WrapRestHandler(s.GetReport))
+	r.Post("/{report_id}/check-disclosure", WrapRestHandler(s.CheckDisclosure))
 
 	r.Post("/activate-license", WrapRestHandler(s.UseLicense))
 
@@ -116,7 +123,7 @@ func (s *ReportService) GetReport(r *http.Request) (any, error) {
 		return nil, CodedError(fmt.Errorf("invalid uuid '%v' provided: %w", param, err), http.StatusBadRequest)
 	}
 
-	report, err := s.manager.GetReport(userId, id)
+	report, err := s.manager.GetReport(userId, id, false)
 	if err != nil {
 		switch {
 		case errors.Is(err, reports.ErrReportNotFound):
@@ -160,4 +167,185 @@ func (s *ReportService) UseLicense(r *http.Request) (any, error) {
 	}
 
 	return nil, nil
+}
+
+func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
+	// Authenticate the user.
+	userId, err := auth.GetUserId(r)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	// Get the report ID from the URL.
+	reportIdParam := chi.URLParam(r, "report_id")
+	reportId, err := uuid.Parse(reportIdParam)
+	if err != nil {
+		return nil, CodedError(fmt.Errorf("invalid report id '%v': %w", reportIdParam, err), http.StatusBadRequest)
+	}
+
+	// Parse the multipart form (limit 32 MB).
+	if err := r.ParseMultipartForm(32 << 20); err != nil {
+		return nil, CodedError(err, http.StatusBadRequest)
+	}
+
+	// Retrieve files under the field "files".
+	fileHeaders := r.MultipartForm.File["files"]
+	if len(fileHeaders) == 0 {
+		return nil, CodedError(errors.New("no files uploaded"), http.StatusBadRequest)
+	}
+
+	// Aggregate text extracted from all uploaded files.
+	var allFileTexts []string
+	for _, fileHeader := range fileHeaders {
+		file, err := fileHeader.Open()
+		if err != nil {
+			slog.Error("error opening uploaded file", "filename", fileHeader.Filename, "error", err)
+			continue // or return error
+		}
+
+		fileBytes, err := io.ReadAll(file)
+		file.Close()
+		if err != nil {
+			slog.Error("error reading file bytes", "filename", fileHeader.Filename, "error", err)
+			continue
+		}
+
+		// Determine file extension.
+		ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
+		text, err := parseFileContent(ext, fileBytes)
+		if err != nil {
+			slog.Error("error parsing file content", "filename", fileHeader.Filename, "error", err)
+			continue
+		}
+
+		allFileTexts = append(allFileTexts, text)
+	}
+
+	// Retrieve the stored report.
+	report, err := s.manager.GetReport(userId, reportId, true)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	// Since convertReport stored the content as a ReportContent, we assert that:
+	rc, ok := report.Content.(reports.ReportContent)
+	if !ok {
+		return nil, CodedError(fmt.Errorf("unexpected content type"), http.StatusInternalServerError)
+	}
+
+	// Now you can work directly with rc.Connections.
+	// For each connection group, update the Disclosed slice as needed:
+	for i, connField := range rc.Connections {
+		disclosedSlice := make([]bool, len(connField.Connections))
+		for j, connection := range connField.Connections {
+			matchFound := false
+			titleLower := strings.ToLower(connection.Title)
+			for _, txt := range allFileTexts { // assuming you already built this slice from uploaded files
+				if strings.Contains(strings.ToLower(txt), titleLower) {
+					matchFound = true
+					break
+				}
+			}
+
+			// If no match in the title, then check the corresponding detail if available.
+			if !matchFound && j < len(connField.Details) {
+				tokens := extractTokens(connField.Details[j])
+				for _, token := range tokens {
+					tokenLower := strings.ToLower(token)
+					for _, txt := range allFileTexts {
+						if strings.Contains(strings.ToLower(txt), tokenLower) {
+							matchFound = true
+							break
+						}
+					}
+					if matchFound {
+						break
+					}
+				}
+			}
+			disclosedSlice[j] = matchFound
+		}
+		rc.Connections[i].Disclosed = disclosedSlice
+	}
+
+	// Update the report with the modified ReportContent.
+	updatedContentBytes, err := json.Marshal(rc)
+	if err != nil {
+		slog.Error("error serializing updated report content", "error", err)
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	if err := s.manager.UpdateReport(report.Id, "complete", updatedContentBytes); err != nil {
+		slog.Error("error updating report with disclosure information", "error", err)
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	for i := range rc.Connections {
+		rc.Connections[i].Details = nil
+	}
+
+	// Optionally, update the report's Content field with our modified content.
+	report.Content = rc
+
+	return report, nil
+
+}
+
+// parseFileContent is a stub to extract text from a file based on its extension.
+// Implement actual parsing logic for different file types as needed.
+func parseFileContent(ext string, fileBytes []byte) (string, error) {
+	switch ext {
+	case ".txt":
+		return string(fileBytes), nil
+	case ".pdf":
+		return extractTextFromPDF(fileBytes)
+	case ".docx":
+		// TODO: Implement DOCX text extraction.
+		return "", errors.New("DOCX parsing not implemented")
+	default:
+		return "", fmt.Errorf("unsupported file extension: %s", ext)
+	}
+}
+
+func extractTextFromPDF(fileBytes []byte) (string, error) {
+	reader, err := pdf.NewReader(bytes.NewReader(fileBytes), int64(len(fileBytes)))
+	if err != nil {
+		return "", err
+	}
+
+	var textBuilder strings.Builder
+	numPages := reader.NumPage()
+	for i := 1; i <= numPages; i++ {
+		page := reader.Page(i)
+		pageText, err := page.GetPlainText(nil)
+		if err != nil {
+			return "", err
+		}
+		textBuilder.WriteString(pageText)
+	}
+
+	return textBuilder.String(), nil
+}
+
+func extractTokens(detail interface{}) []string {
+	var tokens []string
+	switch v := detail.(type) {
+	case string:
+		// Split the string into words.
+		tokens = append(tokens, strings.Fields(v)...)
+	case []interface{}:
+		for _, item := range v {
+			tokens = append(tokens, extractTokens(item)...)
+		}
+	case map[string]interface{}:
+		for _, val := range v {
+			tokens = append(tokens, extractTokens(val)...)
+		}
+	default:
+		// Fallback: try to marshal to JSON and split (not ideal, but something)
+		if b, err := json.Marshal(v); err == nil {
+			tokens = append(tokens, strings.Fields(string(b))...)
+		}
+	}
+	return tokens
 }

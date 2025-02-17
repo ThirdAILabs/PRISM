@@ -96,7 +96,7 @@ func TestReportManager(t *testing.T) {
 	}
 
 	{
-		report, err := manager.GetReport(user1, report1)
+		report, err := manager.GetReport(user1, report1, false)
 		if err != nil {
 			t.Fatal(err)
 		}
