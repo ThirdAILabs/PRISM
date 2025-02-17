@@ -41,6 +41,7 @@ type Flag interface {
  */
 
 type AuthorIsFacultyAtEOCFlag struct {
+	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
 
@@ -65,6 +66,7 @@ type Node struct {
 }
 
 type AuthorIsAssociatedWithEOCFlag struct {
+	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
 
@@ -102,8 +104,11 @@ func (flag *AuthorIsAssociatedWithEOCFlag) Connection() Connection {
  * Work Flags
  */
 type MultipleAssociationsFlag struct { // This flag is deprecated
+	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
+
+	Work openalex.Work
 
 	AuthorName   string
 	Affiliations []string
@@ -120,6 +125,7 @@ func (flag *MultipleAssociationsFlag) Connection() Connection {
 }
 
 type EOCFundersFlag struct {
+	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
 
@@ -140,6 +146,7 @@ func (flag *EOCFundersFlag) Connection() Connection {
 }
 
 type EOCPublishersFlag struct {
+	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
 
@@ -160,6 +167,7 @@ func (flag *EOCPublishersFlag) Connection() Connection {
 }
 
 type EOCCoauthorsFlag struct {
+	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
 
@@ -180,6 +188,7 @@ func (flag *EOCCoauthorsFlag) Connection() Connection {
 }
 
 type EOCAuthorAffiliationsFlag struct {
+	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
 
@@ -200,6 +209,7 @@ func (flag *EOCAuthorAffiliationsFlag) Connection() Connection {
 }
 
 type EOCCoauthorAffiliationsFlag struct {
+	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
 
@@ -227,6 +237,7 @@ type EOCAcknowledgementEntity struct {
 }
 
 type EOCAcknowledgemntsFlag struct {
+	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
 

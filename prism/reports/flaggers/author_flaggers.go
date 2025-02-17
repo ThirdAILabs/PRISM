@@ -61,6 +61,7 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 			url, _ := result.Metadata["url"].(string)
 
 			flags = append(flags, &AuthorIsFacultyAtEOCFlag{
+				FlagType:      AuthorIsFacultyAtEOC,
 				FlagTitle:     "Person may be affiliated with this university",
 				FlagMessage:   fmt.Sprintf("The author %s may be associated with this concerning entity: %s\n", authorName, university),
 				University:    university,
@@ -150,7 +151,9 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(logg
 			entities := result.Metadata["entities"].(string)
 
 			if primaryMatcher.matches(author.author) {
+				logger.Info("found primary connection", "doc", title, "url", url)
 				flags = append(flags, &AuthorIsAssociatedWithEOCFlag{
+					FlagType:        AuthorIsAssociatedWithEOC,
 					FlagTitle:       "Person may be affiliated with someone mentioned in a press release.",
 					FlagMessage:     "The author or a frequent associate may be mentioned in a press release.",
 					DocTitle:        title,
@@ -161,8 +164,10 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(logg
 				})
 				logger.Info("author is assoiciated with EOC", "author", author.author, "doc", title, "entities", entities)
 			} else {
+				logger.Info("found coauthor connection", "doc", title, "url", url)
 				coauthor := strings.ToTitle(author.author)
 				flags = append(flags, &AuthorIsAssociatedWithEOCFlag{
+					FlagType:         AuthorIsAssociatedWithEOC,
 					FlagTitle:        "The author's frequent coauthor may be mentioned in a press release.",
 					FlagMessage:      "The author or a frequent associate may be mentioned in a press release.",
 					DocTitle:         title,
@@ -215,6 +220,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 		for _, entity := range strings.Split(entities, ";") {
 			if _, ok := queryToEntities[entity]; !ok {
 				title, _ := result.Metadata["title"].(string)
+				logger.Info("found first hop match", "doc", title, "url", url)
 				queryToEntities[entity] = entityMetadata{
 					connection: "secondary",
 					nodes:      []Node{{DocTitle: title, DocUrl: url}},
@@ -247,7 +253,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 			for _, entity := range strings.Split(entities, ";") {
 				if _, ok := level2Entities[entity]; !ok {
 					title, _ := result.Metadata["title"].(string)
-
+					logger.Info("found second hop match", "doc", title, "url", url)
 					level2Entities[entity] = entityMetadata{
 						connection: "tertiary",
 						nodes:      append(level1Entity.nodes, Node{DocTitle: title, DocUrl: url}),
@@ -278,7 +284,10 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 			url, _ := result.Metadata["url"].(string)
 			entities, _ := result.Metadata["entities"].(string)
 
+			logger.Info("found complex connection", "doc", title, "url", url, "level", entity.connection, "steps", entity.nodes)
+
 			flags = append(flags, &AuthorIsAssociatedWithEOCFlag{
+				FlagType:        AuthorIsAssociatedWithEOC,
 				FlagTitle:       "Author may be affiliated with an entity whose associate may be mentioned in a press release.",
 				FlagMessage:     "The author may be associated be an entity who/which may be mentioned in a press release.\n",
 				DocTitle:        title,

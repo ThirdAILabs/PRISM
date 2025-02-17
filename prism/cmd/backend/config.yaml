@@ -1,0 +1,23 @@
+# Uri for postgres db
+postgres_uri: "postgresql://postgres:password@localhost:5432/prism"
+
+# Path to entity NDB
+entity_ndb: "./some_ndb.ndb"
+
+# Args for setting up keycloak
+keycloak:
+    keycloak_server_url: "http://localhost:8180"
+    keycloak_admin_username: "temp_admin"
+    keycloak_admin_password: "password"
+    public_hostname: "http://localhost"
+    private_hostname: "http://localhost"
+    ssl_login: false
+    verbose: false
+
+# Port to run backend server on
+port: 8082
+
+# Logfile for backend
+logfile: "./prism_backend.log"
+
+ndb_license: "754AAF-55BFF8-2D3BD1-A0C01B-E12324-V3"

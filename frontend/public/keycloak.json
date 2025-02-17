@@ -1,0 +1,11 @@
+{
+    "realm": "PRISM",
+    "clientId": "account",
+    "ssl-required": "external",
+    "public-client": true,
+    "confidential-port": 0,
+    "auth-server-url": "http://localhost:8180/auth",
+    "redirect-uris": [
+        "http://localhost:3000/*"
+    ]
+}
