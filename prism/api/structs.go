@@ -77,7 +77,7 @@ type CreateLicenseResponse struct {
 	License string
 }
 
-type AddLicenseUserRequest struct {
+type ActivateLicenseRequest struct {
 	License string
 }
 
