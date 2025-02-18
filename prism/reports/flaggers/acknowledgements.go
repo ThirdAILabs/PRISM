@@ -256,7 +256,7 @@ func parseGrobidReponse(data io.Reader) ([]Acknowledgement, error) {
 		s.Find("rs").Each(func(i int, s *goquery.Selection) {
 			entityText := s.Text()
 			entityType := s.AttrOr("type", "misc")
-			start := strings.Index(text[last:], entityText)
+			start := strings.Index(text[last:], entityText) + last
 			last = start + len(entityText)
 
 			if searchAbleEntityTypes[entityType] {
