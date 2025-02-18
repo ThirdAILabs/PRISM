@@ -11,13 +11,22 @@ type ConnectionField struct {
 	Connections []flaggers.Connection `json:"connections"`
 }
 
+type TypeToFlags struct {
+	AuthorAssociationsEOC  []*flaggers.AuthorIsAssociatedWithEOCFlag `json:"doj_press_release_eoc"`
+	CoauthorAffiliationEOC []*flaggers.EOCCoauthorAffiliationsFlag   `json:"oa_coauthor_affiliation_eoc"`
+	AuthorFacultyAtEOC     []*flaggers.AuthorIsFacultyAtEOCFlag      `json:"uni_faculty_eoc"`
+	AcknowledgementEOC     []*flaggers.EOCAcknowledgemntsFlag        `json:"oa_acknowledgement_eoc"`
+	AuthorAffiliationEOC   []*flaggers.EOCAuthorAffiliationsFlag     `json:"oa_author_affiliation_eoc"`
+	FunderEOC              []*flaggers.EOCFundersFlag                `json:"oa_funder_eoc"`
+}
+
 // TODO(Anyone): This format is should be simplified and cleaned, doing it like this now for compatability
 type ReportContent struct {
 	AuthorName  string            `json:"name"`
 	RiskScore   int               `json:"risk_score"`
 	Connections []ConnectionField `json:"connections"`
 
-	TypeToFlags map[string][]flaggers.Flag `json:"type_to_flag"`
+	TypeToFlags TypeToFlags `json:"type_to_flag"`
 }
 
 func hasForeignTalentProgram(flag *flaggers.EOCAcknowledgemntsFlag) bool {
@@ -55,22 +64,24 @@ func FormatReport(authorname string, flags []flaggers.Flag) ReportContent {
 	potentialHighRiskApptsAtInstitutions := make([]flaggers.Connection, 0)
 	miscPotentialHighRiskAssoc := make([]flaggers.Connection, 0)
 
-	typeToFlags := make(map[string][]flaggers.Flag)
+	typeToFlags := TypeToFlags{}
 
 	for _, flag := range flags {
-		typeToFlags[string(flag.Type())] = append(typeToFlags[string(flag.Type())], flag)
-
 		switch flag := flag.(type) {
 		case *flaggers.AuthorIsAssociatedWithEOCFlag:
+			typeToFlags.AuthorAssociationsEOC = append(typeToFlags.AuthorAssociationsEOC, flag)
 			miscPotentialHighRiskAssoc = append(miscPotentialHighRiskAssoc, flag.Connection())
 
 		case *flaggers.EOCCoauthorAffiliationsFlag:
+			typeToFlags.CoauthorAffiliationEOC = append(typeToFlags.CoauthorAffiliationEOC, flag)
 			papersWithHighRiskInstitutions = append(papersWithHighRiskInstitutions, flag.Connection())
 
 		case *flaggers.AuthorIsFacultyAtEOCFlag:
+			typeToFlags.AuthorFacultyAtEOC = append(typeToFlags.AuthorFacultyAtEOC, flag)
 			potentialHighRiskApptsAtInstitutions = append(potentialHighRiskApptsAtInstitutions, flag.Connection())
 
 		case *flaggers.EOCAcknowledgemntsFlag:
+			typeToFlags.AcknowledgementEOC = append(typeToFlags.AcknowledgementEOC, flag)
 			if hasForeignTalentProgram(flag) {
 				papersWithForeignTalentPrograms = append(papersWithForeignTalentPrograms, flag.Connection())
 			} else if hasDeniedEntity(flag) {
@@ -79,9 +90,11 @@ func FormatReport(authorname string, flags []flaggers.Flag) ReportContent {
 				papersWithHighRiskFunding = append(papersWithHighRiskFunding, flag.Connection())
 			}
 		case *flaggers.EOCAuthorAffiliationsFlag:
+			typeToFlags.AuthorAffiliationEOC = append(typeToFlags.AuthorAffiliationEOC, flag)
 			highRiskApptsAtInstitutions = append(highRiskApptsAtInstitutions, flag.Connection())
 
 		case *flaggers.EOCFundersFlag:
+			typeToFlags.FunderEOC = append(typeToFlags.FunderEOC, flag)
 			papersWithHighRiskFunding = append(papersWithHighRiskFunding, flag.Connection())
 		}
 	}
