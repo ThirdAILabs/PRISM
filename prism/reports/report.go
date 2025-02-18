@@ -13,13 +13,22 @@ type ConnectionField struct {
 	Disclosed   []bool                `json:"disclosed"`
 }
 
+type TypeToFlags struct {
+	AuthorAssociationsEOC  []*flaggers.AuthorIsAssociatedWithEOCFlag `json:"doj_press_release_eoc"`
+	CoauthorAffiliationEOC []*flaggers.EOCCoauthorAffiliationsFlag   `json:"oa_coauthor_affiliation_eoc"`
+	AuthorFacultyAtEOC     []*flaggers.AuthorIsFacultyAtEOCFlag      `json:"uni_faculty_eoc"`
+	AcknowledgementEOC     []*flaggers.EOCAcknowledgemntsFlag        `json:"oa_acknowledgement_eoc"`
+	AuthorAffiliationEOC   []*flaggers.EOCAuthorAffiliationsFlag     `json:"oa_author_affiliation_eoc"`
+	FunderEOC              []*flaggers.EOCFundersFlag                `json:"oa_funder_eoc"`
+}
+
 // TODO(Anyone): This format is should be simplified and cleaned, doing it like this now for compatability
 type ReportContent struct {
 	AuthorName  string            `json:"name"`
 	RiskScore   int               `json:"risk_score"`
 	Connections []ConnectionField `json:"connections"`
 
-	TypeToFlags map[string][]flaggers.Flag `json:"type_to_flag"`
+	TypeToFlags TypeToFlags `json:"type_to_flag"`
 }
 
 func hasForeignTalentProgram(flag *flaggers.EOCAcknowledgemntsFlag) bool {
@@ -70,42 +79,47 @@ func FormatReport(authorname string, flags []flaggers.Flag) ReportContent {
 	miscPotentialHighRiskAssoc := make([]flaggers.Connection, 0)
 	miscPotentialHighRiskAssocDetails := make([]interface{}, 0)
 
-	typeToFlags := make(map[string][]flaggers.Flag)
+	typeToFlags := TypeToFlags{}
 
 	for _, flag := range flags {
-		typeToFlags[string(flag.Type())] = append(typeToFlags[string(flag.Type())], flag)
-		switch f := flag.(type) {
+		switch flag := flag.(type) {
 		case *flaggers.AuthorIsAssociatedWithEOCFlag:
-			miscPotentialHighRiskAssoc = append(miscPotentialHighRiskAssoc, f.Connection())
-			miscPotentialHighRiskAssocDetails = append(miscPotentialHighRiskAssocDetails, f.Details())
+			miscPotentialHighRiskAssoc = append(miscPotentialHighRiskAssoc, flag.Connection())
+			miscPotentialHighRiskAssocDetails = append(miscPotentialHighRiskAssocDetails, flag.Details())
+			typeToFlags.AuthorAssociationsEOC = append(typeToFlags.AuthorAssociationsEOC, flag)
 
 		case *flaggers.EOCCoauthorAffiliationsFlag:
-			papersWithHighRiskInstitutions = append(papersWithHighRiskInstitutions, f.Connection())
-			papersWithHighRiskInstitutionsDetails = append(papersWithHighRiskInstitutionsDetails, f.Details())
+			papersWithHighRiskInstitutions = append(papersWithHighRiskInstitutions, flag.Connection())
+			papersWithHighRiskInstitutionsDetails = append(papersWithHighRiskInstitutionsDetails, flag.Details())
+			typeToFlags.CoauthorAffiliationEOC = append(typeToFlags.CoauthorAffiliationEOC, flag)
 
 		case *flaggers.AuthorIsFacultyAtEOCFlag:
-			potentialHighRiskApptsAtInstitutions = append(potentialHighRiskApptsAtInstitutions, f.Connection())
-			potentialHighRiskApptsAtInstitutionsDetails = append(potentialHighRiskApptsAtInstitutionsDetails, f.Details())
+			potentialHighRiskApptsAtInstitutions = append(potentialHighRiskApptsAtInstitutions, flag.Connection())
+			potentialHighRiskApptsAtInstitutionsDetails = append(potentialHighRiskApptsAtInstitutionsDetails, flag.Details())
+			typeToFlags.AuthorFacultyAtEOC = append(typeToFlags.AuthorFacultyAtEOC, flag)
 
 		case *flaggers.EOCAcknowledgemntsFlag:
-			if hasForeignTalentProgram(f) {
-				papersWithForeignTalentPrograms = append(papersWithForeignTalentPrograms, f.Connection())
-				papersWithForeignTalentProgramsDetails = append(papersWithForeignTalentProgramsDetails, f.Details())
-			} else if hasDeniedEntity(f) {
-				papersWithDeniedEntities = append(papersWithDeniedEntities, f.Connection())
-				papersWithDeniedEntitiesDetails = append(papersWithDeniedEntitiesDetails, f.Details())
+			typeToFlags.AcknowledgementEOC = append(typeToFlags.AcknowledgementEOC, flag)
+			if hasForeignTalentProgram(flag) {
+				papersWithForeignTalentPrograms = append(papersWithForeignTalentPrograms, flag.Connection())
+				papersWithForeignTalentProgramsDetails = append(papersWithForeignTalentProgramsDetails, flag.Details())
+			} else if hasDeniedEntity(flag) {
+				papersWithDeniedEntities = append(papersWithDeniedEntities, flag.Connection())
+				papersWithDeniedEntitiesDetails = append(papersWithDeniedEntitiesDetails, flag.Details())
 			} else {
-				papersWithHighRiskFunding = append(papersWithHighRiskFunding, f.Connection())
-				papersWithHighRiskFundingDetails = append(papersWithHighRiskFundingDetails, f.Details())
+				papersWithHighRiskFunding = append(papersWithHighRiskFunding, flag.Connection())
+				papersWithHighRiskFundingDetails = append(papersWithHighRiskFundingDetails, flag.Details())
 			}
 
 		case *flaggers.EOCAuthorAffiliationsFlag:
-			highRiskApptsAtInstitutions = append(highRiskApptsAtInstitutions, f.Connection())
-			highRiskApptsAtInstitutionsDetails = append(highRiskApptsAtInstitutionsDetails, f.Details())
+			typeToFlags.AuthorAffiliationEOC = append(typeToFlags.AuthorAffiliationEOC, flag)
+			highRiskApptsAtInstitutions = append(highRiskApptsAtInstitutions, flag.Connection())
+			highRiskApptsAtInstitutionsDetails = append(highRiskApptsAtInstitutionsDetails, flag.Details())
 
 		case *flaggers.EOCFundersFlag:
-			papersWithHighRiskFunding = append(papersWithHighRiskFunding, f.Connection())
-			papersWithHighRiskFundingDetails = append(papersWithHighRiskFundingDetails, f.Details())
+			papersWithHighRiskFunding = append(papersWithHighRiskFunding, flag.Connection())
+			papersWithHighRiskFundingDetails = append(papersWithHighRiskFundingDetails, flag.Details())
+			typeToFlags.FunderEOC = append(typeToFlags.FunderEOC, flag)
 		}
 	}
 
