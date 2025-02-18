@@ -56,7 +56,7 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
             appointments.add(rel.institution);
         }
         for (const flag of (idToFlags[AUTHOR_AFFIL_EOC] || [])) {
-            for (const inst of flag.metadata.affiliations) {
+            for (const inst of flag.Institutions) {
                 appointments.add(inst);
             }
         }
@@ -72,7 +72,7 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
 
         function fromList(list, flag) {
             return (
-                flag.metadata.entities
+                flag.Entities
                     .flatMap((entity) => entity['lists'])
                     .reduce((prev, curr) => (list.includes(curr) || prev), false)
             );
@@ -91,7 +91,7 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
         const seenUniURLs = new Set();
         for (const flag of (idToFlags[UNI_FACULTY_EOC] || [])) {
             if (flag.FlagMessage.toLowerCase().includes("concerning entity")) {
-                const uniURL = flag.metadata?.url;
+                const uniURL = flag.UniversityUrl;
 
                 if (!seenUniURLs.has(uniURL)) {
                     universityFacultyFlags.push(flag);
@@ -103,8 +103,7 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
         const seenDoJArticles = new Set();
         for (const flag of (idToFlags[DOJ_PRESS_RELEASES_EOC] || [])) {
             if (flag.FlagMessage.toLowerCase().includes("press release")) {
-                // const dojURL = flag.metadata?.url;
-                const dojArticle = flag.metadata?.title;
+                const dojArticle = flag.DocTitle;
 
                 if (!seenDoJArticles.has(dojArticle)) {
                     dojPRFlags.push(flag);
