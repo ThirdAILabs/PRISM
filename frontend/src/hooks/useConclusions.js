@@ -22,11 +22,11 @@ export function useConclusions(author, flags, threshold) {
       ...(flags[AUTHOR_AFFIL_EOC] || []),
       ...(flags[COAUTHOR_AFFIL_EOC] || []),
     ];
-    for (const flag of flagsWithAffils) {
-      if (!frequencies[flag.metadata.affiliations]) {
-        frequencies[flag.metadata.affiliations] = 0;
+    for (const flag of flagsWithAffils) { 
+      if (!frequencies[flag.Institutions]) {
+        frequencies[flag.Institutions] = 0;
       }
-      frequencies[flag.metadata.affiliations] += 1;
+      frequencies[flag.Institutions] += 1;
     }
     return frequencies;
   }, [flags]);
@@ -37,7 +37,7 @@ export function useConclusions(author, flags, threshold) {
     console.log("Calculating funder freqs");
     let frequencies = {};
     for (const flag of (flags[ACK_EOC] || [])) {
-      for (const entity of flag.metadata.entities) {
+      for (const entity of flag.Entities) {
         const name = entity["aliases"][0];
         if (!frequencies[name]) {
           frequencies[name] = 0;
