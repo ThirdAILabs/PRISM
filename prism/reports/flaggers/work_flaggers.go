@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"prism/prism/openalex"
+	"prism/prism/reports/flaggers/eoc"
 	"regexp"
 	"slices"
 	"strings"
@@ -50,16 +51,9 @@ func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(logger *slog.Logger, wo
 	return flags, nil
 }
 
-type eocSet map[string]struct{}
-
-func (s *eocSet) contains(entity string) bool {
-	_, exists := (*s)[entity]
-	return exists
-}
-
 type OpenAlexFunderIsEOC struct {
-	concerningFunders  eocSet
-	concerningEntities eocSet
+	concerningFunders  eoc.EocSet
+	concerningEntities eoc.EocSet
 }
 
 func (flagger *OpenAlexFunderIsEOC) Name() flagType {
@@ -74,7 +68,7 @@ func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.W
 
 		concerningFunders := make([]string, 0)
 		for _, grant := range work.Grants {
-			if flagger.concerningEntities.contains(grant.FunderId) || flagger.concerningFunders.contains(grant.FunderId) {
+			if flagger.concerningEntities.Contains(grant.FunderId) || flagger.concerningFunders.Contains(grant.FunderId) {
 				concerningFunders = append(concerningFunders, grant.FunderName)
 			}
 		}
@@ -98,7 +92,7 @@ func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.W
 }
 
 type OpenAlexPublisherIsEOC struct {
-	concerningPublishers eocSet
+	concerningPublishers eoc.EocSet
 }
 
 func (flagger *OpenAlexPublisherIsEOC) Name() flagType {
@@ -113,7 +107,7 @@ func (flagger *OpenAlexPublisherIsEOC) Flag(logger *slog.Logger, works []openale
 
 		concerningPublishers := make([]string, 0)
 		for _, loc := range work.Locations {
-			if flagger.concerningPublishers.contains(loc.OrganizationId) {
+			if flagger.concerningPublishers.Contains(loc.OrganizationId) {
 				concerningPublishers = append(concerningPublishers, loc.OrganizationName)
 			}
 		}
@@ -137,7 +131,7 @@ func (flagger *OpenAlexPublisherIsEOC) Flag(logger *slog.Logger, works []openale
 }
 
 type OpenAlexCoauthorIsEOC struct {
-	concerningEntities eocSet
+	concerningEntities eoc.EocSet
 }
 
 func (flagger *OpenAlexCoauthorIsEOC) Name() flagType {
@@ -152,7 +146,7 @@ func (flagger *OpenAlexCoauthorIsEOC) Flag(logger *slog.Logger, works []openalex
 
 		concerningAuthors := make([]string, 0)
 		for _, author := range work.Authors {
-			if flagger.concerningEntities.contains(author.AuthorId) {
+			if flagger.concerningEntities.Contains(author.AuthorId) {
 				concerningAuthors = append(concerningAuthors, author.DisplayName)
 			}
 		}
@@ -184,8 +178,8 @@ func getKeys(m map[string]bool) []string {
 }
 
 type OpenAlexAuthorAffiliationIsEOC struct {
-	concerningEntities     eocSet
-	concerningInstitutions eocSet
+	concerningEntities     eoc.EocSet
+	concerningInstitutions eoc.EocSet
 }
 
 func (flagger *OpenAlexAuthorAffiliationIsEOC) Name() flagType {
@@ -204,8 +198,8 @@ func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works [
 				continue
 			}
 			for _, institution := range author.Institutions {
-				if flagger.concerningEntities.contains(institution.InstitutionId) ||
-					flagger.concerningInstitutions.contains(institution.InstitutionId) {
+				if flagger.concerningEntities.Contains(institution.InstitutionId) ||
+					flagger.concerningInstitutions.Contains(institution.InstitutionId) {
 					concerningInstitutions[institution.InstitutionName] = true
 				}
 			}
@@ -231,8 +225,8 @@ func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works [
 }
 
 type OpenAlexCoauthorAffiliationIsEOC struct {
-	concerningEntities     eocSet
-	concerningInstitutions eocSet
+	concerningEntities     eoc.EocSet
+	concerningInstitutions eoc.EocSet
 }
 
 func (flagger *OpenAlexCoauthorAffiliationIsEOC) Name() flagType {
@@ -252,8 +246,8 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works
 				continue
 			}
 			for _, institution := range author.Institutions {
-				if flagger.concerningEntities.contains(institution.InstitutionId) ||
-					flagger.concerningInstitutions.contains(institution.InstitutionId) {
+				if flagger.concerningEntities.Contains(institution.InstitutionId) ||
+					flagger.concerningInstitutions.Contains(institution.InstitutionId) {
 					concerningInstitutions[institution.InstitutionName] = true
 					concerningCoauthors[author.DisplayName] = true
 				}

@@ -40,7 +40,6 @@ type Work struct {
 	DownloadUrl     string
 	PublicationYear int
 	Authors         []Author
-	RawAuthorName   string
 	Grants          []Grant
 	Locations       []Location
 }
