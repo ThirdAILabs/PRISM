@@ -381,8 +381,6 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 			flagged = true
 		}
 
-		logger.Info("ACKNOWLEDGEMENT TEXT", "text", ack.RawText)
-
 		entityQueries := make([]string, 0)
 		if sussyBakaFlag {
 			for _, entity := range ack.SearchableEntities {

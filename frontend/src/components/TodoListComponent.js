@@ -13,6 +13,7 @@ const TodoListComponent = ({ results, canLoadMore, loadMore }) => {
       "AuthorId": result.AuthorId,
       "AuthorName": result.AuthorName,
       "Source": result.Source,
+      "StartYear": 1990
     });
     navigate(`/item`, { state: { response } });
     return;
