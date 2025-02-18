@@ -1,4 +1,4 @@
-package utils
+package flaggers
 
 import (
 	"encoding/json"
@@ -106,7 +106,7 @@ func BuildDocNDB(dataPath string, ndbPath string) search.NeuralDB {
 		chunks := make([]string, 0, len(recordsBatch))
 		metadata := make([]map[string]any, 0, len(recordsBatch))
 		for _, record := range recordsBatch {
-			chunks = append(chunks, record.Text+" "+strings.Join(record.Entities, " "))
+			chunks = append(chunks, record.Text+" "+strings.Join(record.Entities, " ; "))
 			metadata = append(metadata, map[string]any{"title": record.Title, "url": record.Url, "entities": strings.Join(record.Entities, ";")})
 		}
 

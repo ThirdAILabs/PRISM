@@ -145,6 +145,75 @@ func TestStreamWorks(t *testing.T) {
 	}
 }
 
+func TestStreamWorksWithFundersAndLocations(t *testing.T) {
+	// This test is to check that the grants and locations are correctly processed, if they are missing
+	// then something is wrong with the response parsing.
+	authorId := "https://openalex.org/A5084836278"
+	workId := "https://openalex.org/W2910300516"
+
+	oa := openalex.NewRemoteKnowledgeBase()
+	stream := oa.StreamWorks(authorId, 2019, 2019)
+
+	results := make([]openalex.Work, 0)
+	for result := range stream {
+		if result.Error != nil {
+			t.Fatal(result.Error)
+		}
+
+		if !slices.Contains(result.TargetAuthorIds, authorId) {
+			t.Fatal("missing author id")
+		}
+
+		results = append(results, result.Works...)
+	}
+
+	found := false
+	for _, work := range results {
+		if work.WorkId != workId {
+			continue
+		}
+		found = true
+
+		for _, author := range work.Authors {
+			if !strings.HasPrefix(author.AuthorId, "https://openalex.org/") ||
+				author.DisplayName == "" ||
+				author.RawAuthorName == nil || *author.RawAuthorName == "" {
+				t.Fatal("invalid author")
+			}
+			// This work gives institutions for the authors, others don't
+			if len(author.Institutions) == 0 {
+				t.Fatal("missing institutions")
+			}
+			for _, inst := range author.Institutions {
+				if !strings.HasPrefix(inst.InstitutionId, "https://openalex.org/") ||
+					inst.InstitutionName == "" || inst.Location == "" {
+					t.Fatal("invalid institution")
+				}
+			}
+		}
+
+		if len(work.Grants) == 0 {
+			t.Fatal("missing grants")
+		}
+
+		for _, grant := range work.Grants {
+			if grant.FunderId == "" || grant.FunderName == "" {
+				t.Fatal("missing funder info")
+			}
+		}
+
+		for _, loc := range work.Locations {
+			if loc.OrganizationId == "" || loc.OrganizationName == "" {
+				t.Fatal("missing location info")
+			}
+		}
+	}
+
+	if !found {
+		t.Fatal("missing work")
+	}
+}
+
 func TestFindWorksByTitle(t *testing.T) {
 	oa := openalex.NewRemoteKnowledgeBase()
 

@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"path/filepath"
 	"prism/prism/openalex"
+	"prism/prism/reports/flaggers/eoc"
 	"testing"
 )
 
@@ -37,8 +38,8 @@ func TestMultipleAssociations(t *testing.T) {
 	}
 }
 
-func makeSet(entities ...string) eocSet {
-	set := make(eocSet)
+func makeSet(entities ...string) eoc.EocSet {
+	set := make(eoc.EocSet)
 	for _, e := range entities {
 		set[e] = struct{}{}
 	}

@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"prism/prism/openalex"
 	"prism/prism/search"
+	"regexp"
 	"slices"
 	"strings"
 )
@@ -14,23 +15,30 @@ type AuthorIsFacultyAtEOCFlagger struct {
 }
 
 type nameMatcher struct {
-	nameParts []string
+	re *regexp.Regexp
 }
 
-func newNameMatcher(name string) nameMatcher {
-	return nameMatcher{
-		nameParts: strings.Fields(strings.ToLower(name)),
+func newNameMatcher(name string) (nameMatcher, bool) {
+	fields := strings.Fields(strings.ToLower(name))
+	if len(fields) == 0 {
+		return nameMatcher{}, false
 	}
+
+	if len(fields) == 1 {
+		return nameMatcher{regexp.MustCompile(fields[0])}, true
+	}
+
+	firstname, lastname := fields[0], fields[len(fields)-1]
+
+	maxChars := max(len(name)-(len(firstname)+len(lastname)), 10)
+
+	re := regexp.MustCompile(fmt.Sprintf(`(\b%s[\w\s\.\-\,]{0,%d}%s\b)|(\b%s[\w\s\.\-\,]{0,%d}%s\b)`, firstname, maxChars, lastname, lastname, maxChars, firstname))
+
+	return nameMatcher{re: re}, true
 }
 
 func (n *nameMatcher) matches(candidate string) bool {
-	candidate = strings.ToLower(candidate)
-	for _, part := range n.nameParts {
-		if !strings.Contains(candidate, part) {
-			return false
-		}
-	}
-	return true
+	return n.re.MatchString(strings.ToLower(candidate))
 }
 
 func (flagger *AuthorIsFacultyAtEOCFlagger) Name() flagType {
@@ -46,7 +54,11 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 		return nil, fmt.Errorf("error querying ndb: %w", err)
 	}
 
-	matcher := newNameMatcher(authorName)
+	matcher, validName := newNameMatcher(authorName)
+	if !validName {
+		slog.Error("author name is empty")
+		return nil, nil
+	}
 
 	flags := make([]Flag, 0)
 
@@ -122,12 +134,20 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(logg
 
 	seen := make(map[string]bool)
 
-	primaryMatcher := newNameMatcher(authorName)
+	primaryMatcher, validName := newNameMatcher(authorName)
+	if !validName {
+		slog.Error("author name is empty")
+		return nil, nil
+	}
 
 	frequentAuthors := topCoauthors(works)
 	for _, author := range frequentAuthors {
 
-		matcher := newNameMatcher(author.author)
+		matcher, validName := newNameMatcher(author.author)
+		if !validName {
+			slog.Error("co-author name is empty")
+			continue
+		}
 
 		// TODO(question): do we need to use the name combinations, since the tokenizer will split on whitespace and lowercase?
 		results, err := flagger.docNDB.Query(author.author, 5, nil)
@@ -159,13 +179,12 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(logg
 					DocTitle:        title,
 					DocUrl:          url,
 					DocEntities:     strings.Split(entities, ";"),
-					EntityMentioned: strings.ToTitle(author.author),
+					EntityMentioned: author.author,
 					ConnectionLevel: "primary",
 				})
 				logger.Info("author is assoiciated with EOC", "author", author.author, "doc", title, "entities", entities)
 			} else {
 				logger.Info("found coauthor connection", "doc", title, "url", url)
-				coauthor := strings.ToTitle(author.author)
 				flags = append(flags, &AuthorIsAssociatedWithEOCFlag{
 					FlagType:         AuthorIsAssociatedWithEOC,
 					FlagTitle:        "The author's frequent coauthor may be mentioned in a press release.",
@@ -173,10 +192,10 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(logg
 					DocTitle:         title,
 					DocUrl:           url,
 					DocEntities:      strings.Split(entities, ";"),
-					EntityMentioned:  coauthor,
+					EntityMentioned:  author.author,
 					ConnectionLevel:  "secondary",
-					Nodes:            []Node{{DocTitle: coauthor + " (frequent coauthor)", DocUrl: ""}},
-					FrequentCoauthor: &coauthor,
+					Nodes:            []Node{{DocTitle: author.author + " (frequent coauthor)", DocUrl: ""}},
+					FrequentCoauthor: &author.author,
 				})
 				logger.Info("frequent coauthor is assoiciated with EOC", "coauthor", author.author, "doc", title, "entities", entities)
 			}
@@ -196,7 +215,11 @@ type entityMetadata struct {
 func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logger *slog.Logger, authorName string) ([]Flag, error) {
 	seen := make(map[string]bool)
 
-	primaryMatcher := newNameMatcher(authorName)
+	primaryMatcher, validName := newNameMatcher(authorName)
+	if !validName {
+		slog.Error("author name is empty")
+		return nil, nil
+	}
 
 	queryToEntities := make(map[string]entityMetadata)
 

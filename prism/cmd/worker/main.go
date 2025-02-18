@@ -8,9 +8,9 @@ import (
 	"os"
 	"path/filepath"
 	"prism/prism/cmd"
-	"prism/prism/cmd/worker/utils"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers"
+	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/search"
 	"strings"
 	"time"
@@ -72,24 +72,24 @@ func main() {
 		log.Fatalf("error creating work dir: %v", err)
 	}
 
-	entityStore, err := flaggers.NewEntityStore(filepath.Join(ndbDir, "entity_lookup.ndb"), utils.LoadSourceToAlias())
+	entityStore, err := flaggers.NewEntityStore(filepath.Join(ndbDir, "entity_lookup.ndb"), eoc.LoadSourceToAlias())
 	if err != nil {
 		log.Fatalf("error creating entity store: %v", err)
 	}
 	defer entityStore.Free()
 
 	opts := flaggers.ReportProcessorOptions{
-		UniversityNDB: utils.BuildUniversityNDB(config.NDBData.University, filepath.Join(ndbDir, "university.ndb")),
-		DocNDB:        utils.BuildDocNDB(config.NDBData.Doc, filepath.Join(ndbDir, "doc.ndb")),
-		AuxNDB:        utils.BuildAuxNDB(config.NDBData.Aux, filepath.Join(ndbDir, "aux.ndb")),
+		UniversityNDB: flaggers.BuildUniversityNDB(config.NDBData.University, filepath.Join(ndbDir, "university.ndb")),
+		DocNDB:        flaggers.BuildDocNDB(config.NDBData.Doc, filepath.Join(ndbDir, "doc.ndb")),
+		AuxNDB:        flaggers.BuildAuxNDB(config.NDBData.Aux, filepath.Join(ndbDir, "aux.ndb")),
 
 		EntityLookup: entityStore,
 
-		ConcerningEntities:     utils.LoadGeneralEOC(),
-		ConcerningInstitutions: utils.LoadInstitutionEOC(),
-		ConcerningFunders:      utils.LoadFunderEOC(),
-		ConcerningPublishers:   utils.LoadPublisherEOC(),
-		SussyBakas:             utils.LoadSussyBakas(),
+		ConcerningEntities:     eoc.LoadGeneralEOC(),
+		ConcerningInstitutions: eoc.LoadInstitutionEOC(),
+		ConcerningFunders:      eoc.LoadFunderEOC(),
+		ConcerningPublishers:   eoc.LoadPublisherEOC(),
+		SussyBakas:             eoc.LoadSussyBakas(),
 
 		GrobidEndpoint: config.GrobidEndpoint,
 		WorkDir:        config.WorkDir,

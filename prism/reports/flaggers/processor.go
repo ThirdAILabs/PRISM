@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/openalex"
+	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/search"
 	"sync"
 )
@@ -13,8 +14,8 @@ import (
 type ReportProcessor struct {
 	openalex                openalex.KnowledgeBase
 	workFlaggers            []WorkFlagger
-	authorFacultyAtEOC      AuthorIsFacultyAtEOCFlagger
-	authorAssociatedWithEOC AuthorIsAssociatedWithEOCFlagger
+	authorFacultyAtEOC      *AuthorIsFacultyAtEOCFlagger
+	authorAssociatedWithEOC *AuthorIsAssociatedWithEOCFlagger
 }
 
 type ReportProcessorOptions struct {
@@ -24,24 +25,16 @@ type ReportProcessorOptions struct {
 
 	EntityLookup *EntityStore
 
-	ConcerningEntities     []string
-	ConcerningInstitutions []string
-	ConcerningFunders      []string
-	ConcerningPublishers   []string
+	ConcerningEntities     eoc.EocSet
+	ConcerningInstitutions eoc.EocSet
+	ConcerningFunders      eoc.EocSet
+	ConcerningPublishers   eoc.EocSet
 
 	SussyBakas []string
 
 	GrobidEndpoint string
 
 	WorkDir string
-}
-
-func convertToSet(list []string) eocSet {
-	set := make(eocSet)
-	for _, item := range list {
-		set[item] = struct{}{}
-	}
-	return set
 }
 
 // TODO(Nicholas): How to do cleanup for this, or just let it get cleaned up at the end of the process?
@@ -59,32 +52,27 @@ func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
 		return nil, fmt.Errorf("error loading ack cache: %w", err)
 	}
 
-	concerningEntities := convertToSet(opts.ConcerningEntities)
-	concerningInstitutions := convertToSet(opts.ConcerningInstitutions)
-	concerningFunders := convertToSet(opts.ConcerningFunders)
-	concerningPublishers := convertToSet(opts.ConcerningPublishers)
-
 	return &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
 		workFlaggers: []WorkFlagger{
 			&OpenAlexMultipleAffiliationsFlagger{},
 			&OpenAlexFunderIsEOC{
-				concerningFunders:  concerningFunders,
-				concerningEntities: concerningEntities,
+				concerningFunders:  opts.ConcerningFunders,
+				concerningEntities: opts.ConcerningEntities,
 			},
 			&OpenAlexPublisherIsEOC{
-				concerningPublishers: concerningPublishers,
+				concerningPublishers: opts.ConcerningPublishers,
 			},
 			&OpenAlexCoauthorIsEOC{
-				concerningEntities: concerningEntities,
+				concerningEntities: opts.ConcerningEntities,
 			},
 			&OpenAlexAuthorAffiliationIsEOC{
-				concerningEntities:     concerningEntities,
-				concerningInstitutions: concerningInstitutions,
+				concerningEntities:     opts.ConcerningEntities,
+				concerningInstitutions: opts.ConcerningInstitutions,
 			},
 			&OpenAlexCoauthorAffiliationIsEOC{
-				concerningEntities:     concerningEntities,
-				concerningInstitutions: concerningInstitutions,
+				concerningEntities:     opts.ConcerningEntities,
+				concerningInstitutions: opts.ConcerningInstitutions,
 			},
 			&OpenAlexAcknowledgementIsEOC{
 				openalex:     openalex.NewRemoteKnowledgeBase(),
@@ -95,10 +83,10 @@ func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
 				sussyBakas:   opts.SussyBakas,
 			},
 		},
-		authorFacultyAtEOC: AuthorIsFacultyAtEOCFlagger{
+		authorFacultyAtEOC: &AuthorIsFacultyAtEOCFlagger{
 			universityNDB: opts.UniversityNDB,
 		},
-		authorAssociatedWithEOC: AuthorIsAssociatedWithEOCFlagger{
+		authorAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlagger{
 			docNDB: opts.DocNDB,
 			auxNDB: opts.AuxNDB,
 		},
@@ -155,6 +143,9 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 			defer wg.Done()
 
 			flagger := processor.authorAssociatedWithEOC
+			if flagger == nil {
+				return
+			}
 
 			logger := logger.With("flagger", flagger.Name(), "batch", batch)
 			logger.Info("starting batch with flagger")
@@ -175,6 +166,9 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 		defer wg.Done()
 
 		flagger := processor.authorFacultyAtEOC
+		if flagger == nil {
+			return
+		}
 
 		logger := logger.With("flagger", flagger.Name())
 		logger.Info("starting author faculty at eoc with flagger")
