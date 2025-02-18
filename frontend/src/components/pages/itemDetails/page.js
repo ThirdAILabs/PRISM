@@ -46,7 +46,7 @@ const ItemDetails = () => {
   // const reportId = "3b872f16-842b-499e-8001-1f8f617007c9"
 
   const [authorName, setAuthorName] = useState("")
-  const [institutions, setInstitutions] = useState(["TODO INSTITUTIONS"])
+  const [institutions, setInstitutions] = useState([])
   const [graphData, setGraphData] = useState(null)
 
   useEffect(() => {
@@ -312,7 +312,7 @@ const ItemDetails = () => {
         {withYear(<h5 className='fw-bold mt-3'>Acknowledgements contain foreign influences</h5>, flag)}
         <p>
           {
-            flag.metadata.entities.length > 0
+            flag.Entities > 0
               ? <>
                 {get_paper_url(flag)}
                 {" "} acknowledges the following entities of concern:
@@ -323,7 +323,7 @@ const ItemDetails = () => {
               </>
           }
           <ul className='bulleted-list'>
-            {flag.metadata.entities.map((item, index2) => {
+            {flag.Entities.map((item, index2) => {
               const key = `${index} ${index2}`;
               return <li key={key}>
                 <a>
@@ -338,7 +338,7 @@ const ItemDetails = () => {
           </ul>
           <p style={{ "marginTop": "20px", "fontWeight": "bold" }}>Acknowledgement text:</p>
           {
-            flag.metadata.raw_acknowledgements.map((item, index3) => {
+            flag.RawAcknowledements.map((item, index3) => {
               return <p key={index3}>{item}</p>
             })
           }
@@ -362,7 +362,7 @@ const ItemDetails = () => {
     );
   }
 
-  function dojPRFlag(flag, index) {
+  function PRFlag(flag, index) {
     return (
       <li key={index} className='p-3 px-5 w-75 detail-item'>
         {true && (
@@ -391,8 +391,6 @@ const ItemDetails = () => {
                 <>
                   Press Release: <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">{flag.DocTitle}</a>
                   <br />
-                  {/* Press Release: <a href={flag.metadata.doj_url} target="_blank" rel="noopener noreferrer">{flag.metadata.doj_title}</a>
-                <br /> */}
                 </>
               ) : flag.ConnectionLevel === 'secondary' ? (
                 <>
@@ -409,7 +407,7 @@ const ItemDetails = () => {
                   Press Release: <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">{flag.DocTitle}</a>
                   <br />
                 </>
-              ) : flag.metadata.connection === 'tertiary' ? (
+              ) : flag.ConnectionLevel === 'tertiary' ? (
                 <>
                   Relevant Documents: <a href={flag.Nodes[0].DocUrl} target="_blank" rel="noopener noreferrer">{flag.Nodes[0].DocTitle}</a>, <a href={flag.Nodes[1].DocUrl} target="_blank" rel="noopener noreferrer">{flag.Nodes[1].DocTitle}</a>
                   <br />
@@ -419,14 +417,6 @@ const ItemDetails = () => {
               ) : null}
             </>
           )}
-          {/* <br />
-          Relevant Document: <a href={flag.metadata.url} target="_blank" rel="noopener noreferrer">{flag.metadata.title}</a>
-          {flag.metadata && flag.metadata.doj_url && flag.metadata.doj_title && (
-            <>
-              <br />
-              Press Release: <a href={flag.metadata.doj_url} target="_blank" rel="noopener noreferrer">{flag.metadata.doj_title}</a>
-            </>
-          )} */}
         </p>
         <p>
           {true && (
@@ -444,14 +434,6 @@ const ItemDetails = () => {
               </ul>
             </>
           )}
-
-          {/* Author/Frequent Collaborator:
-        <ul className='bulleted-list'>
-        {flag.metadata.associate_mentioned.map((item, index2) => {
-            const key = `${index} ${index2}`;
-            return <li key={key}><a>{item}</a></li>
-          })}
-        </ul> */}
           <strong>Potential affiliate(s)</strong>
           <ul className='bulleted-list'>
             {flag.DocEntities.map((item, index2) => {
@@ -492,7 +474,7 @@ const ItemDetails = () => {
       case UNI_FACULTY_EOC:
         return universityFacultyFlag(flag, index);
       case DOJ_PRESS_RELEASES_EOC:
-        return dojPRFlag(flag, index);
+        return PRFlag(flag, index);
       // case "formal_relations":
       //   return formalRelationFlag(flag, index);
       default:

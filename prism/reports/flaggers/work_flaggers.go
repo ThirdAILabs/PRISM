@@ -345,7 +345,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForSussyBaka(ack Acknowledgeme
 		if entity.EntityType == "person" {
 			if entity.StartPosition >= prevEndPos {
 				newText += ack.RawText[prevEndPos:entity.StartPosition]
-				prevEndPos += entity.StartPosition + len(entity.EntityText)
+				prevEndPos = entity.StartPosition + len(entity.EntityText)
 			}
 		}
 	}
@@ -458,6 +458,11 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 				})
 				logger.Info("cached entry contains flag", "work_id", workId)
 			}
+			continue
+		}
+
+		if work.DownloadUrl == "" {
+			logger.Info("work has no download url", "work_id", workId)
 			continue
 		}
 
