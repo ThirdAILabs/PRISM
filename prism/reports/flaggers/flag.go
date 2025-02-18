@@ -71,11 +71,9 @@ func (flag *AuthorIsFacultyAtEOCFlag) Connection() Connection {
 
 func (flag *AuthorIsFacultyAtEOCFlag) Details() interface{} {
 	return struct {
-		University    string `json:"university"`
-		UniversityUrl string `json:"university_url"`
+		University string `json:"university"`
 	}{
-		University:    flag.University,
-		UniversityUrl: flag.UniversityUrl,
+		University: flag.University,
 	}
 }
 
@@ -125,18 +123,12 @@ func (flag *AuthorIsAssociatedWithEOCFlag) Connection() Connection {
 
 func (flag *AuthorIsAssociatedWithEOCFlag) Details() interface{} {
 	return struct {
-		DocTitle         string   `json:"doc_title"`
-		DocUrl           string   `json:"doc_url"`
 		DocEntities      []string `json:"doc_entities"`
 		EntityMentioned  string   `json:"entity_mentioned"`
-		ConnectionLevel  string   `json:"connection_level"`
 		FrequentCoauthor *string  `json:"frequent_coauthor,omitempty"`
 	}{
-		DocTitle:         flag.DocTitle,
-		DocUrl:           flag.DocUrl,
 		DocEntities:      flag.DocEntities,
 		EntityMentioned:  flag.EntityMentioned,
-		ConnectionLevel:  flag.ConnectionLevel,
 		FrequentCoauthor: flag.FrequentCoauthor,
 	}
 }
@@ -213,10 +205,8 @@ func (flag *EOCFundersFlag) Connection() Connection {
 
 func (flag *EOCFundersFlag) Details() interface{} {
 	return struct {
-		Work    openalex.Work `json:"work"`
-		Funders []string      `json:"funders"`
+		Funders []string `json:"funders"`
 	}{
-		Work:    flag.Work,
 		Funders: flag.Funders,
 	}
 }
@@ -248,10 +238,8 @@ func (flag *EOCPublishersFlag) Connection() Connection {
 
 func (flag *EOCPublishersFlag) Details() interface{} {
 	return struct {
-		Work       openalex.Work `json:"work"`
-		Publishers []string      `json:"publishers"`
+		Publishers []string `json:"publishers"`
 	}{
-		Work:       flag.Work,
 		Publishers: flag.Publishers,
 	}
 }
@@ -283,10 +271,8 @@ func (flag *EOCCoauthorsFlag) Connection() Connection {
 
 func (flag *EOCCoauthorsFlag) Details() interface{} {
 	return struct {
-		Work      openalex.Work `json:"work"`
-		Coauthors []string      `json:"coauthors"`
+		Coauthors []string `json:"coauthors"`
 	}{
-		Work:      flag.Work,
 		Coauthors: flag.Coauthors,
 	}
 }
@@ -318,10 +304,8 @@ func (flag *EOCAuthorAffiliationsFlag) Connection() Connection {
 
 func (flag *EOCAuthorAffiliationsFlag) Details() interface{} {
 	return struct {
-		Work         openalex.Work `json:"work"`
-		Institutions []string      `json:"institutions"`
+		Institutions []string `json:"institutions"`
 	}{
-		Work:         flag.Work,
 		Institutions: flag.Institutions,
 	}
 }
@@ -354,11 +338,9 @@ func (flag *EOCCoauthorAffiliationsFlag) Connection() Connection {
 
 func (flag *EOCCoauthorAffiliationsFlag) Details() interface{} {
 	return struct {
-		Work         openalex.Work `json:"work"`
-		Institutions []string      `json:"institutions"`
-		Authors      []string      `json:"authors"`
+		Institutions []string `json:"institutions"`
+		Authors      []string `json:"authors"`
 	}{
-		Work:         flag.Work,
 		Institutions: flag.Institutions,
 		Authors:      flag.Authors,
 	}
@@ -398,11 +380,9 @@ func (flag *EOCAcknowledgemntsFlag) Connection() Connection {
 
 func (flag *EOCAcknowledgemntsFlag) Details() interface{} {
 	return struct {
-		Work               openalex.Work              `json:"work"`
 		Entities           []EOCAcknowledgementEntity `json:"entities"`
 		RawAcknowledements []string                   `json:"raw_acknowledgements"`
 	}{
-		Work:               flag.Work,
 		Entities:           flag.Entities,
 		RawAcknowledements: flag.RawAcknowledements,
 	}

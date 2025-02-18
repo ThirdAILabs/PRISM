@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bbalet/stopwords"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/ledongthuc/pdf"
@@ -327,12 +328,38 @@ func extractTextFromPDF(fileBytes []byte) (string, error) {
 	return textBuilder.String(), nil
 }
 
+func removeStopwords(text string) string {
+	return stopwords.CleanString(text, "en", false)
+}
+
+func filterTokens(tokens []string) []string {
+	var filtered []string
+	for _, token := range tokens {
+		token = strings.TrimSpace(token)
+		if token == "" {
+			continue
+		}
+		// If the token contains spaces, assume it’s a multi-word phrase and keep it as-is.
+		if strings.Contains(token, " ") {
+			filtered = append(filtered, strings.ToLower(token))
+		} else {
+			// For a single-word token, clean it using the stopwords library.
+			cleaned := removeStopwords(token)
+			// Only add it if it’s not empty after cleaning.
+			if cleaned != "" {
+				filtered = append(filtered, cleaned)
+			}
+		}
+	}
+	return filtered
+}
+
 func extractTokens(detail interface{}) []string {
 	var tokens []string
 	switch v := detail.(type) {
 	case string:
 		// Split the string into words.
-		tokens = append(tokens, strings.Fields(v)...)
+		tokens = append(tokens, strings.TrimSpace(v))
 	case []interface{}:
 		for _, item := range v {
 			tokens = append(tokens, extractTokens(item)...)
@@ -347,5 +374,5 @@ func extractTokens(detail interface{}) []string {
 			tokens = append(tokens, strings.Fields(string(b))...)
 		}
 	}
-	return tokens
+	return filterTokens(tokens)
 }
