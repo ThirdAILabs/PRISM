@@ -43,7 +43,6 @@ const ItemDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const reportId  = location.state.response.Id;
-  // const reportId = "3b872f16-842b-499e-8001-1f8f617007c9"
 
   const [authorName, setAuthorName] = useState("")
   const [institutions, setInstitutions] = useState([])
@@ -327,11 +326,11 @@ const ItemDetails = () => {
               const key = `${index} ${index2}`;
               return <li key={key}>
                 <a>
-                  "{item["entity"]}"
+                  "{item["Entity"]}"
                   {" was detected in "}
-                  <text style={{ "fontWeight": "bold", textDecoration: "underline" }}>{item["lists"].join(", ")}</text>
+                  <text style={{ "fontWeight": "bold", textDecoration: "underline" }}>{item["Sources"].join(", ")}</text>
                   {" as "}
-                  {item["aliases"].map(element => `"${element}"`).join(", ")}
+                  {item["Aliases"].join(", ")}
                 </a>
               </li>
             })}

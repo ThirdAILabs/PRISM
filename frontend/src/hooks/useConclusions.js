@@ -38,7 +38,7 @@ export function useConclusions(author, flags, threshold) {
     let frequencies = {};
     for (const flag of (flags[ACK_EOC] || [])) {
       for (const entity of flag.Entities) {
-        const name = entity["aliases"][0];
+        const name = entity["Aliases"][0];
         if (!frequencies[name]) {
           frequencies[name] = 0;
         }
