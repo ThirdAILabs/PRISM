@@ -234,40 +234,37 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 		return nil, CodedError(fmt.Errorf("unexpected content type"), http.StatusInternalServerError)
 	}
 
-	// Now you can work directly with rc.Connections.
-	// For each connection group, update the Disclosed slice as needed:
-	for i, connField := range rc.Connections {
-		disclosedSlice := make([]bool, len(connField.Connections))
-		for j, connection := range connField.Connections {
-			matchFound := false
-			titleLower := strings.ToLower(connection.Title)
-			for _, txt := range allFileTexts { // assuming you already built this slice from uploaded files
-				if strings.Contains(strings.ToLower(txt), titleLower) {
-					matchFound = true
-					break
-				}
-			}
+	updateDisclosed := func(details []interface{}, disclosed []bool) []bool {
+		if disclosed == nil || len(disclosed) != len(details) {
+			disclosed = make([]bool, len(details))
+		}
 
-			// If no match in the title, then check the corresponding detail if available.
-			if !matchFound && j < len(connField.Details) {
-				tokens := extractTokens(connField.Details[j])
-				for _, token := range tokens {
-					tokenLower := strings.ToLower(token)
-					for _, txt := range allFileTexts {
-						if strings.Contains(strings.ToLower(txt), tokenLower) {
-							matchFound = true
-							break
-						}
-					}
-					if matchFound {
+		for i, detail := range details {
+			disclosedValue := false
+			tokens := extractTokens(detail)
+			for _, token := range tokens {
+				tokenLower := strings.ToLower(token)
+				for _, txt := range allFileTexts {
+					if strings.Contains(strings.ToLower(txt), tokenLower) {
+						disclosedValue = true
 						break
 					}
 				}
+				if disclosedValue {
+					break
+				}
 			}
-			disclosedSlice[j] = matchFound
+			disclosed[i] = disclosedValue
 		}
-		rc.Connections[i].Disclosed = disclosedSlice
+		return disclosed
 	}
+
+	rc.TypeToFlags.AuthorAssociationsEOCDisclosed = updateDisclosed(rc.TypeToFlags.AuthorAssociationsEOCDetails, rc.TypeToFlags.AuthorAssociationsEOCDisclosed)
+	rc.TypeToFlags.CoauthorAffiliationEOCDisclosed = updateDisclosed(rc.TypeToFlags.CoauthorAffiliationEOCDetails, rc.TypeToFlags.CoauthorAffiliationEOCDisclosed)
+	rc.TypeToFlags.AuthorFacultyAtEOCDisclosed = updateDisclosed(rc.TypeToFlags.AuthorFacultyAtEOCDetails, rc.TypeToFlags.AuthorFacultyAtEOCDisclosed)
+	rc.TypeToFlags.AcknowledgementEOCDisclosed = updateDisclosed(rc.TypeToFlags.AcknowledgementEOCDetails, rc.TypeToFlags.AcknowledgementEOCDisclosed)
+	rc.TypeToFlags.AuthorAffiliationEOCDisclosed = updateDisclosed(rc.TypeToFlags.AuthorAffiliationEOCDetails, rc.TypeToFlags.AuthorAffiliationEOCDisclosed)
+	rc.TypeToFlags.FunderEOCDisclosed = updateDisclosed(rc.TypeToFlags.FunderEOCDetails, rc.TypeToFlags.FunderEOCDisclosed)
 
 	// Update the report with the modified ReportContent.
 	updatedContentBytes, err := json.Marshal(rc)
@@ -281,9 +278,12 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	for i := range rc.Connections {
-		rc.Connections[i].Details = nil
-	}
+	rc.TypeToFlags.AuthorAssociationsEOCDetails = nil
+	rc.TypeToFlags.CoauthorAffiliationEOCDetails = nil
+	rc.TypeToFlags.AuthorFacultyAtEOCDetails = nil
+	rc.TypeToFlags.AcknowledgementEOCDetails = nil
+	rc.TypeToFlags.AuthorAffiliationEOCDetails = nil
+	rc.TypeToFlags.FunderEOCDetails = nil
 
 	// Optionally, update the report's Content field with our modified content.
 	report.Content = rc

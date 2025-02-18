@@ -198,9 +198,12 @@ func convertReport(report schema.Report, withDetails bool) (api.Report, error) {
 			return api.Report{}, ErrReportAccessFailed
 		}
 		if !withDetails {
-			for i := range content.Connections {
-				content.Connections[i].Details = nil
-			}
+			content.TypeToFlags.AuthorAssociationsEOCDetails = nil
+			content.TypeToFlags.CoauthorAffiliationEOCDetails = nil
+			content.TypeToFlags.AuthorFacultyAtEOCDetails = nil
+			content.TypeToFlags.AcknowledgementEOCDetails = nil
+			content.TypeToFlags.AuthorAffiliationEOCDetails = nil
+			content.TypeToFlags.FunderEOCDetails = nil
 		}
 
 		result.Content = content
