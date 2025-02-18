@@ -244,3 +244,120 @@ func TestProcessorUniversityFacultySeach(t *testing.T) {
 		}
 	})
 }
+
+func TestProcessorAuthorAssociations(t *testing.T) {
+	docNDB := BuildDocNDB("../../../data/doj_articles_with_content_and_entities_as_text.json", t.TempDir())
+	defer docNDB.Free()
+
+	auxNDB := BuildAuxNDB("../../../data/doj_relevant_webpages_cleaned_with_entities_as_content.json", t.TempDir())
+	defer auxNDB.Free()
+
+	processor := ReportProcessor{
+		openalex: openalex.NewRemoteKnowledgeBase(),
+		authorAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlagger{
+			docNDB: docNDB,
+			auxNDB: auxNDB,
+		},
+	}
+
+	t.Run("PrimaryConnection", func(t *testing.T) {
+		flags, err := processor.ProcessReport(api.Report{
+			Id:         uuid.New(),
+			AuthorId:   "https://openalex.org/A5084836278",
+			AuthorName: "Charles M. Lieber",
+			Source:     api.OpenAlexSource,
+			StartYear:  2013,
+			EndYear:    2013,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(flags) < 1 {
+			t.Fatal("expected >= 1 flag")
+		}
+
+		expectedTitles := []string{
+			"Former Harvard University Professor Sentenced for Lying About His Affiliation with Wuhan University of Technology; China’s Thousand Talents Program; and Filing False Tax Returns",
+			"Harvard University Professor Convicted of Making False Statements and Tax Offenses",
+			"Harvard University Professor Indicted on False Statement Charges",
+			"Harvard University Professor Charged with Tax Offenses",
+			"Harvard University Professor and Two Chinese Nationals Charged in Three Separate China Related Cases",
+		}
+
+		titles := make([]string, 0)
+
+		for _, flag := range flags {
+			flag := flag.(*AuthorIsAssociatedWithEOCFlag)
+			if flag.ConnectionLevel != "primary" || flag.EntityMentioned != "Charles M. Lieber" {
+				t.Fatal("incorrect flag")
+			}
+			titles = append(titles, flag.DocTitle)
+		}
+
+		if !eqOrderInvariant(expectedTitles, titles) {
+			t.Fatal("incorrect docs found")
+		}
+	})
+
+	t.Run("SecondaryConnection", func(t *testing.T) {
+		flags, err := processor.ProcessReport(api.Report{
+			Id:         uuid.New(),
+			AuthorId:   "https://openalex.org/A5012289937",
+			AuthorName: "Anqi Zhang",
+			Source:     api.OpenAlexSource,
+			StartYear:  2015,
+			EndYear:    2020,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(flags) < 1 {
+			t.Fatal("expected >= 1 flag")
+		}
+
+		for _, flag := range flags {
+			flag := flag.(*AuthorIsAssociatedWithEOCFlag)
+			if flag.ConnectionLevel != "secondary" || flag.FrequentCoauthor == nil || *flag.FrequentCoauthor != "Charles M. Lieber" {
+				t.Fatal("incorrect flag")
+			}
+		}
+	})
+
+	t.Run("TertiaryConnection", func(t *testing.T) {
+		flags, err := processor.ProcessReport(api.Report{
+			Id:         uuid.New(),
+			AuthorId:   "https://openalex.org/A5016320004",
+			AuthorName: "David Zhang",
+			Source:     api.OpenAlexSource,
+			StartYear:  2020,
+			EndYear:    2020,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(flags) < 1 {
+			t.Fatal("expected >= 1 flag")
+		}
+
+		entitiesMentioned := map[string]bool{}
+		for _, flag := range flags {
+			flag := flag.(*AuthorIsAssociatedWithEOCFlag)
+
+			if flag.ConnectionLevel != "tertiary" ||
+				len(flag.Nodes) != 2 ||
+				flag.Nodes[0].DocTitle != "NuProbe About Us" ||
+				flag.Nodes[0].DocUrl != "https://nuprobe.com/about-us/" ||
+				flag.Nodes[1].DocTitle != "NuProbe Announces $11 Million Series A Funding Round" ||
+				flag.Nodes[1].DocUrl != "https://nuprobe.com/2018/04/nuprobe-announces-11-million-series-a-funding-round-2/" {
+				t.Fatal("incorrect flag")
+			}
+			entitiesMentioned[flag.EntityMentioned] = true
+		}
+		if !entitiesMentioned["WuXi AppTec"] || !entitiesMentioned["Sequoia Capital China"] {
+			t.Fatal("incorrect entities mentioned")
+		}
+	})
+}
