@@ -42,8 +42,7 @@ const get_paper_url = (flag) => {
 const ItemDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  // const reportId  = location.state.response.Id;
-  const reportId = "9b944670-8575-470c-9312-e31997cb343c"
+  const reportId  = location.state.response.Id;
 
   const [authorName, setAuthorName] = useState("")
   const [institutions, setInstitutions] = useState([])
