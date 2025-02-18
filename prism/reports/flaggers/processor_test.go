@@ -1,6 +1,8 @@
 package flaggers
 
 import (
+	"os"
+	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/openalex"
 	"prism/prism/reports/flaggers/eoc"
@@ -358,6 +360,124 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 		}
 		if !entitiesMentioned["WuXi AppTec"] || !entitiesMentioned["Sequoia Capital China"] {
 			t.Fatal("incorrect entities mentioned")
+		}
+	})
+}
+
+func TestProcessorAcknowledgements(t *testing.T) {
+	grobidEndpoint := os.Getenv("GROBID_ENDPOINT")
+	if grobidEndpoint == "" {
+		t.Skip("No grobid endpoint detected, skipping acknowledgements tests. Set GROBID_ENDPOINT env variable to run these tests")
+	}
+
+	testDir := t.TempDir()
+
+	ackFlagCache, err := NewCache[cachedAckFlag]("ack_flags", filepath.Join(testDir, "ack_flags.cache"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ackFlagCache.Close()
+
+	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(testDir, "authors.cache"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer authorCache.Close()
+
+	ackCache, err := NewCache[Acknowledgements]("acks", filepath.Join(testDir, "acks.cache"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ackCache.Close()
+
+	entityStore, err := NewEntityStore(filepath.Join(testDir, "entity_lookup.ndb"), eoc.LoadSourceToAlias())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer entityStore.Free()
+
+	processor := ReportProcessor{
+		openalex: openalex.NewRemoteKnowledgeBase(),
+		workFlaggers: []WorkFlagger{
+			&OpenAlexAcknowledgementIsEOC{
+				openalex:     openalex.NewRemoteKnowledgeBase(),
+				entityLookup: entityStore,
+				flagCache:    ackFlagCache,
+				authorCache:  authorCache,
+				extractor:    NewGrobidExtractor(ackCache, grobidEndpoint, testDir),
+				sussyBakas:   eoc.LoadSussyBakas(),
+			},
+		},
+	}
+
+	t.Run("Case1", func(t *testing.T) {
+		flags, err := processor.ProcessReport(api.Report{
+			Id:         uuid.New(),
+			AuthorId:   "https://openalex.org/A5084836278",
+			AuthorName: "Charles M. Lieber",
+			Source:     api.OpenAlexSource,
+			StartYear:  2011,
+			EndYear:    2013,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(flags) != 4 {
+			t.Fatal("expected 4 acknowledgement flags")
+		}
+
+		expectedTitles := []string{
+			"Nanoelectronics-biology frontier: From nanoscopic probes for action potential recording in live cells to three-dimensional cyborg tissues",
+			"Nanowire Biosensors for Label-Free, Real-Time, Ultrasensitive Protein Detection",
+			"Design and Synthesis of Diverse Functional Kinked Nanowire Structures for Nanoelectronic Bioprobes",
+			"Nanoelectronics Meets Biology: From New Nanoscale Devices for Live‐Cell Recording to 3D Innervated Tissues",
+		}
+
+		titles := make([]string, 0)
+		for _, flag := range flags {
+			flag := flag.(*EOCAcknowledgemntsFlag)
+			titles = append(titles, flag.Work.DisplayName)
+		}
+
+		if !eqOrderInvariant(expectedTitles, titles) {
+			t.Fatal("incorrect flags")
+		}
+	})
+
+	t.Run("Case2", func(t *testing.T) {
+		flags, err := processor.ProcessReport(api.Report{
+			Id:         uuid.New(),
+			AuthorId:   "https://openalex.org/A5075113943",
+			AuthorName: "Zijian Hong",
+			Source:     api.OpenAlexSource,
+			StartYear:  2023,
+			EndYear:    2023,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(flags) < 1 {
+			t.Fatal("expected >= 1 flags")
+		}
+
+		found := false
+		for _, flag := range flags {
+			flag := flag.(*EOCAcknowledgemntsFlag)
+
+			if flag.Work.WorkId == "https://openalex.org/W4384197626" {
+				found = true
+				if len(flag.Entities) != 1 || flag.Entities[0].Entity != "Zhejiang University" ||
+					len(flag.Entities[0].Sources) != 1 || flag.Entities[0].Sources[0] != "China Defense Universities Tracker" ||
+					len(flag.Entities[0].Aliases) != 1 || flag.Entities[0].Aliases[0] != "Zhejiang University" {
+					t.Fatal("incorrect acknowledgement found")
+				}
+			}
+		}
+
+		if !found {
+			t.Fatal("missing expected flag")
 		}
 	})
 }

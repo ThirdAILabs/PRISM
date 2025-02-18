@@ -359,7 +359,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForSussyBaka(ack Acknowledgeme
 
 func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 	logger *slog.Logger, acknowledgements []Acknowledgement, allAuthorNames []string,
-) (map[string]SourceToAliases, string, error) {
+) (bool, map[string]SourceToAliases, string, error) {
 	message := ""
 	flagged := false
 
@@ -381,6 +381,8 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 			flagged = true
 		}
 
+		logger.Info("ACKNOWLEDGEMENT TEXT", "text", ack.RawText)
+
 		entityQueries := make([]string, 0)
 		if sussyBakaFlag {
 			for _, entity := range ack.SearchableEntities {
@@ -400,7 +402,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 		if len(entityQueries) > 0 {
 			matches, err := flagger.entityLookup.SearchEntities(logger, entityQueries)
 			if err != nil {
-				return nil, "", fmt.Errorf("error looking up entity matches: %w", err)
+				return false, nil, "", fmt.Errorf("error looking up entity matches: %w", err)
 			}
 
 			for _, entity := range entityQueries {
@@ -413,8 +415,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 		}
 	}
 
-	// TODO: flagged and len(flaggedEntities) > 0 could not be equivalent, I think this is ok?
-	return flaggedEntities, message, nil
+	return flagged, flaggedEntities, message, nil
 }
 
 func flagCacheKey(workId string, targetAuthorIds []string) string {
@@ -487,7 +488,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 
 		workLogger.Info("found acknowledgements", "n_acks", len(acks.Result.Acknowledgements))
 
-		flaggedEntities, message, err := flagger.checkAcknowledgementEntities(
+		flagged, flaggedEntities, message, err := flagger.checkAcknowledgementEntities(
 			workLogger, acks.Result.Acknowledgements, allAuthorNames,
 		)
 		if err != nil {
@@ -497,7 +498,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 
 		workLogger.Info("found flagged entities in acknowledgements", "n_entities", len(flaggedEntities))
 
-		if len(flaggedEntities) > 0 {
+		if flagged {
 			ackTexts := make([]string, 0, len(acks.Result.Acknowledgements))
 			for _, ack := range acks.Result.Acknowledgements {
 				ackTexts = append(ackTexts, ack.RawText)

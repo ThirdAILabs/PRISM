@@ -221,7 +221,7 @@ func filterMatchesWorker(task verificationTask) (verificationTask, error) {
 }
 
 func (store *EntityStore) SearchEntities(logger *slog.Logger, queries []string) (map[string]SourceToAliases, error) {
-	logger.Info("searching for entities queries", "queries", queries)
+	logger.Info("searching for entities", "queries", strings.Join(queries, ","))
 
 	queue := make(chan verificationTask, len(queries))
 	for _, query := range queries {
@@ -235,7 +235,6 @@ func (store *EntityStore) SearchEntities(logger *slog.Logger, queries []string) 
 		}
 
 		matches := slices.Concat(ndbMatches, flashMatches)
-		logger.Info("matches found for queries", "matches", matches)
 		if len(matches) > 0 {
 			queue <- verificationTask{query: query, matches: matches}
 		}
