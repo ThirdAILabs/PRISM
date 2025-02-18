@@ -129,7 +129,7 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			flag.DocTitle != "indicted" ||
 			flag.DocUrl != "indicted.com" ||
 			!slices.Equal(flag.DocEntities, []string{"abc", "xyz"}) ||
-			flag.EntityMentioned != "ABC" {
+			flag.EntityMentioned != "abc" {
 			t.Fatalf("incorrect flag: %v", *flag)
 		}
 	})
@@ -155,11 +155,11 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			flag.DocTitle != "indicted" ||
 			flag.DocUrl != "indicted.com" ||
 			!slices.Equal(flag.DocEntities, []string{"abc", "xyz"}) ||
-			flag.EntityMentioned != "ABC" ||
+			flag.EntityMentioned != "abc" ||
 			flag.FrequentCoauthor == nil ||
-			*flag.FrequentCoauthor != "ABC" ||
+			*flag.FrequentCoauthor != "abc" ||
 			len(flag.Nodes) != 1 ||
-			flag.Nodes[0].DocTitle != "ABC (frequent coauthor)" {
+			flag.Nodes[0].DocTitle != "abc (frequent coauthor)" {
 			t.Fatalf("incorrect flag: %v", *flag)
 		}
 	})
