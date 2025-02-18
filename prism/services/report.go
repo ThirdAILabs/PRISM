@@ -171,37 +171,32 @@ func (s *ReportService) UseLicense(r *http.Request) (any, error) {
 }
 
 func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
-	// Authenticate the user.
 	userId, err := auth.GetUserId(r)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	// Get the report ID from the URL.
 	reportIdParam := chi.URLParam(r, "report_id")
 	reportId, err := uuid.Parse(reportIdParam)
 	if err != nil {
 		return nil, CodedError(fmt.Errorf("invalid report id '%v': %w", reportIdParam, err), http.StatusBadRequest)
 	}
 
-	// Parse the multipart form (limit 32 MB).
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
 		return nil, CodedError(err, http.StatusBadRequest)
 	}
 
-	// Retrieve files under the field "files".
 	fileHeaders := r.MultipartForm.File["files"]
 	if len(fileHeaders) == 0 {
 		return nil, CodedError(errors.New("no files uploaded"), http.StatusBadRequest)
 	}
 
-	// Aggregate text extracted from all uploaded files.
 	var allFileTexts []string
 	for _, fileHeader := range fileHeaders {
 		file, err := fileHeader.Open()
 		if err != nil {
 			slog.Error("error opening uploaded file", "filename", fileHeader.Filename, "error", err)
-			continue // or return error
+			continue
 		}
 
 		fileBytes, err := io.ReadAll(file)
@@ -211,7 +206,6 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 			continue
 		}
 
-		// Determine file extension.
 		ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
 		text, err := parseFileContent(ext, fileBytes)
 		if err != nil {
@@ -222,13 +216,11 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 		allFileTexts = append(allFileTexts, text)
 	}
 
-	// Retrieve the stored report.
 	report, err := s.manager.GetReport(userId, reportId, true)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	// Since convertReport stored the content as a ReportContent, we assert that:
 	rc, ok := report.Content.(reports.ReportContent)
 	if !ok {
 		return nil, CodedError(fmt.Errorf("unexpected content type"), http.StatusInternalServerError)
@@ -266,7 +258,6 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 	rc.TypeToFlags.AuthorAffiliationEOCDisclosed = updateDisclosed(rc.TypeToFlags.AuthorAffiliationEOCDetails, rc.TypeToFlags.AuthorAffiliationEOCDisclosed)
 	rc.TypeToFlags.FunderEOCDisclosed = updateDisclosed(rc.TypeToFlags.FunderEOCDetails, rc.TypeToFlags.FunderEOCDisclosed)
 
-	// Update the report with the modified ReportContent.
 	updatedContentBytes, err := json.Marshal(rc)
 	if err != nil {
 		slog.Error("error serializing updated report content", "error", err)
@@ -285,24 +276,18 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 	rc.TypeToFlags.AuthorAffiliationEOCDetails = nil
 	rc.TypeToFlags.FunderEOCDetails = nil
 
-	// Optionally, update the report's Content field with our modified content.
 	report.Content = rc
 
 	return report, nil
 
 }
 
-// parseFileContent is a stub to extract text from a file based on its extension.
-// Implement actual parsing logic for different file types as needed.
 func parseFileContent(ext string, fileBytes []byte) (string, error) {
 	switch ext {
 	case ".txt":
 		return string(fileBytes), nil
 	case ".pdf":
 		return extractTextFromPDF(fileBytes)
-	case ".docx":
-		// TODO: Implement DOCX text extraction.
-		return "", errors.New("DOCX parsing not implemented")
 	default:
 		return "", fmt.Errorf("unsupported file extension: %s", ext)
 	}
@@ -343,9 +328,7 @@ func filterTokens(tokens []string) []string {
 		if strings.Contains(token, " ") {
 			filtered = append(filtered, strings.ToLower(token))
 		} else {
-			// For a single-word token, clean it using the stopwords library.
 			cleaned := removeStopwords(token)
-			// Only add it if it’s not empty after cleaning.
 			if cleaned != "" {
 				filtered = append(filtered, cleaned)
 			}
@@ -358,7 +341,6 @@ func extractTokens(detail interface{}) []string {
 	var tokens []string
 	switch v := detail.(type) {
 	case string:
-		// Split the string into words.
 		tokens = append(tokens, strings.TrimSpace(v))
 	case []interface{}:
 		for _, item := range v {
@@ -369,7 +351,6 @@ func extractTokens(detail interface{}) []string {
 			tokens = append(tokens, extractTokens(val)...)
 		}
 	default:
-		// Fallback: try to marshal to JSON and split (not ideal, but something)
 		if b, err := json.Marshal(v); err == nil {
 			tokens = append(tokens, strings.Fields(string(b))...)
 		}
