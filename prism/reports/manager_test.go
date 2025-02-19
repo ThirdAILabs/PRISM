@@ -51,7 +51,7 @@ func TestReportManager(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := manager.UpdateReport(report1, "complete", []byte("content1")); err != nil {
+	if err := manager.UpdateReport(report1, "complete", []byte(`{"key":"value"}`)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -107,8 +107,11 @@ func TestReportManager(t *testing.T) {
 			report.Source != "openalex" ||
 			report.StartYear != 1 ||
 			report.EndYear != 3 ||
-			report.Status != "complete" ||
-			string(report.Content.([]byte)) != "content1" {
+			report.Status != "complete" {
+			t.Fatal("incorrect report")
+		}
+
+		if value := report.Content.(map[string]any)["key"]; value != "value" {
 			t.Fatal("incorrect report")
 		}
 	}

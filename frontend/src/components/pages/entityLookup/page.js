@@ -4,14 +4,14 @@ import axios from 'axios';
 import { API_BASE_URL } from '../../../services/apiService';
 import "../../common/searchBar/SearchBar.css";
 import { useUser } from '../../../store/userContext';
+import { searchService } from '../../../api/search';
 function EntityLookup() {
 
-  const { userInfo } = useUser();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [backendUrl, setBackendUrl] = useState('');
-  console.log("User info in entity lookup", userInfo);
+
   useEffect(() => {
     setBackendUrl(API_BASE_URL);
   }, []);
@@ -20,10 +20,11 @@ function EntityLookup() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await axios.get(`${backendUrl}/match?query=${encodeURIComponent(query)}`);
-      const entities = response.data.result.split('[ENTITY START]')
+      const response = await searchService.matchEntities(query);
+      console.log(response);
+      const entities = response.Entities
         .filter(entity => entity.trim())
-        .map(entity => entity.split('[ENTITY END]')[0].trim());
+        .map(entity => entity.replace('[ENTITY START]', '').replace('[ENTITY END]', '').trim());
       setResults(entities);
     } catch (error) {
       console.error('Error fetching data:', error);

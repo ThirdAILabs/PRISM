@@ -1,8 +1,9 @@
 # Uri for postgres db
 postgres_uri: ""
 
-# Path to entity NDB
-entity_ndb: ""
+# Path to the searchable_entities.json that contains the entities that we can search 
+# in the match endpoint
+searchable_entities: ""
 
 # Args for setting up keycloak
 keycloak:

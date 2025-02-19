@@ -225,7 +225,7 @@ func TestAcknowledgementEOC(t *testing.T) {
 		sussyBakas:   []string{"bad entity xyz"},
 	}
 
-	flags, err := flagger.Flag(slog.Default(), []openalex.Work{{WorkId: "a/b"}}, []string{})
+	flags, err := flagger.Flag(slog.Default(), []openalex.Work{{WorkId: "a/b", DownloadUrl: "n/a"}}, []string{})
 	if err != nil {
 		t.Fatal(err)
 	}
