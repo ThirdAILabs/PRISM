@@ -13,7 +13,6 @@ import (
 	"prism/prism/reports"
 	"prism/prism/services/auth"
 	"prism/prism/services/licensing"
-	"reflect"
 	"strings"
 	"time"
 
@@ -172,13 +171,12 @@ func (s *ReportService) UseLicense(r *http.Request) (any, error) {
 }
 
 func updateFlagDisclosure(flag api.Flag, allFileTexts []string) {
-	entities := flag.GetEntities()
+	entities := filterTokens(flag.GetEntities())
 
 DisclosureCheck:
 	for _, entity := range entities {
-		tokenLower := strings.ToLower(strings.TrimSpace(entity))
 		for _, txt := range allFileTexts {
-			if strings.Contains(strings.ToLower(txt), tokenLower) {
+			if strings.Contains(strings.ToLower(txt), entity) {
 				flag.MarkDisclosed()
 				break DisclosureCheck
 			}
@@ -318,45 +316,4 @@ func filterTokens(tokens []string) []string {
 		}
 	}
 	return filtered
-}
-
-func extractTokens(detail interface{}) []string {
-	var tokens []string
-	switch v := detail.(type) {
-	case string:
-		tokens = append(tokens, strings.TrimSpace(v))
-	case []string:
-		for _, s := range v {
-			tokens = append(tokens, strings.TrimSpace(s))
-		}
-	case []interface{}:
-		for _, item := range v {
-			tokens = append(tokens, extractTokens(item)...)
-		}
-	case map[string]interface{}:
-		for _, val := range v {
-			tokens = append(tokens, extractTokens(val)...)
-		}
-	default:
-		rv := reflect.ValueOf(detail)
-		switch rv.Kind() {
-		case reflect.Struct:
-			rt := rv.Type()
-			for i := 0; i < rv.NumField(); i++ {
-				if rt.Field(i).PkgPath != "" {
-					continue
-				}
-				fieldVal := rv.Field(i).Interface()
-				tokens = append(tokens, extractTokens(fieldVal)...)
-			}
-		case reflect.Slice:
-			for i := 0; i < rv.Len(); i++ {
-				tokens = append(tokens, extractTokens(rv.Index(i).Interface())...)
-			}
-		default:
-			token := fmt.Sprintf("%v", v)
-			tokens = append(tokens, token)
-		}
-	}
-	return filterTokens(tokens)
 }
