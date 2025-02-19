@@ -25,6 +25,10 @@ const (
 	OAAcknowledgementIsEOC     flagType = "oa_acknowledgement_eoc"
 )
 
+type BaseFlag struct {
+	Disclosed bool `json:"disclosed"`
+}
+
 type Connection struct {
 	Title       string       `json:"title"`
 	Url         string       `json:"url"`
@@ -35,6 +39,8 @@ type Flag interface {
 	Type() flagType
 
 	Connection() Connection
+
+	Details() interface{}
 
 	// This is used to deduplicate flags. Primarily for author flags, it is
 	// possible to have the same flag created for multiple works, for instance by
@@ -48,6 +54,7 @@ type Flag interface {
  */
 
 type AuthorIsFacultyAtEOCFlag struct {
+	BaseFlag
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
@@ -67,6 +74,14 @@ func (flag *AuthorIsFacultyAtEOCFlag) Connection() Connection {
 	}
 }
 
+func (flag *AuthorIsFacultyAtEOCFlag) Details() interface{} {
+	return struct {
+		University string `json:"university"`
+	}{
+		University: flag.University,
+	}
+}
+
 func (flag *AuthorIsFacultyAtEOCFlag) Key() string {
 	return fmt.Sprintf("%v-%s-%s", flag.FlagType, flag.University, flag.UniversityUrl)
 }
@@ -77,6 +92,7 @@ type Node struct {
 }
 
 type AuthorIsAssociatedWithEOCFlag struct {
+	BaseFlag
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
@@ -111,6 +127,18 @@ func (flag *AuthorIsAssociatedWithEOCFlag) Connection() Connection {
 	return connection
 }
 
+func (flag *AuthorIsAssociatedWithEOCFlag) Details() interface{} {
+	return struct {
+		DocEntities      []string `json:"doc_entities"`
+		EntityMentioned  string   `json:"entity_mentioned"`
+		FrequentCoauthor *string  `json:"frequent_coauthor,omitempty"`
+	}{
+		DocEntities:      flag.DocEntities,
+		EntityMentioned:  flag.EntityMentioned,
+		FrequentCoauthor: flag.FrequentCoauthor,
+	}
+}
+
 func (flag *AuthorIsAssociatedWithEOCFlag) Key() string {
 	return fmt.Sprintf("%v-%s-%s-%v", flag.FlagType, flag.DocTitle, flag.EntityMentioned, flag.Nodes)
 }
@@ -126,6 +154,7 @@ func workFlagKey(flagType flagType, workId string) string {
 }
 
 type MultipleAssociationsFlag struct { // This flag is deprecated
+	BaseFlag
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
@@ -146,11 +175,22 @@ func (flag *MultipleAssociationsFlag) Connection() Connection {
 	}
 }
 
+func (flag *MultipleAssociationsFlag) Details() interface{} {
+	return struct {
+		AuthorName   string   `json:"author_name"`
+		Affiliations []string `json:"affiliations"`
+	}{
+		AuthorName:   flag.AuthorName,
+		Affiliations: flag.Affiliations,
+	}
+}
+
 func (flag *MultipleAssociationsFlag) Key() string {
 	return workFlagKey(flag.FlagType, flag.Work.WorkId)
 }
 
 type EOCFundersFlag struct {
+	BaseFlag
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
@@ -171,11 +211,20 @@ func (flag *EOCFundersFlag) Connection() Connection {
 	}
 }
 
+func (flag *EOCFundersFlag) Details() interface{} {
+	return struct {
+		Funders []string `json:"funders"`
+	}{
+		Funders: flag.Funders,
+	}
+}
+
 func (flag *EOCFundersFlag) Key() string {
 	return workFlagKey(flag.FlagType, flag.Work.WorkId)
 }
 
 type EOCPublishersFlag struct {
+	BaseFlag
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
@@ -196,11 +245,20 @@ func (flag *EOCPublishersFlag) Connection() Connection {
 	}
 }
 
+func (flag *EOCPublishersFlag) Details() interface{} {
+	return struct {
+		Publishers []string `json:"publishers"`
+	}{
+		Publishers: flag.Publishers,
+	}
+}
+
 func (flag *EOCPublishersFlag) Key() string {
 	return workFlagKey(flag.FlagType, flag.Work.WorkId)
 }
 
 type EOCCoauthorsFlag struct {
+	BaseFlag
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
@@ -221,11 +279,20 @@ func (flag *EOCCoauthorsFlag) Connection() Connection {
 	}
 }
 
+func (flag *EOCCoauthorsFlag) Details() interface{} {
+	return struct {
+		Coauthors []string `json:"coauthors"`
+	}{
+		Coauthors: flag.Coauthors,
+	}
+}
+
 func (flag *EOCCoauthorsFlag) Key() string {
 	return workFlagKey(flag.FlagType, flag.Work.WorkId)
 }
 
 type EOCAuthorAffiliationsFlag struct {
+	BaseFlag
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
@@ -246,11 +313,20 @@ func (flag *EOCAuthorAffiliationsFlag) Connection() Connection {
 	}
 }
 
+func (flag *EOCAuthorAffiliationsFlag) Details() interface{} {
+	return struct {
+		Institutions []string `json:"institutions"`
+	}{
+		Institutions: flag.Institutions,
+	}
+}
+
 func (flag *EOCAuthorAffiliationsFlag) Key() string {
 	return workFlagKey(flag.FlagType, flag.Work.WorkId)
 }
 
 type EOCCoauthorAffiliationsFlag struct {
+	BaseFlag
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
@@ -272,6 +348,16 @@ func (flag *EOCCoauthorAffiliationsFlag) Connection() Connection {
 	}
 }
 
+func (flag *EOCCoauthorAffiliationsFlag) Details() interface{} {
+	return struct {
+		Institutions []string `json:"institutions"`
+		Authors      []string `json:"authors"`
+	}{
+		Institutions: flag.Institutions,
+		Authors:      flag.Authors,
+	}
+}
+
 func (flag *EOCCoauthorAffiliationsFlag) Key() string {
 	return workFlagKey(flag.FlagType, flag.Work.WorkId)
 }
@@ -283,6 +369,7 @@ type EOCAcknowledgementEntity struct {
 }
 
 type EOCAcknowledgemntsFlag struct {
+	BaseFlag
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
@@ -301,6 +388,16 @@ func (flag *EOCAcknowledgemntsFlag) Connection() Connection {
 	return Connection{
 		Title: flag.Work.DisplayName,
 		Url:   flag.Work.WorkUrl,
+	}
+}
+
+func (flag *EOCAcknowledgemntsFlag) Details() interface{} {
+	return struct {
+		Entities           []EOCAcknowledgementEntity `json:"entities"`
+		RawAcknowledements []string                   `json:"raw_acknowledgements"`
+	}{
+		Entities:           flag.Entities,
+		RawAcknowledements: flag.RawAcknowledements,
 	}
 }
 

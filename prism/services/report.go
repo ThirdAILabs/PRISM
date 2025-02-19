@@ -1,18 +1,27 @@
 package services
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
+	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/reports"
+	"prism/prism/reports/flaggers"
 	"prism/prism/services/auth"
 	"prism/prism/services/licensing"
+	"reflect"
+	"strings"
 	"time"
 
+	"github.com/bbalet/stopwords"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/ledongthuc/pdf"
 	"gorm.io/gorm"
 )
 
@@ -27,6 +36,7 @@ func (s *ReportService) Routes() chi.Router {
 	r.Get("/list", WrapRestHandler(s.List))
 	r.Post("/create", WrapRestHandler(s.CreateReport))
 	r.Get("/{report_id}", WrapRestHandler(s.GetReport))
+	r.Post("/{report_id}/check-disclosure", WrapRestHandler(s.CheckDisclosure))
 
 	r.Post("/activate-license", WrapRestHandler(s.UseLicense))
 
@@ -160,4 +170,225 @@ func (s *ReportService) UseLicense(r *http.Request) (any, error) {
 	}
 
 	return nil, nil
+}
+
+func updateFlagDisclosure(f flaggers.Flag, allFileTexts []string) {
+	tokens := extractTokens(f.Details())
+	disclosed := false
+	for _, token := range tokens {
+		tokenLower := strings.ToLower(token)
+		for _, txt := range allFileTexts {
+			fmt.Println("txt", txt)
+			if strings.Contains(strings.ToLower(txt), tokenLower) {
+				disclosed = true
+				break
+			}
+		}
+		if disclosed {
+			break
+		}
+	}
+
+	switch flagTyped := f.(type) {
+	case *flaggers.AuthorIsAssociatedWithEOCFlag:
+		flagTyped.Disclosed = disclosed
+	case *flaggers.EOCCoauthorAffiliationsFlag:
+		flagTyped.Disclosed = disclosed
+	case *flaggers.AuthorIsFacultyAtEOCFlag:
+		flagTyped.Disclosed = disclosed
+	case *flaggers.EOCAcknowledgemntsFlag:
+		flagTyped.Disclosed = disclosed
+	case *flaggers.EOCAuthorAffiliationsFlag:
+		flagTyped.Disclosed = disclosed
+	case *flaggers.EOCFundersFlag:
+		flagTyped.Disclosed = disclosed
+	}
+}
+
+func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
+	userId, err := auth.GetUserId(r)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	reportIdParam := chi.URLParam(r, "report_id")
+	reportId, err := uuid.Parse(reportIdParam)
+	if err != nil {
+		return nil, CodedError(fmt.Errorf("invalid report id '%v': %w", reportIdParam, err), http.StatusBadRequest)
+	}
+
+	if err := r.ParseMultipartForm(32 << 20); err != nil {
+		return nil, CodedError(err, http.StatusBadRequest)
+	}
+
+	fileHeaders := r.MultipartForm.File["files"]
+	if len(fileHeaders) == 0 {
+		return nil, CodedError(errors.New("no files uploaded"), http.StatusBadRequest)
+	}
+
+	var allFileTexts []string
+	for _, fileHeader := range fileHeaders {
+		file, err := fileHeader.Open()
+		if err != nil {
+			slog.Error("error opening uploaded file", "filename", fileHeader.Filename, "error", err)
+			continue
+		}
+
+		fileBytes, err := io.ReadAll(file)
+		file.Close()
+		if err != nil {
+			slog.Error("error reading file bytes", "filename", fileHeader.Filename, "error", err)
+			continue
+		}
+
+		ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
+		text, err := parseFileContent(ext, fileBytes)
+		if err != nil {
+			slog.Error("error parsing file content", "filename", fileHeader.Filename, "error", err)
+			continue
+		}
+
+		allFileTexts = append(allFileTexts, text)
+	}
+
+	report, err := s.manager.GetReport(userId, reportId)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	rc, ok := report.Content.(reports.ReportContent)
+	if !ok {
+		return nil, CodedError(fmt.Errorf("unexpected content type"), http.StatusInternalServerError)
+	}
+
+	for _, flag := range rc.TypeToFlags.AuthorAssociationsEOC {
+		updateFlagDisclosure(flag, allFileTexts)
+	}
+	for _, flag := range rc.TypeToFlags.CoauthorAffiliationEOC {
+		updateFlagDisclosure(flag, allFileTexts)
+	}
+	for _, flag := range rc.TypeToFlags.AuthorFacultyAtEOC {
+		updateFlagDisclosure(flag, allFileTexts)
+	}
+	for _, flag := range rc.TypeToFlags.AcknowledgementEOC {
+		updateFlagDisclosure(flag, allFileTexts)
+	}
+	for _, flag := range rc.TypeToFlags.AuthorAffiliationEOC {
+		updateFlagDisclosure(flag, allFileTexts)
+	}
+	for _, flag := range rc.TypeToFlags.FunderEOC {
+		updateFlagDisclosure(flag, allFileTexts)
+	}
+
+	updatedContentBytes, err := json.Marshal(rc)
+	if err != nil {
+		slog.Error("error serializing updated report content", "error", err)
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	if err := s.manager.UpdateReport(report.Id, "complete", updatedContentBytes); err != nil {
+		slog.Error("error updating report with disclosure information", "error", err)
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	report.Content = rc
+
+	return report, nil
+
+}
+
+func parseFileContent(ext string, fileBytes []byte) (string, error) {
+	switch ext {
+	case ".txt":
+		return string(fileBytes), nil
+	case ".pdf":
+		return extractTextFromPDF(fileBytes)
+	default:
+		return "", fmt.Errorf("unsupported file extension: %s", ext)
+	}
+}
+
+func extractTextFromPDF(fileBytes []byte) (string, error) {
+	reader, err := pdf.NewReader(bytes.NewReader(fileBytes), int64(len(fileBytes)))
+	if err != nil {
+		return "", err
+	}
+
+	var textBuilder strings.Builder
+	numPages := reader.NumPage()
+	for i := 1; i <= numPages; i++ {
+		page := reader.Page(i)
+		pageText, err := page.GetPlainText(nil)
+		if err != nil {
+			return "", err
+		}
+		textBuilder.WriteString(pageText)
+	}
+
+	return textBuilder.String(), nil
+}
+
+func removeStopwords(text string) string {
+	return stopwords.CleanString(text, "en", false)
+}
+
+func filterTokens(tokens []string) []string {
+	var filtered []string
+	for _, token := range tokens {
+		token = strings.TrimSpace(token)
+		if token == "" {
+			continue
+		}
+		// If the token contains spaces, assume it’s a multi-word phrase and keep it as-is.
+		if strings.Contains(token, " ") {
+			filtered = append(filtered, strings.ToLower(token))
+		} else {
+			cleaned := removeStopwords(token)
+			if cleaned != "" {
+				filtered = append(filtered, cleaned)
+			}
+		}
+	}
+	return filtered
+}
+
+func extractTokens(detail interface{}) []string {
+	var tokens []string
+	switch v := detail.(type) {
+	case string:
+		tokens = append(tokens, strings.TrimSpace(v))
+	case []string:
+		for _, s := range v {
+			tokens = append(tokens, strings.TrimSpace(s))
+		}
+	case []interface{}:
+		for _, item := range v {
+			tokens = append(tokens, extractTokens(item)...)
+		}
+	case map[string]interface{}:
+		for _, val := range v {
+			tokens = append(tokens, extractTokens(val)...)
+		}
+	default:
+		rv := reflect.ValueOf(detail)
+		switch rv.Kind() {
+		case reflect.Struct:
+			rt := rv.Type()
+			for i := 0; i < rv.NumField(); i++ {
+				if rt.Field(i).PkgPath != "" {
+					continue
+				}
+				fieldVal := rv.Field(i).Interface()
+				tokens = append(tokens, extractTokens(fieldVal)...)
+			}
+		case reflect.Slice:
+			for i := 0; i < rv.Len(); i++ {
+				tokens = append(tokens, extractTokens(rv.Index(i).Interface())...)
+			}
+		default:
+			token := fmt.Sprintf("%v", v)
+			tokens = append(tokens, token)
+		}
+	}
+	return filterTokens(tokens)
 }

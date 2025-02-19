@@ -124,7 +124,7 @@ const SearchComponent = () => {
             textDecoration: 'none',
             display: 'inline-block',
             width: '10%'
-          }} onClick={UserService.doLogout}>logout</button>
+          }} onClick={UserService.doLogout}>Logout</button>
       </div>
       <img src={Logo} style={{ width: "100px", marginTop: "12%", animation: "fade-in 0.5s" }} />
       <h1 style={{ fontWeight: "bold", marginTop: 50, animation: "fade-in 0.75s" }}>Welcome to Prism</h1>

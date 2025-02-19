@@ -10,6 +10,7 @@ import {
     UNI_FACULTY_EOC,
     DOJ_PRESS_RELEASES_EOC
 } from "../constants/constants";
+
 import { talentPrograms, deniedEntities, fundingSources, institutions } from "../constants/eoc_categories";
 
 const FOREIGN_TALENT_PROGRAMS = "foreign_talent_programs";
@@ -111,21 +112,15 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
                 }
             }
         }
-
-        function withDisclosure(list) {
-            return list.map(elem => ({ ...elem, disclosed: true }));
-        }
-
+    
         return {
-            [FOREIGN_TALENT_PROGRAMS]: withDisclosure(foreignTalentProgramFlags),
-            [DENIED_ENTITIES]: withDisclosure(deniedEntityFlags),
-            [HIGH_RISK_FUNDING_SOURCES]: withDisclosure(highRiskFundingSourceFlags.concat(idToFlags[FUNDER_EOC] || [])),
-            [HIGH_RISK_FOREIGN_INSTITUTIONS]: withDisclosure(idToFlags[COAUTHOR_AFFIL_EOC] || []),
-            [HIGH_RISK_APPOINTMENTS]: withDisclosure((formalRelations || []).concat(idToFlags[AUTHOR_AFFIL_EOC] || [])),
-            // [UNIVERSITY_FACULTY_APPOINTMENTS]: withDisclosure(idToFlags[UNI_FACULTY_EOC] || []),
-            [UNIVERSITY_FACULTY_APPOINTMENTS]: withDisclosure(universityFacultyFlags),
-            // [DOJ_PRESS_RELEASES]: withDisclosure(idToFlags[DOJ_PRESS_RELEASES_EOC] || [])
-            [DOJ_PRESS_RELEASES]: withDisclosure(dojPRFlags)
+            [FOREIGN_TALENT_PROGRAMS]: foreignTalentProgramFlags,
+            [DENIED_ENTITIES]: deniedEntityFlags,
+            [HIGH_RISK_FUNDING_SOURCES]: highRiskFundingSourceFlags.concat(idToFlags[FUNDER_EOC] || []),
+            [HIGH_RISK_FOREIGN_INSTITUTIONS]: idToFlags[COAUTHOR_AFFIL_EOC] || [],
+            [HIGH_RISK_APPOINTMENTS]: (formalRelations || []).concat(idToFlags[AUTHOR_AFFIL_EOC] || []),
+            [UNIVERSITY_FACULTY_APPOINTMENTS]: universityFacultyFlags,
+            [DOJ_PRESS_RELEASES]: dojPRFlags
         }
     }, [idToFlags, formalRelations]);
 
@@ -152,7 +147,7 @@ export function useVisualizationData(name, idToFlags, formalRelations, worksCoun
             );
         }
 
-        flags.forEach(item => console.log(item));
+        // flags.forEach(item => console.log(item));
         return {
             "display_name": name,
             "desc": desc,
