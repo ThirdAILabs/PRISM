@@ -25,6 +25,10 @@ const (
 	OAAcknowledgementIsEOC     flagType = "oa_acknowledgement_eoc"
 )
 
+type BaseFlag struct {
+	Disclosed bool `json:"disclosed"`
+}
+
 type Connection struct {
 	Title       string       `json:"title"`
 	Url         string       `json:"url"`
@@ -50,6 +54,7 @@ type Flag interface {
  */
 
 type AuthorIsFacultyAtEOCFlag struct {
+	BaseFlag
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
@@ -87,6 +92,7 @@ type Node struct {
 }
 
 type AuthorIsAssociatedWithEOCFlag struct {
+	BaseFlag
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
@@ -148,6 +154,7 @@ func workFlagKey(flagType flagType, workId string) string {
 }
 
 type MultipleAssociationsFlag struct { // This flag is deprecated
+	BaseFlag
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
@@ -183,6 +190,7 @@ func (flag *MultipleAssociationsFlag) Key() string {
 }
 
 type EOCFundersFlag struct {
+	BaseFlag
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
@@ -216,6 +224,7 @@ func (flag *EOCFundersFlag) Key() string {
 }
 
 type EOCPublishersFlag struct {
+	BaseFlag
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
@@ -249,6 +258,7 @@ func (flag *EOCPublishersFlag) Key() string {
 }
 
 type EOCCoauthorsFlag struct {
+	BaseFlag
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
@@ -282,6 +292,7 @@ func (flag *EOCCoauthorsFlag) Key() string {
 }
 
 type EOCAuthorAffiliationsFlag struct {
+	BaseFlag
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
@@ -315,6 +326,7 @@ func (flag *EOCAuthorAffiliationsFlag) Key() string {
 }
 
 type EOCCoauthorAffiliationsFlag struct {
+	BaseFlag
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?
@@ -357,6 +369,7 @@ type EOCAcknowledgementEntity struct {
 }
 
 type EOCAcknowledgemntsFlag struct {
+	BaseFlag
 	FlagType    flagType
 	FlagTitle   string // Do we still need this?
 	FlagMessage string // Do we still need this?

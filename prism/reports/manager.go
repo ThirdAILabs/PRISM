@@ -37,7 +37,7 @@ func (r *ReportManager) ListReports(userId uuid.UUID) ([]api.Report, error) {
 
 	results := make([]api.Report, 0, len(reports))
 	for _, report := range reports {
-		res, err := convertReport(report, false)
+		res, err := convertReport(report)
 		if err != nil {
 			return nil, ErrReportAccessFailed
 		}
@@ -87,7 +87,7 @@ func (r *ReportManager) CreateReport(licenseId, userId uuid.UUID, authorId, auth
 	return report.Id, nil
 }
 
-func (r *ReportManager) GetReport(userId, id uuid.UUID, withDetails bool) (api.Report, error) {
+func (r *ReportManager) GetReport(userId, id uuid.UUID) (api.Report, error) {
 	report, err := getReport(r.db, id, true)
 	if err != nil {
 		return api.Report{}, err
@@ -97,7 +97,7 @@ func (r *ReportManager) GetReport(userId, id uuid.UUID, withDetails bool) (api.R
 		return api.Report{}, ErrUserCannotAccessReport
 	}
 
-	return convertReport(report, withDetails)
+	return convertReport(report)
 }
 
 func (r *ReportManager) GetNextReport() (*api.Report, error) {
@@ -129,7 +129,7 @@ func (r *ReportManager) GetNextReport() (*api.Report, error) {
 	}
 
 	if found {
-		result, err := convertReport(report, false)
+		result, err := convertReport(report)
 		if err != nil {
 			return nil, err
 		}
@@ -178,7 +178,7 @@ func getReport(txn *gorm.DB, id uuid.UUID, withContent bool) (schema.Report, err
 	return report, nil
 }
 
-func convertReport(report schema.Report, withDetails bool) (api.Report, error) {
+func convertReport(report schema.Report) (api.Report, error) {
 	result := api.Report{
 		Id:         report.Id,
 		CreatedAt:  report.CreatedAt,
@@ -197,15 +197,6 @@ func convertReport(report schema.Report, withDetails bool) (api.Report, error) {
 			slog.Error("error parsing report content", "error", err)
 			return api.Report{}, ErrReportAccessFailed
 		}
-		if !withDetails {
-			content.TypeToFlags.AuthorAssociationsEOCDetails = nil
-			content.TypeToFlags.CoauthorAffiliationEOCDetails = nil
-			content.TypeToFlags.AuthorFacultyAtEOCDetails = nil
-			content.TypeToFlags.AcknowledgementEOCDetails = nil
-			content.TypeToFlags.AuthorAffiliationEOCDetails = nil
-			content.TypeToFlags.FunderEOCDetails = nil
-		}
-
 		result.Content = content
 	}
 

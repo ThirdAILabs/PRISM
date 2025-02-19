@@ -12,29 +12,12 @@ type ConnectionField struct {
 }
 
 type TypeToFlags struct {
-	AuthorAssociationsEOC          []*flaggers.AuthorIsAssociatedWithEOCFlag `json:"doj_press_release_eoc"`
-	AuthorAssociationsEOCDetails   []interface{}                             `json:"doj_press_release_eoc_details"`
-	AuthorAssociationsEOCDisclosed []bool                                    `json:"doj_press_release_eoc_disclosed"`
-
-	CoauthorAffiliationEOC          []*flaggers.EOCCoauthorAffiliationsFlag `json:"oa_coauthor_affiliation_eoc"`
-	CoauthorAffiliationEOCDetails   []interface{}                           `json:"oa_coauthor_affiliation_eoc_details"`
-	CoauthorAffiliationEOCDisclosed []bool                                  `json:"oa_coauthor_affiliation_eoc_disclosed"`
-
-	AuthorFacultyAtEOC          []*flaggers.AuthorIsFacultyAtEOCFlag `json:"uni_faculty_eoc"`
-	AuthorFacultyAtEOCDetails   []interface{}                        `json:"uni_faculty_eoc_details"`
-	AuthorFacultyAtEOCDisclosed []bool                               `json:"uni_faculty_eoc_disclosed"`
-
-	AcknowledgementEOC          []*flaggers.EOCAcknowledgemntsFlag `json:"oa_acknowledgement_eoc"`
-	AcknowledgementEOCDetails   []interface{}                      `json:"oa_acknowledgement_eoc_details"`
-	AcknowledgementEOCDisclosed []bool                             `json:"oa_acknowledgement_eoc_disclosed"`
-
-	AuthorAffiliationEOC          []*flaggers.EOCAuthorAffiliationsFlag `json:"oa_author_affiliation_eoc"`
-	AuthorAffiliationEOCDetails   []interface{}                         `json:"oa_author_affiliation_eoc_details"`
-	AuthorAffiliationEOCDisclosed []bool                                `json:"oa_author_affiliation_eoc_disclosed"`
-
-	FunderEOC          []*flaggers.EOCFundersFlag `json:"oa_funder_eoc"`
-	FunderEOCDetails   []interface{}              `json:"oa_funder_eoc_details"`
-	FunderEOCDisclosed []bool                     `json:"oa_funder_eoc_disclosed"`
+	AuthorAssociationsEOC  []*flaggers.AuthorIsAssociatedWithEOCFlag `json:"doj_press_release_eoc"`
+	CoauthorAffiliationEOC []*flaggers.EOCCoauthorAffiliationsFlag   `json:"oa_coauthor_affiliation_eoc"`
+	AuthorFacultyAtEOC     []*flaggers.AuthorIsFacultyAtEOCFlag      `json:"uni_faculty_eoc"`
+	AcknowledgementEOC     []*flaggers.EOCAcknowledgemntsFlag        `json:"oa_acknowledgement_eoc"`
+	AuthorAffiliationEOC   []*flaggers.EOCAuthorAffiliationsFlag     `json:"oa_author_affiliation_eoc"`
+	FunderEOC              []*flaggers.EOCFundersFlag                `json:"oa_funder_eoc"`
 }
 
 // TODO(Anyone): This format is should be simplified and cleaned, doing it like this now for compatability
@@ -74,17 +57,11 @@ func hasDeniedEntity(flag *flaggers.EOCAcknowledgemntsFlag) bool {
 
 func FormatReport(authorname string, flags []flaggers.Flag) ReportContent {
 	papersWithForeignTalentPrograms := make([]flaggers.Connection, 0)
-
 	papersWithDeniedEntities := make([]flaggers.Connection, 0)
-
 	papersWithHighRiskFunding := make([]flaggers.Connection, 0)
-
 	papersWithHighRiskInstitutions := make([]flaggers.Connection, 0)
-
 	highRiskApptsAtInstitutions := make([]flaggers.Connection, 0)
-
 	potentialHighRiskApptsAtInstitutions := make([]flaggers.Connection, 0)
-
 	miscPotentialHighRiskAssoc := make([]flaggers.Connection, 0)
 
 	typeToFlags := TypeToFlags{}
@@ -93,22 +70,18 @@ func FormatReport(authorname string, flags []flaggers.Flag) ReportContent {
 		switch flag := flag.(type) {
 		case *flaggers.AuthorIsAssociatedWithEOCFlag:
 			miscPotentialHighRiskAssoc = append(miscPotentialHighRiskAssoc, flag.Connection())
-			typeToFlags.AuthorAssociationsEOCDetails = append(typeToFlags.AuthorAssociationsEOCDetails, flag.Details())
 			typeToFlags.AuthorAssociationsEOC = append(typeToFlags.AuthorAssociationsEOC, flag)
 
 		case *flaggers.EOCCoauthorAffiliationsFlag:
 			papersWithHighRiskInstitutions = append(papersWithHighRiskInstitutions, flag.Connection())
-			typeToFlags.CoauthorAffiliationEOCDetails = append(typeToFlags.CoauthorAffiliationEOCDetails, flag.Details())
 			typeToFlags.CoauthorAffiliationEOC = append(typeToFlags.CoauthorAffiliationEOC, flag)
 
 		case *flaggers.AuthorIsFacultyAtEOCFlag:
 			potentialHighRiskApptsAtInstitutions = append(potentialHighRiskApptsAtInstitutions, flag.Connection())
-			typeToFlags.AuthorFacultyAtEOCDetails = append(typeToFlags.AuthorFacultyAtEOCDetails, flag.Details())
 			typeToFlags.AuthorFacultyAtEOC = append(typeToFlags.AuthorFacultyAtEOC, flag)
 
 		case *flaggers.EOCAcknowledgemntsFlag:
 			typeToFlags.AcknowledgementEOC = append(typeToFlags.AcknowledgementEOC, flag)
-			typeToFlags.AcknowledgementEOCDetails = append(typeToFlags.AcknowledgementEOCDetails, flag.Details())
 			if hasForeignTalentProgram(flag) {
 				papersWithForeignTalentPrograms = append(papersWithForeignTalentPrograms, flag.Connection())
 			} else if hasDeniedEntity(flag) {
@@ -120,11 +93,9 @@ func FormatReport(authorname string, flags []flaggers.Flag) ReportContent {
 		case *flaggers.EOCAuthorAffiliationsFlag:
 			typeToFlags.AuthorAffiliationEOC = append(typeToFlags.AuthorAffiliationEOC, flag)
 			highRiskApptsAtInstitutions = append(highRiskApptsAtInstitutions, flag.Connection())
-			typeToFlags.AuthorAffiliationEOCDetails = append(typeToFlags.AuthorAffiliationEOCDetails, flag.Details())
 
 		case *flaggers.EOCFundersFlag:
 			papersWithHighRiskFunding = append(papersWithHighRiskFunding, flag.Connection())
-			typeToFlags.FunderEOCDetails = append(typeToFlags.FunderEOCDetails, flag.Details())
 			typeToFlags.FunderEOC = append(typeToFlags.FunderEOC, flag)
 		}
 	}

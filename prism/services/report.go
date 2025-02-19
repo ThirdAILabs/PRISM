@@ -11,8 +11,10 @@ import (
 	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/reports"
+	"prism/prism/reports/flaggers"
 	"prism/prism/services/auth"
 	"prism/prism/services/licensing"
+	"reflect"
 	"strings"
 	"time"
 
@@ -124,7 +126,7 @@ func (s *ReportService) GetReport(r *http.Request) (any, error) {
 		return nil, CodedError(fmt.Errorf("invalid uuid '%v' provided: %w", param, err), http.StatusBadRequest)
 	}
 
-	report, err := s.manager.GetReport(userId, id, false)
+	report, err := s.manager.GetReport(userId, id)
 	if err != nil {
 		switch {
 		case errors.Is(err, reports.ErrReportNotFound):
@@ -168,6 +170,39 @@ func (s *ReportService) UseLicense(r *http.Request) (any, error) {
 	}
 
 	return nil, nil
+}
+
+func updateFlagDisclosure(f flaggers.Flag, allFileTexts []string) {
+	tokens := extractTokens(f.Details())
+	disclosed := false
+	for _, token := range tokens {
+		tokenLower := strings.ToLower(token)
+		for _, txt := range allFileTexts {
+			fmt.Println("txt", txt)
+			if strings.Contains(strings.ToLower(txt), tokenLower) {
+				disclosed = true
+				break
+			}
+		}
+		if disclosed {
+			break
+		}
+	}
+
+	switch flagTyped := f.(type) {
+	case *flaggers.AuthorIsAssociatedWithEOCFlag:
+		flagTyped.Disclosed = disclosed
+	case *flaggers.EOCCoauthorAffiliationsFlag:
+		flagTyped.Disclosed = disclosed
+	case *flaggers.AuthorIsFacultyAtEOCFlag:
+		flagTyped.Disclosed = disclosed
+	case *flaggers.EOCAcknowledgemntsFlag:
+		flagTyped.Disclosed = disclosed
+	case *flaggers.EOCAuthorAffiliationsFlag:
+		flagTyped.Disclosed = disclosed
+	case *flaggers.EOCFundersFlag:
+		flagTyped.Disclosed = disclosed
+	}
 }
 
 func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
@@ -216,7 +251,7 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 		allFileTexts = append(allFileTexts, text)
 	}
 
-	report, err := s.manager.GetReport(userId, reportId, true)
+	report, err := s.manager.GetReport(userId, reportId)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
@@ -226,37 +261,24 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 		return nil, CodedError(fmt.Errorf("unexpected content type"), http.StatusInternalServerError)
 	}
 
-	updateDisclosed := func(details []interface{}, disclosed []bool) []bool {
-		if disclosed == nil || len(disclosed) != len(details) {
-			disclosed = make([]bool, len(details))
-		}
-
-		for i, detail := range details {
-			disclosedValue := false
-			tokens := extractTokens(detail)
-			for _, token := range tokens {
-				tokenLower := strings.ToLower(token)
-				for _, txt := range allFileTexts {
-					if strings.Contains(strings.ToLower(txt), tokenLower) {
-						disclosedValue = true
-						break
-					}
-				}
-				if disclosedValue {
-					break
-				}
-			}
-			disclosed[i] = disclosedValue
-		}
-		return disclosed
+	for _, flag := range rc.TypeToFlags.AuthorAssociationsEOC {
+		updateFlagDisclosure(flag, allFileTexts)
 	}
-
-	rc.TypeToFlags.AuthorAssociationsEOCDisclosed = updateDisclosed(rc.TypeToFlags.AuthorAssociationsEOCDetails, rc.TypeToFlags.AuthorAssociationsEOCDisclosed)
-	rc.TypeToFlags.CoauthorAffiliationEOCDisclosed = updateDisclosed(rc.TypeToFlags.CoauthorAffiliationEOCDetails, rc.TypeToFlags.CoauthorAffiliationEOCDisclosed)
-	rc.TypeToFlags.AuthorFacultyAtEOCDisclosed = updateDisclosed(rc.TypeToFlags.AuthorFacultyAtEOCDetails, rc.TypeToFlags.AuthorFacultyAtEOCDisclosed)
-	rc.TypeToFlags.AcknowledgementEOCDisclosed = updateDisclosed(rc.TypeToFlags.AcknowledgementEOCDetails, rc.TypeToFlags.AcknowledgementEOCDisclosed)
-	rc.TypeToFlags.AuthorAffiliationEOCDisclosed = updateDisclosed(rc.TypeToFlags.AuthorAffiliationEOCDetails, rc.TypeToFlags.AuthorAffiliationEOCDisclosed)
-	rc.TypeToFlags.FunderEOCDisclosed = updateDisclosed(rc.TypeToFlags.FunderEOCDetails, rc.TypeToFlags.FunderEOCDisclosed)
+	for _, flag := range rc.TypeToFlags.CoauthorAffiliationEOC {
+		updateFlagDisclosure(flag, allFileTexts)
+	}
+	for _, flag := range rc.TypeToFlags.AuthorFacultyAtEOC {
+		updateFlagDisclosure(flag, allFileTexts)
+	}
+	for _, flag := range rc.TypeToFlags.AcknowledgementEOC {
+		updateFlagDisclosure(flag, allFileTexts)
+	}
+	for _, flag := range rc.TypeToFlags.AuthorAffiliationEOC {
+		updateFlagDisclosure(flag, allFileTexts)
+	}
+	for _, flag := range rc.TypeToFlags.FunderEOC {
+		updateFlagDisclosure(flag, allFileTexts)
+	}
 
 	updatedContentBytes, err := json.Marshal(rc)
 	if err != nil {
@@ -268,13 +290,6 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 		slog.Error("error updating report with disclosure information", "error", err)
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
-
-	rc.TypeToFlags.AuthorAssociationsEOCDetails = nil
-	rc.TypeToFlags.CoauthorAffiliationEOCDetails = nil
-	rc.TypeToFlags.AuthorFacultyAtEOCDetails = nil
-	rc.TypeToFlags.AcknowledgementEOCDetails = nil
-	rc.TypeToFlags.AuthorAffiliationEOCDetails = nil
-	rc.TypeToFlags.FunderEOCDetails = nil
 
 	report.Content = rc
 
@@ -342,6 +357,10 @@ func extractTokens(detail interface{}) []string {
 	switch v := detail.(type) {
 	case string:
 		tokens = append(tokens, strings.TrimSpace(v))
+	case []string:
+		for _, s := range v {
+			tokens = append(tokens, strings.TrimSpace(s))
+		}
 	case []interface{}:
 		for _, item := range v {
 			tokens = append(tokens, extractTokens(item)...)
@@ -351,8 +370,24 @@ func extractTokens(detail interface{}) []string {
 			tokens = append(tokens, extractTokens(val)...)
 		}
 	default:
-		if b, err := json.Marshal(v); err == nil {
-			tokens = append(tokens, strings.Fields(string(b))...)
+		rv := reflect.ValueOf(detail)
+		switch rv.Kind() {
+		case reflect.Struct:
+			rt := rv.Type()
+			for i := 0; i < rv.NumField(); i++ {
+				if rt.Field(i).PkgPath != "" {
+					continue
+				}
+				fieldVal := rv.Field(i).Interface()
+				tokens = append(tokens, extractTokens(fieldVal)...)
+			}
+		case reflect.Slice:
+			for i := 0; i < rv.Len(); i++ {
+				tokens = append(tokens, extractTokens(rv.Index(i).Interface())...)
+			}
+		default:
+			token := fmt.Sprintf("%v", v)
+			tokens = append(tokens, token)
 		}
 	}
 	return filterTokens(tokens)
