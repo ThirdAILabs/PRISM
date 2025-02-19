@@ -51,7 +51,11 @@ func TestReportManager(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := manager.UpdateReport(report1, "complete", []byte(`{"key":"value"}`)); err != nil {
+	updateJSON := []byte(`{
+		"HighRiskFunders": [{}]
+	}`)
+
+	if err := manager.UpdateReport(report1, "complete", updateJSON); err != nil {
 		t.Fatal(err)
 	}
 
@@ -111,8 +115,8 @@ func TestReportManager(t *testing.T) {
 			t.Fatal("incorrect report")
 		}
 
-		if value := report.Content.(map[string]any)["key"]; value != "value" {
-			t.Fatal("incorrect report")
+		if len(report.Content.HighRiskFunders) != 0 {
+			t.Fatalf("expected 0 connections, got %d", len(report.Content.HighRiskFunders))
 		}
 	}
 
