@@ -2,15 +2,13 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-    AUTHOR_AFFIL_EOC,
-    FUNDER_EOC,
-    PUBLISHER_EOC,
-    ACK_EOC,
-    COAUTHOR_AFFIL_EOC,
-    COAUTHOR_EOC,
-    MULTI_AFFIL,
-    UNI_FACULTY_EOC,
-    DOJ_PRESS_RELEASES_EOC
+    TALENT_CONTRACTS,
+    ASSOCIATIONS_WITH_DENIED_ENTITIES,
+    HIGH_RISK_FUNDERS,
+    AUTHOR_AFFILIATIONS,
+    POTENTIAL_AUTHOR_AFFILIATIONS,
+    MISC_HIGH_RISK_AFFILIATIONS,
+    COAUTHOR_AFFILIATIONS
 } from "../../../constants/constants.js";
 import { useConclusions } from '../../../hooks/useConclusions.js';
 import ConcernVisualizer from '../../ConcernVisualization.js';
@@ -28,9 +26,40 @@ import { reportService } from '../../../api/reports.js';
 import useDisclosureUpload from '../../../hooks/useDisclosureUpload.js'
 
 
-const FLAG_ID_ORDER = [
-    AUTHOR_AFFIL_EOC, FUNDER_EOC, PUBLISHER_EOC, ACK_EOC, COAUTHOR_AFFIL_EOC, COAUTHOR_EOC, MULTI_AFFIL, UNI_FACULTY_EOC, DOJ_PRESS_RELEASES_EOC
+const FLAG_ORDER = [
+    TALENT_CONTRACTS, ASSOCIATIONS_WITH_DENIED_ENTITIES, HIGH_RISK_FUNDERS, AUTHOR_AFFILIATIONS, POTENTIAL_AUTHOR_AFFILIATIONS, MISC_HIGH_RISK_AFFILIATIONS, COAUTHOR_AFFILIATIONS
 ];
+
+const TitlesAndDescriptions = {
+    [TALENT_CONTRACTS]: {
+        "title": "Papers with foreign talent programs",
+        "desc": "Authors in these papers are recruited by talent programs that have close ties to high-risk foreign governments",
+    },
+    [ASSOCIATIONS_WITH_DENIED_ENTITIES]: {
+        "title": "Papers with denied entities",
+        "desc": "Some of the parties involved in these works are in the denied entity lists of U.S. government agencies",
+    },
+    [HIGH_RISK_FUNDERS]: {
+        "title": "Papers with high-risk funding sources",
+        "desc": "These papers is funded by funding sources that have close ties to high-risk foreign governments",
+    },
+    [AUTHOR_AFFILIATIONS]: {
+        "title": "High-risk appointments at foreign institutions",
+        "desc": "Papers that list the current author as being affiliated with a high-risk foreign institution or web pages that showcase official appointments at high-risk foreign institutions",
+    },
+    [POTENTIAL_AUTHOR_AFFILIATIONS]: {
+        "title": "Potential high-risk appointments at foreign institutions",
+        "desc": "The author may be affiliated with high-risk foreign institutions",
+    },
+    [MISC_HIGH_RISK_AFFILIATIONS]: {
+        "title": "Miscellaneous potential high-risk associations",
+        "desc": "The author or an associate may be mentioned in a press release",
+    },
+    [COAUTHOR_AFFILIATIONS]: {
+        "title": "Papers with coauthors from high-risk foreign institutions",
+        "desc": "Coauthors in these papers are affiliated with high-risk foreign institutions"
+    }
+}
 
 const get_paper_url = (flag) => {
     return (
@@ -43,26 +72,27 @@ const get_paper_url = (flag) => {
     );
 }
 
+
 const ItemDetails = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const reportId = location.state?.response.Id;
+    // const reportId = location.state?.response.Id;
+    const reportId = "4355ed32-871b-4d5a-a491-5913ff8e74c2";
 
+    const [reportContent, setReportContent] = useState({})
     const [authorName, setAuthorName] = useState("")
     const [institutions, setInstitutions] = useState([])
     const [graphData, setGraphData] = useState(null)
 
     useEffect(() => {
         let isMounted = true;
-
         const poll = async () => {
             const report = await reportService.getReport(reportId)
-            console.log("REPORT:", report)
             if (report.Status === "complete" && isMounted) {
-                setIdToFlags(report.Content.type_to_flag)
-                setAuthorName(report.AuthorName)
-                setGraphData(report.Content)
-                setLoading(false)
+                setAuthorName(report.AuthorName);
+                setReportContent(report.Content);
+                setGraphData(report.Content);
+                setLoading(false);
             } else if (isMounted) {
                 setTimeout(poll, 500);
             }
@@ -85,9 +115,8 @@ const ItemDetails = () => {
         setLoading(true);
         try {
             if (uploadResult.Status === "complete" && uploadResult.Content) {
-                setIdToFlags(uploadResult.Content.type_to_flag || {});
-                setAuthorName(uploadResult.AuthorName || '');
-                setGraphData(uploadResult.Content);
+                setReportContent(uploadResult.Content);
+                setAuthorName(uploadResult.AuthorName);
             }
         } catch (err) {
             console.error('Error updating reports:', err);
@@ -96,12 +125,8 @@ const ItemDetails = () => {
         }
     }, [uploadResult]);
 
-    const [idToFlags, setIdToFlags] = useState({});
-
 
     const [loading, setLoading] = useState(true);
-    const [worksCount, setWorksCount] = useState(0);
-    const { formalRelations, loading: conclusionLoading } = useConclusions(authorName, idToFlags, /* threshold= */ 3);
 
     const [startYear, setStartYear] = useState('');
     const [endYear, setEndYear] = useState('');
@@ -118,90 +143,7 @@ const ItemDetails = () => {
     const [instDropdownOpen, setInstDropdownOpen] = useState(false);
     const toggleInstDropdown = () => setInstDropdownOpen(!instDropdownOpen);
 
-    const { data, addAffiliations, setWeight, AffiliationChecklist } = useVisualizationData(authorName, idToFlags, formalRelations, worksCount, startYear, endYear);
     const [review, setReview] = useState();
-
-    const [titles, setTitles] = useState();
-    // console.log("Data coming from backend: ", data);
-    // const streamFlags = useMemo(() => (result) => {
-    //   const protocol = window.location.protocol.replace("http", "ws");  // Works whether it's http or https / ws or wss.
-    //   const host = window.location.host.replace(":" + window.location.port, ":" + process.env.REACT_APP_BACKEND_PORT);
-    //   const ws = new WebSocket(protocol + "//" + host + "/flags");
-    //   console.log("ws", ws);
-
-    //   websocket.current = ws;
-
-    //   ws.onopen = () => {
-    //     ws.send(JSON.stringify({ id: result.id, source: result.source, display_name: authorName, start_year: '', end_year: '' }));
-    //   };
-
-    //   ws.onmessage = (event) => {
-    //     const response = JSON.parse(event.data);
-    //     console.log('WebSocket response:', response);
-
-    //     if (response.status === 'success' && response.flags) {
-    //       console.log("About to set flags");
-    //       setStreamFlags(response.flags);
-    //       console.log("Set flags");
-    //     }
-
-
-    //     if (response.status === 'success' && response.update) {
-    //       updateMessage();
-    //       if (response.end_of_stream) {
-    //         setMessage(248_000_000 + Math.floor(Math.random() * 2_000_000))
-    //         setLoading(false);
-    //       } else {
-    //         if (response.update.message) {
-    //           if ((response.update.message || '').includes("Loaded")) {
-    //             console.log(response.update.message);
-    //           }
-    //           const match = response.update.message.match(/^Loaded (\d+) works$/);
-    //           if (match) {
-    //             setWorksCount(prev => Math.max(prev, parseInt(match[1])));
-    //           }
-    //         }
-    //         if (response.update.flags) {
-    //           setIdToFlags((prev) => {
-    //             const newFlags = Object.fromEntries(Object.keys(prev).map(key => {
-    //               return [key, [...prev[key]]];
-    //             }));
-    //             for (const flag of response.update.flags || []) {
-    //               if (!newFlags[flag.flagger_id]) {
-    //                 newFlags[flag.flagger_id] = [];
-    //               }
-    //               newFlags[flag.flagger_id].push(flag);
-    //               addAffiliations(flag.affiliations);
-    //             }
-    //             return newFlags;
-    //           });
-    //         }
-    //       }
-    //     }
-
-    //   };
-
-    //   return () => {
-    //     if (websocket.current) {
-    //       websocket.current.close();
-    //     }
-    //   };
-    // }, [])
-
-    // useEffect(() => {
-    //   setLoading(true);
-    //   if (result.source !== "scopus") {
-    //     streamFlags(result)
-    //     return
-    //   }
-    //   apiService.scopusPaperTitles(result.id, (batch) => setTitles(prev => [...(prev || []), ...batch])).then(titles => {
-    //     const newResult = { ...result, id: JSON.stringify(titles) };
-    //     streamFlags(newResult);
-    //   });
-
-
-    // }, []);
-
 
     function withYear(header, flag) {
         return <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -216,7 +158,7 @@ const ItemDetails = () => {
             <li key={index} className='p-3 px-5 w-75 detail-item'>
                 {withYear(<h5 className='fw-bold mt-3'>Author has multiple affiliations</h5>, flag)}
                 <p>
-                    {flag.AuthorName} is affiliated with multiple institutions in {" "}
+                    {authorName} is affiliated with multiple institutions in {" "}
                     {get_paper_url(flag)}
                     . Detected affiliations:
                     <ul className='bulleted-list'>
@@ -226,7 +168,7 @@ const ItemDetails = () => {
                         })}
                     </ul>
                 </p>
-                {flag.disclosed ? (
+                {flag.Disclosed ? (
                     <button type="button" className="btn btn-success">Disclosed</button>
                 ) : (
                     <button type="button" className="btn btn-danger">Undisclosed</button>
@@ -242,6 +184,7 @@ const ItemDetails = () => {
                 <p>
                     {get_paper_url(flag)}
                     {" "} is funded by the following entities of concern:
+                    {flag.FromAcknowledgements && <p>Acknowledgements Text:</p>}
                     <ul className='bulleted-list'>
                         {flag.Funders.map((item, index2) => {
                             const key = `${index} ${index2}`;
@@ -249,7 +192,7 @@ const ItemDetails = () => {
                         })}
                     </ul>
                 </p>
-                {flag.disclosed ? (
+                {flag.Disclosed ? (
                     <button type="button" className="btn btn-success">Disclosed</button>
                 ) : (
                     <button type="button" className="btn btn-danger">Undisclosed</button>
@@ -272,7 +215,7 @@ const ItemDetails = () => {
                         })}
                     </ul>
                 </p>
-                {flag.disclosed ? (
+                {flag.Disclosed ? (
                     <button type="button" className="btn btn-success">Disclosed</button>
                 ) : (
                     <button type="button" className="btn btn-danger">Undisclosed</button>
@@ -296,7 +239,7 @@ const ItemDetails = () => {
                         })}
                     </ul>
                 </p>
-                {flag.disclosed ? (
+                {flag.Disclosed ? (
                     <button type="button" className="btn btn-success">Disclosed</button>
                 ) : (
                     <button type="button" className="btn btn-danger">Undisclosed</button>
@@ -306,7 +249,6 @@ const ItemDetails = () => {
     }
 
     function coauthorAffiliationFlag(flag, index) {
-        console.log(`FLAG: ${flag}`)
         return (
             <li key={index} className='p-3 px-5 w-75 detail-item'>
                 {withYear(<h5 className='fw-bold mt-3'>Co-authors are affiliated with entities of concern</h5>, flag)}
@@ -315,21 +257,21 @@ const ItemDetails = () => {
                     {get_paper_url(flag)}
                     {" "} are affiliated with entities of concern:
                     <ul className='bulleted-list'>
-                        {flag.Institutions.map((item, index2) => {
+                        {flag.Affiliations.map((item, index2) => {
                             const key = `${index} ${index2}`;
                             return <li key={key}><a>{item}</a></li>
                         })}
                     </ul>
                     Affiliated authors:
                     <ul className='bulleted-list'>
-                        {flag.Authors.map((item, index2) => {
+                        {flag.Coauthors.map((item, index2) => {
                             const key = `${index} ${index2}`;
                             return <li key={key}><a>{item}</a></li>
                         })}
                     </ul>
                 </p>
-                {flag.disclosed}
-                {flag.disclosed ? (
+                {flag.Disclosed}
+                {flag.Disclosed ? (
                     <button type="button" className="btn btn-success">Disclosed</button>
                 ) : (
                     <button type="button" className="btn btn-danger">Undisclosed</button>
@@ -342,19 +284,19 @@ const ItemDetails = () => {
         return (
             <li key={index} className='p-3 px-5 w-75 detail-item'>
                 {withYear(<h5 className='fw-bold mt-3'>Author is affiliated with entities of concern</h5>, flag)}
-                <p>
+                <div>
                     {authorName} is affiliated with an entity of concern in {" "}
                     {get_paper_url(flag)}
                     . Detected affiliations:
                     <ul className='bulleted-list'>
-                        {flag.Institutions.map((item, index2) => {
+                        {flag.Affiliations.map((item, index2) => {
                             const key = `${index} ${index2}`;
                             return <li key={key}><a>{item}</a></li>
                         })}
                     </ul>
-                </p>
-                {flag.disclosed}
-                {flag.disclosed ? (
+                </div>
+                {flag.Disclosed}
+                {flag.Disclosed ? (
                     <button type="button" className="btn btn-success">Disclosed</button>
                 ) : (
                     <button type="button" className="btn btn-danger">Undisclosed</button>
@@ -384,11 +326,11 @@ const ItemDetails = () => {
                             const key = `${index} ${index2}`;
                             return <li key={key}>
                                 <a>
-                                    "{item["entity"]}"
+                                    "{item.Entity}"
                                     {" was detected in "}
-                                    <text style={{ "fontWeight": "bold", textDecoration: "underline" }}>{item["lists"].join(", ")}</text>
+                                    <text style={{ "fontWeight": "bold", textDecoration: "underline" }}>{item.Sources.join(", ")}</text>
                                     {" as "}
-                                    {item["aliases"].map(element => `"${element}"`).join(", ")}
+                                    {item.Aliases.map(element => `"${element}"`).join(", ")}
                                 </a>
                             </li>
                         })}
@@ -402,7 +344,7 @@ const ItemDetails = () => {
                     <p>{ }</p>
                 </p>
                 { }
-                {flag.disclosed ? (
+                {flag.Disclosed ? (
                     <button type="button" className="btn btn-success">Disclosed</button>
                 ) : (
                     <button type="button" className="btn btn-danger">Undisclosed</button>
@@ -437,11 +379,11 @@ const ItemDetails = () => {
             <li key={index} className='p-3 px-5 w-75 detail-item'>
                 <h5 className='fw-bold mt-3'>The author may potentially be linked with an Entity of Concern</h5>
                 <p>
-                    {flag.FlagMessage}
+                    {flag.Message}
                     <br />
                     Relevant Webpage: <a href={flag.UniversityUrl} target="_blank" rel="noopener noreferrer">{flag.UniversityUrl}</a>
                 </p>
-                {flag.disclosed ? (
+                {flag.Disclosed ? (
                     <button type="button" className="btn btn-success">Disclosed</button>
                 ) : (
                     <button type="button" className="btn btn-danger">Undisclosed</button>
@@ -451,19 +393,20 @@ const ItemDetails = () => {
     }
 
     function PRFlag(flag, index) {
+        const connections = flag.Connections || [];
         return (
             <li key={index} className='p-3 px-5 w-75 detail-item'>
                 {true && (
                     <>
-                        {flag.ConnectionLevel === 'primary' ? (
+                        {connections.length == 0 ? (
                             <>
                                 <h5 className='fw-bold mt-3'>The author or an associate may be mentioned in a Press Release</h5>
                             </>
-                        ) : flag.ConnectionLevel === 'secondary' ? (
+                        ) : connections.length == 1 ? (
                             <>
                                 <h5 className='fw-bold mt-3'>The author's associate may be mentioned in a Press Release</h5>
                             </>
-                        ) : flag.ConnectionLevel === 'tertiary' ? (
+                        ) : connections.length === 2 ? (
                             <>
                                 <h5 className='fw-bold mt-3'>The author may potentially be connected to an entity/individual mentioned in a Press Release</h5>
                             </>
@@ -471,57 +414,53 @@ const ItemDetails = () => {
                     </>
                 )}
                 <p>
-                    {flag.FlagMessage}
-                    {true && (
-                        <>
-                            <br />
-                            {flag.ConnectionLevel === 'primary' ? (
-                                <>
-                                    Press Release: <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">{flag.DocTitle}</a>
-                                    <br />
-                                </>
-                            ) : flag.ConnectionLevel === 'secondary' ? (
-                                <>
-                                    {flag.FrequentCoauthor ? (
-                                        <>
-                                            Frequent Coauthor: {flag.FrequentCoauthor}
-                                        </>
-                                    ) :
-                                        <>
-                                            Relevant Document: <a href={flag.Nodes[0].DocUrl} target="_blank" rel="noopener noreferrer">{flag.Nodes[0].DocTitle}</a>
-                                        </>
-                                    }
-                                    <br />
-                                    Press Release: <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">{flag.DocTitle}</a>
-                                    <br />
-                                </>
-                            ) : flag.ConnectionLevel === 'tertiary' ? (
-                                <>
-                                    Relevant Documents: <a href={flag.Nodes[0].DocUrl} target="_blank" rel="noopener noreferrer">{flag.Nodes[0].DocTitle}</a>, <a href={flag.Nodes[1].DocUrl} target="_blank" rel="noopener noreferrer">{flag.Nodes[1].DocTitle}</a>
-                                    <br />
-                                    Press Release: <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">{flag.DocTitle}</a>
-                                    <br />
-                                </>
-                            ) : null}
-                        </>
-                    )}
+                    {flag.Message}
+                    <>
+                        <br />
+                        {connections.length === 0 ? (
+                            <>
+                                Press Release: <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">{flag.DocTitle}</a>
+                                <br />
+                            </>
+                        ) : connections.length === 1 ? (
+                            <>
+                                {flag.FrequentCoauthor ? (
+                                    <>
+                                        Frequent Coauthor: {flag.FrequentCoauthor}
+                                    </>
+                                ) :
+                                    <>
+                                        Relevant Document: <a href={flag.Connections[0].DocUrl} target="_blank" rel="noopener noreferrer">{flag.Connections[0].DocTitle}</a>
+                                    </>
+                                }
+                                <br />
+                                Press Release: <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">{flag.DocTitle}</a>
+                                <br />
+                            </>
+                        ) : connections.legnth == 2 ? (
+                            <>
+                                Relevant Documents: <a href={flag.Connections[0].DocUrl} target="_blank" rel="noopener noreferrer">{flag.Connections[0].DocTitle}</a>, <a href={flag.Connections[1].DocUrl} target="_blank" rel="noopener noreferrer">{flag.Connections[1].DocTitle}</a>
+                                <br />
+                                Press Release: <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">{flag.DocTitle}</a>
+                                <br />
+                            </>
+                        ) : null}
+                    </>
                 </p>
                 <p>
-                    {true && (
-                        <>
-                            <strong>Entity/individual mentioned</strong>
-                            <ul className="bulleted-list">
-                                {[flag.EntityMentioned].map((item, index2) => {
-                                    const key = `${index} ${index2}`;
-                                    return (
-                                        <li key={key}>
-                                            <a>{item}</a>
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                        </>
-                    )}
+                    <>
+                        <strong>Entity/individual mentioned</strong>
+                        <ul className="bulleted-list">
+                            {[flag.EntityMentioned].map((item, index2) => {
+                                const key = `${index} ${index2}`;
+                                return (
+                                    <li key={key}>
+                                        <a>{item}</a>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </>
                     <strong>Potential affiliate(s)</strong>
                     <ul className='bulleted-list'>
                         {flag.DocEntities.map((item, index2) => {
@@ -530,7 +469,7 @@ const ItemDetails = () => {
                         })}
                     </ul>
                 </p>
-                {flag.disclosed ? (
+                {flag.Disclosed ? (
                     <button type="button" className="btn btn-success">Disclosed</button>
                 ) : (
                     <button type="button" className="btn btn-danger">Undisclosed</button>
@@ -547,41 +486,6 @@ const ItemDetails = () => {
     //     </li>
     //   )
     // }
-
-    function makeFlag(flag, index) {
-        switch (flag.FlagType) {
-            case MULTI_AFFIL:
-                return multipleAffiliationsFlag(flag, index);
-            case FUNDER_EOC:
-                return funderFlag(flag, index);
-            case PUBLISHER_EOC:
-                return publisherFlag(flag, index);
-            case COAUTHOR_EOC:
-                return coauthorFlag(flag, index);
-            case COAUTHOR_AFFIL_EOC:
-                return coauthorAffiliationFlag(flag, index);
-            case AUTHOR_AFFIL_EOC:
-                return authorAffiliationFlag(flag, index);
-            case ACK_EOC:
-                return acknowledgementFlag(flag, index);
-            case UNI_FACULTY_EOC:
-                return universityFacultyFlag(flag, index);
-            case DOJ_PRESS_RELEASES_EOC:
-                return PRFlag(flag, index);
-            // case "formal_relations":
-            //   return formalRelationFlag(flag, index);
-            default:
-                return (
-                    <li key={index} className='p-3 px-5 w-75 detail-item'>
-                        <h5 className='fw-bold mt-3'>{flag.FlagTitle}</h5>
-                        <p>{flag.FlagMessage}</p>
-                        {
-                            flag.Work && <p><a href={flag.Work.WorkUrl} target="_blank" rel="noopener noreferrer">{flag.Work.DisplayName}</a></p>
-                        }
-                    </li>
-                );
-        }
-    }
 
     const [showPopover, setShowPopover] = useState(false);
 
@@ -714,7 +618,7 @@ const ItemDetails = () => {
                             >
                                 Filter by Institution
                             </button>
-                            {instDropdownOpen && <AffiliationChecklist />}
+                            {/* {instDropdownOpen && <AffiliationChecklist />} */}
                         </div>
                     </div>
 
@@ -728,7 +632,7 @@ const ItemDetails = () => {
                     {/* <div className='d-flex w-75 align-items-center my-2 mt-3'> */}
                     <div className='d-flex w-100 px-5 align-items-center my-2 mt-3 justify-content-between'>
                         <div style={{ width: "20px" }}>
-                            {(loading || conclusionLoading) && (
+                            {loading && (
                                 <div className="spinner-border text-primary spinner-border-sm" role="status"></div>
                             )}
                         </div>
@@ -755,87 +659,57 @@ const ItemDetails = () => {
                     </div>
                 </div>
 
-                {
-                    titles && <div className='d-flex w-100 flex-column align-items-center'>
-                        <LoadedPapers titles={titles} />
-                    </div>
-                }
-
                 <div className='d-flex w-100 flex-column align-items-center' style={{ color: "white", marginTop: "50px" }}>
                     <div style={{ fontSize: "large", fontWeight: "bold" }}>
                         Total Score
                     </div>
                     <div style={{ fontSize: "60px", fontWeight: "bold" }}>
                         {
-                            Object.keys(data)
-                                .map(name => data[name].weight ? data[name].weight * data[name].details.length : 0)
+                            Object.keys(reportContent || {})
+                                .map(name => (reportContent[name] || []).length)
                                 .reduce((prev, curr) => prev + curr, 0)
                         }
                     </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', height: '500px', marginTop: '20px' }}>
-                    <ConcernVisualizer
-                        title={data.foreign_talent_programs.display_name}
-                        hoverText={data.foreign_talent_programs.desc}
-                        value={data.foreign_talent_programs.details.length}
-                        weight={data.foreign_talent_programs.weight}
-                        setWeight={(w) => setWeight("foreign_talent_programs", w)}
-                        onReview={() => setReview(["foreign_talent_programs", data.foreign_talent_programs.display_name])}
-                    />
-                    <ConcernVisualizer
-                        title={data.denied_entities.display_name}
-                        hoverText={data.denied_entities.desc}
-                        value={data.denied_entities.details.length}
-                        weight={data.denied_entities.weight}
-                        setWeight={(w) => setWeight("denied_entities", w)}
-                        onReview={() => setReview(["denied_entities", data.denied_entities.display_name])}
-                    />
-                    <ConcernVisualizer
-                        title={data.high_risk_funding_sources.display_name}
-                        hoverText={data.high_risk_funding_sources.desc}
-                        value={data.high_risk_funding_sources.details.length}
-                        weight={data.high_risk_funding_sources.weight}
-                        setWeight={(w) => setWeight("high_risk_funding_sources", w)}
-                        onReview={() => setReview(["high_risk_funding_sources", data.high_risk_funding_sources.display_name])}
-                    />
-                    <ConcernVisualizer
-                        title={data.high_risk_foreign_institutions.display_name}
-                        hoverText={data.high_risk_foreign_institutions.desc}
-                        value={data.high_risk_foreign_institutions.details.length}
-                        weight={data.high_risk_foreign_institutions.weight}
-                        setWeight={(w) => setWeight("high_risk_foreign_institutions", w)}
-                        onReview={() => setReview(["high_risk_foreign_institutions", data.high_risk_foreign_institutions.display_name])}
-                    />
-                    <ConcernVisualizer
-                        title={data.high_risk_appointments.display_name}
-                        hoverText={data.high_risk_appointments.desc}
-                        value={data.high_risk_appointments.details.length}
-                        weight={data.high_risk_appointments.weight}
-                        setWeight={(w) => setWeight("high_risk_appointments", w)}
-                        onReview={() => setReview(["high_risk_appointments", data.high_risk_appointments.display_name])}
-                    />
-                    <ConcernVisualizer
-                        title={data.university_faculty_appointments.display_name}
-                        hoverText={data.university_faculty_appointments.desc}
-                        value={data.university_faculty_appointments.details.length}
-                        weight={data.university_faculty_appointments.weight}
-                        setWeight={(w) => setWeight("university_faculty_appointments", w)}
-                        onReview={() => setReview(["university_faculty_appointments", data.university_faculty_appointments.display_name])}
-                    />
-                    <ConcernVisualizer
-                        title={data.doj_press_releases.display_name}
-                        hoverText={data.doj_press_releases.desc}
-                        value={data.doj_press_releases.details.length}
-                        weight={data.doj_press_releases.weight}
-                        setWeight={(w) => setWeight("doj_press_releases", w)}
-                        onReview={() => setReview(["doj_press_releases", data.doj_press_releases.display_name])}
-                    />
+                    {
+                        FLAG_ORDER.map((flag, index) => {
+                            return <ConcernVisualizer
+                                title={TitlesAndDescriptions[flag].title}
+                                hoverText={TitlesAndDescriptions[flag].desc}
+                                value={reportContent[flag] ? reportContent[flag].length : 0}
+                                weight={1}
+                                onReview={() => setReview(flag)}
+                                key={index}
+                            />
+                        })
+                    }
                 </div>
                 {/* Comment the following to get rid of the collapsible components */}
                 {/* <CustomCollapsible /> */}
                 {review && <ul className='d-flex flex-column align-items-center p-0' style={{ color: "white" }}>
-                    <h5 className='fw-bold mt-3'>Reviewing {" "} {review[1]}</h5>
-                    {data[review[0]].details.toSorted((a, b) => b.year - a.year).map((flag, index) => makeFlag(flag, index))}
+                    <h5 className='fw-bold mt-3'>Reviewing {" "} {TitlesAndDescriptions[review].title}</h5>{
+                        (reportContent[review] || []).map(
+                            (flag, index) => {
+                                switch (review) {
+                                    case TALENT_CONTRACTS:
+                                        return acknowledgementFlag(flag, index);
+                                    case ASSOCIATIONS_WITH_DENIED_ENTITIES:
+                                        return acknowledgementFlag(flag, index);
+                                    case HIGH_RISK_FUNDERS:
+                                        return funderFlag(flag, index);
+                                    case AUTHOR_AFFILIATIONS:
+                                        return authorAffiliationFlag(flag, index);
+                                    case POTENTIAL_AUTHOR_AFFILIATIONS:
+                                        return universityFacultyFlag(flag, index);
+                                    case MISC_HIGH_RISK_AFFILIATIONS:
+                                        return PRFlag(flag, index);
+                                    case COAUTHOR_AFFILIATIONS:
+                                        return coauthorAffiliationFlag(flag, index);
+                                }
+                            }
+                        )
+                    }
                 </ul>
                 }
             </>
@@ -844,7 +718,7 @@ const ItemDetails = () => {
             {activeTab === 1 && <>
                 <div className='flex flex-row bg-black'>
                     {/* <RelationShipGraph2 /> */}
-                    <RelationShipGraph3 graphData={graphData} />
+                    <RelationShipGraph3 authorName={authorName} reportContent={reportContent} />
                 </div>
             </>}
         </div>
