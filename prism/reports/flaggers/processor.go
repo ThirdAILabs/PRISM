@@ -108,7 +108,7 @@ func (processor *ReportProcessor) getWorkStream(report api.Report) (chan openale
 	}
 }
 
-func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName string, workStream chan openalex.WorkBatch, flagsCh chan []Flag) {
+func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName string, workStream chan openalex.WorkBatch, flagsCh chan []api.Flag) {
 	wg := sync.WaitGroup{}
 
 	batch := -1
@@ -186,7 +186,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 	close(flagsCh)
 }
 
-func (processor *ReportProcessor) ProcessReport(report api.Report) ([]Flag, error) {
+func (processor *ReportProcessor) ProcessReport(report api.Report) (api.ReportContent, error) {
 	logger := slog.With("report_id", report.Id)
 
 	logger.Info("starting report processing")
@@ -194,25 +194,47 @@ func (processor *ReportProcessor) ProcessReport(report api.Report) ([]Flag, erro
 	workStream, err := processor.getWorkStream(report)
 	if err != nil {
 		logger.Error("unable to get work stream", "error", err)
-		return nil, fmt.Errorf("unable to get works: %w", err)
+		return api.ReportContent{}, fmt.Errorf("unable to get works: %w", err)
 	}
 
 	flagsSeen := make(map[string]bool)
-	flagsCh := make(chan []Flag, 100)
+	flagsCh := make(chan []api.Flag, 100)
 
 	go processor.processWorks(logger, report.AuthorName, workStream, flagsCh)
 
-	allFlags := make([]Flag, 0)
+	content := api.ReportContent{}
 	for flags := range flagsCh {
 		for _, flag := range flags {
 			if key := flag.Key(); !flagsSeen[key] {
 				flagsSeen[key] = true
-				allFlags = append(allFlags, flag)
+
+				switch flag := flag.(type) {
+				case *api.TalentContractFlag:
+					content.TalentContracts = append(content.TalentContracts, flag)
+
+				case *api.AssociationWithDeniedEntityFlag:
+					content.AssociationsWithDeniedEntities = append(content.AssociationsWithDeniedEntities, flag)
+
+				case *api.HighRiskFunderFlag:
+					content.HighRiskFunders = append(content.HighRiskFunders, flag)
+
+				case *api.AuthorAffiliationFlag:
+					content.AuthorAffiliations = append(content.AuthorAffiliations, flag)
+
+				case *api.PotentialAuthorAffiliationFlag:
+					content.PotentialAuthorAffiliations = append(content.PotentialAuthorAffiliations, flag)
+
+				case *api.MiscHighRiskAssociationFlag:
+					content.MiscHighRiskAssociations = append(content.MiscHighRiskAssociations, flag)
+
+				case *api.CoauthorAffiliationFlag:
+					content.CoauthorAffiliations = append(content.CoauthorAffiliations, flag)
+				}
 			}
 		}
 	}
 
-	logger.Info("report complete", "n_flags", len(allFlags))
+	logger.Info("report complete", "n_flags", len(flagsSeen))
 
-	return allFlags, nil
+	return content, nil
 }

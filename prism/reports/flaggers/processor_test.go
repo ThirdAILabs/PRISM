@@ -31,7 +31,7 @@ func TestProcessorCoauthorAffiliationCase1(t *testing.T) {
 	}
 
 	t.Run("Case1", func(t *testing.T) {
-		flags, err := processor.ProcessReport(api.Report{
+		report, err := processor.ProcessReport(api.Report{
 			Id:         uuid.New(),
 			AuthorId:   "https://openalex.org/A5084836278",
 			AuthorName: "Charles M. Lieber",
@@ -43,19 +43,19 @@ func TestProcessorCoauthorAffiliationCase1(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(flags) != 1 {
+		if len(report.CoauthorAffiliations) != 1 {
 			t.Fatal("expected 1 flag")
 		}
 
-		flag := flags[0].(*EOCCoauthorAffiliationsFlag)
+		flag := report.CoauthorAffiliations[0]
 
-		if len(flag.Institutions) != 1 || flag.Institutions[0] != "Central South University" || len(flag.Authors) != 1 || flag.Authors[0] != "Jian Sun" {
+		if len(flag.Affiliations) != 1 || flag.Affiliations[0] != "Central South University" || len(flag.Coauthors) != 1 || flag.Coauthors[0] != "Jian Sun" {
 			t.Fatal("incorrect flag")
 		}
 	})
 
 	t.Run("Case2", func(t *testing.T) {
-		flags, err := processor.ProcessReport(api.Report{
+		report, err := processor.ProcessReport(api.Report{
 			Id:         uuid.New(),
 			AuthorId:   "https://openalex.org/A5075113943",
 			AuthorName: "Zijian Hong",
@@ -67,7 +67,7 @@ func TestProcessorCoauthorAffiliationCase1(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(flags) < 1 {
+		if len(report.CoauthorAffiliations) < 1 {
 			t.Fatal("expected >= 1 flag")
 		}
 
@@ -88,11 +88,10 @@ func TestProcessorCoauthorAffiliationCase1(t *testing.T) {
 		}
 
 		foundFlag := false
-		for _, flag := range flags {
-			flag := flag.(*EOCCoauthorAffiliationsFlag)
+		for _, flag := range report.CoauthorAffiliations {
 			if flag.Work.WorkId == "https://openalex.org/W4402273377" {
 				foundFlag = true
-				if !eqOrderInvariant(flag.Institutions, expectedInstitutions) || !eqOrderInvariant(flag.Authors, expectedAuthors) {
+				if !eqOrderInvariant(flag.Affiliations, expectedInstitutions) || !eqOrderInvariant(flag.Coauthors, expectedAuthors) {
 					t.Fatal("incorrect flag returned")
 				}
 			}
@@ -115,7 +114,7 @@ func TestProcessorAuthorAffiliation(t *testing.T) {
 	}
 
 	t.Run("Case1", func(t *testing.T) {
-		flags, err := processor.ProcessReport(api.Report{
+		report, err := processor.ProcessReport(api.Report{
 			Id:         uuid.New(),
 			AuthorId:   "https://openalex.org/A5084836278",
 			AuthorName: "Charles M. Lieber",
@@ -127,17 +126,16 @@ func TestProcessorAuthorAffiliation(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(flags) < 1 {
+		if len(report.AuthorAffiliations) < 1 {
 			t.Fatal("expected >= 1 flag")
 		}
 
 		found := false
-		for _, flag := range flags {
-			flag := flag.(*EOCAuthorAffiliationsFlag)
-			if len(flag.Institutions) != 1 {
+		for _, flag := range report.AuthorAffiliations {
+			if len(flag.Affiliations) != 1 {
 				t.Fatal("incorrect flag")
 			}
-			if flag.Institutions[0] == "Peking University" {
+			if flag.Affiliations[0] == "Peking University" {
 				found = true
 			}
 		}
@@ -148,7 +146,7 @@ func TestProcessorAuthorAffiliation(t *testing.T) {
 	})
 
 	t.Run("Case2", func(t *testing.T) {
-		flags, err := processor.ProcessReport(api.Report{
+		report, err := processor.ProcessReport(api.Report{
 			Id:         uuid.New(),
 			AuthorId:   "https://openalex.org/A5075113943",
 			AuthorName: "Zijian Hong",
@@ -160,17 +158,16 @@ func TestProcessorAuthorAffiliation(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(flags) < 1 {
+		if len(report.AuthorAffiliations) < 1 {
 			t.Fatal("expected >= 1 flag")
 		}
 
 		found := false
-		for _, flag := range flags {
-			flag := flag.(*EOCAuthorAffiliationsFlag)
-			if len(flag.Institutions) != 1 {
+		for _, flag := range report.AuthorAffiliations {
+			if len(flag.Affiliations) != 1 {
 				t.Fatal("incorrect flag")
 			}
-			if flag.Institutions[0] == "Zhejiang University" {
+			if flag.Affiliations[0] == "Zhejiang University" {
 				found = true
 			}
 		}
@@ -193,7 +190,7 @@ func TestProcessorUniversityFacultySeach(t *testing.T) {
 	}
 
 	t.Run("Case1", func(t *testing.T) {
-		flags, err := processor.ProcessReport(api.Report{
+		report, err := processor.ProcessReport(api.Report{
 			Id:         uuid.New(),
 			AuthorId:   "https://openalex.org/A5019148940",
 			AuthorName: "Natalie Artzi",
@@ -205,11 +202,11 @@ func TestProcessorUniversityFacultySeach(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(flags) != 1 {
+		if len(report.PotentialAuthorAffiliations) != 1 {
 			t.Fatal("expected 1 flag")
 		}
 
-		flag := flags[0].(*AuthorIsFacultyAtEOCFlag)
+		flag := report.PotentialAuthorAffiliations[0]
 
 		if flag.University != "Fudan University" || !strings.Contains(flag.UniversityUrl, "fudan.edu") {
 			t.Fatal("incorrect flag")
@@ -217,7 +214,7 @@ func TestProcessorUniversityFacultySeach(t *testing.T) {
 	})
 
 	t.Run("Case2", func(t *testing.T) {
-		flags, err := processor.ProcessReport(api.Report{
+		report, err := processor.ProcessReport(api.Report{
 			Id:         uuid.New(),
 			AuthorId:   "https://openalex.org/A5075113943",
 			AuthorName: "Zijian Hong",
@@ -229,13 +226,12 @@ func TestProcessorUniversityFacultySeach(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(flags) < 1 {
+		if len(report.PotentialAuthorAffiliations) < 1 {
 			t.Fatal("expected >= 1 flag")
 		}
 
 		found := false
-		for _, flag := range flags {
-			flag := flag.(*AuthorIsFacultyAtEOCFlag)
+		for _, flag := range report.PotentialAuthorAffiliations {
 			if flag.University == "Zhejiang University" && strings.Contains(flag.UniversityUrl, "zju.edu") {
 				found = true
 			}
@@ -263,7 +259,7 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 	}
 
 	t.Run("PrimaryConnection", func(t *testing.T) {
-		flags, err := processor.ProcessReport(api.Report{
+		report, err := processor.ProcessReport(api.Report{
 			Id:         uuid.New(),
 			AuthorId:   "https://openalex.org/A5084836278",
 			AuthorName: "Charles M. Lieber",
@@ -275,7 +271,7 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(flags) < 1 {
+		if len(report.MiscHighRiskAssociations) < 1 {
 			t.Fatal("expected >= 1 flag")
 		}
 
@@ -289,9 +285,8 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 
 		titles := make([]string, 0)
 
-		for _, flag := range flags {
-			flag := flag.(*AuthorIsAssociatedWithEOCFlag)
-			if flag.ConnectionLevel != "primary" || flag.EntityMentioned != "Charles M. Lieber" {
+		for _, flag := range report.MiscHighRiskAssociations {
+			if len(flag.Connections) != 0 || flag.EntityMentioned != "Charles M. Lieber" {
 				t.Fatal("incorrect flag")
 			}
 			titles = append(titles, flag.DocTitle)
@@ -303,7 +298,7 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 	})
 
 	t.Run("SecondaryConnection", func(t *testing.T) {
-		flags, err := processor.ProcessReport(api.Report{
+		report, err := processor.ProcessReport(api.Report{
 			Id:         uuid.New(),
 			AuthorId:   "https://openalex.org/A5012289937",
 			AuthorName: "Anqi Zhang",
@@ -315,20 +310,19 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(flags) < 1 {
+		if len(report.MiscHighRiskAssociations) < 1 {
 			t.Fatal("expected >= 1 flag")
 		}
 
-		for _, flag := range flags {
-			flag := flag.(*AuthorIsAssociatedWithEOCFlag)
-			if flag.ConnectionLevel != "secondary" || flag.FrequentCoauthor == nil || *flag.FrequentCoauthor != "Charles M. Lieber" {
+		for _, flag := range report.MiscHighRiskAssociations {
+			if len(flag.Connections) != 1 || flag.FrequentCoauthor == nil || *flag.FrequentCoauthor != "Charles M. Lieber" {
 				t.Fatal("incorrect flag")
 			}
 		}
 	})
 
 	t.Run("TertiaryConnection", func(t *testing.T) {
-		flags, err := processor.ProcessReport(api.Report{
+		report, err := processor.ProcessReport(api.Report{
 			Id:         uuid.New(),
 			AuthorId:   "https://openalex.org/A5016320004",
 			AuthorName: "David Zhang",
@@ -340,20 +334,17 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(flags) < 1 {
+		if len(report.MiscHighRiskAssociations) < 1 {
 			t.Fatal("expected >= 1 flag")
 		}
 
 		entitiesMentioned := map[string]bool{}
-		for _, flag := range flags {
-			flag := flag.(*AuthorIsAssociatedWithEOCFlag)
-
-			if flag.ConnectionLevel != "tertiary" ||
-				len(flag.Nodes) != 2 ||
-				flag.Nodes[0].DocTitle != "NuProbe About Us" ||
-				flag.Nodes[0].DocUrl != "https://nuprobe.com/about-us/" ||
-				flag.Nodes[1].DocTitle != "NuProbe Announces $11 Million Series A Funding Round" ||
-				flag.Nodes[1].DocUrl != "https://nuprobe.com/2018/04/nuprobe-announces-11-million-series-a-funding-round-2/" {
+		for _, flag := range report.MiscHighRiskAssociations {
+			if len(flag.Connections) != 2 ||
+				flag.Connections[0].DocTitle != "NuProbe About Us" ||
+				flag.Connections[0].DocUrl != "https://nuprobe.com/about-us/" ||
+				flag.Connections[1].DocTitle != "NuProbe Announces $11 Million Series A Funding Round" ||
+				flag.Connections[1].DocUrl != "https://nuprobe.com/2018/04/nuprobe-announces-11-million-series-a-funding-round-2/" {
 				t.Fatal("incorrect flag")
 			}
 			entitiesMentioned[flag.EntityMentioned] = true
@@ -411,7 +402,7 @@ func TestProcessorAcknowledgements(t *testing.T) {
 	}
 
 	t.Run("Case1", func(t *testing.T) {
-		flags, err := processor.ProcessReport(api.Report{
+		report, err := processor.ProcessReport(api.Report{
 			Id:         uuid.New(),
 			AuthorId:   "https://openalex.org/A5084836278",
 			AuthorName: "Charles M. Lieber",
@@ -423,7 +414,7 @@ func TestProcessorAcknowledgements(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(flags) != 4 {
+		if len(report.TalentContracts) != 3 || len(report.HighRiskFunders) != 1 {
 			t.Fatal("expected 4 acknowledgement flags")
 		}
 
@@ -435,8 +426,10 @@ func TestProcessorAcknowledgements(t *testing.T) {
 		}
 
 		titles := make([]string, 0)
-		for _, flag := range flags {
-			flag := flag.(*EOCAcknowledgemntsFlag)
+		for _, flag := range report.TalentContracts {
+			titles = append(titles, flag.Work.DisplayName)
+		}
+		for _, flag := range report.HighRiskFunders {
 			titles = append(titles, flag.Work.DisplayName)
 		}
 
@@ -446,7 +439,7 @@ func TestProcessorAcknowledgements(t *testing.T) {
 	})
 
 	t.Run("Case2", func(t *testing.T) {
-		flags, err := processor.ProcessReport(api.Report{
+		report, err := processor.ProcessReport(api.Report{
 			Id:         uuid.New(),
 			AuthorId:   "https://openalex.org/A5075113943",
 			AuthorName: "Zijian Hong",
@@ -458,19 +451,15 @@ func TestProcessorAcknowledgements(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(flags) < 1 {
+		if len(report.HighRiskFunders) < 1 {
 			t.Fatal("expected >= 1 flags")
 		}
 
 		found := false
-		for _, flag := range flags {
-			flag := flag.(*EOCAcknowledgemntsFlag)
-
+		for _, flag := range report.HighRiskFunders {
 			if flag.Work.WorkId == "https://openalex.org/W4384197626" {
 				found = true
-				if len(flag.Entities) != 1 || flag.Entities[0].Entity != "Zhejiang University" ||
-					len(flag.Entities[0].Sources) != 1 || flag.Entities[0].Sources[0] != "China Defense Universities Tracker" ||
-					len(flag.Entities[0].Aliases) != 1 || flag.Entities[0].Aliases[0] != "Zhejiang University" {
+				if !flag.FromAcknowledgements || !strings.Contains(flag.Funders[0], "Zhejiang University") {
 					t.Fatal("incorrect acknowledgement found")
 				}
 			}

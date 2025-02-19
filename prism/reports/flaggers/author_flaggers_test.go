@@ -2,6 +2,7 @@ package flaggers
 
 import (
 	"log/slog"
+	"prism/prism/api"
 	"prism/prism/openalex"
 	"prism/prism/search"
 	"slices"
@@ -42,7 +43,7 @@ func TestAuthorIsFacultyAtEOC(t *testing.T) {
 		t.Fatal("expected flag")
 	}
 
-	flag := flags[0].(*AuthorIsFacultyAtEOCFlag)
+	flag := flags[0].(*api.PotentialAuthorAffiliationFlag)
 	if flag.University != "xyz" || flag.UniversityUrl != "xyz.com" {
 		t.Fatal("incorrect flag")
 	}
@@ -122,13 +123,12 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			t.Fatal("expected 1 flag")
 		}
 
-		flag := flags[0].(*AuthorIsAssociatedWithEOCFlag)
+		flag := flags[0].(*api.MiscHighRiskAssociationFlag)
 
-		if flag.FlagTitle != "Person may be affiliated with someone mentioned in a press release." ||
-			flag.ConnectionLevel != "primary" ||
-			flag.DocTitle != "indicted" ||
+		if flag.DocTitle != "indicted" ||
 			flag.DocUrl != "indicted.com" ||
 			!slices.Equal(flag.DocEntities, []string{"abc", "xyz"}) ||
+			len(flag.Connections) != 0 ||
 			flag.EntityMentioned != "abc" {
 			t.Fatalf("incorrect flag: %v", *flag)
 		}
@@ -148,18 +148,16 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			t.Fatal("expected 1 flag")
 		}
 
-		flag := flags[0].(*AuthorIsAssociatedWithEOCFlag)
+		flag := flags[0].(*api.MiscHighRiskAssociationFlag)
 
-		if flag.FlagTitle != "The author's frequent coauthor may be mentioned in a press release." ||
-			flag.ConnectionLevel != "secondary" ||
-			flag.DocTitle != "indicted" ||
+		if flag.DocTitle != "indicted" ||
 			flag.DocUrl != "indicted.com" ||
 			!slices.Equal(flag.DocEntities, []string{"abc", "xyz"}) ||
 			flag.EntityMentioned != "abc" ||
 			flag.FrequentCoauthor == nil ||
 			*flag.FrequentCoauthor != "abc" ||
-			len(flag.Nodes) != 1 ||
-			flag.Nodes[0].DocTitle != "abc (frequent coauthor)" {
+			len(flag.Connections) != 1 ||
+			flag.Connections[0].DocTitle != "abc (frequent coauthor)" {
 			t.Fatalf("incorrect flag: %v", *flag)
 		}
 	})
@@ -174,18 +172,17 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			t.Fatal("expected 1 flag")
 		}
 
-		flag := flags[0].(*AuthorIsAssociatedWithEOCFlag)
+		flag := flags[0].(*api.MiscHighRiskAssociationFlag)
 
-		if flag.FlagTitle != "Author may be affiliated with an entity whose associate may be mentioned in a press release." ||
-			flag.ConnectionLevel != "secondary" ||
+		if len(flag.Connections) != 1 ||
 			flag.DocTitle != "indicted" ||
 			flag.DocUrl != "indicted.com" ||
 			!slices.Equal(flag.DocEntities, []string{"abc", "xyz"}) ||
 			flag.EntityMentioned != "xyz" ||
 			flag.FrequentCoauthor != nil ||
-			len(flag.Nodes) != 1 ||
-			flag.Nodes[0].DocTitle != "new company" ||
-			flag.Nodes[0].DocUrl != "newcompany.com" {
+			len(flag.Connections) != 1 ||
+			flag.Connections[0].DocTitle != "new company" ||
+			flag.Connections[0].DocUrl != "newcompany.com" {
 			t.Fatalf("incorrect flag: %v", *flag)
 		}
 	})
@@ -200,20 +197,18 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			t.Fatal("expected 1 flag")
 		}
 
-		flag := flags[0].(*AuthorIsAssociatedWithEOCFlag)
+		flag := flags[0].(*api.MiscHighRiskAssociationFlag)
 
-		if flag.FlagTitle != "Author may be affiliated with an entity whose associate may be mentioned in a press release." ||
-			flag.ConnectionLevel != "tertiary" ||
-			flag.DocTitle != "leaked docs" ||
+		if flag.DocTitle != "leaked docs" ||
 			flag.DocUrl != "leakeddocs.com" ||
 			!slices.Equal(flag.DocEntities, []string{"qrs"}) ||
 			flag.EntityMentioned != "qrs" ||
 			flag.FrequentCoauthor != nil ||
-			len(flag.Nodes) != 2 ||
-			flag.Nodes[0].DocTitle != "best friends" ||
-			flag.Nodes[0].DocUrl != "bestfriends.com" ||
-			flag.Nodes[1].DocTitle != "graduate students" ||
-			flag.Nodes[1].DocUrl != "graduatestudents.com" {
+			len(flag.Connections) != 2 ||
+			flag.Connections[0].DocTitle != "best friends" ||
+			flag.Connections[0].DocUrl != "bestfriends.com" ||
+			flag.Connections[1].DocTitle != "graduate students" ||
+			flag.Connections[1].DocUrl != "graduatestudents.com" {
 			t.Fatalf("incorrect flag: %v", *flag)
 		}
 	})

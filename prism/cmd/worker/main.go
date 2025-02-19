@@ -116,7 +116,7 @@ func main() {
 			continue
 		}
 
-		flags, err := processor.ProcessReport(*nextReport)
+		content, err := processor.ProcessReport(*nextReport)
 		if err != nil {
 			slog.Error("error processing report: %w")
 
@@ -125,8 +125,6 @@ func main() {
 			}
 			continue
 		}
-
-		content := reports.FormatReport(nextReport.AuthorName, flags)
 
 		contentBytes, err := json.Marshal(content)
 		if err != nil {

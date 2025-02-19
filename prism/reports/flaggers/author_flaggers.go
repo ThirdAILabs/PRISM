@@ -3,6 +3,7 @@ package flaggers
 import (
 	"fmt"
 	"log/slog"
+	"prism/prism/api"
 	"prism/prism/openalex"
 	"prism/prism/search"
 	"regexp"
@@ -41,11 +42,11 @@ func (n *nameMatcher) matches(candidate string) bool {
 	return n.re.MatchString(strings.ToLower(candidate))
 }
 
-func (flagger *AuthorIsFacultyAtEOCFlagger) Name() flagType {
-	return AuthorIsFacultyAtEOC
+func (flagger *AuthorIsFacultyAtEOCFlagger) Name() string {
+	return "PotentialFacultyAtEOC"
 }
 
-func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName string) ([]Flag, error) {
+func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName string) ([]api.Flag, error) {
 	logger.Info("checking if author is faculty at EOC", "author_name", authorName)
 
 	results, err := flagger.universityNDB.Query(authorName, 5, nil)
@@ -60,7 +61,7 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 		return nil, nil
 	}
 
-	flags := make([]Flag, 0)
+	flags := make([]api.Flag, 0)
 
 	for _, result := range results {
 		if matcher.matches(result.Text) {
@@ -72,10 +73,8 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 
 			url, _ := result.Metadata["url"].(string)
 
-			flags = append(flags, &AuthorIsFacultyAtEOCFlag{
-				FlagType:      AuthorIsFacultyAtEOC,
-				FlagTitle:     "Person may be affiliated with this university",
-				FlagMessage:   fmt.Sprintf("The author %s may be associated with this concerning entity: %s\n", authorName, university),
+			flags = append(flags, &api.PotentialAuthorAffiliationFlag{
+				Message:       fmt.Sprintf("The author %s may be associated with this concerning entity: %s\n", authorName, university),
 				University:    university,
 				UniversityUrl: url,
 			})
@@ -94,8 +93,8 @@ type AuthorIsAssociatedWithEOCFlagger struct {
 	auxNDB search.NeuralDB
 }
 
-func (flagger *AuthorIsAssociatedWithEOCFlagger) Name() flagType {
-	return AuthorIsAssociatedWithEOC
+func (flagger *AuthorIsAssociatedWithEOCFlagger) Name() string {
+	return "MiscAssociationWithEOC"
 }
 
 type authorCnt struct {
@@ -129,8 +128,8 @@ func topCoauthors(works []openalex.Work) []authorCnt {
 	return topAuthors[:min(len(topAuthors), 4)]
 }
 
-func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(logger *slog.Logger, authorName string, works []openalex.Work) ([]Flag, error) {
-	flags := make([]Flag, 0)
+func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(logger *slog.Logger, authorName string, works []openalex.Work) ([]api.Flag, error) {
+	flags := make([]api.Flag, 0)
 
 	seen := make(map[string]bool)
 
@@ -172,29 +171,23 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(logg
 
 			if primaryMatcher.matches(author.author) {
 				logger.Info("found primary connection", "doc", title, "url", url)
-				flags = append(flags, &AuthorIsAssociatedWithEOCFlag{
-					FlagType:        AuthorIsAssociatedWithEOC,
-					FlagTitle:       "Person may be affiliated with someone mentioned in a press release.",
-					FlagMessage:     "The author or a frequent associate may be mentioned in a press release.",
+				flags = append(flags, &api.MiscHighRiskAssociationFlag{
+					Message:         "The author or a frequent associate may be mentioned in a press release.",
 					DocTitle:        title,
 					DocUrl:          url,
 					DocEntities:     strings.Split(entities, ";"),
 					EntityMentioned: author.author,
-					ConnectionLevel: "primary",
 				})
 				logger.Info("author is assoiciated with EOC", "author", author.author, "doc", title, "entities", entities)
 			} else {
 				logger.Info("found coauthor connection", "doc", title, "url", url)
-				flags = append(flags, &AuthorIsAssociatedWithEOCFlag{
-					FlagType:         AuthorIsAssociatedWithEOC,
-					FlagTitle:        "The author's frequent coauthor may be mentioned in a press release.",
-					FlagMessage:      "The author or a frequent associate may be mentioned in a press release.",
+				flags = append(flags, &api.MiscHighRiskAssociationFlag{
+					Message:          "The author or a frequent associate may be mentioned in a press release.",
 					DocTitle:         title,
 					DocUrl:           url,
 					DocEntities:      strings.Split(entities, ";"),
 					EntityMentioned:  author.author,
-					ConnectionLevel:  "secondary",
-					Nodes:            []Node{{DocTitle: author.author + " (frequent coauthor)", DocUrl: ""}},
+					Connections:      []api.Connection{{DocTitle: author.author + " (frequent coauthor)", DocUrl: ""}},
 					FrequentCoauthor: &author.author,
 				})
 				logger.Info("frequent coauthor is assoiciated with EOC", "coauthor", author.author, "doc", title, "entities", entities)
@@ -207,12 +200,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(logg
 	return flags, nil
 }
 
-type entityMetadata struct {
-	connection string
-	nodes      []Node
-}
-
-func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logger *slog.Logger, authorName string) ([]Flag, error) {
+func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logger *slog.Logger, authorName string) ([]api.Flag, error) {
 	seen := make(map[string]bool)
 
 	primaryMatcher, validName := newNameMatcher(authorName)
@@ -221,7 +209,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 		return nil, nil
 	}
 
-	queryToEntities := make(map[string]entityMetadata)
+	queryToConn := make(map[string][]api.Connection)
 
 	results, err := flagger.auxNDB.Query(authorName, 5, nil)
 	if err != nil {
@@ -241,21 +229,18 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 
 		entities, _ := result.Metadata["entities"].(string)
 		for _, entity := range strings.Split(entities, ";") {
-			if _, ok := queryToEntities[entity]; !ok {
+			if _, ok := queryToConn[entity]; !ok {
 				title, _ := result.Metadata["title"].(string)
 				logger.Info("found first hop match", "doc", title, "url", url)
-				queryToEntities[entity] = entityMetadata{
-					connection: "secondary",
-					nodes:      []Node{{DocTitle: title, DocUrl: url}},
-				}
+				queryToConn[entity] = []api.Connection{{DocTitle: title, DocUrl: url}}
 			}
 		}
 	}
 
 	// Second map to avoid mutating the original while iterating over it
-	level2Entities := make(map[string]entityMetadata)
+	level2Entities := make(map[string][]api.Connection)
 
-	for query, level1Entity := range queryToEntities {
+	for query, level1Entity := range queryToConn {
 		results, err := flagger.auxNDB.Query(query, 5, nil)
 		if err != nil {
 			return nil, fmt.Errorf("error querying ndb: %w", err)
@@ -277,22 +262,19 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 				if _, ok := level2Entities[entity]; !ok {
 					title, _ := result.Metadata["title"].(string)
 					logger.Info("found second hop match", "doc", title, "url", url)
-					level2Entities[entity] = entityMetadata{
-						connection: "tertiary",
-						nodes:      append(level1Entity.nodes, Node{DocTitle: title, DocUrl: url}),
-					}
+					level2Entities[entity] = append(level1Entity, api.Connection{DocTitle: title, DocUrl: url})
 				}
 			}
 		}
 	}
 
 	for k, v := range level2Entities {
-		queryToEntities[k] = v
+		queryToConn[k] = v
 	}
 
-	flags := make([]Flag, 0)
+	flags := make([]api.Flag, 0)
 
-	for query, entity := range queryToEntities {
+	for query, conns := range queryToConn {
 		results, err := flagger.docNDB.Query(query, 5, nil)
 		if err != nil {
 			return nil, fmt.Errorf("error querying ndb: %w", err)
@@ -307,18 +289,15 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 			url, _ := result.Metadata["url"].(string)
 			entities, _ := result.Metadata["entities"].(string)
 
-			logger.Info("found complex connection", "doc", title, "url", url, "level", entity.connection, "steps", entity.nodes)
+			logger.Info("found complex connection", "doc", title, "url", url, "steps", conns)
 
-			flags = append(flags, &AuthorIsAssociatedWithEOCFlag{
-				FlagType:        AuthorIsAssociatedWithEOC,
-				FlagTitle:       "Author may be affiliated with an entity whose associate may be mentioned in a press release.",
-				FlagMessage:     "The author may be associated be an entity who/which may be mentioned in a press release.\n",
+			flags = append(flags, &api.MiscHighRiskAssociationFlag{
+				Message:         "The author may be associated be an entity who/which may be mentioned in a press release.\n",
 				DocTitle:        title,
 				DocUrl:          url,
 				DocEntities:     strings.Split(entities, ";"),
 				EntityMentioned: query,
-				ConnectionLevel: entity.connection,
-				Nodes:           entity.nodes,
+				Connections:     conns,
 			})
 		}
 	}
@@ -328,7 +307,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 	return flags, nil
 }
 
-func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(logger *slog.Logger, authorName string, works []openalex.Work) ([]Flag, error) {
+func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(logger *slog.Logger, authorName string, works []openalex.Work) ([]api.Flag, error) {
 	logger.Info("checking if author is associated with EOC", "author_name", authorName)
 
 	firstSecondLevelFlags, err := flagger.findFirstSecondHopEntities(logger, authorName, works)
