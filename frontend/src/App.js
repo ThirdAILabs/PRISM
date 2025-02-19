@@ -30,7 +30,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<SearchComponent />} />
-          <Route path="/item" element={<ItemDetails />} />
+          <Route path="/:report_id" element={<ItemDetails />} />
           <Route path="/entity-lookup" element={<EntityLookup />} />
         </Routes>
       </Router>

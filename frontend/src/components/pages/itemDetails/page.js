@@ -1,6 +1,6 @@
 // src/ItemDetails.js
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
     TALENT_CONTRACTS,
     ASSOCIATIONS_WITH_DENIED_ENTITIES,
@@ -74,10 +74,8 @@ const get_paper_url = (flag) => {
 
 
 const ItemDetails = () => {
-    const location = useLocation();
     const navigate = useNavigate();
-    // const reportId = location.state?.response.Id;
-    const reportId = "4355ed32-871b-4d5a-a491-5913ff8e74c2";
+    const { report_id } = useParams();
 
     const [reportContent, setReportContent] = useState({})
     const [authorName, setAuthorName] = useState("")
@@ -87,7 +85,7 @@ const ItemDetails = () => {
     useEffect(() => {
         let isMounted = true;
         const poll = async () => {
-            const report = await reportService.getReport(reportId)
+            const report = await reportService.getReport(report_id)
             if (report.Status === "complete" && isMounted) {
                 setAuthorName(report.AuthorName);
                 setReportContent(report.Content);
