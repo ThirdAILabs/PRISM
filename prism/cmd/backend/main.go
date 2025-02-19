@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"log/slog"
@@ -12,18 +14,19 @@ import (
 	"prism/prism/services"
 	"prism/prism/services/auth"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 )
 
 type Config struct {
-	PostgresUri   string `yaml:"postgres_uri"`
-	EntityNdbPath string `yaml:"entity_ndb"`
-	Keycloak      auth.KeycloakArgs
-	Port          int
-	Logfile       string
-	NdbLicense    string `yaml:"ndb_license"`
+	PostgresUri            string `yaml:"postgres_uri"`
+	SearchableEntitiesPath string `yaml:"searchable_entities"`
+	Keycloak               auth.KeycloakArgs
+	Port                   int
+	Logfile                string
+	NdbLicense             string `yaml:"ndb_license"`
 }
 
 func (c *Config) logfile() string {
@@ -38,6 +41,43 @@ func (c *Config) port() int {
 		return 3000
 	}
 	return c.Port
+}
+
+func buildEntityNdb(entityPath string) search.NeuralDB {
+	const entityNdbPath = "searchable_entities.ndb"
+	if err := os.RemoveAll(entityNdbPath); err != nil && !errors.Is(err, os.ErrNotExist) {
+		log.Fatalf("error deleting existing ndb: %v", err)
+	}
+
+	time.Sleep(2 * time.Second)
+
+	file, err := os.Open(entityPath)
+	if err != nil {
+		log.Fatalf("error opening searchable entities: %v", err)
+	}
+
+	var entities []string
+	if err := json.NewDecoder(file).Decode(&entities); err != nil {
+		log.Fatalf("error parsing searchable entities: %v", err)
+	}
+
+	log.Printf("loaded %d searchable entities", len(entities))
+
+	s := time.Now()
+	ndb, err := search.NewNeuralDB(entityNdbPath)
+	if err != nil {
+		log.Fatalf("error openning ndb: %v", err)
+	}
+
+	if err := ndb.Insert("entities", "id", entities, nil, nil); err != nil {
+		log.Fatalf("error inserting into ndb: %v", err)
+	}
+
+	e := time.Now()
+
+	log.Printf("searchable entity ndb construction time=%.3f", e.Sub(s).Seconds())
+
+	return ndb
 }
 
 func main() {
@@ -66,10 +106,7 @@ func main() {
 		}
 	}
 
-	entityNdb, err := search.NewNeuralDB(config.EntityNdbPath)
-	if err != nil {
-		log.Fatalf("unable to load entity ndb: %v", err)
-	}
+	entityNdb := buildEntityNdb(config.SearchableEntitiesPath)
 
 	db := cmd.InitDb(config.PostgresUri)
 
