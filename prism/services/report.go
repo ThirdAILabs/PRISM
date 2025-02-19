@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/reports"
+	"prism/prism/schema"
 	"prism/prism/services/auth"
 	"prism/prism/services/licensing"
 	"strings"
@@ -239,6 +240,10 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 	report, err := s.manager.GetReport(userId, reportId)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	if report.Status != schema.ReportCompleted {
+		return nil, CodedError(errors.New("cannot process disclosures for report unless report status is complete"), http.StatusUnprocessableEntity)
 	}
 
 	updateDisclosures(report.Content.TalentContracts, allFileTexts)
