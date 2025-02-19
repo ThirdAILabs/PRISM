@@ -125,6 +125,55 @@ __Example Response__:
 No response body
 ```
 
+## Check Disclosure
+
+| Method | Path | Auth Required | Permissions |
+| ------ | ---- | ------------- | ----------  |
+| `POST` | `/api/v1/report/{report_id}/check-disclosure` | Yes | Token for Keycloak User Realm |
+
+Checks for the disclosure of flagged details within a report. The process involves scanning one or more uploaded files for text that matches tokens extracted from the report’s flag details. If a token is found in any file’s text, the corresponding flag will be marked as disclosed.
+
+__Example Request__: 
+```
+url = f"http://localhost:8082/api/v1/report/{report_id}/check-disclosure"
+headers = {"Authorization": f"Bearer {token}"}
+
+files = []
+for file_path in file_paths:
+    files.append(('files', (file_path, open(file_path, 'rb'), 'text/plain')))
+
+response = requests.post(url, headers=headers, files=files)
+```
+
+__Example Response__:
+```
+{
+    "Id": "e42ba4dd-f56b-4916-835b-034679df2d4b",
+    "CreatedAt": "2025-02-11T20:21:49.387547Z",
+    "AuthorId": "author id",
+    "AuthorName": "author name",
+    "Source": "openalex",
+    "StartYear": 3,
+    "EndYear": 8,
+    "Status": "complete",
+    "Content": {
+        "name": "test",
+        "risk_score": 10,
+        "connections": [],
+        "type_to_flag": {
+            "doj_press_release_eoc": [ /* flags with updated disclosure statuses */ ],
+            "oa_coauthor_affiliation_eoc": [ /* flags */ ],
+            "uni_faculty_eoc": [ /* flags */ ],
+            "oa_acknowledgement_eoc": [ /* flags */ ],
+            "oa_author_affiliation_eoc": [ /* flags */ ],
+            "oa_funder_eoc": [ /* flags */ ]
+        }
+    }
+}
+
+```
+
+
 # License Endpoints
 
 ## List licenses
