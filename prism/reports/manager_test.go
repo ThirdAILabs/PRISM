@@ -52,7 +52,7 @@ func TestReportManager(t *testing.T) {
 	}
 
 	updateJSON := []byte(`{
-		"HighRiskFunders": [{}]
+		"HighRiskFunders": [{"Message": "test"}]
 	}`)
 
 	if err := manager.UpdateReport(report1, "complete", updateJSON); err != nil {
@@ -115,8 +115,8 @@ func TestReportManager(t *testing.T) {
 			t.Fatal("incorrect report")
 		}
 
-		if len(report.Content.HighRiskFunders) != 0 {
-			t.Fatalf("expected 0 connections, got %d", len(report.Content.HighRiskFunders))
+		if len(report.Content.HighRiskFunders) == 0 {
+			t.Fatalf("expected 1 connections, got %d", len(report.Content.HighRiskFunders))
 		}
 	}
 
