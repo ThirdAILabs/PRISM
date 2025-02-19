@@ -15,7 +15,7 @@ const TodoListComponent = ({ results, canLoadMore, loadMore }) => {
       "Source": result.Source,
       "StartYear": 1990
     });
-    navigate(`/item`, { state: { response } });
+    navigate(`/${response.Id}`);
     return;
   };
 

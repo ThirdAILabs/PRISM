@@ -52,10 +52,7 @@ func TestReportManager(t *testing.T) {
 	}
 
 	updateJSON := []byte(`{
-		"name": "test",
-		"risk_score": 10,
-		"connections": [],
-		"type_to_flag": {}
+		"HighRiskFunders": [{"Message": "test"}]
 	}`)
 
 	if err := manager.UpdateReport(report1, "complete", updateJSON); err != nil {
@@ -118,18 +115,8 @@ func TestReportManager(t *testing.T) {
 			t.Fatal("incorrect report")
 		}
 
-		rc, ok := report.Content.(reports.ReportContent)
-		if !ok {
-			t.Fatal("report content is not of type ReportContent")
-		}
-		if rc.AuthorName != "test" {
-			t.Fatalf("expected AuthorName to be 'test', got '%s'", rc.AuthorName)
-		}
-		if rc.RiskScore != 10 {
-			t.Fatalf("expected RiskScore to be 10, got %d", rc.RiskScore)
-		}
-		if len(rc.Connections) != 0 {
-			t.Fatalf("expected 0 connections, got %d", len(rc.Connections))
+		if len(report.Content.HighRiskFunders) == 0 {
+			t.Fatalf("expected 1 connections, got %d", len(report.Content.HighRiskFunders))
 		}
 	}
 

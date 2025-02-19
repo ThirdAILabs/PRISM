@@ -19,7 +19,7 @@ type Report struct {
 
 	Status string
 
-	Content any
+	Content ReportContent
 }
 
 type CreateReportRequest struct {

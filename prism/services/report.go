@@ -11,10 +11,9 @@ import (
 	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/reports"
-	"prism/prism/reports/flaggers"
+	"prism/prism/schema"
 	"prism/prism/services/auth"
 	"prism/prism/services/licensing"
-	"reflect"
 	"strings"
 	"time"
 
@@ -172,36 +171,23 @@ func (s *ReportService) UseLicense(r *http.Request) (any, error) {
 	return nil, nil
 }
 
-func updateFlagDisclosure(f flaggers.Flag, allFileTexts []string) {
-	tokens := extractTokens(f.Details())
-	disclosed := false
-	for _, token := range tokens {
-		tokenLower := strings.ToLower(token)
+func updateFlagDisclosure(flag api.Flag, allFileTexts []string) {
+	entities := filterTokens(flag.GetEntities())
+
+DisclosureCheck:
+	for _, entity := range entities {
 		for _, txt := range allFileTexts {
-			fmt.Println("txt", txt)
-			if strings.Contains(strings.ToLower(txt), tokenLower) {
-				disclosed = true
-				break
+			if strings.Contains(strings.ToLower(txt), entity) {
+				flag.MarkDisclosed()
+				break DisclosureCheck
 			}
 		}
-		if disclosed {
-			break
-		}
 	}
+}
 
-	switch flagTyped := f.(type) {
-	case *flaggers.AuthorIsAssociatedWithEOCFlag:
-		flagTyped.Disclosed = disclosed
-	case *flaggers.EOCCoauthorAffiliationsFlag:
-		flagTyped.Disclosed = disclosed
-	case *flaggers.AuthorIsFacultyAtEOCFlag:
-		flagTyped.Disclosed = disclosed
-	case *flaggers.EOCAcknowledgemntsFlag:
-		flagTyped.Disclosed = disclosed
-	case *flaggers.EOCAuthorAffiliationsFlag:
-		flagTyped.Disclosed = disclosed
-	case *flaggers.EOCFundersFlag:
-		flagTyped.Disclosed = disclosed
+func updateDisclosures[T api.Flag](flags []T, allTexts []string) {
+	for _, flag := range flags {
+		updateFlagDisclosure(flag, allTexts)
 	}
 }
 
@@ -256,31 +242,19 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	rc, ok := report.Content.(reports.ReportContent)
-	if !ok {
-		return nil, CodedError(fmt.Errorf("unexpected content type"), http.StatusInternalServerError)
+	if report.Status != schema.ReportCompleted {
+		return nil, CodedError(errors.New("cannot process disclosures for report unless report status is complete"), http.StatusUnprocessableEntity)
 	}
 
-	for _, flag := range rc.TypeToFlags.AuthorAssociationsEOC {
-		updateFlagDisclosure(flag, allFileTexts)
-	}
-	for _, flag := range rc.TypeToFlags.CoauthorAffiliationEOC {
-		updateFlagDisclosure(flag, allFileTexts)
-	}
-	for _, flag := range rc.TypeToFlags.AuthorFacultyAtEOC {
-		updateFlagDisclosure(flag, allFileTexts)
-	}
-	for _, flag := range rc.TypeToFlags.AcknowledgementEOC {
-		updateFlagDisclosure(flag, allFileTexts)
-	}
-	for _, flag := range rc.TypeToFlags.AuthorAffiliationEOC {
-		updateFlagDisclosure(flag, allFileTexts)
-	}
-	for _, flag := range rc.TypeToFlags.FunderEOC {
-		updateFlagDisclosure(flag, allFileTexts)
-	}
+	updateDisclosures(report.Content.TalentContracts, allFileTexts)
+	updateDisclosures(report.Content.AssociationsWithDeniedEntities, allFileTexts)
+	updateDisclosures(report.Content.HighRiskFunders, allFileTexts)
+	updateDisclosures(report.Content.AuthorAffiliations, allFileTexts)
+	updateDisclosures(report.Content.PotentialAuthorAffiliations, allFileTexts)
+	updateDisclosures(report.Content.MiscHighRiskAssociations, allFileTexts)
+	updateDisclosures(report.Content.CoauthorAffiliations, allFileTexts)
 
-	updatedContentBytes, err := json.Marshal(rc)
+	updatedContentBytes, err := json.Marshal(report.Content)
 	if err != nil {
 		slog.Error("error serializing updated report content", "error", err)
 		return nil, CodedError(err, http.StatusInternalServerError)
@@ -291,10 +265,7 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	report.Content = rc
-
 	return report, nil
-
 }
 
 func parseFileContent(ext string, fileBytes []byte) (string, error) {
@@ -350,45 +321,4 @@ func filterTokens(tokens []string) []string {
 		}
 	}
 	return filtered
-}
-
-func extractTokens(detail interface{}) []string {
-	var tokens []string
-	switch v := detail.(type) {
-	case string:
-		tokens = append(tokens, strings.TrimSpace(v))
-	case []string:
-		for _, s := range v {
-			tokens = append(tokens, strings.TrimSpace(s))
-		}
-	case []interface{}:
-		for _, item := range v {
-			tokens = append(tokens, extractTokens(item)...)
-		}
-	case map[string]interface{}:
-		for _, val := range v {
-			tokens = append(tokens, extractTokens(val)...)
-		}
-	default:
-		rv := reflect.ValueOf(detail)
-		switch rv.Kind() {
-		case reflect.Struct:
-			rt := rv.Type()
-			for i := 0; i < rv.NumField(); i++ {
-				if rt.Field(i).PkgPath != "" {
-					continue
-				}
-				fieldVal := rv.Field(i).Interface()
-				tokens = append(tokens, extractTokens(fieldVal)...)
-			}
-		case reflect.Slice:
-			for i := 0; i < rv.Len(); i++ {
-				tokens = append(tokens, extractTokens(rv.Index(i).Interface())...)
-			}
-		default:
-			token := fmt.Sprintf("%v", v)
-			tokens = append(tokens, token)
-		}
-	}
-	return filterTokens(tokens)
 }

@@ -3,6 +3,7 @@ package flaggers
 import (
 	"fmt"
 	"log/slog"
+	"prism/prism/api"
 	"prism/prism/openalex"
 	"prism/prism/reports/flaggers/eoc"
 	"regexp"
@@ -11,35 +12,42 @@ import (
 )
 
 type WorkFlagger interface {
-	Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]Flag, error)
+	Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error)
 
-	Name() flagType
+	Name() string
+}
+
+func getWorkSummary(w openalex.Work) api.WorkSummary {
+	return api.WorkSummary{
+		WorkId:          w.WorkId,
+		DisplayName:     w.DisplayName,
+		WorkUrl:         w.WorkUrl,
+		OaUrl:           w.OaUrl,
+		PublicationYear: w.PublicationYear,
+	}
 }
 
 type OpenAlexMultipleAffiliationsFlagger struct{}
 
-func (flagger *OpenAlexMultipleAffiliationsFlagger) Name() flagType {
-	return OAMultipleAffiliations
+func (flagger *OpenAlexMultipleAffiliationsFlagger) Name() string {
+	return "MultipleAffiliations"
 }
 
-func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]Flag, error) {
-	flags := make([]Flag, 0)
+func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
 		logger.Info("processing work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
 
 		for _, author := range work.Authors {
 			if len(author.Institutions) > 1 && slices.Contains(targetAuthorIds, author.AuthorId) {
-				institutionNames := author.InstitutionNames()
-				flags = append(flags, &MultipleAssociationsFlag{
-					FlagType:     OAMultipleAffiliations,
-					FlagTitle:    "Multiple Affiliations",
-					FlagMessage:  fmt.Sprintf("%s has multiple affilitions in work '%s'\n%s", author.DisplayName, work.GetDisplayName(), strings.Join(institutionNames, "\n")),
-					Work:         work,
-					AuthorName:   author.DisplayName,
-					Affiliations: institutionNames,
+				affiliations := author.InstitutionNames()
+				flags = append(flags, &api.MultipleAffiliationFlag{
+					Message:      fmt.Sprintf("%s has multiple affilitions in work '%s'\n%s", author.DisplayName, work.GetDisplayName(), strings.Join(affiliations, "\n")),
+					Work:         getWorkSummary(work),
+					Affiliations: affiliations,
 				})
-				logger.Info("found multiple affiliations", "author_id", author.AuthorId, "author_name", author.DisplayName, "institutions", institutionNames)
+				logger.Info("found multiple affiliations", "author_id", author.AuthorId, "author_name", author.DisplayName, "affiliations", affiliations)
 				break
 			}
 		}
@@ -56,12 +64,12 @@ type OpenAlexFunderIsEOC struct {
 	concerningEntities eoc.EocSet
 }
 
-func (flagger *OpenAlexFunderIsEOC) Name() flagType {
-	return OAFunderIsEOC
+func (flagger *OpenAlexFunderIsEOC) Name() string {
+	return "FunderEOC"
 }
 
-func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]Flag, error) {
-	flags := make([]Flag, 0)
+func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
 		logger.Info("processing work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
@@ -74,12 +82,11 @@ func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.W
 		}
 
 		if len(concerningFunders) > 0 {
-			flags = append(flags, &EOCFundersFlag{
-				FlagType:    OAFunderIsEOC,
-				FlagTitle:   "Funder is Entity of Concern",
-				FlagMessage: fmt.Sprintf("The following funders of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningFunders, "\n")),
-				Work:        work,
-				Funders:     concerningFunders,
+			flags = append(flags, &api.HighRiskFunderFlag{
+				Message:              fmt.Sprintf("The following funders of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningFunders, "\n")),
+				Work:                 getWorkSummary(work),
+				Funders:              concerningFunders,
+				FromAcknowledgements: false,
 			})
 			logger.Info("found concerning funders", "funders", concerningFunders)
 		}
@@ -95,12 +102,12 @@ type OpenAlexPublisherIsEOC struct {
 	concerningPublishers eoc.EocSet
 }
 
-func (flagger *OpenAlexPublisherIsEOC) Name() flagType {
-	return OAPublisherIsEOC
+func (flagger *OpenAlexPublisherIsEOC) Name() string {
+	return "PublisherEOC"
 }
 
-func (flagger *OpenAlexPublisherIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]Flag, error) {
-	flags := make([]Flag, 0)
+func (flagger *OpenAlexPublisherIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
 		logger.Info("processing work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
@@ -113,12 +120,10 @@ func (flagger *OpenAlexPublisherIsEOC) Flag(logger *slog.Logger, works []openale
 		}
 
 		if len(concerningPublishers) > 0 {
-			flags = append(flags, &EOCPublishersFlag{
-				FlagType:    OAPublisherIsEOC,
-				FlagTitle:   "Publisher is Entity of Concern",
-				FlagMessage: fmt.Sprintf("The following publishers of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningPublishers, "\n")),
-				Work:        work,
-				Publishers:  concerningPublishers,
+			flags = append(flags, &api.HighRiskPublisherFlag{
+				Message:    fmt.Sprintf("The following publishers of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningPublishers, "\n")),
+				Work:       getWorkSummary(work),
+				Publishers: concerningPublishers,
 			})
 			logger.Info("found concerning publishers", "publishers", concerningPublishers)
 		}
@@ -134,12 +139,12 @@ type OpenAlexCoauthorIsEOC struct {
 	concerningEntities eoc.EocSet
 }
 
-func (flagger *OpenAlexCoauthorIsEOC) Name() flagType {
-	return OACoauthorIsEOC
+func (flagger *OpenAlexCoauthorIsEOC) Name() string {
+	return "CoauthorEOC"
 }
 
-func (flagger *OpenAlexCoauthorIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]Flag, error) {
-	flags := make([]Flag, 0)
+func (flagger *OpenAlexCoauthorIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
 		logger.Info("processing work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
@@ -152,12 +157,10 @@ func (flagger *OpenAlexCoauthorIsEOC) Flag(logger *slog.Logger, works []openalex
 		}
 
 		if len(concerningAuthors) > 0 {
-			flags = append(flags, &EOCCoauthorsFlag{
-				FlagType:    OACoauthorIsEOC,
-				FlagTitle:   "Co-author is Entity of Concern",
-				FlagMessage: fmt.Sprintf("The following co-authors of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningAuthors, "\n")),
-				Work:        work,
-				Coauthors:   concerningAuthors,
+			flags = append(flags, &api.HighRiskCoauthorFlag{
+				Message:   fmt.Sprintf("The following co-authors of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningAuthors, "\n")),
+				Work:      getWorkSummary(work),
+				Coauthors: concerningAuthors,
 			})
 			logger.Info("found concerning coauthors", "coauthors", concerningAuthors)
 		}
@@ -182,17 +185,17 @@ type OpenAlexAuthorAffiliationIsEOC struct {
 	concerningInstitutions eoc.EocSet
 }
 
-func (flagger *OpenAlexAuthorAffiliationIsEOC) Name() flagType {
-	return OAAuthorAffiliationIsEOC
+func (flagger *OpenAlexAuthorAffiliationIsEOC) Name() string {
+	return "AuthorAffiliationEOC"
 }
 
-func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]Flag, error) {
-	flags := make([]Flag, 0)
+func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
 		logger.Info("processing work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
 
-		concerningInstitutions := make(map[string]bool)
+		concerningAffiliations := make(map[string]bool)
 		for _, author := range work.Authors {
 			if !slices.Contains(targetAuthorIds, author.AuthorId) {
 				continue
@@ -200,21 +203,19 @@ func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works [
 			for _, institution := range author.Institutions {
 				if flagger.concerningEntities.Contains(institution.InstitutionId) ||
 					flagger.concerningInstitutions.Contains(institution.InstitutionId) {
-					concerningInstitutions[institution.InstitutionName] = true
+					concerningAffiliations[institution.InstitutionName] = true
 				}
 			}
 		}
 
-		if len(concerningInstitutions) > 0 {
-			concerningInstitutions := getKeys(concerningInstitutions)
-			flags = append(flags, &EOCAuthorAffiliationsFlag{
-				FlagType:     OAAuthorAffiliationIsEOC,
-				FlagTitle:    "This author is affiliated with entities of concern",
-				FlagMessage:  fmt.Sprintf("In '%s', this author is affiliated with entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningInstitutions, "\n")),
-				Work:         work,
-				Institutions: concerningInstitutions,
+		if len(concerningAffiliations) > 0 {
+			concerningAffiliations := getKeys(concerningAffiliations)
+			flags = append(flags, &api.AuthorAffiliationFlag{
+				Message:      fmt.Sprintf("In '%s', this author is affiliated with entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningAffiliations, "\n")),
+				Work:         getWorkSummary(work),
+				Affiliations: concerningAffiliations,
 			})
-			logger.Info("found concerning affiliations", "institutions", concerningInstitutions)
+			logger.Info("found concerning affiliations", "institutions", concerningAffiliations)
 		}
 		logger.Info("processed work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
 	}
@@ -229,17 +230,17 @@ type OpenAlexCoauthorAffiliationIsEOC struct {
 	concerningInstitutions eoc.EocSet
 }
 
-func (flagger *OpenAlexCoauthorAffiliationIsEOC) Name() flagType {
-	return OACoauthorAffiliationIsEOC
+func (flagger *OpenAlexCoauthorAffiliationIsEOC) Name() string {
+	return "CoauthorAffiliationEOC"
 }
 
-func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]Flag, error) {
-	flags := make([]Flag, 0)
+func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
 		logger.Info("processing work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
 
-		concerningInstitutions := make(map[string]bool)
+		concerningAffiliations := make(map[string]bool)
 		concerningCoauthors := make(map[string]bool)
 		for _, author := range work.Authors {
 			if slices.Contains(targetAuthorIds, author.AuthorId) {
@@ -248,24 +249,22 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works
 			for _, institution := range author.Institutions {
 				if flagger.concerningEntities.Contains(institution.InstitutionId) ||
 					flagger.concerningInstitutions.Contains(institution.InstitutionId) {
-					concerningInstitutions[institution.InstitutionName] = true
+					concerningAffiliations[institution.InstitutionName] = true
 					concerningCoauthors[author.DisplayName] = true
 				}
 			}
 		}
 
-		if len(concerningInstitutions) > 0 {
+		if len(concerningAffiliations) > 0 {
 			concerningCoauthors := getKeys(concerningCoauthors)
-			concerningInstitutions := getKeys(concerningInstitutions)
-			flags = append(flags, &EOCCoauthorAffiliationsFlag{
-				FlagType:     OACoauthorAffiliationIsEOC,
-				FlagTitle:    "This co-authors of work are affiliated with entities of concern",
-				FlagMessage:  fmt.Sprintf("In '%s', some of the co-authors are affiliated with entities of concern:\n%s\n\nAffiliated authors:\n%s", work.GetDisplayName(), strings.Join(concerningInstitutions, "\n"), strings.Join(concerningCoauthors, "\n")),
-				Work:         work,
-				Institutions: concerningInstitutions,
-				Authors:      concerningCoauthors,
+			concerningAffiliations := getKeys(concerningAffiliations)
+			flags = append(flags, &api.CoauthorAffiliationFlag{
+				Message:      fmt.Sprintf("In '%s', some of the co-authors are affiliated with entities of concern:\n%s\n\nAffiliated authors:\n%s", work.GetDisplayName(), strings.Join(concerningAffiliations, "\n"), strings.Join(concerningCoauthors, "\n")),
+				Work:         getWorkSummary(work),
+				Coauthors:    concerningCoauthors,
+				Affiliations: concerningAffiliations,
 			})
-			logger.Info("found concerning coauthor affiliations", "institutions", concerningInstitutions, "coauthors", concerningCoauthors)
+			logger.Info("found concerning coauthor affiliations", "institutions", concerningAffiliations, "coauthors", concerningCoauthors)
 		}
 		logger.Info("processed work", "work_id", work.WorkId, "target_authors", targetAuthorIds)
 	}
@@ -276,8 +275,10 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works
 }
 
 type cachedAckFlag struct {
+	Flagged  bool
 	Message  string
-	FlagData *EOCAcknowledgemntsFlag
+	Entities []api.AcknowledgementEntity
+	RawAcks  []string
 }
 
 type OpenAlexAcknowledgementIsEOC struct {
@@ -289,8 +290,8 @@ type OpenAlexAcknowledgementIsEOC struct {
 	sussyBakas   []string
 }
 
-func (flagger *OpenAlexAcknowledgementIsEOC) Name() flagType {
-	return OAAcknowledgementIsEOC
+func (flagger *OpenAlexAcknowledgementIsEOC) Name() string {
+	return "AcknowledgementEOC"
 }
 
 func (flagger *OpenAlexAcknowledgementIsEOC) getAuthorNames(authorIds []string) ([]string, error) {
@@ -420,8 +421,53 @@ func flagCacheKey(workId string, targetAuthorIds []string) string {
 	return fmt.Sprintf("%s;%v", workId, targetAuthorIds)
 }
 
-func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]Flag, error) {
-	flags := make([]Flag, 0)
+var talentPrograms = []string{
+	"Department of Defense - Foreign Talent Programs that Pose a Threat to National Security Interests of the United States",
+	"Foreign Talent Recruitment Programs",
+}
+
+var deniedEntities = []string{
+	"Chinese Military Companies Operating in the United States",
+}
+
+func containsSource(entities []api.AcknowledgementEntity, sourcesOfInterest []string) bool {
+	for _, entity := range entities {
+		for _, source := range entity.Sources {
+			if slices.Contains(sourcesOfInterest, source) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func createAcknowledgementFlag(work openalex.Work, message string, entities []api.AcknowledgementEntity, rawAcks []string) api.Flag {
+	if strings.Contains(message, "talent") || strings.Contains(message, "Talent") || containsSource(entities, talentPrograms) {
+		return &api.TalentContractFlag{
+			Message:            message,
+			Work:               getWorkSummary(work),
+			Entities:           entities,
+			RawAcknowledements: rawAcks,
+		}
+	} else if containsSource(entities, deniedEntities) {
+		return &api.AssociationWithDeniedEntityFlag{
+			Message:            message,
+			Work:               getWorkSummary(work),
+			Entities:           entities,
+			RawAcknowledements: rawAcks,
+		}
+	} else {
+		return &api.HighRiskFunderFlag{
+			Message:              message,
+			Work:                 getWorkSummary(work),
+			Funders:              rawAcks,
+			FromAcknowledgements: true,
+		}
+	}
+}
+
+func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+	flags := make([]api.Flag, 0)
 
 	remaining := make([]openalex.Work, 0)
 
@@ -440,15 +486,8 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 
 		if cacheEntry := flagger.flagCache.Lookup(flagCacheKey(workId, targetAuthorIds)); cacheEntry != nil {
 			logger.Info("found cached entry for work", "work_id", work.WorkId)
-			if cacheEntry.FlagData != nil {
-				flags = append(flags, &EOCAcknowledgemntsFlag{
-					FlagType:           OAAcknowledgementIsEOC,
-					FlagTitle:          "Acknowledgements are entities of concern",
-					FlagMessage:        cacheEntry.Message,
-					Work:               work,
-					Entities:           cacheEntry.FlagData.Entities,
-					RawAcknowledements: cacheEntry.FlagData.RawAcknowledements,
-				})
+			if cacheEntry.Flagged {
+				flags = append(flags, createAcknowledgementFlag(work, cacheEntry.Message, cacheEntry.Entities, cacheEntry.RawAcks))
 				logger.Info("cached entry contains flag", "work_id", workId)
 			}
 			continue
@@ -502,10 +541,10 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 				ackTexts = append(ackTexts, ack.RawText)
 			}
 
-			entities := make([]EOCAcknowledgementEntity, 0, len(flaggedEntities))
+			entities := make([]api.AcknowledgementEntity, 0, len(flaggedEntities))
 			for entity, sourceToAliases := range flaggedEntities {
 				sources, allAliases := getAllSourcesAndAliases(sourceToAliases)
-				entities = append(entities, EOCAcknowledgementEntity{
+				entities = append(entities, api.AcknowledgementEntity{
 					Entity:  entity,
 					Sources: sources,
 					Aliases: allAliases,
@@ -513,24 +552,24 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 			}
 
 			msg := fmt.Sprintf("%s\n%s", message, strings.Join(ackTexts, "\n"))
-			flag := &EOCAcknowledgemntsFlag{
-				FlagType:           OAAcknowledgementIsEOC,
-				FlagTitle:          "Acknowledgements are entities of concern",
-				FlagMessage:        fmt.Sprintf("%s\n%s", message, strings.Join(ackTexts, "\n")),
-				Work:               workIdToWork[acks.Result.WorkId],
-				Entities:           entities,
-				RawAcknowledements: ackTexts,
-			}
+			flag := createAcknowledgementFlag(
+				workIdToWork[acks.Result.WorkId],
+				fmt.Sprintf("%s\n%s", message, strings.Join(ackTexts, "\n")),
+				entities,
+				ackTexts,
+			)
 
 			flagger.flagCache.Update(flagCacheKey(acks.Result.WorkId, targetAuthorIds), cachedAckFlag{
+				Flagged:  true,
 				Message:  msg,
-				FlagData: flag,
+				Entities: entities,
+				RawAcks:  ackTexts,
 			})
 
 			flags = append(flags, flag)
 		} else {
 			flagger.flagCache.Update(flagCacheKey(acks.Result.WorkId, targetAuthorIds), cachedAckFlag{
-				FlagData: nil,
+				Flagged: false,
 			})
 		}
 
