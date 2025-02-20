@@ -24,44 +24,42 @@ on:
 
 jobs:
   go-unit-tests:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04-8-cores
     steps:
       - uses: actions/checkout@v2
 
-      - uses: actions/checkout@v2
-        with:
-          repository: ThirdAILabs/Universe
-          token: ${{ secrets.UNIVERSE_ACCESS_KEY }}
-          path: ./Universe
-          submodules: 'recursive'
+      # - uses: actions/checkout@v2
+      #   with:
+      #     repository: ThirdAILabs/Universe
+      #     token: ${{ secrets.UNIVERSE_ACCESS_KEY }}
+      #     path: ./Universe
+      #     submodules: 'recursive'
 
       - name: set up go >=1.23.1
         uses: actions/setup-go@v5
         with:
           go-version: '>=1.23.1'
 
-      - name: build universe library
-        run: |
-          cd ./Universe
-          bin/build.py -f THIRDAI_BUILD_LICENSE THIRDAI_CHECK_LICENSE
+      # - name: build universe library
+      #   run: |
+      #     cd ./Universe
+      #     bin/build.py -f THIRDAI_BUILD_LICENSE THIRDAI_CHECK_LICENSE
 
-      - name: archive libraries
-        uses: actions/upload-artifact@v4
-        with:
-          name: libraries
-          path: |
-            ./Universe/build/libthirdai.a
-            ./Universe/build/deps/rocksdb/librocksdb.a
-            ./Universe/build/deps/utf8proc/libutf8proc.a
-            ./Universe/build/deps/cryptopp-cmake/cryptopp/libcryptopp.a
+      # - name: archive libraries
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: libraries
+      #     path: |
+      #       ./Universe/build/libthirdai.a
+      #       ./Universe/build/deps/rocksdb/librocksdb.a
+      #       ./Universe/build/deps/utf8proc/libutf8proc.a
+      #       ./Universe/build/deps/cryptopp-cmake/cryptopp/libcryptopp.a
 
       - name: copy libraries for bindings
         run: |
           mkdir -p prism/search/lib/linux_x64
-          cp ./Universe/build/libthirdai.a prism/search/lib/linux_x64
-          cp ./Universe/build/deps/rocksdb/librocksdb.a prism/search/lib/linux_x64
-          cp ./Universe/build/deps/utf8proc/libutf8proc.a prism/search/lib/linux_x64
-          cp ./Universe/build/deps/cryptopp-cmake/cryptopp/libcryptopp.a prism/search/lib/linux_x64
+          cp -r prism/search/lib/gh_actions/ prism/search/lib/linux_x64
+          ls prism/search/lib/linux_x64
       
       - name: run unit tests
         run: |
