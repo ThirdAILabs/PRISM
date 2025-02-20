@@ -49,13 +49,6 @@ func profileToAuthor(profile gscholarProfile) api.Author {
 	}
 }
 
-func nextPageFilter(nextPageToken *string) string {
-	if nextPageToken != nil {
-		return fmt.Sprintf("&after_author=%s", *nextPageToken) // Should this be escaped?
-	}
-	return ""
-}
-
 func nextGScholarPageV1(query string, nextPageToken *string) ([]api.Author, *string, error) {
 	type gscholarResults struct {
 		Profiles   []gscholarProfile `json:"profiles"`
