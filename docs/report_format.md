@@ -32,7 +32,7 @@ Notes:
 {
     "Message": "Description of flag",
     "Work": {
-		"WorkId": "id for work",
+        "WorkId": "id for work",
         "DisplayName": "name of work",
         "WorkUrl": "url to work (if found)",
         "OaUrl": "open alex work url (if found)",
@@ -55,7 +55,7 @@ Notes:
 {
     "Message": "Description of flag",
     "Work": {
-		"WorkId": "id for work",
+        "WorkId": "id for work",
         "DisplayName": "name of work",
         "WorkUrl": "url to work (if found)",
         "OaUrl": "open alex work url (if found)",
@@ -82,7 +82,7 @@ Notes:
 {
     "Message": "Description of flag",
     "Work": {
-		"WorkId": "id for work",
+        "WorkId": "id for work",
         "DisplayName": "name of work",
         "WorkUrl": "url to work (if found)",
         "OaUrl": "open alex work url (if found)",
@@ -98,7 +98,7 @@ Notes:
 {
     "Message": "Description of flag",
     "Work": {
-		"WorkId": "id for work",
+        "WorkId": "id for work",
         "DisplayName": "name of work",
         "WorkUrl": "url to work (if found)",
         "OaUrl": "open alex work url (if found)",
@@ -135,10 +135,10 @@ Notes:
     "DocEntities": ["Entities in DOJ press release"],
     "EntityMentioned": "Entity mentioned in press release with link to author",
     "Connections": [
-		{
-			"DocTitle": "Name of doc",
-			"DocUrl": "Url of doc"
-		}
+        {
+            "DocTitle": "Name of doc",
+            "DocUrl": "Url of doc"
+        }
     ],
     "FrequentCoauthor": "Optional: name of frequent coauthor if that is the link",
     "Disclosed": false
@@ -150,7 +150,7 @@ Notes:
 {
     "Message": "Description of flag",
     "Work": {
-		"WorkId": "id for work",
+        "WorkId": "id for work",
         "DisplayName": "name of work",
         "WorkUrl": "url to work (if found)",
         "OaUrl": "open alex work url (if found)",
