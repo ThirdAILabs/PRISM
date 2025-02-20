@@ -88,7 +88,7 @@ No request body
 ```
 __Example Response__:
 
-Note: The format of the report content still needs to be decided. We could also have a parameter in the endpoint to specify the format.
+Note: See the `report_format.md` for a description of the format of the report content.
 
 ```json
 {
@@ -100,7 +100,9 @@ Note: The format of the report content still needs to be decided. We could also 
     "StartYear": 3,
     "EndYear": 8,
     "Status": "in-progress",
-    "Content": "format TBD"
+    "Content": {
+
+    }
 }
 ```
 

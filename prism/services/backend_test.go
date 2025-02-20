@@ -6,12 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/openalex"
+	"prism/prism/reports"
 	"prism/prism/schema"
 	"prism/prism/search"
 	"prism/prism/services"
@@ -61,7 +63,7 @@ func (m *MockTokenVerifier) VerifyToken(token string) (uuid.UUID, error) {
 	return id, nil
 }
 
-func createBackend(t *testing.T) http.Handler {
+func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
 	if err != nil {
 		t.Fatal(err)
@@ -92,7 +94,7 @@ func createBackend(t *testing.T) http.Handler {
 		db, openalex.NewRemoteKnowledgeBase(), ndb, &MockTokenVerifier{prefix: userPrefix}, &MockTokenVerifier{prefix: adminPrefix},
 	)
 
-	return backend.Routes()
+	return backend.Routes(), db
 }
 
 var ErrUnauthorized = errors.New("unauthorized")
@@ -250,7 +252,7 @@ func deactivateLicense(backend http.Handler, user string, id uuid.UUID) error {
 }
 
 func TestLicenseEndpoints(t *testing.T) {
-	backend := createBackend(t)
+	backend, _ := createBackend(t)
 
 	admin := newAdmin()
 	user1, user2 := newUser(), newUser()
@@ -317,8 +319,123 @@ func TestLicenseEndpoints(t *testing.T) {
 	}
 }
 
+func TestCheckDisclosure(t *testing.T) {
+	backend, db := createBackend(t)
+
+	admin := newAdmin()
+	user := newUser()
+
+	manager := reports.NewManager(db)
+
+	license, err := createLicense(backend, "test-disclosure-license", admin)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := activateLicense(backend, user, license.License); err != nil {
+		t.Fatal(err)
+	}
+
+	reportResp, err := createReport(backend, user, "disclosure-report")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var report schema.Report
+	if err := db.First(&report, "id = ?", reportResp.Id).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	if err := db.Model(&report).Update("status", schema.ReportCompleted).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	content := api.ReportContent{
+		TalentContracts: []*api.TalentContractFlag{
+			{
+				DisclosableFlag: api.DisclosableFlag{},
+				Message:         "Test disclosure flag - TalentContract",
+				Work: api.WorkSummary{
+					WorkId:          "work-1",
+					DisplayName:     "Test Work",
+					WorkUrl:         "http://example.com/work-1",
+					OaUrl:           "http://example.com/oa/work-1",
+					PublicationYear: 2020,
+				},
+				RawAcknowledements: []string{"discloseme"},
+			},
+		},
+		AssociationsWithDeniedEntities: []*api.AssociationWithDeniedEntityFlag{
+			{
+				DisclosableFlag: api.DisclosableFlag{},
+				Message:         "Test disclosure flag - Association",
+				Work: api.WorkSummary{
+					WorkId:          "work-2",
+					DisplayName:     "Test Work 2",
+					WorkUrl:         "http://example.com/work-2",
+					OaUrl:           "http://example.com/oa/work-2",
+					PublicationYear: 2021,
+				},
+				RawAcknowledements: []string{"nonmatching"},
+			},
+		},
+	}
+	contentBytes, err := json.Marshal(content)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := manager.UpdateReport(report.Id, schema.ReportCompleted, contentBytes); err != nil {
+		t.Fatal(err)
+	}
+
+	var buf bytes.Buffer
+	writer := multipart.NewWriter(&buf)
+	part, err := writer.CreateFormFile("files", "sample.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = part.Write([]byte("This sample file contains discloseme which should trigger disclosure."))
+	if err != nil {
+		t.Fatal(err)
+	}
+	writer.Close()
+
+	endpoint := fmt.Sprintf("/report/%s/check-disclosure", reportResp.Id.String())
+	req := httptest.NewRequest("POST", endpoint, &buf)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Add("Authorization", "Bearer "+user)
+
+	w := httptest.NewRecorder()
+	backend.ServeHTTP(w, req)
+	res := w.Result()
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("expected status 200; got %d, response: %s", res.StatusCode, w.Body.String())
+	}
+
+	var updatedReport api.Report
+	if err := json.NewDecoder(res.Body).Decode(&updatedReport); err != nil {
+		t.Fatal(err)
+	}
+
+	if len(updatedReport.Content.TalentContracts) != 1 {
+		t.Fatalf("expected 1 TalentContract flag; got %d", len(updatedReport.Content.TalentContracts))
+	}
+	if !updatedReport.Content.TalentContracts[0].Disclosed {
+		t.Fatal("expected TalentContract flag to be marked as disclosed")
+	}
+
+	if len(updatedReport.Content.AssociationsWithDeniedEntities) != 1 {
+		t.Fatalf("expected 1 AssociationWithDeniedEntity flag; got %d", len(updatedReport.Content.AssociationsWithDeniedEntities))
+	}
+	if updatedReport.Content.AssociationsWithDeniedEntities[0].Disclosed {
+		t.Fatal("expected AssociationWithDeniedEntity flag to remain undisclosed")
+	}
+}
+
 func TestLicenseExpiration(t *testing.T) {
-	backend := createBackend(t)
+	backend, _ := createBackend(t)
 
 	admin := newAdmin()
 	user1, user2 := newUser(), newUser()
@@ -348,7 +465,7 @@ func TestLicenseExpiration(t *testing.T) {
 }
 
 func TestLicenseInvalidLicense(t *testing.T) {
-	backend := createBackend(t)
+	backend, _ := createBackend(t)
 
 	admin := newAdmin()
 	user := newUser()
@@ -380,7 +497,7 @@ func TestLicenseInvalidLicense(t *testing.T) {
 }
 
 func TestReportEndpoints(t *testing.T) {
-	backend := createBackend(t)
+	backend, _ := createBackend(t)
 
 	admin := newAdmin()
 	user1, user2 := newUser(), newUser()
@@ -436,7 +553,7 @@ func TestReportEndpoints(t *testing.T) {
 }
 
 func TestAutocompleteAuthor(t *testing.T) {
-	backend := createBackend(t)
+	backend, _ := createBackend(t)
 
 	user := newUser()
 
@@ -460,7 +577,7 @@ func TestAutocompleteAuthor(t *testing.T) {
 }
 
 func TestAutocompleteInstution(t *testing.T) {
-	backend := createBackend(t)
+	backend, _ := createBackend(t)
 
 	user := newUser()
 
@@ -484,7 +601,7 @@ func TestAutocompleteInstution(t *testing.T) {
 }
 
 func TestMatchEntities(t *testing.T) {
-	backend := createBackend(t)
+	backend, _ := createBackend(t)
 
 	user := newUser()
 
@@ -500,7 +617,7 @@ func TestMatchEntities(t *testing.T) {
 }
 
 func TestSearchOpenalexAuthors(t *testing.T) {
-	backend := createBackend(t)
+	backend, _ := createBackend(t)
 
 	user := newUser()
 
@@ -523,7 +640,7 @@ func TestSearchOpenalexAuthors(t *testing.T) {
 }
 
 func TestSearchGoogleScholarAuthors(t *testing.T) {
-	backend := createBackend(t)
+	backend, _ := createBackend(t)
 
 	user := newUser()
 
@@ -545,7 +662,7 @@ func TestSearchGoogleScholarAuthors(t *testing.T) {
 }
 
 func TestSearchGoogleScholarAuthorsWithCursor(t *testing.T) {
-	backend := createBackend(t)
+	backend, _ := createBackend(t)
 
 	user := newUser()
 
