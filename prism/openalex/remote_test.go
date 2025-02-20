@@ -5,7 +5,6 @@ import (
 	"slices"
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestAutocompleteAuthor(t *testing.T) {
@@ -259,8 +258,6 @@ func TestFindWorksByTitle(t *testing.T) {
 }
 
 func TestGetAuthor(t *testing.T) {
-	time.Sleep(time.Second) // hack to get around openalex rate limit, otherwise running all tests hits limit
-
 	oa := openalex.NewRemoteKnowledgeBase()
 
 	authorId := "https://openalex.org/A5024993683"
