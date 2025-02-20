@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/xuri/excelize/v2"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -431,6 +432,107 @@ func TestCheckDisclosure(t *testing.T) {
 	}
 	if updatedReport.Content.AssociationsWithDeniedEntities[0].Disclosed {
 		t.Fatal("expected AssociationWithDeniedEntity flag to remain undisclosed")
+	}
+}
+
+func TestDownloadReportExcel(t *testing.T) {
+	backend, db := createBackend(t)
+
+	admin := newAdmin()
+	user := newUser()
+
+	license, err := createLicense(backend, "download-license", admin)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := activateLicense(backend, user, license.License); err != nil {
+		t.Fatal(err)
+	}
+
+	reportResp, err := createReport(backend, user, "download-report")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	content := api.ReportContent{
+		TalentContracts: []*api.TalentContractFlag{
+			{
+				DisclosableFlag: api.DisclosableFlag{},
+				Message:         "Test Talent Contract",
+				Work: api.WorkSummary{
+					WorkId:          "work-1",
+					DisplayName:     "Test Work",
+					WorkUrl:         "http://example.com/work-1",
+					OaUrl:           "http://example.com/oa/work-1",
+					PublicationYear: 2020,
+				},
+				RawAcknowledements: []string{"flag-content"},
+			},
+		},
+		AssociationsWithDeniedEntities: []*api.AssociationWithDeniedEntityFlag{},
+		HighRiskFunders:                []*api.HighRiskFunderFlag{},
+		AuthorAffiliations:             []*api.AuthorAffiliationFlag{},
+		PotentialAuthorAffiliations:    []*api.PotentialAuthorAffiliationFlag{},
+		MiscHighRiskAssociations:       []*api.MiscHighRiskAssociationFlag{},
+		CoauthorAffiliations:           []*api.CoauthorAffiliationFlag{},
+	}
+	contentBytes, err := json.Marshal(content)
+	if err != nil {
+		t.Fatal(err)
+	}
+	manager := reports.NewManager(db)
+	if err := manager.UpdateReport(reportResp.Id, schema.ReportCompleted, contentBytes); err != nil {
+		t.Fatal(err)
+	}
+
+	endpoint := fmt.Sprintf("/report/%s/download?format=excel", reportResp.Id.String())
+	req := httptest.NewRequest("GET", endpoint, nil)
+	req.Header.Add("Authorization", "Bearer "+user)
+	w := httptest.NewRecorder()
+	backend.ServeHTTP(w, req)
+	res := w.Result()
+	defer res.Body.Close()
+
+	var fileResp services.FileResponse
+	if err := json.NewDecoder(res.Body).Decode(&fileResp); err != nil {
+		t.Fatalf("error decoding JSON response: %v", err)
+	}
+
+	expectedContentType := "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	if fileResp.ContentType != expectedContentType {
+		t.Fatalf("expected content type %s, got %s", expectedContentType, fileResp.ContentType)
+	}
+	if fileResp.Filename != "report.xlsx" {
+		t.Fatalf("expected filename 'report.xlsx', got %s", fileResp.Filename)
+	}
+
+	if len(fileResp.Content) == 0 {
+		t.Fatal("downloaded excel file is empty")
+	}
+
+	f, err := excelize.OpenReader(bytes.NewReader(fileResp.Content))
+	if err != nil {
+		t.Fatalf("error opening excel file: %v", err)
+	}
+
+	sheets := f.GetSheetList()
+	found := false
+	for _, sheet := range sheets {
+		if sheet == "Talent Contracts" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("excel file does not contain sheet 'Talent Contracts'; sheets: %v", sheets)
+	}
+
+	val, err := f.GetCellValue("Talent Contracts", "B2")
+	if err != nil {
+		t.Fatalf("error reading cell value from 'Talent Contracts' sheet: %v", err)
+	}
+	if !strings.Contains(val, "Test Talent Contract") {
+		t.Fatalf("expected flag message 'Test Talent Contract' in cell B2, got %s", val)
 	}
 }
 
