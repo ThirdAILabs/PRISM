@@ -6,9 +6,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  PRODUCT_VERSION: "latest"
-  
 # Controls when the workflow will run
 on:
   # Allows you to run this workflow manually from the Actions tab
