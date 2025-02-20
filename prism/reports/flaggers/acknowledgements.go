@@ -32,9 +32,17 @@ type GrobidAcknowledgementsExtractor struct {
 
 func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downloadDir string) *GrobidAcknowledgementsExtractor {
 	return &GrobidAcknowledgementsExtractor{
-		cache:       cache,
-		maxWorkers:  10,
-		grobid:      resty.New().SetBaseURL(grobidEndpoint),
+		cache:      cache,
+		maxWorkers: 10,
+		grobid: resty.New().
+			SetBaseURL(grobidEndpoint).
+			AddRetryCondition(func(response *resty.Response, err error) bool {
+				// There's no reason to retry other 400 requests since the outcome should not change
+				return response != nil && (response.StatusCode() > 499 || response.StatusCode() == http.StatusTooManyRequests)
+			}).
+			SetRetryCount(3).
+			SetRetryWaitTime(time.Second).
+			SetRetryMaxWaitTime(10 * time.Second),
 		downloadDir: downloadDir,
 	}
 }
@@ -132,7 +140,7 @@ func downloadWithPlaywright(url, destPath string) (io.ReadCloser, error) {
 		return nil, fmt.Errorf("error starting playwright: %w", err)
 	}
 	// Skipping error check since there's nothing we can do if this fails
-	defer pw.Stop() //nolint:errcheck 
+	defer pw.Stop() //nolint:errcheck
 
 	browser, err := pw.Firefox.Launch(playwright.BrowserTypeLaunchOptions{Headless: playwright.Bool(true)})
 	if err != nil {
@@ -285,7 +293,7 @@ func (extractor *GrobidAcknowledgementsExtractor) processPdfWithGrobid(pdf io.Re
 	}
 
 	if !res.IsSuccess() {
-		return nil, fmt.Errorf("grobid '%s' returned status=%d, error=%v", res.Request.URL, res.StatusCode(), string(res.Body()))
+		return nil, fmt.Errorf("grobid '%s' returned status=%d, error=%v", res.Request.URL, res.StatusCode(), res.String())
 	}
 
 	body := res.Body()

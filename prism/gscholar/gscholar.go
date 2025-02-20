@@ -5,36 +5,33 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"log/slog"
 	"net/http"
-	"net/url"
 	"prism/prism/api"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/go-resty/resty/v2"
 )
 
 const ApiKey = "24e6015d3c452c7678abe92dd7e585b2cbcf2886b5b8ce7ed685d26e98d0930d"
+
+var client = resty.New().
+	SetBaseURL("https://serpapi.com").
+	SetQueryParam("api_key", ApiKey).
+	AddRetryCondition(func(response *resty.Response, err error) bool {
+		// There's no reason to retry other 400 requests since the outcome should not change
+		return response != nil && (response.StatusCode() > 499 || response.StatusCode() == http.StatusTooManyRequests)
+	}).
+	SetRetryCount(3)
 
 var (
 	ErrGoogleScholarSearchFailed = errors.New("google scholar search failed")
 	ErrInvalidCursor             = errors.New("invalid cursor")
 	ErrCursorCreationFailed      = errors.New("cursor creation failed")
 )
-
-func checkStatus(res *http.Response) error {
-	if res.StatusCode != http.StatusOK {
-		body, err := io.ReadAll(res.Body)
-		if err != nil {
-			slog.Error("google scholar: recieved reponse error", "method", res.Request.Method, "endpoint", res.Request.URL.String(), "status_code", res.StatusCode)
-		} else {
-			slog.Error("google scholar: recieved reponse error", "method", res.Request.Method, "endpoint", res.Request.URL.String(), "status_code", res.StatusCode, "body", string(body))
-		}
-		return fmt.Errorf("google scholar returned status=%d", res.StatusCode)
-	}
-	return nil
-}
 
 type gscholarProfile struct {
 	AuthorId      string  `json:"author_id"`
@@ -59,35 +56,38 @@ func nextPageFilter(nextPageToken *string) string {
 	return ""
 }
 
-const (
-	profilesUrlTemplate = `https://serpapi.com/search.json?engine=google_scholar_profiles&mauthors=%s&api_key=%s%s`
-)
-
 func nextGScholarPageV1(query string, nextPageToken *string) ([]api.Author, *string, error) {
-	url := fmt.Sprintf(profilesUrlTemplate, url.QueryEscape(query), ApiKey, nextPageFilter(nextPageToken))
-
-	res, err := http.Get(url)
-	if err != nil {
-		slog.Error("google scholar profile search: search failed", "query", query, "error", err)
-		return nil, nil, ErrGoogleScholarSearchFailed
-	}
-	defer res.Body.Close()
-
-	if err := checkStatus(res); err != nil {
-		return nil, nil, ErrGoogleScholarSearchFailed
-	}
-
-	var results struct {
+	type gscholarResults struct {
 		Profiles   []gscholarProfile `json:"profiles"`
 		Pagination struct {
 			NextPageToken *string `json:"next_page_token"`
 		} `json:"pagination"`
 	}
 
-	if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
-		slog.Error("google scholar profile search: error parsing reponse", "query", query, "error", err)
+	params := map[string]string{
+		"engine":   "google_scholar_profiles",
+		"mauthors": query,
+	}
+	if nextPageToken != nil {
+		params["after_author"] = *nextPageToken
+	}
+
+	res, err := client.R().
+		SetResult(&gscholarResults{}).
+		SetQueryParams(params).
+		Get("/search.json")
+
+	if err != nil {
+		slog.Error("google scholar profile search: search failed", "query", query, "error", err)
 		return nil, nil, ErrGoogleScholarSearchFailed
 	}
+
+	if !res.IsSuccess() {
+		slog.Error("google scholar profile search returned error", "status_code", res.StatusCode(), "body", res.String())
+		return nil, nil, ErrGoogleScholarSearchFailed
+	}
+
+	results := res.Result().(*gscholarResults)
 
 	authors := make([]api.Author, 0, len(results.Profiles))
 	for _, profile := range results.Profiles {
@@ -98,36 +98,36 @@ func nextGScholarPageV1(query string, nextPageToken *string) ([]api.Author, *str
 }
 
 func getAuthorDetails(authorId string) (api.Author, error) {
-	url := fmt.Sprintf("https://serpapi.com/search?engine=google_scholar_author&author_id=%s&num=0&start=0&sort=pubdate&api_key=%s", authorId, ApiKey)
+	type authorDetailsResult struct {
+		Author gscholarProfile `json:"author"`
+	}
 
-	res, err := http.Get(url)
+	res, err := client.R().
+		SetResult(&authorDetailsResult{}).
+		SetQueryParam("engine", "google_scholar_author").
+		SetQueryParam("author_id", authorId).
+		SetQueryParam("num", "0").
+		SetQueryParam("start", "0").
+		SetQueryParam("sort", "pubdate").
+		Get("/search")
+
 	if err != nil {
 		slog.Error("google scholar author search failed", "author_id", authorId, "error", err)
 		return api.Author{}, ErrGoogleScholarSearchFailed
 	}
-	defer res.Body.Close()
 
-	if err := checkStatus(res); err != nil {
+	if !res.IsSuccess() {
+		slog.Error("google scholar author search returned error", "status_code", res.StatusCode(), "body", res.String())
 		return api.Author{}, ErrGoogleScholarSearchFailed
 	}
 
-	var result struct {
-		Author gscholarProfile `json:"author"`
-	}
-
-	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
-		slog.Error("google scholar author search failed: error parsing reponse", "author_id", authorId, "error", err)
-		return api.Author{}, ErrGoogleScholarSearchFailed
-	}
+	result := res.Result().(*authorDetailsResult)
 	result.Author.AuthorId = authorId // For some reason this isn't part of the response from the endpoint
 
 	return profileToAuthor(result.Author), nil
 }
 
-const (
-	nResultsPerPage     = 20
-	gscholarUrlTemplate = `https://serpapi.com/search.json?engine=google_scholar&q=%s&api_key=%s&start=%d&num=%d`
-)
+const ()
 
 func getAuthorId(link string) string {
 	start := strings.Index(link, "user=")
@@ -149,6 +149,18 @@ func authorNameInQuery(name string, queryTokens []string) bool {
 }
 
 func nextGScholarPageV2(query string, nextIdx *int, seen map[string]bool) ([]api.Author, *int, error) {
+	type gscholarResults struct {
+		OrganicResults []struct {
+			PublicationInfo struct {
+				Authors []struct {
+					Name string `json:"name"`
+					Link string `json:"link"`
+				} `json:"authors"`
+			} `json:"publication_info"`
+		} `json:"organic_results"`
+	}
+	const nResultsPerPage = 20
+
 	queryTokens := strings.Split(strings.ToLower(query), " ")
 
 	authorIds := make([]string, 0)
@@ -161,35 +173,27 @@ func nextGScholarPageV2(query string, nextIdx *int, seen map[string]bool) ([]api
 	seenInbatch := make(map[string]bool)
 
 	for i := 0; i < 5 && len(authorIds) == 0; i++ {
-		url := fmt.Sprintf(gscholarUrlTemplate, url.QueryEscape(query), ApiKey, startIdx, nResultsPerPage)
-		startIdx += nResultsPerPage
+		res, err := client.R().
+			SetResult(&gscholarResults{}).
+			SetQueryParam("engine", "google_scholar").
+			SetQueryParam("q", query).
+			SetQueryParam("start", strconv.Itoa(startIdx)).
+			SetQueryParam("num", strconv.Itoa(nResultsPerPage)).
+			Get("/search.json")
 
-		res, err := http.Get(url)
 		if err != nil {
 			slog.Error("google scholar search: search failed", "query", query, "error", err)
 			return nil, nil, ErrGoogleScholarSearchFailed
 		}
-		defer res.Body.Close()
 
-		if err := checkStatus(res); err != nil {
+		startIdx += nResultsPerPage
+
+		if !res.IsSuccess() {
+			slog.Error("google scholar search returned error", "status_code", res.StatusCode(), "body", res.String())
 			return nil, nil, ErrGoogleScholarSearchFailed
 		}
 
-		var results struct {
-			OrganicResults []struct {
-				PublicationInfo struct {
-					Authors []struct {
-						Name string `json:"name"`
-						Link string `json:"link"`
-					} `json:"authors"`
-				} `json:"publication_info"`
-			} `json:"organic_results"`
-		}
-
-		if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
-			slog.Error("google scholar search: error parsing reponse", "query", query, "error", err)
-			return nil, nil, ErrGoogleScholarSearchFailed
-		}
+		results := res.Result().(*gscholarResults)
 
 		for _, result := range results.OrganicResults {
 			for _, author := range result.PublicationInfo.Authors {
@@ -369,28 +373,32 @@ func (iter *AuthorPaperIterator) Next() ([]string, error) {
 		return nil, nil
 	}
 
-	const batchSize = 100
-
-	url := fmt.Sprintf("https://serpapi.com/search?engine=google_scholar_author&author_id=%s&num=%d&start=%d&sort=pubdate&api_key=%s", iter.authorId, batchSize, iter.start, ApiKey)
-
-	res, err := http.Get(url)
-	if err != nil {
-		slog.Error("google scholar: error getting author papers", "author_id", iter.authorId, "error", err)
-		return nil, fmt.Errorf("google scholar error: %w", err)
-	}
-
-	if err := checkStatus(res); err != nil {
-		return nil, err
-	}
-
-	var results struct {
+	type gscholarPapers struct {
 		Articles []gscholarPaper `json:"articles"`
 	}
 
-	if err := json.NewDecoder(res.Body).Decode(&results); err != nil {
-		slog.Error("google scholar: error parsing papers reponse", "author_id", iter.authorId, "error", err)
-		return nil, fmt.Errorf("error parsing response from google scholar: %w", err)
+	const batchSize = 100
+
+	res, err := client.R().
+		SetResult(&gscholarPapers{}).
+		SetQueryParam("engine", "google_scholar_author").
+		SetQueryParam("author_id", iter.authorId).
+		SetQueryParam("num", strconv.Itoa(batchSize)).
+		SetQueryParam("start", strconv.Itoa(iter.start)).
+		SetQueryParam("sort", "pubdate").
+		Get("/search")
+
+	if err != nil {
+		slog.Error("google scholar paper search failed", "author_id", iter.authorId, "error", err)
+		return nil, fmt.Errorf("google scholar error: %w", err)
 	}
+
+	if !res.IsSuccess() {
+		slog.Error("google scholar paper search returned error", "status_code", res.StatusCode(), "body", res.String())
+		return nil, ErrGoogleScholarSearchFailed
+	}
+
+	results := res.Result().(*gscholarPapers)
 
 	titles := make([]string, 0, len(results.Articles))
 	for _, paper := range results.Articles {
