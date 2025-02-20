@@ -413,12 +413,9 @@ func generateCSV(report api.Report) ([]byte, error) {
 	rows := [][]string{
 		{"Report ID", report.Id.String()},
 		{"Created At", report.CreatedAt.Format(time.RFC3339)},
-		{"Author ID", report.AuthorId},
 		{"Author Name", report.AuthorName},
-		{"Source", report.Source},
 		{"Start Year", fmt.Sprintf("%d", report.StartYear)},
 		{"End Year", fmt.Sprintf("%d", report.EndYear)},
-		{"Status", report.Status},
 	}
 
 	for _, row := range rows {
@@ -507,12 +504,9 @@ func generatePDF(report api.Report) ([]byte, error) {
 
 	addLine("Report ID", report.Id.String())
 	addLine("Created At", report.CreatedAt.Format(time.RFC3339))
-	addLine("Author ID", report.AuthorId)
 	addLine("Author Name", report.AuthorName)
-	addLine("Source", report.Source)
 	addLine("Start Year", fmt.Sprintf("%d", report.StartYear))
 	addLine("End Year", fmt.Sprintf("%d", report.EndYear))
-	addLine("Status", report.Status)
 
 	printFlagPage := func(category string, flag api.Flag) error {
 		pdf.AddPage()
@@ -588,12 +582,9 @@ func generateExcel(report api.Report) ([]byte, error) {
 	summaryData := [][]interface{}{
 		{"Report ID", report.Id.String()},
 		{"Created At", report.CreatedAt.Format(time.RFC3339)},
-		{"Author ID", report.AuthorId},
 		{"Author Name", report.AuthorName},
-		{"Source", report.Source},
 		{"Start Year", report.StartYear},
 		{"End Year", report.EndYear},
-		{"Status", report.Status},
 	}
 
 	for i, row := range summaryData {
@@ -661,7 +652,7 @@ func createSheetForTalentContracts(f *excelize.File, flags []*api.TalentContract
 		return err
 	}
 
-	headers := []string{"Key", "Message", "Disclosed", "Work ID", "Display Name", "Work URL", "Publication Year", "Raw Acknowledgements"}
+	headers := []string{"Key", "Message", "Disclosed", "Display Name", "Work URL", "Publication Year", "Raw Acknowledgements"}
 	for col, header := range headers {
 		cell, err := excelize.CoordinatesToCellName(col+1, 1)
 		if err != nil {
@@ -681,9 +672,6 @@ func createSheetForTalentContracts(f *excelize.File, flags []*api.TalentContract
 			return err
 		}
 		if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", rowNum), flag.Disclosed); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", rowNum), flag.Work.WorkId); err != nil {
 			return err
 		}
 		if err := f.SetCellValue(sheetName, fmt.Sprintf("E%d", rowNum), flag.Work.DisplayName); err != nil {
@@ -708,7 +696,7 @@ func createSheetForAssociations(f *excelize.File, flags []*api.AssociationWithDe
 		return err
 	}
 
-	headers := []string{"Key", "Message", "Disclosed", "Work ID", "Display Name", "Work URL", "Publication Year", "Raw Acknowledgements"}
+	headers := []string{"Key", "Message", "Disclosed", "Display Name", "Work URL", "Publication Year", "Raw Acknowledgements"}
 	for col, header := range headers {
 		cell, err := excelize.CoordinatesToCellName(col+1, 1)
 		if err != nil {
@@ -728,9 +716,6 @@ func createSheetForAssociations(f *excelize.File, flags []*api.AssociationWithDe
 			return err
 		}
 		if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", rowNum), flag.Disclosed); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", rowNum), flag.Work.WorkId); err != nil {
 			return err
 		}
 		if err := f.SetCellValue(sheetName, fmt.Sprintf("E%d", rowNum), flag.Work.DisplayName); err != nil {
@@ -756,7 +741,7 @@ func createSheetForHighRiskFunders(f *excelize.File, flags []*api.HighRiskFunder
 		return err
 	}
 
-	headers := []string{"Key", "Message", "Disclosed", "Work ID", "Display Name", "Work URL", "Publication Year", "Funders", "From Acknowledgements"}
+	headers := []string{"Key", "Message", "Disclosed", "Display Name", "Work URL", "Publication Year", "Funders", "From Acknowledgements"}
 	for col, header := range headers {
 		cell, err := excelize.CoordinatesToCellName(col+1, 1)
 		if err != nil {
@@ -776,9 +761,6 @@ func createSheetForHighRiskFunders(f *excelize.File, flags []*api.HighRiskFunder
 			return err
 		}
 		if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", rowNum), flag.Disclosed); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", rowNum), flag.Work.WorkId); err != nil {
 			return err
 		}
 		if err := f.SetCellValue(sheetName, fmt.Sprintf("E%d", rowNum), flag.Work.DisplayName); err != nil {
@@ -806,7 +788,7 @@ func createSheetForAuthorAffiliations(f *excelize.File, flags []*api.AuthorAffil
 		return err
 	}
 
-	headers := []string{"Key", "Message", "Disclosed", "Work ID", "Display Name", "Work URL", "Publication Year", "Affiliations"}
+	headers := []string{"Key", "Message", "Disclosed", "Display Name", "Work URL", "Publication Year", "Affiliations"}
 	for col, header := range headers {
 		cell, err := excelize.CoordinatesToCellName(col+1, 1)
 		if err != nil {
@@ -826,9 +808,6 @@ func createSheetForAuthorAffiliations(f *excelize.File, flags []*api.AuthorAffil
 			return err
 		}
 		if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", rowNum), flag.Disclosed); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", rowNum), flag.Work.WorkId); err != nil {
 			return err
 		}
 		if err := f.SetCellValue(sheetName, fmt.Sprintf("E%d", rowNum), flag.Work.DisplayName); err != nil {
@@ -940,7 +919,7 @@ func createSheetForCoauthorAffiliations(f *excelize.File, flags []*api.CoauthorA
 		return err
 	}
 
-	headers := []string{"Key", "Message", "Disclosed", "Work ID", "Display Name", "Work URL", "Publication Year", "Coauthors", "Affiliations"}
+	headers := []string{"Key", "Message", "Disclosed", "Display Name", "Work URL", "Publication Year", "Coauthors", "Affiliations"}
 	for col, header := range headers {
 		cell, err := excelize.CoordinatesToCellName(col+1, 1)
 		if err != nil {
@@ -960,9 +939,6 @@ func createSheetForCoauthorAffiliations(f *excelize.File, flags []*api.CoauthorA
 			return err
 		}
 		if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", rowNum), flag.Disclosed); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", rowNum), flag.Work.WorkId); err != nil {
 			return err
 		}
 		if err := f.SetCellValue(sheetName, fmt.Sprintf("E%d", rowNum), flag.Work.DisplayName); err != nil {
