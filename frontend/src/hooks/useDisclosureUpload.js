@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import axios from 'axios';
 import UserService from '../services/userService';
 import { API_BASE_URL } from '../services/apiService';
@@ -8,6 +8,7 @@ const useDisclosureUpload = () => {
     const [uploadStatus, setUploadStatus] = useState("");
     const [isUploading, setIsUploading] = useState(false);
     const [uploadResult, setUploadResult] = useState(null);
+    const { report_id } = useParams();
     const location = useLocation();
 
     const uploadPdf = useCallback(async (pdfFiles) => {
@@ -38,10 +39,9 @@ const useDisclosureUpload = () => {
         try {
             await Promise.all(filePromises);
             const token = UserService.getToken();
-            const reportId = location.state?.response.Id;
 
             const response = await axios.post(
-                `${API_BASE_URL}/api/v1/report/${reportId}/check-disclosure`,
+                `${API_BASE_URL}/api/v1/report/${report_id}/check-disclosure`,
                 formData,
                 {
                     headers: {
