@@ -341,15 +341,6 @@ func TestCheckDisclosure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var report schema.Report
-	if err := db.First(&report, "id = ?", reportResp.Id).Error; err != nil {
-		t.Fatal(err)
-	}
-
-	if err := db.Model(&report).Update("status", schema.ReportCompleted).Error; err != nil {
-		t.Fatal(err)
-	}
-
 	content := api.ReportContent{
 		TalentContracts: []*api.TalentContractFlag{
 			{
@@ -385,7 +376,7 @@ func TestCheckDisclosure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := manager.UpdateReport(report.Id, schema.ReportCompleted, contentBytes); err != nil {
+	if err := manager.UpdateReport(reportResp.Id, schema.ReportCompleted, contentBytes); err != nil {
 		t.Fatal(err)
 	}
 
