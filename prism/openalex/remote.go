@@ -20,10 +20,16 @@ func NewRemoteKnowledgeBase() KnowledgeBase {
 		client: resty.New().
 			SetBaseURL("https://api.openalex.org").
 			AddRetryCondition(func(response *resty.Response, err error) bool {
+				if err != nil {
+					return true // The err can be non nil for some network errors.
+				}
 				// There's no reason to retry other 400 requests since the outcome should not change
 				return response != nil && (response.StatusCode() > 499 || response.StatusCode() == http.StatusTooManyRequests)
 			}).
-			SetRetryCount(3),
+			SetRetryCount(2).
+			// Providing the contact moves requests to a new pool that can have better response times:
+			// https://docs.openalex.org/how-to-use-the-api/rate-limits-and-authentication#the-polite-pool
+			SetQueryParam("mailto", "contact@thirdai.com"),
 	}
 }
 
@@ -42,7 +48,6 @@ func (oa *RemoteKnowledgeBase) autocompleteHelper(component, query string) ([]oa
 	res, err := oa.client.R().
 		SetResult(&oaResults[oaAutocompletion]{}).
 		SetQueryParam("q", query).
-		SetQueryParam("mailto", " kartik@thirdai.com").
 		Get(fmt.Sprintf("/autocomplete/%s", component))
 
 	if err != nil {
@@ -117,7 +122,6 @@ func (oa *RemoteKnowledgeBase) FindAuthors(authorName, institutionId string) ([]
 	res, err := oa.client.R().
 		SetResult(&oaResults[oaAuthor]{}).
 		SetQueryParam("filter", fmt.Sprintf("display_name.search:%s,affiliations.institution.id:%s", authorName, institutionId)).
-		SetQueryParam("mailto", " kartik@thirdai.com").
 		Get("/authors")
 
 	if err != nil {
@@ -322,7 +326,6 @@ func (oa *RemoteKnowledgeBase) StreamWorks(authorId string, startYear, endYear i
 				SetQueryParam("filter", fmt.Sprintf("authorships.author.id:%s%s", authorId, yearFilter)).
 				SetQueryParam("per-page", "200").
 				SetQueryParam("cursor", cursor).
-				SetQueryParam("mailto", " kartik@thirdai.com").
 				Get("/works")
 
 			if err != nil {
@@ -361,7 +364,6 @@ func (oa *RemoteKnowledgeBase) FindWorksByTitle(titles []string, startYear, endY
 			SetResult(&oaResults[oaWork]{}).
 			SetQueryParam("filter", fmt.Sprintf("title.search:%s%s", title, yearFilter)).
 			SetQueryParam("per-page", "1").
-			SetQueryParam("mailto", " kartik@thirdai.com").
 			Get("/works")
 
 		if err != nil {

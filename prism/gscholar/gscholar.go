@@ -22,10 +22,13 @@ var client = resty.New().
 	SetBaseURL("https://serpapi.com").
 	SetQueryParam("api_key", ApiKey).
 	AddRetryCondition(func(response *resty.Response, err error) bool {
+		if err != nil {
+			return true // The err can be non nil for some network errors.
+		}
 		// There's no reason to retry other 400 requests since the outcome should not change
 		return response != nil && (response.StatusCode() > 499 || response.StatusCode() == http.StatusTooManyRequests)
 	}).
-	SetRetryCount(3)
+	SetRetryCount(2)
 
 var (
 	ErrGoogleScholarSearchFailed = errors.New("google scholar search failed")
@@ -119,8 +122,6 @@ func getAuthorDetails(authorId string) (api.Author, error) {
 
 	return profileToAuthor(result.Author), nil
 }
-
-const ()
 
 func getAuthorId(link string) string {
 	start := strings.Index(link, "user=")
