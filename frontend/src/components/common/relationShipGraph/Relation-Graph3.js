@@ -7,6 +7,149 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { onFlagsUpdate } from '../../../services/streamStore';
+import {
+    AUTHOR_AFFILIATIONS
+} from "../../../constants/constants.js"
+
+function getNodeTitle(flagType, flag) {
+    if (flagType == AUTHOR_AFFILIATIONS) {
+        return flag.Affiliations[0];
+    } else if (flag.Work) {
+        return flag.Work.DisplayName;
+    } else if (flag.University) {
+        return flag.University;
+    } else if (flag.DocTitle) {
+        return flag.DocTitle;
+    }
+    return "";
+}
+
+function getNodeUrl(flag) {
+    if (flag.Work) {
+        return flag.Work.WorkUrl;
+    } else if (flag.UniversityUrl) {
+        return flag.UniversityUrl;
+    } else if (flag.DocUrl) {
+        return flag.DocUrl;
+    }
+    return "";
+}
+
+
+function constructGraph(authorName, reportContent) {
+    const nodes = [];
+    const edges = [];
+
+    const rootId = "author";
+
+    nodes.push({
+        id: rootId,
+        html: `
+            <div style="
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+                justify-content: center; 
+                width: 200px;
+                height: 200px;
+                background-color: #ff8c00;
+                border: 5px solid #ffd700;
+                border-radius: 50%;
+                padding: 10px;
+                box-sizing: border-box;
+            ">
+                <svg width="50" height="50" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" 
+                        fill="#ffffff"/>
+                </svg>
+                <div style="
+                color: #ffffff; 
+                margin-top: 8px; 
+                text-align: center; 
+                font-size: 20px;
+                font-weight: bold;
+                line-height: 1.2;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                ">
+                ${authorName}
+                </div>
+            </div>
+            `,
+        width: 200,
+        height: 200,
+        data: { text: authorName }
+    })
+
+    let seen = new Set();
+
+    Object.keys(reportContent).forEach((flagType, index1) => {
+        if (!reportContent[flagType]) {
+            return
+        }
+        reportContent[flagType].forEach((flag, index2) => {
+            const fontSize = 20;
+            const padding = 5;
+
+            const title = getNodeTitle(flagType, flag);
+            const url = getNodeUrl(flag);
+            if (seen.has(title)) {
+                return
+            }
+            seen.add(title);
+
+            let parent = rootId;
+
+            if (flag.Connections) {
+                flag.Connections.forEach((conn, index3) => {
+                    let displayTitle;
+                    if (conn.DocTitle.length > 50) {
+                        displayTitle = conn.DocTitle.slice(0, 50) + "...";
+                    } else {
+                        displayTitle = conn.DocTitle;
+                    }
+                    const nodeId = `${index1}-${index2}-${index3}`;
+                    nodes.push({
+                        id: nodeId,
+                        text: displayTitle,
+                        data: { url: conn.DocUrl, text: conn.DocTitle },
+                        borderWidth: 1, nodeShape: 1, width: 300, height: 60, fontSize: 20
+                    })
+
+                    edges.push({ from: parent, to: nodeId })
+                    parent = nodeId;
+                });
+            }
+
+            let displayTitle;
+            if (title.length > 50) {
+                displayTitle = title.slice(0, 50) + "...";
+            } else {
+                displayTitle = title;
+            }
+            const calculatedWidth = Math.max(displayTitle.length * (fontSize * 0.3), 50) + padding;
+
+            const nodeId = `${index1}-${index2}`;
+            nodes.push({
+                id: nodeId,
+                text: displayTitle,
+                data: { url: url, text: title },
+                width: calculatedWidth,
+                height: calculatedWidth,
+                borderWidth: 3,
+                color: 'transparent',
+                borderColor: '#ff8c00',
+                fontColor: '#ff8c00',
+                fontSize: fontSize,
+            })
+
+            edges.push({ from: parent, to: nodeId })
+        });
+    });
+
+    return [rootId, nodes, edges];
+}
 
 function generateGraphData(data, parentId = null, level = 0) {
     console.log(`${data}`)
@@ -153,7 +296,7 @@ function generateGraphData(data, parentId = null, level = 0) {
     return { nodes, lines, rootId: 'a' };
 }
 
-const Demo = (graphData) => {
+const Demo = ({ authorName, reportContent }) => {
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedNode, setSelectedNode] = useState(null);
@@ -164,9 +307,11 @@ const Demo = (graphData) => {
         // Here you can refer to the parameters in "Graph Graph" for settings
     };
 
-    // const [graphData, setGraphData] = useState(null);
-    let nodes = [], lines = [], rootId = null;
+    const [rootId, nodes, edges] = constructGraph(authorName, reportContent)
 
+    console.log("root", rootId);
+    console.log("nodes", nodes);
+    console.log("edges", edges);
     // useEffect(() => {
     //     const unsubscribe = onFlagsUpdate((flags) => {
     //         setGraphData(flags);
@@ -175,26 +320,20 @@ const Demo = (graphData) => {
     // }, []);
 
     useEffect(() => {
-        if (graphData) {
-            console.log("GraphData: ", graphData.graphData);
-            const elements = generateGraphData(graphData.graphData);
-            nodes = elements.nodes;
-            lines = elements.lines;
-            rootId = elements.rootId;
-
+        if (reportContent) {
             const graphInstance = graphRef.current.getInstance();
-            graphInstance.setJsonData(elements).then(() => {
+            graphInstance.setJsonData({ rootId: rootId, nodes: nodes, lines: edges }).then(() => {
                 graphInstance.moveToCenter();
                 graphInstance.zoomToFit();
             });
         }
-    }, [graphData]);
+    }, [reportContent]);
 
     const showGraph = () => {
         const __graph_json_data = {
             rootId: rootId,
             nodes: nodes,
-            lines: lines
+            lines: edges
         };
         const graphInstance = graphRef.current.getInstance();
         graphInstance.setJsonData(__graph_json_data).then(() => {

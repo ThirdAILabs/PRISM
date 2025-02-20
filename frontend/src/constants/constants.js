@@ -1,3 +1,13 @@
+export const TALENT_CONTRACTS = "TalentContracts";
+export const ASSOCIATIONS_WITH_DENIED_ENTITIES = "AssociationsWithDeniedEntities";
+export const HIGH_RISK_FUNDERS = "HighRiskFunders";
+export const AUTHOR_AFFILIATIONS = "AuthorAffiliations";
+export const POTENTIAL_AUTHOR_AFFILIATIONS = "PotentialAuthorAffiliations";
+export const MISC_HIGH_RISK_AFFILIATIONS = "MiscHighRiskAssociations";
+export const COAUTHOR_AFFILIATIONS = "CoauthorAffiliations"
+
+
+// Deprecated
 export const MULTI_AFFIL = "oa_multi_affil";
 export const FUNDER_EOC = "oa_funder_eoc";
 export const PUBLISHER_EOC = "oa_publisher_eoc";    // isn't used   
