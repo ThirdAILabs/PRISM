@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/openalex"
+	"prism/prism/reports"
 	"prism/prism/schema"
 	"prism/prism/search"
 	"prism/prism/services"
@@ -324,6 +325,8 @@ func TestCheckDisclosure(t *testing.T) {
 	admin := newAdmin()
 	user := newUser()
 
+	manager := reports.NewManager(db)
+
 	license, err := createLicense(backend, "test-disclosure-license", admin)
 	if err != nil {
 		t.Fatal(err)
@@ -350,7 +353,7 @@ func TestCheckDisclosure(t *testing.T) {
 		TalentContracts: []*api.TalentContractFlag{
 			{
 				DisclosableFlag: api.DisclosableFlag{},
-				Message:         "Test disclosure flag",
+				Message:         "Test disclosure flag - TalentContract",
 				Work: api.WorkSummary{
 					WorkId:          "work-1",
 					DisplayName:     "Test Work",
@@ -361,28 +364,28 @@ func TestCheckDisclosure(t *testing.T) {
 				RawAcknowledements: []string{"discloseme"},
 			},
 		},
+		AssociationsWithDeniedEntities: []*api.AssociationWithDeniedEntityFlag{
+			{
+				DisclosableFlag: api.DisclosableFlag{},
+				Message:         "Test disclosure flag - Association",
+				Work: api.WorkSummary{
+					WorkId:          "work-2",
+					DisplayName:     "Test Work 2",
+					WorkUrl:         "http://example.com/work-2",
+					OaUrl:           "http://example.com/oa/work-2",
+					PublicationYear: 2021,
+				},
+				RawAcknowledements: []string{"nonmatching"},
+			},
+		},
 	}
 	contentBytes, err := json.Marshal(content)
 	if err != nil {
 		t.Fatal(err)
 	}
-	var contentRow schema.ReportContent
-	err = db.First(&contentRow, "report_id = ?", report.Id).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		contentRow = schema.ReportContent{
-			ReportId: report.Id,
-			Content:  contentBytes,
-		}
-		if err := db.Create(&contentRow).Error; err != nil {
-			t.Fatal(err)
-		}
-	} else if err != nil {
+
+	if err := manager.UpdateReport(report.Id, schema.ReportCompleted, contentBytes); err != nil {
 		t.Fatal(err)
-	} else {
-		contentRow.Content = contentBytes
-		if err := db.Save(&contentRow).Error; err != nil {
-			t.Fatal(err)
-		}
 	}
 
 	var buf bytes.Buffer
@@ -416,11 +419,18 @@ func TestCheckDisclosure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(updatedReport.Content.TalentContracts) == 0 {
-		t.Fatal("expected at least one TalentContract flag")
+	if len(updatedReport.Content.TalentContracts) != 1 {
+		t.Fatalf("expected 1 TalentContract flag; got %d", len(updatedReport.Content.TalentContracts))
 	}
 	if !updatedReport.Content.TalentContracts[0].Disclosed {
 		t.Fatal("expected TalentContract flag to be marked as disclosed")
+	}
+
+	if len(updatedReport.Content.AssociationsWithDeniedEntities) != 1 {
+		t.Fatalf("expected 1 AssociationWithDeniedEntity flag; got %d", len(updatedReport.Content.AssociationsWithDeniedEntities))
+	}
+	if updatedReport.Content.AssociationsWithDeniedEntities[0].Disclosed {
+		t.Fatal("expected AssociationWithDeniedEntity flag to remain undisclosed")
 	}
 }
 
