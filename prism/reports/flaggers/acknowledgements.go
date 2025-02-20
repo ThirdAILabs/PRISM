@@ -131,7 +131,7 @@ func downloadWithPlaywright(url, destPath string) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error starting playwright: %w", err)
 	}
-	defer pw.Stop()
+	defer pw.Stop() //nolint:errcheck there's nothing we can do if this fails
 
 	browser, err := pw.Firefox.Launch(playwright.BrowserTypeLaunchOptions{Headless: playwright.Bool(true)})
 	if err != nil {
@@ -156,7 +156,7 @@ func downloadWithPlaywright(url, destPath string) (io.ReadCloser, error) {
 
 	download, err := page.ExpectDownload(func() error {
 		// Page.Goto returns an error saying that the download is starting, so we ignore the error
-		page.Goto(url, playwright.PageGotoOptions{WaitUntil: playwright.WaitUntilStateNetworkidle})
+		page.Goto(url, playwright.PageGotoOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}) //nolint:errcheck
 
 		return nil
 	})

@@ -237,7 +237,7 @@ type oaWorkAuthor struct {
 }
 
 type oaAuthorship struct {
-	Author        oaAuthor        `json:"author"`
+	Author        oaWorkAuthor    `json:"author"`
 	Institutions  []oaInstitution `json:"institutions"`
 	RawAuthorName string          `json:"raw_author_name"`
 }
@@ -283,11 +283,10 @@ func converOpenalexWork(work oaWork) Work {
 			})
 		}
 		authors = append(authors, Author{
-			AuthorId:                author.Author.Id,
-			DisplayName:             author.Author.DisplayName,
-			DisplayNameAlternatives: author.Author.DisplayNameAlternatives,
-			RawAuthorName:           &author.RawAuthorName,
-			Institutions:            institutions,
+			AuthorId:      author.Author.Id,
+			DisplayName:   author.Author.DisplayName,
+			RawAuthorName: &author.RawAuthorName,
+			Institutions:  institutions,
 		})
 	}
 
