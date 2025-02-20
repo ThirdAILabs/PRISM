@@ -131,7 +131,8 @@ func downloadWithPlaywright(url, destPath string) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error starting playwright: %w", err)
 	}
-	defer pw.Stop() //nolint:errcheck there's nothing we can do if this fails
+	// Skipping error check since there's nothing we can do if this fails
+	defer pw.Stop() //nolint:errcheck 
 
 	browser, err := pw.Firefox.Launch(playwright.BrowserTypeLaunchOptions{Headless: playwright.Bool(true)})
 	if err != nil {
