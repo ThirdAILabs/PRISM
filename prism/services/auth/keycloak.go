@@ -13,10 +13,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const (
-	userIdContextKey = "user_id"
-)
-
 type KeycloakAuth struct {
 	keycloak *gocloak.GoCloak
 	realm    string
