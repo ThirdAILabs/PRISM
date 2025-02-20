@@ -2,6 +2,7 @@ package services
 
 import (
 	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -20,6 +21,7 @@ import (
 	"github.com/bbalet/stopwords"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/jung-kurt/gofpdf"
 	"github.com/ledongthuc/pdf"
 	"gorm.io/gorm"
 )
@@ -29,6 +31,12 @@ type ReportService struct {
 	db      *gorm.DB
 }
 
+type FileResponse struct {
+	Content     []byte
+	ContentType string
+	Filename    string
+}
+
 func (s *ReportService) Routes() chi.Router {
 	r := chi.NewRouter()
 
@@ -36,6 +44,7 @@ func (s *ReportService) Routes() chi.Router {
 	r.Post("/create", WrapRestHandler(s.CreateReport))
 	r.Get("/{report_id}", WrapRestHandler(s.GetReport))
 	r.Post("/{report_id}/check-disclosure", WrapRestHandler(s.CheckDisclosure))
+	r.Get("/{report_id}/download", WrapRestHandler(s.DownloadReport))
 
 	r.Post("/activate-license", WrapRestHandler(s.UseLicense))
 
@@ -321,4 +330,125 @@ func filterTokens(tokens []string) []string {
 		}
 	}
 	return filtered
+}
+
+func (s *ReportService) DownloadReport(r *http.Request) (any, error) {
+	userId, err := auth.GetUserId(r)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	reportIdParam := chi.URLParam(r, "report_id")
+	reportId, err := uuid.Parse(reportIdParam)
+	if err != nil {
+		return nil, CodedError(fmt.Errorf("invalid report id '%v': %w", reportIdParam, err), http.StatusBadRequest)
+	}
+
+	report, err := s.manager.GetReport(userId, reportId)
+	if err != nil {
+		switch {
+		case errors.Is(err, reports.ErrReportNotFound):
+			return nil, CodedError(err, http.StatusNotFound)
+		case errors.Is(err, reports.ErrUserCannotAccessReport):
+			return nil, CodedError(err, http.StatusForbidden)
+		default:
+			return nil, CodedError(err, http.StatusInternalServerError)
+		}
+	}
+
+	format := r.URL.Query().Get("format")
+	if format == "" {
+		format = "csv"
+	}
+
+	var fileBytes []byte
+	var contentType, filename string
+	switch format {
+	case "csv":
+		fileBytes, err = generateCSV(report)
+		if err != nil {
+			return nil, CodedError(err, http.StatusInternalServerError)
+		}
+		contentType = "text/csv"
+		filename = "report.csv"
+	case "pdf":
+		fileBytes, err = generatePDF(report)
+		if err != nil {
+			return nil, CodedError(err, http.StatusInternalServerError)
+		}
+		contentType = "application/pdf"
+		filename = "report.pdf"
+	default:
+		return nil, CodedError(errors.New("unsupported format"), http.StatusBadRequest)
+	}
+
+	return FileResponse{
+		Content:     fileBytes,
+		ContentType: contentType,
+		Filename:    filename,
+	}, nil
+}
+
+func generateCSV(report api.Report) ([]byte, error) {
+	var buf bytes.Buffer
+	writer := csv.NewWriter(&buf)
+
+	header := []string{"Field", "Value"}
+	if err := writer.Write(header); err != nil {
+		return nil, err
+	}
+
+	rows := [][]string{
+		{"Report ID", report.Id.String()},
+		{"Created At", report.CreatedAt.Format(time.RFC3339)},
+		{"Author ID", report.AuthorId},
+		{"Author Name", report.AuthorName},
+		{"Source", report.Source},
+		{"Start Year", fmt.Sprintf("%d", report.StartYear)},
+		{"End Year", fmt.Sprintf("%d", report.EndYear)},
+		{"Status", report.Status},
+	}
+
+	for _, row := range rows {
+		if err := writer.Write(row); err != nil {
+			return nil, err
+		}
+	}
+
+	writer.Flush()
+	if err := writer.Error(); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func generatePDF(report api.Report) ([]byte, error) {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetFont("Arial", "B", 16)
+
+	pdf.Cell(40, 10, "Report Details")
+	pdf.Ln(12)
+
+	pdf.SetFont("Arial", "", 12)
+	addLine := func(field, value string) {
+		pdf.CellFormat(40, 10, fmt.Sprintf("%s:", field), "", 0, "", false, 0, "")
+		pdf.CellFormat(0, 10, value, "", 1, "", false, 0, "")
+	}
+
+	addLine("Report ID", report.Id.String())
+	addLine("Created At", report.CreatedAt.Format(time.RFC3339))
+	addLine("Author ID", report.AuthorId)
+	addLine("Author Name", report.AuthorName)
+	addLine("Source", report.Source)
+	addLine("Start Year", fmt.Sprintf("%d", report.StartYear))
+	addLine("End Year", fmt.Sprintf("%d", report.EndYear))
+	addLine("Status", report.Status)
+
+	var buf bytes.Buffer
+	err := pdf.Output(&buf)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }

@@ -32,6 +32,7 @@ require (
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/jung-kurt/gofpdf v1.16.2
 	github.com/kr/text v0.2.0 // indirect
 	github.com/ledongthuc/pdf v0.0.0-20240201131950-da5b75280b06 // indirect
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
