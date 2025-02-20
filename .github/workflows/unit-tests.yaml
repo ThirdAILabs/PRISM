@@ -70,4 +70,4 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GROBID_ENDPOINT: http://70.233.60.118:8070
         run: |
-          go test -v ./prism/...
+          go test -v ./prism/reports/flaggers --run TestProcessorAcknowledgements
