@@ -6,9 +6,11 @@ import (
 	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/openalex"
+	"prism/prism/reports"
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/search"
 	"sync"
+	"time"
 )
 
 type ReportProcessor struct {
@@ -93,18 +95,18 @@ func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
 	}, nil
 }
 
-func (processor *ReportProcessor) getWorkStream(report api.Report) (chan openalex.WorkBatch, error) {
-	switch report.Source {
+func (processor *ReportProcessor) getWorkStream(authorId, authorName, source string, startDate, endDate time.Time) (chan openalex.WorkBatch, error) {
+	switch source {
 	case api.OpenAlexSource:
-		return streamOpenAlexWorks(processor.openalex, report.AuthorId, report.StartYear, report.EndYear), nil
+		return streamOpenAlexWorks(processor.openalex, authorId, startDate, endDate), nil
 	case api.GoogleScholarSource:
-		return streamGScholarWorks(processor.openalex, report.AuthorName, report.AuthorId, report.StartYear, report.EndYear), nil
+		return streamGScholarWorks(processor.openalex, authorName, authorId, startDate, endDate), nil
 	// case api.UnstructuredSource:
 	// 	return streamUnstructuredWorks(processor.openalex, report.AuthorName, "what should the text be", report.StartYear, report.EndYear), nil
 	// case api.ScopusSource:
 	// 	return streamScopusWorks()
 	default:
-		return nil, fmt.Errorf("invalid report source '%s'", report.Source)
+		return nil, fmt.Errorf("invalid report source '%s'", source)
 	}
 }
 
@@ -186,12 +188,12 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 	close(flagsCh)
 }
 
-func (processor *ReportProcessor) ProcessReport(report api.Report) (api.ReportContent, error) {
+func (processor *ReportProcessor) ProcessReport(report reports.ReportUpdateTask) (api.ReportContent, error) {
 	logger := slog.With("report_id", report.Id)
 
 	logger.Info("starting report processing")
 
-	workStream, err := processor.getWorkStream(report)
+	workStream, err := processor.getWorkStream(report.AuthorId, report.AuthorName, report.Source, report.StartDate, report.EndDate)
 	if err != nil {
 		logger.Error("unable to get work stream", "error", err)
 		return api.ReportContent{}, fmt.Errorf("unable to get works: %w", err)

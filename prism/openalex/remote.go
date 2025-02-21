@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -250,15 +251,8 @@ type oaGrant struct {
 	FunderDisplayName string `json:"funder_display_name"`
 }
 
-func getYearFilter(startYear, endYear int) string {
-	yearFilter := ""
-	if startYear >= 0 {
-		yearFilter += fmt.Sprintf(",from_publication_date:%d-01-01", startYear)
-	}
-	if endYear >= 0 {
-		yearFilter += fmt.Sprintf(",to_publication_date:%d-12-31", endYear)
-	}
-	return yearFilter
+func getYearFilter(startDate, endDate time.Time) string {
+	return fmt.Sprintf(",from_publication_date:%s,to_publication_date:%s", startDate.Format(time.DateOnly), endDate.Format(time.DateOnly))
 }
 
 func converOpenalexWork(work oaWork) Work {
@@ -310,12 +304,12 @@ func converOpenalexWork(work oaWork) Work {
 	}
 }
 
-func (oa *RemoteKnowledgeBase) StreamWorks(authorId string, startYear, endYear int) chan WorkBatch {
+func (oa *RemoteKnowledgeBase) StreamWorks(authorId string, startDate, endDate time.Time) chan WorkBatch {
 	outputCh := make(chan WorkBatch, 10)
 
 	cursor := "*"
 
-	yearFilter := getYearFilter(startYear, endYear)
+	yearFilter := getYearFilter(startDate, endDate)
 
 	go func() {
 		defer close(outputCh)
@@ -354,10 +348,10 @@ func (oa *RemoteKnowledgeBase) StreamWorks(authorId string, startYear, endYear i
 	return outputCh
 }
 
-func (oa *RemoteKnowledgeBase) FindWorksByTitle(titles []string, startYear, endYear int) ([]Work, error) {
+func (oa *RemoteKnowledgeBase) FindWorksByTitle(titles []string, startDate, endDate time.Time) ([]Work, error) {
 	works := make([]Work, 0, len(titles))
 
-	yearFilter := getYearFilter(startYear, endYear)
+	yearFilter := getYearFilter(startDate, endDate)
 
 	for _, title := range titles {
 		res, err := oa.client.R().

@@ -16,18 +16,14 @@ const (
 type Report struct {
 	Id uuid.UUID `gorm:"type:uuid;primaryKey"`
 
-	UserId uuid.UUID `gorm:"type:uuid;not null"`
+	LastUpdate time.Time
 
-	CreatedAt time.Time
-
-	// Report params
-	AuthorId   string
+	AuthorId   string `gorm:"index"`
 	AuthorName string
 	Source     string
-	StartYear  int
-	EndYear    int
 
-	Status string `gorm:"size:20;not null"`
+	QueuedAt time.Time
+	Status   string `gorm:"size:20;not null"`
 
 	Content *ReportContent `gorm:"foreignKey:ReportId;constraint:OnDelete:CASCADE"`
 }
@@ -36,6 +32,16 @@ type ReportContent struct {
 	ReportId uuid.UUID `gorm:"type:uuid;primaryKey"`
 
 	Content []byte
+}
+
+type UserReport struct {
+	Id     uuid.UUID `gorm:"type:uuid;primaryKey"`
+	UserId uuid.UUID `gorm:"type:uuid;not null;index"`
+
+	CreatedAt time.Time
+
+	ReportId uuid.UUID `gorm:"type:uuid;not null"`
+	Report   *Report   `gorm:"foreignKey:ReportId"`
 }
 
 type License struct {
@@ -54,8 +60,8 @@ type LicenseUser struct {
 }
 
 type LicenseUsage struct {
-	LicenseId uuid.UUID `gorm:"type:uuid;primaryKey"`
-	ReportId  uuid.UUID `gorm:"type:uuid;primaryKey"`
-	UserId    uuid.UUID
-	Timestamp time.Time
+	LicenseId    uuid.UUID `gorm:"type:uuid;primaryKey"`
+	UserReportId uuid.UUID `gorm:"type:uuid;primaryKey"`
+	UserId       uuid.UUID
+	Timestamp    time.Time
 }

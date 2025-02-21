@@ -70,7 +70,7 @@ func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 	}
 
 	if err := db.AutoMigrate(
-		&schema.Report{}, &schema.ReportContent{}, &schema.License{},
+		&schema.Report{}, &schema.ReportContent{}, &schema.UserReport{}, &schema.License{},
 		&schema.LicenseUser{}, &schema.LicenseUsage{},
 	); err != nil {
 		t.Fatal(err)
@@ -153,8 +153,6 @@ func compareReport(t *testing.T, report api.Report, expected string) {
 	if report.AuthorId != expected+"-id" ||
 		report.AuthorName != expected+"-name" ||
 		report.Source != api.OpenAlexSource ||
-		report.StartYear != 10 ||
-		report.EndYear != 12 ||
 		report.Status != "queued" {
 		t.Fatal("invalid reports returned")
 	}
@@ -197,8 +195,6 @@ func createReport(backend http.Handler, user, name string) (api.CreateReportResp
 		AuthorId:   name + "-id",
 		AuthorName: name + "-name",
 		Source:     api.OpenAlexSource,
-		StartYear:  10,
-		EndYear:    12,
 	}
 
 	var res api.CreateReportResponse
@@ -325,7 +321,7 @@ func TestCheckDisclosure(t *testing.T) {
 	admin := newAdmin()
 	user := newUser()
 
-	manager := reports.NewManager(db)
+	manager := reports.NewManager(db, reports.StaleReportThreshold)
 
 	license, err := createLicense(backend, "test-disclosure-license", admin)
 	if err != nil {
@@ -370,12 +366,16 @@ func TestCheckDisclosure(t *testing.T) {
 			},
 		},
 	}
-	contentBytes, err := json.Marshal(content)
+
+	nextReport, err := manager.GetNextReport()
 	if err != nil {
 		t.Fatal(err)
 	}
+	if nextReport == nil {
+		t.Fatal("next report should not be nil")
+	}
 
-	if err := manager.UpdateReport(reportResp.Id, schema.ReportCompleted, contentBytes); err != nil {
+	if err := manager.UpdateReport(nextReport.Id, schema.ReportCompleted, time.Now(), content); err != nil {
 		t.Fatal(err)
 	}
 

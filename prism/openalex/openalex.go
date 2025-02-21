@@ -1,5 +1,7 @@
 package openalex
 
+import "time"
+
 type Institution struct {
 	InstitutionName string
 	InstitutionId   string
@@ -64,9 +66,9 @@ type KnowledgeBase interface {
 
 	FindAuthors(authorName, institutionId string) ([]Author, error)
 
-	StreamWorks(authorId string, startYear, endYear int) chan WorkBatch
+	StreamWorks(authorId string, startDate, endDate time.Time) chan WorkBatch
 
-	FindWorksByTitle(titles []string, startYear, endYear int) ([]Work, error)
+	FindWorksByTitle(titles []string, startDate, endDate time.Time) ([]Work, error)
 
 	GetAuthor(authorId string) (Author, error)
 }

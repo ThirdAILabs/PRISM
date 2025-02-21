@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestAutocompleteAuthor(t *testing.T) {
@@ -82,11 +83,19 @@ func TestFindAuthors(t *testing.T) {
 	}
 }
 
+func yearStart(year int) time.Time {
+	return time.Date(year, 1, 1, 0, 0, 0, 0, nil)
+}
+
+func yearEnd(year int) time.Time {
+	return time.Date(year, 12, 31, 0, 0, 0, 0, nil)
+}
+
 func TestStreamWorks(t *testing.T) {
 	oa := openalex.NewRemoteKnowledgeBase()
 
 	authorId := "https://openalex.org/A5024993683"
-	stream := oa.StreamWorks(authorId, 2024, 2024)
+	stream := oa.StreamWorks(authorId, yearStart(2024), yearEnd(2024))
 
 	results := make([]openalex.Work, 0)
 	for result := range stream {
@@ -152,7 +161,7 @@ func TestStreamWorksWithFundersAndLocations(t *testing.T) {
 	workId := "https://openalex.org/W2910300516"
 
 	oa := openalex.NewRemoteKnowledgeBase()
-	stream := oa.StreamWorks(authorId, 2019, 2019)
+	stream := oa.StreamWorks(authorId, yearStart(2019), yearEnd(2019))
 
 	results := make([]openalex.Work, 0)
 	for result := range stream {
@@ -223,7 +232,7 @@ func TestFindWorksByTitle(t *testing.T) {
 		"Learning Scalable Structural Representations for Link Prediction with Bloom Signatures",
 	}
 
-	results, err := oa.FindWorksByTitle(titles, 2023, 2024)
+	results, err := oa.FindWorksByTitle(titles, yearStart(2023), yearEnd(2024))
 	if err != nil {
 		t.Fatal(err)
 	}
