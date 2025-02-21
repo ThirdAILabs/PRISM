@@ -522,7 +522,7 @@ func TestDownloadReportExcel(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error reading cell value from 'Talent Contracts' sheet: %v", err)
 	}
-	if !strings.Contains(val, "Test Talent Contract") {
+	if !strings.Contains(val, "Test Work") {
 		t.Fatalf("expected flag message 'Test Talent Contract' in cell B2, got %s", val)
 	}
 }
