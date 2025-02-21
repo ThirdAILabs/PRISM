@@ -5,6 +5,7 @@ import TodoListComponent from '../TodoListComponent';
 import { AuthorInstiutionSearchBar } from '../common/searchBar/SearchBar';
 import Logo from "../../assets/images/logo.png";
 import "../common/searchBar/SearchBar.css";
+import "../common/tools/button/button1.css"
 import UserService from '../../services/userService';
 import { searchService } from '../../api/search';
 import { reportService } from '../../api/reports';
@@ -57,7 +58,6 @@ const SearchComponent = () => {
     setHasSearched(true);
   };
 
-  console.log(results);
 
   const handleDeepSearch = async (query, ntoken, reset = false) => {
     if (reset) {
@@ -90,10 +90,9 @@ const SearchComponent = () => {
     }
   };
 
-  console.log(nextToken);
 
   return (
-    <div className='basic-setup' style={{ color: "white" }}>
+    <div className='basic-setup' style={{ color: "black" }}>
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -104,7 +103,7 @@ const SearchComponent = () => {
       }}>
         <Link
           to="/entity-lookup"
-          className="author-institution-search-button"
+          className="button"
           style={{
             padding: '10px 15px',
             fontSize: '14px',
@@ -116,7 +115,7 @@ const SearchComponent = () => {
         >
           Go To Entity Lookup
         </Link>
-        <button className="author-institution-search-button"
+        <button className="button"
           style={{
             padding: '10px 15px',
             fontSize: '14px',
@@ -124,24 +123,26 @@ const SearchComponent = () => {
             textDecoration: 'none',
             display: 'inline-block',
             width: '10%'
-          }} onClick={UserService.doLogout}>Logout</button>
-      </div>
-      <img src={Logo} style={{ width: "100px", marginTop: "12%", animation: "fade-in 0.5s" }} />
-      <h1 style={{ fontWeight: "bold", marginTop: 50, animation: "fade-in 0.75s" }}>Welcome to Prism</h1>
-      <div style={{ animation: "fade-in 1s" }}>
-        <div className='d-flex justify-content-center align-items-center'>
-          <div style={{ marginTop: 10, color: "#888888" }}>We help you comply with research security requirements by automating author assessments.</div>
-        </div>
-        <div className='d-flex justify-content-center align-items-center'>
-          <div style={{ marginTop: 10, marginBottom: 50, color: "#888888" }}>Who would you like to conduct an assessment on?</div>
-        </div>
-      </div>
-      <div className='d-flex justify-content-center align-items-center pt-5'>
-        <div style={{ width: "80%", animation: "fade-in 1.25s" }}>
-          <AuthorInstiutionSearchBar onSearch={search} />
-        </div>
+          }} onClick={UserService.doLogout}>logout</button>
       </div>
 
+      {/* <img src={Logo} style={{ width: "100px", marginTop: "12%", animation: "fade-in 0.5s" }} /> */}
+      <div style={{ textAlign: "center", marginTop: "12.5%", animation: "fade-in 0.75s" }}>
+        <h1 style={{ fontWeight: "bold", marginTop: 50, animation: "fade-in 0.75s" }}>Welcome to Prism</h1>
+        <div style={{ animation: "fade-in 1s" }}>
+          <div className='d-flex justify-content-center align-items-center'>
+            <div style={{ marginTop: 10, color: "#888888" }}>We help you comply with research security requirements by automating author assessments.</div>
+          </div>
+          <div className='d-flex justify-content-center align-items-center'>
+            <div style={{ marginTop: 10, marginBottom: 50, color: "#888888" }}>Who would you like to conduct an assessment on?</div>
+          </div>
+        </div>
+        <div className='d-flex justify-content-center align-items-center pt-5'>
+          <div style={{ width: "80%", animation: "fade-in 1.25s" }}>
+            <AuthorInstiutionSearchBar onSearch={search} />
+          </div>
+        </div>
+      </div>
       {showResultHeaders && (<div style={{ paddingTop: "30px", textAlign: "center", fontSize: "24px", fontWeight: "bold" }}>OpenAlex Results</div>)}
       {isLoadingScopus && <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status"></div>}
       {

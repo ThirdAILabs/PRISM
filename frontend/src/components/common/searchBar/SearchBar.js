@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { autocompleteService } from '../../../api/autocomplete';
 import "./SearchBar.css";
+import "../tools/button/button1.css";
 import useCallOnPause from '../../../hooks/useCallOnPause';
 
 function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
@@ -91,7 +92,7 @@ export function AuthorInstiutionSearchBar({ onSearch }) {
     }, [debouncedSearch]);
 
     function search() {
-        if (author) {
+        if (author && institution) {
             onSearch(author, institution);
         } else {
             alert("Please select an author and institution.");
@@ -108,7 +109,7 @@ export function AuthorInstiutionSearchBar({ onSearch }) {
         </div>
 
         <div className='author-institution-search-button-container'>
-            <button className='author-institution-search-button' onClick={search}>Search</button>
+            <button className='button' onClick={search}>Search</button>
         </div>
     </div>
 }

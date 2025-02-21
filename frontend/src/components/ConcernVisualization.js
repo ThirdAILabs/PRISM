@@ -46,15 +46,6 @@ export default function ConcernVisualizer({
   setWeight,
   onReview,
 }) {
-  const [weightString, setWeightString] = React.useState(weight.toString());
-
-  const updateWeight = () => {
-    let newWeight = 0;
-    if (weightString != "") {
-      newWeight = parseFloat(weightString);
-    }
-    setWeight(newWeight);
-  }
 
   return (
     <div className='chart-wrapper' style={{
@@ -62,31 +53,11 @@ export default function ConcernVisualizer({
     }}>
       <Speedometer scale={scale || [0, 1, 2, 3, 5, 10, 20]} value={value} />
 
-      <div className='mt-3 mb-4 text-light' style={{ height: "50px" }} >
+      <div className='mt-3 mb-4 text-dark' style={{ height: "50px" }} >
         {title} <Hover text={hoverText} />
       </div>
 
-      <div className='mb-3'>
-        <input type='field' className='btn btn-dark rounded rounded-5' style={{ height: '50px', width: '50px' }} value={weightString}
-          onChange={(e) => {
-            if (e.target.value == "") {
-              setWeightString("");
-            }
-            const parsed = parseFloat(e.target.value);
-            if (parsed != NaN) {
-              setWeightString(e.target.value);
-            }
-          }}
-          onKeyDown={(e) => {
-            if (e.key == "Enter") {
-              updateWeight();
-              e.target.blur();
-            }
-          }}
-          onBlur={updateWeight} />
-      </div>
-
-      <button className='btn btn-dark rounded rounded-5 px-4' onClick={onReview}>Review</button>
+      <button className='btn btn-light rounded rounded-5 px-4' onClick={onReview}>Review</button>
 
     </div>
   );
