@@ -7,35 +7,37 @@
     text-align: left;
     font-size: 24px;
     font-weight: bold;
-    color: white;
+    color: black;
     padding-bottom: 5px;
 }
 
 .search-bar {
     width: 100%;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgb(245, 240, 240);
     border: none;
     outline: none;
-    color: white;
+    color: black;
 }
 
 .suggestion-container {
     width: 100%;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgb(245, 240, 240);
     padding: 10px;
     border-radius: 2px 2px 10px 10px;
+    color: black;
 }
 
 .suggestion {
     padding: 5px;
     text-align: left;
-    color: white;
+    color: black;
 }
 
 .suggestion:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgb(225, 220, 220);
     border-radius: 2px;
     cursor: pointer;
+    color: black;
 }
 
 .author-institution-search-bar {
@@ -58,13 +60,12 @@
     width: 100%;
     padding: 10px;
     border-radius: 50px;
-    border: 1px solid #004aa1;
-    background-color: rgba(0, 74, 161, 0.3);
+    border: 2px solid #45037b;
+    background-color: #59059e;
     color: white;
 }
 
 .author-institution-search-button:hover {
-    background-color: rgba(0, 74, 161, 0.5);
+    background-color: rgba(138, 24, 169, 0.5);
     transition: background-color 0.3s ease;
 }
-
