@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"slices"
+	"strings"
 )
 
 type Flag interface {
@@ -15,6 +16,10 @@ type Flag interface {
 	GetEntities() []string
 
 	MarkDisclosed()
+
+	Summary() string
+
+	GetMessage() string
 }
 
 type DisclosableFlag struct {
@@ -56,6 +61,20 @@ func (flag *TalentContractFlag) GetEntities() []string {
 	return flag.RawAcknowledements
 }
 
+func (flag *TalentContractFlag) GetMessage() string {
+	return "Talent Contracts"
+}
+
+func (flag *TalentContractFlag) Summary() string {
+	return fmt.Sprintf("Disclosed: %v\nTitle: %s\nURL: %s\nPublication Year: %d\nRaw Acknowledgements: %s",
+		flag.Disclosed,
+		flag.Work.DisplayName,
+		flag.Work.WorkUrl,
+		flag.Work.PublicationYear,
+		strings.Join(flag.RawAcknowledements, ", "),
+	)
+}
+
 type AssociationWithDeniedEntityFlag struct {
 	DisclosableFlag
 	Message            string
@@ -71,6 +90,20 @@ func (flag *AssociationWithDeniedEntityFlag) Key() string {
 
 func (flag *AssociationWithDeniedEntityFlag) GetEntities() []string {
 	return flag.RawAcknowledements
+}
+
+func (flag *AssociationWithDeniedEntityFlag) GetMessage() string {
+	return "Funding from Denied Entities"
+}
+
+func (flag *AssociationWithDeniedEntityFlag) Summary() string {
+	return fmt.Sprintf("Disclosed: %v\nPaper Title: %s\nURL: %s\nPublication Year: %d\nRaw Acknowledgements: %s",
+		flag.Disclosed,
+		flag.Work.DisplayName,
+		flag.Work.WorkUrl,
+		flag.Work.PublicationYear,
+		strings.Join(flag.RawAcknowledements, ", "),
+	)
 }
 
 type HighRiskFunderFlag struct {
@@ -90,6 +123,21 @@ func (flag *HighRiskFunderFlag) GetEntities() []string {
 	return flag.Funders
 }
 
+func (flag *HighRiskFunderFlag) GetMessage() string {
+	return "High Risk Funding Sources"
+}
+
+func (flag *HighRiskFunderFlag) Summary() string {
+	return fmt.Sprintf("Disclosed: %v\nPaper Title: %s\nURL: %s\nPublication Year: %d\nFunders: %s\nFrom Acknowledgements: %v",
+		flag.Disclosed,
+		flag.Work.DisplayName,
+		flag.Work.WorkUrl,
+		flag.Work.PublicationYear,
+		strings.Join(flag.Funders, ", "),
+		flag.FromAcknowledgements,
+	)
+}
+
 type AuthorAffiliationFlag struct {
 	DisclosableFlag
 	Message      string
@@ -106,6 +154,20 @@ func (flag *AuthorAffiliationFlag) GetEntities() []string {
 	return flag.Affiliations
 }
 
+func (flag *AuthorAffiliationFlag) GetMessage() string {
+	return "Affiliations with High Risk Foreign Institutes"
+}
+
+func (flag *AuthorAffiliationFlag) Summary() string {
+	return fmt.Sprintf("Disclosed: %v\nPaper Title: %s\nURL: %s\nPublication Year: %d\nAffiliations: %s",
+		flag.Disclosed,
+		flag.Work.DisplayName,
+		flag.Work.WorkUrl,
+		flag.Work.PublicationYear,
+		strings.Join(flag.Affiliations, ", "),
+	)
+}
+
 type PotentialAuthorAffiliationFlag struct {
 	DisclosableFlag
 	Message       string
@@ -119,6 +181,18 @@ func (flag *PotentialAuthorAffiliationFlag) Key() string {
 
 func (flag *PotentialAuthorAffiliationFlag) GetEntities() []string {
 	return []string{flag.University}
+}
+
+func (flag *PotentialAuthorAffiliationFlag) GetMessage() string {
+	return "Appointments at High Risk Foreign Institutes"
+}
+
+func (flag *PotentialAuthorAffiliationFlag) Summary() string {
+	return fmt.Sprintf("Disclosed: %v\nUniversity: %s\nUniversity URL: %s",
+		flag.Disclosed,
+		flag.University,
+		flag.UniversityUrl,
+	)
 }
 
 type Connection struct {
@@ -153,6 +227,25 @@ func (flag *MiscHighRiskAssociationFlag) GetEntities() []string {
 	return entities
 }
 
+func (flag *MiscHighRiskAssociationFlag) GetMessage() string {
+	return "Miscellaneous High Risk Connections"
+}
+
+func (flag *MiscHighRiskAssociationFlag) Summary() string {
+	var frequentCoauthor string
+	if flag.FrequentCoauthor != nil {
+		frequentCoauthor = *flag.FrequentCoauthor
+	}
+	return fmt.Sprintf("Disclosed: %v\nDoc Title: %s\nDoc URL: %s\nDoc Entities: %s\nEntity Mentioned: %s\nFrequent Coauthor: %s",
+		flag.Disclosed,
+		flag.DocTitle,
+		flag.DocUrl,
+		strings.Join(flag.DocEntities, ", "),
+		flag.EntityMentioned,
+		frequentCoauthor,
+	)
+}
+
 type CoauthorAffiliationFlag struct {
 	DisclosableFlag
 	Message      string
@@ -168,6 +261,21 @@ func (flag *CoauthorAffiliationFlag) Key() string {
 
 func (flag *CoauthorAffiliationFlag) GetEntities() []string {
 	return slices.Concat(flag.Coauthors, flag.Affiliations)
+}
+
+func (flag *CoauthorAffiliationFlag) GetMessage() string {
+	return "Co-authors' affiliations with High Risk Foreign Institutes"
+}
+
+func (flag *CoauthorAffiliationFlag) Summary() string {
+	return fmt.Sprintf("Disclosed: %v\nPaper Title: %s\nURL: %s\nPublication Year: %d\nCo-authors: %s\nAffiliations: %s",
+		flag.Disclosed,
+		flag.Work.DisplayName,
+		flag.Work.WorkUrl,
+		flag.Work.PublicationYear,
+		strings.Join(flag.Coauthors, ", "),
+		strings.Join(flag.Affiliations, ", "),
+	)
 }
 
 type ReportContent struct {
@@ -199,6 +307,20 @@ func (flag *MultipleAffiliationFlag) GetEntities() []string {
 	return flag.Affiliations
 }
 
+func (flag *MultipleAffiliationFlag) GetMessage() string {
+	return flag.Message
+}
+
+func (flag *MultipleAffiliationFlag) Summary() string {
+	return fmt.Sprintf("Disclosed: %v\nPaper Title: %s\nURL: %s\nPublication Year: %d\nAffiliations: %s",
+		flag.Disclosed,
+		flag.Work.DisplayName,
+		flag.Work.WorkUrl,
+		flag.Work.PublicationYear,
+		strings.Join(flag.Affiliations, ", "),
+	)
+}
+
 type HighRiskPublisherFlag struct {
 	DisclosableFlag
 	Message    string
@@ -215,6 +337,20 @@ func (flag *HighRiskPublisherFlag) GetEntities() []string {
 	return flag.Publishers
 }
 
+func (flag *HighRiskPublisherFlag) GetMessage() string {
+	return flag.Message
+}
+
+func (flag *HighRiskPublisherFlag) Summary() string {
+	return fmt.Sprintf("Disclosed: %v\nPaper Title: %s\nURL: %s\nPublication Year: %d\nPublishers: %s",
+		flag.Disclosed,
+		flag.Work.DisplayName,
+		flag.Work.WorkUrl,
+		flag.Work.PublicationYear,
+		strings.Join(flag.Publishers, ", "),
+	)
+}
+
 type HighRiskCoauthorFlag struct {
 	DisclosableFlag
 	Message   string
@@ -229,4 +365,18 @@ func (flag *HighRiskCoauthorFlag) Key() string {
 
 func (flag *HighRiskCoauthorFlag) GetEntities() []string {
 	return flag.Coauthors
+}
+
+func (flag *HighRiskCoauthorFlag) GetMessage() string {
+	return flag.Message
+}
+
+func (flag *HighRiskCoauthorFlag) Summary() string {
+	return fmt.Sprintf("Disclosed: %v\nPaper Title: %s\nURL: %s\nPublication Year: %d\nCo-authors: %s",
+		flag.Disclosed,
+		flag.Work.DisplayName,
+		flag.Work.WorkUrl,
+		flag.Work.PublicationYear,
+		strings.Join(flag.Coauthors, ", "),
+	)
 }

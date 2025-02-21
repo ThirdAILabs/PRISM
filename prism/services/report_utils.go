@@ -3,7 +3,6 @@ package services
 import (
 	"bytes"
 	"encoding/csv"
-	"encoding/json"
 	"fmt"
 	"prism/prism/api"
 	"strings"
@@ -117,21 +116,17 @@ func generateCSV(report api.Report) ([]byte, error) {
 		return nil, err
 	}
 
-	if err := writer.Write([]string{"Content Flags", "", ""}); err != nil {
+	if err := writer.Write([]string{"Content Flags", ""}); err != nil {
 		return nil, err
 	}
 
-	if err := writer.Write([]string{"Category", "Flag Key", "Details (JSON)"}); err != nil {
+	if err := writer.Write([]string{"Category", "Summary"}); err != nil {
 		return nil, err
 	}
 
-	appendFlags := func(category string, flags []api.Flag) error {
+	appendFlags := func(flags []api.Flag) error {
 		for _, flag := range flags {
-			flagJSON, err := json.Marshal(flag)
-			if err != nil {
-				return err
-			}
-			row := []string{category, flag.Key(), string(flagJSON)}
+			row := []string{flag.GetMessage(), flag.Summary()}
 			if err := writer.Write(row); err != nil {
 				return err
 			}
@@ -140,25 +135,25 @@ func generateCSV(report api.Report) ([]byte, error) {
 	}
 
 	content := report.Content
-	if err := appendFlags("TalentContracts", castFlags(content.TalentContracts)); err != nil {
+	if err := appendFlags(castFlags(content.TalentContracts)); err != nil {
 		return nil, err
 	}
-	if err := appendFlags("AssociationsWithDeniedEntities", castFlags(content.AssociationsWithDeniedEntities)); err != nil {
+	if err := appendFlags(castFlags(content.AssociationsWithDeniedEntities)); err != nil {
 		return nil, err
 	}
-	if err := appendFlags("HighRiskFunders", castFlags(content.HighRiskFunders)); err != nil {
+	if err := appendFlags(castFlags(content.HighRiskFunders)); err != nil {
 		return nil, err
 	}
-	if err := appendFlags("AuthorAffiliations", castFlags(content.AuthorAffiliations)); err != nil {
+	if err := appendFlags(castFlags(content.AuthorAffiliations)); err != nil {
 		return nil, err
 	}
-	if err := appendFlags("PotentialAuthorAffiliations", castFlags(content.PotentialAuthorAffiliations)); err != nil {
+	if err := appendFlags(castFlags(content.PotentialAuthorAffiliations)); err != nil {
 		return nil, err
 	}
-	if err := appendFlags("MiscHighRiskAssociations", castFlags(content.MiscHighRiskAssociations)); err != nil {
+	if err := appendFlags(castFlags(content.MiscHighRiskAssociations)); err != nil {
 		return nil, err
 	}
-	if err := appendFlags("CoauthorAffiliations", castFlags(content.CoauthorAffiliations)); err != nil {
+	if err := appendFlags(castFlags(content.CoauthorAffiliations)); err != nil {
 		return nil, err
 	}
 
@@ -175,89 +170,6 @@ func castFlags[T api.Flag](flags []T) []api.Flag {
 		result[i] = flag
 	}
 	return result
-}
-
-func generatePDF(report api.Report) ([]byte, error) {
-	pdf := gofpdf.New("P", "mm", "A4", "")
-	pdf.AddPage()
-	pdf.SetFont("Arial", "B", 16)
-
-	pdf.Cell(40, 10, "Report Details")
-	pdf.Ln(12)
-
-	pdf.SetFont("Arial", "", 12)
-	addLine := func(field, value string) {
-		pdf.CellFormat(40, 10, fmt.Sprintf("%s:", field), "", 0, "", false, 0, "")
-		pdf.CellFormat(0, 10, value, "", 1, "", false, 0, "")
-	}
-
-	addLine("Report ID", report.Id.String())
-	addLine("Created At", report.CreatedAt.Format(time.RFC3339))
-	addLine("Author Name", report.AuthorName)
-	addLine("Start Year", fmt.Sprintf("%d", report.StartYear))
-	addLine("End Year", fmt.Sprintf("%d", report.EndYear))
-
-	printFlagPage := func(category string, flag api.Flag) error {
-		pdf.AddPage()
-		pdf.SetFont("Arial", "B", 14)
-		pdf.CellFormat(0, 10, fmt.Sprintf("Content Flag (%s)", category), "", 1, "C", false, 0, "")
-		pdf.Ln(5)
-		pdf.SetFont("Arial", "", 12)
-		pdf.CellFormat(40, 10, "Flag Key:", "", 0, "", false, 0, "")
-		pdf.CellFormat(0, 10, flag.Key(), "", 1, "", false, 0, "")
-
-		flagJSON, err := json.Marshal(flag)
-		if err != nil {
-			return err
-		}
-
-		pdf.MultiCell(0, 10, fmt.Sprintf("Details (JSON): %s", string(flagJSON)), "", "", false)
-		return nil
-	}
-
-	content := report.Content
-	for _, flag := range castFlags(content.TalentContracts) {
-		if err := printFlagPage("TalentContracts", flag); err != nil {
-			return nil, err
-		}
-	}
-	for _, flag := range castFlags(content.AssociationsWithDeniedEntities) {
-		if err := printFlagPage("AssociationsWithDeniedEntities", flag); err != nil {
-			return nil, err
-		}
-	}
-	for _, flag := range castFlags(content.HighRiskFunders) {
-		if err := printFlagPage("HighRiskFunders", flag); err != nil {
-			return nil, err
-		}
-	}
-	for _, flag := range castFlags(content.AuthorAffiliations) {
-		if err := printFlagPage("AuthorAffiliations", flag); err != nil {
-			return nil, err
-		}
-	}
-	for _, flag := range castFlags(content.PotentialAuthorAffiliations) {
-		if err := printFlagPage("PotentialAuthorAffiliations", flag); err != nil {
-			return nil, err
-		}
-	}
-	for _, flag := range castFlags(content.MiscHighRiskAssociations) {
-		if err := printFlagPage("MiscHighRiskAssociations", flag); err != nil {
-			return nil, err
-		}
-	}
-	for _, flag := range castFlags(content.CoauthorAffiliations) {
-		if err := printFlagPage("CoauthorAffiliations", flag); err != nil {
-			return nil, err
-		}
-	}
-
-	var buf bytes.Buffer
-	err := pdf.Output(&buf)
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
 }
 
 func generateExcel(report api.Report) ([]byte, error) {
@@ -336,7 +248,7 @@ func generateExcel(report api.Report) ([]byte, error) {
 }
 
 func createSheetForTalentContracts(f *excelize.File, flags []*api.TalentContractFlag) error {
-	sheetName := "Talent Contracts"
+	sheetName := flags[0].GetMessage()
 	if _, err := f.NewSheet(sheetName); err != nil {
 		return err
 	}
@@ -380,7 +292,7 @@ func createSheetForTalentContracts(f *excelize.File, flags []*api.TalentContract
 }
 
 func createSheetForAssociations(f *excelize.File, flags []*api.AssociationWithDeniedEntityFlag) error {
-	sheetName := "Associations With Denied Entities"
+	sheetName := flags[0].GetMessage()
 	if _, err := f.NewSheet(sheetName); err != nil {
 		return err
 	}
@@ -425,7 +337,7 @@ func createSheetForAssociations(f *excelize.File, flags []*api.AssociationWithDe
 }
 
 func createSheetForHighRiskFunders(f *excelize.File, flags []*api.HighRiskFunderFlag) error {
-	sheetName := "High Risk Funders"
+	sheetName := flags[0].GetMessage()
 	if _, err := f.NewSheet(sheetName); err != nil {
 		return err
 	}
@@ -472,7 +384,7 @@ func createSheetForHighRiskFunders(f *excelize.File, flags []*api.HighRiskFunder
 }
 
 func createSheetForAuthorAffiliations(f *excelize.File, flags []*api.AuthorAffiliationFlag) error {
-	sheetName := "Author Affiliations"
+	sheetName := flags[0].GetMessage()
 	if _, err := f.NewSheet(sheetName); err != nil {
 		return err
 	}
@@ -516,7 +428,7 @@ func createSheetForAuthorAffiliations(f *excelize.File, flags []*api.AuthorAffil
 }
 
 func createSheetForPotentialAuthorAffiliations(f *excelize.File, flags []*api.PotentialAuthorAffiliationFlag) error {
-	sheetName := "Potential Author Affiliations"
+	sheetName := flags[0].GetMessage()
 	if _, err := f.NewSheet(sheetName); err != nil {
 		return err
 	}
@@ -554,7 +466,7 @@ func createSheetForPotentialAuthorAffiliations(f *excelize.File, flags []*api.Po
 }
 
 func createSheetForMiscHighRiskAssociations(f *excelize.File, flags []*api.MiscHighRiskAssociationFlag) error {
-	sheetName := "Misc High Risk Associations"
+	sheetName := flags[0].GetMessage()
 	if _, err := f.NewSheet(sheetName); err != nil {
 		return err
 	}
@@ -603,7 +515,7 @@ func createSheetForMiscHighRiskAssociations(f *excelize.File, flags []*api.MiscH
 }
 
 func createSheetForCoauthorAffiliations(f *excelize.File, flags []*api.CoauthorAffiliationFlag) error {
-	sheetName := "Coauthor Affiliations"
+	sheetName := flags[0].GetMessage()
 	if _, err := f.NewSheet(sheetName); err != nil {
 		return err
 	}
@@ -647,4 +559,89 @@ func createSheetForCoauthorAffiliations(f *excelize.File, flags []*api.CoauthorA
 		}
 	}
 	return nil
+}
+
+func generatePDF(report api.Report) ([]byte, error) {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetMargins(20, 20, 20)
+	pdf.SetAutoPageBreak(true, 20)
+
+	pdf.SetHeaderFunc(func() {
+		pdf.SetFont("Arial", "B", 14)
+		pdf.SetFillColor(200, 200, 255)
+		pdf.CellFormat(0, 10, "Report Details", "0", 1, "C", true, 0, "")
+		pdf.Ln(2)
+	})
+
+	pdf.AddPage()
+	pdf.SetFont("Arial", "", 12)
+
+	details := [][]string{
+		{"Report ID", report.Id.String()},
+		{"Created At", report.CreatedAt.Format(time.RFC3339)},
+		{"Author Name", report.AuthorName},
+		{"Start Year", fmt.Sprintf("%d", report.StartYear)},
+		{"End Year", fmt.Sprintf("%d", report.EndYear)},
+	}
+
+	for _, row := range details {
+		pdf.SetFont("Arial", "B", 12)
+		pdf.CellFormat(40, 8, row[0], "1", 0, "L", false, 0, "")
+		pdf.SetFont("Arial", "", 12)
+		pdf.CellFormat(0, 8, row[1], "1", 1, "L", false, 0, "")
+	}
+	pdf.Ln(5)
+
+	addFlagPage := func(flag api.Flag) error {
+		pdf.AddPage()
+		pdf.SetFont("Arial", "B", 14)
+		pdf.SetFillColor(220, 220, 220)
+		pdf.CellFormat(0, 10, flag.GetMessage(), "0", 1, "C", true, 0, "")
+		pdf.Ln(3)
+
+		pdf.SetFont("Arial", "B", 12)
+		pdf.CellFormat(40, 8, "Summary:", "", 1, "L", false, 0, "")
+		pdf.SetFont("Arial", "", 12)
+		pdf.MultiCell(0, 7, flag.Summary(), "1", "L", false)
+		return nil
+	}
+
+	content := report.Content
+
+	addFlagPagesForCategory := func(flags []api.Flag) error {
+		for _, flag := range flags {
+			if err := addFlagPage(flag); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	if err := addFlagPagesForCategory(castFlags(content.TalentContracts)); err != nil {
+		return nil, err
+	}
+	if err := addFlagPagesForCategory(castFlags(content.AssociationsWithDeniedEntities)); err != nil {
+		return nil, err
+	}
+	if err := addFlagPagesForCategory(castFlags(content.HighRiskFunders)); err != nil {
+		return nil, err
+	}
+	if err := addFlagPagesForCategory(castFlags(content.AuthorAffiliations)); err != nil {
+		return nil, err
+	}
+	if err := addFlagPagesForCategory(castFlags(content.PotentialAuthorAffiliations)); err != nil {
+		return nil, err
+	}
+	if err := addFlagPagesForCategory(castFlags(content.MiscHighRiskAssociations)); err != nil {
+		return nil, err
+	}
+	if err := addFlagPagesForCategory(castFlags(content.CoauthorAffiliations)); err != nil {
+		return nil, err
+	}
+
+	var buf bytes.Buffer
+	if err := pdf.Output(&buf); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
