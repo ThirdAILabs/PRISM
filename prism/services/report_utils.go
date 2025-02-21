@@ -264,13 +264,11 @@ func sanitizeSheetName(name string) string {
 	return name
 }
 
-func createSheetForTalentContracts(f *excelize.File, flags []*api.TalentContractFlag) error {
+func createSheetForFlags[T api.Flag](f *excelize.File, flags []T, headers []string, rowExtractor func(flag T) []interface{}) error {
 	sheetName := sanitizeSheetName(flags[0].GetHeading())
 	if _, err := f.NewSheet(sheetName); err != nil {
 		return err
 	}
-
-	headers := []string{"Key", "Message", "Disclosed", "Display Name", "Work URL", "Publication Year", "Raw Acknowledgements"}
 	for col, header := range headers {
 		cell, err := excelize.CoordinatesToCellName(col+1, 1)
 		if err != nil {
@@ -280,250 +278,15 @@ func createSheetForTalentContracts(f *excelize.File, flags []*api.TalentContract
 			return err
 		}
 	}
-
 	for i, flag := range flags {
 		rowNum := i + 2
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("A%d", rowNum), flag.Key()); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", rowNum), flag.Message); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", rowNum), flag.Disclosed); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("E%d", rowNum), flag.Work.DisplayName); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("F%d", rowNum), flag.Work.WorkUrl); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("G%d", rowNum), flag.Work.PublicationYear); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("H%d", rowNum), strings.Join(flag.RawAcknowledements, ", ")); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func createSheetForAssociations(f *excelize.File, flags []*api.AssociationWithDeniedEntityFlag) error {
-	sheetName := sanitizeSheetName(flags[0].GetHeading())
-	if _, err := f.NewSheet(sheetName); err != nil {
-		return err
-	}
-
-	headers := []string{"Key", "Message", "Disclosed", "Display Name", "Work URL", "Publication Year", "Raw Acknowledgements"}
-	for col, header := range headers {
-		cell, err := excelize.CoordinatesToCellName(col+1, 1)
-		if err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, cell, header); err != nil {
-			return err
-		}
-	}
-
-	for i, flag := range flags {
-		rowNum := i + 2
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("A%d", rowNum), flag.Key()); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", rowNum), flag.Message); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", rowNum), flag.Disclosed); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("E%d", rowNum), flag.Work.DisplayName); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("F%d", rowNum), flag.Work.WorkUrl); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("G%d", rowNum), flag.Work.PublicationYear); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("H%d", rowNum), strings.Join(flag.RawAcknowledements, ", ")); err != nil {
-			return err
-		}
-
-	}
-	return nil
-}
-
-func createSheetForHighRiskFunders(f *excelize.File, flags []*api.HighRiskFunderFlag) error {
-	sheetName := sanitizeSheetName(flags[0].GetHeading())
-	if _, err := f.NewSheet(sheetName); err != nil {
-		return err
-	}
-
-	headers := []string{"Key", "Message", "Disclosed", "Display Name", "Work URL", "Publication Year", "Funders", "From Acknowledgements"}
-	for col, header := range headers {
-		cell, err := excelize.CoordinatesToCellName(col+1, 1)
-		if err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, cell, header); err != nil {
-			return err
-		}
-	}
-
-	for i, flag := range flags {
-		rowNum := i + 2
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("A%d", rowNum), flag.Key()); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", rowNum), flag.Message); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", rowNum), flag.Disclosed); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("E%d", rowNum), flag.Work.DisplayName); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("F%d", rowNum), flag.Work.WorkUrl); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("G%d", rowNum), flag.Work.PublicationYear); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("H%d", rowNum), strings.Join(flag.Funders, ", ")); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("I%d", rowNum), flag.FromAcknowledgements); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func createSheetForAuthorAffiliations(f *excelize.File, flags []*api.AuthorAffiliationFlag) error {
-	sheetName := sanitizeSheetName(flags[0].GetHeading())
-	if _, err := f.NewSheet(sheetName); err != nil {
-		return err
-	}
-
-	headers := []string{"Key", "Message", "Disclosed", "Display Name", "Work URL", "Publication Year", "Affiliations"}
-	for col, header := range headers {
-		cell, err := excelize.CoordinatesToCellName(col+1, 1)
-		if err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, cell, header); err != nil {
-			return err
-		}
-	}
-
-	for i, flag := range flags {
-		rowNum := i + 2
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("A%d", rowNum), flag.Key()); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", rowNum), flag.Message); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", rowNum), flag.Disclosed); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("E%d", rowNum), flag.Work.DisplayName); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("F%d", rowNum), flag.Work.WorkUrl); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("G%d", rowNum), flag.Work.PublicationYear); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("H%d", rowNum), strings.Join(flag.Affiliations, ", ")); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func createSheetForPotentialAuthorAffiliations(f *excelize.File, flags []*api.PotentialAuthorAffiliationFlag) error {
-	sheetName := sanitizeSheetName(flags[0].GetHeading())
-	if _, err := f.NewSheet(sheetName); err != nil {
-		return err
-	}
-
-	headers := []string{"Key", "Message", "Disclosed", "University", "University URL"}
-	for col, header := range headers {
-		cell, err := excelize.CoordinatesToCellName(col+1, 1)
-		if err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, cell, header); err != nil {
-			return err
-		}
-	}
-
-	for i, flag := range flags {
-		rowNum := i + 2
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("A%d", rowNum), flag.Key()); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", rowNum), flag.Message); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", rowNum), flag.Disclosed); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", rowNum), flag.University); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("E%d", rowNum), flag.UniversityUrl); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func createSheetForMiscHighRiskAssociations(f *excelize.File, flags []*api.MiscHighRiskAssociationFlag) error {
-	sheetName := sanitizeSheetName(flags[0].GetHeading())
-	if _, err := f.NewSheet(sheetName); err != nil {
-		return err
-	}
-
-	headers := []string{"Key", "Message", "Disclosed", "Doc Title", "Doc URL", "Doc Entities", "Entity Mentioned", "Frequent Coauthor"}
-	for col, header := range headers {
-		cell, err := excelize.CoordinatesToCellName(col+1, 1)
-		if err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, cell, header); err != nil {
-			return err
-		}
-	}
-
-	for i, flag := range flags {
-		rowNum := i + 2
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("A%d", rowNum), flag.Key()); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", rowNum), flag.Message); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", rowNum), flag.Disclosed); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", rowNum), flag.DocTitle); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("E%d", rowNum), flag.DocUrl); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("F%d", rowNum), strings.Join(flag.DocEntities, ", ")); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("G%d", rowNum), flag.EntityMentioned); err != nil {
-			return err
-		}
-		if flag.FrequentCoauthor != nil {
-			if err := f.SetCellValue(sheetName, fmt.Sprintf("H%d", rowNum), *flag.FrequentCoauthor); err != nil {
+		rowData := rowExtractor(flag)
+		for col, value := range rowData {
+			cell, err := excelize.CoordinatesToCellName(col+1, rowNum)
+			if err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, cell, value); err != nil {
 				return err
 			}
 		}
@@ -531,51 +294,99 @@ func createSheetForMiscHighRiskAssociations(f *excelize.File, flags []*api.MiscH
 	return nil
 }
 
+func createSheetForTalentContracts(f *excelize.File, flags []*api.TalentContractFlag) error {
+	headers := []string{"Disclosed", "Display Name", "Work URL", "Publication Year", "Acknowledgements"}
+	return createSheetForFlags[*api.TalentContractFlag](f, flags, headers, func(flag *api.TalentContractFlag) []interface{} {
+		return []interface{}{
+			flag.Disclosed,
+			flag.Work.DisplayName,
+			flag.Work.WorkUrl,
+			flag.Work.PublicationYear,
+			strings.Join(flag.RawAcknowledements, ", "),
+		}
+	})
+}
+
+func createSheetForAssociations(f *excelize.File, flags []*api.AssociationWithDeniedEntityFlag) error {
+	headers := []string{"Disclosed", "Display Name", "Work URL", "Publication Year", "Acknowledgements"}
+	return createSheetForFlags[*api.AssociationWithDeniedEntityFlag](f, flags, headers, func(flag *api.AssociationWithDeniedEntityFlag) []interface{} {
+		return []interface{}{
+			flag.Disclosed,
+			flag.Work.DisplayName,
+			flag.Work.WorkUrl,
+			flag.Work.PublicationYear,
+			strings.Join(flag.RawAcknowledements, ", "),
+		}
+	})
+}
+
+func createSheetForHighRiskFunders(f *excelize.File, flags []*api.HighRiskFunderFlag) error {
+	headers := []string{"Disclosed", "Display Name", "Work URL", "Publication Year", "Funders"}
+	return createSheetForFlags[*api.HighRiskFunderFlag](f, flags, headers, func(flag *api.HighRiskFunderFlag) []interface{} {
+		return []interface{}{
+			flag.Disclosed,
+			flag.Work.DisplayName,
+			flag.Work.WorkUrl,
+			flag.Work.PublicationYear,
+			strings.Join(flag.Funders, ", "),
+		}
+	})
+}
+
+func createSheetForAuthorAffiliations(f *excelize.File, flags []*api.AuthorAffiliationFlag) error {
+	headers := []string{"Disclosed", "Display Name", "Work URL", "Publication Year", "Affiliations"}
+	return createSheetForFlags[*api.AuthorAffiliationFlag](f, flags, headers, func(flag *api.AuthorAffiliationFlag) []interface{} {
+		return []interface{}{
+			flag.Disclosed,
+			flag.Work.DisplayName,
+			flag.Work.WorkUrl,
+			flag.Work.PublicationYear,
+			strings.Join(flag.Affiliations, ", "),
+		}
+	})
+}
+
+func createSheetForPotentialAuthorAffiliations(f *excelize.File, flags []*api.PotentialAuthorAffiliationFlag) error {
+	headers := []string{"Disclosed", "University", "University URL"}
+	return createSheetForFlags[*api.PotentialAuthorAffiliationFlag](f, flags, headers, func(flag *api.PotentialAuthorAffiliationFlag) []interface{} {
+		return []interface{}{
+			flag.Disclosed,
+			flag.University,
+			flag.UniversityUrl,
+		}
+	})
+}
+
+func createSheetForMiscHighRiskAssociations(f *excelize.File, flags []*api.MiscHighRiskAssociationFlag) error {
+	headers := []string{"Disclosed", "Doc Title", "Doc URL", "Doc Entities", "Entity Mentioned", "Frequent Coauthor"}
+	return createSheetForFlags[*api.MiscHighRiskAssociationFlag](f, flags, headers, func(flag *api.MiscHighRiskAssociationFlag) []interface{} {
+		frequentCoauthor := ""
+		if flag.FrequentCoauthor != nil {
+			frequentCoauthor = *flag.FrequentCoauthor
+		}
+		return []interface{}{
+			flag.Disclosed,
+			flag.DocTitle,
+			flag.DocUrl,
+			strings.Join(flag.DocEntities, ", "),
+			flag.EntityMentioned,
+			frequentCoauthor,
+		}
+	})
+}
+
 func createSheetForCoauthorAffiliations(f *excelize.File, flags []*api.CoauthorAffiliationFlag) error {
-	sheetName := sanitizeSheetName(flags[0].GetHeading())
-	if _, err := f.NewSheet(sheetName); err != nil {
-		return err
-	}
-
-	headers := []string{"Key", "Message", "Disclosed", "Display Name", "Work URL", "Publication Year", "Coauthors", "Affiliations"}
-	for col, header := range headers {
-		cell, err := excelize.CoordinatesToCellName(col+1, 1)
-		if err != nil {
-			return err
+	headers := []string{"Disclosed", "Display Name", "Work URL", "Publication Year", "Coauthors", "Affiliations"}
+	return createSheetForFlags[*api.CoauthorAffiliationFlag](f, flags, headers, func(flag *api.CoauthorAffiliationFlag) []interface{} {
+		return []interface{}{
+			flag.Disclosed,
+			flag.Work.DisplayName,
+			flag.Work.WorkUrl,
+			flag.Work.PublicationYear,
+			strings.Join(flag.Coauthors, ", "),
+			strings.Join(flag.Affiliations, ", "),
 		}
-		if err := f.SetCellValue(sheetName, cell, header); err != nil {
-			return err
-		}
-	}
-
-	for i, flag := range flags {
-		rowNum := i + 2
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("A%d", rowNum), flag.Key()); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", rowNum), flag.Message); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", rowNum), flag.Disclosed); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("E%d", rowNum), flag.Work.DisplayName); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("F%d", rowNum), flag.Work.WorkUrl); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("G%d", rowNum), flag.Work.PublicationYear); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("H%d", rowNum), strings.Join(flag.Coauthors, ", ")); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, fmt.Sprintf("I%d", rowNum), strings.Join(flag.Affiliations, ", ")); err != nil {
-			return err
-		}
-	}
-	return nil
+	})
 }
 
 func printWatermark(pdf *gofpdf.Fpdf, text string) {
