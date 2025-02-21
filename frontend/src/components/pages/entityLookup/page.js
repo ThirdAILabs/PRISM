@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import { API_BASE_URL } from '../../../services/apiService';
 import "../../common/searchBar/SearchBar.css";
+import "../../common/tools/button/button1.css"
 import { useUser } from '../../../store/userContext';
 import { searchService } from '../../../api/search';
 function EntityLookup() {
@@ -39,7 +39,7 @@ function EntityLookup() {
       <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
         <Link
           to="/"
-          className="author-institution-search-button"
+          className="button"
           style={{
             padding: '10px 15px',
             fontSize: '14px',
@@ -66,7 +66,7 @@ function EntityLookup() {
             </div>
             <div style={{ width: "20px" }} />
             <div style={{ width: "200px" }}>
-              <button type="submit" disabled={isLoading} className="author-institution-search-button">
+              <button type="submit" disabled={isLoading} className="button">
                 {isLoading ? 'Searching...' : 'Search'}
               </button>
             </div>

@@ -6,17 +6,17 @@ import { makeStyles } from '@mui/styles';
 const useStyles = makeStyles({
     tabs: {
         '& .MuiTabs-indicator': {
-            backgroundColor: 'white',
+            backgroundColor: 'black',
             height: '3px', // Makes the active tab indicator bolder
         },
     },
     tab: {
-        color: 'white !important',
+        color: 'black !important',
         '&.Mui-selected': {
-            color: 'white !important',
+            color: 'black !important',
         },
         '&:hover': {
-            backgroundColor: 'rgba(255, 255, 255, 0.1) !important', // Light gray hover effect
+            backgroundColor: 'rgb(245,240,240) !important', // Light gray hover effect
             transition: 'background-color 0.3s',
         },
     },
@@ -27,16 +27,18 @@ const CustomTabs = ({ activeTab, handleTabChange }) => {
 
     return (
         <Box>
-            <Box sx={{ display: 'flex', 
-                    justifyContent: 'center', // Center the Tabs horizontally
-                    borderBottom: 0  }}>
+            <Box sx={{
+                display: 'flex',
+                justifyContent: 'center', // Center the Tabs horizontally
+                borderBottom: 0
+            }}>
                 <Tabs
                     value={activeTab}
                     onChange={handleTabChange}
                     className={classes.tabs}
                     TabIndicatorProps={{
                         style: {
-                            backgroundColor: 'white'
+                            backgroundColor: 'black'
                         }
                     }}
                     sx={{
@@ -68,7 +70,7 @@ const CustomTabs = ({ activeTab, handleTabChange }) => {
             </Box>
             {/* Added white divider below tabs */}
             <Divider sx={{
-                backgroundColor: 'white',
+                backgroundColor: 'black',
                 height: '1px',
                 width: '100%',
                 opacity: 0.1
