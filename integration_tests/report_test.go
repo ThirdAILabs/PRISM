@@ -13,8 +13,6 @@ func createReport(t *testing.T, user *api.UserClient, authorId, authorName strin
 		AuthorId:   authorId,
 		AuthorName: authorName,
 		Source:     api.OpenAlexSource,
-		StartYear:  2020,
-		EndYear:    2024,
 	})
 	if err != nil {
 		t.Fatal(err)
