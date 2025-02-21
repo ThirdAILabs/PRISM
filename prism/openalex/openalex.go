@@ -40,7 +40,7 @@ type Work struct {
 	WorkUrl         string
 	OaUrl           string
 	DownloadUrl     string
-	PublicationYear int
+	PublicationDate time.Time
 	Authors         []Author
 	Grants          []Grant
 	Locations       []Location

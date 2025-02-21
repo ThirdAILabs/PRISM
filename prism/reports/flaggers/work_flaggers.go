@@ -23,7 +23,7 @@ func getWorkSummary(w openalex.Work) api.WorkSummary {
 		DisplayName:     w.DisplayName,
 		WorkUrl:         w.WorkUrl,
 		OaUrl:           w.OaUrl,
-		PublicationYear: w.PublicationYear,
+		PublicationDate: w.PublicationDate,
 	}
 }
 

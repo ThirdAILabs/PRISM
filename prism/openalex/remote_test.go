@@ -121,7 +121,7 @@ func TestStreamWorks(t *testing.T) {
 			work.WorkUrl == "" ||
 			work.OaUrl == "" ||
 			work.DownloadUrl == "" ||
-			work.PublicationYear != 2024 ||
+			work.PublicationDate.Year() != 2024 ||
 			len(work.Authors) == 0 ||
 			len(work.Locations) == 0 {
 			t.Fatal("invalid work")

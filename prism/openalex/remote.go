@@ -177,7 +177,7 @@ type oaWorkResults struct {
 type oaWork struct {
 	Id              string `json:"id"`
 	DisplayName     string `json:"display_name"`
-	PublicationYear int    `json:"publication_year"`
+	PublicationDate string `json:"publication_date"`
 
 	Ids oaWorkIds `json:"ids"`
 
@@ -255,7 +255,7 @@ func getYearFilter(startDate, endDate time.Time) string {
 	return fmt.Sprintf(",from_publication_date:%s,to_publication_date:%s", startDate.Format(time.DateOnly), endDate.Format(time.DateOnly))
 }
 
-func converOpenalexWork(work oaWork) Work {
+func convertOpenalexWork(work oaWork) Work {
 	authors := make([]Author, 0)
 	for _, author := range work.Authorships {
 		institutions := make([]Institution, 0)
@@ -291,13 +291,18 @@ func converOpenalexWork(work oaWork) Work {
 		})
 	}
 
+	publicationDate, err := time.Parse(time.DateOnly, work.PublicationDate)
+	if err != nil {
+		slog.Error("error parsing openalex publication date", "error", err)
+	}
+
 	return Work{
 		WorkId:          work.Id,
 		DisplayName:     work.DisplayName,
 		WorkUrl:         work.getWorkUrl(),
 		OaUrl:           work.getOaUrl(),
 		DownloadUrl:     work.pdfUrl(),
-		PublicationYear: work.PublicationYear,
+		PublicationDate: publicationDate,
 		Authors:         authors,
 		Grants:          grants,
 		Locations:       locations,
@@ -336,7 +341,7 @@ func (oa *RemoteKnowledgeBase) StreamWorks(authorId string, startDate, endDate t
 
 			works := make([]Work, 0, len(results.Results))
 			for _, work := range results.Results {
-				works = append(works, converOpenalexWork(work))
+				works = append(works, convertOpenalexWork(work))
 			}
 
 			outputCh <- WorkBatch{Works: works, TargetAuthorIds: []string{authorId}, Error: nil}
@@ -372,7 +377,7 @@ func (oa *RemoteKnowledgeBase) FindWorksByTitle(titles []string, startDate, endD
 		results := res.Result().(*oaResults[oaWork])
 
 		if len(results.Results) > 0 {
-			works = append(works, converOpenalexWork(results.Results[0]))
+			works = append(works, convertOpenalexWork(results.Results[0]))
 		}
 	}
 
