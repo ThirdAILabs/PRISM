@@ -691,7 +691,6 @@ func generatePDF(report api.Report) ([]byte, error) {
 		end := currentPage + len(ca) - 1
 		tocLines = append(tocLines, fmt.Sprintf("%s: %d - %d", ca[0].GetHeading(), start, end))
 		tocPages = append(tocPages, struct{ Start, End int }{start, end})
-		currentPage += len(ca)
 	}
 
 	pdf.AddPage()

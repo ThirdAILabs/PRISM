@@ -246,6 +246,12 @@ func (flag *MiscHighRiskAssociationFlag) GetDetailFields() []KeyValue {
 	if flag.FrequentCoauthor != nil {
 		fields = append(fields, KeyValue{Key: "Frequent Coauthor", Value: *flag.FrequentCoauthor})
 	}
+	for i, conn := range flag.Connections {
+		titleKey := fmt.Sprintf("Connection %d Title", i+1)
+		urlKey := fmt.Sprintf("Connection %d URL", i+1)
+		fields = append(fields, KeyValue{Key: titleKey, Value: conn.DocTitle})
+		fields = append(fields, KeyValue{Key: urlKey, Value: conn.DocUrl})
+	}
 	return fields
 }
 
