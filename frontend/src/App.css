@@ -4,7 +4,7 @@
   text-align: center;
   padding: 0px;
   margin: 0px;
-  background-color: rgb(17, 17, 17);
+  background-color: #ffffff;
 }
 
 .custom-input {
@@ -42,18 +42,20 @@
 
 .detail-item {
   margin: 10px;
-  background-color: rgb(28, 28, 28);
-  border: none;
-  color: white;
+  background-color: rgb(255, 255, 255);
+  /* border: none; */
+  color: black;
   border-radius: 10px;
   padding: 20px;
   text-align: start;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .detail-header {
-  background-color: rgb(28, 28, 28);
+  background-color: rgb(245, 240, 240);
   display: flex;
-  color: white;
+  color: rgb(44, 44, 44);
   padding: 20px;
   justify-content: space-between;
 }
@@ -62,7 +64,9 @@
   width: 100vw;
   height: 100vh;
   overflow: auto;
-  background-color: rgb(17, 17, 17);
+  /* background-color: rgb(17, 17, 17); */
+  background-color: #ffffff;
+  color: #000000;
   margin: 0;
 }
 
@@ -71,6 +75,7 @@
     opacity: 0;
     padding-top: 100px;
   }
+
   to {
     opacity: 1;
     padding-top: 0;
@@ -80,9 +85,9 @@
 .result-item {
   margin: 10px;
   width: 35vw;
-  background-color: rgb(28, 28, 28);
+  background-color: rgb(245, 240, 240);
   border: none;
-  color: white;
+  color: black;
   border-radius: 10px;
   padding: 20px;
 
@@ -91,7 +96,9 @@
 }
 
 .result-item:hover {
-  background-color: rgba(255, 255, 255, 0.10);
+  background-color: rgb(225, 220, 220);
+  color: black;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .result-wrapper {
@@ -101,14 +108,19 @@
 .bulleted-list {
   list-style-type: disc;
   padding-left: 20px;
-  background-color: inherit; /* Ensures background is not styled like a button/card */
+  background-color: inherit;
+  /* Ensures background is not styled like a button/card */
 }
 
 .bulleted-list li {
-  margin-bottom: 10px; /* Adds space between items */
-  background-color: inherit; /* Ensures background is not styled like a button/card */
-  border: none; /* Removes any borders */
-  padding: 0; /* Removes padding */
+  margin-bottom: 10px;
+  /* Adds space between items */
+  background-color: inherit;
+  /* Ensures background is not styled like a button/card */
+  border: none;
+  /* Removes any borders */
+  padding: 0;
+  /* Removes padding */
 }
 
 input {

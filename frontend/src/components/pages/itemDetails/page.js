@@ -1,6 +1,6 @@
 // src/ItemDetails.js
-import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
     TALENT_CONTRACTS,
     ASSOCIATIONS_WITH_DENIED_ENTITIES,
@@ -10,17 +10,11 @@ import {
     MISC_HIGH_RISK_AFFILIATIONS,
     COAUTHOR_AFFILIATIONS
 } from "../../../constants/constants.js";
-import { useConclusions } from '../../../hooks/useConclusions.js';
 import ConcernVisualizer from '../../ConcernVisualization.js';
-import { useVisualizationData } from '../../../hooks/useVisualizationData.js';
-import LoadedPapers from '../../common/cards/LoadedPapers.js'
-import apiService from '../../../services/apiService.jsx';
 import RelationShipGraph3 from '../../common/relationShipGraph/Relation-Graph3.js';
 import Tabs from '../../common/tools/Tabs.js';
 
 import DisclosureUploadButton from "../../buttons/disclosureUploadButton/DisclosureUploadButton.js";
-
-import { setStreamFlags } from '../../../services/streamStore.js';
 import { reportService } from '../../../api/reports.js';
 
 import useDisclosureUpload from '../../../hooks/useDisclosureUpload.js'
@@ -80,16 +74,16 @@ const ItemDetails = () => {
     const [reportContent, setReportContent] = useState({})
     const [authorName, setAuthorName] = useState("")
     const [institutions, setInstitutions] = useState([])
-    const [graphData, setGraphData] = useState(null)
-
+    const [initialReprtContent, setInitialReportContent] = useState({})
     useEffect(() => {
         let isMounted = true;
         const poll = async () => {
             const report = await reportService.getReport(report_id)
             if (report.Status === "complete" && isMounted) {
+                console.log("Report", report);
                 setAuthorName(report.AuthorName);
                 setReportContent(report.Content);
-                setGraphData(report.Content);
+                setInitialReportContent(report.Content);
                 setLoading(false);
             } else if (isMounted) {
                 setTimeout(poll, 500);
@@ -137,7 +131,20 @@ const ItemDetails = () => {
     const handleStartYearChange = (e) => setStartYear(e.target.value);
     const handleEndYearChange = (e) => setEndYear(e.target.value);
     const toggleYearDropdown = () => setYearDropdownOpen(!yearDropdownOpen);
-
+    const handleYearFilter = () => {
+        const filteredContent = {};
+        FLAG_ORDER.forEach((flag) => {
+            if (reportContent[flag]) {
+                filteredContent[flag] = reportContent[flag].filter((item) => {
+                    return (item?.Work?.PublicationYear) || item?.Work?.PublicationYear >= startYear && item?.Work?.PublicationYear <= endYear;
+                });
+            }
+            else
+                filteredContent[flag] = null;
+        });
+        setReportContent(filteredContent);
+        setYearDropdownOpen(false);
+    }
     const [instDropdownOpen, setInstDropdownOpen] = useState(false);
     const toggleInstDropdown = () => setInstDropdownOpen(!instDropdownOpen);
 
@@ -504,7 +511,7 @@ const ItemDetails = () => {
         <div className='basic-setup'>
             <div className='flex flex-row'>
                 <div className='detail-header'>
-                    <button onClick={() => navigate(-1)} className='btn text-light mb-3' style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}>
+                    <button onClick={() => navigate("/")} className='btn text-dark mb-3' style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px' }}>
                             <path d="M10 19L3 12L10 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             <path d="M3 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -536,7 +543,7 @@ const ItemDetails = () => {
                                 type="button"
                                 onClick={toggleYearDropdown}
                                 style={{
-                                    backgroundColor: '#323232',
+                                    backgroundColor: 'rgb(160, 160, 160)',
                                     border: 'none',
                                     color: 'white',
                                     width: "200px",
@@ -550,13 +557,17 @@ const ItemDetails = () => {
                                 <div
                                     className="dropdown-menu show p-3"
                                     style={{
-                                        backgroundColor: '#323232',
+                                        backgroundColor: 'rgb(160, 160, 160)',
                                         border: 'none',
                                         right: 0,
                                         marginTop: "10px",
                                         color: 'white',
                                         fontWeight: 'bold',
-                                        fontSize: '14px'
+                                        fontSize: '14px',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        display: 'flex',
+                                        flexDirection: 'column'
                                     }}
                                 >
                                     <div className="form-group mb-2">
@@ -568,10 +579,10 @@ const ItemDetails = () => {
                                             className="form-control"
                                             placeholder="Enter start year"
                                             style={{
-                                                backgroundColor: '#444444',
+                                                backgroundColor: 'rgb(220, 220, 220)',
                                                 border: 'none',
                                                 outline: 'none',
-                                                color: 'white',
+                                                color: 'black',
                                                 marginTop: '10px',
                                             }}
                                         />
@@ -586,27 +597,44 @@ const ItemDetails = () => {
                                             className="form-control"
                                             placeholder="Enter end year"
                                             style={{
-                                                backgroundColor: '#444444',
+                                                backgroundColor: 'rgb(220, 220, 220)',
                                                 border: 'none',
                                                 outline: 'none',
-                                                color: 'white',
+                                                color: 'black',
                                                 marginTop: '10px',
                                             }}
                                         />
                                     </div>
+                                    <button
+                                        className="form-control"
+                                        type="submit"
+                                        onClick={handleYearFilter}
+                                        disabled={!(startYear && endYear)}
+                                        style={{
+                                            backgroundColor: 'rgb(220, 220, 220)',
+                                            border: 'none',
+                                            color: 'white',
+                                            width: "100px",
+                                            fontWeight: 'bold',
+                                            fontSize: '14px',
+                                            marginTop: '20px',
+                                        }}
+                                    >
+                                        submit
+                                    </button>
                                 </div>
                             )}
                         </div>
 
-                        <div style={{ height: "10px" }} />
+                        {/* <div style={{ height: "10px" }} /> */}
 
-                        <div className="dropdown">
+                        {/* <div className="dropdown">
                             <button
                                 className="btn dropdown-toggle"
                                 type="button"
                                 onClick={toggleInstDropdown}
                                 style={{
-                                    backgroundColor: '#323232',
+                                    backgroundColor: 'rgb(160, 160, 160)',
                                     border: 'none',
                                     color: 'white',
                                     width: "200px",
@@ -616,8 +644,8 @@ const ItemDetails = () => {
                             >
                                 Filter by Institution
                             </button>
-                            {/* {instDropdownOpen && <AffiliationChecklist />} */}
-                        </div>
+                            {instDropdownOpen && <AffiliationChecklist />}
+                        </div> */}
                     </div>
 
                 </div>
@@ -634,7 +662,7 @@ const ItemDetails = () => {
                                 <div className="spinner-border text-primary spinner-border-sm" role="status"></div>
                             )}
                         </div>
-                        <DisclosureUploadButton hookValues={hookValues} className="ms-auto" />
+                        {/* <DisclosureUploadButton hookValues={hookValues} className="ms-auto" /> */}
 
                         {/* {message && <h5 className='text-light m-0 ms-2' style={{ fontSize: 'small' }}>{(loading || conclusionLoading) ? `Scanned ${formattedMessage} out of 250M documents` : "Analysis complete"}</h5>} */}
                         {/* {
@@ -657,7 +685,7 @@ const ItemDetails = () => {
                     </div>
                 </div>
 
-                <div className='d-flex w-100 flex-column align-items-center' style={{ color: "white", marginTop: "50px" }}>
+                <div className='d-flex w-100 flex-column align-items-center' style={{ color: "rgb(78, 78, 78)", marginTop: "50px" }}>
                     <div style={{ fontSize: "large", fontWeight: "bold" }}>
                         Total Score
                     </div>
@@ -685,7 +713,7 @@ const ItemDetails = () => {
                 </div>
                 {/* Comment the following to get rid of the collapsible components */}
                 {/* <CustomCollapsible /> */}
-                {review && <ul className='d-flex flex-column align-items-center p-0' style={{ color: "white" }}>
+                {review && <ul className='d-flex flex-column align-items-center p-0' style={{ color: "black" }}>
                     <h5 className='fw-bold mt-3'>Reviewing {" "} {TitlesAndDescriptions[review].title}</h5>{
                         (reportContent[review] || []).map(
                             (flag, index) => {
@@ -714,10 +742,7 @@ const ItemDetails = () => {
             }
 
             {activeTab === 1 && <>
-                <div className='flex flex-row bg-black'>
-                    {/* <RelationShipGraph2 /> */}
-                    <RelationShipGraph3 authorName={authorName} reportContent={reportContent} />
-                </div>
+                <RelationShipGraph3 authorName={authorName} reportContent={reportContent} />
             </>}
         </div>
     );

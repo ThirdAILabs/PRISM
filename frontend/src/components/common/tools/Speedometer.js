@@ -43,7 +43,7 @@ export function Ticks({ scale }) {
             key={step}
             x={tickCx}
             y={tickCy}
-            style={{ fill: "white" }}
+            style={{ fill: "black" }}
             fontSize={0.2 * radius}
             textAnchor="middle"
             dominantBaseline="middle"
@@ -64,7 +64,7 @@ export function Value({ value }) {
       <text
         x={cx}
         y={cy * 1.1}
-        style={{ fill: "white" }}
+        style={{ fill: "grey" }}
         fontSize={innerRadius * 0.8}
         fontWeight="bold"
         textAnchor="middle"
@@ -111,7 +111,7 @@ export function Speedometer({ scale, value }) {
         outerRadius="100%"
         sx={(theme) => ({
           [`& .${gaugeClasses.referenceArc}`]: {
-            fill: "black",
+            fill: "rgb(245, 240, 240)",
           },
         })}
       >

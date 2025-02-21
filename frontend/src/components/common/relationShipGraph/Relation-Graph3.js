@@ -365,7 +365,6 @@ const Demo = ({ authorName, reportContent }) => {
             <div style={{
                 height: '100vh', width: "90%", marginLeft: "5%", overflow: 'hidden',
                 position: 'relative',
-                backgroundColor: "#000000"
             }}>
                 <RelationGraph ref={graphRef} options={graphOptions} onNodeClick={onNodeClick} onLineClick={onLineClick} />
                 <Dialog
