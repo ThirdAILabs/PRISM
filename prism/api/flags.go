@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+type KeyValue struct {
+	Key   string
+	Value string
+}
+
 type Flag interface {
 	// This is used to deduplicate flags. Primarily for author flags, it is
 	// possible to have the same flag created for multiple works, for instance by
@@ -17,9 +22,9 @@ type Flag interface {
 
 	MarkDisclosed()
 
-	Summary() string
+	GetDetailFields() []KeyValue
 
-	GetMessage() string
+	GetHeading() string
 }
 
 type DisclosableFlag struct {
@@ -61,18 +66,18 @@ func (flag *TalentContractFlag) GetEntities() []string {
 	return flag.RawAcknowledements
 }
 
-func (flag *TalentContractFlag) GetMessage() string {
+func (flag *TalentContractFlag) GetHeading() string {
 	return "Talent Contracts"
 }
 
-func (flag *TalentContractFlag) Summary() string {
-	return fmt.Sprintf("Disclosed: %v\nTitle: %s\nURL: %s\nPublication Year: %d\nRaw Acknowledgements: %s",
-		flag.Disclosed,
-		flag.Work.DisplayName,
-		flag.Work.WorkUrl,
-		flag.Work.PublicationYear,
-		strings.Join(flag.RawAcknowledements, ", "),
-	)
+func (flag *TalentContractFlag) GetDetailFields() []KeyValue {
+	return []KeyValue{
+		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
+		{Key: "Title", Value: flag.Work.DisplayName},
+		{Key: "URL", Value: flag.Work.WorkUrl},
+		{Key: "Publication Year", Value: fmt.Sprintf("%d", flag.Work.PublicationYear)},
+		{Key: "Acknowledgements", Value: strings.Join(flag.RawAcknowledements, ", ")},
+	}
 }
 
 type AssociationWithDeniedEntityFlag struct {
@@ -92,18 +97,18 @@ func (flag *AssociationWithDeniedEntityFlag) GetEntities() []string {
 	return flag.RawAcknowledements
 }
 
-func (flag *AssociationWithDeniedEntityFlag) GetMessage() string {
+func (flag *AssociationWithDeniedEntityFlag) GetHeading() string {
 	return "Funding from Denied Entities"
 }
 
-func (flag *AssociationWithDeniedEntityFlag) Summary() string {
-	return fmt.Sprintf("Disclosed: %v\nPaper Title: %s\nURL: %s\nPublication Year: %d\nRaw Acknowledgements: %s",
-		flag.Disclosed,
-		flag.Work.DisplayName,
-		flag.Work.WorkUrl,
-		flag.Work.PublicationYear,
-		strings.Join(flag.RawAcknowledements, ", "),
-	)
+func (flag *AssociationWithDeniedEntityFlag) GetDetailFields() []KeyValue {
+	return []KeyValue{
+		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
+		{Key: "Paper Title", Value: flag.Work.DisplayName},
+		{Key: "URL", Value: flag.Work.WorkUrl},
+		{Key: "Publication Year", Value: fmt.Sprintf("%d", flag.Work.PublicationYear)},
+		{Key: "Acknowledgements", Value: strings.Join(flag.RawAcknowledements, ", ")},
+	}
 }
 
 type HighRiskFunderFlag struct {
@@ -123,19 +128,18 @@ func (flag *HighRiskFunderFlag) GetEntities() []string {
 	return flag.Funders
 }
 
-func (flag *HighRiskFunderFlag) GetMessage() string {
+func (flag *HighRiskFunderFlag) GetHeading() string {
 	return "High Risk Funding Sources"
 }
 
-func (flag *HighRiskFunderFlag) Summary() string {
-	return fmt.Sprintf("Disclosed: %v\nPaper Title: %s\nURL: %s\nPublication Year: %d\nFunders: %s\nFrom Acknowledgements: %v",
-		flag.Disclosed,
-		flag.Work.DisplayName,
-		flag.Work.WorkUrl,
-		flag.Work.PublicationYear,
-		strings.Join(flag.Funders, ", "),
-		flag.FromAcknowledgements,
-	)
+func (flag *HighRiskFunderFlag) GetDetailFields() []KeyValue {
+	return []KeyValue{
+		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
+		{Key: "Paper Title", Value: flag.Work.DisplayName},
+		{Key: "URL", Value: flag.Work.WorkUrl},
+		{Key: "Publication Year", Value: fmt.Sprintf("%d", flag.Work.PublicationYear)},
+		{Key: "Funders", Value: strings.Join(flag.Funders, ", ")},
+	}
 }
 
 type AuthorAffiliationFlag struct {
@@ -154,18 +158,18 @@ func (flag *AuthorAffiliationFlag) GetEntities() []string {
 	return flag.Affiliations
 }
 
-func (flag *AuthorAffiliationFlag) GetMessage() string {
+func (flag *AuthorAffiliationFlag) GetHeading() string {
 	return "Affiliations with High Risk Foreign Institutes"
 }
 
-func (flag *AuthorAffiliationFlag) Summary() string {
-	return fmt.Sprintf("Disclosed: %v\nPaper Title: %s\nURL: %s\nPublication Year: %d\nAffiliations: %s",
-		flag.Disclosed,
-		flag.Work.DisplayName,
-		flag.Work.WorkUrl,
-		flag.Work.PublicationYear,
-		strings.Join(flag.Affiliations, ", "),
-	)
+func (flag *AuthorAffiliationFlag) GetDetailFields() []KeyValue {
+	return []KeyValue{
+		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
+		{Key: "Paper Title", Value: flag.Work.DisplayName},
+		{Key: "URL", Value: flag.Work.WorkUrl},
+		{Key: "Publication Year", Value: fmt.Sprintf("%d", flag.Work.PublicationYear)},
+		{Key: "Affiliations", Value: strings.Join(flag.Affiliations, ", ")},
+	}
 }
 
 type PotentialAuthorAffiliationFlag struct {
@@ -183,16 +187,16 @@ func (flag *PotentialAuthorAffiliationFlag) GetEntities() []string {
 	return []string{flag.University}
 }
 
-func (flag *PotentialAuthorAffiliationFlag) GetMessage() string {
+func (flag *PotentialAuthorAffiliationFlag) GetHeading() string {
 	return "Appointments at High Risk Foreign Institutes"
 }
 
-func (flag *PotentialAuthorAffiliationFlag) Summary() string {
-	return fmt.Sprintf("Disclosed: %v\nUniversity: %s\nUniversity URL: %s",
-		flag.Disclosed,
-		flag.University,
-		flag.UniversityUrl,
-	)
+func (flag *PotentialAuthorAffiliationFlag) GetDetailFields() []KeyValue {
+	return []KeyValue{
+		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
+		{Key: "University", Value: flag.University},
+		{Key: "University URL", Value: flag.UniversityUrl},
+	}
 }
 
 type Connection struct {
@@ -227,23 +231,22 @@ func (flag *MiscHighRiskAssociationFlag) GetEntities() []string {
 	return entities
 }
 
-func (flag *MiscHighRiskAssociationFlag) GetMessage() string {
+func (flag *MiscHighRiskAssociationFlag) GetHeading() string {
 	return "Miscellaneous High Risk Connections"
 }
 
-func (flag *MiscHighRiskAssociationFlag) Summary() string {
-	var frequentCoauthor string
-	if flag.FrequentCoauthor != nil {
-		frequentCoauthor = *flag.FrequentCoauthor
+func (flag *MiscHighRiskAssociationFlag) GetDetailFields() []KeyValue {
+	fields := []KeyValue{
+		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
+		{Key: "Doc Title", Value: flag.DocTitle},
+		{Key: "Doc URL", Value: flag.DocUrl},
+		{Key: "Doc Entities", Value: strings.Join(flag.DocEntities, ", ")},
+		{Key: "Entity Mentioned", Value: flag.EntityMentioned},
 	}
-	return fmt.Sprintf("Disclosed: %v\nDoc Title: %s\nDoc URL: %s\nDoc Entities: %s\nEntity Mentioned: %s\nFrequent Coauthor: %s",
-		flag.Disclosed,
-		flag.DocTitle,
-		flag.DocUrl,
-		strings.Join(flag.DocEntities, ", "),
-		flag.EntityMentioned,
-		frequentCoauthor,
-	)
+	if flag.FrequentCoauthor != nil {
+		fields = append(fields, KeyValue{Key: "Frequent Coauthor", Value: *flag.FrequentCoauthor})
+	}
+	return fields
 }
 
 type CoauthorAffiliationFlag struct {
@@ -263,19 +266,19 @@ func (flag *CoauthorAffiliationFlag) GetEntities() []string {
 	return slices.Concat(flag.Coauthors, flag.Affiliations)
 }
 
-func (flag *CoauthorAffiliationFlag) GetMessage() string {
+func (flag *CoauthorAffiliationFlag) GetHeading() string {
 	return "Co-authors' affiliations with High Risk Foreign Institutes"
 }
 
-func (flag *CoauthorAffiliationFlag) Summary() string {
-	return fmt.Sprintf("Disclosed: %v\nPaper Title: %s\nURL: %s\nPublication Year: %d\nCo-authors: %s\nAffiliations: %s",
-		flag.Disclosed,
-		flag.Work.DisplayName,
-		flag.Work.WorkUrl,
-		flag.Work.PublicationYear,
-		strings.Join(flag.Coauthors, ", "),
-		strings.Join(flag.Affiliations, ", "),
-	)
+func (flag *CoauthorAffiliationFlag) GetDetailFields() []KeyValue {
+	return []KeyValue{
+		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
+		{Key: "Paper Title", Value: flag.Work.DisplayName},
+		{Key: "URL", Value: flag.Work.WorkUrl},
+		{Key: "Publication Year", Value: fmt.Sprintf("%d", flag.Work.PublicationYear)},
+		{Key: "Co-authors", Value: strings.Join(flag.Coauthors, ", ")},
+		{Key: "Affiliations", Value: strings.Join(flag.Affiliations, ", ")},
+	}
 }
 
 type ReportContent struct {
@@ -307,18 +310,18 @@ func (flag *MultipleAffiliationFlag) GetEntities() []string {
 	return flag.Affiliations
 }
 
-func (flag *MultipleAffiliationFlag) GetMessage() string {
+func (flag *MultipleAffiliationFlag) GetHeading() string {
 	return flag.Message
 }
 
-func (flag *MultipleAffiliationFlag) Summary() string {
-	return fmt.Sprintf("Disclosed: %v\nPaper Title: %s\nURL: %s\nPublication Year: %d\nAffiliations: %s",
-		flag.Disclosed,
-		flag.Work.DisplayName,
-		flag.Work.WorkUrl,
-		flag.Work.PublicationYear,
-		strings.Join(flag.Affiliations, ", "),
-	)
+func (flag *MultipleAffiliationFlag) GetDetailFields() []KeyValue {
+	return []KeyValue{
+		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
+		{Key: "Paper Title", Value: flag.Work.DisplayName},
+		{Key: "URL", Value: flag.Work.WorkUrl},
+		{Key: "Publication Year", Value: fmt.Sprintf("%d", flag.Work.PublicationYear)},
+		{Key: "Affiliations", Value: strings.Join(flag.Affiliations, ", ")},
+	}
 }
 
 type HighRiskPublisherFlag struct {
@@ -337,18 +340,18 @@ func (flag *HighRiskPublisherFlag) GetEntities() []string {
 	return flag.Publishers
 }
 
-func (flag *HighRiskPublisherFlag) GetMessage() string {
+func (flag *HighRiskPublisherFlag) GetHeading() string {
 	return flag.Message
 }
 
-func (flag *HighRiskPublisherFlag) Summary() string {
-	return fmt.Sprintf("Disclosed: %v\nPaper Title: %s\nURL: %s\nPublication Year: %d\nPublishers: %s",
-		flag.Disclosed,
-		flag.Work.DisplayName,
-		flag.Work.WorkUrl,
-		flag.Work.PublicationYear,
-		strings.Join(flag.Publishers, ", "),
-	)
+func (flag *HighRiskPublisherFlag) GetDetailFields() []KeyValue {
+	return []KeyValue{
+		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
+		{Key: "Paper Title", Value: flag.Work.DisplayName},
+		{Key: "URL", Value: flag.Work.WorkUrl},
+		{Key: "Publication Year", Value: fmt.Sprintf("%d", flag.Work.PublicationYear)},
+		{Key: "Publishers", Value: strings.Join(flag.Publishers, ", ")},
+	}
 }
 
 type HighRiskCoauthorFlag struct {
@@ -367,16 +370,16 @@ func (flag *HighRiskCoauthorFlag) GetEntities() []string {
 	return flag.Coauthors
 }
 
-func (flag *HighRiskCoauthorFlag) GetMessage() string {
+func (flag *HighRiskCoauthorFlag) GetHeading() string {
 	return flag.Message
 }
 
-func (flag *HighRiskCoauthorFlag) Summary() string {
-	return fmt.Sprintf("Disclosed: %v\nPaper Title: %s\nURL: %s\nPublication Year: %d\nCo-authors: %s",
-		flag.Disclosed,
-		flag.Work.DisplayName,
-		flag.Work.WorkUrl,
-		flag.Work.PublicationYear,
-		strings.Join(flag.Coauthors, ", "),
-	)
+func (flag *HighRiskCoauthorFlag) GetDetailFields() []KeyValue {
+	return []KeyValue{
+		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
+		{Key: "Paper Title", Value: flag.Work.DisplayName},
+		{Key: "URL", Value: flag.Work.WorkUrl},
+		{Key: "Publication Year", Value: fmt.Sprintf("%d", flag.Work.PublicationYear)},
+		{Key: "Co-authors", Value: strings.Join(flag.Coauthors, ", ")},
+	}
 }
