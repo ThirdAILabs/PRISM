@@ -8,6 +8,12 @@ import (
 	"github.com/google/uuid"
 )
 
+type contextKey string
+
+const (
+	userIdContextKey contextKey = "user_id"
+)
+
 type TokenVerifier interface {
 	VerifyToken(token string) (uuid.UUID, error)
 }

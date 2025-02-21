@@ -1,0 +1,45 @@
+name: Build Universe Libs
+
+# Kills old jobs from the same pr if we push a new commit
+# See https://stackoverflow.com/questions/66335225/how-to-cancel-previous-runs-in-the-pr-when-you-push-new-commitsupdate-the-curre
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Controls when the workflow will run
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build-universe-libs:
+    runs-on: ubuntu-22.04-8-cores
+    steps:
+      - uses: actions/checkout@v2
+
+      # The following is used to build the *.a files that are copied from the resulting 
+      # artifact to PRISM/prism/search/lib/gh_actions. They are used for future gh actions
+      # runs because compiling the libraries takes ~30 min, and they will rarely if ever 
+      # change.
+
+      - uses: actions/checkout@v2
+        with:
+          repository: ThirdAILabs/Universe
+          token: ${{ secrets.UNIVERSE_ACCESS_KEY }}
+          path: ./Universe
+          submodules: 'recursive'
+
+      - name: build universe library
+        run: |
+          cd ./Universe
+          bin/build.py -f THIRDAI_BUILD_LICENSE THIRDAI_CHECK_LICENSE
+
+      - name: archive libraries
+        uses: actions/upload-artifact@v4
+        with:
+          name: libraries
+          path: |
+            ./Universe/build/libthirdai.a
+            ./Universe/build/deps/rocksdb/librocksdb.a
+            ./Universe/build/deps/utf8proc/libutf8proc.a
+            ./Universe/build/deps/cryptopp-cmake/cryptopp/libcryptopp.a
