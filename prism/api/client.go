@@ -36,7 +36,7 @@ func (client *baseClient) Login(username, password string) error {
 	}
 
 	if !res.IsSuccess() {
-		return fmt.Errorf("login request returned status=%d body=%s", res.StatusCode(), string(res.Body()))
+		return fmt.Errorf("login request returned status=%d body=%s", res.StatusCode(), res.String())
 	}
 
 	client.backend.SetAuthToken(res.Result().(*loginRes).AccessToken)
@@ -71,7 +71,7 @@ func (client *AdminClient) CreateLicense(name string, expiration time.Time) (str
 	}
 
 	if !res.IsSuccess() {
-		return "", fmt.Errorf("create license returned status=%d, error=%v", res.StatusCode(), string(res.Body()))
+		return "", fmt.Errorf("create license returned status=%d, error=%v", res.StatusCode(), res.String())
 	}
 
 	return res.Result().(*CreateLicenseResponse).License, nil
@@ -101,7 +101,7 @@ func (client *UserClient) CreateReport(report CreateReportRequest) (uuid.UUID, e
 	}
 
 	if !res.IsSuccess() {
-		return uuid.Nil, fmt.Errorf("create report returned status=%d, error=%v", res.StatusCode(), string(res.Body()))
+		return uuid.Nil, fmt.Errorf("create report returned status=%d, error=%v", res.StatusCode(), res.String())
 	}
 
 	return res.Result().(*CreateReportResponse).Id, nil
@@ -117,7 +117,7 @@ func (client *UserClient) GetReport(reportId uuid.UUID) (*Report, error) {
 	}
 
 	if !res.IsSuccess() {
-		return nil, fmt.Errorf("get report returned status=%d, error=%v", res.StatusCode(), string(res.Body()))
+		return nil, fmt.Errorf("get report returned status=%d, error=%v", res.StatusCode(), res.String())
 	}
 
 	return res.Result().(*Report), nil
@@ -153,7 +153,7 @@ func (client *UserClient) ActivateLicense(license string) error {
 	}
 
 	if !res.IsSuccess() {
-		return fmt.Errorf("activate license returned status=%d, error=%v", res.StatusCode(), string(res.Body()))
+		return fmt.Errorf("activate license returned status=%d, error=%v", res.StatusCode(), res.String())
 	}
 
 	return nil

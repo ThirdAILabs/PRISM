@@ -32,9 +32,19 @@ type GrobidAcknowledgementsExtractor struct {
 
 func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downloadDir string) *GrobidAcknowledgementsExtractor {
 	return &GrobidAcknowledgementsExtractor{
-		cache:       cache,
-		maxWorkers:  10,
-		grobid:      resty.New().SetBaseURL(grobidEndpoint),
+		cache:      cache,
+		maxWorkers: 10,
+		grobid: resty.New().
+			SetBaseURL(grobidEndpoint).
+			AddRetryCondition(func(response *resty.Response, err error) bool {
+				if err != nil {
+					return true // The err can be non nil for some network errors.
+				}
+				// There's no reason to retry other 400 requests since the outcome should not change
+				return response != nil && (response.StatusCode() > 499 || response.StatusCode() == http.StatusTooManyRequests)
+			}).
+			SetRetryWaitTime(500 * time.Millisecond).
+			SetRetryMaxWaitTime(5 * time.Second),
 		downloadDir: downloadDir,
 	}
 }
@@ -131,7 +141,8 @@ func downloadWithPlaywright(url, destPath string) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error starting playwright: %w", err)
 	}
-	defer pw.Stop()
+	// Skipping error check since there's nothing we can do if this fails
+	defer pw.Stop() //nolint:errcheck
 
 	browser, err := pw.Firefox.Launch(playwright.BrowserTypeLaunchOptions{Headless: playwright.Bool(true)})
 	if err != nil {
@@ -156,7 +167,7 @@ func downloadWithPlaywright(url, destPath string) (io.ReadCloser, error) {
 
 	download, err := page.ExpectDownload(func() error {
 		// Page.Goto returns an error saying that the download is starting, so we ignore the error
-		page.Goto(url, playwright.PageGotoOptions{WaitUntil: playwright.WaitUntilStateNetworkidle})
+		page.Goto(url, playwright.PageGotoOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}) //nolint:errcheck
 
 		return nil
 	})
@@ -284,7 +295,7 @@ func (extractor *GrobidAcknowledgementsExtractor) processPdfWithGrobid(pdf io.Re
 	}
 
 	if !res.IsSuccess() {
-		return nil, fmt.Errorf("grobid '%s' returned status=%d, error=%v", res.Request.URL, res.StatusCode(), string(res.Body()))
+		return nil, fmt.Errorf("grobid '%s' returned status=%d, error=%v", res.Request.URL, res.StatusCode(), res.String())
 	}
 
 	body := res.Body()
