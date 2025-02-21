@@ -22,11 +22,11 @@ func eqOrderInvariant(a, b []string) bool {
 }
 
 func yearStart(year int) time.Time {
-	return time.Date(year, 1, 1, 0, 0, 0, 0, nil)
+	return time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
 }
 
 func yearEnd(year int) time.Time {
-	return time.Date(year, 12, 31, 0, 0, 0, 0, nil)
+	return time.Date(year, 12, 31, 0, 0, 0, 0, time.UTC)
 }
 
 func TestProcessorCoauthorAffiliationCase1(t *testing.T) {
