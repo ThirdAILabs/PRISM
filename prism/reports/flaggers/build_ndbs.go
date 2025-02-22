@@ -75,7 +75,7 @@ func BuildUniversityNDB(dataPath string, ndbPath string) search.NeuralDB {
 type dojArticleRecord struct {
 	Title    string   `json:"title"`
 	Url      string   `json:"link"`
-	Text     string   `json:"article_text"`
+	Text     string   `json:"entities_as_text"`
 	Entities []string `json:"entities"`
 }
 
@@ -106,11 +106,11 @@ func BuildDocNDB(dataPath string, ndbPath string) search.NeuralDB {
 		chunks := make([]string, 0, len(recordsBatch))
 		metadata := make([]map[string]any, 0, len(recordsBatch))
 		for _, record := range recordsBatch {
-			chunks = append(chunks, record.Text+" "+strings.Join(record.Entities, " ; "))
+			chunks = append(chunks, record.Text)
 			metadata = append(metadata, map[string]any{"title": record.Title, "url": record.Url, "entities": strings.Join(record.Entities, ";")})
 		}
 
-		if err := ndb.Insert("university_data", "0", chunks, metadata, nil); err != nil {
+		if err := ndb.Insert("press_release_docs", "0", chunks, metadata, nil); err != nil {
 			log.Fatalf("error inserting into ndb: %v", err)
 		}
 
