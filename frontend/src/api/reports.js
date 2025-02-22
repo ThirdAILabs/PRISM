@@ -19,5 +19,23 @@ export const reportService = {
 
     activateLicense: async (licenseKey) => {
         await axiosInstance.post(API_ROUTES.REPORTS.ACTIVATE_LICENSE, { License: licenseKey });
-    }
+    },
+
+    checkDisclosure: async (reportId, files) => {
+        const formData = new FormData();
+        files.forEach(file => {
+            formData.append('files', file);
+        });
+
+        const response = await axiosInstance.post(
+            API_ROUTES.REPORTS.CHECK_DISCLOSURE(reportId),
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            }
+        );
+        return response.data;
+    },
 };
