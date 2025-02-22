@@ -5,6 +5,7 @@ import "../../common/searchBar/SearchBar.css";
 import "../../common/tools/button/button1.css"
 import { useUser } from '../../../store/userContext';
 import { searchService } from '../../../api/search';
+
 function EntityLookup() {
 
   const [query, setQuery] = useState('');
@@ -51,26 +52,30 @@ function EntityLookup() {
           Go To Individual Assessment
         </Link>
       </div>
-      <h1 style={{ marginTop: '50px', fontWeight: 'bold' }}>Entity Lookup</h1>
-      <div className='d-flex justify-content-center align-items-center pt-5'>
-        <div style={{ width: "80%" }}>
-          <form onSubmit={handleSubmit} className="author-institution-search-bar">
-            <div className='autocomplete-search-bar'>
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Enter query"
-                className="search-bar"
-              />
+      <div style={{ textAlign: "center", marginTop: "5.5%", animation: "fade-in 0.75s" }}>
+        <h1 style={{ fontWeight: "bold", marginTop: 20, animation: "fade-in 0.75s", color: 'black' }}>Entity Lookup</h1>
+        <div style={{ animation: "fade-in 1s" }}>
+          <div className='d-flex justify-content-center align-items-center pt-5'>
+            <div style={{ width: "80%" }}>
+              <form onSubmit={handleSubmit} className="author-institution-search-bar">
+                <div className='autocomplete-search-bar'>
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Enter query"
+                    className="search-bar"
+                  />
+                </div>
+                <div style={{ width: "20px" }} />
+                <div style={{ width: "200px" }}>
+                  <button type="submit" disabled={isLoading} className="button">
+                    {isLoading ? 'Searching...' : 'Search'}
+                  </button>
+                </div>
+              </form>
             </div>
-            <div style={{ width: "20px" }} />
-            <div style={{ width: "200px" }}>
-              <button type="submit" disabled={isLoading} className="button">
-                {isLoading ? 'Searching...' : 'Search'}
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
       </div>
       {isLoading && <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status"></div>}

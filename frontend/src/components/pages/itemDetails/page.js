@@ -26,32 +26,32 @@ const FLAG_ORDER = [
 
 const TitlesAndDescriptions = {
     [TALENT_CONTRACTS]: {
-        "title": "Papers with foreign talent programs",
-        "desc": "Authors in these papers are recruited by talent programs that have close ties to high-risk foreign governments",
+        "title": "Talent Contracts",
+        "desc": "Authors in these papers are recruited by talent programs that have close ties to high-risk foreign governments.",
     },
     [ASSOCIATIONS_WITH_DENIED_ENTITIES]: {
-        "title": "Papers with denied entities",
-        "desc": "Some of the parties involved in these works are in the denied entity lists of U.S. government agencies",
+        "title": "Funding from Denied Entities",
+        "desc": "Some of the parties involved in these works are in the denied entity lists of U.S. government agencies.",
     },
     [HIGH_RISK_FUNDERS]: {
-        "title": "Papers with high-risk funding sources",
-        "desc": "These papers is funded by funding sources that have close ties to high-risk foreign governments",
+        "title": "High Risk Funding Sources",
+        "desc": "These papers are funded by funding sources that have close ties to high-risk foreign governments.",
     },
     [AUTHOR_AFFILIATIONS]: {
-        "title": "High-risk appointments at foreign institutions",
-        "desc": "Papers that list the current author as being affiliated with a high-risk foreign institution or web pages that showcase official appointments at high-risk foreign institutions",
+        "title": "Affiliations with High Risk Foreign Institutes",
+        "desc": "Papers that list the queried author as being affiliated with a high-risk foreign institution or web pages that showcase official appointments at high-risk foreign institutions.",
     },
     [POTENTIAL_AUTHOR_AFFILIATIONS]: {
-        "title": "Potential high-risk appointments at foreign institutions",
-        "desc": "The author may be affiliated with high-risk foreign institutions",
+        "title": "Appointments at High Risk Foreign Institutes*",
+        "desc": "The author may have an appointment at a high-risk foreign institutions.\n\n*Collated information from the web, might contain false positives.",
     },
     [MISC_HIGH_RISK_AFFILIATIONS]: {
-        "title": "Miscellaneous potential high-risk associations",
-        "desc": "The author or an associate may be mentioned in a press release",
+        "title": "Miscellaneous High Risk Connections*",
+        "desc": "The author or an associate may be mentioned in a press release.\n\n*Collated information from the web, might contain false positives.",
     },
     [COAUTHOR_AFFILIATIONS]: {
-        "title": "Papers with coauthors from high-risk foreign institutions",
-        "desc": "Coauthors in these papers are affiliated with high-risk foreign institutions"
+        "title": "Co-authors' affiliations with High Risk Foreign Institutes",
+        "desc": "Coauthors in these papers are affiliated with high-risk foreign institutions."
     }
 }
 
@@ -442,7 +442,7 @@ const ItemDetails = () => {
                                 Press Release: <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">{flag.DocTitle}</a>
                                 <br />
                             </>
-                        ) : connections.legnth == 2 ? (
+                        ) : connections.length == 2 ? (
                             <>
                                 Relevant Documents: <a href={flag.Connections[0].DocUrl} target="_blank" rel="noopener noreferrer">{flag.Connections[0].DocTitle}</a>, <a href={flag.Connections[1].DocUrl} target="_blank" rel="noopener noreferrer">{flag.Connections[1].DocTitle}</a>
                                 <br />
@@ -662,7 +662,7 @@ const ItemDetails = () => {
                                 <div className="spinner-border text-primary spinner-border-sm" role="status"></div>
                             )}
                         </div>
-                        {/* <DisclosureUploadButton hookValues={hookValues} className="ms-auto" /> */}
+                        <DisclosureUploadButton hookValues={hookValues} className="ms-auto" />
 
                         {/* {message && <h5 className='text-light m-0 ms-2' style={{ fontSize: 'small' }}>{(loading || conclusionLoading) ? `Scanned ${formattedMessage} out of 250M documents` : "Analysis complete"}</h5>} */}
                         {/* {
