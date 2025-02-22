@@ -28,7 +28,7 @@ const Hover = ({ text }) => {
         ?
       </button>
       <div className="popover">
-        <div className="popover-body">
+        <div className="popover-body" style={{ whiteSpace: 'pre-wrap' }}>
           {text}
         </div>
       </div>
