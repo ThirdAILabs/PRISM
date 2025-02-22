@@ -175,6 +175,43 @@ __Example Response__:
 
 ```
 
+## Download Report
+
+| Method | Path | Auth Required | Permissions |
+| ------ | ---- | ------------- | ----------  |
+| `GET` | `/api/v1/report/{report_id}/download` | Yes | Token for Keycloak User Realm |
+
+Downloads a completed report in the requested format. The report status must be complete in order for the report to be downloadable.
+
+__Example Request__: 
+```
+url = f"http://localhost:8082/api/v1/report/{report_id}/download?format={format}"
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        print("Failed to download report:", response.status_code, response.text)
+        return
+    
+    data = response.json()
+    if not output_file:
+        content_disp = response.headers.get("Content-Disposition")
+        if content_disp and "filename=" in content_disp:
+            output_file = content_disp.split("filename=")[1].strip().strip('"')
+        else:
+            output_file = f"report.{format}"
+    
+    encoded_content = data.get("Content")
+    if not encoded_content:
+        print("No content found in response.")
+        return
+    
+    decoded_bytes = base64.b64decode(encoded_content)
+    
+    with open(output_file, "wb") as f:
+        f.write(decoded_bytes)
+```
+
 
 # License Endpoints
 
