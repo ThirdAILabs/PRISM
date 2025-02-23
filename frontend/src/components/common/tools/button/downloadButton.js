@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FaFilePdf, FaFileCsv, FaFileExcel } from 'react-icons/fa';
-
+import { reportService } from '../../../../api/reports';
 const StyledWrapper = styled.div`
 position: relative;
 
@@ -70,12 +70,12 @@ position: relative;
   }
   `;
 
-const Button = () => {
+const Button = ({ reportId }) => {
     const [isOpen, setIsOpen] = useState(false);
-    console.log('Button', isOpen);
     const handleDownload = (format) => {
         // Add download logic here
         console.log(`Downloading as ${format}`);
+        reportService.downloadReport(reportId, format);
         setIsOpen(false);
     };
     return (
@@ -90,8 +90,6 @@ const Button = () => {
                 <span>Download Report</span>
             </button>
             {isOpen && (
-                console.log('Dropdown', isOpen),
-
                 <div className="dropdown-container">
                     <div
                         className="dropdown-item"

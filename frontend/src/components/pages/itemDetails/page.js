@@ -759,7 +759,7 @@ const ItemDetails = () => {
                     <Tabs activeTab={activeTab} handleTabChange={handleTabChange} />
                 </div>
                 <div className='d-flex justify-content-end mt-2'>
-                    <DownloadButton />
+                    <DownloadButton reportId={report_id} />
                 </div>
             </div>
 
