@@ -142,7 +142,7 @@ const ItemDetails = () => {
         setIsUploading(true);
         try {
             const result = await reportService.checkDisclosure(report_id, selectedFiles);
-            setInitialReportContent(result.Content);
+            setReportContent(result.Content);
             handleCloseDialog();
         } catch (error) {
             setUploadError(error.message || 'Failed to check disclosure');
@@ -150,18 +150,6 @@ const ItemDetails = () => {
             setIsUploading(false);
         }
     };
-
-
-
-
-
-
-
-
-
-
-
-
 
     useEffect(() => {
         let isMounted = true;
@@ -174,7 +162,7 @@ const ItemDetails = () => {
                 setInitialReportContent(report.Content);
                 setLoading(false);
             } else if (isMounted) {
-                setTimeout(poll, 500);
+                setTimeout(poll, 2000);
             }
         };
 
@@ -806,26 +794,6 @@ const ItemDetails = () => {
                                 <div className="spinner-border text-primary spinner-border-sm" role="status"></div>
                             )}
                         </div>
-                        {/* <DisclosureUploadButton hookValues={hookValues} className="ms-auto" /> */}
-
-                        {/* {message && <h5 className='text-light m-0 ms-2' style={{ fontSize: 'small' }}>{(loading || conclusionLoading) ? `Scanned ${formattedMessage} out of 250M documents` : "Analysis complete"}</h5>} */}
-                        {/* {
-            !(loading || conclusionLoading) && 
-            <button
-              type="button"
-              className="btn btn-info btn-circle ml-2"
-              onClick={togglePopover}
-              style={buttonStyles}
-            >
-              ?
-              {showPopover && (
-                <div className="popover" style={popoverStyles}>
-                  <div className="popover-header">Disclaimer</div>
-                  <div className="popover-body">These flags are meant to act as an aid in detecting foreign influence. Please double check the results.</div>
-                </div>
-              )}
-            </button>
-          } */}
                     </div>
                 </div>
 
@@ -841,6 +809,7 @@ const ItemDetails = () => {
                         }
                     </div>
                 </div>
+
                 <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', height: '500px', marginTop: '20px' }}>
                     {
                         FLAG_ORDER.map((flag, index) => {
