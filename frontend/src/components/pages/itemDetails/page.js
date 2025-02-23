@@ -15,7 +15,6 @@ import RelationShipGraph3 from '../../common/relationShipGraph/Relation-Graph3.j
 import Tabs from '../../common/tools/Tabs.js';
 
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider } from '@mui/material';
-import UploadButton from "../../common/tools/button/uploadButton.js";
 import { reportService } from '../../../api/reports.js';
 
 
@@ -143,6 +142,7 @@ const ItemDetails = () => {
         try {
             const result = await reportService.checkDisclosure(report_id, selectedFiles);
             setReportContent(result.Content);
+            setInitialReportContent(result.Content);
             handleCloseDialog();
         } catch (error) {
             setUploadError(error.message || 'Failed to check disclosure');
@@ -794,7 +794,6 @@ const ItemDetails = () => {
                                 <div className="spinner-border text-primary spinner-border-sm" role="status"></div>
                             )}
                         </div>
-                        <DisclosureUploadButton hookValues={hookValues} className="ms-auto" />
 
                         {/* {message && <h5 className='text-light m-0 ms-2' style={{ fontSize: 'small' }}>{(loading || conclusionLoading) ? `Scanned ${formattedMessage} out of 250M documents` : "Analysis complete"}</h5>} */}
                         {/* {
