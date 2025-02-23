@@ -13,7 +13,7 @@ import {
 import ConcernVisualizer from '../../ConcernVisualization.js';
 import RelationShipGraph3 from '../../common/relationShipGraph/Relation-Graph3.js';
 import Tabs from '../../common/tools/Tabs.js';
-
+import DownloadButton from '../../common/tools/button/downloadButton.js';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider } from '@mui/material';
 import { reportService } from '../../../api/reports.js';
 
@@ -569,254 +569,213 @@ const ItemDetails = () => {
 
     return (
         <div className='basic-setup'>
-            <div className='flex flex-row'>
-                <div className='detail-header'>
-                    <button onClick={() => navigate("/")} className='btn text-dark mb-3' style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px' }}>
-                            <path d="M10 19L3 12L10 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            <path d="M3 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        Back
-                    </button>
+            <div className='grid grid-cols-2 gap-4'>
+                <div className='flex flex-row'>
+                    <div className='detail-header'>
+                        <button onClick={() => navigate("/")} className='btn text-dark mb-3' style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px' }}>
+                                <path d="M10 19L3 12L10 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M3 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            Back
+                        </button>
 
-                    <div className='d-flex w-80'>
-                        <div className='text-start px-5'>
-                            <div className='d-flex align-items-center mb-2'>
-                                <h5 className='m-0'>{authorName}</h5>
+                        <div className='d-flex w-80'>
+                            <div className='text-start px-5'>
+                                <div className='d-flex align-items-center mb-2'>
+                                    <h5 className='m-0'>{authorName}</h5>
+                                </div>
+                                <b className='m-0 p-0' style={{ fontSize: 'small' }}>{institutions.join(', ')}</b>
                             </div>
-                            <b className='m-0 p-0' style={{ fontSize: 'small' }}>{institutions.join(', ')}</b>
                         </div>
-                    </div>
 
-                    <div>
+                        <div>
 
-                        <div className="dropdown">
-                            <style>
-                                {` 
+                            <div className="dropdown">
+                                <style>
+                                    {` 
                     .form-control::placeholder { 
                         color: #888; 
                     }`
-                                }
-                            </style>
-                            <button
-                                className="btn dropdown-toggle"
-                                type="button"
-                                onClick={toggleYearDropdown}
-                                style={{
-                                    backgroundColor: 'rgb(160, 160, 160)',
-                                    border: 'none',
-                                    color: 'white',
-                                    width: "200px",
-                                    fontWeight: 'bold',
-                                    fontSize: '14px'
-                                }}
-                            >
-                                Filter by Year
-                            </button>
-                            {yearDropdownOpen && (
-                                <div
-                                    className="dropdown-menu show p-3"
+                                    }
+                                </style>
+                                <button
+                                    className="btn dropdown-toggle"
+                                    type="button"
+                                    onClick={toggleYearDropdown}
                                     style={{
                                         backgroundColor: 'rgb(160, 160, 160)',
                                         border: 'none',
-                                        right: 0,
-                                        marginTop: "10px",
                                         color: 'white',
+                                        width: "200px",
                                         fontWeight: 'bold',
-                                        fontSize: '14px',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        display: 'flex',
-                                        flexDirection: 'column'
+                                        fontSize: '14px'
                                     }}
                                 >
-                                    <div className="form-group mb-2">
-                                        <label>Start Year</label>
-                                        <input
-                                            type="text"
-                                            value={startYear}
-                                            onChange={handleStartYearChange}
-                                            className="form-control"
-                                            placeholder="Enter start year"
-                                            style={{
-                                                backgroundColor: 'rgb(220, 220, 220)',
-                                                border: 'none',
-                                                outline: 'none',
-                                                color: 'black',
-                                                marginTop: '10px',
-                                            }}
-                                        />
-                                    </div>
-                                    <div style={{ height: "10px" }} />
-                                    <div className="form-group">
-                                        <label>End Year</label>
-                                        <input
-                                            type="text"
-                                            value={endYear}
-                                            onChange={handleEndYearChange}
-                                            className="form-control"
-                                            placeholder="Enter end year"
-                                            style={{
-                                                backgroundColor: 'rgb(220, 220, 220)',
-                                                border: 'none',
-                                                outline: 'none',
-                                                color: 'black',
-                                                marginTop: '10px',
-                                            }}
-                                        />
-                                    </div>
-                                    <button
-                                        className="form-control"
-                                        type="submit"
-                                        onClick={handleYearFilter}
-                                        disabled={!(startYear && endYear)}
+                                    Filter by Year
+                                </button>
+                                {yearDropdownOpen && (
+                                    <div
+                                        className="dropdown-menu show p-3"
                                         style={{
-                                            backgroundColor: 'rgb(220, 220, 220)',
+                                            backgroundColor: 'rgb(160, 160, 160)',
                                             border: 'none',
+                                            right: 0,
+                                            marginTop: "10px",
                                             color: 'white',
-                                            width: "100px",
                                             fontWeight: 'bold',
                                             fontSize: '14px',
-                                            marginTop: '20px',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            display: 'flex',
+                                            flexDirection: 'column'
                                         }}
                                     >
-                                        submit
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                        <>
-                            <button
-                                className="form-control"
-                                onClick={handleOpenDialog}
-                                style={{
-                                    backgroundColor: 'rgb(160, 160, 160)',
-                                    border: 'none',
-                                    color: 'white',
-                                    width: "200px",
-                                    fontWeight: 'bold',
-                                    fontSize: '14px',
-                                    marginTop: '20px',
-                                }}
-                            >
-                                Check disclosure
-                            </button>
-
-                            <Dialog
-                                open={openDialog}
-                                onClose={handleCloseDialog}
-                                maxWidth="sm"
-                                fullWidth
-                            >
-                                <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-                                    Select files to check for disclosure
-                                </DialogTitle>
-                                <Divider sx={{ color: 'black', backgroundColor: '#000000' }} />
-                                <DialogContent>
-                                    <div
-                                        className="container"
-                                        onDrop={handleDrop}
-                                        onDragOver={(e) => e.preventDefault()}
-                                    >
-                                        <div className="header">
-                                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                            </svg>
-                                            <p>Browse File to upload!</p>
+                                        <div className="form-group mb-2">
+                                            <label>Start Year</label>
+                                            <input
+                                                type="text"
+                                                value={startYear}
+                                                onChange={handleStartYearChange}
+                                                className="form-control"
+                                                placeholder="Enter start year"
+                                                style={{
+                                                    backgroundColor: 'rgb(220, 220, 220)',
+                                                    border: 'none',
+                                                    outline: 'none',
+                                                    color: 'black',
+                                                    marginTop: '10px',
+                                                }}
+                                            />
                                         </div>
-                                        <label htmlFor="file" className="footer">
-                                            <p>{selectedFiles.length ? `${selectedFiles.length} files selected` : 'No file selected'}</p>
-                                        </label>
-                                        <input
-                                            id="file"
-                                            type="file"
-                                            multiple
-                                            onChange={handleFileSelect}
-                                            accept=".txt,.doc,.docx,.pdf"
-                                        />
+                                        <div style={{ height: "10px" }} />
+                                        <div className="form-group">
+                                            <label>End Year</label>
+                                            <input
+                                                type="text"
+                                                value={endYear}
+                                                onChange={handleEndYearChange}
+                                                className="form-control"
+                                                placeholder="Enter end year"
+                                                style={{
+                                                    backgroundColor: 'rgb(220, 220, 220)',
+                                                    border: 'none',
+                                                    outline: 'none',
+                                                    color: 'black',
+                                                    marginTop: '10px',
+                                                }}
+                                            />
+                                        </div>
+                                        <button
+                                            className="form-control"
+                                            type="submit"
+                                            onClick={handleYearFilter}
+                                            disabled={!(startYear && endYear)}
+                                            style={{
+                                                backgroundColor: 'rgb(220, 220, 220)',
+                                                border: 'none',
+                                                color: 'white',
+                                                width: "100px",
+                                                fontWeight: 'bold',
+                                                fontSize: '14px',
+                                                marginTop: '20px',
+                                            }}
+                                        >
+                                            submit
+                                        </button>
                                     </div>
-                                    {uploadError && (
-                                        <div style={{ color: 'red', marginTop: '10px' }}>{uploadError}</div>
-                                    )}
-                                </DialogContent>
-                                {/* <DialogContent>
-                                    <UploadButton
-                                        selectedFiles={selectedFiles}
-                                        handleFileSelect={handleFileSelect}
-                                        uploadError={uploadError}
-                                    />
-                                </DialogContent> */}
-                                <DialogActions>
-                                    <Button onClick={handleCloseDialog}>Cancel</Button>
-                                    <Button
-                                        onClick={handleSubmit}
-                                        disabled={isUploading}
-                                        variant="contained"
-                                    >
-                                        {isUploading ? 'Uploading...' : 'Submit'}
-                                    </Button>
-                                </DialogActions>
-                            </Dialog>
-                        </>
-                        {/* <div style={{ height: "10px" }} /> */}
+                                )}
+                            </div>
+                            <>
+                                <button
+                                    className="form-control"
+                                    onClick={handleOpenDialog}
+                                    style={{
+                                        backgroundColor: 'rgb(160, 160, 160)',
+                                        border: 'none',
+                                        color: 'white',
+                                        width: "200px",
+                                        fontWeight: 'bold',
+                                        fontSize: '14px',
+                                        marginTop: '20px',
+                                    }}
+                                >
+                                    Check disclosure
+                                </button>
 
-                        {/* <div className="dropdown">
-                            <button
-                                className="btn dropdown-toggle"
-                                type="button"
-                                onClick={toggleInstDropdown}
-                                style={{
-                                    backgroundColor: 'rgb(160, 160, 160)',
-                                    border: 'none',
-                                    color: 'white',
-                                    width: "200px",
-                                    fontWeight: 'bold',
-                                    fontSize: '14px'
-                                }}
-                            >
-                                Filter by Institution
-                            </button>
-                            {instDropdownOpen && <AffiliationChecklist />}
-                        </div> */}
+                                <Dialog
+                                    open={openDialog}
+                                    onClose={handleCloseDialog}
+                                    maxWidth="sm"
+                                    fullWidth
+                                >
+                                    <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+                                        Select files to check for disclosure
+                                    </DialogTitle>
+                                    <Divider sx={{ color: 'black', backgroundColor: '#000000' }} />
+                                    <DialogContent>
+                                        <div
+                                            className="container"
+                                            onDrop={handleDrop}
+                                            onDragOver={(e) => e.preventDefault()}
+                                        >
+                                            <div className="header">
+                                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                                </svg>
+                                                <p>Browse File to upload!</p>
+                                            </div>
+                                            <label htmlFor="file" className="footer">
+                                                <p>{selectedFiles.length ? `${selectedFiles.length} files selected` : 'No file selected'}</p>
+                                            </label>
+                                            <input
+                                                id="file"
+                                                type="file"
+                                                multiple
+                                                onChange={handleFileSelect}
+                                                accept=".txt,.doc,.docx,.pdf"
+                                            />
+                                        </div>
+                                        {uploadError && (
+                                            <div style={{ color: 'red', marginTop: '10px' }}>{uploadError}</div>
+                                        )}
+                                    </DialogContent>
+                                    <DialogActions>
+                                        <Button onClick={handleCloseDialog}>Cancel</Button>
+                                        <Button
+                                            onClick={handleSubmit}
+                                            disabled={isUploading}
+                                            variant="contained"
+                                        >
+                                            {isUploading ? 'Uploading...' : 'Submit'}
+                                        </Button>
+                                    </DialogActions>
+                                </Dialog>
+                            </>
+                        </div>
+
                     </div>
-
+                    {/* Comment the following to get rid of the graph tab */}
+                    <Tabs activeTab={activeTab} handleTabChange={handleTabChange} />
                 </div>
-                {/* Comment the following to get rid of the graph tab */}
-                <Tabs activeTab={activeTab} handleTabChange={handleTabChange} />
+                <div className='d-flex justify-content-end mt-2'>
+                    <DownloadButton />
+                </div>
             </div>
+
 
             {activeTab === 0 && <>
                 <div className='d-flex w-100 flex-column align-items-center'>
-                    {/* <div className='d-flex w-75 align-items-center my-2 mt-3'> */}
                     <div className='d-flex w-100 px-5 align-items-center my-2 mt-3 justify-content-between'>
                         <div style={{ width: "20px" }}>
                             {loading && (
                                 <div className="spinner-border text-primary spinner-border-sm" role="status"></div>
                             )}
                         </div>
-
-                        {/* {message && <h5 className='text-light m-0 ms-2' style={{ fontSize: 'small' }}>{(loading || conclusionLoading) ? `Scanned ${formattedMessage} out of 250M documents` : "Analysis complete"}</h5>} */}
-                        {/* {
-            !(loading || conclusionLoading) && 
-            <button
-              type="button"
-              className="btn btn-info btn-circle ml-2"
-              onClick={togglePopover}
-              style={buttonStyles}
-            >
-              ?
-              {showPopover && (
-                <div className="popover" style={popoverStyles}>
-                  <div className="popover-header">Disclaimer</div>
-                  <div className="popover-body">These flags are meant to act as an aid in detecting foreign influence. Please double check the results.</div>
-                </div>
-              )}
-            </button>
-          } */}
                     </div>
                 </div>
 
-                <div className='d-flex w-100 flex-column align-items-center' style={{ color: "rgb(78, 78, 78)", marginTop: "50px" }}>
+                <div className='d-flex w-100 flex-column align-items-center' style={{ color: "rgb(78, 78, 78)", marginTop: "0px" }}>
                     <div style={{ fontSize: "large", fontWeight: "bold" }}>
                         Total Score
                     </div>
