@@ -162,7 +162,7 @@ const ItemDetails = () => {
                 setInitialReportContent(report.Content);
                 setLoading(false);
             } else if (isMounted) {
-                // setTimeout(poll, 2000);
+                setTimeout(poll, 2000);
             }
         };
 
