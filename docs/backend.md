@@ -137,14 +137,14 @@ Checks for the disclosure of flagged details within a report. The process involv
 
 __Example Request__: 
 ```
-url = f"http://localhost:8082/api/v1/report/{report_id}/check-disclosure"
-headers = {"Authorization": f"Bearer {token}"}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryXYZ
 
-files = []
-for file_path in file_paths:
-    files.append(('files', (file_path, open(file_path, 'rb'), 'text/plain')))
+------WebKitFormBoundaryXYZ
+Content-Disposition: form-data; name="files"; filename="document.txt"
+Content-Type: text/plain
 
-response = requests.post(url, headers=headers, files=files)
+This is the content of the document...
+------WebKitFormBoundaryXYZ--
 ```
 
 __Example Response__:
@@ -183,35 +183,35 @@ __Example Response__:
 
 Downloads a completed report in the requested format. The report status must be complete in order for the report to be downloadable.
 
-__Example Request__: 
-```
-url = f"http://localhost:8082/api/v1/report/{report_id}/download?format={format}"
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    response = requests.get(url, headers=headers)
-    if response.status_code != 200:
-        print("Failed to download report:", response.status_code, response.text)
-        return
-    
-    data = response.json()
-    if not output_file:
-        content_disp = response.headers.get("Content-Disposition")
-        if content_disp and "filename=" in content_disp:
-            output_file = content_disp.split("filename=")[1].strip().strip('"')
-        else:
-            output_file = f"report.{format}"
-    
-    encoded_content = data.get("Content")
-    if not encoded_content:
-        print("No content found in response.")
-        return
-    
-    decoded_bytes = base64.b64decode(encoded_content)
-    
-    with open(output_file, "wb") as f:
-        f.write(decoded_bytes)
-```
+format (optional): Specifies the file format for the report.
+Allowed values:
+- csv (default): CSV (Comma-Separated Values) format.
+- pdf: PDF (Portable Document Format).
+- excel or xlsx: Excel file in XLSX format.
 
+
+__Example Request__: 
+**Status Code:** 200
+
+**Response Headers:**
+
+- **Content-Type:**
+  - `text/csv` for CSV.
+  - `application/pdf` for PDF.
+  - `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` for Excel.
+- **Content-Disposition:**
+  - `attachment; filename="report.<ext>"` where `<ext>` is `csv`, `pdf`, or `xlsx` depending on the format.
+
+**Response Body:**
+
+The response contains the generated report file.
+```
+{
+  "Content": "JVBERi0xLjQKJcTl8uXrp/Og0MTGCjEgMCBvYmoKPDwv...",
+  "ContentType": "application/pdf",
+  "Filename": "report.pdf"
+}
+```
 
 # License Endpoints
 
