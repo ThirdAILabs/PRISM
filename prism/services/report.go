@@ -112,72 +112,6 @@ func parseDateParam(param string) (time.Time, error) {
 	return date, nil
 }
 
-type dateFilter struct {
-	startDate    time.Time
-	hasStartDate bool
-	endDate      time.Time
-	hasEndDate   bool
-}
-
-func newDateFilter(startDateStr, endDateStr string) (dateFilter, error) {
-	filter := dateFilter{}
-	if startDateStr != "" {
-		startDate, err := parseDateParam(startDateStr)
-		if err != nil {
-			return dateFilter{}, err
-		}
-		filter.startDate = startDate
-		filter.hasStartDate = true
-	}
-
-	if endDateStr != "" {
-		endDate, err := parseDateParam(endDateStr)
-		if err != nil {
-			return dateFilter{}, err
-		}
-		filter.endDate = endDate
-		filter.hasEndDate = true
-	}
-
-	return filter, nil
-}
-
-func (filter *dateFilter) matches(flag api.Flag) bool {
-	if filter.hasStartDate && flag.Before(filter.startDate) {
-		return false
-	}
-	if filter.hasEndDate && flag.After(filter.endDate) {
-		return false
-	}
-	return true
-}
-
-func (filter *dateFilter) hasFilters() bool {
-	return filter.hasStartDate || filter.hasEndDate
-}
-
-func filterFlagsByDate[T api.Flag](filter *dateFilter, flags []T) []T {
-	output := make([]T, 0, len(flags))
-	for _, flag := range flags {
-		if filter.matches(flag) {
-			output = append(output, flag)
-		}
-	}
-	return output
-}
-
-func (filter *dateFilter) filterContent(content api.ReportContent) api.ReportContent {
-	return api.ReportContent{
-		TalentContracts:                filterFlagsByDate(filter, content.TalentContracts),
-		AssociationsWithDeniedEntities: filterFlagsByDate(filter, content.AssociationsWithDeniedEntities),
-		HighRiskFunders:                filterFlagsByDate(filter, content.HighRiskFunders),
-		AuthorAffiliations:             filterFlagsByDate(filter, content.AuthorAffiliations),
-		PotentialAuthorAffiliations:    filterFlagsByDate(filter, content.PotentialAuthorAffiliations),
-		MiscHighRiskAssociations:       filterFlagsByDate(filter, content.MiscHighRiskAssociations),
-		CoauthorAffiliations:           filterFlagsByDate(filter, content.CoauthorAffiliations),
-	}
-}
-
 func (s *ReportService) GetReport(r *http.Request) (any, error) {
 	userId, err := auth.GetUserId(r)
 	if err != nil {
@@ -190,12 +124,6 @@ func (s *ReportService) GetReport(r *http.Request) (any, error) {
 		return nil, CodedError(fmt.Errorf("invalid uuid '%v' provided: %w", param, err), http.StatusBadRequest)
 	}
 
-	query := r.URL.Query()
-	dateFilter, err := newDateFilter(query.Get("start_date"), query.Get("end_date"))
-	if err != nil {
-		return nil, err
-	}
-
 	report, err := s.manager.GetReport(userId, id)
 	if err != nil {
 		switch {
@@ -206,10 +134,6 @@ func (s *ReportService) GetReport(r *http.Request) (any, error) {
 		default:
 			return nil, CodedError(err, http.StatusInternalServerError)
 		}
-	}
-
-	if dateFilter.hasFilters() {
-		report.Content = dateFilter.filterContent(report.Content)
 	}
 
 	return report, nil
@@ -278,12 +202,6 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 		return nil, CodedError(fmt.Errorf("invalid report id '%v': %w", reportIdParam, err), http.StatusBadRequest)
 	}
 
-	query := r.URL.Query()
-	dateFilter, err := newDateFilter(query.Get("start_date"), query.Get("end_date"))
-	if err != nil {
-		return nil, err
-	}
-
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
 		return nil, CodedError(err, http.StatusBadRequest)
 	}
@@ -325,10 +243,6 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 
 	if report.Status != schema.ReportCompleted {
 		return nil, CodedError(errors.New("cannot process disclosures for report unless report status is complete"), http.StatusUnprocessableEntity)
-	}
-
-	if dateFilter.hasFilters() {
-		report.Content = dateFilter.filterContent(report.Content)
 	}
 
 	updateDisclosures(report.Content.TalentContracts, allFileTexts)
