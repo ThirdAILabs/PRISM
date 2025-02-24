@@ -420,13 +420,6 @@ func (flag *CoauthorAffiliationFlag) After(t time.Time) bool {
 
 type ReportContent map[string][]Flag
 
-func addFlags[T Flag](groups map[string][]Flag, flags []T) {
-	for _, flag := range flags {
-		key := flag.GetHeading()
-		groups[key] = append(groups[key], flag)
-	}
-}
-
 //The following flags are unused by the frontend, but they are kept in case we
 // want to have them in the future.
 

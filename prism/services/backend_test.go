@@ -407,7 +407,9 @@ func TestCheckDisclosure(t *testing.T) {
 		t.Fatalf("expected status 200; got %d, response: %s", res.StatusCode, w.Body.String())
 	}
 
-	var updatedReport api.Report
+	var updatedReport struct {
+		Content map[string][]map[string]any
+	}
 	if err := json.NewDecoder(res.Body).Decode(&updatedReport); err != nil {
 		t.Fatal(err)
 	}
@@ -415,14 +417,14 @@ func TestCheckDisclosure(t *testing.T) {
 	if len(updatedReport.Content["TalentContracts"]) != 1 {
 		t.Fatalf("expected 1 TalentContract flag; got %d", len(updatedReport.Content["TalentContracts"]))
 	}
-	if !updatedReport.Content["TalentContracts"][0].(*api.TalentContractFlag).Disclosed {
+	if !(updatedReport.Content["TalentContracts"][0]["Disclosed"].(bool)) {
 		t.Fatal("expected TalentContract flag to be marked as disclosed")
 	}
 
 	if len(updatedReport.Content["AssociationsWithDeniedEntities"]) != 1 {
 		t.Fatalf("expected 1 AssociationWithDeniedEntity flag; got %d", len(updatedReport.Content["AssociationsWithDeniedEntities"]))
 	}
-	if updatedReport.Content["AssociationsWithDeniedEntities"][0].(*api.AssociationWithDeniedEntityFlag).Disclosed {
+	if updatedReport.Content["AssociationsWithDeniedEntities"][0]["Disclosed"].(bool) {
 		t.Fatal("expected AssociationWithDeniedEntity flag to remain undisclosed")
 	}
 }
