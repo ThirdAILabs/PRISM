@@ -1,5 +1,6 @@
 # Uri for postgres db
 postgres_uri: ""
+fundcode_triangulation_postgres_uri: ""
 
 # Logfile for backend
 logfile: "./worker.log"

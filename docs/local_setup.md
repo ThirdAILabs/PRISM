@@ -23,6 +23,8 @@ Note: For macos the wheels assume that you have libomp installed in `/opt/homebr
 
 Ensure that you have a postgres database for PRISM to use if you don't already, this is needed for the backend. If you don't have one you can create one with the command `psql -U postgres` followed by `create database prism;`. This only needs to be done once.
 
+Ensure that you have a postgres database with the fundcode triangulation data if you don't already. The database can be created with the command `psql -U postgres` followed by `create database prism_triangulation;`. To populate the database, the following command should be run in the terminal `pg_restore -U postgres -d prism_triangulation -F c prism_triangulation.dump`. The dump can be found on Blade server at `/share/fids/data/triangulation/prism_triangulation.dump`.
+
 1. Clone the PRISM repo:
 ```bash
 git clone https://github.com/ThirdAILabs/PRISM

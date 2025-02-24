@@ -3,13 +3,14 @@ package flaggers
 import (
 	"fmt"
 	"log/slog"
+	"regexp"
+	"slices"
+	"strings"
+
 	"prism/prism/api"
 	"prism/prism/openalex"
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/triangulation"
-	"regexp"
-	"slices"
-	"strings"
 )
 
 type WorkFlagger interface {
@@ -276,10 +277,10 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works
 }
 
 type cachedAckFlag struct {
-	Flagged  bool
-	Message  string
-	Entities []api.AcknowledgementEntity
-	RawAcks  []string
+	Flagged              bool
+	Message              string
+	Entities             []api.AcknowledgementEntity
+	RawAcks              []string
 	LikelyGrantRecipient bool
 }
 
@@ -448,21 +449,15 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
 				return false, fmt.Errorf("error executing triangulation query: %w", err)
 			}
 			if result != nil {
-				logger.Info("triangulation: result", "num_papers_by_author", result.NumPapersByAuthor, "num_papers", result.NumPapers)
-				numPapersToTotalPapersRatio = append(numPapersToTotalPapersRatio, float64(result.NumPapersByAuthor) / float64(result.NumPapers))
-				logger.Info("numPapersByAuthor/NumPapers", "ratio", float64(result.NumPapersByAuthor)/float64(result.NumPapers))
-				logger.Info("numPaperToTotalPapersRatio", "list", numPapersToTotalPapersRatio)
-			} 
+				numPapersToTotalPapersRatio = append(numPapersToTotalPapersRatio, float64(result.NumPapersByAuthor)/float64(result.NumPapers))
+				logger.Info("result from triangulation db", "num_papers_by_author", result.NumPapersByAuthor, "num_papers", result.NumPapers, "numPapersByAuthor/NumPapers", float64(result.NumPapersByAuthor)/float64(result.NumPapers))
+			}
 		}
 	}
-	logger.Info("numPapersToTotalPapersRatioLength", "Length", len(numPapersToTotalPapersRatio))
 
 	isPrimaryRecipient := false
 	if len(numPapersToTotalPapersRatio) > 0 {
 		for _, value := range numPapersToTotalPapersRatio {
-			logger.Info("numPaperToTotalPapersRatioElement", "value", value)
-			logger.Info("numPaperToTotalPapersRatioElement comparision", "comparision", value >= 0.4)
-			// If the queries author has authored >= 40% of the papers funded by this grant, we consider them a primary recipient.
 			if value >= 0.4 {
 				isPrimaryRecipient = true
 				break
@@ -500,18 +495,18 @@ func containsSource(entities []api.AcknowledgementEntity, sourcesOfInterest []st
 func createAcknowledgementFlag(work openalex.Work, message string, entities []api.AcknowledgementEntity, rawAcks []string, isLikelyGrantRecipient bool) api.Flag {
 	if strings.Contains(message, "talent") || strings.Contains(message, "Talent") || containsSource(entities, talentPrograms) {
 		return &api.TalentContractFlag{
-			Message:            message,
-			Work:               getWorkSummary(work),
-			Entities:           entities,
-			RawAcknowledements: rawAcks,
+			Message:              message,
+			Work:                 getWorkSummary(work),
+			Entities:             entities,
+			RawAcknowledements:   rawAcks,
 			LikelyGrantRecipient: isLikelyGrantRecipient,
 		}
 	} else if containsSource(entities, deniedEntities) {
 		return &api.AssociationWithDeniedEntityFlag{
-			Message:            message,
-			Work:               getWorkSummary(work),
-			Entities:           entities,
-			RawAcknowledements: rawAcks,
+			Message:              message,
+			Work:                 getWorkSummary(work),
+			Entities:             entities,
+			RawAcknowledements:   rawAcks,
 			LikelyGrantRecipient: isLikelyGrantRecipient,
 		}
 	} else {
@@ -601,11 +596,6 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 			isLikelyGrantRecipient, err = flagger.checkForGrantRecipient(
 				workLogger, acks.Result.Acknowledgements, allAuthorNames,
 			)
-			
-			if isLikelyGrantRecipient {
-				workLogger.Info("triangulation; likely grant recipient", "work_id", acks.Result.WorkId)
-			}
-
 			if err != nil {
 				workLogger.Error("error checking for grant recipient", "error", err)
 				continue
@@ -638,10 +628,10 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 			)
 
 			flagger.flagCache.Update(flagCacheKey(acks.Result.WorkId, targetAuthorIds), cachedAckFlag{
-				Flagged:  true,
-				Message:  msg,
-				Entities: entities,
-				RawAcks:  ackTexts,
+				Flagged:              true,
+				Message:              msg,
+				Entities:             entities,
+				RawAcks:              ackTexts,
 				LikelyGrantRecipient: isLikelyGrantRecipient,
 			})
 

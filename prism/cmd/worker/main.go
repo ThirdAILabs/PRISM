@@ -7,22 +7,22 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
+
 	"prism/prism/cmd"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers"
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/search"
 	"prism/prism/triangulation"
-	"strings"
-	"time"
 )
 
-
 type Config struct {
-	PostgresUri string `yaml:"postgres_uri"`
-	FundcodeTriangulationUri string `yaml:"fundcode_triangulation_uri"`
-	Logfile     string `yaml:"logfile"`
-	NdbLicense  string `yaml:"ndb_license"`
+	PostgresUri              string `yaml:"postgres_uri"`
+	FundcodeTriangulationUri string `yaml:"fundcode_triangulation_postgres_uri"`
+	Logfile                  string `yaml:"logfile"`
+	NdbLicense               string `yaml:"ndb_license"`
 
 	WorkDir string `yaml:"work_dir"`
 
@@ -46,7 +46,7 @@ func main() {
 	var config Config
 	cmd.LoadConfig(&config)
 
-	logFile, err := os.OpenFile(config.logfile(), os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+	logFile, err := os.OpenFile(config.logfile(), os.O_CREATE|os.O_APPEND|os.O_RDWR, 0o666)
 	if err != nil {
 		log.Fatalf("error opening log file: %v", err)
 	}
@@ -71,7 +71,7 @@ func main() {
 		log.Fatalf("error deleting existing ndb dir '%s': %v", ndbDir, err)
 	}
 
-	if err := os.MkdirAll(ndbDir, 0777); err != nil {
+	if err := os.MkdirAll(ndbDir, 0o777); err != nil {
 		log.Fatalf("error creating work dir: %v", err)
 	}
 

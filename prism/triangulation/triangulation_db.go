@@ -16,17 +16,17 @@ func SetTriangulationDB(db *gorm.DB) {
 }
 
 func GetTriangulationDB() *gorm.DB {
-    return triangulationDB
+	return triangulationDB
 }
 
 func GetAuthorFundCodeResult(db *gorm.DB, authorName, fundCode string) (*AuthorFundCodeResult, error) {
-    hash := sha256.New()
-    hash.Write([]byte(fundCode))
-    fundCodeHash := hex.EncodeToString(hash.Sum(nil))
+	hash := sha256.New()
+	hash.Write([]byte(fundCode))
+	fundCodeHash := hex.EncodeToString(hash.Sum(nil))
 
-    var result AuthorFundCodeResult
+	var result AuthorFundCodeResult
 
-    err := db.Raw(`
+	err := db.Raw(`
         SELECT a.numpapersbyauthor, f.numpapers
         FROM authors a
         JOIN fundcodes f 
@@ -34,18 +34,15 @@ func GetAuthorFundCodeResult(db *gorm.DB, authorName, fundCode string) (*AuthorF
         WHERE a.authorname = ? AND a.fund_code_hash = ?
         LIMIT 1
     `, authorName, fundCodeHash).Scan(&result).Error
-
-	// slog.Info("TRIANGULATION_QUERY: ", "result", &result, "author_name", authorName, "fund_code", fundCode, "fund_code_hash", fundCodeHash)
-
-    if err != nil {
+	if err != nil {
 		slog.Error("error executing fundcode triangulation query", "error", err)
-        return nil, fmt.Errorf("error executing query: %w", err)
-    }
+		return nil, fmt.Errorf("error executing query: %w", err)
+	}
 
-    if result.NumPapersByAuthor == 0 && result.NumPapers == 0 {
+	if result.NumPapersByAuthor == 0 && result.NumPapers == 0 {
 		slog.Info("not found author and number of papers with triangulation query", "author_name", authorName, "fund_code", fundCode)
-        return nil, nil
-    }
+		return nil, nil
+	}
 
-    return &result, nil
+	return &result, nil
 }
