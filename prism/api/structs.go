@@ -14,8 +14,6 @@ type Report struct {
 	AuthorId   string
 	AuthorName string
 	Source     string
-	StartYear  int
-	EndYear    int
 
 	Status string
 
@@ -26,8 +24,6 @@ type CreateReportRequest struct {
 	AuthorId   string
 	AuthorName string
 	Source     string
-	StartYear  int
-	EndYear    int
 }
 
 type CreateReportResponse struct {

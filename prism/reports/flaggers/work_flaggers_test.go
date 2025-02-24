@@ -194,12 +194,6 @@ func (m *mockAcknowledgmentExtractor) GetAcknowledgements(logger *slog.Logger, w
 func TestAcknowledgementEOC(t *testing.T) {
 	testDir := t.TempDir()
 
-	flagCache, err := NewCache[cachedAckFlag]("flags", filepath.Join(testDir, "flag.cache"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer flagCache.Close()
-
 	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(testDir, "author.cache"))
 	if err != nil {
 		t.Fatal(err)
@@ -219,7 +213,6 @@ func TestAcknowledgementEOC(t *testing.T) {
 	flagger := OpenAlexAcknowledgementIsEOC{
 		openalex:     openalex.NewRemoteKnowledgeBase(),
 		entityLookup: entityStore,
-		flagCache:    flagCache,
 		authorCache:  authorCache,
 		extractor:    &mockAcknowledgmentExtractor{},
 		sussyBakas:   []string{"bad entity xyz"},

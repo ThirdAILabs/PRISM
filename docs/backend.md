@@ -32,8 +32,6 @@ Note: that the field `Status` will be one of `queued`, `in-progress`, `failed`, 
         "AuthorId": "author id",
         "AuthorName": "author name",
         "Source": "openalex",
-        "StartYear": 10,
-        "EndYear": 12,
         "Status": "queued"
     },
     {
@@ -42,8 +40,6 @@ Note: that the field `Status` will be one of `queued`, `in-progress`, `failed`, 
         "AuthorId": "author id",
         "AuthorName": "author name",
         "Source": "openalex",
-        "StartYear": 3,
-        "EndYear": 8,
         "Status": "in-progress"
     }
 ]
@@ -62,9 +58,7 @@ __Example Request__:
 {
     "AuthorId": "author name",
     "AuthorName": "author id",
-    "Source": "openalex",
-    "StartYear": 10,
-    "EndYear": 12
+    "Source": "openalex"
 }
 ```
 __Example Response__:
@@ -97,8 +91,6 @@ Note: See the `report_format.md` for a description of the format of the report c
     "AuthorId": "author id",
     "AuthorName": "author name",
     "Source": "openalex",
-    "StartYear": 3,
-    "EndYear": 8,
     "Status": "in-progress",
     "Content": {
 
@@ -155,8 +147,6 @@ __Example Response__:
     "AuthorId": "author id",
     "AuthorName": "author name",
     "Source": "openalex",
-    "StartYear": 3,
-    "EndYear": 8,
     "Status": "complete",
     "Content": {
         "name": "test",

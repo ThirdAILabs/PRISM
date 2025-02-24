@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"slices"
+	"time"
 )
 
 type Flag interface {
@@ -15,6 +16,10 @@ type Flag interface {
 	GetEntities() []string
 
 	MarkDisclosed()
+
+	Before(time.Time) bool
+
+	After(time.Time) bool
 }
 
 type DisclosableFlag struct {
@@ -30,7 +35,7 @@ type WorkSummary struct {
 	DisplayName     string
 	WorkUrl         string
 	OaUrl           string
-	PublicationYear int
+	PublicationDate time.Time
 }
 
 type AcknowledgementEntity struct {
@@ -56,6 +61,14 @@ func (flag *TalentContractFlag) GetEntities() []string {
 	return flag.RawAcknowledements
 }
 
+func (flag *TalentContractFlag) Before(t time.Time) bool {
+	return flag.Work.PublicationDate.Before(t)
+}
+
+func (flag *TalentContractFlag) After(t time.Time) bool {
+	return flag.Work.PublicationDate.After(t)
+}
+
 type AssociationWithDeniedEntityFlag struct {
 	DisclosableFlag
 	Message            string
@@ -71,6 +84,14 @@ func (flag *AssociationWithDeniedEntityFlag) Key() string {
 
 func (flag *AssociationWithDeniedEntityFlag) GetEntities() []string {
 	return flag.RawAcknowledements
+}
+
+func (flag *AssociationWithDeniedEntityFlag) Before(t time.Time) bool {
+	return flag.Work.PublicationDate.Before(t)
+}
+
+func (flag *AssociationWithDeniedEntityFlag) After(t time.Time) bool {
+	return flag.Work.PublicationDate.After(t)
 }
 
 type HighRiskFunderFlag struct {
@@ -90,6 +111,14 @@ func (flag *HighRiskFunderFlag) GetEntities() []string {
 	return flag.Funders
 }
 
+func (flag *HighRiskFunderFlag) Before(t time.Time) bool {
+	return flag.Work.PublicationDate.Before(t)
+}
+
+func (flag *HighRiskFunderFlag) After(t time.Time) bool {
+	return flag.Work.PublicationDate.After(t)
+}
+
 type AuthorAffiliationFlag struct {
 	DisclosableFlag
 	Message      string
@@ -106,6 +135,14 @@ func (flag *AuthorAffiliationFlag) GetEntities() []string {
 	return flag.Affiliations
 }
 
+func (flag *AuthorAffiliationFlag) Before(t time.Time) bool {
+	return flag.Work.PublicationDate.Before(t)
+}
+
+func (flag *AuthorAffiliationFlag) After(t time.Time) bool {
+	return flag.Work.PublicationDate.After(t)
+}
+
 type PotentialAuthorAffiliationFlag struct {
 	DisclosableFlag
 	Message       string
@@ -119,6 +156,16 @@ func (flag *PotentialAuthorAffiliationFlag) Key() string {
 
 func (flag *PotentialAuthorAffiliationFlag) GetEntities() []string {
 	return []string{flag.University}
+}
+
+func (flag *PotentialAuthorAffiliationFlag) Before(t time.Time) bool {
+	// TODO: add date information to this flag and check it here
+	return true
+}
+
+func (flag *PotentialAuthorAffiliationFlag) After(t time.Time) bool {
+	// TODO: add date information to this flag and check it here
+	return true
 }
 
 type Connection struct {
@@ -153,6 +200,16 @@ func (flag *MiscHighRiskAssociationFlag) GetEntities() []string {
 	return entities
 }
 
+func (flag *MiscHighRiskAssociationFlag) Before(t time.Time) bool {
+	// TODO: add date information to this flag and check it here
+	return true
+}
+
+func (flag *MiscHighRiskAssociationFlag) After(t time.Time) bool {
+	// TODO: add date information to this flag and check it here
+	return true
+}
+
 type CoauthorAffiliationFlag struct {
 	DisclosableFlag
 	Message      string
@@ -168,6 +225,14 @@ func (flag *CoauthorAffiliationFlag) Key() string {
 
 func (flag *CoauthorAffiliationFlag) GetEntities() []string {
 	return slices.Concat(flag.Coauthors, flag.Affiliations)
+}
+
+func (flag *CoauthorAffiliationFlag) Before(t time.Time) bool {
+	return flag.Work.PublicationDate.Before(t)
+}
+
+func (flag *CoauthorAffiliationFlag) After(t time.Time) bool {
+	return flag.Work.PublicationDate.After(t)
 }
 
 type ReportContent struct {
@@ -199,6 +264,14 @@ func (flag *MultipleAffiliationFlag) GetEntities() []string {
 	return flag.Affiliations
 }
 
+func (flag *MultipleAffiliationFlag) Before(t time.Time) bool {
+	return flag.Work.PublicationDate.Before(t)
+}
+
+func (flag *MultipleAffiliationFlag) After(t time.Time) bool {
+	return flag.Work.PublicationDate.After(t)
+}
+
 type HighRiskPublisherFlag struct {
 	DisclosableFlag
 	Message    string
@@ -215,6 +288,14 @@ func (flag *HighRiskPublisherFlag) GetEntities() []string {
 	return flag.Publishers
 }
 
+func (flag *HighRiskPublisherFlag) Before(t time.Time) bool {
+	return flag.Work.PublicationDate.Before(t)
+}
+
+func (flag *HighRiskPublisherFlag) After(t time.Time) bool {
+	return flag.Work.PublicationDate.After(t)
+}
+
 type HighRiskCoauthorFlag struct {
 	DisclosableFlag
 	Message   string
@@ -229,4 +310,12 @@ func (flag *HighRiskCoauthorFlag) Key() string {
 
 func (flag *HighRiskCoauthorFlag) GetEntities() []string {
 	return flag.Coauthors
+}
+
+func (flag *HighRiskCoauthorFlag) Before(t time.Time) bool {
+	return flag.Work.PublicationDate.Before(t)
+}
+
+func (flag *HighRiskCoauthorFlag) After(t time.Time) bool {
+	return flag.Work.PublicationDate.After(t)
 }
