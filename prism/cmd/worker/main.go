@@ -12,12 +12,15 @@ import (
 	"prism/prism/reports/flaggers"
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/search"
+	"prism/prism/triangulation"
 	"strings"
 	"time"
 )
 
+
 type Config struct {
 	PostgresUri string `yaml:"postgres_uri"`
+	FundcodeTriangulationUri string `yaml:"fundcode_triangulation_uri"`
 	Logfile     string `yaml:"logfile"`
 	NdbLicense  string `yaml:"ndb_license"`
 
@@ -101,6 +104,8 @@ func main() {
 	}
 
 	db := cmd.InitDb(config.PostgresUri)
+
+	triangulation.SetTriangulationDB(cmd.InitDb(config.FundcodeTriangulationUri))
 
 	reportManager := reports.NewManager(db)
 

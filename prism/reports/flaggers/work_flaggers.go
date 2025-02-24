@@ -6,6 +6,7 @@ import (
 	"prism/prism/api"
 	"prism/prism/openalex"
 	"prism/prism/reports/flaggers/eoc"
+	"prism/prism/triangulation"
 	"regexp"
 	"slices"
 	"strings"
@@ -279,6 +280,7 @@ type cachedAckFlag struct {
 	Message  string
 	Entities []api.AcknowledgementEntity
 	RawAcks  []string
+	LikelyGrantRecipient bool
 }
 
 type OpenAlexAcknowledgementIsEOC struct {
@@ -417,6 +419,60 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 	return flagged, flaggedEntities, message, nil
 }
 
+func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
+	logger *slog.Logger, acknowledgements []Acknowledgement, allAuthorNames []string,
+) (bool, error) {
+	db := triangulation.GetTriangulationDB()
+	if db == nil {
+		logger.Error("triangulation db is not set")
+		return false, fmt.Errorf("triangulation db is not set")
+	}
+
+	var grantNumbers []string
+
+	for _, ack := range acknowledgements {
+		for _, entity := range ack.SearchableEntities {
+			if entity.EntityType == "grantNumber" {
+				grantNumbers = append(grantNumbers, entity.EntityText)
+			}
+		}
+	}
+
+	var numPapersToTotalPapersRatio []float64
+
+	for _, grantNumber := range grantNumbers {
+		for _, authorName := range allAuthorNames {
+			result, err := triangulation.GetAuthorFundCodeResult(db, authorName, grantNumber)
+			if err != nil {
+				logger.Error("error executing triangulation query", "error", err)
+				return false, fmt.Errorf("error executing triangulation query: %w", err)
+			}
+			if result != nil {
+				logger.Info("triangulation: result", "num_papers_by_author", result.NumPapersByAuthor, "num_papers", result.NumPapers)
+				numPapersToTotalPapersRatio = append(numPapersToTotalPapersRatio, float64(result.NumPapersByAuthor) / float64(result.NumPapers))
+				logger.Info("numPapersByAuthor/NumPapers", "ratio", float64(result.NumPapersByAuthor)/float64(result.NumPapers))
+				logger.Info("numPaperToTotalPapersRatio", "list", numPapersToTotalPapersRatio)
+			} 
+		}
+	}
+	logger.Info("numPapersToTotalPapersRatioLength", "Length", len(numPapersToTotalPapersRatio))
+
+	isPrimaryRecipient := false
+	if len(numPapersToTotalPapersRatio) > 0 {
+		for _, value := range numPapersToTotalPapersRatio {
+			logger.Info("numPaperToTotalPapersRatioElement", "value", value)
+			logger.Info("numPaperToTotalPapersRatioElement comparision", "comparision", value >= 0.4)
+			// If the queries author has authored >= 40% of the papers funded by this grant, we consider them a primary recipient.
+			if value >= 0.4 {
+				isPrimaryRecipient = true
+				break
+			}
+		}
+	}
+
+	return isPrimaryRecipient, nil
+}
+
 func flagCacheKey(workId string, targetAuthorIds []string) string {
 	return fmt.Sprintf("%s;%v", workId, targetAuthorIds)
 }
@@ -441,13 +497,14 @@ func containsSource(entities []api.AcknowledgementEntity, sourcesOfInterest []st
 	return false
 }
 
-func createAcknowledgementFlag(work openalex.Work, message string, entities []api.AcknowledgementEntity, rawAcks []string) api.Flag {
+func createAcknowledgementFlag(work openalex.Work, message string, entities []api.AcknowledgementEntity, rawAcks []string, isLikelyGrantRecipient bool) api.Flag {
 	if strings.Contains(message, "talent") || strings.Contains(message, "Talent") || containsSource(entities, talentPrograms) {
 		return &api.TalentContractFlag{
 			Message:            message,
 			Work:               getWorkSummary(work),
 			Entities:           entities,
 			RawAcknowledements: rawAcks,
+			LikelyGrantRecipient: isLikelyGrantRecipient,
 		}
 	} else if containsSource(entities, deniedEntities) {
 		return &api.AssociationWithDeniedEntityFlag{
@@ -455,6 +512,7 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			Work:               getWorkSummary(work),
 			Entities:           entities,
 			RawAcknowledements: rawAcks,
+			LikelyGrantRecipient: isLikelyGrantRecipient,
 		}
 	} else {
 		return &api.HighRiskFunderFlag{
@@ -462,6 +520,7 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			Work:                 getWorkSummary(work),
 			Funders:              rawAcks,
 			FromAcknowledgements: true,
+			LikelyGrantRecipient: isLikelyGrantRecipient,
 		}
 	}
 }
@@ -487,7 +546,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 		if cacheEntry := flagger.flagCache.Lookup(flagCacheKey(workId, targetAuthorIds)); cacheEntry != nil {
 			logger.Info("found cached entry for work", "work_id", work.WorkId)
 			if cacheEntry.Flagged {
-				flags = append(flags, createAcknowledgementFlag(work, cacheEntry.Message, cacheEntry.Entities, cacheEntry.RawAcks))
+				flags = append(flags, createAcknowledgementFlag(work, cacheEntry.Message, cacheEntry.Entities, cacheEntry.RawAcks, cacheEntry.LikelyGrantRecipient))
 				logger.Info("cached entry contains flag", "work_id", workId)
 			}
 			continue
@@ -535,6 +594,24 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 
 		workLogger.Info("found flagged entities in acknowledgements", "n_entities", len(flaggedEntities))
 
+		isLikelyGrantRecipient := false
+
+		if flagged {
+			var err error
+			isLikelyGrantRecipient, err = flagger.checkForGrantRecipient(
+				workLogger, acks.Result.Acknowledgements, allAuthorNames,
+			)
+			
+			if isLikelyGrantRecipient {
+				workLogger.Info("triangulation; likely grant recipient", "work_id", acks.Result.WorkId)
+			}
+
+			if err != nil {
+				workLogger.Error("error checking for grant recipient", "error", err)
+				continue
+			}
+		}
+
 		if flagged {
 			ackTexts := make([]string, 0, len(acks.Result.Acknowledgements))
 			for _, ack := range acks.Result.Acknowledgements {
@@ -557,6 +634,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 				fmt.Sprintf("%s\n%s", message, strings.Join(ackTexts, "\n")),
 				entities,
 				ackTexts,
+				isLikelyGrantRecipient,
 			)
 
 			flagger.flagCache.Update(flagCacheKey(acks.Result.WorkId, targetAuthorIds), cachedAckFlag{
@@ -564,6 +642,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 				Message:  msg,
 				Entities: entities,
 				RawAcks:  ackTexts,
+				LikelyGrantRecipient: isLikelyGrantRecipient,
 			})
 
 			flags = append(flags, flag)

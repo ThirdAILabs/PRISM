@@ -246,6 +246,7 @@ var searchAbleEntityTypes = map[string]bool{
 	"programName": true,
 	"projectName": true,
 	"funder":      true,
+	"grantNumber": true,
 }
 
 func parseGrobidReponse(data io.Reader) ([]Acknowledgement, error) {

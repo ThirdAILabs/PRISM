@@ -45,6 +45,7 @@ type TalentContractFlag struct {
 	Work               WorkSummary
 	Entities           []AcknowledgementEntity
 	RawAcknowledements []string
+	LikelyGrantRecipient bool
 }
 
 func (flag *TalentContractFlag) Key() string {
@@ -62,6 +63,8 @@ type AssociationWithDeniedEntityFlag struct {
 	Work               WorkSummary
 	Entities           []AcknowledgementEntity
 	RawAcknowledements []string
+	LikelyGrantRecipient bool
+
 }
 
 func (flag *AssociationWithDeniedEntityFlag) Key() string {
@@ -79,6 +82,7 @@ type HighRiskFunderFlag struct {
 	Work                 WorkSummary
 	Funders              []string
 	FromAcknowledgements bool
+	LikelyGrantRecipient bool
 }
 
 func (flag *HighRiskFunderFlag) Key() string {

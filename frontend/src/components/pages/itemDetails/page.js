@@ -257,11 +257,19 @@ const ItemDetails = () => {
                         })}
                     </ul>
                 </p>
-                {flag.Disclosed ? (
-                    <button type="button" className="btn btn-success">Disclosed</button>
-                ) : (
-                    <button type="button" className="btn btn-danger">Undisclosed</button>
-                )}
+                <hr />
+                <div className="d-flex justify-content-between">
+                    {flag.Disclosed ? (
+                        <button type="button" className="btn btn-success">Disclosed</button>
+                    ) : (
+                        <button type="button" className="btn btn-danger">Undisclosed</button>
+                    )}
+                    {flag.LikelyGrantRecipient ? (
+                        <button type="button" className="btn btn-outline-danger">Likely Grant Recipient</button>
+                    ) : (
+                        <button type="button" className="btn btn-outline-success">Likely NOT Grant Recipient</button>
+                    )}
+                </div>
             </li>
         );
     }
@@ -335,7 +343,6 @@ const ItemDetails = () => {
                         })}
                     </ul>
                 </p>
-                {flag.Disclosed}
                 {flag.Disclosed ? (
                     <button type="button" className="btn btn-success">Disclosed</button>
                 ) : (
@@ -360,7 +367,6 @@ const ItemDetails = () => {
                         })}
                     </ul>
                 </div>
-                {flag.Disclosed}
                 {flag.Disclosed ? (
                     <button type="button" className="btn btn-success">Disclosed</button>
                 ) : (
@@ -408,33 +414,20 @@ const ItemDetails = () => {
                     }
                     <p>{ }</p>
                 </p>
-                { }
-                {flag.Disclosed ? (
-                    <button type="button" className="btn btn-success">Disclosed</button>
-                ) : (
-                    <button type="button" className="btn btn-danger">Undisclosed</button>
-                )}
-
-                {/* DISCLOSURE */}
-                {/* <hr />
+                <hr />
+                <hr />
                 <div className="d-flex justify-content-between">
-                    {flag.metadata?.dislosed === true ? (
-                    <button type="button" className="btn btn-success">Disclosed</button>
-                    ) : flag.metadata?.dislosed === false ? (
-                    <button type="button" className="btn btn-danger">Undisclosed</button>
+                    {flag.Disclosed ? (
+                        <button type="button" className="btn btn-success">Disclosed</button>
                     ) : (
-                    // <button type="button" className="btn btn-secondary">No Disclosure Status</button> // Optional: Add a fallback state
-                    <></>
+                        <button type="button" className="btn btn-danger">Undisclosed</button>
                     )}
-                    {flag.metadata?.is_primary_recipient === true ? (
-                    <button type="button" className="btn btn-outline-success">Likely Not a Primary Recipient of Funds</button>
-                    ) : flag.metadata?.is_primary_recipeitn === false ? (
-                    <button type="button" className="btn btn-outline-danger">Likely a Primary Recipient of Funds</button>
+                    {flag.LikelyGrantRecipient ? (
+                        <button type="button" className="btn btn-outline-danger">Likely Grant Recipient</button>
                     ) : (
-                    <></>
-                    // <button type="button" className="btn btn-outline-secondary">No Grant Information</button>
+                        <button type="button" className="btn btn-outline-success">Likely NOT Grant Recipient</button>
                     )}
-                </div> */}
+                </div>
             </li>
         );
     }
