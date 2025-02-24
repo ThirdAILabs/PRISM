@@ -162,7 +162,7 @@ const ItemDetails = () => {
                 setInitialReportContent(report.Content);
                 setLoading(false);
             } else if (isMounted) {
-                setTimeout(poll, 2000);
+                // setTimeout(poll, 2000);
             }
         };
 
@@ -612,7 +612,7 @@ const ItemDetails = () => {
                                         fontSize: '14px'
                                     }}
                                 >
-                                    Filter by Year
+                                    Filter by Timeline
                                 </button>
                                 {yearDropdownOpen && (
                                     <div
@@ -621,14 +621,14 @@ const ItemDetails = () => {
                                             backgroundColor: 'rgb(160, 160, 160)',
                                             border: 'none',
                                             right: 0,
-                                            marginTop: "10px",
+                                            marginTop: "5px",
                                             color: 'white',
                                             fontWeight: 'bold',
                                             fontSize: '14px',
                                             justifyContent: 'center',
                                             alignItems: 'center',
                                             display: 'flex',
-                                            flexDirection: 'column'
+                                            flexDirection: 'column',
                                         }}
                                     >
                                         <div className="form-group mb-2">
@@ -693,7 +693,7 @@ const ItemDetails = () => {
                     {/* Comment the following to get rid of the graph tab */}
                     <Tabs activeTab={activeTab} handleTabChange={handleTabChange} />
                 </div>
-                {activeTab === 0 && <div className='d-flex justify-content-end mt-2 gap-2'>
+                {activeTab === 0 && <div className='d-flex justify-content-end mt-2 gap-2 px-2'>
                     <>
                         <StyledWrapper>
                             <button
@@ -788,15 +788,13 @@ const ItemDetails = () => {
                                 title={TitlesAndDescriptions[flag].title}
                                 hoverText={TitlesAndDescriptions[flag].desc}
                                 value={reportContent[flag] ? reportContent[flag].length : 0}
-                                weight={1}
                                 onReview={() => setReview(flag)}
                                 key={index}
                             />
                         })
                     }
                 </div>
-                {/* Comment the following to get rid of the collapsible components */}
-                {/* <CustomCollapsible /> */}
+
                 {review && <ul className='d-flex flex-column align-items-center p-0' style={{ color: "black" }}>
                     <h5 className='fw-bold mt-3'>Reviewing {" "} {TitlesAndDescriptions[review].title}</h5>{
                         (reportContent[review] || []).map(
@@ -881,9 +879,9 @@ position: relative;
     background: #ad5389;
     background: linear-gradient(
       0deg,
-      rgb(163, 82, 108) 0%,
+      rgb(174, 4, 4) 0%,
 
-      rgba(132, 116, 254, 1) 100%
+      rgb(39, 18, 197) 100%
     );
     border: none;
     box-shadow: 0 0.7em 1.5em -0.5em #4d36d0be;
