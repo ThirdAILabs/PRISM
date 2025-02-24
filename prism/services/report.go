@@ -14,7 +14,6 @@ import (
 	"prism/prism/services/auth"
 	"prism/prism/services/licensing"
 	"strings"
-	"time"
 
 	"github.com/bbalet/stopwords"
 	"github.com/go-chi/chi/v5"
@@ -102,14 +101,6 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 	}
 
 	return api.CreateReportResponse{Id: id}, nil
-}
-
-func parseDateParam(param string) (time.Time, error) {
-	date, err := time.Parse(time.DateOnly, param)
-	if err != nil {
-		return time.Time{}, CodedError(fmt.Errorf("error parsing date constraint: %w", err), http.StatusBadRequest)
-	}
-	return date, nil
 }
 
 func (s *ReportService) GetReport(r *http.Request) (any, error) {
