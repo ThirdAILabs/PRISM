@@ -409,10 +409,6 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 	return flagged, flaggedEntities, message, nil
 }
 
-func flagCacheKey(workId string, targetAuthorIds []string) string {
-	return fmt.Sprintf("%s;%v", workId, targetAuthorIds)
-}
-
 var talentPrograms = []string{
 	"Department of Defense - Foreign Talent Programs that Pose a Threat to National Security Interests of the United States",
 	"Foreign Talent Recruitment Programs",
