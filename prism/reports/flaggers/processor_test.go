@@ -1,6 +1,8 @@
 package flaggers
 
 import (
+	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"prism/prism/api"
@@ -56,6 +58,9 @@ func TestProcessorCoauthorAffiliationCase1(t *testing.T) {
 		if len(report.CoauthorAffiliations) != 1 {
 			t.Fatal("expected 1 flag")
 		}
+
+		data, _ := json.MarshalIndent(report, "", "    ")
+		fmt.Println(string(data))
 
 		flag := report.CoauthorAffiliations[0]
 
