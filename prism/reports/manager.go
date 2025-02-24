@@ -26,7 +26,6 @@ var (
 	ErrReportCreationFailed   = errors.New("report creation failed")
 	ErrReportNotFound         = errors.New("report not found")
 	ErrUserCannotAccessReport = errors.New("user cannot access report")
-	ErrReportVersionMimatch   = errors.New("report version mismatch")
 )
 
 type ReportManager struct {
@@ -59,7 +58,7 @@ func (r *ReportManager) ListReports(userId uuid.UUID) ([]api.Report, error) {
 }
 
 func (r *ReportManager) queueReportUpdateIfNeeded(txn *gorm.DB, report *schema.Report) error {
-	if time.Now().UTC().Sub(report.LastUpdate) > r.staleReportThreshold &&
+	if time.Now().UTC().Sub(report.LastUpdatedAt) > r.staleReportThreshold &&
 		report.Status != schema.ReportInProgress && report.Status != schema.ReportQueued {
 		updates := map[string]any{"status": schema.ReportQueued, "queued_at": time.Now().UTC()}
 		if err := txn.Model(&report).Updates(updates).Error; err != nil {
@@ -85,12 +84,12 @@ func (r *ReportManager) CreateReport(licenseId, userId uuid.UUID, authorId, auth
 		if result.RowsAffected == 0 {
 			reportId := uuid.New()
 			report = schema.Report{
-				Id:         reportId,
-				LastUpdate: EarliestReportDate,
-				AuthorId:   authorId,
-				AuthorName: authorName,
-				Source:     source,
-				Status:     schema.ReportQueued,
+				Id:            reportId,
+				LastUpdatedAt: EarliestReportDate,
+				AuthorId:      authorId,
+				AuthorName:    authorName,
+				Source:        source,
+				Status:        schema.ReportQueued,
 				Content: &schema.ReportContent{
 					ReportId: reportId,
 					Content:  []byte(`{}`),
@@ -211,7 +210,7 @@ func (r *ReportManager) GetNextReport() (*ReportUpdateTask, error) {
 			AuthorId:   report.AuthorId,
 			AuthorName: report.AuthorName,
 			Source:     report.Source,
-			StartDate:  report.LastUpdate,
+			StartDate:  report.LastUpdatedAt,
 			EndDate:    time.Now().UTC(),
 		}, nil
 	}

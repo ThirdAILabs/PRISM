@@ -16,7 +16,7 @@ const (
 type Report struct {
 	Id uuid.UUID `gorm:"type:uuid;primaryKey"`
 
-	LastUpdate time.Time
+	LastUpdatedAt time.Time
 
 	AuthorId   string `gorm:"index"`
 	AuthorName string

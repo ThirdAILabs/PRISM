@@ -10,7 +10,6 @@ import (
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/search"
 	"sync"
-	"time"
 )
 
 type ReportProcessor struct {
@@ -90,18 +89,18 @@ func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
 	}, nil
 }
 
-func (processor *ReportProcessor) getWorkStream(authorId, authorName, source string, startDate, endDate time.Time) (chan openalex.WorkBatch, error) {
-	switch source {
+func (processor *ReportProcessor) getWorkStream(report reports.ReportUpdateTask) (chan openalex.WorkBatch, error) {
+	switch report.Source {
 	case api.OpenAlexSource:
-		return streamOpenAlexWorks(processor.openalex, authorId, startDate, endDate), nil
+		return streamOpenAlexWorks(processor.openalex, report.AuthorId, report.StartDate, report.EndDate), nil
 	case api.GoogleScholarSource:
-		return streamGScholarWorks(processor.openalex, authorName, authorId, startDate, endDate), nil
+		return streamGScholarWorks(processor.openalex, report.AuthorName, report.AuthorId, report.StartDate, report.EndDate), nil
 	// case api.UnstructuredSource:
 	// 	return streamUnstructuredWorks(processor.openalex, report.AuthorName, "what should the text be", report.StartYear, report.EndYear), nil
 	// case api.ScopusSource:
 	// 	return streamScopusWorks()
 	default:
-		return nil, fmt.Errorf("invalid report source '%s'", source)
+		return nil, fmt.Errorf("invalid report source '%s'", report.Source)
 	}
 }
 
@@ -188,7 +187,7 @@ func (processor *ReportProcessor) ProcessReport(report reports.ReportUpdateTask)
 
 	logger.Info("starting report processing")
 
-	workStream, err := processor.getWorkStream(report.AuthorId, report.AuthorName, report.Source, report.StartDate, report.EndDate)
+	workStream, err := processor.getWorkStream(report)
 	if err != nil {
 		logger.Error("unable to get work stream", "error", err)
 		return api.ReportContent{}, fmt.Errorf("unable to get works: %w", err)
