@@ -282,7 +282,7 @@ func (r *ReportManager) UpdateReport(id uuid.UUID, status string, updateTime tim
 		updates := map[string]any{"status": status}
 
 		if status == schema.ReportCompleted {
-			updates["last_update"] = updateTime
+			updates["last_updated_at"] = updateTime
 
 			oldContent, err := deserializeReportContent(report.Content.Content)
 			if err != nil {
