@@ -83,10 +83,9 @@ func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.W
 
 		if len(concerningFunders) > 0 {
 			flags = append(flags, &api.HighRiskFunderFlag{
-				Message:              fmt.Sprintf("The following funders of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningFunders, "\n")),
-				Work:                 getWorkSummary(work),
-				Funders:              concerningFunders,
-				FromAcknowledgements: false,
+				Message: fmt.Sprintf("The following funders of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningFunders, "\n")),
+				Work:    getWorkSummary(work),
+				Funders: concerningFunders,
 			})
 			logger.Info("found concerning funders", "funders", concerningFunders)
 		}
@@ -457,11 +456,15 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			RawAcknowledements: rawAcks,
 		}
 	} else {
+		entityNames := make([]string, 0, len(entities))
+		for _, entity := range entities {
+			entityNames = append(entityNames, entity.Entity)
+		}
 		return &api.HighRiskFunderFlag{
-			Message:              message,
-			Work:                 getWorkSummary(work),
-			Funders:              rawAcks,
-			FromAcknowledgements: true,
+			Message:          message,
+			Work:             getWorkSummary(work),
+			Funders:          entityNames,
+			Acknowledgements: rawAcks,
 		}
 	}
 }

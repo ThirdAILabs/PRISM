@@ -75,10 +75,10 @@ func (flag *AssociationWithDeniedEntityFlag) GetEntities() []string {
 
 type HighRiskFunderFlag struct {
 	DisclosableFlag
-	Message              string
-	Work                 WorkSummary
-	Funders              []string
-	FromAcknowledgements bool
+	Message          string
+	Work             WorkSummary
+	Funders          []string
+	Acknowledgements []string
 }
 
 func (flag *HighRiskFunderFlag) Key() string {
