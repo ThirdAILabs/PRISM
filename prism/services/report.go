@@ -39,7 +39,7 @@ func (s *ReportService) Routes() chi.Router {
 	r.Post("/create", WrapRestHandler(s.CreateReport))
 	r.Get("/{report_id}", WrapRestHandler(s.GetReport))
 	r.Post("/{report_id}/check-disclosure", WrapRestHandler(s.CheckDisclosure))
-	r.Get("/{report_id}/download", WrapRestHandler(s.DownloadReport))
+	r.Get("/{report_id}/download", s.DownloadReport)
 
 	r.Post("/activate-license", WrapRestHandler(s.UseLicense))
 
@@ -225,24 +225,28 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 	return report, nil
 }
 
-func (s *ReportService) DownloadReport(r *http.Request) (any, error) {
+func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 	userId, err := auth.GetUserId(r)
 	if err != nil {
-		return nil, CodedError(err, http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	reportId, err := URLParamUUID(r, "report_id")
 	if err != nil {
-		return nil, CodedError(err, http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	report, err := s.manager.GetReport(userId, reportId)
 	if err != nil {
-		return nil, CodedError(err, errorStatus(err))
+		http.Error(w, err.Error(), errorStatus(err))
+		return
 	}
 
 	if report.Status != schema.ReportCompleted {
-		return nil, CodedError(errors.New("cannot download report unless report status is complete"), http.StatusUnprocessableEntity)
+		http.Error(w, "cannot download report unless report status is complete", http.StatusUnprocessableEntity)
+		return
 	}
 
 	format := r.URL.Query().Get("format")
@@ -256,31 +260,34 @@ func (s *ReportService) DownloadReport(r *http.Request) (any, error) {
 	case "csv":
 		fileBytes, err = generateCSV(report)
 		if err != nil {
-			return nil, CodedError(err, http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 		contentType = "text/csv"
 		filename = "report.csv"
 	case "pdf":
 		fileBytes, err = generatePDF(report)
 		if err != nil {
-			return nil, CodedError(err, http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 		contentType = "application/pdf"
 		filename = "report.pdf"
 	case "excel", "xlsx":
 		fileBytes, err = generateExcel(report)
 		if err != nil {
-			return nil, CodedError(err, http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 		contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 		filename = "report.xlsx"
 	default:
-		return nil, CodedError(errors.New("unsupported format"), http.StatusBadRequest)
+		http.Error(w, "unsupported format", http.StatusBadRequest)
+		return
 	}
 
-	return FileResponse{
-		Content:     fileBytes,
-		ContentType: contentType,
-		Filename:    filename,
-	}, nil
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Cache-Control", "no-store")
+	w.Write(fileBytes)
 }

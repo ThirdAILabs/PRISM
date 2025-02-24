@@ -484,24 +484,25 @@ func TestDownloadReportExcel(t *testing.T) {
 	res := w.Result()
 	defer res.Body.Close()
 
-	var fileResp services.FileResponse
-	if err := json.NewDecoder(res.Body).Decode(&fileResp); err != nil {
-		t.Fatalf("error decoding JSON response: %v", err)
+	fileBytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		t.Fatalf("error reading response body: %v", err)
 	}
 
 	expectedContentType := "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-	if fileResp.ContentType != expectedContentType {
-		t.Fatalf("expected content type %s, got %s", expectedContentType, fileResp.ContentType)
+	if ct := res.Header.Get("Content-Type"); ct != expectedContentType {
+		t.Fatalf("expected content type %s, got %s", expectedContentType, ct)
 	}
-	if fileResp.Filename != "report.xlsx" {
-		t.Fatalf("expected filename 'report.xlsx', got %s", fileResp.Filename)
+	contentDisp := res.Header.Get("Content-Disposition")
+	if !strings.Contains(contentDisp, "report.xlsx") {
+		t.Fatalf("expected filename 'report.xlsx' in Content-Disposition, got %s", contentDisp)
 	}
 
-	if len(fileResp.Content) == 0 {
+	if len(fileBytes) == 0 {
 		t.Fatal("downloaded excel file is empty")
 	}
 
-	f, err := excelize.OpenReader(bytes.NewReader(fileResp.Content))
+	f, err := excelize.OpenReader(bytes.NewReader(fileBytes))
 	if err != nil {
 		t.Fatalf("error opening excel file: %v", err)
 	}
