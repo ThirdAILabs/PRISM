@@ -34,7 +34,7 @@ func InitDb(uri string) *gorm.DB {
 
 	err = db.AutoMigrate(
 		&schema.Report{}, &schema.ReportContent{}, &schema.License{},
-		&schema.LicenseUser{}, &schema.LicenseUsage{},
+		&schema.LicenseUser{}, &schema.LicenseUsage{}, &schema.UserReport{},
 	)
 	if err != nil {
 		log.Fatalf("error migrating db schema: %v", err)
