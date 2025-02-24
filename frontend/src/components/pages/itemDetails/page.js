@@ -693,7 +693,7 @@ const ItemDetails = () => {
                     {/* Comment the following to get rid of the graph tab */}
                     <Tabs activeTab={activeTab} handleTabChange={handleTabChange} />
                 </div>
-                <div className='d-flex justify-content-end mt-2 gap-2'>
+                {activeTab === 0 && <div className='d-flex justify-content-end mt-2 gap-2'>
                     <>
                         <StyledWrapper>
                             <button
@@ -753,7 +753,7 @@ const ItemDetails = () => {
                         </Dialog>
                     </>
                     <DownloadButton reportId={report_id} />
-                </div>
+                </div>}
             </div>
 
 
