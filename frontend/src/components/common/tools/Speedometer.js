@@ -96,10 +96,6 @@ export function Speedometer({ scale, value }) {
   return (
     <div
       className="chart-wrapper"
-      style={{
-        position: "relative",
-        color: "white",
-      }}
     >
       <Gauge
         value={transformValue(value)}

@@ -32,8 +32,6 @@ Note: that the field `Status` will be one of `queued`, `in-progress`, `failed`, 
         "AuthorId": "author id",
         "AuthorName": "author name",
         "Source": "openalex",
-        "StartYear": 10,
-        "EndYear": 12,
         "Status": "queued"
     },
     {
@@ -42,8 +40,6 @@ Note: that the field `Status` will be one of `queued`, `in-progress`, `failed`, 
         "AuthorId": "author id",
         "AuthorName": "author name",
         "Source": "openalex",
-        "StartYear": 3,
-        "EndYear": 8,
         "Status": "in-progress"
     }
 ]
@@ -62,9 +58,7 @@ __Example Request__:
 {
     "AuthorId": "author name",
     "AuthorName": "author id",
-    "Source": "openalex",
-    "StartYear": 10,
-    "EndYear": 12
+    "Source": "openalex"
 }
 ```
 __Example Response__:
@@ -97,8 +91,6 @@ Note: See the `report_format.md` for a description of the format of the report c
     "AuthorId": "author id",
     "AuthorName": "author name",
     "Source": "openalex",
-    "StartYear": 3,
-    "EndYear": 8,
     "Status": "in-progress",
     "Content": {
 
@@ -137,14 +129,14 @@ Checks for the disclosure of flagged details within a report. The process involv
 
 __Example Request__: 
 ```
-url = f"http://localhost:8082/api/v1/report/{report_id}/check-disclosure"
-headers = {"Authorization": f"Bearer {token}"}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryXYZ
 
-files = []
-for file_path in file_paths:
-    files.append(('files', (file_path, open(file_path, 'rb'), 'text/plain')))
+------WebKitFormBoundaryXYZ
+Content-Disposition: form-data; name="files"; filename="document.txt"
+Content-Type: text/plain
 
-response = requests.post(url, headers=headers, files=files)
+This is the content of the document...
+------WebKitFormBoundaryXYZ--
 ```
 
 __Example Response__:
@@ -155,8 +147,6 @@ __Example Response__:
     "AuthorId": "author id",
     "AuthorName": "author name",
     "Source": "openalex",
-    "StartYear": 3,
-    "EndYear": 8,
     "Status": "complete",
     "Content": {
         "name": "test",
@@ -175,6 +165,38 @@ __Example Response__:
 
 ```
 
+## Download Report
+
+| Method | Path | Auth Required | Permissions |
+| ------ | ---- | ------------- | ----------  |
+| `GET` | `/api/v1/report/{report_id}/download` | Yes | Token for Keycloak User Realm |
+
+Downloads a completed report in the requested format. The report status must be complete in order for the report to be downloadable.
+
+format (optional): Specifies the file format for the report.
+Allowed values:
+- csv (default): CSV (Comma-Separated Values) format.
+- pdf: PDF (Portable Document Format).
+- excel or xlsx: Excel file in XLSX format.
+
+
+__Example Request__: 
+**Status Code:** 200
+
+**Response Headers:**
+
+- **Content-Type:**
+  - `text/csv` for CSV.
+  - `application/pdf` for PDF.
+  - `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` for Excel.
+- **Content-Disposition:**
+  - `attachment; filename="report.<ext>"` where `<ext>` is `csv`, `pdf`, or `xlsx` depending on the format.
+- **Cache-Control:**
+  - `no-store`
+
+**Response Body:**
+
+The body contains the raw bytes of the generated report file.
 
 # License Endpoints
 

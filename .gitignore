@@ -175,3 +175,11 @@ cython_debug/
 
 config.yaml
 model/
+
+*.csv
+*.txt
+*.py
+*.pdf
+*.xlsx
+*.cache
+*.ndb

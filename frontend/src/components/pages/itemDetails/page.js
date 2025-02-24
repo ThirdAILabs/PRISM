@@ -16,7 +16,7 @@ import Tabs from '../../common/tools/Tabs.js';
 import DownloadButton from '../../common/tools/button/downloadButton.js';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider } from '@mui/material';
 import { reportService } from '../../../api/reports.js';
-
+import styled from 'styled-components';
 
 
 const FLAG_ORDER = [
@@ -181,6 +181,7 @@ const ItemDetails = () => {
     const [startYear, setStartYear] = useState('');
     const [endYear, setEndYear] = useState('');
     const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
+    const [isDownloadOpen, setIsDownloadOpen] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
 
     const handleTabChange = (event, newValue) => {
@@ -188,7 +189,10 @@ const ItemDetails = () => {
     };
     const handleStartYearChange = (e) => setStartYear(e.target.value);
     const handleEndYearChange = (e) => setEndYear(e.target.value);
-    const toggleYearDropdown = () => setYearDropdownOpen(!yearDropdownOpen);
+    const toggleYearDropdown = () => {
+        setYearDropdownOpen(!yearDropdownOpen);
+        setIsDownloadOpen(false);  // Close download dropdown
+    };
     const handleYearFilter = () => {
         const filteredContent = {};
         FLAG_ORDER.forEach((flag) => {
@@ -605,7 +609,7 @@ const ItemDetails = () => {
                                         fontSize: '14px'
                                     }}
                                 >
-                                    Filter by Year
+                                    Filter by Timeline
                                 </button>
                                 {yearDropdownOpen && (
                                     <div
@@ -614,14 +618,14 @@ const ItemDetails = () => {
                                             backgroundColor: 'rgb(160, 160, 160)',
                                             border: 'none',
                                             right: 0,
-                                            marginTop: "10px",
+                                            marginTop: "5px",
                                             color: 'white',
                                             fontWeight: 'bold',
                                             fontSize: '14px',
                                             justifyContent: 'center',
                                             alignItems: 'center',
                                             display: 'flex',
-                                            flexDirection: 'column'
+                                            flexDirection: 'column',
                                         }}
                                     >
                                         <div className="form-group mb-2">
@@ -679,81 +683,81 @@ const ItemDetails = () => {
                                     </div>
                                 )}
                             </div>
-                            <>
-                                <button
-                                    className="form-control"
-                                    onClick={handleOpenDialog}
-                                    style={{
-                                        backgroundColor: 'rgb(160, 160, 160)',
-                                        border: 'none',
-                                        color: 'white',
-                                        width: "200px",
-                                        fontWeight: 'bold',
-                                        fontSize: '14px',
-                                        marginTop: '20px',
-                                    }}
-                                >
-                                    Check disclosure
-                                </button>
 
-                                <Dialog
-                                    open={openDialog}
-                                    onClose={handleCloseDialog}
-                                    maxWidth="sm"
-                                    fullWidth
-                                >
-                                    <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-                                        Select files to check for disclosure
-                                    </DialogTitle>
-                                    <Divider sx={{ color: 'black', backgroundColor: '#000000' }} />
-                                    <DialogContent>
-                                        <div
-                                            className="container"
-                                            onDrop={handleDrop}
-                                            onDragOver={(e) => e.preventDefault()}
-                                        >
-                                            <div className="header">
-                                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                                </svg>
-                                                <p>Browse File to upload!</p>
-                                            </div>
-                                            <label htmlFor="file" className="footer">
-                                                <p>{selectedFiles.length ? `${selectedFiles.length} files selected` : 'No file selected'}</p>
-                                            </label>
-                                            <input
-                                                id="file"
-                                                type="file"
-                                                multiple
-                                                onChange={handleFileSelect}
-                                                accept=".txt,.doc,.docx,.pdf"
-                                            />
-                                        </div>
-                                        {uploadError && (
-                                            <div style={{ color: 'red', marginTop: '10px' }}>{uploadError}</div>
-                                        )}
-                                    </DialogContent>
-                                    <DialogActions>
-                                        <Button onClick={handleCloseDialog}>Cancel</Button>
-                                        <Button
-                                            onClick={handleSubmit}
-                                            disabled={isUploading}
-                                            variant="contained"
-                                        >
-                                            {isUploading ? 'Uploading...' : 'Submit'}
-                                        </Button>
-                                    </DialogActions>
-                                </Dialog>
-                            </>
                         </div>
 
                     </div>
                     {/* Comment the following to get rid of the graph tab */}
                     <Tabs activeTab={activeTab} handleTabChange={handleTabChange} />
                 </div>
-                <div className='d-flex justify-content-end mt-2'>
-                    <DownloadButton reportId={report_id} />
-                </div>
+                {activeTab === 0 && <div className='d-flex justify-content-end mt-2 gap-2 px-2'>
+                    <>
+                        <StyledWrapper>
+                            <button
+                                className="cssbuttons-io-button"
+                                onClick={handleOpenDialog}
+                            >
+                                Verify with Disclosures
+                            </button>
+                        </StyledWrapper>
+                        <Dialog
+                            open={openDialog}
+                            onClose={handleCloseDialog}
+                            maxWidth="sm"
+                            fullWidth
+                        >
+                            <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+                                Select files to check for disclosure
+                            </DialogTitle>
+                            <Divider sx={{ color: 'black', backgroundColor: '#000000' }} />
+                            <DialogContent>
+                                <div
+                                    className="container"
+                                    onDrop={handleDrop}
+                                    onDragOver={(e) => e.preventDefault()}
+                                >
+                                    <div className="header">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                        <p>Browse File to upload!</p>
+                                    </div>
+                                    <label htmlFor="file" className="footer">
+                                        <p>{selectedFiles.length ? `${selectedFiles.length} files selected` : 'No file selected'}</p>
+                                    </label>
+                                    <input
+                                        id="file"
+                                        type="file"
+                                        multiple
+                                        onChange={handleFileSelect}
+                                        accept=".txt,.doc,.docx,.pdf"
+                                    />
+                                </div>
+                                {uploadError && (
+                                    <div style={{ color: 'red', marginTop: '10px' }}>{uploadError}</div>
+                                )}
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={handleCloseDialog}>Cancel</Button>
+                                <Button
+                                    onClick={handleSubmit}
+                                    disabled={isUploading}
+                                    variant="contained"
+                                >
+                                    {isUploading ? 'Uploading...' : 'Submit'}
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
+                    </>
+                    <DownloadButton
+                        reportId={report_id}
+                        isOpen={isDownloadOpen}
+                        setIsOpen={(value) => {
+                            setIsDownloadOpen(value);
+                            setYearDropdownOpen(false);  // Close year dropdown
+                        }}
+                    />
+                </div>}
             </div>
 
 
@@ -788,15 +792,13 @@ const ItemDetails = () => {
                                 title={TitlesAndDescriptions[flag].title}
                                 hoverText={TitlesAndDescriptions[flag].desc}
                                 value={reportContent[flag] ? reportContent[flag].length : 0}
-                                weight={1}
                                 onReview={() => setReview(flag)}
                                 key={index}
                             />
                         })
                     }
                 </div>
-                {/* Comment the following to get rid of the collapsible components */}
-                {/* <CustomCollapsible /> */}
+
                 {review && <ul className='d-flex flex-column align-items-center p-0' style={{ color: "black" }}>
                     <h5 className='fw-bold mt-3'>Reviewing {" "} {TitlesAndDescriptions[review].title}</h5>{
                         (reportContent[review] || []).map(
@@ -865,5 +867,31 @@ const buttonStyles = {
     position: 'relative',
     boxShadow: 'none',
 };
+
+const StyledWrapper = styled.div`
+position: relative;
+
+  .cssbuttons-io-button {
+    display: flex;
+    align-items: center;
+    font-family: inherit;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 17px;
+    padding: 0.8em 1.5em 0.8em 1.2em;
+    color: white;
+    background: #ad5389;
+    background: linear-gradient(
+      0deg,
+      rgb(174, 4, 4) 0%,
+
+      rgb(39, 18, 197) 100%
+    );
+    border: none;
+    box-shadow: 0 0.7em 1.5em -0.5em #4d36d0be;
+    letter-spacing: 0.05em;
+    border-radius: 20em;
+  }
+  `;
 
 export default ItemDetails;

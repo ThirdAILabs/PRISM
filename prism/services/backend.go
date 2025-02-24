@@ -25,7 +25,7 @@ type BackendService struct {
 func NewBackend(db *gorm.DB, oa openalex.KnowledgeBase, entityNdb search.NeuralDB, userAuth, adminAuth auth.TokenVerifier) *BackendService {
 	return &BackendService{
 		report: ReportService{
-			manager: reports.NewManager(db),
+			manager: reports.NewManager(db, reports.StaleReportThreshold),
 			db:      db,
 		},
 		search: SearchService{

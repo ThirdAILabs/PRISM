@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/openalex"
+	"prism/prism/reports"
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/search"
 	"prism/prism/triangulation"
@@ -41,10 +42,6 @@ type ReportProcessorOptions struct {
 
 // TODO(Nicholas): How to do cleanup for this, or just let it get cleaned up at the end of the process?
 func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
-	ackFlagCache, err := NewCache[cachedAckFlag]("ack_flags", filepath.Join(opts.WorkDir, "ack_flags.cache"))
-	if err != nil {
-		return nil, fmt.Errorf("error loading ack flag cache: %w", err)
-	}
 	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(opts.WorkDir, "authors.cache"))
 	if err != nil {
 		return nil, fmt.Errorf("error loading author cache: %w", err)
@@ -79,7 +76,6 @@ func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
 			&OpenAlexAcknowledgementIsEOC{
 				openalex:        openalex.NewRemoteKnowledgeBase(),
 				entityLookup:    opts.EntityLookup,
-				flagCache:       ackFlagCache,
 				authorCache:     authorCache,
 				extractor:       NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.WorkDir),
 				sussyBakas:      opts.SussyBakas,
@@ -96,12 +92,12 @@ func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
 	}, nil
 }
 
-func (processor *ReportProcessor) getWorkStream(report api.Report) (chan openalex.WorkBatch, error) {
+func (processor *ReportProcessor) getWorkStream(report reports.ReportUpdateTask) (chan openalex.WorkBatch, error) {
 	switch report.Source {
 	case api.OpenAlexSource:
-		return streamOpenAlexWorks(processor.openalex, report.AuthorId, report.StartYear, report.EndYear), nil
+		return streamOpenAlexWorks(processor.openalex, report.AuthorId, report.StartDate, report.EndDate), nil
 	case api.GoogleScholarSource:
-		return streamGScholarWorks(processor.openalex, report.AuthorName, report.AuthorId, report.StartYear, report.EndYear), nil
+		return streamGScholarWorks(processor.openalex, report.AuthorName, report.AuthorId, report.StartDate, report.EndDate), nil
 	// case api.UnstructuredSource:
 	// 	return streamUnstructuredWorks(processor.openalex, report.AuthorName, "what should the text be", report.StartYear, report.EndYear), nil
 	// case api.ScopusSource:
@@ -189,7 +185,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 	close(flagsCh)
 }
 
-func (processor *ReportProcessor) ProcessReport(report api.Report) (api.ReportContent, error) {
+func (processor *ReportProcessor) ProcessReport(report reports.ReportUpdateTask) (api.ReportContent, error) {
 	logger := slog.With("report_id", report.Id)
 
 	logger.Info("starting report processing")
