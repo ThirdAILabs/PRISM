@@ -67,7 +67,6 @@ Notes:
         "Aliases": ["Alias of the known entity that is matched"]
     },
     "RawAcknowledements": ["The raw text of the acknowledgement section of the work"],
-    "FromAcknowledgements": false,
     "Disclosed": false
 }
 ```
@@ -75,9 +74,8 @@ Notes:
 ## HighRiskFunders
 Notes:
 - There are two flaggers that can produce this flag.
-- The first flagger checks the funders/grants listed by openalex and compares them to known entities of concern. If this flag is produced by this flagger then the `Funders` field will be the list of concerning funders and the `FromAcknowledgements` flag will be false. 
-- The second flagger is the acknowledgements flagger. If the flag is produced by this flagger then the `Funders` field will contain the text of the acknowledgements and the `FromAcknowledgements` field will be true.
-
+- The first flagger checks the funders/grants listed by openalex and compares them to known entities of concern. If this flag is produced by this flagger then the `Funders` field will be the list of concerning funders and the `RawAcknowledements` field will be empty. 
+- The second flagger is the acknowledgements flagger. If the flag is produced by this flagger then the `Funders` field will contain the text of any of the matched entities that are found in government watch lists, and the `RawAcknowledements` field will contain the full text of the acknowledgements. The `Funders` list of could be empty while the `RawAcknowledements` list isn't if we detect an entity of concern but it doesn't occur on one of the lists of high risk entities. 
 ```json
 {
     "Message": "Description of flag",
@@ -89,6 +87,7 @@ Notes:
         "PublicationYear": 2018
     },
     "Funders": ["Funder name"],
+    "RawAcknowledements": ["acknowledgement text"],
     "Disclosed": false
 }
 ```

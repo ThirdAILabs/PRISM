@@ -255,11 +255,11 @@ const ItemDetails = () => {
                             return <li key={key}><a>{item}</a></li>
                         })}
                     </ul>
-                    {flag.Acknowledgements.length > 0 && (
+                    {flag.RawAcknowledements.length > 0 && (
                         <>
                             <p>Acknowledgements Text:</p>
                             <ul>
-                                {flag.Acknowledgements.map((item, index2) => {
+                                {flag.RawAcknowledements.map((item, index2) => {
                                     const key = `ack-${index} ${index2}`;
                                     return <li key={key}>{item}</li>
                                 })}

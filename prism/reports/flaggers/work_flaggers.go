@@ -461,10 +461,10 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			entityNames = append(entityNames, entity.Entity)
 		}
 		return &api.HighRiskFunderFlag{
-			Message:          message,
-			Work:             getWorkSummary(work),
-			Funders:          entityNames,
-			Acknowledgements: rawAcks,
+			Message:            message,
+			Work:               getWorkSummary(work),
+			Funders:            entityNames,
+			RawAcknowledements: rawAcks,
 		}
 	}
 }
