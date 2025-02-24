@@ -106,61 +106,36 @@ func generateCSV(report api.Report) ([]byte, error) {
 		{"End Year", fmt.Sprintf("%d", report.EndYear)},
 	}
 
-	for _, row := range rows {
-		if err := writer.Write(row); err != nil {
-			return nil, err
-		}
+	if err := writer.WriteAll(rows); err != nil {
+		return nil, err
 	}
 
 	if err := writer.Write([]string{}); err != nil {
 		return nil, err
 	}
 
-	if err := writer.Write([]string{"Content Flags", ""}); err != nil {
-		return nil, err
-	}
-
-	if err := writer.Write([]string{"Category", "Details"}); err != nil {
-		return nil, err
-	}
-
 	appendFlags := func(flags []api.Flag) error {
 		for _, flag := range flags {
-			details := flag.GetDetailFields()
-			var parts []string
-			for _, kv := range details {
-				parts = append(parts, fmt.Sprintf("%s: %s", kv.Key, kv.Value))
+			if err := writer.Write([]string{"Flag Title", flag.GetHeading()}); err != nil {
+				return err
 			}
-			detailStr := strings.Join(parts, "; ")
-			row := []string{flag.GetHeading(), detailStr}
-			if err := writer.Write(row); err != nil {
+			for _, kv := range flag.GetDetailFields() {
+				if err := writer.Write([]string{kv.Key, kv.Value}); err != nil {
+					return err
+				}
+			}
+			if err := writer.Write([]string{"", ""}); err != nil {
 				return err
 			}
 		}
 		return nil
 	}
 
-	content := report.Content
-	if err := appendFlags(castFlags(content.TalentContracts)); err != nil {
-		return nil, err
-	}
-	if err := appendFlags(castFlags(content.AssociationsWithDeniedEntities)); err != nil {
-		return nil, err
-	}
-	if err := appendFlags(castFlags(content.HighRiskFunders)); err != nil {
-		return nil, err
-	}
-	if err := appendFlags(castFlags(content.AuthorAffiliations)); err != nil {
-		return nil, err
-	}
-	if err := appendFlags(castFlags(content.PotentialAuthorAffiliations)); err != nil {
-		return nil, err
-	}
-	if err := appendFlags(castFlags(content.MiscHighRiskAssociations)); err != nil {
-		return nil, err
-	}
-	if err := appendFlags(castFlags(content.CoauthorAffiliations)); err != nil {
-		return nil, err
+	flagGroups := report.Content.GroupFlags()
+	for _, flags := range flagGroups {
+		if err := appendFlags(flags); err != nil {
+			return nil, err
+		}
 	}
 
 	writer.Flush()
@@ -168,14 +143,6 @@ func generateCSV(report api.Report) ([]byte, error) {
 		return nil, err
 	}
 	return buf.Bytes(), nil
-}
-
-func castFlags[T api.Flag](flags []T) []api.Flag {
-	result := make([]api.Flag, len(flags))
-	for i, flag := range flags {
-		result[i] = flag
-	}
-	return result
 }
 
 func generateExcel(report api.Report) ([]byte, error) {
@@ -441,6 +408,13 @@ func generatePDF(report api.Report) ([]byte, error) {
 	}
 	pdf.Ln(5)
 
+	flagGroups := report.Content.GroupFlags()
+
+	var flagTypes []string
+	for flagType := range flagGroups {
+		flagTypes = append(flagTypes, flagType)
+	}
+
 	currentPage := 3
 	var tocLines []string
 	var tocPages []struct {
@@ -448,60 +422,15 @@ func generatePDF(report api.Report) ([]byte, error) {
 		End   int
 	}
 
-	tc := castFlags(report.Content.TalentContracts)
-	if len(tc) > 0 {
-		start := currentPage
-		end := currentPage + len(tc) - 1
-		tocLines = append(tocLines, fmt.Sprintf("%s: %d - %d", tc[0].GetHeading(), start, end))
-		tocPages = append(tocPages, struct{ Start, End int }{start, end})
-		currentPage += len(tc)
-	}
-	assoc := castFlags(report.Content.AssociationsWithDeniedEntities)
-	if len(assoc) > 0 {
-		start := currentPage
-		end := currentPage + len(assoc) - 1
-		tocLines = append(tocLines, fmt.Sprintf("%s: %d - %d", assoc[0].GetHeading(), start, end))
-		tocPages = append(tocPages, struct{ Start, End int }{start, end})
-		currentPage += len(assoc)
-	}
-	hrf := castFlags(report.Content.HighRiskFunders)
-	if len(hrf) > 0 {
-		start := currentPage
-		end := currentPage + len(hrf) - 1
-		tocLines = append(tocLines, fmt.Sprintf("%s: %d - %d", hrf[0].GetHeading(), start, end))
-		tocPages = append(tocPages, struct{ Start, End int }{start, end})
-		currentPage += len(hrf)
-	}
-	aa := castFlags(report.Content.AuthorAffiliations)
-	if len(aa) > 0 {
-		start := currentPage
-		end := currentPage + len(aa) - 1
-		tocLines = append(tocLines, fmt.Sprintf("%s: %d - %d", aa[0].GetHeading(), start, end))
-		tocPages = append(tocPages, struct{ Start, End int }{start, end})
-		currentPage += len(aa)
-	}
-	paa := castFlags(report.Content.PotentialAuthorAffiliations)
-	if len(paa) > 0 {
-		start := currentPage
-		end := currentPage + len(paa) - 1
-		tocLines = append(tocLines, fmt.Sprintf("%s: %d - %d", paa[0].GetHeading(), start, end))
-		tocPages = append(tocPages, struct{ Start, End int }{start, end})
-		currentPage += len(paa)
-	}
-	mha := castFlags(report.Content.MiscHighRiskAssociations)
-	if len(mha) > 0 {
-		start := currentPage
-		end := currentPage + len(mha) - 1
-		tocLines = append(tocLines, fmt.Sprintf("%s: %d - %d", mha[0].GetHeading(), start, end))
-		tocPages = append(tocPages, struct{ Start, End int }{start, end})
-		currentPage += len(mha)
-	}
-	ca := castFlags(report.Content.CoauthorAffiliations)
-	if len(ca) > 0 {
-		start := currentPage
-		end := currentPage + len(ca) - 1
-		tocLines = append(tocLines, fmt.Sprintf("%s: %d - %d", ca[0].GetHeading(), start, end))
-		tocPages = append(tocPages, struct{ Start, End int }{start, end})
+	for _, flagType := range flagTypes {
+		flags := flagGroups[flagType]
+		if len(flags) > 0 {
+			start := currentPage
+			end := currentPage + len(flags) - 1
+			tocLines = append(tocLines, fmt.Sprintf("%s: %d - %d", flagType, start, end))
+			tocPages = append(tocPages, struct{ Start, End int }{start, end})
+			currentPage += len(flags)
+		}
 	}
 
 	pdf.AddPage()
@@ -553,39 +482,11 @@ func generatePDF(report api.Report) ([]byte, error) {
 		return nil
 	}
 
-	for _, flag := range tc {
-		if err := addFlagPage(flag); err != nil {
-			return nil, err
-		}
-	}
-	for _, flag := range assoc {
-		if err := addFlagPage(flag); err != nil {
-			return nil, err
-		}
-	}
-	for _, flag := range hrf {
-		if err := addFlagPage(flag); err != nil {
-			return nil, err
-		}
-	}
-	for _, flag := range aa {
-		if err := addFlagPage(flag); err != nil {
-			return nil, err
-		}
-	}
-	for _, flag := range paa {
-		if err := addFlagPage(flag); err != nil {
-			return nil, err
-		}
-	}
-	for _, flag := range mha {
-		if err := addFlagPage(flag); err != nil {
-			return nil, err
-		}
-	}
-	for _, flag := range ca {
-		if err := addFlagPage(flag); err != nil {
-			return nil, err
+	for _, group := range flagGroups {
+		for _, flag := range group {
+			if err := addFlagPage(flag); err != nil {
+				return nil, err
+			}
 		}
 	}
 

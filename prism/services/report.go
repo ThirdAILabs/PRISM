@@ -97,16 +97,7 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 	licenseId, err := licensing.VerifyLicenseForReport(s.db, userId)
 	if err != nil {
 		slog.Error("cannot create new report, unable to verify license", "error", err)
-		switch {
-		case errors.Is(err, licensing.ErrMissingLicense):
-			return nil, CodedError(err, http.StatusUnprocessableEntity)
-		case errors.Is(err, licensing.ErrExpiredLicense):
-			return nil, CodedError(err, http.StatusForbidden)
-		case errors.Is(err, licensing.ErrDeactivatedLicense):
-			return nil, CodedError(err, http.StatusForbidden)
-		default:
-			return nil, CodedError(err, http.StatusInternalServerError)
-		}
+		return nil, CodedError(err, errorStatus(err))
 	}
 
 	id, err := s.manager.CreateReport(licenseId, userId, params.AuthorId, params.AuthorName, params.Source, params.StartYear, params.EndYear)
@@ -131,14 +122,7 @@ func (s *ReportService) GetReport(r *http.Request) (any, error) {
 
 	report, err := s.manager.GetReport(userId, id)
 	if err != nil {
-		switch {
-		case errors.Is(err, reports.ErrReportNotFound):
-			return nil, CodedError(err, http.StatusNotFound)
-		case errors.Is(err, reports.ErrUserCannotAccessReport):
-			return nil, CodedError(err, http.StatusForbidden)
-		default:
-			return nil, CodedError(err, http.StatusInternalServerError)
-		}
+		return nil, CodedError(err, errorStatus(err))
 	}
 
 	return report, nil
@@ -158,18 +142,7 @@ func (s *ReportService) UseLicense(r *http.Request) (any, error) {
 	if err := s.db.Transaction(func(txn *gorm.DB) error {
 		return licensing.AddLicenseUser(txn, params.License, userId)
 	}); err != nil {
-		switch {
-		case errors.Is(err, licensing.ErrLicenseNotFound):
-			return nil, CodedError(err, http.StatusNotFound)
-		case errors.Is(err, licensing.ErrInvalidLicense):
-			return nil, CodedError(err, http.StatusUnprocessableEntity)
-		case errors.Is(err, licensing.ErrExpiredLicense):
-			return nil, CodedError(err, http.StatusForbidden)
-		case errors.Is(err, licensing.ErrDeactivatedLicense):
-			return nil, CodedError(err, http.StatusForbidden)
-		default:
-			return nil, CodedError(err, http.StatusInternalServerError)
-		}
+		return nil, CodedError(err, errorStatus(err))
 	}
 
 	return nil, nil
@@ -258,22 +231,14 @@ func (s *ReportService) DownloadReport(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	reportIdParam := chi.URLParam(r, "report_id")
-	reportId, err := uuid.Parse(reportIdParam)
+	reportId, err := URLParamUUID(r, "report_id")
 	if err != nil {
-		return nil, CodedError(fmt.Errorf("invalid report id '%v': %w", reportIdParam, err), http.StatusBadRequest)
+		return nil, CodedError(err, http.StatusBadRequest)
 	}
 
 	report, err := s.manager.GetReport(userId, reportId)
 	if err != nil {
-		switch {
-		case errors.Is(err, reports.ErrReportNotFound):
-			return nil, CodedError(err, http.StatusNotFound)
-		case errors.Is(err, reports.ErrUserCannotAccessReport):
-			return nil, CodedError(err, http.StatusForbidden)
-		default:
-			return nil, CodedError(err, http.StatusInternalServerError)
-		}
+		return nil, CodedError(err, errorStatus(err))
 	}
 
 	if report.Status != schema.ReportCompleted {

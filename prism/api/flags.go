@@ -297,6 +297,35 @@ type ReportContent struct {
 	CoauthorAffiliations           []*CoauthorAffiliationFlag
 }
 
+func castFlags[T Flag](flags []T) []Flag {
+	result := make([]Flag, len(flags))
+	for i, flag := range flags {
+		result[i] = flag
+	}
+	return result
+}
+
+func (rc *ReportContent) GroupFlags() map[string][]Flag {
+	groups := make(map[string][]Flag)
+
+	addFlags := func(flags []Flag) {
+		for _, flag := range flags {
+			key := flag.GetHeading()
+			groups[key] = append(groups[key], flag)
+		}
+	}
+
+	addFlags(castFlags(rc.TalentContracts))
+	addFlags(castFlags(rc.AssociationsWithDeniedEntities))
+	addFlags(castFlags(rc.HighRiskFunders))
+	addFlags(castFlags(rc.AuthorAffiliations))
+	addFlags(castFlags(rc.PotentialAuthorAffiliations))
+	addFlags(castFlags(rc.MiscHighRiskAssociations))
+	addFlags(castFlags(rc.CoauthorAffiliations))
+
+	return groups
+}
+
 //The following flags are unused by the frontend, but they are kept in case we
 // want to have them in the future.
 
