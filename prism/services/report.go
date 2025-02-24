@@ -1,7 +1,6 @@
 package services
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -15,10 +14,8 @@ import (
 	"prism/prism/services/licensing"
 	"strings"
 
-	"github.com/bbalet/stopwords"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/ledongthuc/pdf"
 	"gorm.io/gorm"
 )
 
@@ -34,6 +31,7 @@ func (s *ReportService) Routes() chi.Router {
 	r.Post("/create", WrapRestHandler(s.CreateReport))
 	r.Get("/{report_id}", WrapRestHandler(s.GetReport))
 	r.Post("/{report_id}/check-disclosure", WrapRestHandler(s.CheckDisclosure))
+	r.Get("/{report_id}/download", s.DownloadReport)
 
 	r.Post("/activate-license", WrapRestHandler(s.UseLicense))
 
@@ -83,16 +81,7 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 	licenseId, err := licensing.VerifyLicenseForReport(s.db, userId)
 	if err != nil {
 		slog.Error("cannot create new report, unable to verify license", "error", err)
-		switch {
-		case errors.Is(err, licensing.ErrMissingLicense):
-			return nil, CodedError(err, http.StatusUnprocessableEntity)
-		case errors.Is(err, licensing.ErrExpiredLicense):
-			return nil, CodedError(err, http.StatusForbidden)
-		case errors.Is(err, licensing.ErrDeactivatedLicense):
-			return nil, CodedError(err, http.StatusForbidden)
-		default:
-			return nil, CodedError(err, http.StatusInternalServerError)
-		}
+		return nil, CodedError(err, licensingErrorStatus(err))
 	}
 
 	id, err := s.manager.CreateReport(licenseId, userId, params.AuthorId, params.AuthorName, params.Source)
@@ -117,14 +106,7 @@ func (s *ReportService) GetReport(r *http.Request) (any, error) {
 
 	report, err := s.manager.GetReport(userId, id)
 	if err != nil {
-		switch {
-		case errors.Is(err, reports.ErrReportNotFound):
-			return nil, CodedError(err, http.StatusNotFound)
-		case errors.Is(err, reports.ErrUserCannotAccessReport):
-			return nil, CodedError(err, http.StatusForbidden)
-		default:
-			return nil, CodedError(err, http.StatusInternalServerError)
-		}
+		return nil, CodedError(err, reportErrorStatus(err))
 	}
 
 	return report, nil
@@ -144,41 +126,10 @@ func (s *ReportService) UseLicense(r *http.Request) (any, error) {
 	if err := s.db.Transaction(func(txn *gorm.DB) error {
 		return licensing.AddLicenseUser(txn, params.License, userId)
 	}); err != nil {
-		switch {
-		case errors.Is(err, licensing.ErrLicenseNotFound):
-			return nil, CodedError(err, http.StatusNotFound)
-		case errors.Is(err, licensing.ErrInvalidLicense):
-			return nil, CodedError(err, http.StatusUnprocessableEntity)
-		case errors.Is(err, licensing.ErrExpiredLicense):
-			return nil, CodedError(err, http.StatusForbidden)
-		case errors.Is(err, licensing.ErrDeactivatedLicense):
-			return nil, CodedError(err, http.StatusForbidden)
-		default:
-			return nil, CodedError(err, http.StatusInternalServerError)
-		}
+		return nil, CodedError(err, licensingErrorStatus(err))
 	}
 
 	return nil, nil
-}
-
-func updateFlagDisclosure(flag api.Flag, allFileTexts []string) {
-	entities := filterTokens(flag.GetEntities())
-
-DisclosureCheck:
-	for _, entity := range entities {
-		for _, txt := range allFileTexts {
-			if strings.Contains(strings.ToLower(txt), entity) {
-				flag.MarkDisclosed()
-				break DisclosureCheck
-			}
-		}
-	}
-}
-
-func updateDisclosures[T api.Flag](flags []T, allTexts []string) {
-	for _, flag := range flags {
-		updateFlagDisclosure(flag, allTexts)
-	}
 }
 
 func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
@@ -247,57 +198,72 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 	return report, nil
 }
 
-func parseFileContent(ext string, fileBytes []byte) (string, error) {
-	switch ext {
-	case ".txt":
-		return string(fileBytes), nil
-	case ".pdf":
-		return extractTextFromPDF(fileBytes)
-	default:
-		return "", fmt.Errorf("unsupported file extension: %s", ext)
-	}
-}
-
-func extractTextFromPDF(fileBytes []byte) (string, error) {
-	reader, err := pdf.NewReader(bytes.NewReader(fileBytes), int64(len(fileBytes)))
+func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
+	userId, err := auth.GetUserId(r)
 	if err != nil {
-		return "", err
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	var textBuilder strings.Builder
-	numPages := reader.NumPage()
-	for i := 1; i <= numPages; i++ {
-		page := reader.Page(i)
-		pageText, err := page.GetPlainText(nil)
+	reportId, err := URLParamUUID(r, "report_id")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	report, err := s.manager.GetReport(userId, reportId)
+	if err != nil {
+		http.Error(w, err.Error(), reportErrorStatus(err))
+		return
+	}
+
+	if report.Status != schema.ReportCompleted {
+		http.Error(w, "cannot download report unless report status is complete", http.StatusUnprocessableEntity)
+		return
+	}
+
+	format := r.URL.Query().Get("format")
+	if format == "" {
+		format = "csv"
+	}
+
+	var fileBytes []byte
+	var contentType, filename string
+	switch format {
+	case "csv":
+		fileBytes, err = generateCSV(report)
 		if err != nil {
-			return "", err
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
-		textBuilder.WriteString(pageText)
+		contentType = "text/csv"
+		filename = "report.csv"
+	case "pdf":
+		fileBytes, err = generatePDF(report)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		contentType = "application/pdf"
+		filename = "report.pdf"
+	case "excel", "xlsx":
+		fileBytes, err = generateExcel(report)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+		filename = "report.xlsx"
+	default:
+		http.Error(w, "unsupported format", http.StatusBadRequest)
+		return
 	}
 
-	return textBuilder.String(), nil
-}
-
-func removeStopwords(text string) string {
-	return stopwords.CleanString(text, "en", false)
-}
-
-func filterTokens(tokens []string) []string {
-	var filtered []string
-	for _, token := range tokens {
-		token = strings.TrimSpace(token)
-		if token == "" {
-			continue
-		}
-		// If the token contains spaces, assume it’s a multi-word phrase and keep it as-is.
-		if strings.Contains(token, " ") {
-			filtered = append(filtered, strings.ToLower(token))
-		} else {
-			cleaned := removeStopwords(token)
-			if cleaned != "" {
-				filtered = append(filtered, cleaned)
-			}
-		}
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Cache-Control", "no-store")
+	if _, err := w.Write(fileBytes); err != nil {
+		slog.Error("error writing file bytes", "error", err)
+		http.Error(w, "error writing file", http.StatusInternalServerError)
 	}
-	return filtered
 }

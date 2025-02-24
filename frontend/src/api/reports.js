@@ -43,24 +43,12 @@ export const reportService = {
             const response = await axiosInstance.get(
                 `${API_ROUTES.REPORTS.DOWNLOAD(reportId)}?format=${format}`,
                 {
-                    responseType: 'json'
+                    responseType: 'blob'
                 }
             );
 
-            const { Content: encodedContent } = response.data;
-            if (!encodedContent) {
-                throw new Error('No content found in response');
-            }
-
-            // Decode base64 content
-            const decodedContent = atob(encodedContent);
-            const uint8Array = new Uint8Array(decodedContent.length);
-            for (let i = 0; i < decodedContent.length; i++) {
-                uint8Array[i] = decodedContent.charCodeAt(i);
-            }
-
             // Create blob and download
-            const blob = new Blob([uint8Array]);
+            const blob = response.data;
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;

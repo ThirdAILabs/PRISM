@@ -2,6 +2,7 @@ package services_test
 
 import (
 	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -24,6 +25,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/xuri/excelize/v2"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -422,6 +424,153 @@ func TestCheckDisclosure(t *testing.T) {
 	}
 	if updatedReport.Content.AssociationsWithDeniedEntities[0].Disclosed {
 		t.Fatal("expected AssociationWithDeniedEntity flag to remain undisclosed")
+	}
+}
+
+func TestDownloadReportAllFormats(t *testing.T) {
+	backend, db := createBackend(t)
+
+	admin := newAdmin()
+	user := newUser()
+
+	license, err := createLicense(backend, "download-license", admin)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := activateLicense(backend, user, license.License); err != nil {
+		t.Fatal(err)
+	}
+
+	reportResp, err := createReport(backend, user, "download-report")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	manager := reports.NewManager(db, reports.StaleReportThreshold)
+
+	content := api.ReportContent{
+		TalentContracts: []*api.TalentContractFlag{
+			{
+				DisclosableFlag: api.DisclosableFlag{},
+				Message:         "Test Talent Contract",
+				Work: api.WorkSummary{
+					WorkId:          "work-1",
+					DisplayName:     "Test Work",
+					WorkUrl:         "http://example.com/work-1",
+					OaUrl:           "http://example.com/oa/work-1",
+					PublicationDate: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
+				},
+				RawAcknowledements: []string{"flag-content"},
+			},
+		},
+		AssociationsWithDeniedEntities: []*api.AssociationWithDeniedEntityFlag{},
+		HighRiskFunders:                []*api.HighRiskFunderFlag{},
+		AuthorAffiliations:             []*api.AuthorAffiliationFlag{},
+		PotentialAuthorAffiliations:    []*api.PotentialAuthorAffiliationFlag{},
+		MiscHighRiskAssociations:       []*api.MiscHighRiskAssociationFlag{},
+		CoauthorAffiliations:           []*api.CoauthorAffiliationFlag{},
+	}
+
+	nextReport, err := manager.GetNextReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if nextReport == nil {
+		t.Fatal("next report should not be nil")
+	}
+
+	if err := manager.UpdateReport(nextReport.Id, schema.ReportCompleted, time.Now(), content); err != nil {
+		t.Fatal(err)
+	}
+
+	formats := []string{"csv", "pdf", "excel"}
+	for _, format := range formats {
+		endpoint := fmt.Sprintf("/report/%s/download?format=%s", reportResp.Id.String(), format)
+		req := httptest.NewRequest("GET", endpoint, nil)
+		req.Header.Add("Authorization", "Bearer "+user)
+		w := httptest.NewRecorder()
+		backend.ServeHTTP(w, req)
+		res := w.Result()
+		defer res.Body.Close()
+
+		fileBytes, err := io.ReadAll(res.Body)
+		if err != nil {
+			t.Fatalf("error reading response body for format %s: %v", format, err)
+		}
+
+		var expectedContentType, expectedFilename string
+		switch format {
+		case "csv":
+			expectedContentType = "text/csv"
+			expectedFilename = "report.csv"
+		case "pdf":
+			expectedContentType = "application/pdf"
+			expectedFilename = "report.pdf"
+		case "excel":
+			expectedContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+			expectedFilename = "report.xlsx"
+		}
+
+		if ct := res.Header.Get("Content-Type"); ct != expectedContentType {
+			t.Fatalf("expected content type %s for format %s, got %s", expectedContentType, format, ct)
+		}
+		contentDisp := res.Header.Get("Content-Disposition")
+		if !strings.Contains(contentDisp, expectedFilename) {
+			t.Fatalf("expected filename '%s' in Content-Disposition for format %s, got %s", expectedFilename, format, contentDisp)
+		}
+
+		if len(fileBytes) == 0 {
+			t.Fatalf("downloaded file for format %s is empty", format)
+		}
+
+		switch format {
+		case "pdf":
+			if !strings.HasPrefix(string(fileBytes), "%PDF") {
+				t.Fatalf("downloaded file for format %s does not appear to be a valid PDF", format)
+			}
+		case "excel":
+			f, err := excelize.OpenReader(bytes.NewReader(fileBytes))
+			if err != nil {
+				t.Fatalf("error opening excel file for format %s: %v", format, err)
+			}
+			sheets := f.GetSheetList()
+			found := false
+			for _, sheet := range sheets {
+				if sheet == "Talent Contracts" {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Fatalf("excel file does not contain sheet 'Talent Contracts'; sheets: %v", sheets)
+			}
+
+			val, err := f.GetCellValue("Talent Contracts", "B2")
+			if err != nil {
+				t.Fatalf("error reading cell value from 'Talent Contracts' sheet: %v", err)
+			}
+			if !strings.Contains(val, "Test Work") {
+				t.Fatalf("expected flag message 'Test Work' in cell B2, got %s", val)
+			}
+		case "csv":
+			reader := csv.NewReader(bytes.NewReader(fileBytes))
+			records, err := reader.ReadAll()
+			if err != nil {
+				t.Fatalf("error reading CSV for format %s: %v", format, err)
+			}
+			if len(records) == 0 {
+				t.Fatalf("no records found in CSV for format %s", format)
+			}
+			expectedHeader := []string{"Field", "Value"}
+			for i, v := range expectedHeader {
+				if records[0][i] != v {
+					t.Fatalf("expected header %v, got %v", expectedHeader, records[0])
+				}
+			}
+			if len(records) < 2 || !strings.Contains(records[1][1], reportResp.Id.String()) {
+				t.Fatalf("expected report id %s in CSV summary, got %v", reportResp.Id.String(), records[1])
+			}
+		}
 	}
 }
 
