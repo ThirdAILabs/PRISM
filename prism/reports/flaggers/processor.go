@@ -41,10 +41,6 @@ type ReportProcessorOptions struct {
 
 // TODO(Nicholas): How to do cleanup for this, or just let it get cleaned up at the end of the process?
 func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
-	ackFlagCache, err := NewCache[cachedAckFlag]("ack_flags", filepath.Join(opts.WorkDir, "ack_flags.cache"))
-	if err != nil {
-		return nil, fmt.Errorf("error loading ack flag cache: %w", err)
-	}
 	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(opts.WorkDir, "authors.cache"))
 	if err != nil {
 		return nil, fmt.Errorf("error loading author cache: %w", err)
@@ -79,7 +75,6 @@ func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
 			&OpenAlexAcknowledgementIsEOC{
 				openalex:     openalex.NewRemoteKnowledgeBase(),
 				entityLookup: opts.EntityLookup,
-				flagCache:    ackFlagCache,
 				authorCache:  authorCache,
 				extractor:    NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.WorkDir),
 				sussyBakas:   opts.SussyBakas,

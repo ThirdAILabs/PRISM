@@ -378,12 +378,6 @@ func TestProcessorAcknowledgements(t *testing.T) {
 
 	testDir := t.TempDir()
 
-	ackFlagCache, err := NewCache[cachedAckFlag]("ack_flags", filepath.Join(testDir, "ack_flags.cache"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer ackFlagCache.Close()
-
 	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(testDir, "authors.cache"))
 	if err != nil {
 		t.Fatal(err)
@@ -408,7 +402,6 @@ func TestProcessorAcknowledgements(t *testing.T) {
 			&OpenAlexAcknowledgementIsEOC{
 				openalex:     openalex.NewRemoteKnowledgeBase(),
 				entityLookup: entityStore,
-				flagCache:    ackFlagCache,
 				authorCache:  authorCache,
 				extractor:    NewGrobidExtractor(ackCache, grobidEndpoint, testDir),
 				sussyBakas:   eoc.LoadSussyBakas(),
