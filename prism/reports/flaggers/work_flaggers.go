@@ -285,12 +285,13 @@ type cachedAckFlag struct {
 }
 
 type OpenAlexAcknowledgementIsEOC struct {
-	openalex     openalex.KnowledgeBase
-	entityLookup *EntityStore
-	flagCache    DataCache[cachedAckFlag]
-	authorCache  DataCache[openalex.Author]
-	extractor    AcknowledgementsExtractor
-	sussyBakas   []string
+	openalex        openalex.KnowledgeBase
+	entityLookup    *EntityStore
+	flagCache       DataCache[cachedAckFlag]
+	authorCache     DataCache[openalex.Author]
+	extractor       AcknowledgementsExtractor
+	sussyBakas      []string
+	triangulationDB *triangulation.TriangulationDB
 }
 
 func (flagger *OpenAlexAcknowledgementIsEOC) Name() string {
@@ -423,8 +424,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
 	logger *slog.Logger, acknowledgements []Acknowledgement, allAuthorNames []string,
 ) (bool, error) {
-	db := triangulation.GetTriangulationDB()
-	if db == nil {
+	if flagger.triangulationDB.GetTriangulationDB() == nil {
 		logger.Error("triangulation db is not set")
 		return false, fmt.Errorf("triangulation db is not set")
 	}
@@ -439,33 +439,22 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
 		}
 	}
 
-	var numPapersToTotalPapersRatio []float64
-
 	for _, grantNumber := range grantNumbers {
 		for _, authorName := range allAuthorNames {
-			result, err := triangulation.GetAuthorFundCodeResult(db, authorName, grantNumber)
+			result, err := flagger.triangulationDB.GetAuthorFundCodeResult(authorName, grantNumber)
 			if err != nil {
 				logger.Error("error executing triangulation query", "error", err)
 				return false, fmt.Errorf("error executing triangulation query: %w", err)
 			}
 			if result != nil {
-				numPapersToTotalPapersRatio = append(numPapersToTotalPapersRatio, float64(result.NumPapersByAuthor)/float64(result.NumPapers))
-				logger.Info("result from triangulation db", "num_papers_by_author", result.NumPapersByAuthor, "num_papers", result.NumPapers, "numPapersByAuthor/NumPapers", float64(result.NumPapersByAuthor)/float64(result.NumPapers))
+				if float64(result.NumPapersByAuthor)/float64(result.NumPapers) >= 0.4 {
+					return true, nil
+				}
 			}
 		}
 	}
 
-	isPrimaryRecipient := false
-	if len(numPapersToTotalPapersRatio) > 0 {
-		for _, value := range numPapersToTotalPapersRatio {
-			if value >= 0.4 {
-				isPrimaryRecipient = true
-				break
-			}
-		}
-	}
-
-	return isPrimaryRecipient, nil
+	return false, nil
 }
 
 func flagCacheKey(workId string, targetAuthorIds []string) string {

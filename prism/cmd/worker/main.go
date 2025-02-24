@@ -82,9 +82,10 @@ func main() {
 	defer entityStore.Free()
 
 	opts := flaggers.ReportProcessorOptions{
-		UniversityNDB: flaggers.BuildUniversityNDB(config.NDBData.University, filepath.Join(ndbDir, "university.ndb")),
-		DocNDB:        flaggers.BuildDocNDB(config.NDBData.Doc, filepath.Join(ndbDir, "doc.ndb")),
-		AuxNDB:        flaggers.BuildAuxNDB(config.NDBData.Aux, filepath.Join(ndbDir, "aux.ndb")),
+		UniversityNDB:   flaggers.BuildUniversityNDB(config.NDBData.University, filepath.Join(ndbDir, "university.ndb")),
+		DocNDB:          flaggers.BuildDocNDB(config.NDBData.Doc, filepath.Join(ndbDir, "doc.ndb")),
+		AuxNDB:          flaggers.BuildAuxNDB(config.NDBData.Aux, filepath.Join(ndbDir, "aux.ndb")),
+		TriangulationDB: triangulation.CreateTriangulationDB(cmd.InitDb(config.FundcodeTriangulationUri)),
 
 		EntityLookup: entityStore,
 
@@ -104,8 +105,6 @@ func main() {
 	}
 
 	db := cmd.InitDb(config.PostgresUri)
-
-	triangulation.SetTriangulationDB(cmd.InitDb(config.FundcodeTriangulationUri))
 
 	reportManager := reports.NewManager(db)
 

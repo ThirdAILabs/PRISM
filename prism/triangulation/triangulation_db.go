@@ -9,31 +9,28 @@ import (
 	"gorm.io/gorm"
 )
 
-var triangulationDB *gorm.DB
-
-func SetTriangulationDB(db *gorm.DB) {
-	triangulationDB = db
+type TriangulationDB struct {
+	db *gorm.DB
 }
 
-func GetTriangulationDB() *gorm.DB {
-	return triangulationDB
+func (t *TriangulationDB) GetTriangulationDB() *gorm.DB {
+	return t.db
 }
 
-func GetAuthorFundCodeResult(db *gorm.DB, authorName, fundCode string) (*AuthorFundCodeResult, error) {
+func (t *TriangulationDB) GetAuthorFundCodeResult(authorName, fundCode string) (*AuthorFundCodeResult, error) {
 	hash := sha256.New()
 	hash.Write([]byte(fundCode))
 	fundCodeHash := hex.EncodeToString(hash.Sum(nil))
 
 	var result AuthorFundCodeResult
 
-	err := db.Raw(`
-        SELECT a.numpapersbyauthor, f.numpapers
-        FROM authors a
-        JOIN fundcodes f 
-        ON a.fundcodes_id = f.id
-        WHERE a.authorname = ? AND a.fund_code_hash = ?
-        LIMIT 1
-    `, authorName, fundCodeHash).Scan(&result).Error
+	err := t.db.Table("authors a").
+		Select("a.numpapersbyauthor, f.numpapers").
+		Joins("JOIN fundcodes f ON a.fundcodes_id = f.id").
+		Where("a.authorname = ? AND a.fund_code_hash = ?", authorName, fundCodeHash).
+		Limit(1).
+		Scan(&result).Error
+
 	if err != nil {
 		slog.Error("error executing fundcode triangulation query", "error", err)
 		return nil, fmt.Errorf("error executing query: %w", err)
@@ -45,4 +42,8 @@ func GetAuthorFundCodeResult(db *gorm.DB, authorName, fundCode string) (*AuthorF
 	}
 
 	return &result, nil
+}
+
+func CreateTriangulationDB(db *gorm.DB) *TriangulationDB {
+	return &TriangulationDB{db: db}
 }
