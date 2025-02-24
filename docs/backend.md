@@ -201,17 +201,12 @@ __Example Request__:
   - `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` for Excel.
 - **Content-Disposition:**
   - `attachment; filename="report.<ext>"` where `<ext>` is `csv`, `pdf`, or `xlsx` depending on the format.
+- **Cache-Control:**
+  - `no-store`
 
 **Response Body:**
 
-The response contains the generated report file.
-```
-{
-  "Content": "JVBERi0xLjQKJcTl8uXrp/Og0MTGCjEgMCBvYmoKPDwv...",
-  "ContentType": "application/pdf",
-  "Filename": "report.pdf"
-}
-```
+The body contains the raw bytes of the generated report file.
 
 # License Endpoints
 
