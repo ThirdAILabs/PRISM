@@ -103,8 +103,6 @@ func generateCSV(report api.Report) ([]byte, error) {
 		{"Report ID", report.Id.String()},
 		{"Created At", report.CreatedAt.Format(time.RFC3339)},
 		{"Author Name", report.AuthorName},
-		{"Start Year", fmt.Sprintf("%d", report.StartYear)},
-		{"End Year", fmt.Sprintf("%d", report.EndYear)},
 	}
 
 	if err := writer.WriteAll(rows); err != nil {
@@ -151,8 +149,6 @@ func generateExcel(report api.Report) ([]byte, error) {
 		{"Report ID", report.Id.String()},
 		{"Created At", report.CreatedAt.Format(time.RFC3339)},
 		{"Author Name", report.AuthorName},
-		{"Start Year", report.StartYear},
-		{"End Year", report.EndYear},
 	}
 
 	for i, row := range summaryData {
@@ -269,8 +265,6 @@ func generatePDF(report api.Report) ([]byte, error) {
 		{"Report ID", report.Id.String()},
 		{"Created At", report.CreatedAt.Format(time.RFC3339)},
 		{"Author Name", report.AuthorName},
-		{"Start Year", fmt.Sprintf("%d", report.StartYear)},
-		{"End Year", fmt.Sprintf("%d", report.EndYear)},
 	}
 	pdf.SetFont("Arial", "", 12)
 

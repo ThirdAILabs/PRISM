@@ -23,7 +23,7 @@ func getWorkSummary(w openalex.Work) api.WorkSummary {
 		DisplayName:     w.DisplayName,
 		WorkUrl:         w.WorkUrl,
 		OaUrl:           w.OaUrl,
-		PublicationYear: w.PublicationYear,
+		PublicationDate: w.PublicationDate,
 	}
 }
 
@@ -274,17 +274,9 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works
 	return flags, nil
 }
 
-type cachedAckFlag struct {
-	Flagged  bool
-	Message  string
-	Entities []api.AcknowledgementEntity
-	RawAcks  []string
-}
-
 type OpenAlexAcknowledgementIsEOC struct {
 	openalex     openalex.KnowledgeBase
 	entityLookup *EntityStore
-	flagCache    DataCache[cachedAckFlag]
 	authorCache  DataCache[openalex.Author]
 	extractor    AcknowledgementsExtractor
 	sussyBakas   []string
@@ -417,10 +409,6 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 	return flagged, flaggedEntities, message, nil
 }
 
-func flagCacheKey(workId string, targetAuthorIds []string) string {
-	return fmt.Sprintf("%s;%v", workId, targetAuthorIds)
-}
-
 var talentPrograms = []string{
 	"Department of Defense - Foreign Talent Programs that Pose a Threat to National Security Interests of the United States",
 	"Foreign Talent Recruitment Programs",
@@ -484,15 +472,6 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 
 		workIdToWork[workId] = work
 
-		if cacheEntry := flagger.flagCache.Lookup(flagCacheKey(workId, targetAuthorIds)); cacheEntry != nil {
-			logger.Info("found cached entry for work", "work_id", work.WorkId)
-			if cacheEntry.Flagged {
-				flags = append(flags, createAcknowledgementFlag(work, cacheEntry.Message, cacheEntry.Entities, cacheEntry.RawAcks))
-				logger.Info("cached entry contains flag", "work_id", workId)
-			}
-			continue
-		}
-
 		if work.DownloadUrl == "" {
 			logger.Info("work has no download url", "work_id", workId)
 			continue
@@ -551,26 +530,12 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 				})
 			}
 
-			msg := fmt.Sprintf("%s\n%s", message, strings.Join(ackTexts, "\n"))
-			flag := createAcknowledgementFlag(
+			flags = append(flags, createAcknowledgementFlag(
 				workIdToWork[acks.Result.WorkId],
 				fmt.Sprintf("%s\n%s", message, strings.Join(ackTexts, "\n")),
 				entities,
 				ackTexts,
-			)
-
-			flagger.flagCache.Update(flagCacheKey(acks.Result.WorkId, targetAuthorIds), cachedAckFlag{
-				Flagged:  true,
-				Message:  msg,
-				Entities: entities,
-				RawAcks:  ackTexts,
-			})
-
-			flags = append(flags, flag)
-		} else {
-			flagger.flagCache.Update(flagCacheKey(acks.Result.WorkId, targetAuthorIds), cachedAckFlag{
-				Flagged: false,
-			})
+			))
 		}
 
 		workLogger.Info("processed acknowledgements for work")

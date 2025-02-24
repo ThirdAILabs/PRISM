@@ -1,156 +1,310 @@
 package reports_test
 
 import (
+	"prism/prism/api"
 	"prism/prism/reports"
 	"prism/prism/schema"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-func TestReportManager(t *testing.T) {
+func setup(t *testing.T) *reports.ReportManager {
 	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := db.AutoMigrate(&schema.Report{}, &schema.ReportContent{}, &schema.LicenseUsage{}); err != nil {
+	if err := db.AutoMigrate(&schema.Report{}, &schema.ReportContent{}, &schema.UserReport{}, &schema.LicenseUsage{}); err != nil {
 		t.Fatal(err)
 	}
 
-	manager := reports.NewManager(db)
+	return reports.NewManager(db, time.Second)
+}
+
+func checkNextReport(t *testing.T, next *reports.ReportUpdateTask, authorId, authorName, source string, startDate, endDate time.Time) {
+	if next == nil ||
+		next.AuthorId != authorId ||
+		next.AuthorName != authorName ||
+		next.Source != source ||
+		next.StartDate.Sub(startDate).Abs() > 100*time.Millisecond ||
+		next.EndDate.Sub(endDate).Abs() > 100*time.Millisecond {
+		t.Fatalf("incorrect next report: %v", next)
+	}
+}
+
+func checkReport(t *testing.T, manager *reports.ReportManager, userId, reportId uuid.UUID, authorId, authorName, source, status string, nflags int) {
+	report, err := manager.GetReport(userId, reportId)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if report.Id != reportId ||
+		report.AuthorId != authorId ||
+		report.AuthorName != authorName ||
+		report.Source != source ||
+		report.Status != status ||
+		len(report.Content.HighRiskFunders) != nflags {
+		t.Fatalf("incorrect report: %v", report)
+	}
+}
+
+func checkNoNextReport(t *testing.T, manager *reports.ReportManager) {
+	next, err := manager.GetNextReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if next != nil {
+		t.Fatal("should be no report")
+	}
+}
+
+func TestCreateGetReports(t *testing.T) {
+	// This test checks report creation and access, as well as verifing that the report
+	// processing queue behaves as expected. It also verifies the caching behavior,
+	// it checks that reports content can be reused when possible, and also verifies
+	// that reports are requeued when they become stale and are accessed.
+	manager := setup(t)
 
 	user1, user2 := uuid.New(), uuid.New()
-
-	{
-		reports, err := manager.ListReports(user1)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(reports) != 0 {
-			t.Fatal("should be no reports")
-		}
-	}
-
 	license := uuid.New()
 
-	report1, err := manager.CreateReport(license, user1, "1", "author1", "openalex", 1, 3)
+	checkNoNextReport(t, manager)
+
+	reportId1, err := manager.CreateReport(license, user1, "1", "author1", api.OpenAlexSource)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	report2, err := manager.CreateReport(license, user2, "2", "author2", "openalex", 2, 4)
+	reportId2, err := manager.CreateReport(license, user2, "2", "author2", api.GoogleScholarSource)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	report3, err := manager.CreateReport(license, user1, "3", "author3", "google-scholar", 3, 5)
+	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "queued", 0)
+
+	next1, err := manager.GetNextReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	report1End := time.Now()
+	checkNextReport(t, next1, "1", "author1", api.OpenAlexSource, reports.EarliestReportDate, report1End)
+
+	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "in-progress", 0)
+
+	if err := manager.UpdateReport(next1.Id, "complete", next1.EndDate, api.ReportContent{HighRiskFunders: []*api.HighRiskFunderFlag{{}}}); err != nil {
+		t.Fatal(err)
+	}
+
+	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "complete", 1)
+
+	next2, err := manager.GetNextReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	report2End := time.Now()
+	checkNextReport(t, next2, "2", "author2", api.GoogleScholarSource, reports.EarliestReportDate, report2End)
+
+	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "in-progress", 0)
+
+	if err := manager.UpdateReport(next2.Id, "complete", next2.EndDate, api.ReportContent{HighRiskFunders: []*api.HighRiskFunderFlag{{}}}); err != nil {
+		t.Fatal(err)
+	}
+
+	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "complete", 1)
+
+	// Both reports should be removed from queue now
+	checkNoNextReport(t, manager)
+
+	// Check that report access does not queue report update since we are under threshold
+	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "complete", 1)
+	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "complete", 1)
+	checkNoNextReport(t, manager)
+
+	// Check that reports are reused
+	reportId3, err := manager.CreateReport(license, user1, "2", "author2", api.GoogleScholarSource)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Content should be reused so report is immediately available
+	checkReport(t, manager, user1, reportId3, "2", "author2", api.GoogleScholarSource, "complete", 1)
+	// Check that no report update is queued
+	checkNoNextReport(t, manager)
+
+	// This is to ensure reports are stale
+	time.Sleep(time.Second)
+
+	// Accessing a stale report should add it back to the queue, it should still have 1 flag though
+	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "queued", 1)
+	// Perform multiple accesses to ensure it is only added once
+	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "queued", 1)
+
+	next3, err := manager.GetNextReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkNextReport(t, next3, "2", "author2", api.GoogleScholarSource, report2End, time.Now())
+	// Check report was only queued once
+	checkNoNextReport(t, manager)
+
+	// Verify that accessing report while it's in progress doesn't queue it again
+	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "in-progress", 1)
+	checkNoNextReport(t, manager)
+
+	reportUpdate := api.ReportContent{HighRiskFunders: []*api.HighRiskFunderFlag{{Work: api.WorkSummary{WorkId: "2"}}}}
+	if err := manager.UpdateReport(next3.Id, "complete", next3.EndDate, reportUpdate); err != nil {
+		t.Fatal(err)
+	}
+
+	// Check that report is updated
+	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "complete", 2)
+
+	// Create a new report from an old report and ensure that it is queued
+	reportId4, err := manager.CreateReport(license, user2, "1", "author1", api.OpenAlexSource)
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkReport(t, manager, user2, reportId4, "1", "author1", api.OpenAlexSource, "queued", 1)
+
+	// Check that the original report is being updated as well
+	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "queued", 1)
+
+	next4, err := manager.GetNextReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkNextReport(t, next4, "1", "author1", api.OpenAlexSource, report1End, time.Now())
+	checkNoNextReport(t, manager)
+
+	// Verify that the report is in progress
+	checkReport(t, manager, user2, reportId4, "1", "author1", api.OpenAlexSource, "in-progress", 1)
+	// Check that the original report is being updated as well
+	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "in-progress", 1)
+
+	if err := manager.UpdateReport(next4.Id, "complete", next4.EndDate, reportUpdate); err != nil {
+		t.Fatal(err)
+	}
+
+	// Verify that the report is complete
+	checkReport(t, manager, user2, reportId4, "1", "author1", api.OpenAlexSource, "complete", 2)
+	// Check that the original report is being updated as well
+	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "complete", 2)
+}
+
+func TestReportAccessErrors(t *testing.T) {
+	manager := setup(t)
+
+	user1, user2 := uuid.New(), uuid.New()
+	license := uuid.New()
+
+	reportId, err := manager.CreateReport(license, user1, "1", "author1", api.OpenAlexSource)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	updateJSON := []byte(`{
-		"HighRiskFunders": [{"Message": "test"}]
-	}`)
-
-	if err := manager.UpdateReport(report1, "complete", updateJSON); err != nil {
+	if _, err := manager.GetReport(user1, reportId); err != nil {
 		t.Fatal(err)
 	}
 
-	{
-		reports, err := manager.ListReports(user1)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(reports) != 2 {
-			t.Fatal("should be 2 reports")
-		}
-
-		if reports[0].Id != report1 || reports[1].Id != report3 ||
-			reports[0].AuthorId != "1" || reports[1].AuthorId != "3" ||
-			reports[0].AuthorName != "author1" || reports[1].AuthorName != "author3" ||
-			reports[0].Source != "openalex" || reports[1].Source != "google-scholar" ||
-			reports[0].StartYear != 1 || reports[1].StartYear != 3 ||
-			reports[0].EndYear != 3 || reports[1].EndYear != 5 ||
-			reports[0].Status != "complete" || reports[1].Status != "queued" {
-			t.Fatal("incorrect reports")
-		}
+	if _, err := manager.GetReport(user2, reportId); err != reports.ErrUserCannotAccessReport {
+		t.Fatal(err)
 	}
 
-	{
-		reports, err := manager.ListReports(user2)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(reports) != 1 {
-			t.Fatal("should be 1 report")
-		}
+	if _, err := manager.GetReport(user1, uuid.New()); err != reports.ErrReportNotFound {
+		t.Fatal(err)
+	}
+}
 
-		if reports[0].Id != report2 ||
-			reports[0].AuthorId != "2" ||
-			reports[0].AuthorName != "author2" ||
-			reports[0].Source != "openalex" ||
-			reports[0].StartYear != 2 ||
-			reports[0].EndYear != 4 ||
-			reports[0].Status != "queued" {
-			t.Fatal("incorrect report")
-		}
+func TestListReports(t *testing.T) {
+	manager := setup(t)
+
+	user1, user2 := uuid.New(), uuid.New()
+	license := uuid.New()
+
+	report1, err := manager.CreateReport(license, user1, "1", "author1", api.OpenAlexSource)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	{
-		report, err := manager.GetReport(user1, report1)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if report.Id != report1 ||
-			report.AuthorId != "1" ||
-			report.AuthorName != "author1" ||
-			report.Source != "openalex" ||
-			report.StartYear != 1 ||
-			report.EndYear != 3 ||
-			report.Status != "complete" {
-			t.Fatal("incorrect report")
-		}
-
-		if len(report.Content.HighRiskFunders) == 0 {
-			t.Fatalf("expected 1 connections, got %d", len(report.Content.HighRiskFunders))
-		}
+	noReports, err := manager.ListReports(user2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(noReports) != 0 {
+		t.Fatal("should be no reports for user2")
 	}
 
-	{
-		report, err := manager.GetNextReport()
-		if err != nil {
-			t.Fatal(err)
-		}
-		if report == nil {
-			t.Fatal("report should not be nil")
-		}
-		if report.Id != report2 || report.AuthorId != "2" {
-			t.Fatal("wrong report")
-		}
+	report2, err := manager.CreateReport(license, user2, "2", "author2", api.OpenAlexSource)
+	if err != nil {
+		t.Fatal(err)
 	}
-	{
-		report, err := manager.GetNextReport()
-		if err != nil {
-			t.Fatal(err)
-		}
-		if report == nil {
-			t.Fatal("report should not be nil")
-		}
-		if report.Id != report3 || report.AuthorId != "3" {
-			t.Fatal("wrong report")
-		}
+
+	report3, err := manager.CreateReport(license, user1, "3", "author3", api.GoogleScholarSource)
+	if err != nil {
+		t.Fatal(err)
 	}
-	{
-		report, err := manager.GetNextReport()
-		if err != nil {
-			t.Fatal(err)
-		}
-		if report != nil {
-			t.Fatal("report should be nil")
-		}
+
+	reports1, err := manager.ListReports(user1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(reports1) != 2 {
+		t.Fatal("should be 2 reports")
+	}
+
+	if reports1[0].Id != report1 || reports1[1].Id != report3 ||
+		reports1[0].AuthorId != "1" || reports1[1].AuthorId != "3" ||
+		reports1[0].AuthorName != "author1" || reports1[1].AuthorName != "author3" ||
+		reports1[0].Source != api.OpenAlexSource || reports1[1].Source != api.GoogleScholarSource ||
+		reports1[0].Status != "queued" || reports1[1].Status != "queued" {
+		t.Fatal("incorrect reports")
+	}
+
+	reports2, err := manager.ListReports(user2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(reports2) != 1 {
+		t.Fatal("should be 1 report")
+	}
+
+	if reports2[0].Id != report2 ||
+		reports2[0].AuthorId != "2" ||
+		reports2[0].AuthorName != "author2" ||
+		reports2[0].Source != api.OpenAlexSource ||
+		reports2[0].Status != "queued" {
+		t.Fatal("incorrect report")
+	}
+
+	// Update a report to complete
+	next, err := manager.GetNextReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if next == nil {
+		t.Fatal("report should not be nil")
+	}
+
+	if err := manager.UpdateReport(next.Id, "complete", time.Now(), api.ReportContent{}); err != nil {
+		t.Fatal(err)
+	}
+
+	reports1, err = manager.ListReports(user1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(reports1) != 2 {
+		t.Fatal("should be 2 reports")
+	}
+
+	if reports1[0].Id != report1 || reports1[1].Id != report3 ||
+		reports1[0].AuthorId != "1" || reports1[1].AuthorId != "3" ||
+		reports1[0].AuthorName != "author1" || reports1[1].AuthorName != "author3" ||
+		reports1[0].Source != "openalex" || reports1[1].Source != "google-scholar" ||
+		reports1[0].Status != "complete" || reports1[1].Status != "queued" {
+		t.Fatal("incorrect reports")
 	}
 }

@@ -1,7 +1,6 @@
 package services
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -14,7 +13,6 @@ import (
 	"prism/prism/services/auth"
 	"prism/prism/services/licensing"
 	"strings"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -80,21 +78,13 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 		return nil, CodedError(errors.New("invalid Source"), http.StatusUnprocessableEntity)
 	}
 
-	if params.StartYear == 0 {
-		params.StartYear = time.Now().Year() - 4
-	}
-
-	if params.EndYear == 0 {
-		params.EndYear = time.Now().Year()
-	}
-
 	licenseId, err := licensing.VerifyLicenseForReport(s.db, userId)
 	if err != nil {
 		slog.Error("cannot create new report, unable to verify license", "error", err)
 		return nil, CodedError(err, licensingErrorStatus(err))
 	}
 
-	id, err := s.manager.CreateReport(licenseId, userId, params.AuthorId, params.AuthorName, params.Source, params.StartYear, params.EndYear)
+	id, err := s.manager.CreateReport(licenseId, userId, params.AuthorId, params.AuthorName, params.Source)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
@@ -204,17 +194,6 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 	updateDisclosures(report.Content.PotentialAuthorAffiliations, allFileTexts)
 	updateDisclosures(report.Content.MiscHighRiskAssociations, allFileTexts)
 	updateDisclosures(report.Content.CoauthorAffiliations, allFileTexts)
-
-	updatedContentBytes, err := json.Marshal(report.Content)
-	if err != nil {
-		slog.Error("error serializing updated report content", "error", err)
-		return nil, CodedError(err, http.StatusInternalServerError)
-	}
-
-	if err := s.manager.UpdateReport(report.Id, "complete", updatedContentBytes); err != nil {
-		slog.Error("error updating report with disclosure information", "error", err)
-		return nil, CodedError(err, http.StatusInternalServerError)
-	}
 
 	return report, nil
 }
