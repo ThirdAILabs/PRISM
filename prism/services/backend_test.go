@@ -2,6 +2,7 @@ package services_test
 
 import (
 	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -426,7 +427,7 @@ func TestCheckDisclosure(t *testing.T) {
 	}
 }
 
-func TestDownloadReportExcel(t *testing.T) {
+func TestDownloadReportAllFormats(t *testing.T) {
 	backend, db := createBackend(t)
 
 	admin := newAdmin()
@@ -476,55 +477,94 @@ func TestDownloadReportExcel(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	endpoint := fmt.Sprintf("/report/%s/download?format=excel", reportResp.Id.String())
-	req := httptest.NewRequest("GET", endpoint, nil)
-	req.Header.Add("Authorization", "Bearer "+user)
-	w := httptest.NewRecorder()
-	backend.ServeHTTP(w, req)
-	res := w.Result()
-	defer res.Body.Close()
+	formats := []string{"csv", "pdf", "excel"}
+	for _, format := range formats {
+		endpoint := fmt.Sprintf("/report/%s/download?format=%s", reportResp.Id.String(), format)
+		req := httptest.NewRequest("GET", endpoint, nil)
+		req.Header.Add("Authorization", "Bearer "+user)
+		w := httptest.NewRecorder()
+		backend.ServeHTTP(w, req)
+		res := w.Result()
+		defer res.Body.Close()
 
-	fileBytes, err := io.ReadAll(res.Body)
-	if err != nil {
-		t.Fatalf("error reading response body: %v", err)
-	}
-
-	expectedContentType := "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-	if ct := res.Header.Get("Content-Type"); ct != expectedContentType {
-		t.Fatalf("expected content type %s, got %s", expectedContentType, ct)
-	}
-	contentDisp := res.Header.Get("Content-Disposition")
-	if !strings.Contains(contentDisp, "report.xlsx") {
-		t.Fatalf("expected filename 'report.xlsx' in Content-Disposition, got %s", contentDisp)
-	}
-
-	if len(fileBytes) == 0 {
-		t.Fatal("downloaded excel file is empty")
-	}
-
-	f, err := excelize.OpenReader(bytes.NewReader(fileBytes))
-	if err != nil {
-		t.Fatalf("error opening excel file: %v", err)
-	}
-
-	sheets := f.GetSheetList()
-	found := false
-	for _, sheet := range sheets {
-		if sheet == "Talent Contracts" {
-			found = true
-			break
+		fileBytes, err := io.ReadAll(res.Body)
+		if err != nil {
+			t.Fatalf("error reading response body for format %s: %v", format, err)
 		}
-	}
-	if !found {
-		t.Fatalf("excel file does not contain sheet 'Talent Contracts'; sheets: %v", sheets)
-	}
 
-	val, err := f.GetCellValue("Talent Contracts", "B2")
-	if err != nil {
-		t.Fatalf("error reading cell value from 'Talent Contracts' sheet: %v", err)
-	}
-	if !strings.Contains(val, "Test Work") {
-		t.Fatalf("expected flag message 'Test Talent Contract' in cell B2, got %s", val)
+		var expectedContentType, expectedFilename string
+		switch format {
+		case "csv":
+			expectedContentType = "text/csv"
+			expectedFilename = "report.csv"
+		case "pdf":
+			expectedContentType = "application/pdf"
+			expectedFilename = "report.pdf"
+		case "excel":
+			expectedContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+			expectedFilename = "report.xlsx"
+		}
+
+		if ct := res.Header.Get("Content-Type"); ct != expectedContentType {
+			t.Fatalf("expected content type %s for format %s, got %s", expectedContentType, format, ct)
+		}
+		contentDisp := res.Header.Get("Content-Disposition")
+		if !strings.Contains(contentDisp, expectedFilename) {
+			t.Fatalf("expected filename '%s' in Content-Disposition for format %s, got %s", expectedFilename, format, contentDisp)
+		}
+
+		if len(fileBytes) == 0 {
+			t.Fatalf("downloaded file for format %s is empty", format)
+		}
+
+		switch format {
+		case "pdf":
+			if !strings.HasPrefix(string(fileBytes), "%PDF") {
+				t.Fatalf("downloaded file for format %s does not appear to be a valid PDF", format)
+			}
+		case "excel":
+			f, err := excelize.OpenReader(bytes.NewReader(fileBytes))
+			if err != nil {
+				t.Fatalf("error opening excel file for format %s: %v", format, err)
+			}
+			sheets := f.GetSheetList()
+			found := false
+			for _, sheet := range sheets {
+				if sheet == "Talent Contracts" {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Fatalf("excel file does not contain sheet 'Talent Contracts'; sheets: %v", sheets)
+			}
+
+			val, err := f.GetCellValue("Talent Contracts", "B2")
+			if err != nil {
+				t.Fatalf("error reading cell value from 'Talent Contracts' sheet: %v", err)
+			}
+			if !strings.Contains(val, "Test Work") {
+				t.Fatalf("expected flag message 'Test Work' in cell B2, got %s", val)
+			}
+		case "csv":
+			reader := csv.NewReader(bytes.NewReader(fileBytes))
+			records, err := reader.ReadAll()
+			if err != nil {
+				t.Fatalf("error reading CSV for format %s: %v", format, err)
+			}
+			if len(records) == 0 {
+				t.Fatalf("no records found in CSV for format %s", format)
+			}
+			expectedHeader := []string{"Field", "Value"}
+			for i, v := range expectedHeader {
+				if records[0][i] != v {
+					t.Fatalf("expected header %v, got %v", expectedHeader, records[0])
+				}
+			}
+			if len(records) < 2 || !strings.Contains(records[1][1], reportResp.Id.String()) {
+				t.Fatalf("expected report id %s in CSV summary, got %v", reportResp.Id.String(), records[1])
+			}
+		}
 	}
 }
 

@@ -26,12 +26,6 @@ type ReportService struct {
 	db      *gorm.DB
 }
 
-type FileResponse struct {
-	Content     []byte
-	ContentType string
-	Filename    string
-}
-
 func (s *ReportService) Routes() chi.Router {
 	r := chi.NewRouter()
 
@@ -97,7 +91,7 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 	licenseId, err := licensing.VerifyLicenseForReport(s.db, userId)
 	if err != nil {
 		slog.Error("cannot create new report, unable to verify license", "error", err)
-		return nil, CodedError(err, errorStatus(err))
+		return nil, CodedError(err, licensingErrorStatus(err))
 	}
 
 	id, err := s.manager.CreateReport(licenseId, userId, params.AuthorId, params.AuthorName, params.Source, params.StartYear, params.EndYear)
@@ -122,7 +116,7 @@ func (s *ReportService) GetReport(r *http.Request) (any, error) {
 
 	report, err := s.manager.GetReport(userId, id)
 	if err != nil {
-		return nil, CodedError(err, errorStatus(err))
+		return nil, CodedError(err, reportErrorStatus(err))
 	}
 
 	return report, nil
@@ -142,7 +136,7 @@ func (s *ReportService) UseLicense(r *http.Request) (any, error) {
 	if err := s.db.Transaction(func(txn *gorm.DB) error {
 		return licensing.AddLicenseUser(txn, params.License, userId)
 	}); err != nil {
-		return nil, CodedError(err, errorStatus(err))
+		return nil, CodedError(err, licensingErrorStatus(err))
 	}
 
 	return nil, nil
@@ -240,7 +234,7 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 
 	report, err := s.manager.GetReport(userId, reportId)
 	if err != nil {
-		http.Error(w, err.Error(), errorStatus(err))
+		http.Error(w, err.Error(), reportErrorStatus(err))
 		return
 	}
 
