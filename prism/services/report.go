@@ -289,5 +289,8 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Cache-Control", "no-store")
-	w.Write(fileBytes)
+	if _, err := w.Write(fileBytes); err != nil {
+		slog.Error("error writing file bytes", "error", err)
+		http.Error(w, "error writing file", http.StatusInternalServerError)
+	}
 }
