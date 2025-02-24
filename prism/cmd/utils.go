@@ -33,7 +33,7 @@ func InitDb(uri string) *gorm.DB {
 	}
 
 	err = db.AutoMigrate(
-		&schema.Report{}, &schema.ReportContent{}, &schema.License{},
+		&schema.AuthorFlag{}, &schema.AuthorReport{}, &schema.License{},
 		&schema.LicenseUser{}, &schema.LicenseUsage{},
 	)
 	if err != nil {

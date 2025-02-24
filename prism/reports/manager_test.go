@@ -4,6 +4,7 @@ import (
 	"prism/prism/api"
 	"prism/prism/reports"
 	"prism/prism/schema"
+	"runtime"
 	"testing"
 	"time"
 
@@ -18,7 +19,7 @@ func setup(t *testing.T) *reports.ReportManager {
 		t.Fatal(err)
 	}
 
-	if err := db.AutoMigrate(&schema.Report{}, &schema.ReportContent{}, &schema.UserReport{}, &schema.LicenseUsage{}); err != nil {
+	if err := db.AutoMigrate(&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{}, &schema.LicenseUsage{}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -47,8 +48,14 @@ func checkReport(t *testing.T, manager *reports.ReportManager, userId, reportId 
 		report.AuthorName != authorName ||
 		report.Source != source ||
 		report.Status != status ||
-		len(report.Content.HighRiskFunders) != nflags {
-		t.Fatalf("incorrect report: %v", report)
+		(nflags > 0 && len(report.Content) == 0) {
+		_, file, line, _ := runtime.Caller(1)
+		t.Fatalf("%s:%d: incorrect report: %v", file, line, report)
+	}
+	for ftype, flags := range report.Content {
+		if len(flags) != nflags {
+			t.Fatalf("expected %d flags for %v, got %d", nflags, ftype, len(flags))
+		}
 	}
 }
 
@@ -59,6 +66,18 @@ func checkNoNextReport(t *testing.T, manager *reports.ReportManager) {
 	}
 	if next != nil {
 		t.Fatal("should be no report")
+	}
+}
+
+func dummyReportUpdate() api.ReportContent {
+	return api.ReportContent{
+		api.TalentContractType:               {&api.TalentContractFlag{Work: api.WorkSummary{WorkId: uuid.NewString()}}},
+		api.AssociationsWithDeniedEntityType: {&api.AssociationWithDeniedEntityFlag{Work: api.WorkSummary{WorkId: uuid.NewString()}}},
+		api.HighRiskFunderType:               {&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: uuid.NewString()}}},
+		api.AuthorAffiliationType:            {&api.AuthorAffiliationFlag{Work: api.WorkSummary{WorkId: uuid.NewString()}}},
+		api.PotentialAuthorAffiliationType:   {&api.PotentialAuthorAffiliationFlag{University: uuid.NewString()}},
+		api.MiscHighRiskAssociationType:      {&api.MiscHighRiskAssociationFlag{DocTitle: uuid.NewString()}},
+		api.CoauthorAffiliationType:          {&api.CoauthorAffiliationFlag{Work: api.WorkSummary{WorkId: uuid.NewString()}}},
 	}
 }
 
@@ -95,7 +114,7 @@ func TestCreateGetReports(t *testing.T) {
 
 	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "in-progress", 0)
 
-	if err := manager.UpdateReport(next1.Id, "complete", next1.EndDate, api.ReportContent{HighRiskFunders: []*api.HighRiskFunderFlag{{}}}); err != nil {
+	if err := manager.UpdateReport(next1.Id, "complete", next1.EndDate, dummyReportUpdate()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -110,7 +129,7 @@ func TestCreateGetReports(t *testing.T) {
 
 	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "in-progress", 0)
 
-	if err := manager.UpdateReport(next2.Id, "complete", next2.EndDate, api.ReportContent{HighRiskFunders: []*api.HighRiskFunderFlag{{}}}); err != nil {
+	if err := manager.UpdateReport(next2.Id, "complete", next2.EndDate, dummyReportUpdate()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -154,8 +173,7 @@ func TestCreateGetReports(t *testing.T) {
 	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "in-progress", 1)
 	checkNoNextReport(t, manager)
 
-	reportUpdate := api.ReportContent{HighRiskFunders: []*api.HighRiskFunderFlag{{Work: api.WorkSummary{WorkId: "2"}}}}
-	if err := manager.UpdateReport(next3.Id, "complete", next3.EndDate, reportUpdate); err != nil {
+	if err := manager.UpdateReport(next3.Id, "complete", next3.EndDate, dummyReportUpdate()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -184,7 +202,7 @@ func TestCreateGetReports(t *testing.T) {
 	// Check that the original report is being updated as well
 	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "in-progress", 1)
 
-	if err := manager.UpdateReport(next4.Id, "complete", next4.EndDate, reportUpdate); err != nil {
+	if err := manager.UpdateReport(next4.Id, "complete", next4.EndDate, dummyReportUpdate()); err != nil {
 		t.Fatal(err)
 	}
 

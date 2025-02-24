@@ -72,7 +72,7 @@ func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 	}
 
 	if err := db.AutoMigrate(
-		&schema.Report{}, &schema.ReportContent{}, &schema.UserReport{}, &schema.License{},
+		&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{}, &schema.License{},
 		&schema.LicenseUser{}, &schema.LicenseUsage{},
 	); err != nil {
 		t.Fatal(err)
@@ -339,8 +339,8 @@ func TestCheckDisclosure(t *testing.T) {
 	}
 
 	content := api.ReportContent{
-		TalentContracts: []*api.TalentContractFlag{
-			{
+		"TalentContracts": []api.Flag{
+			&api.TalentContractFlag{
 				DisclosableFlag: api.DisclosableFlag{},
 				Message:         "Test disclosure flag - TalentContract",
 				Work: api.WorkSummary{
@@ -353,8 +353,8 @@ func TestCheckDisclosure(t *testing.T) {
 				RawAcknowledements: []string{"discloseme"},
 			},
 		},
-		AssociationsWithDeniedEntities: []*api.AssociationWithDeniedEntityFlag{
-			{
+		"AssociationsWithDeniedEntities": []api.Flag{
+			&api.AssociationWithDeniedEntityFlag{
 				DisclosableFlag: api.DisclosableFlag{},
 				Message:         "Test disclosure flag - Association",
 				Work: api.WorkSummary{
@@ -412,17 +412,17 @@ func TestCheckDisclosure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(updatedReport.Content.TalentContracts) != 1 {
-		t.Fatalf("expected 1 TalentContract flag; got %d", len(updatedReport.Content.TalentContracts))
+	if len(updatedReport.Content["TalentContracts"]) != 1 {
+		t.Fatalf("expected 1 TalentContract flag; got %d", len(updatedReport.Content["TalentContracts"]))
 	}
-	if !updatedReport.Content.TalentContracts[0].Disclosed {
+	if !updatedReport.Content["TalentContracts"][0].(*api.TalentContractFlag).Disclosed {
 		t.Fatal("expected TalentContract flag to be marked as disclosed")
 	}
 
-	if len(updatedReport.Content.AssociationsWithDeniedEntities) != 1 {
-		t.Fatalf("expected 1 AssociationWithDeniedEntity flag; got %d", len(updatedReport.Content.AssociationsWithDeniedEntities))
+	if len(updatedReport.Content["AssociationsWithDeniedEntities"]) != 1 {
+		t.Fatalf("expected 1 AssociationWithDeniedEntity flag; got %d", len(updatedReport.Content["AssociationsWithDeniedEntities"]))
 	}
-	if updatedReport.Content.AssociationsWithDeniedEntities[0].Disclosed {
+	if updatedReport.Content["AssociationsWithDeniedEntities"][0].(*api.AssociationWithDeniedEntityFlag).Disclosed {
 		t.Fatal("expected AssociationWithDeniedEntity flag to remain undisclosed")
 	}
 }
@@ -449,8 +449,8 @@ func TestDownloadReportAllFormats(t *testing.T) {
 	manager := reports.NewManager(db, reports.StaleReportThreshold)
 
 	content := api.ReportContent{
-		TalentContracts: []*api.TalentContractFlag{
-			{
+		"TalentContracts": []api.Flag{
+			&api.TalentContractFlag{
 				DisclosableFlag: api.DisclosableFlag{},
 				Message:         "Test Talent Contract",
 				Work: api.WorkSummary{
@@ -463,12 +463,6 @@ func TestDownloadReportAllFormats(t *testing.T) {
 				RawAcknowledements: []string{"flag-content"},
 			},
 		},
-		AssociationsWithDeniedEntities: []*api.AssociationWithDeniedEntityFlag{},
-		HighRiskFunders:                []*api.HighRiskFunderFlag{},
-		AuthorAffiliations:             []*api.AuthorAffiliationFlag{},
-		PotentialAuthorAffiliations:    []*api.PotentialAuthorAffiliationFlag{},
-		MiscHighRiskAssociations:       []*api.MiscHighRiskAssociationFlag{},
-		CoauthorAffiliations:           []*api.CoauthorAffiliationFlag{},
 	}
 
 	nextReport, err := manager.GetNextReport()
