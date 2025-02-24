@@ -13,11 +13,10 @@ import {
 import ConcernVisualizer from '../../ConcernVisualization.js';
 import RelationShipGraph3 from '../../common/relationShipGraph/Relation-Graph3.js';
 import Tabs from '../../common/tools/Tabs.js';
-
-import DisclosureUploadButton from "../../buttons/disclosureUploadButton/DisclosureUploadButton.js";
+import DownloadButton from '../../common/tools/button/downloadButton.js';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider } from '@mui/material';
 import { reportService } from '../../../api/reports.js';
 
-import useDisclosureUpload from '../../../hooks/useDisclosureUpload.js'
 
 
 const FLAG_ORDER = [
@@ -26,32 +25,32 @@ const FLAG_ORDER = [
 
 const TitlesAndDescriptions = {
     [TALENT_CONTRACTS]: {
-        "title": "Papers with foreign talent programs",
-        "desc": "Authors in these papers are recruited by talent programs that have close ties to high-risk foreign governments",
+        "title": "Talent Contracts",
+        "desc": "Authors in these papers are recruited by talent programs that have close ties to high-risk foreign governments.",
     },
     [ASSOCIATIONS_WITH_DENIED_ENTITIES]: {
-        "title": "Papers with denied entities",
-        "desc": "Some of the parties involved in these works are in the denied entity lists of U.S. government agencies",
+        "title": "Funding from Denied Entities",
+        "desc": "Some of the parties involved in these works are in the denied entity lists of U.S. government agencies.",
     },
     [HIGH_RISK_FUNDERS]: {
-        "title": "Papers with high-risk funding sources",
-        "desc": "These papers is funded by funding sources that have close ties to high-risk foreign governments",
+        "title": "High Risk Funding Sources",
+        "desc": "These papers are funded by funding sources that have close ties to high-risk foreign governments.",
     },
     [AUTHOR_AFFILIATIONS]: {
-        "title": "High-risk appointments at foreign institutions",
-        "desc": "Papers that list the current author as being affiliated with a high-risk foreign institution or web pages that showcase official appointments at high-risk foreign institutions",
+        "title": "Affiliations with High Risk Foreign Institutes",
+        "desc": "Papers that list the queried author as being affiliated with a high-risk foreign institution or web pages that showcase official appointments at high-risk foreign institutions.",
     },
     [POTENTIAL_AUTHOR_AFFILIATIONS]: {
-        "title": "Potential high-risk appointments at foreign institutions",
-        "desc": "The author may be affiliated with high-risk foreign institutions",
+        "title": "Appointments at High Risk Foreign Institutes*",
+        "desc": "The author may have an appointment at a high-risk foreign institutions.\n\n*Collated information from the web, might contain false positives.",
     },
     [MISC_HIGH_RISK_AFFILIATIONS]: {
-        "title": "Miscellaneous potential high-risk associations",
-        "desc": "The author or an associate may be mentioned in a press release",
+        "title": "Miscellaneous High Risk Connections*",
+        "desc": "The author or an associate may be mentioned in a press release.\n\n*Collated information from the web, might contain false positives.",
     },
     [COAUTHOR_AFFILIATIONS]: {
-        "title": "Papers with coauthors from high-risk foreign institutions",
-        "desc": "Coauthors in these papers are affiliated with high-risk foreign institutions"
+        "title": "Co-authors' affiliations with High Risk Foreign Institutes",
+        "desc": "Coauthors in these papers are affiliated with high-risk foreign institutions."
     }
 }
 
@@ -75,6 +74,83 @@ const ItemDetails = () => {
     const [authorName, setAuthorName] = useState("")
     const [institutions, setInstitutions] = useState([])
     const [initialReprtContent, setInitialReportContent] = useState({})
+    // Add these states at the top with other states
+    // const [selectedFiles, setSelectedFiles] = useState([]);
+    // const [isUploading, setIsUploading] = useState(false);
+    // const [uploadError, setUploadError] = useState(null);
+
+    // // Add this function to handle file selection
+    // const handleFileSelect = (event) => {
+    //     setSelectedFiles([...event.target.files]);
+    //     setUploadError(null);
+    // };
+
+    // // Add this function to handle check disclosure
+    // const handleCheckDisclosure = async () => {
+    //     if (selectedFiles.length === 0) {
+    //         setUploadError('Please select at least one file');
+    //         return;
+    //     }
+
+    //     setIsUploading(true);
+    //     setUploadError(null);
+
+    //     try {
+    //         const result = await reportService.checkDisclosure(report_id, selectedFiles);
+    //         setInitialReportContent(result.Content);
+    //     } catch (error) {
+    //         setUploadError(error.message || 'Failed to check disclosure');
+    //     } finally {
+    //         setIsUploading(false);
+    //     }
+    // };
+
+
+
+    // Add new states
+    const [openDialog, setOpenDialog] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadError, setUploadError] = useState(null);
+
+    // Add handlers
+    const handleOpenDialog = () => setOpenDialog(true);
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
+        setSelectedFiles([]);
+        setUploadError(null);
+    };
+
+    const handleDrop = (event) => {
+        event.preventDefault();
+        const files = Array.from(event.dataTransfer.files);
+        setSelectedFiles(files);
+    };
+
+    const handleFileSelect = (event) => {
+        const files = Array.from(event.target.files);
+        setSelectedFiles(files);
+    };
+
+    const handleSubmit = async () => {
+        if (selectedFiles.length === 0) {
+            setUploadError('Please select at least one file');
+            return;
+        }
+
+        setIsUploading(true);
+        try {
+            const result = await reportService.checkDisclosure(report_id, selectedFiles);
+            setReportContent(result.Content);
+            setInitialReportContent(result.Content);
+            handleCloseDialog();
+        } catch (error) {
+            setUploadError(error.message || 'Failed to check disclosure');
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     useEffect(() => {
         let isMounted = true;
         const poll = async () => {
@@ -86,7 +162,7 @@ const ItemDetails = () => {
                 setInitialReportContent(report.Content);
                 setLoading(false);
             } else if (isMounted) {
-                setTimeout(poll, 500);
+                setTimeout(poll, 2000);
             }
         };
 
@@ -97,25 +173,7 @@ const ItemDetails = () => {
         };
     }, [])
 
-    const hookValues = useDisclosureUpload();
-    const { uploadPdf, uploadStatus, isUploading, uploadResult } = hookValues;
 
-    useEffect(() => {
-        console.log('ItemDetails: uploadResult changed:', uploadResult);
-        if (!uploadResult) return;
-
-        setLoading(true);
-        try {
-            if (uploadResult.Status === "complete" && uploadResult.Content) {
-                setReportContent(uploadResult.Content);
-                setAuthorName(uploadResult.AuthorName);
-            }
-        } catch (err) {
-            console.error('Error updating reports:', err);
-        } finally {
-            setLoading(false);
-        }
-    }, [uploadResult]);
 
 
     const [loading, setLoading] = useState(true);
@@ -134,15 +192,17 @@ const ItemDetails = () => {
     const handleYearFilter = () => {
         const filteredContent = {};
         FLAG_ORDER.forEach((flag) => {
-            if (reportContent[flag]) {
-                filteredContent[flag] = reportContent[flag].filter((item) => {
-                    return (item?.Work?.PublicationYear) || item?.Work?.PublicationYear >= startYear && item?.Work?.PublicationYear <= endYear;
+            if (initialReprtContent[flag]) {
+                filteredContent[flag] = initialReprtContent[flag].filter((item) => {
+                    return (item?.Work?.PublicationYear === undefined) || item?.Work?.PublicationYear >= startYear && item?.Work?.PublicationYear <= endYear;
                 });
             }
             else
                 filteredContent[flag] = null;
         });
         setReportContent(filteredContent);
+        console.log("Unfiltered", initialReprtContent);
+        console.log("Filtered", reportContent);
         setYearDropdownOpen(false);
     }
     const [instDropdownOpen, setInstDropdownOpen] = useState(false);
@@ -442,7 +502,7 @@ const ItemDetails = () => {
                                 Press Release: <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">{flag.DocTitle}</a>
                                 <br />
                             </>
-                        ) : connections.legnth == 2 ? (
+                        ) : connections.length == 2 ? (
                             <>
                                 Relevant Documents: <a href={flag.Connections[0].DocUrl} target="_blank" rel="noopener noreferrer">{flag.Connections[0].DocTitle}</a>, <a href={flag.Connections[1].DocUrl} target="_blank" rel="noopener noreferrer">{flag.Connections[1].DocTitle}</a>
                                 <br />
@@ -509,183 +569,213 @@ const ItemDetails = () => {
 
     return (
         <div className='basic-setup'>
-            <div className='flex flex-row'>
-                <div className='detail-header'>
-                    <button onClick={() => navigate("/")} className='btn text-dark mb-3' style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px' }}>
-                            <path d="M10 19L3 12L10 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            <path d="M3 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        Back
-                    </button>
+            <div className='grid grid-cols-2 gap-4'>
+                <div className='flex flex-row'>
+                    <div className='detail-header'>
+                        <button onClick={() => navigate("/")} className='btn text-dark mb-3' style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px' }}>
+                                <path d="M10 19L3 12L10 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M3 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            Back
+                        </button>
 
-                    <div className='d-flex w-80'>
-                        <div className='text-start px-5'>
-                            <div className='d-flex align-items-center mb-2'>
-                                <h5 className='m-0'>{authorName}</h5>
+                        <div className='d-flex w-80'>
+                            <div className='text-start px-5'>
+                                <div className='d-flex align-items-center mb-2'>
+                                    <h5 className='m-0'>{authorName}</h5>
+                                </div>
+                                <b className='m-0 p-0' style={{ fontSize: 'small' }}>{institutions.join(', ')}</b>
                             </div>
-                            <b className='m-0 p-0' style={{ fontSize: 'small' }}>{institutions.join(', ')}</b>
                         </div>
-                    </div>
 
-                    <div>
+                        <div>
 
-                        <div className="dropdown">
-                            <style>
-                                {` 
+                            <div className="dropdown">
+                                <style>
+                                    {` 
                     .form-control::placeholder { 
                         color: #888; 
                     }`
-                                }
-                            </style>
-                            <button
-                                className="btn dropdown-toggle"
-                                type="button"
-                                onClick={toggleYearDropdown}
-                                style={{
-                                    backgroundColor: 'rgb(160, 160, 160)',
-                                    border: 'none',
-                                    color: 'white',
-                                    width: "200px",
-                                    fontWeight: 'bold',
-                                    fontSize: '14px'
-                                }}
-                            >
-                                Filter by Year
-                            </button>
-                            {yearDropdownOpen && (
-                                <div
-                                    className="dropdown-menu show p-3"
+                                    }
+                                </style>
+                                <button
+                                    className="btn dropdown-toggle"
+                                    type="button"
+                                    onClick={toggleYearDropdown}
                                     style={{
                                         backgroundColor: 'rgb(160, 160, 160)',
                                         border: 'none',
-                                        right: 0,
-                                        marginTop: "10px",
                                         color: 'white',
+                                        width: "200px",
                                         fontWeight: 'bold',
-                                        fontSize: '14px',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        display: 'flex',
-                                        flexDirection: 'column'
+                                        fontSize: '14px'
                                     }}
                                 >
-                                    <div className="form-group mb-2">
-                                        <label>Start Year</label>
-                                        <input
-                                            type="text"
-                                            value={startYear}
-                                            onChange={handleStartYearChange}
-                                            className="form-control"
-                                            placeholder="Enter start year"
-                                            style={{
-                                                backgroundColor: 'rgb(220, 220, 220)',
-                                                border: 'none',
-                                                outline: 'none',
-                                                color: 'black',
-                                                marginTop: '10px',
-                                            }}
-                                        />
-                                    </div>
-                                    <div style={{ height: "10px" }} />
-                                    <div className="form-group">
-                                        <label>End Year</label>
-                                        <input
-                                            type="text"
-                                            value={endYear}
-                                            onChange={handleEndYearChange}
-                                            className="form-control"
-                                            placeholder="Enter end year"
-                                            style={{
-                                                backgroundColor: 'rgb(220, 220, 220)',
-                                                border: 'none',
-                                                outline: 'none',
-                                                color: 'black',
-                                                marginTop: '10px',
-                                            }}
-                                        />
-                                    </div>
-                                    <button
-                                        className="form-control"
-                                        type="submit"
-                                        onClick={handleYearFilter}
-                                        disabled={!(startYear && endYear)}
+                                    Filter by Year
+                                </button>
+                                {yearDropdownOpen && (
+                                    <div
+                                        className="dropdown-menu show p-3"
                                         style={{
-                                            backgroundColor: 'rgb(220, 220, 220)',
+                                            backgroundColor: 'rgb(160, 160, 160)',
                                             border: 'none',
+                                            right: 0,
+                                            marginTop: "10px",
                                             color: 'white',
-                                            width: "100px",
                                             fontWeight: 'bold',
                                             fontSize: '14px',
-                                            marginTop: '20px',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            display: 'flex',
+                                            flexDirection: 'column'
                                         }}
                                     >
-                                        submit
-                                    </button>
-                                </div>
-                            )}
+                                        <div className="form-group mb-2">
+                                            <label>Start Year</label>
+                                            <input
+                                                type="text"
+                                                value={startYear}
+                                                onChange={handleStartYearChange}
+                                                className="form-control"
+                                                placeholder="Enter start year"
+                                                style={{
+                                                    backgroundColor: 'rgb(220, 220, 220)',
+                                                    border: 'none',
+                                                    outline: 'none',
+                                                    color: 'black',
+                                                    marginTop: '10px',
+                                                }}
+                                            />
+                                        </div>
+                                        <div style={{ height: "10px" }} />
+                                        <div className="form-group">
+                                            <label>End Year</label>
+                                            <input
+                                                type="text"
+                                                value={endYear}
+                                                onChange={handleEndYearChange}
+                                                className="form-control"
+                                                placeholder="Enter end year"
+                                                style={{
+                                                    backgroundColor: 'rgb(220, 220, 220)',
+                                                    border: 'none',
+                                                    outline: 'none',
+                                                    color: 'black',
+                                                    marginTop: '10px',
+                                                }}
+                                            />
+                                        </div>
+                                        <button
+                                            className="form-control"
+                                            type="submit"
+                                            onClick={handleYearFilter}
+                                            disabled={!(startYear && endYear)}
+                                            style={{
+                                                backgroundColor: 'rgb(220, 220, 220)',
+                                                border: 'none',
+                                                color: 'white',
+                                                width: "100px",
+                                                fontWeight: 'bold',
+                                                fontSize: '14px',
+                                                marginTop: '20px',
+                                            }}
+                                        >
+                                            submit
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                            <>
+                                <button
+                                    className="form-control"
+                                    onClick={handleOpenDialog}
+                                    style={{
+                                        backgroundColor: 'rgb(160, 160, 160)',
+                                        border: 'none',
+                                        color: 'white',
+                                        width: "200px",
+                                        fontWeight: 'bold',
+                                        fontSize: '14px',
+                                        marginTop: '20px',
+                                    }}
+                                >
+                                    Check disclosure
+                                </button>
+
+                                <Dialog
+                                    open={openDialog}
+                                    onClose={handleCloseDialog}
+                                    maxWidth="sm"
+                                    fullWidth
+                                >
+                                    <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+                                        Select files to check for disclosure
+                                    </DialogTitle>
+                                    <Divider sx={{ color: 'black', backgroundColor: '#000000' }} />
+                                    <DialogContent>
+                                        <div
+                                            className="container"
+                                            onDrop={handleDrop}
+                                            onDragOver={(e) => e.preventDefault()}
+                                        >
+                                            <div className="header">
+                                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                                </svg>
+                                                <p>Browse File to upload!</p>
+                                            </div>
+                                            <label htmlFor="file" className="footer">
+                                                <p>{selectedFiles.length ? `${selectedFiles.length} files selected` : 'No file selected'}</p>
+                                            </label>
+                                            <input
+                                                id="file"
+                                                type="file"
+                                                multiple
+                                                onChange={handleFileSelect}
+                                                accept=".txt,.doc,.docx,.pdf"
+                                            />
+                                        </div>
+                                        {uploadError && (
+                                            <div style={{ color: 'red', marginTop: '10px' }}>{uploadError}</div>
+                                        )}
+                                    </DialogContent>
+                                    <DialogActions>
+                                        <Button onClick={handleCloseDialog}>Cancel</Button>
+                                        <Button
+                                            onClick={handleSubmit}
+                                            disabled={isUploading}
+                                            variant="contained"
+                                        >
+                                            {isUploading ? 'Uploading...' : 'Submit'}
+                                        </Button>
+                                    </DialogActions>
+                                </Dialog>
+                            </>
                         </div>
 
-                        {/* <div style={{ height: "10px" }} /> */}
-
-                        {/* <div className="dropdown">
-                            <button
-                                className="btn dropdown-toggle"
-                                type="button"
-                                onClick={toggleInstDropdown}
-                                style={{
-                                    backgroundColor: 'rgb(160, 160, 160)',
-                                    border: 'none',
-                                    color: 'white',
-                                    width: "200px",
-                                    fontWeight: 'bold',
-                                    fontSize: '14px'
-                                }}
-                            >
-                                Filter by Institution
-                            </button>
-                            {instDropdownOpen && <AffiliationChecklist />}
-                        </div> */}
                     </div>
-
+                    {/* Comment the following to get rid of the graph tab */}
+                    <Tabs activeTab={activeTab} handleTabChange={handleTabChange} />
                 </div>
-                {/* Comment the following to get rid of the graph tab */}
-                <Tabs activeTab={activeTab} handleTabChange={handleTabChange} />
+                <div className='d-flex justify-content-end mt-2'>
+                    <DownloadButton reportId={report_id} />
+                </div>
             </div>
+
 
             {activeTab === 0 && <>
                 <div className='d-flex w-100 flex-column align-items-center'>
-                    {/* <div className='d-flex w-75 align-items-center my-2 mt-3'> */}
                     <div className='d-flex w-100 px-5 align-items-center my-2 mt-3 justify-content-between'>
                         <div style={{ width: "20px" }}>
                             {loading && (
                                 <div className="spinner-border text-primary spinner-border-sm" role="status"></div>
                             )}
                         </div>
-                        {/* <DisclosureUploadButton hookValues={hookValues} className="ms-auto" /> */}
-
-                        {/* {message && <h5 className='text-light m-0 ms-2' style={{ fontSize: 'small' }}>{(loading || conclusionLoading) ? `Scanned ${formattedMessage} out of 250M documents` : "Analysis complete"}</h5>} */}
-                        {/* {
-            !(loading || conclusionLoading) && 
-            <button
-              type="button"
-              className="btn btn-info btn-circle ml-2"
-              onClick={togglePopover}
-              style={buttonStyles}
-            >
-              ?
-              {showPopover && (
-                <div className="popover" style={popoverStyles}>
-                  <div className="popover-header">Disclaimer</div>
-                  <div className="popover-body">These flags are meant to act as an aid in detecting foreign influence. Please double check the results.</div>
-                </div>
-              )}
-            </button>
-          } */}
                     </div>
                 </div>
 
-                <div className='d-flex w-100 flex-column align-items-center' style={{ color: "rgb(78, 78, 78)", marginTop: "50px" }}>
+                <div className='d-flex w-100 flex-column align-items-center' style={{ color: "rgb(78, 78, 78)", marginTop: "0px" }}>
                     <div style={{ fontSize: "large", fontWeight: "bold" }}>
                         Total Score
                     </div>
@@ -697,6 +787,7 @@ const ItemDetails = () => {
                         }
                     </div>
                 </div>
+
                 <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', height: '500px', marginTop: '20px' }}>
                     {
                         FLAG_ORDER.map((flag, index) => {

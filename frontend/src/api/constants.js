@@ -5,7 +5,9 @@ export const API_ROUTES = {
         LIST: '/api/v1/report/list',
         CREATE: '/api/v1/report/create',
         GET: (id) => `/api/v1/report/${id}`,
-        ACTIVATE_LICENSE: '/api/v1/report/activate-license'
+        ACTIVATE_LICENSE: '/api/v1/report/activate-license',
+        CHECK_DISCLOSURE: (id) => `/api/v1/report/${id}/check-disclosure`,
+        DOWNLOAD: (id) => `/api/v1/report/${id}/download`,
     },
     LICENSES: {
         LIST: '/api/v1/license/list',

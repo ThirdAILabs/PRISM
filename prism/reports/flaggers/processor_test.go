@@ -194,7 +194,7 @@ func TestProcessorAuthorAffiliation(t *testing.T) {
 }
 
 func TestProcessorUniversityFacultySeach(t *testing.T) {
-	universityNDB := BuildUniversityNDB("../../../data/university_websites_with_entities_filtered.json", t.TempDir())
+	universityNDB := BuildUniversityNDB("../../../data/university_webpages.json", t.TempDir())
 	defer universityNDB.Free()
 
 	processor := ReportProcessor{
@@ -259,10 +259,10 @@ func TestProcessorUniversityFacultySeach(t *testing.T) {
 }
 
 func TestProcessorAuthorAssociations(t *testing.T) {
-	docNDB := BuildDocNDB("../../../data/doj_articles_with_content_and_entities_as_text.json", t.TempDir())
+	docNDB := BuildDocNDB("../../../data/docs_and_press_releases.json", t.TempDir())
 	defer docNDB.Free()
 
-	auxNDB := BuildAuxNDB("../../../data/doj_relevant_webpages_cleaned_with_entities_as_content.json", t.TempDir())
+	auxNDB := BuildAuxNDB("../../../data/auxiliary_webpages.json", t.TempDir())
 	defer auxNDB.Free()
 
 	processor := ReportProcessor{
