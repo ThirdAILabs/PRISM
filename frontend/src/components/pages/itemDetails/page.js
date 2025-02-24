@@ -181,6 +181,7 @@ const ItemDetails = () => {
     const [startYear, setStartYear] = useState('');
     const [endYear, setEndYear] = useState('');
     const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
+    const [isDownloadOpen, setIsDownloadOpen] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
 
     const handleTabChange = (event, newValue) => {
@@ -188,7 +189,10 @@ const ItemDetails = () => {
     };
     const handleStartYearChange = (e) => setStartYear(e.target.value);
     const handleEndYearChange = (e) => setEndYear(e.target.value);
-    const toggleYearDropdown = () => setYearDropdownOpen(!yearDropdownOpen);
+    const toggleYearDropdown = () => {
+        setYearDropdownOpen(!yearDropdownOpen);
+        setIsDownloadOpen(false);  // Close download dropdown
+    };
     const handleYearFilter = () => {
         const filteredContent = {};
         FLAG_ORDER.forEach((flag) => {
@@ -752,7 +756,14 @@ const ItemDetails = () => {
                             </DialogActions>
                         </Dialog>
                     </>
-                    <DownloadButton reportId={report_id} />
+                    <DownloadButton
+                        reportId={report_id}
+                        isOpen={isDownloadOpen}
+                        setIsOpen={(value) => {
+                            setIsDownloadOpen(value);
+                            setYearDropdownOpen(false);  // Close year dropdown
+                        }}
+                    />
                 </div>}
             </div>
 

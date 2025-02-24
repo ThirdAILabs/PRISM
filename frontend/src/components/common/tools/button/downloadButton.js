@@ -70,11 +70,8 @@ position: relative;
   }
   `;
 
-const Button = ({ reportId }) => {
-    const [isOpen, setIsOpen] = useState(false);
+const Button = ({ reportId, isOpen, setIsOpen }) => {
     const handleDownload = (format) => {
-        // Add download logic here
-        console.log(`Downloading as ${format}`);
         reportService.downloadReport(reportId, format);
         setIsOpen(false);
     };
