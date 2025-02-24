@@ -19,5 +19,66 @@ export const reportService = {
 
     activateLicense: async (licenseKey) => {
         await axiosInstance.post(API_ROUTES.REPORTS.ACTIVATE_LICENSE, { License: licenseKey });
-    }
+    },
+
+    checkDisclosure: async (reportId, files) => {
+        const formData = new FormData();
+        files.forEach(file => {
+            formData.append('files', file);
+        });
+
+        const response = await axiosInstance.post(
+            API_ROUTES.REPORTS.CHECK_DISCLOSURE(reportId),
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            }
+        );
+        return response.data;
+    },
+    downloadReport: async (reportId, format) => {
+        try {
+            const response = await axiosInstance.get(
+                `${API_ROUTES.REPORTS.DOWNLOAD(reportId)}?format=${format}`,
+                {
+                    responseType: 'json'
+                }
+            );
+
+            const { Content: encodedContent } = response.data;
+            if (!encodedContent) {
+                throw new Error('No content found in response');
+            }
+
+            // Decode base64 content
+            const decodedContent = atob(encodedContent);
+            const uint8Array = new Uint8Array(decodedContent.length);
+            for (let i = 0; i < decodedContent.length; i++) {
+                uint8Array[i] = decodedContent.charCodeAt(i);
+            }
+
+            // Create blob and download
+            const blob = new Blob([uint8Array]);
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+
+            // Get filename from Content-Disposition or use default
+            const contentDisposition = response.headers['content-disposition'];
+            const filename = contentDisposition
+                ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+                : `report.${format}`;
+
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Download failed:', error);
+            throw error;
+        }
+    },
 };
