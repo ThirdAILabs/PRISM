@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Speedometer } from './common/tools/Speedometer';
-import "../App.css";
+import '../App.css';
 
 const Hover = ({ text }) => {
   return (
@@ -34,27 +34,20 @@ const Hover = ({ text }) => {
       </div>
     </div>
   );
-}
+};
 
-
-export default function ConcernVisualizer({
-  title,
-  hoverText,
-  value,
-  scale,
-  onReview,
-}) {
-
+export default function ConcernVisualizer({ title, hoverText, value, scale, onReview }) {
   return (
     <div style={{ width: '200px', height: '300px', position: 'relative' }}>
       <Speedometer scale={scale || [0, 1, 2, 3, 5, 10, 20]} value={value} />
 
-      <div className='mt-3 mb-4 text-dark' style={{ height: "50px" }} >
+      <div className="mt-3 mb-4 text-dark" style={{ height: '50px' }}>
         {title} <Hover text={hoverText} />
       </div>
 
-      <button className='btn btn-light rounded rounded-5 px-4' onClick={onReview}>Review</button>
-
+      <button className="btn btn-light rounded rounded-5 px-4" onClick={onReview}>
+        Review
+      </button>
     </div>
   );
 }
