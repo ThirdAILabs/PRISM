@@ -26,4 +26,4 @@ jobs:
         with:
           # when we set dry command files wont get changed and the action fails if there are unprettified files.
           dry: True
-          prettier_options: --check --ignore-path  ./frontend/prettierignore ./frontend/src --config ./frontend/prettierrc
+          prettier_options: --check --ignore-path  ./frontend/.prettierignore ./frontend/src --config ./frontend/.prettierrc
