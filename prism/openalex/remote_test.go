@@ -280,3 +280,25 @@ func TestGetAuthor(t *testing.T) {
 		t.Fatal("incorrect author")
 	}
 }
+
+func TestGetInstitutionAuthors(t *testing.T) {
+	oa := openalex.NewRemoteKnowledgeBase()
+
+	institutionId := "https://openalex.org/I74775410"
+
+	startDate, endDate := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2023, 2, 1, 0, 0, 0, 0, time.UTC)
+	authors, err := oa.GetInstitutionAuthors(institutionId, startDate, endDate)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(authors) == 0 {
+		t.Fatal("expected > 0 authors")
+	}
+
+	for _, author := range authors {
+		if author.AuthorId == "" || author.AuthorName == "" {
+			t.Fatal("author info cannot be empty")
+		}
+	}
+}
