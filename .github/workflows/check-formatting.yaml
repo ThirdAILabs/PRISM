@@ -19,14 +19,11 @@ on:
 jobs:
   js-format:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     steps:
       - uses: actions/checkout@v2
-      - name: Check prettier formatting for model bazaar frontend
+      - name: Check prettier formatting for frontend
         uses: creyD/prettier_action@v4.3
         with:
           # when we set dry command files wont get changed and the action fails if there are unprettified files.
           dry: True
-          prettier_options: --check --ignore-path  .prettierignore --config .prettierrc
+          prettier_options: --check --ignore-path  ./frontend/prettierignore ./frontend --config ./frontend/prettierrc
