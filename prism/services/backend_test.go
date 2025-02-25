@@ -162,7 +162,7 @@ func compareReport(t *testing.T, report api.Report, expected string) {
 
 func checkListReports(t *testing.T, backend http.Handler, user string, expected []string) {
 	var reports []api.Report
-	if err := Get(backend, "/report/list", user, &reports); err != nil {
+	if err := Get(backend, "/report/author/list", user, &reports); err != nil {
 		t.Fatal(err)
 	}
 
@@ -188,19 +188,19 @@ func checkListReports(t *testing.T, backend http.Handler, user string, expected 
 
 func getReport(backend http.Handler, user string, id uuid.UUID) (api.Report, error) {
 	var res api.Report
-	err := Get(backend, "/report/"+id.String(), user, &res)
+	err := Get(backend, "/report/author/"+id.String(), user, &res)
 	return res, err
 }
 
 func createReport(backend http.Handler, user, name string) (api.CreateReportResponse, error) {
-	req := api.CreateReportRequest{
+	req := api.CreateAuthorReportRequest{
 		AuthorId:   name + "-id",
 		AuthorName: name + "-name",
 		Source:     api.OpenAlexSource,
 	}
 
 	var res api.CreateReportResponse
-	err := Post(backend, "/report/create", user, req, &res)
+	err := Post(backend, "/report/author/create", user, req, &res)
 	return res, err
 }
 
@@ -393,7 +393,7 @@ func TestCheckDisclosure(t *testing.T) {
 	}
 	writer.Close()
 
-	endpoint := fmt.Sprintf("/report/%s/check-disclosure", reportResp.Id.String())
+	endpoint := fmt.Sprintf("/report/author/%s/check-disclosure", reportResp.Id.String())
 	req := httptest.NewRequest("POST", endpoint, &buf)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Add("Authorization", "Bearer "+user)
@@ -481,7 +481,7 @@ func TestDownloadReportAllFormats(t *testing.T) {
 
 	formats := []string{"csv", "pdf", "excel"}
 	for _, format := range formats {
-		endpoint := fmt.Sprintf("/report/%s/download?format=%s", reportResp.Id.String(), format)
+		endpoint := fmt.Sprintf("/report/author/%s/download?format=%s", reportResp.Id.String(), format)
 		req := httptest.NewRequest("GET", endpoint, nil)
 		req.Header.Add("Authorization", "Bearer "+user)
 		w := httptest.NewRecorder()

@@ -20,10 +20,15 @@ type Report struct {
 	Content ReportContent
 }
 
-type CreateReportRequest struct {
+type CreateAuthorReportRequest struct {
 	AuthorId   string
 	AuthorName string
 	Source     string
+}
+
+type CreateUniversityReportRequest struct {
+	UniversityId   string
+	UniversityName string
 }
 
 type CreateReportResponse struct {

@@ -9,13 +9,13 @@ Unless stated otherwise, the following apply to all endpoints.
 
 # Report Endpoints
 
-## List Reports
+## List Author Reports
 
 | Method | Path | Auth Required | Permissions |
 | ------ | ---- | ------------- | ----------  |
-| `GET` | `/api/v1/report/list` | Yes | Token for Keycloak User Realm |
+| `GET` | `/api/v1/report/author/list` | Yes | Token for Keycloak User Realm |
 
-Lists all reports created by the user. The user id is determined from the provided access token.
+Lists all author reports created by the user. The user id is determined from the provided access token.
 
 __Example Request__: 
 ```
@@ -45,13 +45,13 @@ Note: that the field `Status` will be one of `queued`, `in-progress`, `failed`, 
 ]
 ```
 
-## Create a Report
+## Create an Author Report
 
 | Method | Path | Auth Required | Permissions |
 | ------ | ---- | ------------- | ----------  |
-| `POST` | `/api/v1/report/create` | Yes | Token for Keycloak User Realm |
+| `POST` | `/api/v1/report/author/create` | Yes | Token for Keycloak User Realm |
 
-Create a new report. The user id is determined from the provided access token.
+Create a new author report. The user id is determined from the provided access token.
 
 __Example Request__: 
 ```json
@@ -68,13 +68,13 @@ __Example Response__:
 }
 ```
 
-## Get a Report
+## Get an Author Report
 
 | Method | Path | Auth Required | Permissions |
 | ------ | ---- | ------------- | ----------  |
-| `GET` | `/api/v1/report/{report_id}` | Yes | Token for Keycloak User Realm |
+| `GET` | `/api/v1/report/author/{report_id}` | Yes | Token for Keycloak User Realm |
 
-Gets a report. The user must be the same one who create the report. 
+Gets an author report. The user must be the same one who create the report. 
 
 __Example Request__: 
 ```
@@ -123,7 +123,7 @@ No response body
 
 | Method | Path | Auth Required | Permissions |
 | ------ | ---- | ------------- | ----------  |
-| `POST` | `/api/v1/report/{report_id}/check-disclosure` | Yes | Token for Keycloak User Realm |
+| `POST` | `/api/v1/report/author/{report_id}/check-disclosure` | Yes | Token for Keycloak User Realm |
 
 Checks for the disclosure of flagged details within a report. The process involves scanning one or more uploaded files for text that matches tokens extracted from the report’s flag details. If a token is found in any file’s text, the corresponding flag will be marked as disclosed.
 
@@ -169,7 +169,7 @@ __Example Response__:
 
 | Method | Path | Auth Required | Permissions |
 | ------ | ---- | ------------- | ----------  |
-| `GET` | `/api/v1/report/{report_id}/download` | Yes | Token for Keycloak User Realm |
+| `GET` | `/api/v1/report/author/{report_id}/download` | Yes | Token for Keycloak User Realm |
 
 Downloads a completed report in the requested format. The report status must be complete in order for the report to be downloadable.
 
@@ -197,6 +197,114 @@ __Example Request__:
 **Response Body:**
 
 The body contains the raw bytes of the generated report file.
+
+## Create a University Report
+
+| Method | Path | Auth Required | Permissions |
+| ------ | ---- | ------------- | ----------  |
+| `POST` | `/api/v1/report/university/create` | Yes | Token for Keycloak User Realm |
+
+Create a new university report. The user id is determined from the provided access token.
+
+__Example Request__: 
+```json
+{
+    "UniversityId": "university name",
+    "UniversityName": "university id",
+}
+```
+__Example Response__:
+```json
+{
+    "Id": "f9589b57-4b73-409a-98b8-a97b0ca5d936"
+}
+```
+
+## Get a University Report
+
+| Method | Path | Auth Required | Permissions |
+| ------ | ---- | ------------- | ----------  |
+| `GET` | `/api/v1/report/university/{report_id}` | Yes | Token for Keycloak User Realm |
+
+Gets an university report. The user must be the same one who create the report. 
+
+__Example Request__: 
+```
+No request body
+```
+__Example Response__:
+
+Notes: 
+- The report flags will update as the author reports are completed (if not already complete).
+- The `FlagCount` for each author entry in each flag gives the number of flags of that type for the given author. 
+- To get an author report from the results you can simply pass the `AuthorId`, `AuthorName`, and `Source` fields to the `/report/author/create` endpoint. The author report will be cached, so it will be displayed immediately after creation. 
+```json
+{
+    "Id": "e42ba4dd-f56b-4916-835b-034679df2d4b",
+    "CreatedAt": "2025-02-11T20:21:49.387547Z",
+    "UniversityId": "university id",
+    "UniversityName": "university name",
+    "Status": "complete",
+    "Content": {
+        "AssociationsWithDeniedEntities": [
+            {
+                "AuthorId": "author id",
+                "AuthorName": "author name",
+                "Source": "source",
+                "FlagCount": 2
+            }
+        ],
+        "AuthorAffiliations": [
+            {
+                "AuthorId": "author id",
+                "AuthorName": "author name",
+                "Source": "source",
+                "FlagCount": 2
+            }
+        ],
+        "CoauthorAffiliations": [
+            {
+                "AuthorId": "author id",
+                "AuthorName": "author name",
+                "Source": "source",
+                "FlagCount": 2
+            }
+        ],
+        "HighRiskFunders": [
+            {
+                "AuthorId": "author id",
+                "AuthorName": "author name",
+                "Source": "source",
+                "FlagCount": 2
+            }
+        ],
+        "MiscHighRiskAssociations": [
+            {
+                "AuthorId": "author id",
+                "AuthorName": "author name",
+                "Source": "source",
+                "FlagCount": 2
+            }
+        ],
+        "PotentialAuthorAffiliations": [
+            {
+                "AuthorId": "author id",
+                "AuthorName": "author name",
+                "Source": "source",
+                "FlagCount": 2
+            }
+        ],
+        "TalentContracts": [
+            {
+                "AuthorId": "author id",
+                "AuthorName": "author name",
+                "Source": "source",
+                "FlagCount": 2
+            }
+        ]
+    }
+}
+```
 
 # License Endpoints
 
