@@ -1,38 +1,44 @@
 import React, { useEffect, useRef, useState } from 'react';
 import RelationGraph from 'relation-graph-react';
 import {
-    Dialog, DialogTitle, DialogContent, Divider,
-    Card, CardContent, Typography, Collapse, IconButton, Link
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Divider,
+  Card,
+  CardContent,
+  Typography,
+  Collapse,
+  IconButton,
+  Link,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { onFlagsUpdate } from '../../../services/streamStore';
-import {
-    AUTHOR_AFFILIATIONS
-} from "../../../constants/constants.js"
+import { AUTHOR_AFFILIATIONS } from '../../../constants/constants.js';
 
 function getNodeTitle(flagType, flag) {
-    if (flagType == AUTHOR_AFFILIATIONS) {
-        return flag.Affiliations[0];
-    } else if (flag.Work) {
-        return flag.Work.DisplayName;
-    } else if (flag.University) {
-        return flag.University;
-    } else if (flag.DocTitle) {
-        return flag.DocTitle;
-    }
-    return "";
+  if (flagType == AUTHOR_AFFILIATIONS) {
+    return flag.Affiliations[0];
+  } else if (flag.Work) {
+    return flag.Work.DisplayName;
+  } else if (flag.University) {
+    return flag.University;
+  } else if (flag.DocTitle) {
+    return flag.DocTitle;
+  }
+  return '';
 }
 
 function getNodeUrl(flag) {
-    if (flag.Work) {
-        return flag.Work.WorkUrl;
-    } else if (flag.UniversityUrl) {
-        return flag.UniversityUrl;
-    } else if (flag.DocUrl) {
-        return flag.DocUrl;
-    }
-    return "";
+  if (flag.Work) {
+    return flag.Work.WorkUrl;
+  } else if (flag.UniversityUrl) {
+    return flag.UniversityUrl;
+  } else if (flag.DocUrl) {
+    return flag.DocUrl;
+  }
+  return '';
 }
 
 function convertDataToGraphFormat(authorName, reportContent) {
@@ -315,6 +321,7 @@ function generateVisibleGraphData(data, parentId = null, level = 0) {
             levelNodePairs = [...levelNodePairs, ...childGraph.levelNodePairs];
         }
     }
+  }
 
     return { nodes, lines, rootId: 'a', levelNodePairs };
 }
@@ -404,6 +411,36 @@ function generateGraphData(data) {
 }
 
 const Demo = ({ authorName, reportContent }) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedNode, setSelectedNode] = useState(null);
+  const [expandedChildren, setExpandedChildren] = useState(false);
+
+  const graphRef = useRef(null);
+  const graphOptions = {
+    // Here you can refer to the parameters in "Graph Graph" for settings
+  };
+
+  const [rootId, nodes, edges] = constructGraph(authorName, reportContent);
+
+  console.log('root', rootId);
+  console.log('nodes', nodes);
+  console.log('edges', edges);
+  // useEffect(() => {
+  //     const unsubscribe = onFlagsUpdate((flags) => {
+  //         setGraphData(flags);
+  //     });
+  //     return () => unsubscribe();
+  // }, []);
+
+  useEffect(() => {
+    if (reportContent) {
+      const graphInstance = graphRef.current.getInstance();
+      graphInstance.setJsonData({ rootId: rootId, nodes: nodes, lines: edges }).then(() => {
+        graphInstance.moveToCenter();
+        graphInstance.zoomToFit();
+      });
+    }
+  }, [reportContent]);
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedNode, setSelectedNode] = useState(null);

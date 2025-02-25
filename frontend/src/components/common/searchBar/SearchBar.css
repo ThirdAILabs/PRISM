@@ -1,71 +1,71 @@
 .autocomplete-search-bar {
-    width: 100%;
+  width: 100%;
 }
 
 .autocomplete-search-bar-title {
-    width: 100%;
-    text-align: left;
-    font-size: 24px;
-    font-weight: bold;
-    color: black;
-    padding-bottom: 5px;
+  width: 100%;
+  text-align: left;
+  font-size: 24px;
+  font-weight: bold;
+  color: black;
+  padding-bottom: 5px;
 }
 
 .search-bar {
-    width: 100%;
-    background-color: rgb(245, 240, 240);
-    border: none;
-    outline: none;
-    color: black;
+  width: 100%;
+  background-color: rgb(245, 240, 240);
+  border: none;
+  outline: none;
+  color: black;
 }
 
 .suggestion-container {
-    width: 100%;
-    background-color: rgb(245, 240, 240);
-    padding: 10px;
-    border-radius: 2px 2px 10px 10px;
-    color: black;
+  width: 100%;
+  background-color: rgb(245, 240, 240);
+  padding: 10px;
+  border-radius: 2px 2px 10px 10px;
+  color: black;
 }
 
 .suggestion {
-    padding: 5px;
-    text-align: left;
-    color: black;
+  padding: 5px;
+  text-align: left;
+  color: black;
 }
 
 .suggestion:hover {
-    background-color: rgb(225, 220, 220);
-    border-radius: 2px;
-    cursor: pointer;
-    color: black;
+  background-color: rgb(225, 220, 220);
+  border-radius: 2px;
+  cursor: pointer;
+  color: black;
 }
 
 .author-institution-search-bar {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 .author-institution-search-bar-container {
-    width: 40%;
+  width: 40%;
 }
 
 .author-institution-search-button-container {
-    width: 10%;
-    padding-top: 36px;
+  width: 10%;
+  padding-top: 36px;
 }
 
 .author-institution-search-button {
-    width: 100%;
-    padding: 10px;
-    border-radius: 50px;
-    border: 2px solid #45037b;
-    background-color: #59059e;
-    color: white;
+  width: 100%;
+  padding: 10px;
+  border-radius: 50px;
+  border: 2px solid #45037b;
+  background-color: #59059e;
+  color: white;
 }
 
 .author-institution-search-button:hover {
-    background-color: rgba(138, 24, 169, 0.5);
-    transition: background-color 0.3s ease;
+  background-color: rgba(138, 24, 169, 0.5);
+  transition: background-color 0.3s ease;
 }
