@@ -473,7 +473,7 @@ func TestProcessorAcknowledgements(t *testing.T) {
 			flag := flag.(*api.HighRiskFunderFlag)
 			if flag.Work.WorkId == "https://openalex.org/W4384197626" {
 				found = true
-				if !flag.FromAcknowledgements || !strings.Contains(flag.Funders[0], "Zhejiang University") {
+				if len(flag.RawAcknowledements) == 0 || !strings.Contains(flag.Funders[0], "Zhejiang University") {
 					t.Fatal("incorrect acknowledgement found")
 				}
 			}
