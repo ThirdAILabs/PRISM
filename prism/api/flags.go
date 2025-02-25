@@ -198,10 +198,6 @@ func (flag *HighRiskFunderFlag) Type() string {
 	return HighRiskFunderType
 }
 
-func (flag *HighRiskFunderFlag) Type() string {
-	return HighRiskFunderType
-}
-
 func (flag *HighRiskFunderFlag) Key() string {
 	// Assumes 1 flag per work
 	return fmt.Sprintf("high-risk-funder-%s", flag.Work.WorkId)
