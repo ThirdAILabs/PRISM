@@ -19,6 +19,8 @@ import { reportService } from '../../../api/reports.js';
 import styled from 'styled-components';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 
 
 const FLAG_ORDER = [
@@ -509,9 +511,17 @@ const ItemDetails = () => {
     const [showUndisclosed, setShowUndisclosed] = useState(true);
     const disclosedItems = (reportContent[review] || []).filter(item => item.Disclosed);
     const undisclosedItems = (reportContent[review] || []).filter(item => !item.Disclosed);
+    const [sortOrder, setSortOrder] = useState('asc'); // default to ascending
+
 
     function renderFlags(items) {
-        return items.map((flag, index) => {
+        const sortedItems = [...items].sort((a, b) => {
+          const dateA = a.Work.PublicationDate ? new Date(a.Work.PublicationDate).getTime() : 0;
+          const dateB = b.Work.PublicationDate ? new Date(b.Work.PublicationDate).getTime() : 0;
+          return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+        });
+        
+        return sortedItems.map((flag, index) => {
           switch (review) {
             case TALENT_CONTRACTS:
               return acknowledgementFlag(flag, index);
@@ -531,7 +541,7 @@ const ItemDetails = () => {
               return null;
           }
         });
-      }
+    }   
 
     function PRFlag(flag, index) {
         const connections = flag.Connections || [];
@@ -904,7 +914,24 @@ const ItemDetails = () => {
                     }
                 </div>
                 {review && (
-                <div style={{ width: '100%', textAlign: 'center', marginTop: '50px'}}>
+                <div style={{ width: '100%', textAlign: 'center', marginTop: '50px' }}>
+                    <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                    <span style={{ marginRight: '10px' }}>Sort by Date:</span>
+                    <ArrowUpwardIcon 
+                        onClick={() => setSortOrder('asc')}
+                        style={{
+                        cursor: 'pointer',
+                        color: sortOrder === 'asc' ? 'black' : 'lightgray'
+                        }}
+                    />
+                    <ArrowDownwardIcon 
+                        onClick={() => setSortOrder('desc')}
+                        style={{
+                        cursor: 'pointer',
+                        color: sortOrder === 'desc' ? 'black' : 'lightgray'
+                        }}
+                    />
+                    </div>
                     {disclosedItems.length > 0 ? (
                     <>
                         <button
@@ -922,7 +949,7 @@ const ItemDetails = () => {
                             justifyContent: 'center',
                             width: '200px',
                             fontSize: '16px',
-                            transition: 'background-color 0.3s, color 0.3s',
+                            transition: 'background-color 0.3s, color 0.3s'
                         }}
                         >
                         Disclosed ({disclosedItems.length})
@@ -940,7 +967,7 @@ const ItemDetails = () => {
                             margin: '0 auto',
                             display: 'flex',
                             flexDirection: 'column',
-                            alignItems: 'center',
+                            alignItems: 'center'
                             }}
                         >
                             {renderFlags(disclosedItems)}
@@ -956,7 +983,7 @@ const ItemDetails = () => {
                         textAlign: 'center',
                         padding: '10px 20px',
                         border: '2px solid green',
-                        borderRadius: '20px',
+                        borderRadius: '20px'
                         }}
                     >
                         Disclosed (0)
@@ -980,7 +1007,7 @@ const ItemDetails = () => {
                             justifyContent: 'center',
                             width: '200px',
                             fontSize: '16px',
-                            transition: 'background-color 0.3s, color 0.3s',
+                            transition: 'background-color 0.3s, color 0.3s'
                         }}
                         >
                         Undisclosed ({undisclosedItems.length})
@@ -998,7 +1025,7 @@ const ItemDetails = () => {
                             margin: '0 auto',
                             display: 'flex',
                             flexDirection: 'column',
-                            alignItems: 'center',
+                            alignItems: 'center'
                             }}
                         >
                             {renderFlags(undisclosedItems)}
@@ -1014,7 +1041,7 @@ const ItemDetails = () => {
                         textAlign: 'center',
                         padding: '10px 20px',
                         border: '2px solid red',
-                        borderRadius: '20px',
+                        borderRadius: '20px'
                         }}
                     >
                         Undisclosed (0)
@@ -1022,6 +1049,7 @@ const ItemDetails = () => {
                     )}
                 </div>
                 )}
+
             </>
             }
 
