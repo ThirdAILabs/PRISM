@@ -253,13 +253,23 @@ const ItemDetails = () => {
                 <p>
                     {get_paper_url(flag)}
                     {" "} is funded by the following entities of concern:
-                    {flag.FromAcknowledgements && <p>Acknowledgements Text:</p>}
                     <ul className='bulleted-list'>
                         {flag.Funders.map((item, index2) => {
                             const key = `${index} ${index2}`;
                             return <li key={key}><a>{item}</a></li>
                         })}
                     </ul>
+                    {flag.RawAcknowledements.length > 0 && (
+                        <>
+                            <p>Acknowledgements Text:</p>
+                            <ul>
+                                {flag.RawAcknowledements.map((item, index2) => {
+                                    const key = `ack-${index} ${index2}`;
+                                    return <li key={key}>{item}</li>
+                                })}
+                            </ul>
+                        </>
+                    )}
                 </p>
                 {flag.Disclosed ? (
                     <button type="button" className="btn btn-success">Disclosed</button>

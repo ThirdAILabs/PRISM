@@ -67,7 +67,11 @@ func (flag *TalentContractFlag) Key() string {
 }
 
 func (flag *TalentContractFlag) GetEntities() []string {
-	return flag.RawAcknowledements
+	entities := make([]string, 0, len(flag.Entities))
+	for _, ack := range flag.Entities {
+		entities = append(entities, ack.Entity)
+	}
+	return entities
 }
 
 func (flag *TalentContractFlag) GetHeading() string {
@@ -106,7 +110,11 @@ func (flag *AssociationWithDeniedEntityFlag) Key() string {
 }
 
 func (flag *AssociationWithDeniedEntityFlag) GetEntities() []string {
-	return flag.RawAcknowledements
+	entities := make([]string, 0, len(flag.Entities))
+	for _, ack := range flag.Entities {
+		entities = append(entities, ack.Entity)
+	}
+	return entities
 }
 
 func (flag *AssociationWithDeniedEntityFlag) GetHeading() string {
@@ -133,10 +141,10 @@ func (flag *AssociationWithDeniedEntityFlag) After(t time.Time) bool {
 
 type HighRiskFunderFlag struct {
 	DisclosableFlag
-	Message              string
-	Work                 WorkSummary
-	Funders              []string
-	FromAcknowledgements bool
+	Message            string
+	Work               WorkSummary
+	Funders            []string
+	RawAcknowledements []string
 }
 
 func (flag *HighRiskFunderFlag) Key() string {
