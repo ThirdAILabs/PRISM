@@ -169,7 +169,7 @@ const SearchComponent = () => {
         ></div>
       )}
       {hasSearched && (
-        <TodoListComponent results={openAlexResults} canLoadMore={false} loadMore={() => {}} />
+        <TodoListComponent results={openAlexResults} canLoadMore={false} loadMore={() => { }} />
       )}
 
       {showResultHeaders && (
@@ -187,7 +187,7 @@ const SearchComponent = () => {
         ></div>
       )}
       {hasSearched && (
-        <TodoListComponent results={scholarResults} canLoadMore={false} loadMore={() => {}} />
+        <TodoListComponent results={scholarResults} canLoadMore={false} loadMore={() => { }} />
       )}
     </div>
   );
