@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import TodoListComponent from '../TodoListComponent';
 import { AuthorInstiutionSearchBar } from '../common/searchBar/SearchBar';
-import Logo from "../../assets/images/logo-coloured.png";
+import Logo from "../../assets/images/prism-logo-2.png";
 import "../common/searchBar/SearchBar.css";
 import "../common/tools/button/button1.css"
 import UserService from '../../services/userService';
@@ -126,10 +126,9 @@ const SearchComponent = () => {
           }} onClick={UserService.doLogout}>Logout</button>
       </div>
 
-      {/* <div style={{ textAlign: "center", marginTop: "12.5%", animation: "fade-in 0.75s" }}> */}
-      <div style={{ textAlign: "center", marginTop: "5.5%", animation: "fade-in 0.75s" }}>
-        <img src={Logo} style={{ width: "160px", marginTop: "0%", animation: "fade-in 0.5s" }} />
-        <h1 style={{ fontWeight: "bold", marginTop: 20, animation: "fade-in 0.75s" }}>Welcome to Prism</h1>
+      <div style={{ textAlign: "center", marginTop: "3%", animation: "fade-in 0.75s" }}>
+        <img src={Logo} style={{ width: "320px", marginTop: "1%", marginBottom: "1%", animation: "fade-in 0.5s" }} />
+        <h1 style={{ fontWeight: "bold", marginTop: 20, animation: "fade-in 0.75s" }}>Welcome</h1>
         <div style={{ animation: "fade-in 1s" }}>
           <div className='d-flex justify-content-center align-items-center'>
             <div style={{ marginTop: 10, color: "#888888" }}>We help you comply with research security requirements by automating author assessments.</div>

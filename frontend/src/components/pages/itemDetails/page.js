@@ -878,26 +878,31 @@ const buttonStyles = {
 const StyledWrapper = styled.div`
 position: relative;
 
-  .cssbuttons-io-button {
+    .cssbuttons-io-button {
+    position: relative;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+    padding-block: 0.5rem;
+    padding-inline: 0.75rem;
+    background-color: rgb(0 107 179);
+    border-radius: 9999px;
     display: flex;
     align-items: center;
-    font-family: inherit;
+    justify-content: center;
     cursor: pointer;
-    font-weight: 500;
-    font-size: 17px;
-    padding: 0.8em 1.5em 0.8em 1.2em;
-    color: white;
-    background: #ad5389;
-    background: linear-gradient(
-      0deg,
-      rgb(174, 4, 4) 0%,
+    color: #ffff;
+    gap: 10px;
+    font-weight: bold;
+    border: 3px solid #ffffff4d;
+    outline: none;
+    overflow: hidden;
+    font-size: 15px;
+}
 
-      rgb(39, 18, 197) 100%
-    );
-    border: none;
-    box-shadow: 0 0.7em 1.5em -0.5em #4d36d0be;
-    letter-spacing: 0.05em;
-    border-radius: 20em;
+  
+  .cssbuttons-io-button:hover {
+      transform: scale(1.009);
+      border-color: #fff9;
   }
   `;
 
