@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Check Prettier version
+        run: npx prettier --version
       - name: Check prettier formatting for frontend
         uses: creyD/prettier_action@v4.3
         with:
