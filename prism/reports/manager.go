@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 const (
@@ -75,7 +76,7 @@ func (r *ReportManager) CreateReport(licenseId, userId uuid.UUID, authorId, auth
 
 	err := r.db.Transaction(func(txn *gorm.DB) error {
 		var report schema.AuthorReport
-		result := txn.Limit(1).Find(&report, "author_id = ? AND source = ?", authorId, source)
+		result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Limit(1).Find(&report, "author_id = ? AND source = ?", authorId, source)
 		if result.Error != nil {
 			slog.Error("error checking for existing report", "error", result.Error)
 			return ErrReportCreationFailed
@@ -139,7 +140,9 @@ func (r *ReportManager) GetReport(userId, reportId uuid.UUID) (api.Report, error
 	var report schema.UserAuthorReport
 
 	if err := r.db.Transaction(func(txn *gorm.DB) error {
-		if err := txn.Preload("Report").Preload("Report.Flags").First(&report, "id = ?", reportId).Error; err != nil {
+		if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Preload("Report").Preload("Report.Flags").
+			First(&report, "id = ?", reportId).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return ErrReportNotFound
 			}
@@ -176,7 +179,9 @@ func (r *ReportManager) GetNextReport() (*ReportUpdateTask, error) {
 	var report schema.AuthorReport
 
 	err := r.db.Transaction(func(txn *gorm.DB) error {
-		result := txn.Limit(1).Order("queued_at ASC").Find(&report, "status = ?", schema.ReportQueued)
+		result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Limit(1).Order("queued_at ASC").
+			Find(&report, "status = ?", schema.ReportQueued)
 		if result.Error != nil {
 			slog.Error("error getting next report from queue", "error", result.Error)
 			return ErrReportAccessFailed
@@ -234,7 +239,7 @@ func (r *ReportManager) UpdateReport(id uuid.UUID, status string, updateTime tim
 	return r.db.Transaction(func(txn *gorm.DB) error {
 		var report schema.AuthorReport
 
-		if err := txn.Preload("Flags").First(&report, "id = ?", id).Error; err != nil {
+		if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Preload("Flags").First(&report, "id = ?", id).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				slog.Error("cannot update status of report, report not found", "report_id", id, "status", status)
 				return ErrReportNotFound
