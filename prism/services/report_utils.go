@@ -5,6 +5,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"prism/prism/api"
+	"sort"
 	"strings"
 	"time"
 
@@ -102,8 +103,6 @@ func generateCSV(report api.Report) ([]byte, error) {
 		{"Report ID", report.Id.String()},
 		{"Created At", report.CreatedAt.Format(time.RFC3339)},
 		{"Author Name", report.AuthorName},
-		{"Start Year", fmt.Sprintf("%d", report.StartYear)},
-		{"End Year", fmt.Sprintf("%d", report.EndYear)},
 	}
 
 	if err := writer.WriteAll(rows); err != nil {
@@ -114,27 +113,20 @@ func generateCSV(report api.Report) ([]byte, error) {
 		return nil, err
 	}
 
-	appendFlags := func(flags []api.Flag) error {
+	flagGroups := report.Content.GroupFlags()
+	for _, flags := range flagGroups {
 		for _, flag := range flags {
 			if err := writer.Write([]string{"Flag Title", flag.GetHeading()}); err != nil {
-				return err
+				return nil, err
 			}
 			for _, kv := range flag.GetDetailFields() {
 				if err := writer.Write([]string{kv.Key, kv.Value}); err != nil {
-					return err
+					return nil, err
 				}
 			}
 			if err := writer.Write([]string{"", ""}); err != nil {
-				return err
+				return nil, err
 			}
-		}
-		return nil
-	}
-
-	flagGroups := report.Content.GroupFlags()
-	for _, flags := range flagGroups {
-		if err := appendFlags(flags); err != nil {
-			return nil, err
 		}
 	}
 
@@ -157,8 +149,6 @@ func generateExcel(report api.Report) ([]byte, error) {
 		{"Report ID", report.Id.String()},
 		{"Created At", report.CreatedAt.Format(time.RFC3339)},
 		{"Author Name", report.AuthorName},
-		{"Start Year", report.StartYear},
-		{"End Year", report.EndYear},
 	}
 
 	for i, row := range summaryData {
@@ -171,39 +161,44 @@ func generateExcel(report api.Report) ([]byte, error) {
 		}
 	}
 
-	if len(report.Content.TalentContracts) > 0 {
-		if err := createSheetForTalentContracts(f, report.Content.TalentContracts); err != nil {
+	flagGroups := report.Content.GroupFlags()
+	for groupName, flags := range flagGroups {
+		sheetName := sanitizeSheetName(groupName)
+		if _, err := f.NewSheet(sheetName); err != nil {
 			return nil, err
 		}
-	}
-	if len(report.Content.AssociationsWithDeniedEntities) > 0 {
-		if err := createSheetForAssociations(f, report.Content.AssociationsWithDeniedEntities); err != nil {
-			return nil, err
+
+		if len(flags) == 0 {
+			continue
 		}
-	}
-	if len(report.Content.HighRiskFunders) > 0 {
-		if err := createSheetForHighRiskFunders(f, report.Content.HighRiskFunders); err != nil {
-			return nil, err
+
+		details := flags[0].GetDetailFields()
+		headers := make([]string, len(details))
+		for i, kv := range details {
+			headers[i] = kv.Key
 		}
-	}
-	if len(report.Content.AuthorAffiliations) > 0 {
-		if err := createSheetForAuthorAffiliations(f, report.Content.AuthorAffiliations); err != nil {
-			return nil, err
+
+		for i, header := range headers {
+			cell, err := excelize.CoordinatesToCellName(i+1, 1)
+			if err != nil {
+				return nil, err
+			}
+			if err := f.SetCellValue(sheetName, cell, header); err != nil {
+				return nil, err
+			}
 		}
-	}
-	if len(report.Content.PotentialAuthorAffiliations) > 0 {
-		if err := createSheetForPotentialAuthorAffiliations(f, report.Content.PotentialAuthorAffiliations); err != nil {
-			return nil, err
-		}
-	}
-	if len(report.Content.MiscHighRiskAssociations) > 0 {
-		if err := createSheetForMiscHighRiskAssociations(f, report.Content.MiscHighRiskAssociations); err != nil {
-			return nil, err
-		}
-	}
-	if len(report.Content.CoauthorAffiliations) > 0 {
-		if err := createSheetForCoauthorAffiliations(f, report.Content.CoauthorAffiliations); err != nil {
-			return nil, err
+
+		for j, flag := range flags {
+			rowData := flag.GetDetailFields()
+			for i, kv := range rowData {
+				cell, err := excelize.CoordinatesToCellName(i+1, j+2)
+				if err != nil {
+					return nil, err
+				}
+				if err := f.SetCellValue(sheetName, cell, kv.Value); err != nil {
+					return nil, err
+				}
+			}
 		}
 	}
 
@@ -229,131 +224,6 @@ func sanitizeSheetName(name string) string {
 		name = name[:31]
 	}
 	return name
-}
-
-func createSheetForFlags[T api.Flag](f *excelize.File, flags []T, headers []string, rowExtractor func(flag T) []interface{}) error {
-	sheetName := sanitizeSheetName(flags[0].GetHeading())
-	if _, err := f.NewSheet(sheetName); err != nil {
-		return err
-	}
-	for col, header := range headers {
-		cell, err := excelize.CoordinatesToCellName(col+1, 1)
-		if err != nil {
-			return err
-		}
-		if err := f.SetCellValue(sheetName, cell, header); err != nil {
-			return err
-		}
-	}
-	for i, flag := range flags {
-		rowNum := i + 2
-		rowData := rowExtractor(flag)
-		for col, value := range rowData {
-			cell, err := excelize.CoordinatesToCellName(col+1, rowNum)
-			if err != nil {
-				return err
-			}
-			if err := f.SetCellValue(sheetName, cell, value); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func createSheetForTalentContracts(f *excelize.File, flags []*api.TalentContractFlag) error {
-	headers := []string{"Disclosed", "Display Name", "Work URL", "Publication Year", "Acknowledgements"}
-	return createSheetForFlags[*api.TalentContractFlag](f, flags, headers, func(flag *api.TalentContractFlag) []interface{} {
-		return []interface{}{
-			flag.Disclosed,
-			flag.Work.DisplayName,
-			flag.Work.WorkUrl,
-			flag.Work.PublicationYear,
-			strings.Join(flag.RawAcknowledements, ", "),
-		}
-	})
-}
-
-func createSheetForAssociations(f *excelize.File, flags []*api.AssociationWithDeniedEntityFlag) error {
-	headers := []string{"Disclosed", "Display Name", "Work URL", "Publication Year", "Acknowledgements"}
-	return createSheetForFlags[*api.AssociationWithDeniedEntityFlag](f, flags, headers, func(flag *api.AssociationWithDeniedEntityFlag) []interface{} {
-		return []interface{}{
-			flag.Disclosed,
-			flag.Work.DisplayName,
-			flag.Work.WorkUrl,
-			flag.Work.PublicationYear,
-			strings.Join(flag.RawAcknowledements, ", "),
-		}
-	})
-}
-
-func createSheetForHighRiskFunders(f *excelize.File, flags []*api.HighRiskFunderFlag) error {
-	headers := []string{"Disclosed", "Display Name", "Work URL", "Publication Year", "Funders"}
-	return createSheetForFlags[*api.HighRiskFunderFlag](f, flags, headers, func(flag *api.HighRiskFunderFlag) []interface{} {
-		return []interface{}{
-			flag.Disclosed,
-			flag.Work.DisplayName,
-			flag.Work.WorkUrl,
-			flag.Work.PublicationYear,
-			strings.Join(flag.Funders, ", "),
-		}
-	})
-}
-
-func createSheetForAuthorAffiliations(f *excelize.File, flags []*api.AuthorAffiliationFlag) error {
-	headers := []string{"Disclosed", "Display Name", "Work URL", "Publication Year", "Affiliations"}
-	return createSheetForFlags[*api.AuthorAffiliationFlag](f, flags, headers, func(flag *api.AuthorAffiliationFlag) []interface{} {
-		return []interface{}{
-			flag.Disclosed,
-			flag.Work.DisplayName,
-			flag.Work.WorkUrl,
-			flag.Work.PublicationYear,
-			strings.Join(flag.Affiliations, ", "),
-		}
-	})
-}
-
-func createSheetForPotentialAuthorAffiliations(f *excelize.File, flags []*api.PotentialAuthorAffiliationFlag) error {
-	headers := []string{"Disclosed", "University", "University URL"}
-	return createSheetForFlags[*api.PotentialAuthorAffiliationFlag](f, flags, headers, func(flag *api.PotentialAuthorAffiliationFlag) []interface{} {
-		return []interface{}{
-			flag.Disclosed,
-			flag.University,
-			flag.UniversityUrl,
-		}
-	})
-}
-
-func createSheetForMiscHighRiskAssociations(f *excelize.File, flags []*api.MiscHighRiskAssociationFlag) error {
-	headers := []string{"Disclosed", "Doc Title", "Doc URL", "Doc Entities", "Entity Mentioned", "Frequent Coauthor"}
-	return createSheetForFlags[*api.MiscHighRiskAssociationFlag](f, flags, headers, func(flag *api.MiscHighRiskAssociationFlag) []interface{} {
-		frequentCoauthor := ""
-		if flag.FrequentCoauthor != nil {
-			frequentCoauthor = *flag.FrequentCoauthor
-		}
-		return []interface{}{
-			flag.Disclosed,
-			flag.DocTitle,
-			flag.DocUrl,
-			strings.Join(flag.DocEntities, ", "),
-			flag.EntityMentioned,
-			frequentCoauthor,
-		}
-	})
-}
-
-func createSheetForCoauthorAffiliations(f *excelize.File, flags []*api.CoauthorAffiliationFlag) error {
-	headers := []string{"Disclosed", "Display Name", "Work URL", "Publication Year", "Coauthors", "Affiliations"}
-	return createSheetForFlags[*api.CoauthorAffiliationFlag](f, flags, headers, func(flag *api.CoauthorAffiliationFlag) []interface{} {
-		return []interface{}{
-			flag.Disclosed,
-			flag.Work.DisplayName,
-			flag.Work.WorkUrl,
-			flag.Work.PublicationYear,
-			strings.Join(flag.Coauthors, ", "),
-			strings.Join(flag.Affiliations, ", "),
-		}
-	})
 }
 
 func printWatermark(pdf *gofpdf.Fpdf, text string) {
@@ -395,8 +265,6 @@ func generatePDF(report api.Report) ([]byte, error) {
 		{"Report ID", report.Id.String()},
 		{"Created At", report.CreatedAt.Format(time.RFC3339)},
 		{"Author Name", report.AuthorName},
-		{"Start Year", fmt.Sprintf("%d", report.StartYear)},
-		{"End Year", fmt.Sprintf("%d", report.EndYear)},
 	}
 	pdf.SetFont("Arial", "", 12)
 
@@ -414,6 +282,8 @@ func generatePDF(report api.Report) ([]byte, error) {
 	for flagType := range flagGroups {
 		flagTypes = append(flagTypes, flagType)
 	}
+
+	sort.Strings(flagTypes)
 
 	currentPage := 3
 	var tocLines []string

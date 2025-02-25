@@ -87,23 +87,25 @@ func URLParamUUID(r *http.Request, key string) (uuid.UUID, error) {
 	return id, nil
 }
 
-func errorStatus(err error) int {
-	if errors.Is(err, licensing.ErrMissingLicense) {
+func licensingErrorStatus(err error) int {
+	switch {
+	case errors.Is(err, licensing.ErrMissingLicense):
 		return http.StatusUnprocessableEntity
-	}
-	if errors.Is(err, licensing.ErrExpiredLicense) || errors.Is(err, licensing.ErrDeactivatedLicense) {
+	case errors.Is(err, licensing.ErrExpiredLicense), errors.Is(err, licensing.ErrDeactivatedLicense):
 		return http.StatusForbidden
-	}
-	if errors.Is(err, licensing.ErrLicenseNotFound) {
+	case errors.Is(err, licensing.ErrLicenseNotFound):
 		return http.StatusNotFound
-	}
-	if errors.Is(err, licensing.ErrInvalidLicense) {
+	case errors.Is(err, licensing.ErrInvalidLicense):
 		return http.StatusUnprocessableEntity
 	}
-	if errors.Is(err, reports.ErrReportNotFound) {
+	return http.StatusInternalServerError
+}
+
+func reportErrorStatus(err error) int {
+	switch {
+	case errors.Is(err, reports.ErrReportNotFound):
 		return http.StatusNotFound
-	}
-	if errors.Is(err, reports.ErrUserCannotAccessReport) {
+	case errors.Is(err, reports.ErrUserCannotAccessReport):
 		return http.StatusForbidden
 	}
 	return http.StatusInternalServerError

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"time"
 )
 
 type KeyValue struct {
@@ -25,6 +26,9 @@ type Flag interface {
 	GetDetailFields() []KeyValue
 
 	GetHeading() string
+	Before(time.Time) bool
+
+	After(time.Time) bool
 }
 
 type DisclosableFlag struct {
@@ -40,7 +44,7 @@ type WorkSummary struct {
 	DisplayName     string
 	WorkUrl         string
 	OaUrl           string
-	PublicationYear int
+	PublicationDate time.Time
 }
 
 type AcknowledgementEntity struct {
@@ -75,9 +79,17 @@ func (flag *TalentContractFlag) GetDetailFields() []KeyValue {
 		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
 		{Key: "Title", Value: flag.Work.DisplayName},
 		{Key: "URL", Value: flag.Work.WorkUrl},
-		{Key: "Publication Year", Value: fmt.Sprintf("%d", flag.Work.PublicationYear)},
+		{Key: "Publication Date", Value: flag.Work.PublicationDate.String()},
 		{Key: "Acknowledgements", Value: strings.Join(flag.RawAcknowledements, ", ")},
 	}
+}
+
+func (flag *TalentContractFlag) Before(t time.Time) bool {
+	return flag.Work.PublicationDate.Before(t)
+}
+
+func (flag *TalentContractFlag) After(t time.Time) bool {
+	return flag.Work.PublicationDate.After(t)
 }
 
 type AssociationWithDeniedEntityFlag struct {
@@ -106,9 +118,17 @@ func (flag *AssociationWithDeniedEntityFlag) GetDetailFields() []KeyValue {
 		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
 		{Key: "Paper Title", Value: flag.Work.DisplayName},
 		{Key: "URL", Value: flag.Work.WorkUrl},
-		{Key: "Publication Year", Value: fmt.Sprintf("%d", flag.Work.PublicationYear)},
+		{Key: "Publication Date", Value: flag.Work.PublicationDate.String()},
 		{Key: "Acknowledgements", Value: strings.Join(flag.RawAcknowledements, ", ")},
 	}
+}
+
+func (flag *AssociationWithDeniedEntityFlag) Before(t time.Time) bool {
+	return flag.Work.PublicationDate.Before(t)
+}
+
+func (flag *AssociationWithDeniedEntityFlag) After(t time.Time) bool {
+	return flag.Work.PublicationDate.After(t)
 }
 
 type HighRiskFunderFlag struct {
@@ -137,9 +157,17 @@ func (flag *HighRiskFunderFlag) GetDetailFields() []KeyValue {
 		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
 		{Key: "Paper Title", Value: flag.Work.DisplayName},
 		{Key: "URL", Value: flag.Work.WorkUrl},
-		{Key: "Publication Year", Value: fmt.Sprintf("%d", flag.Work.PublicationYear)},
+		{Key: "Publication Date", Value: flag.Work.PublicationDate.String()},
 		{Key: "Funders", Value: strings.Join(flag.Funders, ", ")},
 	}
+}
+
+func (flag *HighRiskFunderFlag) Before(t time.Time) bool {
+	return flag.Work.PublicationDate.Before(t)
+}
+
+func (flag *HighRiskFunderFlag) After(t time.Time) bool {
+	return flag.Work.PublicationDate.After(t)
 }
 
 type AuthorAffiliationFlag struct {
@@ -167,9 +195,17 @@ func (flag *AuthorAffiliationFlag) GetDetailFields() []KeyValue {
 		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
 		{Key: "Paper Title", Value: flag.Work.DisplayName},
 		{Key: "URL", Value: flag.Work.WorkUrl},
-		{Key: "Publication Year", Value: fmt.Sprintf("%d", flag.Work.PublicationYear)},
+		{Key: "Publication Date", Value: flag.Work.PublicationDate.String()},
 		{Key: "Affiliations", Value: strings.Join(flag.Affiliations, ", ")},
 	}
+}
+
+func (flag *AuthorAffiliationFlag) Before(t time.Time) bool {
+	return flag.Work.PublicationDate.Before(t)
+}
+
+func (flag *AuthorAffiliationFlag) After(t time.Time) bool {
+	return flag.Work.PublicationDate.After(t)
 }
 
 type PotentialAuthorAffiliationFlag struct {
@@ -197,6 +233,16 @@ func (flag *PotentialAuthorAffiliationFlag) GetDetailFields() []KeyValue {
 		{Key: "University", Value: flag.University},
 		{Key: "University URL", Value: flag.UniversityUrl},
 	}
+}
+
+func (flag *PotentialAuthorAffiliationFlag) Before(t time.Time) bool {
+	// TODO: add date information to this flag and check it here
+	return true
+}
+
+func (flag *PotentialAuthorAffiliationFlag) After(t time.Time) bool {
+	// TODO: add date information to this flag and check it here
+	return true
 }
 
 type Connection struct {
@@ -255,6 +301,16 @@ func (flag *MiscHighRiskAssociationFlag) GetDetailFields() []KeyValue {
 	return fields
 }
 
+func (flag *MiscHighRiskAssociationFlag) Before(t time.Time) bool {
+	// TODO: add date information to this flag and check it here
+	return true
+}
+
+func (flag *MiscHighRiskAssociationFlag) After(t time.Time) bool {
+	// TODO: add date information to this flag and check it here
+	return true
+}
+
 type CoauthorAffiliationFlag struct {
 	DisclosableFlag
 	Message      string
@@ -281,10 +337,18 @@ func (flag *CoauthorAffiliationFlag) GetDetailFields() []KeyValue {
 		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
 		{Key: "Paper Title", Value: flag.Work.DisplayName},
 		{Key: "URL", Value: flag.Work.WorkUrl},
-		{Key: "Publication Year", Value: fmt.Sprintf("%d", flag.Work.PublicationYear)},
+		{Key: "Publication Date", Value: flag.Work.PublicationDate.String()},
 		{Key: "Co-authors", Value: strings.Join(flag.Coauthors, ", ")},
 		{Key: "Affiliations", Value: strings.Join(flag.Affiliations, ", ")},
 	}
+}
+
+func (flag *CoauthorAffiliationFlag) Before(t time.Time) bool {
+	return flag.Work.PublicationDate.Before(t)
+}
+
+func (flag *CoauthorAffiliationFlag) After(t time.Time) bool {
+	return flag.Work.PublicationDate.After(t)
 }
 
 type ReportContent struct {
@@ -297,31 +361,23 @@ type ReportContent struct {
 	CoauthorAffiliations           []*CoauthorAffiliationFlag
 }
 
-func castFlags[T Flag](flags []T) []Flag {
-	result := make([]Flag, len(flags))
-	for i, flag := range flags {
-		result[i] = flag
+func addFlags[T Flag](groups map[string][]Flag, flags []T) {
+	for _, flag := range flags {
+		key := flag.GetHeading()
+		groups[key] = append(groups[key], flag)
 	}
-	return result
 }
 
 func (rc *ReportContent) GroupFlags() map[string][]Flag {
 	groups := make(map[string][]Flag)
 
-	addFlags := func(flags []Flag) {
-		for _, flag := range flags {
-			key := flag.GetHeading()
-			groups[key] = append(groups[key], flag)
-		}
-	}
-
-	addFlags(castFlags(rc.TalentContracts))
-	addFlags(castFlags(rc.AssociationsWithDeniedEntities))
-	addFlags(castFlags(rc.HighRiskFunders))
-	addFlags(castFlags(rc.AuthorAffiliations))
-	addFlags(castFlags(rc.PotentialAuthorAffiliations))
-	addFlags(castFlags(rc.MiscHighRiskAssociations))
-	addFlags(castFlags(rc.CoauthorAffiliations))
+	addFlags(groups, rc.TalentContracts)
+	addFlags(groups, rc.AssociationsWithDeniedEntities)
+	addFlags(groups, rc.HighRiskFunders)
+	addFlags(groups, rc.AuthorAffiliations)
+	addFlags(groups, rc.PotentialAuthorAffiliations)
+	addFlags(groups, rc.MiscHighRiskAssociations)
+	addFlags(groups, rc.CoauthorAffiliations)
 
 	return groups
 }
@@ -354,9 +410,17 @@ func (flag *MultipleAffiliationFlag) GetDetailFields() []KeyValue {
 		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
 		{Key: "Paper Title", Value: flag.Work.DisplayName},
 		{Key: "URL", Value: flag.Work.WorkUrl},
-		{Key: "Publication Year", Value: fmt.Sprintf("%d", flag.Work.PublicationYear)},
+		{Key: "Publication Date", Value: flag.Work.PublicationDate.String()},
 		{Key: "Affiliations", Value: strings.Join(flag.Affiliations, ", ")},
 	}
+}
+
+func (flag *MultipleAffiliationFlag) Before(t time.Time) bool {
+	return flag.Work.PublicationDate.Before(t)
+}
+
+func (flag *MultipleAffiliationFlag) After(t time.Time) bool {
+	return flag.Work.PublicationDate.After(t)
 }
 
 type HighRiskPublisherFlag struct {
@@ -384,9 +448,17 @@ func (flag *HighRiskPublisherFlag) GetDetailFields() []KeyValue {
 		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
 		{Key: "Paper Title", Value: flag.Work.DisplayName},
 		{Key: "URL", Value: flag.Work.WorkUrl},
-		{Key: "Publication Year", Value: fmt.Sprintf("%d", flag.Work.PublicationYear)},
+		{Key: "Publication Date", Value: flag.Work.PublicationDate.String()},
 		{Key: "Publishers", Value: strings.Join(flag.Publishers, ", ")},
 	}
+}
+
+func (flag *HighRiskPublisherFlag) Before(t time.Time) bool {
+	return flag.Work.PublicationDate.Before(t)
+}
+
+func (flag *HighRiskPublisherFlag) After(t time.Time) bool {
+	return flag.Work.PublicationDate.After(t)
 }
 
 type HighRiskCoauthorFlag struct {
@@ -414,7 +486,15 @@ func (flag *HighRiskCoauthorFlag) GetDetailFields() []KeyValue {
 		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
 		{Key: "Paper Title", Value: flag.Work.DisplayName},
 		{Key: "URL", Value: flag.Work.WorkUrl},
-		{Key: "Publication Year", Value: fmt.Sprintf("%d", flag.Work.PublicationYear)},
+		{Key: "Publication Date", Value: flag.Work.PublicationDate.String()},
 		{Key: "Co-authors", Value: strings.Join(flag.Coauthors, ", ")},
 	}
+}
+
+func (flag *HighRiskCoauthorFlag) Before(t time.Time) bool {
+	return flag.Work.PublicationDate.Before(t)
+}
+
+func (flag *HighRiskCoauthorFlag) After(t time.Time) bool {
+	return flag.Work.PublicationDate.After(t)
 }
