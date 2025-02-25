@@ -42,15 +42,11 @@ export default function ConcernVisualizer({
   hoverText,
   value,
   scale,
-  weight,
-  setWeight,
   onReview,
 }) {
 
   return (
-    <div className='chart-wrapper' style={{
-      position: 'relative'
-    }}>
+    <div style={{ width: '200px', height: '300px', position: 'relative' }}>
       <Speedometer scale={scale || [0, 1, 2, 3, 5, 10, 20]} value={value} />
 
       <div className='mt-3 mb-4 text-dark' style={{ height: "50px" }} >

@@ -17,9 +17,9 @@ position: relative;
     background: #ad5389;
     background: linear-gradient(
       0deg,
-      rgb(163, 82, 108) 0%,
+      rgb(174, 4, 4) 0%,
 
-      rgba(132, 116, 254, 1) 100%
+      rgb(39, 18, 197) 100%
     );
     border: none;
     box-shadow: 0 0.7em 1.5em -0.5em #4d36d0be;
@@ -70,11 +70,8 @@ position: relative;
   }
   `;
 
-const Button = ({ reportId }) => {
-    const [isOpen, setIsOpen] = useState(false);
+const Button = ({ reportId, isOpen, setIsOpen }) => {
     const handleDownload = (format) => {
-        // Add download logic here
-        console.log(`Downloading as ${format}`);
         reportService.downloadReport(reportId, format);
         setIsOpen(false);
     };
