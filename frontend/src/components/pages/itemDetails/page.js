@@ -17,11 +17,15 @@ import DownloadButton from '../../common/tools/button/downloadButton.js';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider } from '@mui/material';
 import { reportService } from '../../../api/reports.js';
 import styled from 'styled-components';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 
 
 const FLAG_ORDER = [
     TALENT_CONTRACTS, ASSOCIATIONS_WITH_DENIED_ENTITIES, HIGH_RISK_FUNDERS, AUTHOR_AFFILIATIONS, POTENTIAL_AUTHOR_AFFILIATIONS, MISC_HIGH_RISK_AFFILIATIONS, COAUTHOR_AFFILIATIONS
 ];
+
+const todayStr = new Date().toISOString().split("T")[0];
 
 const TitlesAndDescriptions = {
     [TALENT_CONTRACTS]: {
@@ -178,8 +182,8 @@ const ItemDetails = () => {
 
     const [loading, setLoading] = useState(true);
 
-    const [startYear, setStartYear] = useState('');
-    const [endYear, setEndYear] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
     const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
     const [isDownloadOpen, setIsDownloadOpen] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
@@ -187,45 +191,85 @@ const ItemDetails = () => {
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);
     };
-    const handleStartYearChange = (e) => setStartYear(e.target.value);
-    const handleEndYearChange = (e) => setEndYear(e.target.value);
+    const handleStartDateChange = (e) => setStartDate(e.target.value);
+    const handleEndDateChange = (e) => setEndDate(e.target.value);
     const toggleYearDropdown = () => {
         setYearDropdownOpen(!yearDropdownOpen);
         setIsDownloadOpen(false);  // Close download dropdown
     };
-    const handleYearFilter = () => {
+
+    const handleDateFilter = () => {
+        if (!startDate && !endDate) {
+          setReportContent(initialReprtContent);
+          setYearDropdownOpen(false);
+          return;
+        }
+
+        let start = startDate ? new Date(startDate) : null;
+        let end = endDate ? new Date(endDate) : null;
+
+        if (start && !end) {
+          end = new Date();
+        }
+
+        if (!start && end) {
+          start = new Date("1900-01-01");
+        }
+      
+        if (start > end) {
+          alert("Start date cannot be after End date.");
+          return;
+        }
+      
         const filteredContent = {};
         FLAG_ORDER.forEach((flag) => {
-            if (initialReprtContent[flag]) {
-                filteredContent[flag] = initialReprtContent[flag].filter((item) => {
-                    return (item?.Work?.PublicationYear === undefined) || item?.Work?.PublicationYear >= startYear && item?.Work?.PublicationYear <= endYear;
-                });
-            }
-            else
-                filteredContent[flag] = null;
+          if (initialReprtContent[flag]) {
+            filteredContent[flag] = initialReprtContent[flag].filter((item) => {
+              if (!item?.Work?.PublicationDate) return true;
+              const pubDate = new Date(item.Work.PublicationDate);
+      
+              if (pubDate < start) return false;
+              if (pubDate > end) return false;
+      
+              return true;
+            });
+          } else {
+            filteredContent[flag] = null;
+          }
         });
+      
         setReportContent(filteredContent);
-        console.log("Unfiltered", initialReprtContent);
-        console.log("Filtered", reportContent);
         setYearDropdownOpen(false);
-    }
+      };      
     const [instDropdownOpen, setInstDropdownOpen] = useState(false);
     const toggleInstDropdown = () => setInstDropdownOpen(!instDropdownOpen);
 
     const [review, setReview] = useState();
 
-    function withYear(header, flag) {
-        return <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    function withPublicationDate(header, flag) {
+        const publicationDateStr = flag.Work.PublicationDate;
+        let formattedDate = "N/A";
+        if (publicationDateStr) {
+            const publicationDate = new Date(publicationDateStr);
+            formattedDate = publicationDate.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            });
+        }
+        return (
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             {header}
-            <span className='fw-bold mt-3'>{flag.Work.PublicationYear}</span>
-        </div>
+            <span className="fw-bold mt-3">{formattedDate}</span>
+            </div>
+        );
     }
 
 
     function multipleAffiliationsFlag(flag, index) {
         return (
             <li key={index} className='p-3 px-5 w-75 detail-item'>
-                {withYear(<h5 className='fw-bold mt-3'>Author has multiple affiliations</h5>, flag)}
+                {withPublicationDate(<h5 className='fw-bold mt-3'>Author has multiple affiliations</h5>, flag)}
                 <p>
                     {authorName} is affiliated with multiple institutions in {" "}
                     {get_paper_url(flag)}
@@ -249,7 +293,7 @@ const ItemDetails = () => {
     function funderFlag(flag, index) {
         return (
             <li key={index} className='p-3 px-5 w-75 detail-item'>
-                {withYear(<h5 className='fw-bold mt-3'>Funder is an entity of concern</h5>, flag)}
+                {withPublicationDate(<h5 className='fw-bold mt-3'>Funder is an entity of concern</h5>, flag)}
                 <p>
                     {get_paper_url(flag)}
                     {" "} is funded by the following entities of concern:
@@ -273,7 +317,7 @@ const ItemDetails = () => {
     function publisherFlag(flag, index) {
         return (
             <li key={index} className='p-3 px-5 w-75 detail-item'>
-                {withYear(<h5 className='fw-bold mt-3'>Publisher is an entity of concern</h5>, flag)}
+                {withPublicationDate(<h5 className='fw-bold mt-3'>Publisher is an entity of concern</h5>, flag)}
                 <p>
                     {get_paper_url(flag)}
                     {" "} is published by the following entities of concern:
@@ -296,7 +340,7 @@ const ItemDetails = () => {
     function coauthorFlag(flag, index) {
         return (
             <li key={index} className='p-3 px-5 w-75 detail-item'>
-                {withYear(<h5 className='fw-bold mt-3'>Co-authors are high-risk entities</h5>, flag)}
+                {withPublicationDate(<h5 className='fw-bold mt-3'>Co-authors are high-risk entities</h5>, flag)}
                 <p>
                     The following co-authors of {" "}
                     {get_paper_url(flag)}
@@ -320,7 +364,7 @@ const ItemDetails = () => {
     function coauthorAffiliationFlag(flag, index) {
         return (
             <li key={index} className='p-3 px-5 w-75 detail-item'>
-                {withYear(<h5 className='fw-bold mt-3'>Co-authors are affiliated with entities of concern</h5>, flag)}
+                {withPublicationDate(<h5 className='fw-bold mt-3'>Co-authors are affiliated with entities of concern</h5>, flag)}
                 <p>
                     Some authors of {" "}
                     {get_paper_url(flag)}
@@ -352,7 +396,7 @@ const ItemDetails = () => {
     function authorAffiliationFlag(flag, index) {
         return (
             <li key={index} className='p-3 px-5 w-75 detail-item'>
-                {withYear(<h5 className='fw-bold mt-3'>Author is affiliated with entities of concern</h5>, flag)}
+                {withPublicationDate(<h5 className='fw-bold mt-3'>Author is affiliated with entities of concern</h5>, flag)}
                 <div>
                     {authorName} is affiliated with an entity of concern in {" "}
                     {get_paper_url(flag)}
@@ -377,7 +421,7 @@ const ItemDetails = () => {
     function acknowledgementFlag(flag, index) {
         return (
             <li key={index} className='p-3 px-5 w-75 detail-item'>
-                {withYear(<h5 className='fw-bold mt-3'>Acknowledgements contain foreign influences</h5>, flag)}
+                {withPublicationDate(<h5 className='fw-bold mt-3'>Acknowledgements contain foreign influences</h5>, flag)}
                 <p>
                     {
                         flag.Entities > 0
@@ -460,6 +504,34 @@ const ItemDetails = () => {
             </li>
         );
     }
+
+    const [showDisclosed, setShowDisclosed] = useState(true);
+    const [showUndisclosed, setShowUndisclosed] = useState(true);
+    const disclosedItems = (reportContent[review] || []).filter(item => item.Disclosed);
+    const undisclosedItems = (reportContent[review] || []).filter(item => !item.Disclosed);
+
+    function renderFlags(items) {
+        return items.map((flag, index) => {
+          switch (review) {
+            case TALENT_CONTRACTS:
+              return acknowledgementFlag(flag, index);
+            case ASSOCIATIONS_WITH_DENIED_ENTITIES:
+              return acknowledgementFlag(flag, index);
+            case HIGH_RISK_FUNDERS:
+              return funderFlag(flag, index);
+            case AUTHOR_AFFILIATIONS:
+              return authorAffiliationFlag(flag, index);
+            case POTENTIAL_AUTHOR_AFFILIATIONS:
+              return universityFacultyFlag(flag, index);
+            case MISC_HIGH_RISK_AFFILIATIONS:
+              return PRFlag(flag, index);
+            case COAUTHOR_AFFILIATIONS:
+              return coauthorAffiliationFlag(flag, index);
+            default:
+              return null;
+          }
+        });
+      }
 
     function PRFlag(flag, index) {
         const connections = flag.Connections || [];
@@ -550,13 +622,20 @@ const ItemDetails = () => {
     // function formalRelationFlag(flag, index) {
     //   return (
     //     <li key={index} className='p-3 px-5 w-75 detail-item'>
-    //       {withYear(<h5 className='fw-bold mt-3'>{flag.title}</h5>, flag)}
+    //       {withPublicationDate(<h5 className='fw-bold mt-3'>{flag.title}</h5>, flag)}
     //       <p>{wrapLinks(flag.message)}</p>
     //     </li>
     //   )
     // }
 
     const [showPopover, setShowPopover] = useState(false);
+
+    const handleResetFilter = () => {
+        setStartDate('');
+        setEndDate('');
+        setReportContent(initialReprtContent);
+        setYearDropdownOpen(false);
+ };
 
     const togglePopover = () => {
         setShowPopover(!showPopover);
@@ -619,75 +698,94 @@ const ItemDetails = () => {
                                     Filter by Timeline
                                 </button>
                                 {yearDropdownOpen && (
-                                    <div
-                                        className="dropdown-menu show p-3"
+                                <div
+                                    className="dropdown-menu show p-3"
+                                    style={{
+                                    backgroundColor: 'rgb(160, 160, 160)',
+                                    border: 'none',
+                                    right: 0,
+                                    marginTop: "5px",
+                                    color: 'white',
+                                    fontWeight: 'bold',
+                                    fontSize: '14px',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    }}
+                                >
+                                    <div className="form-group mb-2">
+                                    <label>Start Date</label>
+                                    <input
+                                        type="date"
+                                        value={startDate}
+                                        max={todayStr}
+                                        onChange={handleStartDateChange}
+                                        className="form-control"
                                         style={{
-                                            backgroundColor: 'rgb(160, 160, 160)',
-                                            border: 'none',
-                                            right: 0,
-                                            marginTop: "5px",
-                                            color: 'white',
-                                            fontWeight: 'bold',
-                                            fontSize: '14px',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            display: 'flex',
-                                            flexDirection: 'column',
+                                        backgroundColor: 'rgb(220, 220, 220)',
+                                        border: 'none',
+                                        outline: 'none',
+                                        color: 'black',
+                                        marginTop: '10px',
+                                        }}
+                                    />
+                                    </div>
+                                    <div style={{ height: "10px" }} />
+                                    <div className="form-group">
+                                    <label>End Date</label>
+                                    <input
+                                        type="date"
+                                        value={endDate}
+                                        max={todayStr}
+                                        onChange={handleEndDateChange}
+                                        className="form-control"
+                                        style={{
+                                        backgroundColor: 'rgb(220, 220, 220)',
+                                        border: 'none',
+                                        outline: 'none',
+                                        color: 'black',
+                                        marginTop: '10px',
+                                        }}
+                                    />
+                                    </div>
+                                    <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+                                    <button
+                                        className="form-control"
+                                        type="submit"
+                                        onClick={handleDateFilter}
+                                        disabled={!(startDate || endDate)}
+                                        style={{
+                                        backgroundColor: (startDate || endDate) ? 'black' : 'rgb(220, 220, 220)',
+                                        border: 'none',
+                                        color: 'white',
+                                        width: "100px",
+                                        fontWeight: 'bold',
+                                        fontSize: '14px',
+                                        cursor: (startDate || endDate) ? 'pointer' : 'default',
+                                        transition: 'background-color 0.3s'
                                         }}
                                     >
-                                        <div className="form-group mb-2">
-                                            <label>Start Year</label>
-                                            <input
-                                                type="text"
-                                                value={startYear}
-                                                onChange={handleStartYearChange}
-                                                className="form-control"
-                                                placeholder="Enter start year"
-                                                style={{
-                                                    backgroundColor: 'rgb(220, 220, 220)',
-                                                    border: 'none',
-                                                    outline: 'none',
-                                                    color: 'black',
-                                                    marginTop: '10px',
-                                                }}
-                                            />
-                                        </div>
-                                        <div style={{ height: "10px" }} />
-                                        <div className="form-group">
-                                            <label>End Year</label>
-                                            <input
-                                                type="text"
-                                                value={endYear}
-                                                onChange={handleEndYearChange}
-                                                className="form-control"
-                                                placeholder="Enter end year"
-                                                style={{
-                                                    backgroundColor: 'rgb(220, 220, 220)',
-                                                    border: 'none',
-                                                    outline: 'none',
-                                                    color: 'black',
-                                                    marginTop: '10px',
-                                                }}
-                                            />
-                                        </div>
-                                        <button
-                                            className="form-control"
-                                            type="submit"
-                                            onClick={handleYearFilter}
-                                            disabled={!(startYear && endYear)}
-                                            style={{
-                                                backgroundColor: 'rgb(220, 220, 220)',
-                                                border: 'none',
-                                                color: 'white',
-                                                width: "100px",
-                                                fontWeight: 'bold',
-                                                fontSize: '14px',
-                                                marginTop: '20px',
-                                            }}
-                                        >
-                                            submit
-                                        </button>
+                                        Submit
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleResetFilter}
+                                        style={{
+                                        backgroundColor: 'black',
+                                        border: 'none',
+                                        color: 'white',
+                                        width: '100px',
+                                        fontWeight: 'bold',
+                                        fontSize: '14px',
+                                        cursor: 'pointer',
+                                        transition: 'background-color 0.3s'
+                                        }}
+                                    >
+                                        Reset
+                                    </button>
                                     </div>
+                                </div>
                                 )}
                             </div>
 
@@ -792,7 +890,7 @@ const ItemDetails = () => {
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', height: '500px', marginTop: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', marginTop: '20px' }}>
                     {
                         FLAG_ORDER.map((flag, index) => {
                             return <ConcernVisualizer
@@ -805,32 +903,125 @@ const ItemDetails = () => {
                         })
                     }
                 </div>
+                {review && (
+                <div style={{ width: '100%', textAlign: 'center', marginTop: '50px'}}>
+                    {disclosedItems.length > 0 ? (
+                    <>
+                        <button
+                        onClick={() => setShowDisclosed(!showDisclosed)}
+                        style={{
+                            backgroundColor: showDisclosed ? 'green' : 'transparent',
+                            color: showDisclosed ? 'white' : 'green',
+                            borderRadius: '20px',
+                            border: '2px solid green',
+                            padding: '10px 20px',
+                            margin: '10px auto',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '200px',
+                            fontSize: '16px',
+                            transition: 'background-color 0.3s, color 0.3s',
+                        }}
+                        >
+                        Disclosed ({disclosedItems.length})
+                        {showDisclosed ? (
+                            <ArrowDropDownIcon style={{ verticalAlign: 'middle', marginLeft: '8px' }} />
+                        ) : (
+                            <ArrowRightIcon style={{ verticalAlign: 'middle', marginLeft: '8px' }} />
+                        )}
+                        </button>
+                        {showDisclosed && (
+                        <div
+                            style={{
+                            width: '100%',
+                            maxWidth: '1200px',
+                            margin: '0 auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            }}
+                        >
+                            {renderFlags(disclosedItems)}
+                        </div>
+                        )}
+                    </>
+                    ) : (
+                    <div
+                        style={{
+                        color: 'green',
+                        margin: '10px auto',
+                        width: '200px',
+                        textAlign: 'center',
+                        padding: '10px 20px',
+                        border: '2px solid green',
+                        borderRadius: '20px',
+                        }}
+                    >
+                        Disclosed (0)
+                    </div>
+                    )}
 
-                {review && <ul className='d-flex flex-column align-items-center p-0' style={{ color: "black" }}>
-                    <h5 className='fw-bold mt-3'>Reviewing {" "} {TitlesAndDescriptions[review].title}</h5>{
-                        (reportContent[review] || []).map(
-                            (flag, index) => {
-                                switch (review) {
-                                    case TALENT_CONTRACTS:
-                                        return acknowledgementFlag(flag, index);
-                                    case ASSOCIATIONS_WITH_DENIED_ENTITIES:
-                                        return acknowledgementFlag(flag, index);
-                                    case HIGH_RISK_FUNDERS:
-                                        return funderFlag(flag, index);
-                                    case AUTHOR_AFFILIATIONS:
-                                        return authorAffiliationFlag(flag, index);
-                                    case POTENTIAL_AUTHOR_AFFILIATIONS:
-                                        return universityFacultyFlag(flag, index);
-                                    case MISC_HIGH_RISK_AFFILIATIONS:
-                                        return PRFlag(flag, index);
-                                    case COAUTHOR_AFFILIATIONS:
-                                        return coauthorAffiliationFlag(flag, index);
-                                }
-                            }
-                        )
-                    }
-                </ul>
-                }
+                    {undisclosedItems.length > 0 ? (
+                    <>
+                        <button
+                        onClick={() => setShowUndisclosed(!showUndisclosed)}
+                        style={{
+                            backgroundColor: showUndisclosed ? 'red' : 'transparent',
+                            color: showUndisclosed ? 'white' : 'red',
+                            borderRadius: '20px',
+                            border: '2px solid red',
+                            padding: '10px 20px',
+                            margin: '10px auto',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '200px',
+                            fontSize: '16px',
+                            transition: 'background-color 0.3s, color 0.3s',
+                        }}
+                        >
+                        Undisclosed ({undisclosedItems.length})
+                        {showUndisclosed ? (
+                            <ArrowDropDownIcon style={{ verticalAlign: 'middle', marginLeft: '8px' }} />
+                        ) : (
+                            <ArrowRightIcon style={{ verticalAlign: 'middle', marginLeft: '8px' }} />
+                        )}
+                        </button>
+                        {showUndisclosed && (
+                        <div
+                            style={{
+                            width: '100%',
+                            maxWidth: '1200px',
+                            margin: '0 auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            }}
+                        >
+                            {renderFlags(undisclosedItems)}
+                        </div>
+                        )}
+                    </>
+                    ) : (
+                    <div
+                        style={{
+                        color: 'red',
+                        margin: '10px auto',
+                        width: '200px',
+                        textAlign: 'center',
+                        padding: '10px 20px',
+                        border: '2px solid red',
+                        borderRadius: '20px',
+                        }}
+                    >
+                        Undisclosed (0)
+                    </div>
+                    )}
+                </div>
+                )}
             </>
             }
 
