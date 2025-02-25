@@ -53,7 +53,11 @@ func (flag *TalentContractFlag) Key() string {
 }
 
 func (flag *TalentContractFlag) GetEntities() []string {
-	return flag.RawAcknowledements
+	entities := make([]string, 0, len(flag.Entities))
+	for _, ack := range flag.Entities {
+		entities = append(entities, ack.Entity)
+	}
+	return entities
 }
 
 type AssociationWithDeniedEntityFlag struct {
@@ -70,7 +74,11 @@ func (flag *AssociationWithDeniedEntityFlag) Key() string {
 }
 
 func (flag *AssociationWithDeniedEntityFlag) GetEntities() []string {
-	return flag.RawAcknowledements
+	entities := make([]string, 0, len(flag.Entities))
+	for _, ack := range flag.Entities {
+		entities = append(entities, ack.Entity)
+	}
+	return entities
 }
 
 type HighRiskFunderFlag struct {
