@@ -8,7 +8,6 @@ import { useUser } from '../../../store/userContext';
 import { searchService } from '../../../api/search';
 
 function EntityLookup() {
-
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,9 +23,9 @@ function EntityLookup() {
     try {
       const response = await searchService.matchEntities(query);
       console.log(response);
-      const entities = response.Entities
-        .filter(entity => entity.trim())
-        .map(entity => entity.replace('[ENTITY START]', '').replace('[ENTITY END]', '').trim());
+      const entities = response.Entities.filter((entity) => entity.trim()).map((entity) =>
+        entity.replace('[ENTITY START]', '').replace('[ENTITY END]', '').trim()
+      );
       setResults(entities);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -37,7 +36,7 @@ function EntityLookup() {
   };
 
   return (
-    <div className="basic-setup" style={{ color: "white" }}>
+    <div className="basic-setup" style={{ color: 'white' }}>
       <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
         <Link
           to="/"
@@ -47,7 +46,7 @@ function EntityLookup() {
             fontSize: '14px',
             whiteSpace: 'nowrap',
             textDecoration: 'none',
-            display: 'inline-block'
+            display: 'inline-block',
           }}
         >
           Go To Individual Assessment
@@ -68,7 +67,7 @@ function EntityLookup() {
           <div className='d-flex justify-content-center align-items-center pt-5'>
             <div style={{ width: "80%" }}>
               <form onSubmit={handleSubmit} className="author-institution-search-bar">
-                <div className='autocomplete-search-bar'>
+                <div className="autocomplete-search-bar">
                   <input
                     type="text"
                     value={query}
@@ -77,8 +76,8 @@ function EntityLookup() {
                     className="search-bar"
                   />
                 </div>
-                <div style={{ width: "20px" }} />
-                <div style={{ width: "200px" }}>
+                <div style={{ width: '20px' }} />
+                <div style={{ width: '200px' }}>
                   <button type="submit" disabled={isLoading} className="button">
                     {isLoading ? 'Searching...' : 'Search'}
                   </button>
@@ -88,7 +87,13 @@ function EntityLookup() {
           </div>
         </div>
       </div>
-      {isLoading && <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status"></div>}
+      {isLoading && (
+        <div
+          className="spinner-border text-primary"
+          style={{ width: '3rem', height: '3rem' }}
+          role="status"
+        ></div>
+      )}
       <div className="results" style={{ marginTop: '30px' }}>
         {results.map((entity, index) => (
           <div key={index} className="detail-item">

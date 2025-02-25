@@ -1,10 +1,5 @@
-import {
-  Gauge,
-  GaugeValueArc,
-  useGaugeState,
-  gaugeClasses,
-} from "@mui/x-charts/Gauge";
-import * as React from "react";
+import { Gauge, GaugeValueArc, useGaugeState, gaugeClasses } from '@mui/x-charts/Gauge';
+import * as React from 'react';
 
 export function GradientValueGauge() {
   const { outerRadius } = useGaugeState();
@@ -14,11 +9,11 @@ export function GradientValueGauge() {
     <svg width="200" height="200">
       <defs>
         <linearGradient id="gauge-gradient" x1={x1} x2={x2} gradientUnits="userSpaceOnUse">
-          <stop offset="0%" style={{ stopColor: "blue", stopOpacity: 1 }} />
-          <stop offset="100%" style={{ stopColor: "red", stopOpacity: 1 }} />
+          <stop offset="0%" style={{ stopColor: 'blue', stopOpacity: 1 }} />
+          <stop offset="100%" style={{ stopColor: 'red', stopOpacity: 1 }} />
         </linearGradient>
       </defs>
-      <GaugeValueArc style={{ fill: "url(#gauge-gradient)" }} />
+      <GaugeValueArc style={{ fill: 'url(#gauge-gradient)' }} />
     </svg>
   );
 }
@@ -27,11 +22,7 @@ export function Ticks({ scale }) {
   const { innerRadius, cx, cy, startAngle, endAngle } = useGaugeState();
   const radius = innerRadius * 0.8;
   function angleAtStep(step) {
-    return (
-      -Math.PI / 2 +
-      startAngle +
-      (step / (scale.length - 1)) * (endAngle - startAngle)
-    );
+    return -Math.PI / 2 + startAngle + (step / (scale.length - 1)) * (endAngle - startAngle);
   }
   return (
     <g>
@@ -43,13 +34,13 @@ export function Ticks({ scale }) {
             key={step}
             x={tickCx}
             y={tickCy}
-            style={{ fill: "black" }}
+            style={{ fill: 'black' }}
             fontSize={0.2 * radius}
             textAnchor="middle"
             dominantBaseline="middle"
           >
             {val}
-            {step === scale.length - 1 ? "+" : ""}
+            {step === scale.length - 1 ? '+' : ''}
           </text>
         );
       })}
@@ -64,7 +55,7 @@ export function Value({ value }) {
       <text
         x={cx}
         y={cy * 1.1}
-        style={{ fill: "grey" }}
+        style={{ fill: 'grey' }}
         fontSize={innerRadius * 0.8}
         fontWeight="bold"
         textAnchor="middle"
@@ -83,23 +74,18 @@ export function Speedometer({ scale, value }) {
     }
     for (let i = 2; i <= scale.length; i++) {
       if (scale[scale.length - i] < value) {
-        const segmentWidth =
-          scale[scale.length - i + 1] - scale[scale.length - i];
+        const segmentWidth = scale[scale.length - i + 1] - scale[scale.length - i];
         const delta = value - scale[scale.length - i];
-        return (
-          (100 * (scale.length - i + delta / segmentWidth)) / (scale.length - 1)
-        );
+        return (100 * (scale.length - i + delta / segmentWidth)) / (scale.length - 1);
       }
     }
     return 0;
   }
   return (
-    <div
-      className="chart-wrapper"
-    >
+    <div className="chart-wrapper">
       <Gauge
         value={transformValue(value)}
-        text={""}
+        text={''}
         startAngle={-120}
         endAngle={120}
         cornerRadius="50%"
@@ -107,11 +93,11 @@ export function Speedometer({ scale, value }) {
         outerRadius="100%"
         sx={(theme) => ({
           [`& .${gaugeClasses.referenceArc}`]: {
-            fill: "rgb(245, 240, 240)",
+            fill: 'rgb(245, 240, 240)',
           },
         })}
       >
-        <Ticks fill={"white"} scale={scale} />
+        <Ticks fill={'white'} scale={scale} />
         <GradientValueGauge />
         <Value value={value} />
       </Gauge>

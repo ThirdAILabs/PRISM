@@ -47,7 +47,7 @@ position: relative;
     min-width: 160px;
     animation: fadeIn 0.2s ease-in-out;
   }
-    .dropdown-item {
+  .dropdown-item {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -64,7 +64,7 @@ position: relative;
       font-size: 20px;
     }
   }
-  `;
+`;
 
 const Button = ({ reportId, isOpen, setIsOpen }) => {
     const handleDownload = (format) => {

@@ -13,6 +13,7 @@ type KeyValue struct {
 }
 
 type Flag interface {
+	Type() string
 	// This is used to deduplicate flags. Primarily for author flags, it is
 	// possible to have the same flag created for multiple works, for instance by
 	// finding the author is faculty at an EOC. For work flags, the key is just
@@ -29,6 +30,44 @@ type Flag interface {
 	Before(time.Time) bool
 
 	After(time.Time) bool
+}
+
+const (
+	TalentContractType               = "TalentContracts"
+	AssociationsWithDeniedEntityType = "AssociationsWithDeniedEntities"
+	HighRiskFunderType               = "HighRiskFunders"
+	AuthorAffiliationType            = "AuthorAffiliations"
+	PotentialAuthorAffiliationType   = "PotentialAuthorAffiliations"
+	MiscHighRiskAssociationType      = "MiscHighRiskAssociations"
+	CoauthorAffiliationType          = "CoauthorAffiliations"
+)
+
+func EmptyFlag(ftype string) (Flag, error) {
+	switch ftype {
+	case TalentContractType:
+		return &TalentContractFlag{}, nil
+
+	case AssociationsWithDeniedEntityType:
+		return &AssociationWithDeniedEntityFlag{}, nil
+
+	case HighRiskFunderType:
+		return &HighRiskFunderFlag{}, nil
+
+	case AuthorAffiliationType:
+		return &AuthorAffiliationFlag{}, nil
+
+	case PotentialAuthorAffiliationType:
+		return &PotentialAuthorAffiliationFlag{}, nil
+
+	case MiscHighRiskAssociationType:
+		return &MiscHighRiskAssociationFlag{}, nil
+
+	case CoauthorAffiliationType:
+		return &CoauthorAffiliationFlag{}, nil
+
+	default:
+		return nil, fmt.Errorf("invalid flag type '%s'", ftype)
+	}
 }
 
 type DisclosableFlag struct {
@@ -61,13 +100,21 @@ type TalentContractFlag struct {
 	RawAcknowledements []string
 }
 
+func (flag *TalentContractFlag) Type() string {
+	return TalentContractType
+}
+
 func (flag *TalentContractFlag) Key() string {
 	// Assumes 1 flag per work
 	return fmt.Sprintf("talent-contract-%s", flag.Work.WorkId)
 }
 
 func (flag *TalentContractFlag) GetEntities() []string {
-	return flag.RawAcknowledements
+	entities := make([]string, 0, len(flag.Entities))
+	for _, ack := range flag.Entities {
+		entities = append(entities, ack.Entity)
+	}
+	return entities
 }
 
 func (flag *TalentContractFlag) GetHeading() string {
@@ -100,13 +147,21 @@ type AssociationWithDeniedEntityFlag struct {
 	RawAcknowledements []string
 }
 
+func (flag *AssociationWithDeniedEntityFlag) Type() string {
+	return AssociationsWithDeniedEntityType
+}
+
 func (flag *AssociationWithDeniedEntityFlag) Key() string {
 	// Assumes 1 flag per work
 	return fmt.Sprintf("association-with-denied-entity-%s", flag.Work.WorkId)
 }
 
 func (flag *AssociationWithDeniedEntityFlag) GetEntities() []string {
-	return flag.RawAcknowledements
+	entities := make([]string, 0, len(flag.Entities))
+	for _, ack := range flag.Entities {
+		entities = append(entities, ack.Entity)
+	}
+	return entities
 }
 
 func (flag *AssociationWithDeniedEntityFlag) GetHeading() string {
@@ -133,10 +188,14 @@ func (flag *AssociationWithDeniedEntityFlag) After(t time.Time) bool {
 
 type HighRiskFunderFlag struct {
 	DisclosableFlag
-	Message              string
-	Work                 WorkSummary
-	Funders              []string
-	FromAcknowledgements bool
+	Message            string
+	Work               WorkSummary
+	Funders            []string
+	RawAcknowledements []string
+}
+
+func (flag *HighRiskFunderFlag) Type() string {
+	return HighRiskFunderType
 }
 
 func (flag *HighRiskFunderFlag) Key() string {
@@ -177,6 +236,10 @@ type AuthorAffiliationFlag struct {
 	Affiliations []string
 }
 
+func (flag *AuthorAffiliationFlag) Type() string {
+	return AuthorAffiliationType
+}
+
 func (flag *AuthorAffiliationFlag) Key() string {
 	// Assumes 1 flag per work
 	return fmt.Sprintf("author-affiliation-%s", flag.Work.WorkId)
@@ -213,6 +276,10 @@ type PotentialAuthorAffiliationFlag struct {
 	Message       string
 	University    string
 	UniversityUrl string
+}
+
+func (flag *PotentialAuthorAffiliationFlag) Type() string {
+	return PotentialAuthorAffiliationType
 }
 
 func (flag *PotentialAuthorAffiliationFlag) Key() string {
@@ -259,6 +326,10 @@ type MiscHighRiskAssociationFlag struct {
 	EntityMentioned  string
 	Connections      []Connection
 	FrequentCoauthor *string
+}
+
+func (flag *MiscHighRiskAssociationFlag) Type() string {
+	return MiscHighRiskAssociationType
 }
 
 func (flag *MiscHighRiskAssociationFlag) Key() string {
@@ -319,6 +390,10 @@ type CoauthorAffiliationFlag struct {
 	Affiliations []string
 }
 
+func (flag *CoauthorAffiliationFlag) Type() string {
+	return CoauthorAffiliationType
+}
+
 func (flag *CoauthorAffiliationFlag) Key() string {
 	// Assumes 1 flag per work
 	return fmt.Sprintf("coauthor-affiliation-%s", flag.Work.WorkId)
@@ -351,36 +426,7 @@ func (flag *CoauthorAffiliationFlag) After(t time.Time) bool {
 	return flag.Work.PublicationDate.After(t)
 }
 
-type ReportContent struct {
-	TalentContracts                []*TalentContractFlag
-	AssociationsWithDeniedEntities []*AssociationWithDeniedEntityFlag
-	HighRiskFunders                []*HighRiskFunderFlag
-	AuthorAffiliations             []*AuthorAffiliationFlag
-	PotentialAuthorAffiliations    []*PotentialAuthorAffiliationFlag
-	MiscHighRiskAssociations       []*MiscHighRiskAssociationFlag
-	CoauthorAffiliations           []*CoauthorAffiliationFlag
-}
-
-func addFlags[T Flag](groups map[string][]Flag, flags []T) {
-	for _, flag := range flags {
-		key := flag.GetHeading()
-		groups[key] = append(groups[key], flag)
-	}
-}
-
-func (rc *ReportContent) GroupFlags() map[string][]Flag {
-	groups := make(map[string][]Flag)
-
-	addFlags(groups, rc.TalentContracts)
-	addFlags(groups, rc.AssociationsWithDeniedEntities)
-	addFlags(groups, rc.HighRiskFunders)
-	addFlags(groups, rc.AuthorAffiliations)
-	addFlags(groups, rc.PotentialAuthorAffiliations)
-	addFlags(groups, rc.MiscHighRiskAssociations)
-	addFlags(groups, rc.CoauthorAffiliations)
-
-	return groups
-}
+type ReportContent map[string][]Flag
 
 //The following flags are unused by the frontend, but they are kept in case we
 // want to have them in the future.
@@ -390,6 +436,10 @@ type MultipleAffiliationFlag struct {
 	Message      string
 	Work         WorkSummary
 	Affiliations []string
+}
+
+func (flag *MultipleAffiliationFlag) Type() string {
+	return "MultipleAffiliationType"
 }
 
 func (flag *MultipleAffiliationFlag) Key() string {
@@ -430,6 +480,10 @@ type HighRiskPublisherFlag struct {
 	Publishers []string
 }
 
+func (flag *HighRiskPublisherFlag) Type() string {
+	return "HighRiskPublisherType"
+}
+
 func (flag *HighRiskPublisherFlag) Key() string {
 	// Assumes 1 flag per work
 	return fmt.Sprintf("high-risk-publisher-%s", flag.Work.WorkId)
@@ -466,6 +520,10 @@ type HighRiskCoauthorFlag struct {
 	Message   string
 	Work      WorkSummary
 	Coauthors []string
+}
+
+func (flag *HighRiskCoauthorFlag) Type() string {
+	return "HighRiskCoauthorType"
 }
 
 func (flag *HighRiskCoauthorFlag) Key() string {
