@@ -8,10 +8,11 @@ import (
 	"prism/prism/openalex"
 	"regexp"
 	"strings"
+	"time"
 )
 
-func streamOpenAlexWorks(openalex openalex.KnowledgeBase, authorId string, startYear, endYear int) chan openalex.WorkBatch {
-	return openalex.StreamWorks(authorId, startYear, endYear)
+func streamOpenAlexWorks(openalex openalex.KnowledgeBase, authorId string, startDate, endDate time.Time) chan openalex.WorkBatch {
+	return openalex.StreamWorks(authorId, startDate, endDate)
 }
 
 func findOAAuthorId(work openalex.Work, targetAuthorName string) string {
@@ -43,7 +44,7 @@ func findTargetAuthorIds(works []openalex.Work, targetAuthorName string) []strin
 	return targetAuthorIds
 }
 
-func streamGScholarWorks(oa openalex.KnowledgeBase, authorName, gScholarAuthorId string, startYear, endYear int) chan openalex.WorkBatch {
+func streamGScholarWorks(oa openalex.KnowledgeBase, authorName, gScholarAuthorId string, startDate, endDate time.Time) chan openalex.WorkBatch {
 	outputCh := make(chan openalex.WorkBatch, 10)
 
 	go func() {
@@ -61,7 +62,7 @@ func streamGScholarWorks(oa openalex.KnowledgeBase, authorName, gScholarAuthorId
 				break
 			}
 
-			works, err := oa.FindWorksByTitle(batch, startYear, endYear)
+			works, err := oa.FindWorksByTitle(batch, startDate, endDate)
 			if err != nil {
 				slog.Error("error getting works from openalex", "error", err)
 				outputCh <- openalex.WorkBatch{Works: nil, TargetAuthorIds: nil, Error: err}
@@ -86,7 +87,7 @@ And so on. Here comes the snippet:
 `
 
 //lint:ignore U1000 streamUnstructuredWorks
-func streamUnstructuredWorks(oa openalex.KnowledgeBase, authorName, text string, startYear, endYear int) chan openalex.WorkBatch {
+func streamUnstructuredWorks(oa openalex.KnowledgeBase, authorName, text string, startDate, endDate time.Time) chan openalex.WorkBatch {
 	outputCh := make(chan openalex.WorkBatch, 10)
 
 	go func() {
@@ -114,7 +115,7 @@ func streamUnstructuredWorks(oa openalex.KnowledgeBase, authorName, text string,
 
 		const batchSize = 20
 		for i := 0; i < len(titles); i += batchSize {
-			works, err := oa.FindWorksByTitle(titles[i:min(len(titles), i+batchSize)], startYear, endYear)
+			works, err := oa.FindWorksByTitle(titles[i:min(len(titles), i+batchSize)], startDate, endDate)
 			if err != nil {
 				slog.Error("error finding works for titles", "error", err)
 				outputCh <- openalex.WorkBatch{Works: nil, TargetAuthorIds: nil, Error: fmt.Errorf("error finding works: %w", err)}
@@ -129,7 +130,7 @@ func streamUnstructuredWorks(oa openalex.KnowledgeBase, authorName, text string,
 }
 
 //lint:ignore U1000 streamScopusWorks
-func streamScopusWorks(oa openalex.KnowledgeBase, authorName string, titles []string, startYear, endYear int) chan openalex.WorkBatch {
+func streamScopusWorks(oa openalex.KnowledgeBase, authorName string, titles []string, startDate, endDate time.Time) chan openalex.WorkBatch {
 	outputCh := make(chan openalex.WorkBatch, 10)
 
 	go func() {
@@ -137,7 +138,7 @@ func streamScopusWorks(oa openalex.KnowledgeBase, authorName string, titles []st
 
 		const batchSize = 20
 		for i := 0; i < len(titles); i += batchSize {
-			works, err := oa.FindWorksByTitle(titles[i:min(len(titles), i+batchSize)], startYear, endYear)
+			works, err := oa.FindWorksByTitle(titles[i:min(len(titles), i+batchSize)], startDate, endDate)
 			if err != nil {
 				slog.Error("error finding works for titles", "error", err)
 				outputCh <- openalex.WorkBatch{Works: nil, TargetAuthorIds: nil, Error: fmt.Errorf("error finding works: %w", err)}

@@ -23,6 +23,7 @@ flag we display to the user. Here is what the object looks like (examples of the
 ### General Notes: 
 - All flags have a message field.
 - All flags that are related to information from a particular work (for example acknowledgements or listed affiliations) will have a field called `Work` that provides some information about that work. The schema for this work field is consistent accross all flags which contain it. 
+- The `PublicationDate` field of the `Work` object contains timestamps in RFC3339 format.
 - All flags have a field called `Disclosed` which indicates if that flag was disclosed by an uploaded disclosure. If no disclosure has been uploaded, this will be false.
 
 ## TalentContracts
@@ -36,7 +37,7 @@ Notes:
         "DisplayName": "name of work",
         "WorkUrl": "url to work (if found)",
         "OaUrl": "open alex work url (if found)",
-        "PublicationYear": 2018
+        "PublicationDate": "2019-01-14T00:00:00Z"
     },
     "Entities": {
         "Entity": "Entity Name",
@@ -59,7 +60,7 @@ Notes:
         "DisplayName": "name of work",
         "WorkUrl": "url to work (if found)",
         "OaUrl": "open alex work url (if found)",
-        "PublicationYear": 2018
+        "PublicationDate": "2019-01-14T00:00:00Z"
     },
     "Entities": {
         "Entity": "Entity Name",
@@ -84,7 +85,7 @@ Notes:
         "DisplayName": "name of work",
         "WorkUrl": "url to work (if found)",
         "OaUrl": "open alex work url (if found)",
-        "PublicationYear": 2018
+        "PublicationDate": "2019-01-14T00:00:00Z"
     },
     "Funders": ["Funder name"],
     "RawAcknowledements": ["acknowledgement text"],
@@ -101,7 +102,7 @@ Notes:
         "DisplayName": "name of work",
         "WorkUrl": "url to work (if found)",
         "OaUrl": "open alex work url (if found)",
-        "PublicationYear": 2018
+        "PublicationDate": "2019-01-14T00:00:00Z"
     },
     "Affiliations": ["name of affiliated university/institution"],
     "Disclosed": false
@@ -153,7 +154,7 @@ Notes:
         "DisplayName": "name of work",
         "WorkUrl": "url to work (if found)",
         "OaUrl": "open alex work url (if found)",
-        "PublicationYear": 2018
+        "PublicationDate": "2019-01-14T00:00:00Z"
     },
     "Coauthors": ["Name of coauthor"],
     "Affiliations": ["name of affiliated university/institution"],

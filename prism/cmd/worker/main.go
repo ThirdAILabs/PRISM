@@ -1,12 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"log"
 	"log/slog"
 	"os"
 	"path/filepath"
+	"prism/prism/api"
 	"prism/prism/cmd"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers"
@@ -102,7 +102,7 @@ func main() {
 
 	db := cmd.InitDb(config.PostgresUri)
 
-	reportManager := reports.NewManager(db)
+	reportManager := reports.NewManager(db, reports.StaleReportThreshold)
 
 	for {
 		time.Sleep(10 * time.Second)
@@ -120,23 +120,13 @@ func main() {
 		if err != nil {
 			slog.Error("error processing report: %w")
 
-			if err := reportManager.UpdateReport(nextReport.Id, "failed", []byte(err.Error())); err != nil {
+			if err := reportManager.UpdateReport(nextReport.Id, "failed", time.Time{}, api.ReportContent{}); err != nil {
 				slog.Error("error updating report status to failed", "error", err)
 			}
 			continue
 		}
 
-		contentBytes, err := json.Marshal(content)
-		if err != nil {
-			slog.Error("error serializing report", "error", err)
-
-			if err := reportManager.UpdateReport(nextReport.Id, "failed", []byte(err.Error())); err != nil {
-				slog.Error("error updating report status to failed", "error", err)
-			}
-			continue
-		}
-
-		if err := reportManager.UpdateReport(nextReport.Id, "complete", contentBytes); err != nil {
+		if err := reportManager.UpdateReport(nextReport.Id, "complete", nextReport.EndDate, content); err != nil {
 			slog.Error("error updating report status to complete", "error", err)
 		}
 	}
