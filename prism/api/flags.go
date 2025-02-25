@@ -40,6 +40,10 @@ const (
 	PotentialAuthorAffiliationType   = "PotentialAuthorAffiliations"
 	MiscHighRiskAssociationType      = "MiscHighRiskAssociations"
 	CoauthorAffiliationType          = "CoauthorAffiliations"
+	// Unused flags
+	MultipleAffiliationType = "MultipleAffiliations"
+	HighRiskPublisherType   = "HighRiskPublishers"
+	HighRiskCoauthorType    = "HighRiskCoauthors"
 )
 
 func EmptyFlag(ftype string) (Flag, error) {
@@ -64,6 +68,15 @@ func EmptyFlag(ftype string) (Flag, error) {
 
 	case CoauthorAffiliationType:
 		return &CoauthorAffiliationFlag{}, nil
+
+	case MultipleAffiliationType:
+		return &MultipleAffiliationFlag{}, nil
+
+	case HighRiskPublisherType:
+		return &HighRiskPublisherFlag{}, nil
+
+	case HighRiskCoauthorType:
+		return &HighRiskCoauthorFlag{}, nil
 
 	default:
 		return nil, fmt.Errorf("invalid flag type '%s'", ftype)
@@ -439,7 +452,7 @@ type MultipleAffiliationFlag struct {
 }
 
 func (flag *MultipleAffiliationFlag) Type() string {
-	return "MultipleAffiliationType"
+	return MultipleAffiliationType
 }
 
 func (flag *MultipleAffiliationFlag) Key() string {
@@ -481,7 +494,7 @@ type HighRiskPublisherFlag struct {
 }
 
 func (flag *HighRiskPublisherFlag) Type() string {
-	return "HighRiskPublisherType"
+	return HighRiskPublisherType
 }
 
 func (flag *HighRiskPublisherFlag) Key() string {
@@ -523,7 +536,7 @@ type HighRiskCoauthorFlag struct {
 }
 
 func (flag *HighRiskCoauthorFlag) Type() string {
-	return "HighRiskCoauthorType"
+	return HighRiskCoauthorType
 }
 
 func (flag *HighRiskCoauthorFlag) Key() string {
