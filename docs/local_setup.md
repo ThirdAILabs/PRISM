@@ -11,7 +11,7 @@ cd keycloak-26.0.0/
 ```
 5. Start the Keycloak server in development mode with the following command:
 ```bash
-bin/kc.sh start-dev --http-port=8180 --debug --bootstrap-admin-username temp_admin --bootstrap-admin-password password
+bin/kc.sh start-dev --http-port=8180 --debug --bootstrap-admin-username temp_admin --bootstrap-admin-password password --hostname-strict false --proxy-headers forwarded --http-relative-path /keycloak
 ```
 6. To view the admin dashboard go to `localhost:8180` in your browser and login with the credentials `temp_admin` and `password`. 
 
@@ -31,10 +31,12 @@ git clone https://github.com/ThirdAILabs/PRISM
 ```bash
 cd PRISM/prism
 ```
-3. Make a copy of `cmd/backend/config_tmp.yaml` and fill in the fields. If using the keycloak setup described above then the keycloak args in the config file should look like this: 
+3. Make a copy of `cmd/backend/config_tmp.yaml` and fill in the fields. If using the keycloak setup described above, configure the keycloak args in the config file based on your hosting environment:
+
+For local setup:
 ```yaml
 keycloak:
-    keycloak_server_url: "http://localhost:8180"
+    keycloak_server_url: "http://localhost/keycloak"
     keycloak_admin_username: "temp_admin"
     keycloak_admin_password: "password"
     public_hostname: "http://localhost"
@@ -42,9 +44,65 @@ keycloak:
     ssl_login: false
     verbose: false
 ```
+
+For hosted setup (replace example.com with your domain or IP):
+```yaml
+keycloak:
+    keycloak_server_url: "http://example.com/keycloak"
+    keycloak_admin_username: "temp_admin"
+    keycloak_admin_password: "password"
+    public_hostname: "http://example.com"
+    private_hostname: "http://example.com"
+    ssl_login: false
+    verbose: false
+```
+
 4. Start the backend: 
 ```bash
 go run cmd/backend/main.go --config "./cmd/backend/config.yaml"
+```
+
+## Start the Frontend
+
+1. Navigate to the frontend folder:
+```bash
+cd PRISM/frontend
+```
+
+2. Create and configure the `.env` file:
+    - For local development:
+    ```
+    REACT_APP_API_URL=http://localhost
+    REACT_APP_KEYCLOAK_URL=http://localhost/keycloak
+    ```
+    - For hosted setup (replace example.com with your domain or IP):
+    ```
+    REACT_APP_API_URL=http://example.com
+    REACT_APP_KEYCLOAK_URL=http://example.com/keycloak
+    ```
+
+3. Install dependencies:
+```bash
+npm i
+```
+
+4. Start the frontend development server:
+```bash
+npm start
+```
+
+The frontend will be accessible at `http://localhost` in your browser.
+
+
+## Setup Traefik
+
+1. Install Traefik using Homebrew:
+```bash
+brew install traefik
+```
+2. Navigate to the local_setup folder in the PRISM repository and run:
+```bash
+bash launch_traefik.sh
 ```
 
 ## Create a Keycloak User
