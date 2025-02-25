@@ -53,11 +53,11 @@ func TestProcessorCoauthorAffiliationCase1(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(report["CoauthorAffiliations"]) != 1 {
+		if len(report[api.CoauthorAffiliationType]) != 1 {
 			t.Fatal("expected 1 flag")
 		}
 
-		flag := report["CoauthorAffiliations"][0].(*api.CoauthorAffiliationFlag)
+		flag := report[api.CoauthorAffiliationType][0].(*api.CoauthorAffiliationFlag)
 
 		if len(flag.Affiliations) != 1 || flag.Affiliations[0] != "Central South University" || len(flag.Coauthors) != 1 || flag.Coauthors[0] != "Jian Sun" {
 			t.Fatal("incorrect flag")
@@ -77,7 +77,7 @@ func TestProcessorCoauthorAffiliationCase1(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(report["CoauthorAffiliations"]) < 1 {
+		if len(report[api.CoauthorAffiliationType]) < 1 {
 			t.Fatal("expected >= 1 flag")
 		}
 
@@ -98,7 +98,7 @@ func TestProcessorCoauthorAffiliationCase1(t *testing.T) {
 		}
 
 		foundFlag := false
-		for _, flag := range report["CoauthorAffiliations"] {
+		for _, flag := range report[api.CoauthorAffiliationType] {
 			flag := flag.(*api.CoauthorAffiliationFlag)
 			if flag.Work.WorkId == "https://openalex.org/W4402273377" {
 				foundFlag = true
@@ -137,12 +137,12 @@ func TestProcessorAuthorAffiliation(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(report["AuthorAffiliations"]) < 1 {
+		if len(report[api.AuthorAffiliationType]) < 1 {
 			t.Fatal("expected >= 1 flag")
 		}
 
 		found := false
-		for _, flag := range report["AuthorAffiliations"] {
+		for _, flag := range report[api.AuthorAffiliationType] {
 			flag := flag.(*api.AuthorAffiliationFlag)
 			if len(flag.Affiliations) != 1 {
 				t.Fatal("incorrect flag")
@@ -170,12 +170,12 @@ func TestProcessorAuthorAffiliation(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(report["AuthorAffiliations"]) < 1 {
+		if len(report[api.AuthorAffiliationType]) < 1 {
 			t.Fatal("expected >= 1 flag")
 		}
 
 		found := false
-		for _, flag := range report["AuthorAffiliations"] {
+		for _, flag := range report[api.AuthorAffiliationType] {
 			flag := flag.(*api.AuthorAffiliationFlag)
 
 			if len(flag.Affiliations) != 1 {
@@ -216,11 +216,11 @@ func TestProcessorUniversityFacultySeach(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(report["PotentialAuthorAffiliations"]) != 1 {
+		if len(report[api.PotentialAuthorAffiliationType]) != 1 {
 			t.Fatal("expected 1 flag")
 		}
 
-		flag := report["PotentialAuthorAffiliations"][0].(*api.PotentialAuthorAffiliationFlag)
+		flag := report[api.PotentialAuthorAffiliationType][0].(*api.PotentialAuthorAffiliationFlag)
 
 		if flag.University != "Fudan University" || !strings.Contains(flag.UniversityUrl, "fudan.edu") {
 			t.Fatal("incorrect flag")
@@ -240,12 +240,12 @@ func TestProcessorUniversityFacultySeach(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(report["PotentialAuthorAffiliations"]) < 1 {
+		if len(report[api.PotentialAuthorAffiliationType]) < 1 {
 			t.Fatal("expected >= 1 flag")
 		}
 
 		found := false
-		for _, flag := range report["PotentialAuthorAffiliations"] {
+		for _, flag := range report[api.PotentialAuthorAffiliationType] {
 			flag := flag.(*api.PotentialAuthorAffiliationFlag)
 			if flag.University == "Zhejiang University" && strings.Contains(flag.UniversityUrl, "zju.edu") {
 				found = true
@@ -286,7 +286,7 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(report["MiscHighRiskAssociations"]) < 1 {
+		if len(report[api.MiscHighRiskAssociationType]) < 1 {
 			t.Fatal("expected >= 1 flag")
 		}
 
@@ -300,7 +300,7 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 
 		titles := make([]string, 0)
 
-		for _, flag := range report["MiscHighRiskAssociations"] {
+		for _, flag := range report[api.MiscHighRiskAssociationType] {
 			flag := flag.(*api.MiscHighRiskAssociationFlag)
 			if len(flag.Connections) != 0 || flag.EntityMentioned != "Charles M. Lieber" {
 				t.Fatal("incorrect flag")
@@ -326,11 +326,11 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(report["MiscHighRiskAssociations"]) < 1 {
+		if len(report[api.MiscHighRiskAssociationType]) < 1 {
 			t.Fatal("expected >= 1 flag")
 		}
 
-		for _, flag := range report["MiscHighRiskAssociations"] {
+		for _, flag := range report[api.MiscHighRiskAssociationType] {
 			flag := flag.(*api.MiscHighRiskAssociationFlag)
 			if len(flag.Connections) != 1 || flag.FrequentCoauthor == nil || *flag.FrequentCoauthor != "Charles M. Lieber" {
 				t.Fatal("incorrect flag")
@@ -351,12 +351,12 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(report["MiscHighRiskAssociations"]) < 1 {
+		if len(report[api.MiscHighRiskAssociationType]) < 1 {
 			t.Fatal("expected >= 1 flag")
 		}
 
 		entitiesMentioned := map[string]bool{}
-		for _, flag := range report["MiscHighRiskAssociations"] {
+		for _, flag := range report[api.MiscHighRiskAssociationType] {
 			flag := flag.(*api.MiscHighRiskAssociationFlag)
 			if len(flag.Connections) != 2 ||
 				flag.Connections[0].DocTitle != "NuProbe About Us" ||
@@ -425,7 +425,7 @@ func TestProcessorAcknowledgements(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(report["TalentContracts"]) != 3 || len(report["HighRiskFunders"]) != 1 {
+		if len(report[api.TalentContractType]) != 3 || len(report[api.HighRiskFunderType]) != 1 {
 			t.Fatal("expected 4 acknowledgement flags")
 		}
 
@@ -437,11 +437,11 @@ func TestProcessorAcknowledgements(t *testing.T) {
 		}
 
 		titles := make([]string, 0)
-		for _, flag := range report["TalentContracts"] {
+		for _, flag := range report[api.TalentContractType] {
 			flag := flag.(*api.TalentContractFlag)
 			titles = append(titles, flag.Work.DisplayName)
 		}
-		for _, flag := range report["HighRiskFunders"] {
+		for _, flag := range report[api.HighRiskFunderType] {
 			flag := flag.(*api.HighRiskFunderFlag)
 			titles = append(titles, flag.Work.DisplayName)
 		}
@@ -464,12 +464,12 @@ func TestProcessorAcknowledgements(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(report["HighRiskFunders"]) < 1 {
+		if len(report[api.HighRiskFunderType]) < 1 {
 			t.Fatal("expected >= 1 flags")
 		}
 
 		found := false
-		for _, flag := range report["HighRiskFunders"] {
+		for _, flag := range report[api.HighRiskFunderType] {
 			flag := flag.(*api.HighRiskFunderFlag)
 			if flag.Work.WorkId == "https://openalex.org/W4384197626" {
 				found = true
