@@ -38,7 +38,7 @@ func NewManager(db *gorm.DB, staleReportThreshold time.Duration) *ReportManager 
 	return &ReportManager{db: db, staleReportThreshold: staleReportThreshold}
 }
 
-func (r *ReportManager) ListReports(userId uuid.UUID) ([]api.Report, error) {
+func (r *ReportManager) ListAuthorReports(userId uuid.UUID) ([]api.Report, error) {
 	var reports []schema.UserAuthorReport
 
 	if err := r.db.Preload("Report").Order("created_at ASC").Find(&reports, "user_id = ?", userId).Error; err != nil {
@@ -71,7 +71,7 @@ func (r *ReportManager) queueReportUpdateIfNeeded(txn *gorm.DB, report *schema.A
 	return nil
 }
 
-func (r *ReportManager) CreateReport(licenseId, userId uuid.UUID, authorId, authorName, source string) (uuid.UUID, error) {
+func (r *ReportManager) CreateAuthorReport(licenseId, userId uuid.UUID, authorId, authorName, source string) (uuid.UUID, error) {
 	userReportId := uuid.New()
 
 	err := r.db.Transaction(func(txn *gorm.DB) error {
@@ -136,7 +136,7 @@ func (r *ReportManager) CreateReport(licenseId, userId uuid.UUID, authorId, auth
 	return userReportId, nil
 }
 
-func (r *ReportManager) GetReport(userId, reportId uuid.UUID) (api.Report, error) {
+func (r *ReportManager) GetAuthorReport(userId, reportId uuid.UUID) (api.Report, error) {
 	var report schema.UserAuthorReport
 
 	if err := r.db.Transaction(func(txn *gorm.DB) error {
@@ -174,7 +174,7 @@ type ReportUpdateTask struct {
 	EndDate    time.Time
 }
 
-func (r *ReportManager) GetNextReport() (*ReportUpdateTask, error) {
+func (r *ReportManager) GetNextAuthorReport() (*ReportUpdateTask, error) {
 	found := false
 	var report schema.AuthorReport
 
@@ -235,7 +235,7 @@ func flagsToReportContent(flags []schema.AuthorFlag) (api.ReportContent, error) 
 	return content, nil
 }
 
-func (r *ReportManager) UpdateReport(id uuid.UUID, status string, updateTime time.Time, updateContent api.ReportContent) error {
+func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTime time.Time, updateContent api.ReportContent) error {
 	return r.db.Transaction(func(txn *gorm.DB) error {
 		var report schema.AuthorReport
 

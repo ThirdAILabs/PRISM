@@ -46,6 +46,30 @@ type UserAuthorReport struct {
 	Report   *AuthorReport `gorm:"foreignKey:ReportId"`
 }
 
+type UniversityReport struct {
+	Id uuid.UUID `gorm:"type:uuid;primaryKey"`
+
+	LastUpdatedAt time.Time
+
+	UniversityId   string `gorm:"index"`
+	UniversityName string
+
+	QueuedAt time.Time
+	Status   string `gorm:"size:20;not null"`
+
+	Authors []AuthorReport `gorm:"many2many:university_authors"`
+}
+
+type UserUniversityReport struct {
+	Id     uuid.UUID `gorm:"type:uuid;primaryKey"`
+	UserId uuid.UUID `gorm:"type:uuid;not null;index"`
+
+	CreatedAt time.Time
+
+	ReportId uuid.UUID         `gorm:"type:uuid;not null"`
+	Report   *UniversityReport `gorm:"foreignKey:ReportId"`
+}
+
 type License struct {
 	Id          uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Secret      []byte

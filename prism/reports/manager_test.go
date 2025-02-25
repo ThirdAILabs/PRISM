@@ -38,7 +38,7 @@ func checkNextReport(t *testing.T, next *reports.ReportUpdateTask, authorId, aut
 }
 
 func checkReport(t *testing.T, manager *reports.ReportManager, userId, reportId uuid.UUID, authorId, authorName, source, status string, nflags int) {
-	report, err := manager.GetReport(userId, reportId)
+	report, err := manager.GetAuthorReport(userId, reportId)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -60,7 +60,7 @@ func checkReport(t *testing.T, manager *reports.ReportManager, userId, reportId 
 }
 
 func checkNoNextReport(t *testing.T, manager *reports.ReportManager) {
-	next, err := manager.GetNextReport()
+	next, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,19 +93,19 @@ func TestCreateGetReports(t *testing.T) {
 
 	checkNoNextReport(t, manager)
 
-	reportId1, err := manager.CreateReport(license, user1, "1", "author1", api.OpenAlexSource)
+	reportId1, err := manager.CreateAuthorReport(license, user1, "1", "author1", api.OpenAlexSource)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	reportId2, err := manager.CreateReport(license, user2, "2", "author2", api.GoogleScholarSource)
+	reportId2, err := manager.CreateAuthorReport(license, user2, "2", "author2", api.GoogleScholarSource)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "queued", 0)
 
-	next1, err := manager.GetNextReport()
+	next1, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,13 +114,13 @@ func TestCreateGetReports(t *testing.T) {
 
 	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "in-progress", 0)
 
-	if err := manager.UpdateReport(next1.Id, "complete", next1.EndDate, dummyReportUpdate()); err != nil {
+	if err := manager.UpdateAuthorReport(next1.Id, "complete", next1.EndDate, dummyReportUpdate()); err != nil {
 		t.Fatal(err)
 	}
 
 	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "complete", 1)
 
-	next2, err := manager.GetNextReport()
+	next2, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -129,7 +129,7 @@ func TestCreateGetReports(t *testing.T) {
 
 	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "in-progress", 0)
 
-	if err := manager.UpdateReport(next2.Id, "complete", next2.EndDate, dummyReportUpdate()); err != nil {
+	if err := manager.UpdateAuthorReport(next2.Id, "complete", next2.EndDate, dummyReportUpdate()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -144,7 +144,7 @@ func TestCreateGetReports(t *testing.T) {
 	checkNoNextReport(t, manager)
 
 	// Check that reports are reused
-	reportId3, err := manager.CreateReport(license, user1, "2", "author2", api.GoogleScholarSource)
+	reportId3, err := manager.CreateAuthorReport(license, user1, "2", "author2", api.GoogleScholarSource)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -161,7 +161,7 @@ func TestCreateGetReports(t *testing.T) {
 	// Perform multiple accesses to ensure it is only added once
 	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "queued", 1)
 
-	next3, err := manager.GetNextReport()
+	next3, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,7 +173,7 @@ func TestCreateGetReports(t *testing.T) {
 	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "in-progress", 1)
 	checkNoNextReport(t, manager)
 
-	if err := manager.UpdateReport(next3.Id, "complete", next3.EndDate, dummyReportUpdate()); err != nil {
+	if err := manager.UpdateAuthorReport(next3.Id, "complete", next3.EndDate, dummyReportUpdate()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -181,7 +181,7 @@ func TestCreateGetReports(t *testing.T) {
 	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "complete", 2)
 
 	// Create a new report from an old report and ensure that it is queued
-	reportId4, err := manager.CreateReport(license, user2, "1", "author1", api.OpenAlexSource)
+	reportId4, err := manager.CreateAuthorReport(license, user2, "1", "author1", api.OpenAlexSource)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -190,7 +190,7 @@ func TestCreateGetReports(t *testing.T) {
 	// Check that the original report is being updated as well
 	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "queued", 1)
 
-	next4, err := manager.GetNextReport()
+	next4, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -202,7 +202,7 @@ func TestCreateGetReports(t *testing.T) {
 	// Check that the original report is being updated as well
 	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "in-progress", 1)
 
-	if err := manager.UpdateReport(next4.Id, "complete", next4.EndDate, dummyReportUpdate()); err != nil {
+	if err := manager.UpdateAuthorReport(next4.Id, "complete", next4.EndDate, dummyReportUpdate()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -218,20 +218,20 @@ func TestReportAccessErrors(t *testing.T) {
 	user1, user2 := uuid.New(), uuid.New()
 	license := uuid.New()
 
-	reportId, err := manager.CreateReport(license, user1, "1", "author1", api.OpenAlexSource)
+	reportId, err := manager.CreateAuthorReport(license, user1, "1", "author1", api.OpenAlexSource)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := manager.GetReport(user1, reportId); err != nil {
+	if _, err := manager.GetAuthorReport(user1, reportId); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := manager.GetReport(user2, reportId); err != reports.ErrUserCannotAccessReport {
+	if _, err := manager.GetAuthorReport(user2, reportId); err != reports.ErrUserCannotAccessReport {
 		t.Fatal(err)
 	}
 
-	if _, err := manager.GetReport(user1, uuid.New()); err != reports.ErrReportNotFound {
+	if _, err := manager.GetAuthorReport(user1, uuid.New()); err != reports.ErrReportNotFound {
 		t.Fatal(err)
 	}
 }
@@ -242,12 +242,12 @@ func TestListReports(t *testing.T) {
 	user1, user2 := uuid.New(), uuid.New()
 	license := uuid.New()
 
-	report1, err := manager.CreateReport(license, user1, "1", "author1", api.OpenAlexSource)
+	report1, err := manager.CreateAuthorReport(license, user1, "1", "author1", api.OpenAlexSource)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	noReports, err := manager.ListReports(user2)
+	noReports, err := manager.ListAuthorReports(user2)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -255,17 +255,17 @@ func TestListReports(t *testing.T) {
 		t.Fatal("should be no reports for user2")
 	}
 
-	report2, err := manager.CreateReport(license, user2, "2", "author2", api.OpenAlexSource)
+	report2, err := manager.CreateAuthorReport(license, user2, "2", "author2", api.OpenAlexSource)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	report3, err := manager.CreateReport(license, user1, "3", "author3", api.GoogleScholarSource)
+	report3, err := manager.CreateAuthorReport(license, user1, "3", "author3", api.GoogleScholarSource)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	reports1, err := manager.ListReports(user1)
+	reports1, err := manager.ListAuthorReports(user1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -281,7 +281,7 @@ func TestListReports(t *testing.T) {
 		t.Fatal("incorrect reports")
 	}
 
-	reports2, err := manager.ListReports(user2)
+	reports2, err := manager.ListAuthorReports(user2)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -298,7 +298,7 @@ func TestListReports(t *testing.T) {
 	}
 
 	// Update a report to complete
-	next, err := manager.GetNextReport()
+	next, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -306,11 +306,11 @@ func TestListReports(t *testing.T) {
 		t.Fatal("report should not be nil")
 	}
 
-	if err := manager.UpdateReport(next.Id, "complete", time.Now(), api.ReportContent{}); err != nil {
+	if err := manager.UpdateAuthorReport(next.Id, "complete", time.Now(), api.ReportContent{}); err != nil {
 		t.Fatal(err)
 	}
 
-	reports1, err = manager.ListReports(user1)
+	reports1, err = manager.ListAuthorReports(user1)
 	if err != nil {
 		t.Fatal(err)
 	}

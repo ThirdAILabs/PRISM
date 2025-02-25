@@ -369,7 +369,7 @@ func TestCheckDisclosure(t *testing.T) {
 		},
 	}
 
-	nextReport, err := manager.GetNextReport()
+	nextReport, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -377,7 +377,7 @@ func TestCheckDisclosure(t *testing.T) {
 		t.Fatal("next report should not be nil")
 	}
 
-	if err := manager.UpdateReport(nextReport.Id, schema.ReportCompleted, time.Now(), content); err != nil {
+	if err := manager.UpdateAuthorReport(nextReport.Id, schema.ReportCompleted, time.Now(), content); err != nil {
 		t.Fatal(err)
 	}
 
@@ -467,7 +467,7 @@ func TestDownloadReportAllFormats(t *testing.T) {
 		},
 	}
 
-	nextReport, err := manager.GetNextReport()
+	nextReport, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -475,7 +475,7 @@ func TestDownloadReportAllFormats(t *testing.T) {
 		t.Fatal("next report should not be nil")
 	}
 
-	if err := manager.UpdateReport(nextReport.Id, schema.ReportCompleted, time.Now(), content); err != nil {
+	if err := manager.UpdateAuthorReport(nextReport.Id, schema.ReportCompleted, time.Now(), content); err != nil {
 		t.Fatal(err)
 	}
 

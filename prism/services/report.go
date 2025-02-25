@@ -44,7 +44,7 @@ func (s *ReportService) List(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	reports, err := s.manager.ListReports(userId)
+	reports, err := s.manager.ListAuthorReports(userId)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
@@ -84,7 +84,7 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 		return nil, CodedError(err, licensingErrorStatus(err))
 	}
 
-	id, err := s.manager.CreateReport(licenseId, userId, params.AuthorId, params.AuthorName, params.Source)
+	id, err := s.manager.CreateAuthorReport(licenseId, userId, params.AuthorId, params.AuthorName, params.Source)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
@@ -104,7 +104,7 @@ func (s *ReportService) GetReport(r *http.Request) (any, error) {
 		return nil, CodedError(fmt.Errorf("invalid uuid '%v' provided: %w", param, err), http.StatusBadRequest)
 	}
 
-	report, err := s.manager.GetReport(userId, id)
+	report, err := s.manager.GetAuthorReport(userId, id)
 	if err != nil {
 		return nil, CodedError(err, reportErrorStatus(err))
 	}
@@ -178,7 +178,7 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 		allFileTexts = append(allFileTexts, text)
 	}
 
-	report, err := s.manager.GetReport(userId, reportId)
+	report, err := s.manager.GetAuthorReport(userId, reportId)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
@@ -209,7 +209,7 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	report, err := s.manager.GetReport(userId, reportId)
+	report, err := s.manager.GetAuthorReport(userId, reportId)
 	if err != nil {
 		http.Error(w, err.Error(), reportErrorStatus(err))
 		return

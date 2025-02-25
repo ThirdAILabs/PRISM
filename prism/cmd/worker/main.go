@@ -107,7 +107,7 @@ func main() {
 	for {
 		time.Sleep(10 * time.Second)
 
-		nextReport, err := reportManager.GetNextReport()
+		nextReport, err := reportManager.GetNextAuthorReport()
 		if err != nil {
 			slog.Error("error checking for next report", "error", err)
 			continue
@@ -120,13 +120,13 @@ func main() {
 		if err != nil {
 			slog.Error("error processing report: %w")
 
-			if err := reportManager.UpdateReport(nextReport.Id, "failed", time.Time{}, api.ReportContent{}); err != nil {
+			if err := reportManager.UpdateAuthorReport(nextReport.Id, "failed", time.Time{}, api.ReportContent{}); err != nil {
 				slog.Error("error updating report status to failed", "error", err)
 			}
 			continue
 		}
 
-		if err := reportManager.UpdateReport(nextReport.Id, "complete", nextReport.EndDate, content); err != nil {
+		if err := reportManager.UpdateAuthorReport(nextReport.Id, "complete", nextReport.EndDate, content); err != nil {
 			slog.Error("error updating report status to complete", "error", err)
 		}
 	}
