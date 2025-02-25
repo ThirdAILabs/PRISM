@@ -2,7 +2,7 @@
 
 ## Setup Keycloak
 
-1. Download Keycloak version 26.0.0 from the official GitHub repository using this link: [Download Keycloak 26.0.0](https://github.com/keycloak/keycloak/releases/download/26.0.0/keycloak-26.0.0.zip).
+1. Download Keycloak version 26.0.0 from the official GitHub repository using this link: [Download Keycloak 26.0.0](https://thirdai-corp-public.s3.us-east-2.amazonaws.com/keycloak/keycloak-26.0.0.zip).
 2. Extract the downloaded `keycloak-26.0.0.zip` file to a directory of your choice.
 3. After extraction, you should have a directory named `keycloak-26.0.0`.
 4. Open a terminal and navigate to the `keycloak-26.0.0` directory:
