@@ -164,10 +164,6 @@ func generateExcel(report api.Report) ([]byte, error) {
 			return nil, err
 		}
 
-		if len(flags) == 0 {
-			continue
-		}
-
 		details := flags[0].GetDetailFields()
 		headers := make([]string, len(details))
 		for i, kv := range details {

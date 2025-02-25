@@ -350,7 +350,7 @@ func TestCheckDisclosure(t *testing.T) {
 					OaUrl:           "http://example.com/oa/work-1",
 					PublicationDate: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
 				},
-				RawAcknowledements: []string{"discloseme"},
+				Entities: []api.AcknowledgementEntity{{Entity: "discloseme"}},
 			},
 		},
 		"AssociationsWithDeniedEntities": []api.Flag{
@@ -364,7 +364,7 @@ func TestCheckDisclosure(t *testing.T) {
 					OaUrl:           "http://example.com/oa/work-2",
 					PublicationDate: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
 				},
-				RawAcknowledements: []string{"nonmatching"},
+				Entities: []api.AcknowledgementEntity{{Entity: "nonmatching"}},
 			},
 		},
 	}
