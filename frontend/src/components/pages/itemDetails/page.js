@@ -32,7 +32,7 @@ const FLAG_ORDER = [
   COAUTHOR_AFFILIATIONS,
 ];
 
-const todayStr = new Date().toISOString().split("T")[0];
+const todayStr = new Date().toISOString().split('T')[0];
 
 const TitlesAndDescriptions = {
   [TALENT_CONTRACTS]: {
@@ -93,6 +93,7 @@ const ItemDetails = () => {
   const [authorName, setAuthorName] = useState('');
   const [institutions, setInstitutions] = useState([]);
   const [initialReprtContent, setInitialReportContent] = useState({});
+  const [isDisclosureChecked, setDisclosureChecked] = useState(false);
   // Add these states at the top with other states
   // const [selectedFiles, setSelectedFiles] = useState([]);
   // const [isUploading, setIsUploading] = useState(false);
@@ -160,6 +161,7 @@ const ItemDetails = () => {
       const result = await reportService.checkDisclosure(report_id, selectedFiles);
       setReportContent(result.Content);
       setInitialReportContent(result.Content);
+      setDisclosureChecked(true);
       handleCloseDialog();
     } catch (error) {
       setUploadError(error.message || 'Failed to check disclosure');
@@ -192,8 +194,8 @@ const ItemDetails = () => {
 
   const [loading, setLoading] = useState(true);
 
-  const [startYear, setStartYear] = useState('');
-  const [endYear, setEndYear] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
@@ -201,27 +203,54 @@ const ItemDetails = () => {
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
   };
-  const handleStartYearChange = (e) => setStartYear(e.target.value);
-  const handleEndYearChange = (e) => setEndYear(e.target.value);
+  const handleStartDateChange = (e) => setStartDate(e.target.value);
+  const handleEndDateChange = (e) => setEndDate(e.target.value);
   const toggleYearDropdown = () => {
     setYearDropdownOpen(!yearDropdownOpen);
     setIsDownloadOpen(false); // Close download dropdown
   };
-  const handleYearFilter = () => {
+
+  const handleDateFilter = () => {
+    if (!startDate && !endDate) {
+      setReportContent(initialReprtContent);
+      setYearDropdownOpen(false);
+      return;
+    }
+
+    let start = startDate ? new Date(startDate) : null;
+    let end = endDate ? new Date(endDate) : null;
+
+    if (start && !end) {
+      end = new Date();
+    }
+
+    if (!start && end) {
+      start = new Date('1900-01-01');
+    }
+
+    if (start > end) {
+      alert('Start date cannot be after End date.');
+      return;
+    }
+
     const filteredContent = {};
     FLAG_ORDER.forEach((flag) => {
       if (initialReprtContent[flag]) {
         filteredContent[flag] = initialReprtContent[flag].filter((item) => {
-          return (
-            item?.Work?.PublicationYear === undefined ||
-            (item?.Work?.PublicationYear >= startYear && item?.Work?.PublicationYear <= endYear)
-          );
+          if (!item?.Work?.PublicationDate) return true;
+          const pubDate = new Date(item.Work.PublicationDate);
+
+          if (pubDate < start) return false;
+          if (pubDate > end) return false;
+
+          return true;
         });
-      } else filteredContent[flag] = null;
+      } else {
+        filteredContent[flag] = null;
+      }
     });
+
     setReportContent(filteredContent);
-    console.log('Unfiltered', initialReprtContent);
-    console.log('Filtered', reportContent);
     setYearDropdownOpen(false);
   };
   const [instDropdownOpen, setInstDropdownOpen] = useState(false);
@@ -229,11 +258,21 @@ const ItemDetails = () => {
 
   const [review, setReview] = useState();
 
-  function withYear(header, flag) {
+  function withPublicationDate(header, flag) {
+    const publicationDateStr = flag.Work && flag.Work.PublicationDate;
+    let formattedDate = 'N/A';
+    if (publicationDateStr) {
+      const publicationDate = new Date(publicationDateStr);
+      formattedDate = publicationDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+    }
     return (
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         {header}
-        <span className="fw-bold mt-3">{flag.Work.PublicationYear}</span>
+        <span className="fw-bold mt-3">{formattedDate}</span>
       </div>
     );
   }
@@ -241,7 +280,10 @@ const ItemDetails = () => {
   function multipleAffiliationsFlag(flag, index) {
     return (
       <li key={index} className="p-3 px-5 w-75 detail-item">
-        {withYear(<h5 className="fw-bold mt-3">Author has multiple affiliations</h5>, flag)}
+        {withPublicationDate(
+          <h5 className="fw-bold mt-3">Author has multiple affiliations</h5>,
+          flag
+        )}
         <p>
           {authorName} is affiliated with multiple institutions in {get_paper_url(flag)}. Detected
           affiliations:
@@ -256,15 +298,16 @@ const ItemDetails = () => {
             })}
           </ul>
         </p>
-        {flag.Disclosed ? (
-          <button type="button" className="btn btn-success">
-            Disclosed
-          </button>
-        ) : (
-          <button type="button" className="btn btn-danger">
-            Undisclosed
-          </button>
-        )}
+        {isDisclosureChecked &&
+          (flag.Disclosed ? (
+            <button type="button" className="btn btn-success">
+              Disclosed
+            </button>
+          ) : (
+            <button type="button" className="btn btn-danger">
+              Undisclosed
+            </button>
+          ))}
       </li>
     );
   }
@@ -272,9 +315,13 @@ const ItemDetails = () => {
   function funderFlag(flag, index) {
     return (
       <li key={index} className="p-3 px-5 w-75 detail-item">
-        {withYear(<h5 className="fw-bold mt-3">Funder is an entity of concern</h5>, flag)}
+        {withPublicationDate(
+          <h5 className="fw-bold mt-3">Funder is an entity of concern</h5>,
+          flag
+        )}
         <p>
           {get_paper_url(flag)} is funded by the following entities of concern:
+          {flag.FromAcknowledgements && <p>Acknowledgements Text:</p>}
           <ul className="bulleted-list">
             {flag.Funders.map((item, index2) => {
               const key = `${index} ${index2}`;
@@ -285,27 +332,17 @@ const ItemDetails = () => {
               );
             })}
           </ul>
-          {flag.RawAcknowledements.length > 0 && (
-            <>
-              <p>Acknowledgements Text:</p>
-              <ul>
-                {flag.RawAcknowledements.map((item, index2) => {
-                  const key = `ack-${index} ${index2}`;
-                  return <li key={key}>{item}</li>;
-                })}
-              </ul>
-            </>
-          )}
         </p>
-        {flag.Disclosed ? (
-          <button type="button" className="btn btn-success">
-            Disclosed
-          </button>
-        ) : (
-          <button type="button" className="btn btn-danger">
-            Undisclosed
-          </button>
-        )}
+        {isDisclosureChecked &&
+          (flag.Disclosed ? (
+            <button type="button" className="btn btn-success">
+              Disclosed
+            </button>
+          ) : (
+            <button type="button" className="btn btn-danger">
+              Undisclosed
+            </button>
+          ))}
       </li>
     );
   }
@@ -313,7 +350,10 @@ const ItemDetails = () => {
   function publisherFlag(flag, index) {
     return (
       <li key={index} className="p-3 px-5 w-75 detail-item">
-        {withYear(<h5 className="fw-bold mt-3">Publisher is an entity of concern</h5>, flag)}
+        {withPublicationDate(
+          <h5 className="fw-bold mt-3">Publisher is an entity of concern</h5>,
+          flag
+        )}
         <p>
           {get_paper_url(flag)} is published by the following entities of concern:
           <ul className="bulleted-list">
@@ -327,15 +367,16 @@ const ItemDetails = () => {
             })}
           </ul>
         </p>
-        {flag.Disclosed ? (
-          <button type="button" className="btn btn-success">
-            Disclosed
-          </button>
-        ) : (
-          <button type="button" className="btn btn-danger">
-            Undisclosed
-          </button>
-        )}
+        {isDisclosureChecked &&
+          (flag.Disclosed ? (
+            <button type="button" className="btn btn-success">
+              Disclosed
+            </button>
+          ) : (
+            <button type="button" className="btn btn-danger">
+              Undisclosed
+            </button>
+          ))}
       </li>
     );
   }
@@ -343,7 +384,10 @@ const ItemDetails = () => {
   function coauthorFlag(flag, index) {
     return (
       <li key={index} className="p-3 px-5 w-75 detail-item">
-        {withYear(<h5 className="fw-bold mt-3">Co-authors are high-risk entities</h5>, flag)}
+        {withPublicationDate(
+          <h5 className="fw-bold mt-3">Co-authors are high-risk entities</h5>,
+          flag
+        )}
         <p>
           The following co-authors of {get_paper_url(flag)} are high-risk entities:
           <ul className="bulleted-list">
@@ -357,15 +401,16 @@ const ItemDetails = () => {
             })}
           </ul>
         </p>
-        {flag.Disclosed ? (
-          <button type="button" className="btn btn-success">
-            Disclosed
-          </button>
-        ) : (
-          <button type="button" className="btn btn-danger">
-            Undisclosed
-          </button>
-        )}
+        {isDisclosureChecked &&
+          (flag.Disclosed ? (
+            <button type="button" className="btn btn-success">
+              Disclosed
+            </button>
+          ) : (
+            <button type="button" className="btn btn-danger">
+              Undisclosed
+            </button>
+          ))}
       </li>
     );
   }
@@ -373,7 +418,7 @@ const ItemDetails = () => {
   function coauthorAffiliationFlag(flag, index) {
     return (
       <li key={index} className="p-3 px-5 w-75 detail-item">
-        {withYear(
+        {withPublicationDate(
           <h5 className="fw-bold mt-3">Co-authors are affiliated with entities of concern</h5>,
           flag
         )}
@@ -401,16 +446,16 @@ const ItemDetails = () => {
             })}
           </ul>
         </p>
-        {flag.Disclosed}
-        {flag.Disclosed ? (
-          <button type="button" className="btn btn-success">
-            Disclosed
-          </button>
-        ) : (
-          <button type="button" className="btn btn-danger">
-            Undisclosed
-          </button>
-        )}
+        {isDisclosureChecked &&
+          (flag.Disclosed ? (
+            <button type="button" className="btn btn-success">
+              Disclosed
+            </button>
+          ) : (
+            <button type="button" className="btn btn-danger">
+              Undisclosed
+            </button>
+          ))}
       </li>
     );
   }
@@ -418,7 +463,7 @@ const ItemDetails = () => {
   function authorAffiliationFlag(flag, index) {
     return (
       <li key={index} className="p-3 px-5 w-75 detail-item">
-        {withYear(
+        {withPublicationDate(
           <h5 className="fw-bold mt-3">Author is affiliated with entities of concern</h5>,
           flag
         )}
@@ -436,16 +481,16 @@ const ItemDetails = () => {
             })}
           </ul>
         </div>
-        {flag.Disclosed}
-        {flag.Disclosed ? (
-          <button type="button" className="btn btn-success">
-            Disclosed
-          </button>
-        ) : (
-          <button type="button" className="btn btn-danger">
-            Undisclosed
-          </button>
-        )}
+        {isDisclosureChecked &&
+          (flag.Disclosed ? (
+            <button type="button" className="btn btn-success">
+              Disclosed
+            </button>
+          ) : (
+            <button type="button" className="btn btn-danger">
+              Undisclosed
+            </button>
+          ))}
       </li>
     );
   }
@@ -453,7 +498,7 @@ const ItemDetails = () => {
   function acknowledgementFlag(flag, index) {
     return (
       <li key={index} className="p-3 px-5 w-75 detail-item">
-        {withYear(
+        {withPublicationDate(
           <h5 className="fw-bold mt-3">Acknowledgements contain foreign influences</h5>,
           flag
         )}
@@ -487,15 +532,16 @@ const ItemDetails = () => {
           <p>{}</p>
         </p>
         {}
-        {flag.Disclosed ? (
-          <button type="button" className="btn btn-success">
-            Disclosed
-          </button>
-        ) : (
-          <button type="button" className="btn btn-danger">
-            Undisclosed
-          </button>
-        )}
+        {isDisclosureChecked &&
+          (flag.Disclosed ? (
+            <button type="button" className="btn btn-success">
+              Disclosed
+            </button>
+          ) : (
+            <button type="button" className="btn btn-danger">
+              Undisclosed
+            </button>
+          ))}
 
         {/* DISCLOSURE */}
         {/* <hr />
@@ -535,17 +581,55 @@ const ItemDetails = () => {
             {flag.UniversityUrl}
           </a>
         </p>
-        {flag.Disclosed ? (
-          <button type="button" className="btn btn-success">
-            Disclosed
-          </button>
-        ) : (
-          <button type="button" className="btn btn-danger">
-            Undisclosed
-          </button>
-        )}
+        {isDisclosureChecked &&
+          (flag.Disclosed ? (
+            <button type="button" className="btn btn-success">
+              Disclosed
+            </button>
+          ) : (
+            <button type="button" className="btn btn-danger">
+              Undisclosed
+            </button>
+          ))}
       </li>
     );
+  }
+
+  const [showDisclosed, setShowDisclosed] = useState(true);
+  const [showUndisclosed, setShowUndisclosed] = useState(true);
+  const disclosedItems = (reportContent[review] || []).filter((item) => item.Disclosed);
+  const undisclosedItems = (reportContent[review] || []).filter((item) => !item.Disclosed);
+  const [sortOrder, setSortOrder] = useState('desc');
+
+  function renderFlags(items) {
+    const sortedItems = [...items].sort((a, b) => {
+      const dateA =
+        a.Work && a.Work.PublicationDate ? new Date(a.Work.PublicationDate).getTime() : 0;
+      const dateB =
+        b.Work && b.Work.PublicationDate ? new Date(b.Work.PublicationDate).getTime() : 0;
+      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+
+    return sortedItems.map((flag, index) => {
+      switch (review) {
+        case TALENT_CONTRACTS:
+          return acknowledgementFlag(flag, index);
+        case ASSOCIATIONS_WITH_DENIED_ENTITIES:
+          return acknowledgementFlag(flag, index);
+        case HIGH_RISK_FUNDERS:
+          return funderFlag(flag, index);
+        case AUTHOR_AFFILIATIONS:
+          return authorAffiliationFlag(flag, index);
+        case POTENTIAL_AUTHOR_AFFILIATIONS:
+          return universityFacultyFlag(flag, index);
+        case MISC_HIGH_RISK_AFFILIATIONS:
+          return PRFlag(flag, index);
+        case COAUTHOR_AFFILIATIONS:
+          return coauthorAffiliationFlag(flag, index);
+        default:
+          return null;
+      }
+    });
   }
 
   function PRFlag(flag, index) {
@@ -653,15 +737,16 @@ const ItemDetails = () => {
             })}
           </ul>
         </p>
-        {flag.Disclosed ? (
-          <button type="button" className="btn btn-success">
-            Disclosed
-          </button>
-        ) : (
-          <button type="button" className="btn btn-danger">
-            Undisclosed
-          </button>
-        )}
+        {isDisclosureChecked &&
+          (flag.Disclosed ? (
+            <button type="button" className="btn btn-success">
+              Disclosed
+            </button>
+          ) : (
+            <button type="button" className="btn btn-danger">
+              Undisclosed
+            </button>
+          ))}
       </li>
     );
   }
@@ -669,13 +754,20 @@ const ItemDetails = () => {
   // function formalRelationFlag(flag, index) {
   //   return (
   //     <li key={index} className='p-3 px-5 w-75 detail-item'>
-  //       {withYear(<h5 className='fw-bold mt-3'>{flag.title}</h5>, flag)}
+  //       {withPublicationDate(<h5 className='fw-bold mt-3'>{flag.title}</h5>, flag)}
   //       <p>{wrapLinks(flag.message)}</p>
   //     </li>
   //   )
   // }
 
   const [showPopover, setShowPopover] = useState(false);
+
+  const handleResetFilter = () => {
+    setStartDate('');
+    setEndDate('');
+    setReportContent(initialReprtContent);
+    setYearDropdownOpen(false);
+  };
 
   const togglePopover = () => {
     setShowPopover(!showPopover);
@@ -783,13 +875,13 @@ const ItemDetails = () => {
                     }}
                   >
                     <div className="form-group mb-2">
-                      <label>Start Year</label>
+                      <label>Start Date</label>
                       <input
-                        type="text"
-                        value={startYear}
-                        onChange={handleStartYearChange}
+                        type="date"
+                        value={startDate}
+                        max={todayStr}
+                        onChange={handleStartDateChange}
                         className="form-control"
-                        placeholder="Enter start year"
                         style={{
                           backgroundColor: 'rgb(220, 220, 220)',
                           border: 'none',
@@ -801,13 +893,13 @@ const ItemDetails = () => {
                     </div>
                     <div style={{ height: '10px' }} />
                     <div className="form-group">
-                      <label>End Year</label>
+                      <label>End Date</label>
                       <input
-                        type="text"
-                        value={endYear}
-                        onChange={handleEndYearChange}
+                        type="date"
+                        value={endDate}
+                        max={todayStr}
+                        onChange={handleEndDateChange}
                         className="form-control"
-                        placeholder="Enter end year"
                         style={{
                           backgroundColor: 'rgb(220, 220, 220)',
                           border: 'none',
@@ -817,23 +909,42 @@ const ItemDetails = () => {
                         }}
                       />
                     </div>
-                    <button
-                      className="form-control"
-                      type="submit"
-                      onClick={handleYearFilter}
-                      disabled={!(startYear && endYear)}
-                      style={{
-                        backgroundColor: 'rgb(220, 220, 220)',
-                        border: 'none',
-                        color: 'white',
-                        width: '100px',
-                        fontWeight: 'bold',
-                        fontSize: '14px',
-                        marginTop: '20px',
-                      }}
-                    >
-                      submit
-                    </button>
+                    <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+                      <button
+                        className="form-control"
+                        type="submit"
+                        onClick={handleDateFilter}
+                        disabled={!(startDate || endDate)}
+                        style={{
+                          backgroundColor: startDate || endDate ? 'black' : 'rgb(220, 220, 220)',
+                          border: 'none',
+                          color: 'white',
+                          width: '100px',
+                          fontWeight: 'bold',
+                          fontSize: '14px',
+                          cursor: startDate || endDate ? 'pointer' : 'default',
+                          transition: 'background-color 0.3s',
+                        }}
+                      >
+                        Submit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleResetFilter}
+                        style={{
+                          backgroundColor: 'black',
+                          border: 'none',
+                          color: 'white',
+                          width: '100px',
+                          fontWeight: 'bold',
+                          fontSize: '14px',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.3s',
+                        }}
+                      >
+                        Reset
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -944,7 +1055,6 @@ const ItemDetails = () => {
               display: 'flex',
               justifyContent: 'space-around',
               flexWrap: 'wrap',
-              height: '500px',
               marginTop: '20px',
             }}
           >
@@ -960,29 +1070,165 @@ const ItemDetails = () => {
               );
             })}
           </div>
-
           {review && (
-            <ul className="d-flex flex-column align-items-center p-0" style={{ color: 'black' }}>
-              <h5 className="fw-bold mt-3">Reviewing {TitlesAndDescriptions[review].title}</h5>
-              {(reportContent[review] || []).map((flag, index) => {
-                switch (review) {
-                  case TALENT_CONTRACTS:
-                    return acknowledgementFlag(flag, index);
-                  case ASSOCIATIONS_WITH_DENIED_ENTITIES:
-                    return acknowledgementFlag(flag, index);
-                  case HIGH_RISK_FUNDERS:
-                    return funderFlag(flag, index);
-                  case AUTHOR_AFFILIATIONS:
-                    return authorAffiliationFlag(flag, index);
-                  case POTENTIAL_AUTHOR_AFFILIATIONS:
-                    return universityFacultyFlag(flag, index);
-                  case MISC_HIGH_RISK_AFFILIATIONS:
-                    return PRFlag(flag, index);
-                  case COAUTHOR_AFFILIATIONS:
-                    return coauthorAffiliationFlag(flag, index);
-                }
-              })}
-            </ul>
+            <div style={{ width: '100%', textAlign: 'center', marginTop: '50px' }}>
+              <div
+                style={{
+                  marginBottom: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '10px',
+                }}
+              >
+                <span style={{ marginRight: '10px' }}>Sort by Date:</span>
+                <ArrowUpwardIcon
+                  onClick={() => setSortOrder('asc')}
+                  style={{ cursor: 'pointer', color: sortOrder === 'asc' ? 'black' : 'lightgray' }}
+                />
+                <ArrowDownwardIcon
+                  onClick={() => setSortOrder('desc')}
+                  style={{ cursor: 'pointer', color: sortOrder === 'desc' ? 'black' : 'lightgray' }}
+                />
+              </div>
+              {isDisclosureChecked ? (
+                <>
+                  {disclosedItems.length > 0 ? (
+                    <>
+                      <button
+                        onClick={() => setShowDisclosed(!showDisclosed)}
+                        style={{
+                          backgroundColor: showDisclosed ? 'green' : 'transparent',
+                          color: showDisclosed ? 'white' : 'green',
+                          borderRadius: '20px',
+                          border: '2px solid green',
+                          padding: '10px 20px',
+                          margin: '10px auto',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '200px',
+                          fontSize: '16px',
+                          transition: 'background-color 0.3s, color 0.3s',
+                        }}
+                      >
+                        Disclosed ({disclosedItems.length})
+                        {showDisclosed ? (
+                          <ArrowDropDownIcon
+                            style={{ verticalAlign: 'middle', marginLeft: '8px' }}
+                          />
+                        ) : (
+                          <ArrowRightIcon style={{ verticalAlign: 'middle', marginLeft: '8px' }} />
+                        )}
+                      </button>
+                      {showDisclosed && (
+                        <div
+                          style={{
+                            width: '100%',
+                            maxWidth: '1200px',
+                            margin: '0 auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                          }}
+                        >
+                          {renderFlags(disclosedItems)}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div
+                      style={{
+                        color: 'green',
+                        margin: '10px auto',
+                        width: '200px',
+                        textAlign: 'center',
+                        padding: '10px 20px',
+                        border: '2px solid green',
+                        borderRadius: '20px',
+                      }}
+                    >
+                      Disclosed (0)
+                    </div>
+                  )}
+
+                  {undisclosedItems.length > 0 ? (
+                    <>
+                      <button
+                        onClick={() => setShowUndisclosed(!showUndisclosed)}
+                        style={{
+                          backgroundColor: showUndisclosed ? 'red' : 'transparent',
+                          color: showUndisclosed ? 'white' : 'red',
+                          borderRadius: '20px',
+                          border: '2px solid red',
+                          padding: '10px 20px',
+                          margin: '10px auto',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '200px',
+                          fontSize: '16px',
+                          transition: 'background-color 0.3s, color 0.3s',
+                        }}
+                      >
+                        Undisclosed ({undisclosedItems.length})
+                        {showUndisclosed ? (
+                          <ArrowDropDownIcon
+                            style={{ verticalAlign: 'middle', marginLeft: '8px' }}
+                          />
+                        ) : (
+                          <ArrowRightIcon style={{ verticalAlign: 'middle', marginLeft: '8px' }} />
+                        )}
+                      </button>
+                      {showUndisclosed && (
+                        <div
+                          style={{
+                            width: '100%',
+                            maxWidth: '1200px',
+                            margin: '0 auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                          }}
+                        >
+                          {renderFlags(undisclosedItems)}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div
+                      style={{
+                        color: 'red',
+                        margin: '10px auto',
+                        width: '200px',
+                        textAlign: 'center',
+                        padding: '10px 20px',
+                        border: '2px solid red',
+                        borderRadius: '20px',
+                      }}
+                    >
+                      Undisclosed (0)
+                    </div>
+                  )}
+                </>
+              ) : (
+                // When no disclosure check has been done, just show all items in one list.
+                <div
+                  style={{
+                    width: '100%',
+                    maxWidth: '1200px',
+                    margin: '0 auto',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                  }}
+                >
+                  {renderFlags(reportContent[review])}
+                </div>
+              )}
+            </div>
           )}
         </>
       )}
