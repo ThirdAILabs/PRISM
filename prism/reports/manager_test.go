@@ -81,7 +81,7 @@ func dummyReportUpdate() api.ReportContent {
 	}
 }
 
-func TestCreateGetReports(t *testing.T) {
+func TestCreateGetAuthorReports(t *testing.T) {
 	// This test checks report creation and access, as well as verifing that the report
 	// processing queue behaves as expected. It also verifies the caching behavior,
 	// it checks that reports content can be reused when possible, and also verifies
@@ -212,7 +212,7 @@ func TestCreateGetReports(t *testing.T) {
 	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "complete", 2)
 }
 
-func TestReportAccessErrors(t *testing.T) {
+func TestAuthorReportAccessErrors(t *testing.T) {
 	manager := setup(t)
 
 	user1, user2 := uuid.New(), uuid.New()
