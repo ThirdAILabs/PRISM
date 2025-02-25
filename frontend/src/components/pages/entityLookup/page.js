@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { API_BASE_URL } from '../../../services/apiService';
 import "../../common/searchBar/SearchBar.css";
 import "../../common/tools/button/button1.css"
 import { useUser } from '../../../store/userContext';
@@ -11,11 +10,6 @@ function EntityLookup() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [backendUrl, setBackendUrl] = useState('');
-
-  useEffect(() => {
-    setBackendUrl(API_BASE_URL);
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

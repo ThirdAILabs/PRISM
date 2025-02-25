@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { onFlagsUpdate } from '../../../services/streamStore';
+
 import {
     AUTHOR_AFFILIATIONS
 } from "../../../constants/constants.js"
