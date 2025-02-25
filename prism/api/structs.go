@@ -37,6 +37,31 @@ const (
 	ScopusSource        = "scopus"
 )
 
+type UniversityAuthorFlag struct {
+	AuthorId   string
+	AuthorName string
+	Source     string
+	FlagCount  int
+}
+
+type UniversityReportFlag struct {
+	Total   int
+	Authors []UniversityAuthorFlag
+}
+
+type UniversityReport struct {
+	Id uuid.UUID
+
+	CreatedAt time.Time
+
+	UniversityId   string
+	UniversityName string
+
+	Status string
+
+	Content map[string][]UniversityAuthorFlag
+}
+
 type Author struct {
 	AuthorId     string
 	AuthorName   string

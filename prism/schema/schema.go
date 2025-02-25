@@ -86,8 +86,9 @@ type LicenseUser struct {
 }
 
 type LicenseUsage struct {
-	LicenseId          uuid.UUID `gorm:"type:uuid;primaryKey"`
-	UserAuthorReportId uuid.UUID `gorm:"type:uuid;primaryKey"`
-	UserId             uuid.UUID
-	Timestamp          time.Time
+	LicenseId  uuid.UUID `gorm:"type:uuid;primaryKey"`
+	ReportId   uuid.UUID `gorm:"type:uuid;primaryKey"`
+	ReportType string    `gorm:"size:40"`
+	UserId     uuid.UUID
+	Timestamp  time.Time
 }

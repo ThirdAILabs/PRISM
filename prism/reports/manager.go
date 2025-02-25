@@ -58,12 +58,12 @@ func (r *ReportManager) ListAuthorReports(userId uuid.UUID) ([]api.Report, error
 	return results, nil
 }
 
-func (r *ReportManager) queueReportUpdateIfNeeded(txn *gorm.DB, report *schema.AuthorReport) error {
+func (r *ReportManager) queueAuthorReportUpdateIfNeeded(txn *gorm.DB, report *schema.AuthorReport) error {
 	if time.Now().UTC().Sub(report.LastUpdatedAt) > r.staleReportThreshold &&
 		report.Status != schema.ReportInProgress && report.Status != schema.ReportQueued {
 		updates := map[string]any{"status": schema.ReportQueued, "queued_at": time.Now().UTC()}
 		if err := txn.Model(&report).Updates(updates).Error; err != nil {
-			slog.Error("error queueing stale report for update", "report_id", report.Id, "error", err)
+			slog.Error("error queueing stale author report for update", "author_report_id", report.Id, "error", err)
 			return ErrReportAccessFailed
 		}
 		report.Status = schema.ReportQueued
@@ -71,35 +71,43 @@ func (r *ReportManager) queueReportUpdateIfNeeded(txn *gorm.DB, report *schema.A
 	return nil
 }
 
+func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string) (schema.AuthorReport, error) {
+	var report schema.AuthorReport
+	result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Limit(1).Find(&report, "author_id = ? AND source = ?", authorId, source)
+	if result.Error != nil {
+		slog.Error("error checking for existing author report", "error", result.Error)
+		return schema.AuthorReport{}, ErrReportCreationFailed
+	}
+
+	if result.RowsAffected == 0 {
+		report = schema.AuthorReport{
+			Id:            uuid.New(),
+			LastUpdatedAt: EarliestReportDate,
+			AuthorId:      authorId,
+			AuthorName:    authorName,
+			Source:        source,
+			Status:        schema.ReportQueued,
+		}
+
+		if err := txn.Create(&report).Error; err != nil {
+			slog.Error("error creating new author report", "error", err)
+			return schema.AuthorReport{}, ErrReportCreationFailed
+		}
+	}
+
+	return report, nil
+}
+
 func (r *ReportManager) CreateAuthorReport(licenseId, userId uuid.UUID, authorId, authorName, source string) (uuid.UUID, error) {
 	userReportId := uuid.New()
 
 	err := r.db.Transaction(func(txn *gorm.DB) error {
-		var report schema.AuthorReport
-		result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Limit(1).Find(&report, "author_id = ? AND source = ?", authorId, source)
-		if result.Error != nil {
-			slog.Error("error checking for existing report", "error", result.Error)
-			return ErrReportCreationFailed
+		report, err := createOrGetAuthorReport(txn, authorId, authorName, source)
+		if err != nil {
+			return err
 		}
 
-		if result.RowsAffected == 0 {
-			reportId := uuid.New()
-			report = schema.AuthorReport{
-				Id:            reportId,
-				LastUpdatedAt: EarliestReportDate,
-				AuthorId:      authorId,
-				AuthorName:    authorName,
-				Source:        source,
-				Status:        schema.ReportQueued,
-			}
-
-			if err := txn.Create(&report).Error; err != nil {
-				slog.Error("error creating new report", "error", err)
-				return ErrReportCreationFailed
-			}
-		}
-
-		if err := r.queueReportUpdateIfNeeded(txn, &report); err != nil {
+		if err := r.queueAuthorReportUpdateIfNeeded(txn, &report); err != nil {
 			return err
 		}
 
@@ -111,15 +119,16 @@ func (r *ReportManager) CreateAuthorReport(licenseId, userId uuid.UUID, authorId
 		}
 
 		if err := txn.Create(&userReport).Error; err != nil {
-			slog.Error("error creating new user report", "error", err)
+			slog.Error("error creating new user author report", "error", err)
 			return ErrReportCreationFailed
 		}
 
 		usage := schema.LicenseUsage{
-			LicenseId:          licenseId,
-			UserAuthorReportId: userReport.Id,
-			UserId:             userId,
-			Timestamp:          time.Now().UTC(),
+			LicenseId:  licenseId,
+			ReportId:   userReport.Id,
+			ReportType: "author",
+			UserId:     userId,
+			Timestamp:  time.Now().UTC(),
 		}
 		if err := txn.Create(&usage).Error; err != nil {
 			slog.Error("error logging license usage", "error", err)
@@ -146,7 +155,7 @@ func (r *ReportManager) GetAuthorReport(userId, reportId uuid.UUID) (api.Report,
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return ErrReportNotFound
 			}
-			slog.Error("error getting user report", "report_id", reportId, "error", err)
+			slog.Error("error getting user author report", "author_report_id", reportId, "error", err)
 			return ErrReportAccessFailed
 		}
 
@@ -154,7 +163,7 @@ func (r *ReportManager) GetAuthorReport(userId, reportId uuid.UUID) (api.Report,
 			return ErrUserCannotAccessReport
 		}
 
-		if err := r.queueReportUpdateIfNeeded(txn, report.Report); err != nil {
+		if err := r.queueAuthorReportUpdateIfNeeded(txn, report.Report); err != nil {
 			return err
 		}
 		return nil
@@ -183,7 +192,7 @@ func (r *ReportManager) GetNextAuthorReport() (*ReportUpdateTask, error) {
 			Limit(1).Order("queued_at ASC").
 			Find(&report, "status = ?", schema.ReportQueued)
 		if result.Error != nil {
-			slog.Error("error getting next report from queue", "error", result.Error)
+			slog.Error("error getting next author report from queue", "error", result.Error)
 			return ErrReportAccessFailed
 		}
 
@@ -192,7 +201,7 @@ func (r *ReportManager) GetNextAuthorReport() (*ReportUpdateTask, error) {
 		}
 
 		if err := txn.Model(&report).Update("status", schema.ReportInProgress).Error; err != nil {
-			slog.Error("error updating report status to in progress", "error", err)
+			slog.Error("error updating author report status to in progress", "error", err)
 			return ErrReportAccessFailed
 		}
 
@@ -241,10 +250,10 @@ func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTi
 
 		if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Preload("Flags").First(&report, "id = ?", id).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				slog.Error("cannot update status of report, report not found", "report_id", id, "status", status)
+				slog.Error("cannot update status of author report, report not found", "author_report_id", id, "status", status)
 				return ErrReportNotFound
 			}
-			slog.Error("error getting report to update status", "report_id", id, "status", status, "error", err)
+			slog.Error("error getting author report to update status", "author_report_id", id, "status", status, "error", err)
 			return ErrReportAccessFailed
 		}
 
@@ -282,14 +291,14 @@ func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTi
 
 			if len(newFlags) > 0 {
 				if err := txn.Save(newFlags).Error; err != nil {
-					slog.Error("error adding new flags to report", "report_id", id, "error", err)
+					slog.Error("error adding new flags to author report", "author_report_id", id, "error", err)
 					return ErrReportAccessFailed
 				}
 			}
 		}
 
 		if err := txn.Model(&report).Updates(updates).Error; err != nil {
-			slog.Error("error updating report status", "report_id", id, "error", err)
+			slog.Error("error updating author report status", "author_report_id", id, "error", err)
 			return ErrReportAccessFailed
 		}
 		return nil
@@ -311,4 +320,276 @@ func convertReport(report schema.UserAuthorReport) (api.Report, error) {
 		Status:     report.Report.Status,
 		Content:    content,
 	}, nil
+}
+
+func (r *ReportManager) queueUniversityReportUpdateIfNeeded(txn *gorm.DB, report *schema.UniversityReport) error {
+	if time.Now().UTC().Sub(report.LastUpdatedAt) > r.staleReportThreshold &&
+		report.Status != schema.ReportInProgress && report.Status != schema.ReportQueued {
+		updates := map[string]any{"status": schema.ReportQueued, "queued_at": time.Now().UTC()}
+		if err := txn.Model(&report).Updates(updates).Error; err != nil {
+			slog.Error("error queueing stale university report for update", "university_report_id", report.Id, "error", err)
+			return ErrReportAccessFailed
+		}
+		report.Status = schema.ReportQueued
+	}
+	return nil
+}
+
+func (r *ReportManager) CreateUniversityReport(licenseId, userId uuid.UUID, universityId, unviersityName string) (uuid.UUID, error) {
+	userReportId := uuid.New()
+
+	err := r.db.Transaction(func(txn *gorm.DB) error {
+		var report schema.UniversityReport
+		result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Limit(1).Find(&report, "university_id = ?", universityId)
+		if result.Error != nil {
+			slog.Error("error checking for existing university report", "error", result.Error)
+			return ErrReportCreationFailed
+		}
+
+		if result.RowsAffected == 0 {
+			reportId := uuid.New()
+			report = schema.UniversityReport{
+				Id:             reportId,
+				LastUpdatedAt:  EarliestReportDate,
+				UniversityId:   universityId,
+				UniversityName: unviersityName,
+				Status:         schema.ReportQueued,
+			}
+
+			if err := txn.Create(&report).Error; err != nil {
+				slog.Error("error creating new university report", "error", err)
+				return ErrReportCreationFailed
+			}
+		}
+
+		if err := r.queueUniversityReportUpdateIfNeeded(txn, &report); err != nil {
+			return err
+		}
+
+		userReport := schema.UserUniversityReport{
+			Id:        userReportId,
+			UserId:    userId,
+			CreatedAt: time.Now().UTC(),
+			ReportId:  report.Id,
+		}
+
+		if err := txn.Create(&userReport).Error; err != nil {
+			slog.Error("error creating new user university report", "error", err)
+			return ErrReportCreationFailed
+		}
+
+		usage := schema.LicenseUsage{
+			LicenseId:  licenseId,
+			ReportId:   userReport.Id,
+			ReportType: "university",
+			UserId:     userId,
+			Timestamp:  time.Now().UTC(),
+		}
+		if err := txn.Create(&usage).Error; err != nil {
+			slog.Error("error logging license usage", "error", err)
+			return errors.New("error updating license usage")
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return userReportId, nil
+}
+
+func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.UniversityReport, error) {
+	type universityAuthorFlags struct {
+		AuthorName string
+		AuthorId   string
+		Source     string
+		FlagType   string
+		Count      int
+	}
+
+	var report schema.UserUniversityReport
+
+	var flags []universityAuthorFlags
+
+	if err := r.db.Transaction(func(txn *gorm.DB) error {
+		if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Preload("Report").
+			First(&report, "id = ?", reportId).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return ErrReportNotFound
+			}
+			slog.Error("error getting user university report", "university_report_id", reportId, "error", err)
+			return ErrReportAccessFailed
+		}
+
+		if report.UserId != userId {
+			return ErrUserCannotAccessReport
+		}
+
+		if err := r.queueUniversityReportUpdateIfNeeded(txn, report.Report); err != nil {
+			return err
+		}
+
+		// Note: it is ok to select author_reports.author_name/author_id/source even though
+		// they are not not part of the group by clause or have an aggregator becuase
+		// we are grouping by the primary key of the table they come from, so only a single value is possible.
+		if err := txn.Model(&schema.AuthorFlag{}).
+			Select("author_reports.author_name, author_reports.author_id, author_reports.source, author_flags.flag_type, count(*) as count").
+			Joins("JOIN author_reports ON author_flags.report_id = author_reports.id").
+			Joins("JOIN university_authors ON author_reports.id = university_authors.author_report_id AND university_authors.university_report_id = ?", report.ReportId).
+			Group("author_reports.id, author_flags.flag_type").
+			Find(&flags).Error; err != nil {
+			slog.Error("error querying flags for author reports linked to university report", "university_report_id", reportId, "error", err)
+			return ErrReportAccessFailed
+		}
+
+		return nil
+	}); err != nil {
+		return api.UniversityReport{}, err
+	}
+
+	content := make(map[string][]api.UniversityAuthorFlag)
+	for _, flag := range flags {
+		content[flag.FlagType] = append(content[flag.FlagType], api.UniversityAuthorFlag{
+			AuthorId:   flag.AuthorId,
+			AuthorName: flag.AuthorName,
+			Source:     flag.Source,
+			FlagCount:  flag.Count,
+		})
+	}
+
+	return api.UniversityReport{
+		Id:             report.Id,
+		CreatedAt:      report.CreatedAt,
+		UniversityId:   report.Report.UniversityId,
+		UniversityName: report.Report.UniversityName,
+		Status:         report.Report.Status,
+		Content:        content,
+	}, nil
+
+}
+
+type UniversityReportUpdateTask struct {
+	ReportId       uuid.UUID
+	UniversityId   string
+	UniversityName string
+}
+
+func (r *ReportManager) GetNextUniversityReport() (*UniversityReportUpdateTask, error) {
+	found := false
+	var report schema.UniversityReport
+
+	err := r.db.Transaction(func(txn *gorm.DB) error {
+		result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Limit(1).Order("queued_at ASC").
+			Find(&report, "status = ?", schema.ReportQueued)
+		if result.Error != nil {
+			slog.Error("error getting next university report from queue", "error", result.Error)
+			return ErrReportAccessFailed
+		}
+
+		if result.RowsAffected != 1 {
+			return nil
+		}
+
+		if err := txn.Model(&report).Update("status", schema.ReportInProgress).Error; err != nil {
+			slog.Error("error updating university report status to in progress", "error", err)
+			return ErrReportAccessFailed
+		}
+
+		found = true
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if found {
+		return &UniversityReportUpdateTask{
+			ReportId:       report.Id,
+			UniversityId:   report.UniversityId,
+			UniversityName: report.UniversityName,
+		}, nil
+	}
+
+	return nil, nil
+}
+
+func (r *ReportManager) queueAuthorReportUpdatesForUniversityReport(txn *gorm.DB, universityReportId uuid.UUID) error {
+	staleCutoff := time.Now().Add(-r.staleReportThreshold)
+
+	result := txn.Model(&schema.AuthorReport{}).
+		Joins("JOIN university_authors ON university_authors.author_report_id == author_reports.id").
+		Where("university_authors.university_report_id = ?", universityReportId).
+		Where("author_reports.last_updated_at < ?", staleCutoff).
+		Where("author_reports.status IN ?", []string{schema.ReportFailed, schema.ReportCompleted}).
+		Update("status", schema.ReportQueued).
+		Update("queued_at", time.Now())
+
+	if result.Error != nil {
+		slog.Error("error queueing stale author reports for university report", "university_report_id", universityReportId, "error", result.Error)
+		return ErrReportAccessFailed
+	}
+
+	slog.Info("queued updates for author reports for university report", "n_author_reports", result.RowsAffected, "university_report_id", universityReportId)
+	return nil
+}
+
+type UniversityAuthorReport struct {
+	AuthorId   string
+	AuthorName string
+	Source     string
+}
+
+func (r *ReportManager) UpdateUnivesityReport(id uuid.UUID, status string, updateTime time.Time, authors []UniversityAuthorReport) error {
+	return r.db.Transaction(func(txn *gorm.DB) error {
+		var report schema.UniversityReport
+
+		if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Preload("Flags").First(&report, "id = ?", id).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				slog.Error("cannot update status of university report, report not found", "university_report_id", id, "status", status)
+				return ErrReportNotFound
+			}
+			slog.Error("error getting university report to update status", "university_report_id", id, "status", status, "error", err)
+			return ErrReportAccessFailed
+		}
+
+		updates := map[string]any{"status": status}
+
+		if status == schema.ReportCompleted {
+			updates["last_updated_at"] = updateTime
+
+			var authorReports []schema.AuthorReport
+
+			for _, author := range authors {
+				report, err := createOrGetAuthorReport(txn, author.AuthorId, author.AuthorName, author.Source)
+				if err != nil {
+					slog.Error("error getting author report to add to university report", "author_id", author.AuthorId, "university_report_id", id, "error", err)
+					return err
+				}
+				authorReports = append(authorReports, report)
+			}
+
+			if err := txn.Model(&schema.UniversityReport{Id: id}).Association("Authors").Replace(authorReports); err != nil {
+				slog.Error("error replacing author univerisity associations", "university_report_id", id, "error", err)
+				return ErrReportAccessFailed
+			}
+
+			if err := r.queueAuthorReportUpdatesForUniversityReport(txn, id); err != nil {
+				slog.Error("error queueing author report updates for university report", "university_report_id", id, "error", err)
+				return err
+			}
+		}
+
+		if err := txn.Model(&report).Updates(updates).Error; err != nil {
+			slog.Error("error updating university report status", "university_report_id", id, "error", err)
+			return ErrReportAccessFailed
+		}
+
+		return nil
+	})
+
 }
