@@ -511,7 +511,7 @@ const ItemDetails = () => {
     const [showUndisclosed, setShowUndisclosed] = useState(true);
     const disclosedItems = (reportContent[review] || []).filter(item => item.Disclosed);
     const undisclosedItems = (reportContent[review] || []).filter(item => !item.Disclosed);
-    const [sortOrder, setSortOrder] = useState('asc'); // default to ascending
+    const [sortOrder, setSortOrder] = useState('desc');
 
 
     function renderFlags(items) {
