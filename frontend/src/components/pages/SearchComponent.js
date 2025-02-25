@@ -127,14 +127,14 @@ const SearchComponent = () => {
       </div>
 
       <div style={{ textAlign: "center", marginTop: "3%", animation: "fade-in 0.75s" }}>
-        <img src={Logo} style={{ width: "320px", marginTop: "1%", marginBottom: "1%", animation: "fade-in 0.5s" }} />
+        <img src={Logo} style={{ width: "320px", marginTop: "1%", marginBottom: "1%", marginRight: "2%", animation: "fade-in 0.5s" }} />
         <h1 style={{ fontWeight: "bold", marginTop: 20, animation: "fade-in 0.75s" }}>Welcome</h1>
         <div style={{ animation: "fade-in 1s" }}>
           <div className='d-flex justify-content-center align-items-center'>
             <div style={{ marginTop: 10, color: "#888888" }}>We help you comply with research security requirements by automating author assessments.</div>
           </div>
           <div className='d-flex justify-content-center align-items-center'>
-            <div style={{ marginTop: 10, marginBottom: 50, color: "#888888" }}>Who would you like to conduct an assessment on?</div>
+            <div style={{ marginTop: 10, marginBottom: "1%", color: "#888888" }}>Who would you like to conduct an assessment on?</div>
           </div>
         </div>
         <div className='d-flex justify-content-center align-items-center pt-5'>
