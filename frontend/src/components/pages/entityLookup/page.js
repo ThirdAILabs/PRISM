@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '../../../services/apiService';
-import "../../common/searchBar/SearchBar.css";
-import "../../common/tools/button/button1.css"
-import Logo from "../../../assets/images/prism-logo.png";
+import '../../common/searchBar/SearchBar.css';
+import '../../common/tools/button/button1.css';
+import Logo from '../../../assets/images/prism-logo.png';
 import { useUser } from '../../../store/userContext';
 import { searchService } from '../../../api/search';
 
@@ -53,19 +53,32 @@ function EntityLookup() {
         </Link>
       </div>
 
-      <div style={{ textAlign: "center", marginTop: "5.5%", animation: "fade-in 0.75s" }}>
-        <img src={Logo} style={{ width: "320px", marginTop: "5%", marginBottom: "1%", marginRight: "2%", animation: "fade-in 0.5s" }} />
-        <div style={{ animation: "fade-in 1s" }}>
-          <div className='d-flex justify-content-center align-items-center'>
-            <div style={{ marginTop: 10, color: "#888888" }}>We help you comply with research security requirements.</div>
+      <div style={{ textAlign: 'center', marginTop: '5.5%', animation: 'fade-in 0.75s' }}>
+        <img
+          src={Logo}
+          style={{
+            width: '320px',
+            marginTop: '5%',
+            marginBottom: '1%',
+            marginRight: '2%',
+            animation: 'fade-in 0.5s',
+          }}
+        />
+        <div style={{ animation: 'fade-in 1s' }}>
+          <div className="d-flex justify-content-center align-items-center">
+            <div style={{ marginTop: 10, color: '#888888' }}>
+              We help you comply with research security requirements.
+            </div>
           </div>
-          <div className='d-flex justify-content-center align-items-center'>
-            <div style={{ marginTop: 10, marginBottom: "2%", color: "#888888" }}>Search for an entity to see if it is on any list if concerning entities.</div>
+          <div className="d-flex justify-content-center align-items-center">
+            <div style={{ marginTop: 10, marginBottom: '2%', color: '#888888' }}>
+              Search for an entity to see if it is on any list if concerning entities.
+            </div>
           </div>
         </div>
-        <div style={{ animation: "fade-in 1s" }}>
-          <div className='d-flex justify-content-center align-items-center pt-5'>
-            <div style={{ width: "80%" }}>
+        <div style={{ animation: 'fade-in 1s' }}>
+          <div className="d-flex justify-content-center align-items-center pt-5">
+            <div style={{ width: '80%' }}>
               <form onSubmit={handleSubmit} className="author-institution-search-bar">
                 <div className="autocomplete-search-bar">
                   <input

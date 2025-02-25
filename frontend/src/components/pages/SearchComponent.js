@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import TodoListComponent from '../TodoListComponent';
 import { AuthorInstiutionSearchBar } from '../common/searchBar/SearchBar';
-import Logo from "../../assets/images/prism-logo.png";
-import "../common/searchBar/SearchBar.css";
-import "../common/tools/button/button1.css"
+import Logo from '../../assets/images/prism-logo.png';
+import '../common/searchBar/SearchBar.css';
+import '../common/tools/button/button1.css';
 import UserService from '../../services/userService';
 import { searchService } from '../../api/search';
 import { reportService } from '../../api/reports';
@@ -137,15 +137,29 @@ const SearchComponent = () => {
         </button>
       </div>
 
-      <div style={{ textAlign: "center", marginTop: "3%", animation: "fade-in 0.75s" }}>
-        <img src={Logo} style={{ width: "320px", marginTop: "1%", marginBottom: "1%", marginRight: "2%", animation: "fade-in 0.5s" }} />
-        <h1 style={{ fontWeight: "bold", marginTop: 20, animation: "fade-in 0.75s" }}>Welcome</h1>
-        <div style={{ animation: "fade-in 1s" }}>
-          <div className='d-flex justify-content-center align-items-center'>
-            <div style={{ marginTop: 10, color: "#888888" }}>We help you comply with research security requirements by automating author assessments.</div>
+      <div style={{ textAlign: 'center', marginTop: '3%', animation: 'fade-in 0.75s' }}>
+        <img
+          src={Logo}
+          style={{
+            width: '320px',
+            marginTop: '1%',
+            marginBottom: '1%',
+            marginRight: '2%',
+            animation: 'fade-in 0.5s',
+          }}
+        />
+        <h1 style={{ fontWeight: 'bold', marginTop: 20, animation: 'fade-in 0.75s' }}>Welcome</h1>
+        <div style={{ animation: 'fade-in 1s' }}>
+          <div className="d-flex justify-content-center align-items-center">
+            <div style={{ marginTop: 10, color: '#888888' }}>
+              We help you comply with research security requirements by automating author
+              assessments.
+            </div>
           </div>
-          <div className='d-flex justify-content-center align-items-center'>
-            <div style={{ marginTop: 10, marginBottom: "1%", color: "#888888" }}>Who would you like to conduct an assessment on?</div>
+          <div className="d-flex justify-content-center align-items-center">
+            <div style={{ marginTop: 10, marginBottom: '1%', color: '#888888' }}>
+              Who would you like to conduct an assessment on?
+            </div>
           </div>
         </div>
         <div className="d-flex justify-content-center align-items-center pt-5">
@@ -169,7 +183,7 @@ const SearchComponent = () => {
         ></div>
       )}
       {hasSearched && (
-        <TodoListComponent results={openAlexResults} canLoadMore={false} loadMore={() => { }} />
+        <TodoListComponent results={openAlexResults} canLoadMore={false} loadMore={() => {}} />
       )}
 
       {showResultHeaders && (
@@ -187,7 +201,7 @@ const SearchComponent = () => {
         ></div>
       )}
       {hasSearched && (
-        <TodoListComponent results={scholarResults} canLoadMore={false} loadMore={() => { }} />
+        <TodoListComponent results={scholarResults} canLoadMore={false} loadMore={() => {}} />
       )}
     </div>
   );

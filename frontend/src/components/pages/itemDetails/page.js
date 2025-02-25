@@ -478,9 +478,9 @@ const ItemDetails = () => {
           {flag.RawAcknowledements.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
-          <p>{ }</p>
+          <p>{}</p>
         </p>
-        { }
+        {}
         {flag.Disclosed ? (
           <button type="button" className="btn btn-success">
             Disclosed
@@ -1024,7 +1024,7 @@ const buttonStyles = {
 const StyledWrapper = styled.div`
   position: relative;
 
-    .cssbuttons-io-button {
+  .cssbuttons-io-button {
     position: relative;
     transition: all 0.3s ease-in-out;
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
@@ -1043,12 +1043,11 @@ const StyledWrapper = styled.div`
     outline: none;
     overflow: hidden;
     font-size: 15px;
-}
+  }
 
-  
   .cssbuttons-io-button:hover {
-      transform: scale(1.009);
-      border-color: #fff9;
+    transform: scale(1.009);
+    border-color: #fff9;
   }
 `;
 
