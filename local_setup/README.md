@@ -127,11 +127,11 @@ brew install jq      # macOS
 ```
 3. Make the script executable:
 ```bash
-chmod +x create_and_activate_license.sh
+chmod +x create_license.sh
 ```
 4. Run the script:
 ```bash
-./create_and_activate_license.sh
+./create_license.sh
 ```
 
 The script will:
