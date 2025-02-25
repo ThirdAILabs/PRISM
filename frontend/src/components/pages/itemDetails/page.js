@@ -11,7 +11,7 @@ import {
   COAUTHOR_AFFILIATIONS,
 } from '../../../constants/constants.js';
 import ConcernVisualizer from '../../ConcernVisualization.js';
-import RelationShipGraph3 from '../../common/relationShipGraph/Relation-Graph3.js';
+import Graph from '../../common/graph/graph.js';
 import Tabs from '../../common/tools/Tabs.js';
 import DownloadButton from '../../common/tools/button/downloadButton.js';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider } from '@mui/material';
@@ -983,7 +983,7 @@ const ItemDetails = () => {
 
       {activeTab === 1 && (
         <>
-          <RelationShipGraph3 authorName={authorName} reportContent={reportContent} />
+          <Graph authorName={authorName} reportContent={reportContent} />
         </>
       )}
     </div>
