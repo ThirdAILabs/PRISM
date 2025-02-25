@@ -15,7 +15,6 @@ bin/kc.sh start-dev --http-port=8180 --debug --bootstrap-admin-username temp_adm
 ```
 6. To view the admin dashboard go to `localhost:8180` in your browser and login with the credentials `temp_admin` and `password`. 
 
-
 ## Start the Backend
 Note: Right now this assumes you are running on an m1 mac. This repo has thirdai libraries for M1 macs stored with it. If running somewhere else follow instructions below to build thirdai libraries.
 
@@ -93,7 +92,6 @@ npm start
 
 The frontend will be accessible at `http://localhost` in your browser.
 
-
 ## Setup Traefik
 
 1. Install Traefik using Homebrew:
@@ -106,14 +104,40 @@ bash launch_traefik.sh
 ```
 
 ## Create a Keycloak User
-1. Go back to `localhost:8180` and login with the keycloak admin credentials like in step 6 of keycloak setup. 
-2. In the top left there should be a dropdown that defaults to `Keycloak master`. Click on it and select `prism-user` this is changing the realm. 
-3. Click on `Users` on the left hand side menu. 
-4. Click `Add user` and fill in the username field. Then click `Create` at the bottom. 
-5. This will display the user details. Click on `Credentials` at the top and then `Set password` then enter a password and save it.
-6. Go back to the `Details` menu (next to the `Credentials` menu) and click the `x` next to `Update Password` in the `Required user actions` section. If you don't do this it will say that the account setup is not complete hwen logging on. 
-7. The username and password can now be used to login as a user with keycloak.
+1. Go to `localhost:8180/keycloak` and log in with the Keycloak admin credentials from step 6 of Keycloak setup.
+2. In the top left, select `prism-user` from the dropdown to change the realm.
+3. Click `Users` on the left-hand menu.
+4. Click `Add user`, fill in the username field, and click `Create` at the bottom.
+5. Go to the `Credentials` tab, click `Set password`, enter a password, and save it.
+6. In the `Details` tab, remove the `Update Password` requirement under `Required User Actions`.
+7. The username and password can now be used to log in as a user with Keycloak.
 
+### **Adding an Admin User in the `prism-admin` Realm**
+Follow the same steps as above, but select the `prism-admin` realm instead of `prism-user`. Create an admin user with credentials that will be used in the Bash script.
+
+## Running the License Automation Script
+1. Navigate to the directory where the script is stored:
+```bash
+cd PRISM/local_setup
+```
+2. Ensure you have `jq` installed:
+```bash
+sudo apt install jq  # Ubuntu/Debian
+brew install jq      # macOS
+```
+3. Make the script executable:
+```bash
+chmod +x create_and_activate_license.sh
+```
+4. Run the script:
+```bash
+./create_and_activate_license.sh
+```
+
+The script will:
+- Fetch an admin access token from `prism-admin` realm and create a license.
+- Fetch a user access token from `prism-user` realm and activate the license for that user.
+- Print the activation response to confirm success.
 
 ## Building ThirdAI Libraries (Optional: Should not be needed for M1 mac)
 
