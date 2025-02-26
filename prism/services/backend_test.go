@@ -782,7 +782,7 @@ func TestSearchGoogleScholarAuthors(t *testing.T) {
 
 	authorName := "anshumali shrivastava"
 
-	url := fmt.Sprintf("/search/advanced?query=%s", url.QueryEscape(authorName))
+	url := fmt.Sprintf("/search/advanced?author_name=%s&institution_name=%s", url.QueryEscape(authorName), url.QueryEscape("rice university"))
 	var results api.GScholarSearchResults
 	err := mockRequest(backend, "GET", url, user, nil, &results)
 	if err != nil {
@@ -816,7 +816,7 @@ func TestSearchGoogleScholarAuthorsWithCursor(t *testing.T) {
 
 	authorName := "bill zhang"
 
-	url1 := fmt.Sprintf("/search/advanced?query=%s", url.QueryEscape(authorName))
+	url1 := fmt.Sprintf("/search/advanced?author_name=%s&institution_name=any", url.QueryEscape(authorName))
 	var results1 api.GScholarSearchResults
 	if err := mockRequest(backend, "GET", url1, user, nil, &results1); err != nil {
 		t.Fatal(err)
@@ -824,7 +824,7 @@ func TestSearchGoogleScholarAuthorsWithCursor(t *testing.T) {
 
 	checkQuery(results1.Authors)
 
-	url2 := fmt.Sprintf("/search/advanced?query=%s&cursor=%s", url.QueryEscape(authorName), results1.Cursor)
+	url2 := fmt.Sprintf("/search/advanced?author_name=%s&institution_name=any&cursor=%s", url.QueryEscape(authorName), results1.Cursor)
 	var results2 api.GScholarSearchResults
 	if err := mockRequest(backend, "GET", url2, user, nil, &results2); err != nil {
 		t.Fatal(err)

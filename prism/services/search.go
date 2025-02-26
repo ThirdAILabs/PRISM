@@ -89,6 +89,9 @@ func filterAuthorsBySimilarity(authors []api.Author, queryName string) []api.Aut
 func (s *SearchService) SearchGoogleScholar(r *http.Request) (any, error) {
 	query := r.URL.Query()
 	author, institution, cursor := query.Get("author_name"), query.Get("institution_name"), r.URL.Query().Get("cursor")
+	if author == "" || institution == "" {
+		return nil, CodedError(errors.New("author_name and institution_name must be specified"), http.StatusBadRequest)
+	}
 
 	slog.Info("searching google scholar", "author_name", author, "institution_name", institution, "cursor", cursor)
 
