@@ -279,7 +279,7 @@ const ItemDetails = () => {
 
   function multipleAffiliationsFlag(flag, index) {
     return (
-      <li key={index} className="p-3 px-5 w-75 detail-item">
+      <div key={index} className="p-3 px-5 w-75 detail-item">
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Author has multiple affiliations</h5>,
           flag
@@ -308,20 +308,19 @@ const ItemDetails = () => {
               Undisclosed
             </button>
           ))}
-      </li>
+      </div>
     );
   }
 
   function funderFlag(flag, index) {
     return (
-      <li key={index} className="p-3 px-5 w-75 detail-item">
+      <div key={index} className="p-3 px-5 w-75 detail-item">
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Funder is an entity of concern</h5>,
           flag
         )}
         <p>
           {get_paper_url(flag)} is funded by the following entities of concern:
-          {flag.FromAcknowledgements && <p>Acknowledgements Text:</p>}
           <ul className="bulleted-list">
             {flag.Funders.map((item, index2) => {
               const key = `${index} ${index2}`;
@@ -355,13 +354,13 @@ const ItemDetails = () => {
             </button>
           )}
         </div>
-      </li>
+      </div>
     );
   }
 
   function publisherFlag(flag, index) {
     return (
-      <li key={index} className="p-3 px-5 w-75 detail-item">
+      <div key={index} className="p-3 px-5 w-75 detail-item">
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Publisher is an entity of concern</h5>,
           flag
@@ -389,13 +388,13 @@ const ItemDetails = () => {
               Undisclosed
             </button>
           ))}
-      </li>
+      </div>
     );
   }
 
   function coauthorFlag(flag, index) {
     return (
-      <li key={index} className="p-3 px-5 w-75 detail-item">
+      <div key={index} className="p-3 px-5 w-75 detail-item">
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Co-authors are high-risk entities</h5>,
           flag
@@ -423,13 +422,13 @@ const ItemDetails = () => {
               Undisclosed
             </button>
           ))}
-      </li>
+      </div>
     );
   }
 
   function coauthorAffiliationFlag(flag, index) {
     return (
-      <li key={index} className="p-3 px-5 w-75 detail-item">
+      <div key={index} className="p-3 px-5 w-75 detail-item">
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Co-authors are affiliated with entities of concern</h5>,
           flag
@@ -468,13 +467,13 @@ const ItemDetails = () => {
               Undisclosed
             </button>
           ))}
-      </li>
+      </div>
     );
   }
 
   function authorAffiliationFlag(flag, index) {
     return (
-      <li key={index} className="p-3 px-5 w-75 detail-item">
+      <div key={index} className="p-3 px-5 w-75 detail-item">
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Author is affiliated with entities of concern</h5>,
           flag
@@ -503,13 +502,13 @@ const ItemDetails = () => {
               Undisclosed
             </button>
           ))}
-      </li>
+      </div>
     );
   }
 
   function acknowledgementFlag(flag, index) {
     return (
-      <li key={index} className="p-3 px-5 w-75 detail-item">
+      <div key={index} className="p-3 px-5 w-75 detail-item">
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Acknowledgements contain foreign influences</h5>,
           flag
@@ -585,13 +584,13 @@ const ItemDetails = () => {
                         <button type="button" className="btn btn-outline-success">Likely NOT Grant Recipient</button>
                     )}
                 </div> */}
-      </li>
+      </div>
     );
   }
 
   function universityFacultyFlag(flag, index) {
     return (
-      <li key={index} className="p-3 px-5 w-75 detail-item">
+      <div key={index} className="p-3 px-5 w-75 detail-item">
         <h5 className="fw-bold mt-3">
           The author may potentially be linked with an Entity of Concern
         </h5>
@@ -613,7 +612,7 @@ const ItemDetails = () => {
               Undisclosed
             </button>
           ))}
-      </li>
+      </div>
     );
   }
 
@@ -662,7 +661,7 @@ const ItemDetails = () => {
   function PRFlag(flag, index) {
     const connections = flag.Connections || [];
     return (
-      <li key={index} className="p-3 px-5 w-75 detail-item">
+      <div key={index} className="p-3 px-5 w-75 detail-item">
         {true && (
           <>
             {connections.length == 0 ? (
@@ -774,7 +773,7 @@ const ItemDetails = () => {
               Undisclosed
             </button>
           ))}
-      </li>
+      </div>
     );
   }
 
@@ -793,7 +792,6 @@ const ItemDetails = () => {
     setStartDate('');
     setEndDate('');
     setReportContent(initialReprtContent);
-    setYearDropdownOpen(false);
   };
 
   const togglePopover = () => {
@@ -813,6 +811,11 @@ const ItemDetails = () => {
       </a>,
     ];
   }
+
+  const items = review ? reportContent[review] || [] : [];
+  const hasDates = items.some(
+    (item) => item?.Work?.PublicationDate && !isNaN(new Date(item.Work.PublicationDate).getTime())
+  );
 
   return (
     <div className="basic-setup">
@@ -905,16 +908,17 @@ const ItemDetails = () => {
                       <label>Start Date</label>
                       <input
                         type="date"
+                        className="form-control"
                         value={startDate}
                         max={todayStr}
                         onChange={handleStartDateChange}
-                        className="form-control"
                         style={{
                           backgroundColor: 'rgb(220, 220, 220)',
                           border: 'none',
                           outline: 'none',
                           color: 'black',
                           marginTop: '10px',
+                          width: '100%',
                         }}
                       />
                     </div>
@@ -936,14 +940,38 @@ const ItemDetails = () => {
                         }}
                       />
                     </div>
-                    <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+                    <div
+                      style={{
+                        marginTop: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px',
+                      }}
+                    >
+                      <button
+                        className="form-control"
+                        onClick={handleResetFilter}
+                        style={{
+                          backgroundColor: 'rgb(220, 220, 220)',
+                          border: 'none',
+                          color: 'black',
+                          width: '100px',
+                          fontWeight: 'bold',
+                          fontSize: '14px',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.3s',
+                        }}
+                      >
+                        Reset
+                      </button>
+
                       <button
                         className="form-control"
                         type="submit"
                         onClick={handleDateFilter}
                         disabled={!(startDate || endDate)}
                         style={{
-                          backgroundColor: startDate || endDate ? 'black' : 'rgb(220, 220, 220)',
+                          backgroundColor: 'black',
                           border: 'none',
                           color: 'white',
                           width: '100px',
@@ -954,22 +982,6 @@ const ItemDetails = () => {
                         }}
                       >
                         Submit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleResetFilter}
-                        style={{
-                          backgroundColor: 'black',
-                          border: 'none',
-                          color: 'white',
-                          width: '100px',
-                          fontWeight: 'bold',
-                          fontSize: '14px',
-                          cursor: 'pointer',
-                          transition: 'background-color 0.3s',
-                        }}
-                      >
-                        Reset
                       </button>
                     </div>
                   </div>
@@ -1099,25 +1111,33 @@ const ItemDetails = () => {
           </div>
           {review && (
             <div style={{ width: '100%', textAlign: 'center', marginTop: '50px' }}>
-              <div
-                style={{
-                  marginBottom: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px',
-                }}
-              >
-                <span style={{ marginRight: '10px' }}>Sort by Date:</span>
-                <ArrowUpwardIcon
-                  onClick={() => setSortOrder('asc')}
-                  style={{ cursor: 'pointer', color: sortOrder === 'asc' ? 'black' : 'lightgray' }}
-                />
-                <ArrowDownwardIcon
-                  onClick={() => setSortOrder('desc')}
-                  style={{ cursor: 'pointer', color: sortOrder === 'desc' ? 'black' : 'lightgray' }}
-                />
-              </div>
+              {hasDates && (
+                <div
+                  style={{
+                    marginBottom: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
+                  }}
+                >
+                  <span style={{ marginRight: '10px' }}>Sort by Date:</span>
+                  <ArrowUpwardIcon
+                    onClick={() => setSortOrder('asc')}
+                    style={{
+                      cursor: 'pointer',
+                      color: sortOrder === 'asc' ? 'black' : 'lightgray',
+                    }}
+                  />
+                  <ArrowDownwardIcon
+                    onClick={() => setSortOrder('desc')}
+                    style={{
+                      cursor: 'pointer',
+                      color: sortOrder === 'desc' ? 'black' : 'lightgray',
+                    }}
+                  />
+                </div>
+              )}
               {isDisclosureChecked ? (
                 <>
                   {disclosedItems.length > 0 ? (
