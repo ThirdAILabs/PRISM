@@ -11,18 +11,53 @@ import (
 	"prism/prism/openalex"
 	"prism/prism/reports/flaggers"
 	"prism/prism/search"
+	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
 )
 
-const institutionSimilarityThreshold = 0.8
+const institutionNameSimilarityThreshold = 0.8
 
 type SearchService struct {
 	openalex openalex.KnowledgeBase
 
 	entityNdb search.NeuralDB
+}
+
+func hybridInstitutionNamesSort(originalInstitution string, institutionNames []string, similarityThreshold float64) []string {
+	// put the institutes with name similar to the Original Institution at the front
+	// sort the rest alphabetically
+
+	type InstitutionSimilarity struct {
+		Name       string
+		Similarity float64
+	}
+	var similarInstitutesSimilarity []InstitutionSimilarity
+	var differentInstitutes []string
+
+	for _, inst := range institutionNames {
+		if similarity := flaggers.JaroWinklerSimilarity(originalInstitution, inst); similarity >= similarityThreshold {
+			similarInstitutesSimilarity = append(similarInstitutesSimilarity, InstitutionSimilarity{Name: inst, Similarity: similarity})
+		} else {
+			differentInstitutes = append(differentInstitutes, inst)
+		}
+	}
+
+	// sort the similar institutes by similarity
+	sort.Slice(similarInstitutesSimilarity, func(i, j int) bool {
+		return similarInstitutesSimilarity[i].Similarity > similarInstitutesSimilarity[j].Similarity
+	})
+	similarInstitutes := make([]string, len(similarInstitutesSimilarity))
+	for i, inst := range similarInstitutesSimilarity {
+		similarInstitutes[i] = inst.Name
+	}
+
+	// sort the different institutes alphabetically
+	sort.Strings(differentInstitutes)
+	finalList := append(similarInstitutes, differentInstitutes...)
+	return finalList
 }
 
 func (s *SearchService) Routes() chi.Router {
@@ -50,7 +85,7 @@ func (s *SearchService) SearchOpenAlex(r *http.Request) (any, error) {
 
 	results := make([]api.Author, 0, len(authors))
 	for _, author := range authors {
-		sortedInstitutions := flaggers.HybridInstitutionNamesSort(institutionName, author.InstitutionNames(), institutionSimilarityThreshold)
+		sortedInstitutions := hybridInstitutionNamesSort(institutionName, author.InstitutionNames(), institutionNameSimilarityThreshold)
 		results = append(results, api.Author{
 			AuthorId:     author.AuthorId,
 			AuthorName:   author.DisplayName,
