@@ -539,9 +539,9 @@ const ItemDetails = () => {
           {flag.RawAcknowledements.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
-          <p>{}</p>
+          <p>{ }</p>
         </p>
-        {}
+        { }
         {isDisclosureChecked &&
           (flag.Disclosed ? (
             <button type="button" className="btn btn-success">
@@ -781,7 +781,6 @@ const ItemDetails = () => {
     setStartDate('');
     setEndDate('');
     setReportContent(initialReprtContent);
-    setYearDropdownOpen(false);
   };
 
   const togglePopover = () => {
@@ -898,16 +897,17 @@ const ItemDetails = () => {
                       <label>Start Date</label>
                       <input
                         type="date"
+                        className="form-control"
                         value={startDate}
                         max={todayStr}
                         onChange={handleStartDateChange}
-                        className="form-control"
                         style={{
                           backgroundColor: 'rgb(220, 220, 220)',
                           border: 'none',
                           outline: 'none',
                           color: 'black',
                           marginTop: '10px',
+                          width: '100%',
                         }}
                       />
                     </div>
@@ -929,14 +929,31 @@ const ItemDetails = () => {
                         }}
                       />
                     </div>
-                    <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+                    <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <button
+                        className='form-control'
+                        onClick={handleResetFilter}
+                        style={{
+                          backgroundColor: 'rgb(220, 220, 220)',
+                          border: 'none',
+                          color: 'black',
+                          width: '100px',
+                          fontWeight: 'bold',
+                          fontSize: '14px',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.3s',
+                        }}
+                      >
+                        Reset
+                      </button>
+
                       <button
                         className="form-control"
                         type="submit"
                         onClick={handleDateFilter}
                         disabled={!(startDate || endDate)}
                         style={{
-                          backgroundColor: startDate || endDate ? 'black' : 'rgb(220, 220, 220)',
+                          backgroundColor: 'black',
                           border: 'none',
                           color: 'white',
                           width: '100px',
@@ -948,22 +965,7 @@ const ItemDetails = () => {
                       >
                         Submit
                       </button>
-                      <button
-                        type="button"
-                        onClick={handleResetFilter}
-                        style={{
-                          backgroundColor: 'black',
-                          border: 'none',
-                          color: 'white',
-                          width: '100px',
-                          fontWeight: 'bold',
-                          fontSize: '14px',
-                          cursor: 'pointer',
-                          transition: 'background-color 0.3s',
-                        }}
-                      >
-                        Reset
-                      </button>
+
                     </div>
                   </div>
                 )}
