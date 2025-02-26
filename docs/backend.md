@@ -198,6 +198,40 @@ __Example Request__:
 
 The body contains the raw bytes of the generated report file.
 
+## List University Reports
+
+| Method | Path | Auth Required | Permissions |
+| ------ | ---- | ------------- | ----------  |
+| `GET` | `/api/v1/report/university/list` | Yes | Token for Keycloak User Realm |
+
+Lists all university reports created by the user. The user id is determined from the provided access token.
+
+__Example Request__: 
+```
+No request body
+```
+__Example Response__:
+
+Note: that the field `Status` will be one of `queued`, `in-progress`, `failed`, or `complete`.
+```json
+[
+    {
+        "Id": "e42ba4dd-f56b-4916-835b-034679df2d4b",
+        "CreatedAt": "2025-02-11T20:21:49.387547Z",
+        "UniversityId": "university id",
+        "UniversityName": "university name",
+        "Status": "complete",
+    },
+    {
+        "Id": "e42ba4dd-f56b-4916-835b-034679df2d4b",
+        "CreatedAt": "2025-02-11T20:21:49.387547Z",
+        "UniversityId": "university id",
+        "UniversityName": "university name",
+        "Status": "complete",
+    }
+]
+```
+
 ## Create a University Report
 
 | Method | Path | Auth Required | Permissions |
