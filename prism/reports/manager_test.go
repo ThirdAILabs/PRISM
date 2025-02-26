@@ -339,7 +339,7 @@ func checkNextUniversityReport(t *testing.T, next *reports.UniversityReportUpdat
 	}
 }
 
-func checkUniversityReport(t *testing.T, manager *reports.ReportManager, userId, reportId uuid.UUID, universityId, universityName, status string, nauthorsFlagged, nflags int) {
+func checkUniversityReport(t *testing.T, manager *reports.ReportManager, userId, reportId uuid.UUID, universityId, universityName, status string, nauthorsFlagged, nflags, authorsReviewed, totalAuthors int) {
 	report, err := manager.GetUniversityReport(userId, reportId)
 	if err != nil {
 		t.Fatal(err)
@@ -349,11 +349,13 @@ func checkUniversityReport(t *testing.T, manager *reports.ReportManager, userId,
 		report.UniversityId != universityId ||
 		report.UniversityName != universityName ||
 		report.Status != status ||
-		(nflags > 0 && len(report.Content) == 0) {
+		report.Content.AuthorsReviewed != authorsReviewed ||
+		report.Content.TotalAuthors != totalAuthors ||
+		(nflags > 0 && len(report.Content.Flags) == 0) {
 		_, file, line, _ := runtime.Caller(1)
 		t.Fatalf("%s:%d: incorrect report: %+v", file, line, report)
 	}
-	for ftype, flags := range report.Content {
+	for ftype, flags := range report.Content.Flags {
 		if len(flags) != nauthorsFlagged {
 			_, file, line, _ := runtime.Caller(1)
 			t.Fatalf("%s:%d: expected %d authors to be flagged for %v, got %d", file, line, nflags, ftype, len(flags))
@@ -426,7 +428,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	}
 
 	// Flags from first author should be immediately visible in the university report
-	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 1, 1)
+	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 1, 1, 1, 2)
 
 	nextAuthor2, err := manager.GetNextAuthorReport()
 	if err != nil {
@@ -439,7 +441,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	}
 
 	// University report should be updated to have flags from second author
-	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 2, 2)
+	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 2, 2, 2, 2)
 
 	// No other author reports should be queued
 	checkNoNextAuthorReport(t, manager)
@@ -476,8 +478,8 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	checkNoNextAuthorReport(t, manager)
 	checkNoNextUniversityReport(t, manager)
 
-	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 2, 2)
-	checkUniversityReport(t, manager, user1, uniId2, "2", "university2", "complete", 1, 1)
+	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 2, 2, 2, 2)
+	checkUniversityReport(t, manager, user1, uniId2, "2", "university2", "complete", 1, 1, 1, 1)
 	// Check that report access does not queue report update since we are under threshold
 	checkNoNextUniversityReport(t, manager)
 
@@ -487,7 +489,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Content should be reused so report is immediately available
-	checkUniversityReport(t, manager, user1, uniId3, "1", "university1", "complete", 2, 2)
+	checkUniversityReport(t, manager, user1, uniId3, "1", "university1", "complete", 2, 2, 2, 2)
 	// Check that no report update is queued
 	checkNoNextAuthorReport(t, manager)
 	checkNoNextUniversityReport(t, manager)
@@ -496,9 +498,9 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	time.Sleep(time.Second)
 
 	// Accessing a stale report should add it back to the queue, it should still have 1 flag though
-	checkUniversityReport(t, manager, user1, uniId2, "2", "university2", "queued", 1, 1)
+	checkUniversityReport(t, manager, user1, uniId2, "2", "university2", "queued", 1, 1, 1, 1)
 	// Perform multiple accesses to ensure it is only added once
-	checkUniversityReport(t, manager, user1, uniId2, "2", "university2", "queued", 1, 1)
+	checkUniversityReport(t, manager, user1, uniId2, "2", "university2", "queued", 1, 1, 1, 1)
 
 	nextUni3, err := manager.GetNextUniversityReport()
 	if err != nil {
@@ -509,7 +511,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	checkNoNextUniversityReport(t, manager)
 
 	// Verify that accessing report while it's in progress doesn't queue it again
-	checkUniversityReport(t, manager, user1, uniId2, "2", "university2", "in-progress", 1, 1)
+	checkUniversityReport(t, manager, user1, uniId2, "2", "university2", "in-progress", 1, 1, 1, 1)
 	checkNoNextUniversityReport(t, manager)
 
 	checkNoNextAuthorReport(t, manager)
@@ -527,6 +529,9 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	}
 	checkNextAuthorReport(t, nextAuthor4, "3", "author3", api.OpenAlexSource, report3End, time.Now())
 	checkNoNextAuthorReport(t, manager)
+	if err := manager.UpdateAuthorReport(nextAuthor4.Id, "complete", nextAuthor4.EndDate, nil); err != nil {
+		t.Fatal(err)
+	}
 
 	// Update 1 of the author reports so we can check that only the other is requeued when the university report is accessed
 	checkAuthorReport(t, manager, user1, authorId1, "1", "author1", api.OpenAlexSource, "queued", 1)
@@ -549,10 +554,10 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	checkUniversityReport(t, manager, user2, uniId4, "1", "university1", "queued", 2, 3)
+	checkUniversityReport(t, manager, user2, uniId4, "1", "university1", "queued", 2, 3, 2, 2)
 
 	// Check that the original report is being updated as well
-	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "queued", 2, 3)
+	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "queued", 2, 3, 2, 2)
 
 	nextUni4, err := manager.GetNextUniversityReport()
 	if err != nil {
@@ -563,9 +568,9 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	checkNoNextAuthorReport(t, manager)
 
 	// Verify that the report is in progress
-	checkUniversityReport(t, manager, user2, uniId4, "1", "university1", "in-progress", 2, 3)
+	checkUniversityReport(t, manager, user2, uniId4, "1", "university1", "in-progress", 2, 3, 2, 2)
 	// Check that the original report is being updated as well
-	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "in-progress", 2, 3)
+	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "in-progress", 2, 3, 2, 2)
 
 	// Add a new author to the university report
 	if err := manager.UpdateUniversityReport(nextUni4.Id, "complete", nextAuthor4.EndDate, []reports.UniversityAuthorReport{
@@ -577,9 +582,9 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	}
 
 	// Verify that there is 1 new flag from adding author3
-	checkUniversityReport(t, manager, user2, uniId4, "1", "university1", "complete", 3, 4)
+	checkUniversityReport(t, manager, user2, uniId4, "1", "university1", "complete", 3, 4, 2, 3)
 	// Check that the original report is being updated as well
-	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 3, 4)
+	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 3, 4, 2, 3)
 
 	// Check that author2 is queued because it's stale
 	nextAuthor6, err := manager.GetNextAuthorReport()
@@ -593,9 +598,9 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	}
 
 	// Verify that the report is fully updated
-	checkUniversityReport(t, manager, user2, uniId4, "1", "university1", "complete", 3, 5)
+	checkUniversityReport(t, manager, user2, uniId4, "1", "university1", "complete", 3, 5, 3, 3)
 	// Check that the original report is being updated as well
-	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 3, 5)
+	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 3, 5, 3, 3)
 }
 
 func TestListUniversityReport(t *testing.T) {

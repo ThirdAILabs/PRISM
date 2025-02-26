@@ -64,7 +64,13 @@ type UniversityReport struct {
 
 	Status string
 
-	Content map[string][]UniversityAuthorFlag
+	Content UniversityReportContent
+}
+
+type UniversityReportContent struct {
+	TotalAuthors    int
+	AuthorsReviewed int
+	Flags           map[string][]UniversityAuthorFlag
 }
 
 type Author struct {

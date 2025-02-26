@@ -270,6 +270,7 @@ __Example Response__:
 
 Notes: 
 - The report flags will update as the author reports are completed (if not already complete).
+- The `TotalAuthors` and `AuthorsReviewed` fields in the content give the total number of authors detected at the university that need review and the number that have been reviewed so far.
 - The `FlagCount` for each author entry in each flag gives the number of flags of that type for the given author. 
 - To get an author report from the results you can simply pass the `AuthorId`, `AuthorName`, and `Source` fields to the `/report/author/create` endpoint. The author report will be cached, so it will be displayed immediately after creation. 
 ```json
@@ -280,62 +281,66 @@ Notes:
     "UniversityName": "university name",
     "Status": "complete",
     "Content": {
-        "AssociationsWithDeniedEntities": [
-            {
-                "AuthorId": "author id",
-                "AuthorName": "author name",
-                "Source": "source",
-                "FlagCount": 2
-            }
-        ],
-        "AuthorAffiliations": [
-            {
-                "AuthorId": "author id",
-                "AuthorName": "author name",
-                "Source": "source",
-                "FlagCount": 2
-            }
-        ],
-        "CoauthorAffiliations": [
-            {
-                "AuthorId": "author id",
-                "AuthorName": "author name",
-                "Source": "source",
-                "FlagCount": 2
-            }
-        ],
-        "HighRiskFunders": [
-            {
-                "AuthorId": "author id",
-                "AuthorName": "author name",
-                "Source": "source",
-                "FlagCount": 2
-            }
-        ],
-        "MiscHighRiskAssociations": [
-            {
-                "AuthorId": "author id",
-                "AuthorName": "author name",
-                "Source": "source",
-                "FlagCount": 2
-            }
-        ],
-        "PotentialAuthorAffiliations": [
-            {
-                "AuthorId": "author id",
-                "AuthorName": "author name",
-                "Source": "source",
-                "FlagCount": 2
-            }
-        ],
-        "TalentContracts": [
-            {
-                "AuthorId": "author id",
-                "AuthorName": "author name",
-                "Source": "source",
-                "FlagCount": 2
-            }
-        ]
+        "TotalAuthors": 4,
+        "AuthorsReviewed": 3,
+        "Flags": {
+            "AssociationsWithDeniedEntities": [
+                {
+                    "AuthorId": "author id",
+                    "AuthorName": "author name",
+                    "Source": "source",
+                    "FlagCount": 2
+                }
+            ],
+            "AuthorAffiliations": [
+                {
+                    "AuthorId": "author id",
+                    "AuthorName": "author name",
+                    "Source": "source",
+                    "FlagCount": 2
+                }
+            ],
+            "CoauthorAffiliations": [
+                {
+                    "AuthorId": "author id",
+                    "AuthorName": "author name",
+                    "Source": "source",
+                    "FlagCount": 2
+                }
+            ],
+            "HighRiskFunders": [
+                {
+                    "AuthorId": "author id",
+                    "AuthorName": "author name",
+                    "Source": "source",
+                    "FlagCount": 2
+                }
+            ],
+            "MiscHighRiskAssociations": [
+                {
+                    "AuthorId": "author id",
+                    "AuthorName": "author name",
+                    "Source": "source",
+                    "FlagCount": 2
+                }
+            ],
+            "PotentialAuthorAffiliations": [
+                {
+                    "AuthorId": "author id",
+                    "AuthorName": "author name",
+                    "Source": "source",
+                    "FlagCount": 2
+                }
+            ],
+            "TalentContracts": [
+                {
+                    "AuthorId": "author id",
+                    "AuthorName": "author name",
+                    "Source": "source",
+                    "FlagCount": 2
+                }
+            ]
+        }
     }
 }
 ```

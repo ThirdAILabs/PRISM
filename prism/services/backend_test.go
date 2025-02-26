@@ -775,7 +775,7 @@ func TestUniversityReportEndpoints(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if uniReport.UniversityId != "uni-report1-id" || uniReport.UniversityName != "uni-report1-name" || uniReport.Status != "complete" || len(uniReport.Content[api.HighRiskFunderType]) != 1 {
+	if uniReport.UniversityId != "uni-report1-id" || uniReport.UniversityName != "uni-report1-name" || uniReport.Status != "complete" || len(uniReport.Content.Flags[api.HighRiskFunderType]) != 1 {
 		t.Fatal("invalid university report returned")
 	}
 

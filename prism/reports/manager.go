@@ -333,7 +333,7 @@ func (r *ReportManager) ListUniversityReports(userId uuid.UUID) ([]api.Universit
 
 	results := make([]api.UniversityReport, 0, len(reports))
 	for _, report := range reports {
-		results = append(results, convertUniversityReport(report, nil))
+		results = append(results, convertUniversityReport(report, api.UniversityReportContent{}))
 	}
 
 	return results, nil
@@ -426,8 +426,14 @@ func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.Uni
 		Count      int
 	}
 
+	type authorReportStatus struct {
+		Status string
+		Count  int
+	}
+
 	var report schema.UserUniversityReport
 
+	var statusCounts []authorReportStatus
 	var flags []universityAuthorFlags
 
 	if err := r.db.Transaction(func(txn *gorm.DB) error {
@@ -449,6 +455,15 @@ func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.Uni
 			return err
 		}
 
+		if err := txn.Model(&schema.AuthorReport{}).
+			Select("author_reports.status, count(*) as count").
+			Joins("JOIN university_authors ON author_reports.id = university_authors.author_report_id AND university_authors.university_report_id = ?", report.ReportId).
+			Group("author_reports.status").
+			Find(&statusCounts).Error; err != nil {
+			slog.Error("error checking status for author reports linked to university report", "university_report_id", reportId, "error", err)
+			return ErrReportAccessFailed
+		}
+
 		// Note: it is ok to select author_reports.author_name/author_id/source even though
 		// they are not not part of the group by clause or have an aggregator becuase
 		// we are grouping by the primary key of the table they come from, so only a single value is possible.
@@ -467,14 +482,25 @@ func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.Uni
 		return api.UniversityReport{}, err
 	}
 
-	content := make(map[string][]api.UniversityAuthorFlag)
+	content := api.UniversityReportContent{
+		Flags: make(map[string][]api.UniversityAuthorFlag),
+	}
+
 	for _, flag := range flags {
-		content[flag.FlagType] = append(content[flag.FlagType], api.UniversityAuthorFlag{
+		content.Flags[flag.FlagType] = append(content.Flags[flag.FlagType], api.UniversityAuthorFlag{
 			AuthorId:   flag.AuthorId,
 			AuthorName: flag.AuthorName,
 			Source:     flag.Source,
 			FlagCount:  flag.Count,
 		})
+	}
+
+	for _, status := range statusCounts {
+		switch status.Status {
+		case schema.ReportCompleted, schema.ReportFailed:
+			content.AuthorsReviewed += status.Count
+		}
+		content.TotalAuthors += status.Count
 	}
 
 	return convertUniversityReport(report, content), nil
@@ -609,7 +635,7 @@ func (r *ReportManager) UpdateUniversityReport(id uuid.UUID, status string, upda
 
 }
 
-func convertUniversityReport(report schema.UserUniversityReport, content map[string][]api.UniversityAuthorFlag) api.UniversityReport {
+func convertUniversityReport(report schema.UserUniversityReport, content api.UniversityReportContent) api.UniversityReport {
 	return api.UniversityReport{
 		Id:             report.Id,
 		CreatedAt:      report.CreatedAt,
