@@ -5,7 +5,11 @@ import (
 	"path/filepath"
 	"prism/prism/openalex"
 	"prism/prism/reports/flaggers/eoc"
+	"prism/prism/triangulation"
 	"testing"
+
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 func TestMultipleAssociations(t *testing.T) {
@@ -210,12 +214,26 @@ func TestAcknowledgementEOC(t *testing.T) {
 	}
 	defer entityStore.Free()
 
+	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := db.AutoMigrate(
+		&triangulation.Author{},
+		&triangulation.FundCode{},
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	triangulationDB := triangulation.CreateTriangulationDB(db)
+
 	flagger := OpenAlexAcknowledgementIsEOC{
-		openalex:     openalex.NewRemoteKnowledgeBase(),
-		entityLookup: entityStore,
-		authorCache:  authorCache,
-		extractor:    &mockAcknowledgmentExtractor{},
-		sussyBakas:   []string{"bad entity xyz"},
+		openalex:        openalex.NewRemoteKnowledgeBase(),
+		entityLookup:    entityStore,
+		authorCache:     authorCache,
+		extractor:       &mockAcknowledgmentExtractor{},
+		sussyBakas:      []string{"bad entity xyz"},
+		triangulationDB: triangulationDB,
 	}
 
 	flags, err := flagger.Flag(slog.Default(), []openalex.Work{{WorkId: "a/b", DownloadUrl: "n/a"}}, []string{})

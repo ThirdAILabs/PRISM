@@ -118,10 +118,6 @@ func (flag *TalentContractFlag) Type() string {
 	return TalentContractType
 }
 
-func (flag *TalentContractFlag) Type() string {
-	return TalentContractType
-}
-
 func (flag *TalentContractFlag) Key() string {
 	// Assumes 1 flag per work
 	return fmt.Sprintf("talent-contract-%s", flag.Work.WorkId)

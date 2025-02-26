@@ -346,9 +346,13 @@ const ItemDetails = () => {
               </button>
             ))}
           {flag.LikelyGrantRecipient ? (
-            <button type="button" className="btn btn-outline-danger">Likely Grant Recipient</button>
+            <button type="button" className="btn btn-outline-danger">
+              Likely Grant Recipient
+            </button>
           ) : (
-            <button type="button" className="btn btn-outline-success">Likely NOT Grant Recipient</button>
+            <button type="button" className="btn btn-outline-success">
+              Likely NOT Grant Recipient
+            </button>
           )}
         </div>
       </li>
@@ -537,9 +541,9 @@ const ItemDetails = () => {
           {flag.RawAcknowledements.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
-          <p>{ }</p>
+          <p>{}</p>
         </p>
-        { }
+        {}
         <div className="d-flex justify-content-between">
           {isDisclosureChecked &&
             (flag.Disclosed ? (
@@ -552,11 +556,14 @@ const ItemDetails = () => {
               </button>
             ))}
           {flag.LikelyGrantRecipient ? (
-            <button type="button" className="btn btn-outline-danger">Likely Grant Recipient</button>
+            <button type="button" className="btn btn-outline-danger">
+              Likely Grant Recipient
+            </button>
           ) : (
-            <button type="button" className="btn btn-outline-success">Likely NOT Grant Recipient</button>
+            <button type="button" className="btn btn-outline-success">
+              Likely NOT Grant Recipient
+            </button>
           )}
-
         </div>
 
         {/* DISCLOSURE */}

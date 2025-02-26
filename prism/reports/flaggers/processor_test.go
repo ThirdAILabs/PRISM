@@ -7,12 +7,15 @@ import (
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers/eoc"
+	"prism/prism/triangulation"
 	"slices"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 func eqOrderInvariant(a, b []string) bool {
@@ -399,15 +402,29 @@ func TestProcessorAcknowledgements(t *testing.T) {
 	}
 	defer entityStore.Free()
 
+	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := db.AutoMigrate(
+		&triangulation.Author{},
+		&triangulation.FundCode{},
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	triangulationDB := triangulation.CreateTriangulationDB(db)
+
 	processor := ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
 		workFlaggers: []WorkFlagger{
 			&OpenAlexAcknowledgementIsEOC{
-				openalex:     openalex.NewRemoteKnowledgeBase(),
-				entityLookup: entityStore,
-				authorCache:  authorCache,
-				extractor:    NewGrobidExtractor(ackCache, grobidEndpoint, testDir),
-				sussyBakas:   eoc.LoadSussyBakas(),
+				openalex:        openalex.NewRemoteKnowledgeBase(),
+				entityLookup:    entityStore,
+				authorCache:     authorCache,
+				extractor:       NewGrobidExtractor(ackCache, grobidEndpoint, testDir),
+				sussyBakas:      eoc.LoadSussyBakas(),
+				triangulationDB: triangulationDB,
 			},
 		},
 	}
