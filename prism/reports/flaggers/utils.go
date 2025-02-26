@@ -101,22 +101,36 @@ func getInitialsCombinations(name string) []string {
 	return candidates
 }
 
-func HybridInstitutionNamesSort(originalInstitution string, institutionNames []string, similarityThreshold float32) []string {
+func HybridInstitutionNamesSort(originalInstitution string, institutionNames []string, similarityThreshold float64) []string {
 	// put the institutes with similar name to the Original Instiatution at the front
 	// sort the rest alphabetically
 
-	var sortedInstitutionsAboveThreshold []string
-	var sortedInstitutionsBelowThreshold []string
+	type InstitutionSimilarity struct {
+		Name       string
+		Similarity float64
+	}
+	var similarInstitutesSimilarity []InstitutionSimilarity
+	var differentInstitutes []string
 
 	for _, inst := range institutionNames {
-		if JaroWinklerSimilarity(originalInstitution, inst) >= float64(similarityThreshold) {
-			sortedInstitutionsAboveThreshold = append(sortedInstitutionsAboveThreshold, inst)
+		if similarity := JaroWinklerSimilarity(originalInstitution, inst); similarity >= similarityThreshold {
+			similarInstitutesSimilarity = append(similarInstitutesSimilarity, InstitutionSimilarity{Name: inst, Similarity: similarity})
 		} else {
-			sortedInstitutionsBelowThreshold = append(sortedInstitutionsBelowThreshold, inst)
+			differentInstitutes = append(differentInstitutes, inst)
 		}
 	}
 
-	sort.Strings(sortedInstitutionsBelowThreshold)
-	finalList := append(sortedInstitutionsAboveThreshold, sortedInstitutionsBelowThreshold...)
+	// sort the similar institutes by similarity
+	sort.Slice(similarInstitutesSimilarity, func(i, j int) bool {
+		return similarInstitutesSimilarity[i].Similarity > similarInstitutesSimilarity[j].Similarity
+	})
+	similarInstitutes := make([]string, len(similarInstitutesSimilarity))
+	for i, inst := range similarInstitutesSimilarity {
+		similarInstitutes[i] = inst.Name
+	}
+
+	// sort the different institutes alphabetically
+	sort.Strings(differentInstitutes)
+	finalList := append(similarInstitutes, differentInstitutes...)
 	return finalList
 }
