@@ -472,7 +472,7 @@ func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.Uni
 }
 
 type UniversityReportUpdateTask struct {
-	ReportId       uuid.UUID
+	Id             uuid.UUID
 	UniversityId   string
 	UniversityName string
 	UpdateDate     time.Time
@@ -510,7 +510,7 @@ func (r *ReportManager) GetNextUniversityReport() (*UniversityReportUpdateTask, 
 
 	if found {
 		return &UniversityReportUpdateTask{
-			ReportId:       report.Id,
+			Id:             report.Id,
 			UniversityId:   report.UniversityId,
 			UniversityName: report.UniversityName,
 			UpdateDate:     time.Now().UTC(),

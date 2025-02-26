@@ -75,13 +75,13 @@ func processNextUniversityReport(reportManager *reports.ReportManager, processor
 		return false
 	}
 
-	slog.Info("processing university report", "report_id", nextReport.ReportId, "university_report_id", nextReport.UniversityId, "university_name", nextReport.UniversityName)
+	slog.Info("processing university report", "report_id", nextReport.Id, "university_report_id", nextReport.UniversityId, "university_name", nextReport.UniversityName)
 
 	authors, err := processor.GetUniversityAuthors(*nextReport)
 	if err != nil {
 		slog.Error("error processing university report: %w")
 
-		if err := reportManager.UpdateUniversityReport(nextReport.ReportId, "failed", time.Time{}, nil); err != nil {
+		if err := reportManager.UpdateUniversityReport(nextReport.Id, "failed", time.Time{}, nil); err != nil {
 			slog.Error("error updating report status to failed", "error", err)
 		}
 		return true
@@ -89,11 +89,11 @@ func processNextUniversityReport(reportManager *reports.ReportManager, processor
 
 	slog.Info("authors found for university report", "n_authors", len(authors))
 
-	if err := reportManager.UpdateUniversityReport(nextReport.ReportId, "complete", time.Now(), authors); err != nil {
+	if err := reportManager.UpdateUniversityReport(nextReport.Id, "complete", nextReport.UpdateDate, authors); err != nil {
 		slog.Error("error updating university report status to complete", "error", err)
 	}
 
-	slog.Info("university report complete", "report_id", nextReport.ReportId, "university_report_id", nextReport.UniversityId, "university_name", nextReport.UniversityName)
+	slog.Info("university report complete", "report_id", nextReport.Id, "university_report_id", nextReport.UniversityId, "university_name", nextReport.UniversityName)
 
 	return true
 }

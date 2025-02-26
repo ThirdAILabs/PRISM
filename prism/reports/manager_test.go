@@ -418,7 +418,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 		t.Fatal(err)
 	}
 	checkNextUniversityReport(t, nextUni1, "1", "university1", time.Now())
-	if err := manager.UpdateUniversityReport(nextUni1.ReportId, "complete", nextUni1.UpdateDate, []reports.UniversityAuthorReport{
+	if err := manager.UpdateUniversityReport(nextUni1.Id, "complete", nextUni1.UpdateDate, []reports.UniversityAuthorReport{
 		{AuthorId: "1", AuthorName: "author1", Source: api.OpenAlexSource},
 		{AuthorId: "2", AuthorName: "author2", Source: api.OpenAlexSource},
 	}); err != nil {
@@ -456,7 +456,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 		t.Fatal(err)
 	}
 	checkNextUniversityReport(t, nextUni2, "2", "university2", time.Now())
-	if err := manager.UpdateUniversityReport(nextUni2.ReportId, "complete", nextUni2.UpdateDate, []reports.UniversityAuthorReport{
+	if err := manager.UpdateUniversityReport(nextUni2.Id, "complete", nextUni2.UpdateDate, []reports.UniversityAuthorReport{
 		{AuthorId: "3", AuthorName: "author3", Source: api.OpenAlexSource},
 	}); err != nil {
 		t.Fatal(err)
@@ -514,7 +514,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 
 	checkNoNextAuthorReport(t, manager)
 
-	if err := manager.UpdateUniversityReport(nextUni3.ReportId, "complete", nextUni3.UpdateDate, []reports.UniversityAuthorReport{
+	if err := manager.UpdateUniversityReport(nextUni3.Id, "complete", nextUni3.UpdateDate, []reports.UniversityAuthorReport{
 		{AuthorId: "3", AuthorName: "author3", Source: api.OpenAlexSource}, // Authors are unchanged
 	}); err != nil {
 		t.Fatal(err)
@@ -568,7 +568,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "in-progress", 2, 3)
 
 	// Add a new author to the university report
-	if err := manager.UpdateUniversityReport(nextUni4.ReportId, "complete", nextAuthor4.EndDate, []reports.UniversityAuthorReport{
+	if err := manager.UpdateUniversityReport(nextUni4.Id, "complete", nextAuthor4.EndDate, []reports.UniversityAuthorReport{
 		{AuthorId: "1", AuthorName: "author1", Source: api.OpenAlexSource},
 		{AuthorId: "2", AuthorName: "author2", Source: api.OpenAlexSource},
 		{AuthorId: "3", AuthorName: "author3", Source: api.OpenAlexSource},
