@@ -2,6 +2,7 @@ package flaggers
 
 import (
 	"prism/prism/openalex"
+	"sort"
 	"strings"
 	"sync"
 )
@@ -98,4 +99,24 @@ func getInitialsCombinations(name string) []string {
 	}
 
 	return candidates
+}
+
+func HybridInstitutionNamesSort(originalInstitution string, institutionNames []string, similarityThreshold float32) []string {
+	// put the institutes with similar name to the Original Instiatution at the front
+	// sort the rest alphabetically
+
+	var sortedInstitutionsAboveThreshold []string
+	var sortedInstitutionsBelowThreshold []string
+
+	for _, inst := range institutionNames {
+		if JaroWinklerSimilarity(originalInstitution, inst) >= float64(similarityThreshold) {
+			sortedInstitutionsAboveThreshold = append(sortedInstitutionsAboveThreshold, inst)
+		} else {
+			sortedInstitutionsBelowThreshold = append(sortedInstitutionsBelowThreshold, inst)
+		}
+	}
+
+	sort.Strings(sortedInstitutionsBelowThreshold)
+	finalList := append(sortedInstitutionsAboveThreshold, sortedInstitutionsBelowThreshold...)
+	return finalList
 }
