@@ -53,15 +53,8 @@ func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
 	return &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
 		workFlaggers: []WorkFlagger{
-			&OpenAlexMultipleAffiliationsFlagger{},
 			&OpenAlexFunderIsEOC{
 				concerningFunders:  opts.ConcerningFunders,
-				concerningEntities: opts.ConcerningEntities,
-			},
-			&OpenAlexPublisherIsEOC{
-				concerningPublishers: opts.ConcerningPublishers,
-			},
-			&OpenAlexCoauthorIsEOC{
 				concerningEntities: opts.ConcerningEntities,
 			},
 			&OpenAlexAuthorAffiliationIsEOC{

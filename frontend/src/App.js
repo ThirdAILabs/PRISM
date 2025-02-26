@@ -6,11 +6,9 @@ import EntityLookup from './components/pages/entityLookup/page';
 import UserService from './services/userService';
 import { useUser } from './store/userContext';
 
-import "bootstrap/dist/css/bootstrap.css";
-import "bootstrap/dist/js/bootstrap.bundle.js";
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap/dist/js/bootstrap.bundle.js';
 import './App.css';
-
-
 
 function App() {
   const { updateUserInfo } = useUser();
@@ -26,7 +24,6 @@ function App() {
 
   return (
     <div className="App">
-
       <Router>
         <Routes>
           <Route path="/" element={<SearchComponent />} />

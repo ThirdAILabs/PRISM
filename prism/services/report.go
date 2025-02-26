@@ -105,10 +105,9 @@ func (s *ReportService) GetReport(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	param := chi.URLParam(r, "report_id")
-	id, err := uuid.Parse(param)
+	id, err := URLParamUUID(r, "report_id")
 	if err != nil {
-		return nil, CodedError(fmt.Errorf("invalid uuid '%v' provided: %w", param, err), http.StatusBadRequest)
+		return nil, CodedError(err, http.StatusBadRequest)
 	}
 
 	report, err := s.manager.GetAuthorReport(userId, id)

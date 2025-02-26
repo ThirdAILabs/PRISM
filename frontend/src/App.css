@@ -18,7 +18,7 @@
 }
 
 .custom-input:focus {
-  border-bottom: 1px solid #004AA1;
+  border-bottom: 1px solid #004aa1;
 }
 
 .chart-text {
@@ -166,18 +166,19 @@ li {
   width: 200px;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+  transition:
+    opacity 0.3s ease-in-out,
+    visibility 0.3s ease-in-out;
 }
 
 .popover-body {
-  color: "white"
+  color: 'white';
 }
 
 .popover-container:hover .popover {
   opacity: 1;
   visibility: visible;
 }
-
 
 .container {
   height: 300px;
