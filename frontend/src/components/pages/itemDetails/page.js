@@ -602,6 +602,11 @@ const ItemDetails = () => {
   const [sortOrder, setSortOrder] = useState('desc');
 
   function renderFlags(items) {
+    if (!items) {
+      setReview(false);
+      return null;
+    }
+    
     const sortedItems = [...items].sort((a, b) => {
       const dateA =
         a.Work && a.Work.PublicationDate ? new Date(a.Work.PublicationDate).getTime() : 0;
