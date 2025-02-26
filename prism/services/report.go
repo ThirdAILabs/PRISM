@@ -98,10 +98,9 @@ func (s *ReportService) GetReport(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	param := chi.URLParam(r, "report_id")
-	id, err := uuid.Parse(param)
+	id, err := URLParamUUID(r, "report_id")
 	if err != nil {
-		return nil, CodedError(fmt.Errorf("invalid uuid '%v' provided: %w", param, err), http.StatusBadRequest)
+		return nil, CodedError(err, http.StatusBadRequest)
 	}
 
 	report, err := s.manager.GetReport(userId, id)
@@ -187,13 +186,11 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 		return nil, CodedError(errors.New("cannot process disclosures for report unless report status is complete"), http.StatusUnprocessableEntity)
 	}
 
-	updateDisclosures(report.Content.TalentContracts, allFileTexts)
-	updateDisclosures(report.Content.AssociationsWithDeniedEntities, allFileTexts)
-	updateDisclosures(report.Content.HighRiskFunders, allFileTexts)
-	updateDisclosures(report.Content.AuthorAffiliations, allFileTexts)
-	updateDisclosures(report.Content.PotentialAuthorAffiliations, allFileTexts)
-	updateDisclosures(report.Content.MiscHighRiskAssociations, allFileTexts)
-	updateDisclosures(report.Content.CoauthorAffiliations, allFileTexts)
+	for _, flags := range report.Content {
+		for _, flag := range flags {
+			updateFlagDisclosure(flag, allFileTexts)
+		}
+	}
 
 	return report, nil
 }

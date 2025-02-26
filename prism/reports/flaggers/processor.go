@@ -52,15 +52,8 @@ func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
 	return &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
 		workFlaggers: []WorkFlagger{
-			&OpenAlexMultipleAffiliationsFlagger{},
 			&OpenAlexFunderIsEOC{
 				concerningFunders:  opts.ConcerningFunders,
-				concerningEntities: opts.ConcerningEntities,
-			},
-			&OpenAlexPublisherIsEOC{
-				concerningPublishers: opts.ConcerningPublishers,
-			},
-			&OpenAlexCoauthorIsEOC{
 				concerningEntities: opts.ConcerningEntities,
 			},
 			&OpenAlexAuthorAffiliationIsEOC{
@@ -198,34 +191,13 @@ func (processor *ReportProcessor) ProcessReport(report reports.ReportUpdateTask)
 
 	go processor.processWorks(logger, report.AuthorName, workStream, flagsCh)
 
-	content := api.ReportContent{}
+	content := make(api.ReportContent)
 	for flags := range flagsCh {
 		for _, flag := range flags {
 			if key := flag.Key(); !flagsSeen[key] {
 				flagsSeen[key] = true
 
-				switch flag := flag.(type) {
-				case *api.TalentContractFlag:
-					content.TalentContracts = append(content.TalentContracts, flag)
-
-				case *api.AssociationWithDeniedEntityFlag:
-					content.AssociationsWithDeniedEntities = append(content.AssociationsWithDeniedEntities, flag)
-
-				case *api.HighRiskFunderFlag:
-					content.HighRiskFunders = append(content.HighRiskFunders, flag)
-
-				case *api.AuthorAffiliationFlag:
-					content.AuthorAffiliations = append(content.AuthorAffiliations, flag)
-
-				case *api.PotentialAuthorAffiliationFlag:
-					content.PotentialAuthorAffiliations = append(content.PotentialAuthorAffiliations, flag)
-
-				case *api.MiscHighRiskAssociationFlag:
-					content.MiscHighRiskAssociations = append(content.MiscHighRiskAssociations, flag)
-
-				case *api.CoauthorAffiliationFlag:
-					content.CoauthorAffiliations = append(content.CoauthorAffiliations, flag)
-				}
+				content[string(flag.Type())] = append(content[string(flag.Type())], flag)
 			}
 		}
 	}

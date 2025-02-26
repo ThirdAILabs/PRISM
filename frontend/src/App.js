@@ -15,49 +15,6 @@ import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.bundle.js";
 import './App.css';
 
-
-
-// function App() {
-//   const { updateUserInfo } = useUser();
-//   const location = useLocation();
-//   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
-
-//   useEffect(() => {
-//     const tokenParsed = UserService.getTokenParsed();
-//     const accessToken = UserService.getToken();
-//     if (tokenParsed) {
-//       const { preferred_username: username, email, name } = tokenParsed;
-//       updateUserInfo({ name: name || username, email, username, accessToken });
-//     }
-//   }, []);
-//   const showMenuIcon = !location.pathname.includes('report_id');
-//   return (
-//     <div className="App">
-//       {showMenuIcon && <FaBars size={30}
-//         style={{
-//           cursor: 'pointer',
-//           position: 'fixed',
-//           left: '20px',
-//           top: '20px',
-//           zIndex: 1000,
-//         }}
-//         onClick={() => setIsSidePanelOpen(!isSidePanelOpen)}
-//         className="hover:bg-gray-200" />}
-//       <SidePanel isOpen={isSidePanelOpen} onClose={() => setIsSidePanelOpen(false)} />
-//       <Router>
-//         <Routes>
-//           <Route path="/" element={<SearchComponent />} />
-//           <Route path="/:report_id" element={<ItemDetails />} />
-//           <Route path="/entity-lookup" element={<EntityLookup />} />
-//           <Route path='/university-assessment' element={<UniversityAssessment />} />
-//         </Routes>
-//       </Router>
-//     </div>
-//   );
-// }
-
-// export default App;
-
 function App() {
   return (
     <Router>
