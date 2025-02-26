@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import TodoListComponent from '../TodoListComponent';
 import { AuthorInstiutionSearchBar } from '../common/searchBar/SearchBar';
-import Logo from "../../assets/images/logo-coloured.png";
-import "../common/searchBar/SearchBar.css";
-import "../common/tools/button/button1.css"
+import Logo from '../../assets/images/prism-logo.png';
+import '../common/searchBar/SearchBar.css';
+import '../common/tools/button/button1.css';
 import UserService from '../../services/userService';
 import { searchService } from '../../api/search';
 import { reportService } from '../../api/reports';
@@ -29,7 +29,11 @@ const SearchComponent = () => {
 
   const search = async (author, institution) => {
     // setShowResultHeaders(true);
-    handleDeepSearch(`${author.AuthorName} ${institution.InstitutionName}`, nextToken, /* reset= */ false);
+    handleDeepSearch(
+      `${author.AuthorName} ${institution.InstitutionName}`,
+      nextToken,
+      /* reset= */ false
+    );
     searchOpenAlex(author, institution);
     // setIsLoadingScopus(true);
     setAuthor(author);
@@ -42,7 +46,6 @@ const SearchComponent = () => {
   };
 
   const searchOpenAlex = async (author, institution) => {
-
     setIsOALoading(true);
     setAuthor(author);
     setInstitution(institution);
@@ -50,57 +53,60 @@ const SearchComponent = () => {
     setQuery(`${author.AuthorName} ${institution ? institution.InstitutionName : ''}`);
     setResults([]);
 
-    const result = await searchService.searchOpenalexAuthors(author.AuthorName, institution.InstitutionId);
-    console.log("result in openAlex", result);
+    const result = await searchService.searchOpenalexAuthors(
+      author.AuthorName,
+      institution.InstitutionId
+    );
+    console.log('result in openAlex', result);
     setOpenAlexResults(result);
     setIsOALoading(false);
     setLoadMoreCount(0);
     setHasSearched(true);
   };
 
-
   const handleDeepSearch = async (query, ntoken, reset = false) => {
     if (reset) {
       setScholarResults([]);
     }
-    setIsDpLoading(true)
+    setIsDpLoading(true);
     setTriedDp(true);
 
     try {
       let result;
 
-      console.log("N token is", ntoken);
+      console.log('N token is', ntoken);
       if (ntoken !== null) {
         result = await searchService.searchGoogleScholarAuthors(query, ntoken);
-        console.log("Old deep search with query", query);
+        console.log('Old deep search with query', query);
       } else {
-        console.log("New deep search with query", query);
+        console.log('New deep search with query', query);
         result = await searchService.searchGoogleScholarAuthors(query, ntoken);
-        console.log("Got results", results);
+        console.log('Got results', results);
       }
 
       setScholarResults(result.Authors);
 
-      setNextToken(result.next_page_token)
+      setNextToken(result.next_page_token);
 
-      setIsDpLoading(false)
+      setIsDpLoading(false);
     } catch (error) {
       console.error('Error during deep search', error);
-      setIsDpLoading(false)
+      setIsDpLoading(false);
     }
   };
 
-
   return (
-    <div className='basic-setup' style={{ color: "black" }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        width: '100%',
-        padding: '20px',
-        position: 'relative'
-      }}>
+    <div className="basic-setup" style={{ color: 'black' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%',
+          padding: '20px',
+          position: 'relative',
+        }}
+      >
         <Link
           to="/entity-lookup"
           className="button"
@@ -110,64 +116,95 @@ const SearchComponent = () => {
             whiteSpace: 'nowrap',
             textDecoration: 'none',
             display: 'inline-block',
-            width: '25%'
+            width: '25%',
           }}
         >
           Go To Entity Lookup
         </Link>
-        <button className="button"
+        <button
+          className="button"
           style={{
             padding: '10px 15px',
             fontSize: '14px',
             whiteSpace: 'nowrap',
             textDecoration: 'none',
             display: 'inline-block',
-            width: '10%'
-          }} onClick={UserService.doLogout}>Logout</button>
+            width: '10%',
+          }}
+          onClick={UserService.doLogout}
+        >
+          Logout
+        </button>
       </div>
 
-      {/* <div style={{ textAlign: "center", marginTop: "12.5%", animation: "fade-in 0.75s" }}> */}
-      <div style={{ textAlign: "center", marginTop: "5.5%", animation: "fade-in 0.75s" }}>
-        <img src={Logo} style={{ width: "160px", marginTop: "0%", animation: "fade-in 0.5s" }} />
-        <h1 style={{ fontWeight: "bold", marginTop: 20, animation: "fade-in 0.75s" }}>Welcome to Prism</h1>
-        <div style={{ animation: "fade-in 1s" }}>
-          <div className='d-flex justify-content-center align-items-center'>
-            <div style={{ marginTop: 10, color: "#888888" }}>We help you comply with research security requirements by automating author assessments.</div>
+      <div style={{ textAlign: 'center', marginTop: '3%', animation: 'fade-in 0.75s' }}>
+        <img
+          src={Logo}
+          style={{
+            width: '320px',
+            marginTop: '1%',
+            marginBottom: '1%',
+            marginRight: '2%',
+            animation: 'fade-in 0.5s',
+          }}
+        />
+        <h1 style={{ fontWeight: 'bold', marginTop: 20, animation: 'fade-in 0.75s' }}>Welcome</h1>
+        <div style={{ animation: 'fade-in 1s' }}>
+          <div className="d-flex justify-content-center align-items-center">
+            <div style={{ marginTop: 10, color: '#888888' }}>
+              We help you comply with research security requirements by automating author
+              assessments.
+            </div>
           </div>
-          <div className='d-flex justify-content-center align-items-center'>
-            <div style={{ marginTop: 10, marginBottom: 50, color: "#888888" }}>Who would you like to conduct an assessment on?</div>
+          <div className="d-flex justify-content-center align-items-center">
+            <div style={{ marginTop: 10, marginBottom: '1%', color: '#888888' }}>
+              Who would you like to conduct an assessment on?
+            </div>
           </div>
         </div>
-        <div className='d-flex justify-content-center align-items-center pt-5'>
-          <div style={{ width: "80%", animation: "fade-in 1.25s" }}>
+        <div className="d-flex justify-content-center align-items-center pt-5">
+          <div style={{ width: '80%', animation: 'fade-in 1.25s' }}>
             <AuthorInstiutionSearchBar onSearch={search} />
           </div>
         </div>
       </div>
-      {showResultHeaders && (<div style={{ paddingTop: "30px", textAlign: "center", fontSize: "24px", fontWeight: "bold" }}>OpenAlex Results</div>)}
-      {isLoadingScopus && <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status"></div>}
-      {
-        hasSearched &&
-        <TodoListComponent
-          results={openAlexResults}
-          canLoadMore={false}
-          loadMore={() => { }}
-        />
-      }
+      {showResultHeaders && (
+        <div
+          style={{ paddingTop: '30px', textAlign: 'center', fontSize: '24px', fontWeight: 'bold' }}
+        >
+          OpenAlex Results
+        </div>
+      )}
+      {isLoadingScopus && (
+        <div
+          className="spinner-border text-primary"
+          style={{ width: '3rem', height: '3rem' }}
+          role="status"
+        ></div>
+      )}
+      {hasSearched && (
+        <TodoListComponent results={openAlexResults} canLoadMore={false} loadMore={() => {}} />
+      )}
 
-      {showResultHeaders && <div style={{ paddingTop: "30px", textAlign: "center", fontSize: "24px", fontWeight: "bold" }}>Google Scholar Results</div>}
-      {isDpLoading && <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status"></div>}
-      {
-        hasSearched &&
-        <TodoListComponent
-          results={scholarResults}
-          canLoadMore={false}
-          loadMore={() => { }}
-        />
-      }
+      {showResultHeaders && (
+        <div
+          style={{ paddingTop: '30px', textAlign: 'center', fontSize: '24px', fontWeight: 'bold' }}
+        >
+          Google Scholar Results
+        </div>
+      )}
+      {isDpLoading && (
+        <div
+          className="spinner-border text-primary"
+          style={{ width: '3rem', height: '3rem' }}
+          role="status"
+        ></div>
+      )}
+      {hasSearched && (
+        <TodoListComponent results={scholarResults} canLoadMore={false} loadMore={() => {}} />
+      )}
     </div>
   );
-
 };
 
 export default SearchComponent;
