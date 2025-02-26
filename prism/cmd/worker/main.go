@@ -81,7 +81,7 @@ func processNextUniversityReport(reportManager *reports.ReportManager, processor
 	if err != nil {
 		slog.Error("error processing university report: %w")
 
-		if err := reportManager.UpdateUnivesityReport(nextReport.ReportId, "failed", time.Time{}, nil); err != nil {
+		if err := reportManager.UpdateUniversityReport(nextReport.ReportId, "failed", time.Time{}, nil); err != nil {
 			slog.Error("error updating report status to failed", "error", err)
 		}
 		return true
@@ -89,7 +89,7 @@ func processNextUniversityReport(reportManager *reports.ReportManager, processor
 
 	slog.Info("authors found for university report", "n_authors", len(authors))
 
-	if err := reportManager.UpdateUnivesityReport(nextReport.ReportId, "complete", time.Now(), authors); err != nil {
+	if err := reportManager.UpdateUniversityReport(nextReport.ReportId, "complete", time.Now(), authors); err != nil {
 		slog.Error("error updating university report status to complete", "error", err)
 	}
 

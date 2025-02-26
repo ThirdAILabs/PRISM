@@ -72,8 +72,9 @@ func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 	}
 
 	if err := db.AutoMigrate(
-		&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{}, &schema.License{},
-		&schema.LicenseUser{}, &schema.LicenseUsage{},
+		&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{},
+		&schema.UniversityReport{}, &schema.UserUniversityReport{},
+		&schema.License{}, &schema.LicenseUser{}, &schema.LicenseUsage{},
 	); err != nil {
 		t.Fatal(err)
 	}
