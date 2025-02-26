@@ -4,7 +4,11 @@ import { API_ROUTES } from './constants';
 export const searchService = {
   searchOpenalexAuthors: async (authorName, institutionId, institutionName) => {
     const response = await axiosInstance.get(API_ROUTES.SEARCH.REGULAR, {
-      params: { author_name: authorName, institution_id: institutionId, institution_name: institutionName },
+      params: {
+        author_name: authorName,
+        institution_id: institutionId,
+        institution_name: institutionName,
+      },
     });
     return response.data;
   },
