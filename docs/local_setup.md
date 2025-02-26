@@ -13,7 +13,12 @@ cd keycloak-26.0.0/
 ```bash
 bin/kc.sh start-dev --http-port=8180 --debug --bootstrap-admin-username temp_admin --bootstrap-admin-password password
 ```
-6. To view the admin dashboard go to `localhost:8180` in your browser and login with the credentials `temp_admin` and `password`. 
+6. To view the admin dashboard go to `localhost:8180` in your browser and login with the credentials `temp_admin` and `password`.
+
+7. Integrate Custom Theme in Login UI
+    1. Copy the custom-theme folder from keycloak-assets.
+    2. Navigate to the themes folder inside your keycloak-26.0.0 directory.
+    3. Paste the extracted directory (named custom-theme) into the themes folder.
 
 
 ## Start the Backend
