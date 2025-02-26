@@ -597,3 +597,63 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	// Check that the original report is being updated as well
 	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 3, 5)
 }
+
+func TestListUniversityReport(t *testing.T) {
+	manager := setup(t)
+
+	user1, user2 := uuid.New(), uuid.New()
+	license := uuid.New()
+
+	uniId1, err := manager.CreateUniversityReport(license, user1, "1", "university1")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	noReports, err := manager.ListUniversityReports(user2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(noReports) != 0 {
+		t.Fatal("should be no reports for user2")
+	}
+
+	uniId2, err := manager.CreateUniversityReport(license, user2, "2", "university2")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	uniId3, err := manager.CreateUniversityReport(license, user1, "3", "university3")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	reports1, err := manager.ListUniversityReports(user1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(reports1) != 2 {
+		t.Fatal("should be 2 reports")
+	}
+
+	if reports1[0].Id != uniId1 || reports1[1].Id != uniId3 ||
+		reports1[0].UniversityId != "1" || reports1[1].UniversityId != "3" ||
+		reports1[0].UniversityName != "university1" || reports1[1].UniversityName != "university3" ||
+		reports1[0].Status != "queued" || reports1[1].Status != "queued" {
+		t.Fatal("incorrect reports")
+	}
+
+	reports2, err := manager.ListUniversityReports(user2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(reports2) != 1 {
+		t.Fatal("should be 1 report")
+	}
+
+	if reports2[0].Id != uniId2 ||
+		reports2[0].UniversityId != "2" ||
+		reports2[0].UniversityName != "university2" ||
+		reports2[0].Status != "queued" {
+		t.Fatal("incorrect report")
+	}
+}

@@ -168,13 +168,7 @@ func checkListAuthorReports(t *testing.T, backend http.Handler, user string, exp
 	}
 
 	slices.SortFunc(reports, func(a, b api.Report) int {
-		if a.AuthorId < b.AuthorId {
-			return -1
-		}
-		if a.AuthorId > b.AuthorId {
-			return 1
-		}
-		return 0
+		return strings.Compare(a.AuthorId, b.AuthorId)
 	})
 
 	slices.Sort(expected)
@@ -203,6 +197,30 @@ func createAuthorReport(backend http.Handler, user, name string) (api.CreateRepo
 	var res api.CreateReportResponse
 	err := Post(backend, "/report/author/create", user, req, &res)
 	return res, err
+}
+
+func checkListUniversityReports(t *testing.T, backend http.Handler, user string, expected []string) {
+	var reports []api.UniversityReport
+	if err := Get(backend, "/report/university/list", user, &reports); err != nil {
+		t.Fatal(err)
+	}
+
+	slices.SortFunc(reports, func(a, b api.UniversityReport) int {
+		return strings.Compare(a.UniversityId, b.UniversityId)
+	})
+
+	slices.Sort(expected)
+
+	if len(reports) != len(expected) {
+		t.Fatal("incorrect number of reports returned")
+	}
+	for i := range expected {
+		if reports[i].UniversityId != expected[i]+"-id" ||
+			reports[i].UniversityName != expected[i]+"-name" ||
+			reports[i].Status != "complete" {
+			t.Fatalf("invalid reports returned: %+v, %s", reports[i], expected[i])
+		}
+	}
 }
 
 func getUniversityReport(backend http.Handler, user string, id uuid.UUID) (api.UniversityReport, error) {
@@ -764,6 +782,8 @@ func TestUniversityReportEndpoints(t *testing.T) {
 	if _, err := getUniversityReport(backend, user2, uniReportId.Id); err == nil || !strings.Contains(err.Error(), "user cannot access report") {
 		t.Fatal(err)
 	}
+
+	checkListUniversityReports(t, backend, user1, []string{"uni-report1"})
 }
 
 func TestAutocompleteAuthor(t *testing.T) {

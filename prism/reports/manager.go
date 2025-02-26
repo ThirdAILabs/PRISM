@@ -323,6 +323,22 @@ func convertReport(report schema.UserAuthorReport) (api.Report, error) {
 	}, nil
 }
 
+func (r *ReportManager) ListUniversityReports(userId uuid.UUID) ([]api.UniversityReport, error) {
+	var reports []schema.UserUniversityReport
+
+	if err := r.db.Preload("Report").Order("created_at ASC").Find(&reports, "user_id = ?", userId).Error; err != nil {
+		slog.Error("error finding list of reports ")
+		return nil, ErrReportAccessFailed
+	}
+
+	results := make([]api.UniversityReport, 0, len(reports))
+	for _, report := range reports {
+		results = append(results, convertUniversityReport(report, nil))
+	}
+
+	return results, nil
+}
+
 func (r *ReportManager) queueUniversityReportUpdateIfNeeded(txn *gorm.DB, report *schema.UniversityReport) error {
 	if time.Now().UTC().Sub(report.LastUpdatedAt) > r.staleReportThreshold &&
 		report.Status != schema.ReportInProgress && report.Status != schema.ReportQueued {
@@ -461,15 +477,7 @@ func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.Uni
 		})
 	}
 
-	return api.UniversityReport{
-		Id:             report.Id,
-		CreatedAt:      report.CreatedAt,
-		UniversityId:   report.Report.UniversityId,
-		UniversityName: report.Report.UniversityName,
-		Status:         report.Report.Status,
-		Content:        content,
-	}, nil
-
+	return convertUniversityReport(report, content), nil
 }
 
 type UniversityReportUpdateTask struct {
@@ -599,4 +607,15 @@ func (r *ReportManager) UpdateUniversityReport(id uuid.UUID, status string, upda
 		return nil
 	})
 
+}
+
+func convertUniversityReport(report schema.UserUniversityReport, content map[string][]api.UniversityAuthorFlag) api.UniversityReport {
+	return api.UniversityReport{
+		Id:             report.Id,
+		CreatedAt:      report.CreatedAt,
+		UniversityId:   report.Report.UniversityId,
+		UniversityName: report.Report.UniversityName,
+		Status:         report.Report.Status,
+		Content:        content,
+	}
 }

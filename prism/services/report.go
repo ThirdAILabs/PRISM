@@ -36,6 +36,7 @@ func (s *ReportService) Routes() chi.Router {
 	})
 
 	r.Route("/university", func(r chi.Router) {
+		r.Get("/list", WrapRestHandler(s.ListUniversityReports))
 		r.Post("/create", WrapRestHandler(s.CreateUniversityReport))
 		r.Get("/{report_id}", WrapRestHandler(s.GetUniversityReport))
 	})
@@ -270,6 +271,20 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 		slog.Error("error writing file bytes", "error", err)
 		http.Error(w, "error writing file", http.StatusInternalServerError)
 	}
+}
+
+func (s *ReportService) ListUniversityReports(r *http.Request) (any,error) {
+	userId, err := auth.GetUserId(r)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	reports, err := s.manager.ListUniversityReports(userId)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	return reports, nil
 }
 
 func (s *ReportService) CreateUniversityReport(r *http.Request) (any, error) {
