@@ -18,7 +18,6 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore }) => {
   };
 
   const getMoreResults = async () => {
-    console.log("LOADING MORE")
     if (canLoadMore) {
       setResults(results.concat(await loadMore()));
     }
