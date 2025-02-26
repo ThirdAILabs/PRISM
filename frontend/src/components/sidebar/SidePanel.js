@@ -26,9 +26,9 @@ const SidePanel = ({ isOpen, onClose }) => {
   };
 
   const status = {
-    queued: <CiCircleList title="Queued" size={20} />,
-    'in-progress': <CgSpinner className="animate-spin" title="In-Progress" size={20} />,
-    complete: <CiCircleCheck title="Completed" size={20} />,
+    queued: <CiCircleList title="Queued" size={16} />,
+    'in-progress': <CgSpinner className="animate-spin" title="In-Progress" size={16} />,
+    complete: <CiCircleCheck title="Completed" size={16} />,
   };
   const location = useLocation();
   const currentLocation = location.pathname;
