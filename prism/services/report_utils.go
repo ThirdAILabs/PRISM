@@ -5,7 +5,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"prism/prism/api"
-	"sort"
+	"slices"
 	"strings"
 	"time"
 
@@ -26,12 +26,6 @@ DisclosureCheck:
 				break DisclosureCheck
 			}
 		}
-	}
-}
-
-func updateDisclosures[T api.Flag](flags []T, allTexts []string) {
-	for _, flag := range flags {
-		updateFlagDisclosure(flag, allTexts)
 	}
 }
 
@@ -113,8 +107,7 @@ func generateCSV(report api.Report) ([]byte, error) {
 		return nil, err
 	}
 
-	flagGroups := report.Content.GroupFlags()
-	for _, flags := range flagGroups {
+	for _, flags := range report.Content {
 		for _, flag := range flags {
 			if err := writer.Write([]string{"Flag Title", flag.GetHeading()}); err != nil {
 				return nil, err
@@ -161,15 +154,14 @@ func generateExcel(report api.Report) ([]byte, error) {
 		}
 	}
 
-	flagGroups := report.Content.GroupFlags()
-	for groupName, flags := range flagGroups {
+	for _, flags := range report.Content {
+		if len(flags) == 0 {
+			continue
+		}
+		groupName := flags[0].GetHeading()
 		sheetName := sanitizeSheetName(groupName)
 		if _, err := f.NewSheet(sheetName); err != nil {
 			return nil, err
-		}
-
-		if len(flags) == 0 {
-			continue
 		}
 
 		details := flags[0].GetDetailFields()
@@ -276,14 +268,25 @@ func generatePDF(report api.Report) ([]byte, error) {
 	}
 	pdf.Ln(5)
 
-	flagGroups := report.Content.GroupFlags()
-
-	var flagTypes []string
-	for flagType := range flagGroups {
-		flagTypes = append(flagTypes, flagType)
+	type headingAndFlag struct {
+		heading string
+		flags   []api.Flag
 	}
 
-	sort.Strings(flagTypes)
+	var headingsAndFlags []headingAndFlag
+	for _, flags := range report.Content {
+		if len(flags) > 0 {
+			headingsAndFlags = append(headingsAndFlags, headingAndFlag{
+				heading: flags[0].GetHeading(),
+				flags:   flags,
+			})
+		}
+
+	}
+
+	slices.SortFunc(headingsAndFlags, func(a, b headingAndFlag) int {
+		return strings.Compare(a.heading, b.heading)
+	})
 
 	currentPage := 3
 	var tocLines []string
@@ -292,14 +295,13 @@ func generatePDF(report api.Report) ([]byte, error) {
 		End   int
 	}
 
-	for _, flagType := range flagTypes {
-		flags := flagGroups[flagType]
-		if len(flags) > 0 {
+	for _, group := range headingsAndFlags {
+		if len(group.flags) > 0 {
 			start := currentPage
-			end := currentPage + len(flags) - 1
-			tocLines = append(tocLines, fmt.Sprintf("%s: %d - %d", flagType, start, end))
+			end := currentPage + len(group.flags) - 1
+			tocLines = append(tocLines, fmt.Sprintf("%s: %d - %d", group.heading, start, end))
 			tocPages = append(tocPages, struct{ Start, End int }{start, end})
-			currentPage += len(flags)
+			currentPage += len(group.flags)
 		}
 	}
 
@@ -352,8 +354,8 @@ func generatePDF(report api.Report) ([]byte, error) {
 		return nil
 	}
 
-	for _, group := range flagGroups {
-		for _, flag := range group {
+	for _, group := range headingsAndFlags {
+		for _, flag := range group.flags {
 			if err := addFlagPage(flag); err != nil {
 				return nil, err
 			}

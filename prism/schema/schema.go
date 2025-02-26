@@ -13,7 +13,7 @@ const (
 	ReportCompleted  = "complete"
 )
 
-type Report struct {
+type AuthorReport struct {
 	Id uuid.UUID `gorm:"type:uuid;primaryKey"`
 
 	LastUpdatedAt time.Time
@@ -25,23 +25,25 @@ type Report struct {
 	QueuedAt time.Time
 	Status   string `gorm:"size:20;not null"`
 
-	Content *ReportContent `gorm:"foreignKey:ReportId;constraint:OnDelete:CASCADE"`
+	Flags []AuthorFlag `gorm:"foreignKey:ReportId;constraint:OnDelete:CASCADE"`
 }
 
-type ReportContent struct {
-	ReportId uuid.UUID `gorm:"type:uuid;primaryKey"`
-
-	Content []byte
+type AuthorFlag struct {
+	Id       uuid.UUID `gorm:"type:uuid;primaryKey"`
+	ReportId uuid.UUID `gorm:"type:uuid"`
+	FlagType string    `gorm:"size:40;not null"`
+	FlagKey  string
+	Data     []byte
 }
 
-type UserReport struct {
+type UserAuthorReport struct {
 	Id     uuid.UUID `gorm:"type:uuid;primaryKey"`
 	UserId uuid.UUID `gorm:"type:uuid;not null;index"`
 
 	CreatedAt time.Time
 
-	ReportId uuid.UUID `gorm:"type:uuid;not null"`
-	Report   *Report   `gorm:"foreignKey:ReportId"`
+	ReportId uuid.UUID     `gorm:"type:uuid;not null"`
+	Report   *AuthorReport `gorm:"foreignKey:ReportId"`
 }
 
 type License struct {
@@ -60,8 +62,8 @@ type LicenseUser struct {
 }
 
 type LicenseUsage struct {
-	LicenseId    uuid.UUID `gorm:"type:uuid;primaryKey"`
-	UserReportId uuid.UUID `gorm:"type:uuid;primaryKey"`
-	UserId       uuid.UUID
-	Timestamp    time.Time
+	LicenseId          uuid.UUID `gorm:"type:uuid;primaryKey"`
+	UserAuthorReportId uuid.UUID `gorm:"type:uuid;primaryKey"`
+	UserId             uuid.UUID
+	Timestamp          time.Time
 }

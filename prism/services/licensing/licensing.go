@@ -15,6 +15,7 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 var (
@@ -112,9 +113,9 @@ func CreateLicense(txn *gorm.DB, name string, expiration time.Time) (api.CreateL
 	return api.CreateLicenseResponse{Id: licenseEntry.Id, License: licenseKey}, nil
 }
 
-func getLicense(txn *gorm.DB, id uuid.UUID) (schema.License, error) {
+func getLicenseForUpdate(txn *gorm.DB, id uuid.UUID) (schema.License, error) {
 	var license schema.License
-	if err := txn.First(&license, "id = ?", id).Error; err != nil {
+	if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).First(&license, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return license, ErrLicenseNotFound
 		}
@@ -125,7 +126,7 @@ func getLicense(txn *gorm.DB, id uuid.UUID) (schema.License, error) {
 }
 
 func DeactivateLicense(txn *gorm.DB, id uuid.UUID) error {
-	license, err := getLicense(txn, id)
+	license, err := getLicenseForUpdate(txn, id)
 	if err != nil {
 		return err
 	}
@@ -146,7 +147,7 @@ func AddLicenseUser(txn *gorm.DB, licenseKey string, userId uuid.UUID) error {
 		return err
 	}
 
-	license, err := getLicense(txn, licenseData.Id)
+	license, err := getLicenseForUpdate(txn, licenseData.Id)
 	if err != nil {
 		return err
 	}
