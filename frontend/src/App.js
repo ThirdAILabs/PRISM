@@ -11,8 +11,8 @@ import UniversityAssessment from './components/pages/UniversityAssessment';
 import { useLocation } from 'react-router-dom';
 
 //CSS
-import "bootstrap/dist/css/bootstrap.css";
-import "bootstrap/dist/js/bootstrap.bundle.js";
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap/dist/js/bootstrap.bundle.js';
 import './App.css';
 
 function App() {
@@ -60,7 +60,7 @@ function AppContent() {
         <Route path="/" element={<SearchComponent />} />
         <Route path="/report/:report_id" element={<ItemDetails />} />
         <Route path="/entity-lookup" element={<EntityLookup />} />
-        <Route path='/university-assessment' element={<UniversityAssessment />} />
+        <Route path="/university-assessment" element={<UniversityAssessment />} />
       </Routes>
     </div>
   );

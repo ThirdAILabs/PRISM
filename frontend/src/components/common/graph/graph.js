@@ -485,7 +485,7 @@ const Graph = ({ authorName, reportContent }) => {
         <RelationGraph ref={graphRef} options={graphOptions} onNodeClick={onNodeClick} />
         <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm">
           <DialogTitle sx={{ bgcolor: '#2A2A2A', color: 'white' }}>
-            {"Detailed Information"}
+            {'Detailed Information'}
           </DialogTitle>
           <Divider
             sx={{

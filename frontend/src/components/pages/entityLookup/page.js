@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import '../../common/searchBar/SearchBar.css';
 import '../../common/tools/button/button1.css';
 import Logo from '../../../assets/images/prism-logo.png';
-import "../../common/searchBar/SearchBar.css";
-import "../../common/tools/button/button1.css"
+import '../../common/searchBar/SearchBar.css';
+import '../../common/tools/button/button1.css';
 import { searchService } from '../../../api/search';
 
 function EntityLookup() {

@@ -96,7 +96,6 @@ const SearchComponent = () => {
 
   return (
     <div className="basic-setup" style={{ color: 'black' }}>
-
       <div style={{ textAlign: 'center', marginTop: '3%', animation: 'fade-in 0.75s' }}>
         <img
           src={Logo}
@@ -143,7 +142,7 @@ const SearchComponent = () => {
         ></div>
       )}
       {hasSearched && (
-        <TodoListComponent results={openAlexResults} canLoadMore={false} loadMore={() => { }} />
+        <TodoListComponent results={openAlexResults} canLoadMore={false} loadMore={() => {}} />
       )}
 
       {showResultHeaders && (
@@ -161,7 +160,7 @@ const SearchComponent = () => {
         ></div>
       )}
       {hasSearched && (
-        <TodoListComponent results={scholarResults} canLoadMore={false} loadMore={() => { }} />
+        <TodoListComponent results={scholarResults} canLoadMore={false} loadMore={() => {}} />
       )}
     </div>
   );

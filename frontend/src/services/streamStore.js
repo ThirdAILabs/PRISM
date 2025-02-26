@@ -15,4 +15,3 @@ export const onFlagsUpdate = (callback) => {
   }
   return () => listeners.delete(callback);
 };
-

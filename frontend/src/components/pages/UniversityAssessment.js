@@ -1,11 +1,11 @@
-import React from "react";
+import React from 'react';
 
 const UniversityAssessment = () => {
-    return (
-        <div>
-            <h1>University Assessment</h1>
-        </div>
-    );
+  return (
+    <div>
+      <h1>University Assessment</h1>
+    </div>
+  );
 };
 
 export default UniversityAssessment;
