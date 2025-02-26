@@ -539,9 +539,9 @@ const ItemDetails = () => {
           {flag.RawAcknowledements.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
-          <p>{ }</p>
+          <p>{}</p>
         </p>
-        { }
+        {}
         {isDisclosureChecked &&
           (flag.Disclosed ? (
             <button type="button" className="btn btn-success">
@@ -929,9 +929,16 @@ const ItemDetails = () => {
                         }}
                       />
                     </div>
-                    <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div
+                      style={{
+                        marginTop: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px',
+                      }}
+                    >
                       <button
-                        className='form-control'
+                        className="form-control"
                         onClick={handleResetFilter}
                         style={{
                           backgroundColor: 'rgb(220, 220, 220)',
@@ -965,7 +972,6 @@ const ItemDetails = () => {
                       >
                         Submit
                       </button>
-
                     </div>
                   </div>
                 )}
