@@ -9,7 +9,9 @@ import (
 	"prism/prism/gscholar"
 	"prism/prism/llms"
 	"prism/prism/openalex"
+	"prism/prism/reports/flaggers"
 	"prism/prism/search"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -52,19 +54,45 @@ func (s *SearchService) SearchOpenAlex(r *http.Request) (any, error) {
 			AuthorName:   author.DisplayName,
 			Institutions: author.InstitutionNames(),
 			Source:       api.OpenAlexSource,
+			Interests:    author.Concepts,
 		})
 	}
 
 	return results, nil
 }
 
+func filterAuthorsBySimilarity(authors []api.Author, queryName string) []api.Author {
+	const minSimilarity = 0.5
+
+	type pair struct {
+		author *api.Author
+		sim    float64
+	}
+	authorSims := make([]pair, 0, len(authors))
+	for _, author := range authors {
+		sim := flaggers.IndelSimilarity(author.AuthorName, queryName)
+		if sim > minSimilarity {
+			authorSims = append(authorSims, pair{author: &author, sim: sim})
+		}
+	}
+	sort.Slice(authorSims, func(i, j int) bool {
+		return authorSims[i].sim > authorSims[j].sim
+	})
+
+	sortedAuthors := make([]api.Author, 0, len(authors))
+	for _, pair := range authorSims {
+		sortedAuthors = append(sortedAuthors, *pair.author)
+	}
+	return sortedAuthors
+}
+
 func (s *SearchService) SearchGoogleScholar(r *http.Request) (any, error) {
-	query := strings.ReplaceAll(strings.ToLower(r.URL.Query().Get("query")), "@", " ")
-	cursor := r.URL.Query().Get("cursor")
+	query := r.URL.Query()
+	author, institution, cursor := query.Get("author_name"), query.Get("institution_name"), r.URL.Query().Get("cursor")
 
-	slog.Info("searching google scholar", "query", query, "cursor", cursor)
+	slog.Info("searching google scholar", "author_name", author, "institution_name", institution, "cursor", cursor)
 
-	results, nextCursor, err := gscholar.NextGScholarPage(query, cursor)
+	results, nextCursor, err := gscholar.NextGScholarPage(strings.ToLower(fmt.Sprintf("%s %s", author, institution)), cursor)
 	if err != nil {
 		if errors.Is(err, gscholar.ErrInvalidCursor) {
 			return nil, CodedError(err, http.StatusBadRequest)
@@ -72,7 +100,8 @@ func (s *SearchService) SearchGoogleScholar(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	return api.GScholarSearchResults{Authors: results, Cursor: nextCursor}, nil
+	return api.GScholarSearchResults{Authors: filterAuthorsBySimilarity(results, author), Cursor: nextCursor}, nil
+	// return api.GScholarSearchResults{Authors: results, Cursor: nextCursor}, nil
 }
 
 func cleanEntry(id uint64, text string) string {

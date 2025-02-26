@@ -14,6 +14,7 @@ type Author struct {
 	DisplayNameAlternatives []string // Only set when calling GetAuthor, not returned via works
 	RawAuthorName           *string  // Only set when getting author via works
 	Institutions            []Institution
+	Concepts                []string // Only set when calling FindAuthors
 }
 
 func (a *Author) InstitutionNames() []string {

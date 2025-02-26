@@ -69,9 +69,9 @@ func buildEntityNdb(entityPath string) search.NeuralDB {
 		log.Fatalf("error openning ndb: %v", err)
 	}
 
-	if err := ndb.Insert("entities", "id", entities, nil, nil); err != nil {
-		log.Fatalf("error inserting into ndb: %v", err)
-	}
+	// if err := ndb.Insert("entities", "id", entities, nil, nil); err != nil {
+	// 	log.Fatalf("error inserting into ndb: %v", err)
+	// }
 
 	e := time.Now()
 
