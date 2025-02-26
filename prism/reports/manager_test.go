@@ -26,7 +26,7 @@ func setup(t *testing.T) *reports.ReportManager {
 	return reports.NewManager(db, time.Second)
 }
 
-func checkNextReport(t *testing.T, next *reports.ReportUpdateTask, authorId, authorName, source string, startDate, endDate time.Time) {
+func checkNextAuthorReport(t *testing.T, next *reports.ReportUpdateTask, authorId, authorName, source string, startDate, endDate time.Time) {
 	if next == nil ||
 		next.AuthorId != authorId ||
 		next.AuthorName != authorName ||
@@ -37,7 +37,7 @@ func checkNextReport(t *testing.T, next *reports.ReportUpdateTask, authorId, aut
 	}
 }
 
-func checkReport(t *testing.T, manager *reports.ReportManager, userId, reportId uuid.UUID, authorId, authorName, source, status string, nflags int) {
+func checkAuthorReport(t *testing.T, manager *reports.ReportManager, userId, reportId uuid.UUID, authorId, authorName, source, status string, nflags int) {
 	report, err := manager.GetAuthorReport(userId, reportId)
 	if err != nil {
 		t.Fatal(err)
@@ -59,7 +59,7 @@ func checkReport(t *testing.T, manager *reports.ReportManager, userId, reportId 
 	}
 }
 
-func checkNoNextReport(t *testing.T, manager *reports.ReportManager) {
+func checkNoNextAuthorReport(t *testing.T, manager *reports.ReportManager) {
 	next, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
@@ -91,7 +91,7 @@ func TestCreateGetAuthorReports(t *testing.T) {
 	user1, user2 := uuid.New(), uuid.New()
 	license := uuid.New()
 
-	checkNoNextReport(t, manager)
+	checkNoNextAuthorReport(t, manager)
 
 	reportId1, err := manager.CreateAuthorReport(license, user1, "1", "author1", api.OpenAlexSource)
 	if err != nil {
@@ -103,45 +103,45 @@ func TestCreateGetAuthorReports(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "queued", 0)
+	checkAuthorReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "queued", 0)
 
 	next1, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
 	report1End := time.Now()
-	checkNextReport(t, next1, "1", "author1", api.OpenAlexSource, reports.EarliestReportDate, report1End)
+	checkNextAuthorReport(t, next1, "1", "author1", api.OpenAlexSource, reports.EarliestReportDate, report1End)
 
-	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "in-progress", 0)
+	checkAuthorReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "in-progress", 0)
 
 	if err := manager.UpdateAuthorReport(next1.Id, "complete", next1.EndDate, dummyReportUpdate()); err != nil {
 		t.Fatal(err)
 	}
 
-	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "complete", 1)
+	checkAuthorReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "complete", 1)
 
 	next2, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
 	report2End := time.Now()
-	checkNextReport(t, next2, "2", "author2", api.GoogleScholarSource, reports.EarliestReportDate, report2End)
+	checkNextAuthorReport(t, next2, "2", "author2", api.GoogleScholarSource, reports.EarliestReportDate, report2End)
 
-	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "in-progress", 0)
+	checkAuthorReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "in-progress", 0)
 
 	if err := manager.UpdateAuthorReport(next2.Id, "complete", next2.EndDate, dummyReportUpdate()); err != nil {
 		t.Fatal(err)
 	}
 
-	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "complete", 1)
+	checkAuthorReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "complete", 1)
 
 	// Both reports should be removed from queue now
-	checkNoNextReport(t, manager)
+	checkNoNextAuthorReport(t, manager)
 
 	// Check that report access does not queue report update since we are under threshold
-	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "complete", 1)
-	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "complete", 1)
-	checkNoNextReport(t, manager)
+	checkAuthorReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "complete", 1)
+	checkAuthorReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "complete", 1)
+	checkNoNextAuthorReport(t, manager)
 
 	// Check that reports are reused
 	reportId3, err := manager.CreateAuthorReport(license, user1, "2", "author2", api.GoogleScholarSource)
@@ -149,67 +149,67 @@ func TestCreateGetAuthorReports(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Content should be reused so report is immediately available
-	checkReport(t, manager, user1, reportId3, "2", "author2", api.GoogleScholarSource, "complete", 1)
+	checkAuthorReport(t, manager, user1, reportId3, "2", "author2", api.GoogleScholarSource, "complete", 1)
 	// Check that no report update is queued
-	checkNoNextReport(t, manager)
+	checkNoNextAuthorReport(t, manager)
 
 	// This is to ensure reports are stale
 	time.Sleep(time.Second)
 
 	// Accessing a stale report should add it back to the queue, it should still have 1 flag though
-	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "queued", 1)
+	checkAuthorReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "queued", 1)
 	// Perform multiple accesses to ensure it is only added once
-	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "queued", 1)
+	checkAuthorReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "queued", 1)
 
 	next3, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	checkNextReport(t, next3, "2", "author2", api.GoogleScholarSource, report2End, time.Now())
+	checkNextAuthorReport(t, next3, "2", "author2", api.GoogleScholarSource, report2End, time.Now())
 	// Check report was only queued once
-	checkNoNextReport(t, manager)
+	checkNoNextAuthorReport(t, manager)
 
 	// Verify that accessing report while it's in progress doesn't queue it again
-	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "in-progress", 1)
-	checkNoNextReport(t, manager)
+	checkAuthorReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "in-progress", 1)
+	checkNoNextAuthorReport(t, manager)
 
 	if err := manager.UpdateAuthorReport(next3.Id, "complete", next3.EndDate, dummyReportUpdate()); err != nil {
 		t.Fatal(err)
 	}
 
 	// Check that report is updated
-	checkReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "complete", 2)
+	checkAuthorReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "complete", 2)
 
 	// Create a new report from an old report and ensure that it is queued
 	reportId4, err := manager.CreateAuthorReport(license, user2, "1", "author1", api.OpenAlexSource)
 	if err != nil {
 		t.Fatal(err)
 	}
-	checkReport(t, manager, user2, reportId4, "1", "author1", api.OpenAlexSource, "queued", 1)
+	checkAuthorReport(t, manager, user2, reportId4, "1", "author1", api.OpenAlexSource, "queued", 1)
 
 	// Check that the original report is being updated as well
-	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "queued", 1)
+	checkAuthorReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "queued", 1)
 
 	next4, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	checkNextReport(t, next4, "1", "author1", api.OpenAlexSource, report1End, time.Now())
-	checkNoNextReport(t, manager)
+	checkNextAuthorReport(t, next4, "1", "author1", api.OpenAlexSource, report1End, time.Now())
+	checkNoNextAuthorReport(t, manager)
 
 	// Verify that the report is in progress
-	checkReport(t, manager, user2, reportId4, "1", "author1", api.OpenAlexSource, "in-progress", 1)
+	checkAuthorReport(t, manager, user2, reportId4, "1", "author1", api.OpenAlexSource, "in-progress", 1)
 	// Check that the original report is being updated as well
-	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "in-progress", 1)
+	checkAuthorReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "in-progress", 1)
 
 	if err := manager.UpdateAuthorReport(next4.Id, "complete", next4.EndDate, dummyReportUpdate()); err != nil {
 		t.Fatal(err)
 	}
 
 	// Verify that the report is complete
-	checkReport(t, manager, user2, reportId4, "1", "author1", api.OpenAlexSource, "complete", 2)
+	checkAuthorReport(t, manager, user2, reportId4, "1", "author1", api.OpenAlexSource, "complete", 2)
 	// Check that the original report is being updated as well
-	checkReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "complete", 2)
+	checkAuthorReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "complete", 2)
 }
 
 func TestAuthorReportAccessErrors(t *testing.T) {
