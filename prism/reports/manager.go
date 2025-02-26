@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 const (
@@ -38,7 +39,7 @@ func NewManager(db *gorm.DB, staleReportThreshold time.Duration) *ReportManager 
 }
 
 func (r *ReportManager) ListReports(userId uuid.UUID) ([]api.Report, error) {
-	var reports []schema.UserReport
+	var reports []schema.UserAuthorReport
 
 	if err := r.db.Preload("Report").Order("created_at ASC").Find(&reports, "user_id = ?", userId).Error; err != nil {
 		slog.Error("error finding list of reports ")
@@ -57,7 +58,7 @@ func (r *ReportManager) ListReports(userId uuid.UUID) ([]api.Report, error) {
 	return results, nil
 }
 
-func (r *ReportManager) queueReportUpdateIfNeeded(txn *gorm.DB, report *schema.Report) error {
+func (r *ReportManager) queueReportUpdateIfNeeded(txn *gorm.DB, report *schema.AuthorReport) error {
 	if time.Now().UTC().Sub(report.LastUpdatedAt) > r.staleReportThreshold &&
 		report.Status != schema.ReportInProgress && report.Status != schema.ReportQueued {
 		updates := map[string]any{"status": schema.ReportQueued, "queued_at": time.Now().UTC()}
@@ -74,8 +75,8 @@ func (r *ReportManager) CreateReport(licenseId, userId uuid.UUID, authorId, auth
 	userReportId := uuid.New()
 
 	err := r.db.Transaction(func(txn *gorm.DB) error {
-		var report schema.Report
-		result := txn.Limit(1).Find(&report, "author_id = ? AND source = ?", authorId, source)
+		var report schema.AuthorReport
+		result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Limit(1).Find(&report, "author_id = ? AND source = ?", authorId, source)
 		if result.Error != nil {
 			slog.Error("error checking for existing report", "error", result.Error)
 			return ErrReportCreationFailed
@@ -83,17 +84,13 @@ func (r *ReportManager) CreateReport(licenseId, userId uuid.UUID, authorId, auth
 
 		if result.RowsAffected == 0 {
 			reportId := uuid.New()
-			report = schema.Report{
+			report = schema.AuthorReport{
 				Id:            reportId,
 				LastUpdatedAt: EarliestReportDate,
 				AuthorId:      authorId,
 				AuthorName:    authorName,
 				Source:        source,
 				Status:        schema.ReportQueued,
-				Content: &schema.ReportContent{
-					ReportId: reportId,
-					Content:  []byte(`{}`),
-				},
 			}
 
 			if err := txn.Create(&report).Error; err != nil {
@@ -106,7 +103,7 @@ func (r *ReportManager) CreateReport(licenseId, userId uuid.UUID, authorId, auth
 			return err
 		}
 
-		userReport := schema.UserReport{
+		userReport := schema.UserAuthorReport{
 			Id:        userReportId,
 			UserId:    userId,
 			CreatedAt: time.Now().UTC(),
@@ -119,10 +116,10 @@ func (r *ReportManager) CreateReport(licenseId, userId uuid.UUID, authorId, auth
 		}
 
 		usage := schema.LicenseUsage{
-			LicenseId:    licenseId,
-			UserReportId: userReport.Id,
-			UserId:       userId,
-			Timestamp:    time.Now().UTC(),
+			LicenseId:          licenseId,
+			UserAuthorReportId: userReport.Id,
+			UserId:             userId,
+			Timestamp:          time.Now().UTC(),
 		}
 		if err := txn.Create(&usage).Error; err != nil {
 			slog.Error("error logging license usage", "error", err)
@@ -140,10 +137,12 @@ func (r *ReportManager) CreateReport(licenseId, userId uuid.UUID, authorId, auth
 }
 
 func (r *ReportManager) GetReport(userId, reportId uuid.UUID) (api.Report, error) {
-	var report schema.UserReport
+	var report schema.UserAuthorReport
 
 	if err := r.db.Transaction(func(txn *gorm.DB) error {
-		if err := txn.Preload("Report").Preload("Report.Content").First(&report, "id = ?", reportId).Error; err != nil {
+		if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Preload("Report").Preload("Report.Flags").
+			First(&report, "id = ?", reportId).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return ErrReportNotFound
 			}
@@ -160,7 +159,6 @@ func (r *ReportManager) GetReport(userId, reportId uuid.UUID) (api.Report, error
 		}
 		return nil
 	}); err != nil {
-		slog.Error("error getting user report", "report_id", reportId, "error", err)
 		return api.Report{}, err
 	}
 
@@ -178,10 +176,12 @@ type ReportUpdateTask struct {
 
 func (r *ReportManager) GetNextReport() (*ReportUpdateTask, error) {
 	found := false
-	var report schema.Report
+	var report schema.AuthorReport
 
 	err := r.db.Transaction(func(txn *gorm.DB) error {
-		result := txn.Limit(1).Order("queued_at ASC").Find(&report, "status = ?", schema.ReportQueued)
+		result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Limit(1).Order("queued_at ASC").
+			Find(&report, "status = ?", schema.ReportQueued)
 		if result.Error != nil {
 			slog.Error("error getting next report from queue", "error", result.Error)
 			return ErrReportAccessFailed
@@ -218,59 +218,29 @@ func (r *ReportManager) GetNextReport() (*ReportUpdateTask, error) {
 	return nil, nil
 }
 
-func mergeFlags[T api.Flag](old, new []T) []T {
-	seen := make(map[string]bool)
-	output := make([]T, 0, len(old)+len(new))
-	for _, flag := range old {
-		if key := flag.Key(); !seen[key] {
-			output = append(output, flag)
-			seen[key] = true
-		}
-	}
-	for _, flag := range new {
-		if key := flag.Key(); !seen[key] {
-			output = append(output, flag)
-			seen[key] = true
-		}
-	}
-	return output
-}
+func flagsToReportContent(flags []schema.AuthorFlag) (api.ReportContent, error) {
+	content := make(api.ReportContent)
 
-func deserializeReportContent(data []byte) (api.ReportContent, error) {
-	var content api.ReportContent
-	if err := json.Unmarshal(data, &content); err != nil {
-		slog.Error("error deserializing report content", "error", err)
-		return api.ReportContent{}, fmt.Errorf("error deserializing report content: %w", err)
+	for _, flag := range flags {
+		output, err := api.EmptyFlag(flag.FlagType)
+		if err != nil {
+			slog.Error("error creating empty flag", "error", err)
+			return nil, err
+		}
+		if err := json.Unmarshal(flag.Data, output); err != nil {
+			return nil, fmt.Errorf("error deserializing flag: %w", err)
+		}
+		content[output.Type()] = append(content[output.Type()], output)
 	}
+
 	return content, nil
-}
-
-func serializeReportContent(content api.ReportContent) ([]byte, error) {
-	data, err := json.Marshal(content)
-	if err != nil {
-		slog.Error("error serializing report content", "error", err)
-		return nil, fmt.Errorf("error serializing report content: %w", err)
-	}
-	return data, nil
-}
-
-func mergeContents(old, new api.ReportContent) api.ReportContent {
-	return api.ReportContent{
-		TalentContracts:                mergeFlags(old.TalentContracts, new.TalentContracts),
-		AssociationsWithDeniedEntities: mergeFlags(old.AssociationsWithDeniedEntities, new.AssociationsWithDeniedEntities),
-		HighRiskFunders:                mergeFlags(old.HighRiskFunders, new.HighRiskFunders),
-		AuthorAffiliations:             mergeFlags(old.AuthorAffiliations, new.AuthorAffiliations),
-		PotentialAuthorAffiliations:    mergeFlags(old.PotentialAuthorAffiliations, new.PotentialAuthorAffiliations),
-		MiscHighRiskAssociations:       mergeFlags(old.MiscHighRiskAssociations, new.MiscHighRiskAssociations),
-		CoauthorAffiliations:           mergeFlags(old.CoauthorAffiliations, new.CoauthorAffiliations),
-	}
 }
 
 func (r *ReportManager) UpdateReport(id uuid.UUID, status string, updateTime time.Time, updateContent api.ReportContent) error {
 	return r.db.Transaction(func(txn *gorm.DB) error {
-		var report schema.Report
+		var report schema.AuthorReport
 
-		if err := txn.Preload("Content").First(&report, "id = ?", id).Error; err != nil {
+		if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Preload("Flags").First(&report, "id = ?", id).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				slog.Error("cannot update status of report, report not found", "report_id", id, "status", status)
 				return ErrReportNotFound
@@ -284,19 +254,38 @@ func (r *ReportManager) UpdateReport(id uuid.UUID, status string, updateTime tim
 		if status == schema.ReportCompleted {
 			updates["last_updated_at"] = updateTime
 
-			oldContent, err := deserializeReportContent(report.Content.Content)
-			if err != nil {
-				return err
+			seen := make(map[string]bool)
+			for _, flag := range report.Flags {
+				seen[flag.FlagKey] = true
 			}
 
-			newContent, err := serializeReportContent(mergeContents(oldContent, updateContent))
-			if err != nil {
-				return err
+			newFlags := make([]schema.AuthorFlag, 0)
+			for _, flags := range updateContent {
+				for _, flag := range flags {
+					if key := flag.Key(); !seen[key] {
+						seen[key] = true
+
+						data, err := json.Marshal(flag)
+						if err != nil {
+							return fmt.Errorf("error serializing flag: %w", err)
+						}
+
+						newFlags = append(newFlags, schema.AuthorFlag{
+							Id:       uuid.New(),
+							ReportId: report.Id,
+							FlagType: flag.Type(),
+							FlagKey:  key,
+							Data:     data,
+						})
+					}
+				}
 			}
 
-			if err := txn.Save(&schema.ReportContent{ReportId: id, Content: newContent}).Error; err != nil {
-				slog.Error("error updating report content", "report_id", id, "error", err)
-				return ErrReportAccessFailed
+			if len(newFlags) > 0 {
+				if err := txn.Save(newFlags).Error; err != nil {
+					slog.Error("error adding new flags to report", "report_id", id, "error", err)
+					return ErrReportAccessFailed
+				}
 			}
 		}
 
@@ -308,23 +297,19 @@ func (r *ReportManager) UpdateReport(id uuid.UUID, status string, updateTime tim
 	})
 }
 
-func convertReport(report schema.UserReport) (api.Report, error) {
-	result := api.Report{
+func convertReport(report schema.UserAuthorReport) (api.Report, error) {
+	content, err := flagsToReportContent(report.Report.Flags)
+	if err != nil {
+		return api.Report{}, err
+	}
+
+	return api.Report{
 		Id:         report.Id,
 		CreatedAt:  report.CreatedAt,
 		AuthorId:   report.Report.AuthorId,
 		AuthorName: report.Report.AuthorName,
 		Source:     report.Report.Source,
 		Status:     report.Report.Status,
-	}
-
-	if report.Report.Content != nil {
-		content, err := deserializeReportContent(report.Report.Content.Content)
-		if err != nil {
-			return api.Report{}, ErrReportAccessFailed
-		}
-		result.Content = content
-	}
-
-	return result, nil
+		Content:    content,
+	}, nil
 }
