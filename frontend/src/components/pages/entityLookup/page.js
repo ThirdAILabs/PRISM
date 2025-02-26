@@ -31,7 +31,7 @@ function EntityLookup() {
 
   return (
     <div className="basic-setup" style={{ color: "white" }}>
-      <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
+      {/* <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
         <Link
           to="/"
           className="button"
@@ -45,7 +45,7 @@ function EntityLookup() {
         >
           Go To Individual Assessment
         </Link>
-      </div>
+      </div> */}
       <div style={{ textAlign: "center", marginTop: "5.5%", animation: "fade-in 0.75s" }}>
         <h1 style={{ fontWeight: "bold", marginTop: 20, animation: "fade-in 0.75s", color: 'black' }}>Entity Lookup</h1>
         <div style={{ animation: "fade-in 1s" }}>

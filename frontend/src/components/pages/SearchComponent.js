@@ -9,8 +9,11 @@ import "../common/tools/button/button1.css"
 import UserService from '../../services/userService';
 import { searchService } from '../../api/search';
 import { reportService } from '../../api/reports';
+import { FaBars } from 'react-icons/fa';
+import SidePanel from '../sidebar/SidePanel';
 
 const SearchComponent = () => {
+  // const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [author, setAuthor] = useState();
   const [hasSearched, setHasSearched] = useState(false);
@@ -93,39 +96,23 @@ const SearchComponent = () => {
 
   return (
     <div className='basic-setup' style={{ color: "black" }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        width: '100%',
-        padding: '20px',
-        position: 'relative'
-      }}>
-        <Link
-          to="/entity-lookup"
-          className="button"
-          style={{
-            padding: '10px 15px',
-            fontSize: '14px',
-            whiteSpace: 'nowrap',
-            textDecoration: 'none',
-            display: 'inline-block',
-            width: '25%'
-          }}
-        >
-          Go To Entity Lookup
-        </Link>
-        <button className="button"
-          style={{
-            padding: '10px 15px',
-            fontSize: '14px',
-            whiteSpace: 'nowrap',
-            textDecoration: 'none',
-            display: 'inline-block',
-            width: '10%'
-          }} onClick={UserService.doLogout}>Logout</button>
-      </div>
 
+      {/* <Link
+        to="/entity-lookup"
+        className="button"
+        style={{
+          padding: '10px 15px',
+          fontSize: '14px',
+          whiteSpace: 'nowrap',
+          textDecoration: 'none',
+          display: 'inline-block',
+          width: '25%'
+        }}
+      >
+        Go To Entity Lookup
+      </Link> */}
+      {/* <FaBars onClick={() => setIsSidePanelOpen(!isSidePanelOpen)} />
+      <SidePanel isOpen={isSidePanelOpen} onClose={() => setIsSidePanelOpen(false)} /> */}
       {/* <div style={{ textAlign: "center", marginTop: "12.5%", animation: "fade-in 0.75s" }}> */}
       <div style={{ textAlign: "center", marginTop: "5.5%", animation: "fade-in 0.75s" }}>
         <img src={Logo} style={{ width: "160px", marginTop: "0%", animation: "fade-in 0.5s" }} />
