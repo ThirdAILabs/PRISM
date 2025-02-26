@@ -284,7 +284,7 @@ func TestGetAuthor(t *testing.T) {
 func TestGetInstitutionAuthors(t *testing.T) {
 	oa := openalex.NewRemoteKnowledgeBase()
 
-	institutionId := "https://openalex.org/I74775410"
+	institutionId := "https://openalex.org/I74775410" // Rice university
 
 	startDate, endDate := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2023, 2, 1, 0, 0, 0, 0, time.UTC)
 	authors, err := oa.GetInstitutionAuthors(institutionId, startDate, endDate)

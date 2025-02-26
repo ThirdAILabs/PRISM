@@ -126,7 +126,7 @@ func (r *ReportManager) CreateAuthorReport(licenseId, userId uuid.UUID, authorId
 		usage := schema.LicenseUsage{
 			LicenseId:  licenseId,
 			ReportId:   userReport.Id,
-			ReportType: "author",
+			ReportType: schema.AuthorReportType,
 			UserId:     userId,
 			Timestamp:  time.Now().UTC(),
 		}
@@ -398,7 +398,7 @@ func (r *ReportManager) CreateUniversityReport(licenseId, userId uuid.UUID, univ
 		usage := schema.LicenseUsage{
 			LicenseId:  licenseId,
 			ReportId:   userReport.Id,
-			ReportType: "university",
+			ReportType: schema.UniversityReportType,
 			UserId:     userId,
 			Timestamp:  time.Now().UTC(),
 		}

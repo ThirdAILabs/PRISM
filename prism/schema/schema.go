@@ -85,6 +85,11 @@ type LicenseUser struct {
 	License *License `gorm:"foreignKey:LicenseId"`
 }
 
+const (
+	UniversityReportType = "university"
+	AuthorReportType     = "author"
+)
+
 type LicenseUsage struct {
 	LicenseId  uuid.UUID `gorm:"type:uuid;primaryKey"`
 	ReportId   uuid.UUID `gorm:"type:uuid;primaryKey"`
