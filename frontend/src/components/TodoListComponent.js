@@ -23,7 +23,6 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore }) => {
     }
   };
 
-
   return (
     <div className="d-flex flex-column align-items-center w-100 ">
       <>
@@ -35,18 +34,26 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore }) => {
                   <h5 className="m-0">{result.AuthorName}</h5>
                 </div>
                 <p className="m-0 p-0" style={{ fontSize: 'small' }}>
-                  <b>Affiliations: </b>{result.Institutions.join(', ')}
+                  <b>Affiliations: </b>
+                  {result.Institutions.join(', ')}
                 </p>
                 {result.Interests && result.Interests.length > 0 && (
                   <div>
-                    <p className="m-0 p-0 pt-1" style={{ fontSize: 'small' }}><b>Research Interests: </b>{result.Interests.slice(0, 3).join(", ")}</p>
+                    <p className="m-0 p-0 pt-1" style={{ fontSize: 'small' }}>
+                      <b>Research Interests: </b>
+                      {result.Interests.slice(0, 3).join(', ')}
+                    </p>
                   </div>
                 )}
               </div>
             </li>
           ))}
         </ul>
-        {canLoadMore && <button className="button" onClick={getMoreResults}>Show More</button>}
+        {canLoadMore && (
+          <button className="button" onClick={getMoreResults}>
+            Show More
+          </button>
+        )}
       </>
     </div>
   );

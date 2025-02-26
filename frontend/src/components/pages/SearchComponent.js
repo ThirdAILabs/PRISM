@@ -21,7 +21,6 @@ const SearchComponent = () => {
   const [loadMoreCount, setLoadMoreCount] = useState(0);
   const [canLoadMore, setCanLoadMore] = useState(true);
 
-
   const search = async (author, institution) => {
     searchOpenAlex(author, institution);
     // setIsLoadingScopus(true);
@@ -128,11 +127,20 @@ const SearchComponent = () => {
         </div>
       </div>
       {hasSearched && (
-        <TodoListComponent results={openAlexResults} setResults={setOpenAlexResults} canLoadMore={canLoadMore} loadMore={async () => {
-          const result = await searchService.searchGoogleScholarAuthors(author.AuthorName, institution.InstitutionName, null);
-          setCanLoadMore(false);
-          return result.Authors;
-        }} />
+        <TodoListComponent
+          results={openAlexResults}
+          setResults={setOpenAlexResults}
+          canLoadMore={canLoadMore}
+          loadMore={async () => {
+            const result = await searchService.searchGoogleScholarAuthors(
+              author.AuthorName,
+              institution.InstitutionName,
+              null
+            );
+            setCanLoadMore(false);
+            return result.Authors;
+          }}
+        />
       )}
     </div>
   );
