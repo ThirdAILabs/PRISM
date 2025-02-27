@@ -60,6 +60,11 @@ type WorkBatch struct {
 	Error           error
 }
 
+type InstitutionAuthor struct {
+	AuthorId   string
+	AuthorName string
+}
+
 type KnowledgeBase interface {
 	AutocompleteAuthor(query string) ([]Author, error)
 
@@ -72,4 +77,6 @@ type KnowledgeBase interface {
 	FindWorksByTitle(titles []string, startDate, endDate time.Time) ([]Work, error)
 
 	GetAuthor(authorId string) (Author, error)
+
+	GetInstitutionAuthors(institutionId string, startDate, endDate time.Time) ([]InstitutionAuthor, error)
 }

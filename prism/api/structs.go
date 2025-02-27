@@ -20,10 +20,15 @@ type Report struct {
 	Content ReportContent
 }
 
-type CreateReportRequest struct {
+type CreateAuthorReportRequest struct {
 	AuthorId   string
 	AuthorName string
 	Source     string
+}
+
+type CreateUniversityReportRequest struct {
+	UniversityId   string
+	UniversityName string
 }
 
 type CreateReportResponse struct {
@@ -36,6 +41,37 @@ const (
 	UnstructuredSource  = "unstructured"
 	ScopusSource        = "scopus"
 )
+
+type UniversityAuthorFlag struct {
+	AuthorId   string
+	AuthorName string
+	Source     string
+	FlagCount  int
+}
+
+type UniversityReportFlag struct {
+	Total   int
+	Authors []UniversityAuthorFlag
+}
+
+type UniversityReport struct {
+	Id uuid.UUID
+
+	CreatedAt time.Time
+
+	UniversityId   string
+	UniversityName string
+
+	Status string
+
+	Content UniversityReportContent
+}
+
+type UniversityReportContent struct {
+	TotalAuthors    int
+	AuthorsReviewed int
+	Flags           map[string][]UniversityAuthorFlag
+}
 
 type Author struct {
 	AuthorId          string

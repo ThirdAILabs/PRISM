@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	backendUrl = "http://localhost:3000"
+	backendUrl = "http://localhost"
 
-	keycloakUrl           = "http://localhost:8180"
+	keycloakUrl           = "http://localhost/keycloak"
 	keycloakAdminUsername = "kc-admin"
 	keycloakAdminPassword = "kc-admin-pwd"
 

@@ -240,9 +240,10 @@ type oaWorkAuthor struct {
 }
 
 type oaAuthorship struct {
-	Author        oaWorkAuthor    `json:"author"`
-	Institutions  []oaInstitution `json:"institutions"`
-	RawAuthorName string          `json:"raw_author_name"`
+	AuthorPosition string          `json:"author_position"`
+	Author         oaWorkAuthor    `json:"author"`
+	Institutions   []oaInstitution `json:"institutions"`
+	RawAuthorName  string          `json:"raw_author_name"`
 }
 
 type oaLocation struct {
@@ -434,4 +435,54 @@ func (oa *RemoteKnowledgeBase) GetAuthor(authorId string) (Author, error) {
 		RawAuthorName:           nil,
 		Institutions:            institutions,
 	}, nil
+}
+
+func (oa *RemoteKnowledgeBase) GetInstitutionAuthors(institutionId string, startDate, endDate time.Time) ([]InstitutionAuthor, error) {
+	filter := fmt.Sprintf("institutions.id:%s%s", institutionId, getYearFilter(startDate, endDate))
+	cursor := "*"
+
+	seen := make(map[string]bool)
+	authors := make([]InstitutionAuthor, 0)
+
+	for cursor != "" {
+		res, err := oa.client.R().
+			SetResult(&oaWorkResults{}).
+			SetQueryParam("filter", filter).
+			SetQueryParam("cursor", cursor).
+			SetQueryParam("per-page", "200").
+			Get("/works")
+
+		if err != nil {
+			slog.Error("openalex: get institution authors failed", "institution_id", institutionId, "error", err)
+			return nil, ErrSearchFailed
+		}
+
+		if !res.IsSuccess() {
+			slog.Error("openalex: get institution authors returned error", "status_code", res.StatusCode(), "body", res.String())
+			return nil, ErrSearchFailed
+		}
+
+		result := res.Result().(*oaWorkResults)
+
+		for _, work := range result.Results {
+			for _, author := range work.Authorships {
+				if author.AuthorPosition == "last" {
+					for _, inst := range author.Institutions {
+						if inst.Id == institutionId && !seen[author.Author.Id] {
+							seen[author.Author.Id] = true
+							authors = append(authors, InstitutionAuthor{
+								AuthorId:   author.Author.Id,
+								AuthorName: author.Author.DisplayName,
+							})
+							break
+						}
+					}
+				}
+			}
+		}
+
+		cursor = result.Meta.NextCursor
+	}
+
+	return authors, nil
 }

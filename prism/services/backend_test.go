@@ -72,8 +72,9 @@ func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 	}
 
 	if err := db.AutoMigrate(
-		&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{}, &schema.License{},
-		&schema.LicenseUser{}, &schema.LicenseUsage{},
+		&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{},
+		&schema.UniversityReport{}, &schema.UserUniversityReport{},
+		&schema.License{}, &schema.LicenseUser{}, &schema.LicenseUsage{},
 	); err != nil {
 		t.Fatal(err)
 	}
@@ -160,20 +161,14 @@ func compareReport(t *testing.T, report api.Report, expected string) {
 	}
 }
 
-func checkListReports(t *testing.T, backend http.Handler, user string, expected []string) {
+func checkListAuthorReports(t *testing.T, backend http.Handler, user string, expected []string) {
 	var reports []api.Report
-	if err := Get(backend, "/report/list", user, &reports); err != nil {
+	if err := Get(backend, "/report/author/list", user, &reports); err != nil {
 		t.Fatal(err)
 	}
 
 	slices.SortFunc(reports, func(a, b api.Report) int {
-		if a.AuthorId < b.AuthorId {
-			return -1
-		}
-		if a.AuthorId > b.AuthorId {
-			return 1
-		}
-		return 0
+		return strings.Compare(a.AuthorId, b.AuthorId)
 	})
 
 	slices.Sort(expected)
@@ -186,22 +181,71 @@ func checkListReports(t *testing.T, backend http.Handler, user string, expected 
 	}
 }
 
-func getReport(backend http.Handler, user string, id uuid.UUID) (api.Report, error) {
+func getAuthorReport(backend http.Handler, user string, id uuid.UUID) (api.Report, error) {
 	var res api.Report
-	err := Get(backend, "/report/"+id.String(), user, &res)
+	err := Get(backend, "/report/author/"+id.String(), user, &res)
 	return res, err
 }
 
-func createReport(backend http.Handler, user, name string) (api.CreateReportResponse, error) {
-	req := api.CreateReportRequest{
+func createAuthorReport(backend http.Handler, user, name string) (api.CreateReportResponse, error) {
+	req := api.CreateAuthorReportRequest{
 		AuthorId:   name + "-id",
 		AuthorName: name + "-name",
 		Source:     api.OpenAlexSource,
 	}
 
 	var res api.CreateReportResponse
-	err := Post(backend, "/report/create", user, req, &res)
+	err := Post(backend, "/report/author/create", user, req, &res)
 	return res, err
+}
+
+func deleteAuthorReport(backend http.Handler, user string, id uuid.UUID) error {
+	return Delete(backend, "/report/author/"+id.String(), user)
+}
+
+func checkListUniversityReports(t *testing.T, backend http.Handler, user string, expected []string) {
+	var reports []api.UniversityReport
+	if err := Get(backend, "/report/university/list", user, &reports); err != nil {
+		t.Fatal(err)
+	}
+
+	slices.SortFunc(reports, func(a, b api.UniversityReport) int {
+		return strings.Compare(a.UniversityId, b.UniversityId)
+	})
+
+	slices.Sort(expected)
+
+	if len(reports) != len(expected) {
+		t.Fatal("incorrect number of reports returned")
+	}
+	for i := range expected {
+		if reports[i].UniversityId != expected[i]+"-id" ||
+			reports[i].UniversityName != expected[i]+"-name" ||
+			reports[i].Status != "complete" {
+			t.Fatalf("invalid reports returned: %+v, %s", reports[i], expected[i])
+		}
+	}
+}
+
+func getUniversityReport(backend http.Handler, user string, id uuid.UUID) (api.UniversityReport, error) {
+	var res api.UniversityReport
+	err := Get(backend, "/report/university/"+id.String(), user, &res)
+	return res, err
+}
+
+func createUniversityReport(backend http.Handler, user, name string) (api.CreateReportResponse, error) {
+	req := api.CreateUniversityReportRequest{
+		UniversityId:   name + "-id",
+		UniversityName: name + "-name",
+	}
+
+	var res api.CreateReportResponse
+	err := Post(backend, "/report/university/create", user, req, &res)
+	return res, err
+}
+
+func deleteUniversityReport(backend http.Handler, user string, id uuid.UUID) error {
+	return Delete(backend, "/report/university/"+id.String(), user)
 }
 
 func createLicense(backend http.Handler, name, user string) (api.CreateLicenseResponse, error) {
@@ -296,7 +340,7 @@ func TestLicenseEndpoints(t *testing.T) {
 		t.Fatal("cannot use deactivated license")
 	}
 
-	if _, err := createReport(backend, user1, "report1"); err != nil {
+	if _, err := createAuthorReport(backend, user1, "report1"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -304,7 +348,7 @@ func TestLicenseEndpoints(t *testing.T) {
 		t.Fatal("users cannot deactivate licenses")
 	}
 
-	if _, err := createReport(backend, user1, "report1"); err != nil {
+	if _, err := createAuthorReport(backend, user1, "report1"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -312,7 +356,7 @@ func TestLicenseEndpoints(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := createReport(backend, user1, "report1"); err == nil || !strings.Contains(err.Error(), "license is deactivated") {
+	if _, err := createAuthorReport(backend, user1, "report1"); err == nil || !strings.Contains(err.Error(), "license is deactivated") {
 		t.Fatal("cannot use deactivated license")
 	}
 }
@@ -333,7 +377,7 @@ func TestCheckDisclosure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	reportResp, err := createReport(backend, user, "disclosure-report")
+	reportResp, err := createAuthorReport(backend, user, "disclosure-report")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -369,7 +413,7 @@ func TestCheckDisclosure(t *testing.T) {
 		},
 	}
 
-	nextReport, err := manager.GetNextReport()
+	nextReport, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -377,7 +421,7 @@ func TestCheckDisclosure(t *testing.T) {
 		t.Fatal("next report should not be nil")
 	}
 
-	if err := manager.UpdateReport(nextReport.Id, schema.ReportCompleted, time.Now(), content); err != nil {
+	if err := manager.UpdateAuthorReport(nextReport.Id, schema.ReportCompleted, time.Now(), content); err != nil {
 		t.Fatal(err)
 	}
 
@@ -393,7 +437,7 @@ func TestCheckDisclosure(t *testing.T) {
 	}
 	writer.Close()
 
-	endpoint := fmt.Sprintf("/report/%s/check-disclosure", reportResp.Id.String())
+	endpoint := fmt.Sprintf("/report/author/%s/check-disclosure", reportResp.Id.String())
 	req := httptest.NewRequest("POST", endpoint, &buf)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Add("Authorization", "Bearer "+user)
@@ -443,7 +487,7 @@ func TestDownloadReportAllFormats(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	reportResp, err := createReport(backend, user, "download-report")
+	reportResp, err := createAuthorReport(backend, user, "download-report")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -467,7 +511,7 @@ func TestDownloadReportAllFormats(t *testing.T) {
 		},
 	}
 
-	nextReport, err := manager.GetNextReport()
+	nextReport, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -475,13 +519,13 @@ func TestDownloadReportAllFormats(t *testing.T) {
 		t.Fatal("next report should not be nil")
 	}
 
-	if err := manager.UpdateReport(nextReport.Id, schema.ReportCompleted, time.Now(), content); err != nil {
+	if err := manager.UpdateAuthorReport(nextReport.Id, schema.ReportCompleted, time.Now(), content); err != nil {
 		t.Fatal(err)
 	}
 
 	formats := []string{"csv", "pdf", "excel"}
 	for _, format := range formats {
-		endpoint := fmt.Sprintf("/report/%s/download?format=%s", reportResp.Id.String(), format)
+		endpoint := fmt.Sprintf("/report/author/%s/download?format=%s", reportResp.Id.String(), format)
 		req := httptest.NewRequest("GET", endpoint, nil)
 		req.Header.Add("Authorization", "Bearer "+user)
 		w := httptest.NewRecorder()
@@ -585,13 +629,13 @@ func TestLicenseExpiration(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := createReport(backend, user1, "report1"); err != nil {
+	if _, err := createAuthorReport(backend, user1, "report1"); err != nil {
 		t.Fatal(err)
 	}
 
 	time.Sleep(500 * time.Millisecond)
 
-	if _, err := createReport(backend, user1, "report1"); err == nil || !strings.Contains(err.Error(), "expired license") {
+	if _, err := createAuthorReport(backend, user1, "report1"); err == nil || !strings.Contains(err.Error(), "expired license") {
 		t.Fatal(err)
 	}
 
@@ -632,21 +676,21 @@ func TestLicenseInvalidLicense(t *testing.T) {
 	}
 }
 
-func TestReportEndpoints(t *testing.T) {
+func TestAuthorReportEndpoints(t *testing.T) {
 	backend, _ := createBackend(t)
 
 	admin := newAdmin()
 	user1, user2 := newUser(), newUser()
 
-	checkListReports(t, backend, user1, []string{})
-	checkListReports(t, backend, user2, []string{})
+	checkListAuthorReports(t, backend, user1, []string{})
+	checkListAuthorReports(t, backend, user2, []string{})
 
 	license, err := createLicense(backend, "test-license", admin)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := createReport(backend, user1, "report1"); err == nil || !strings.Contains(err.Error(), "user does not have registered license") {
+	if _, err := createAuthorReport(backend, user1, "report1"); err == nil || !strings.Contains(err.Error(), "user does not have registered license") {
 		t.Fatalf("report should fail %v", err)
 	}
 
@@ -657,35 +701,122 @@ func TestReportEndpoints(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	report, err := createReport(backend, user1, "report1")
+	report, err := createAuthorReport(backend, user1, "report1")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	checkListReports(t, backend, user1, []string{"report1"})
-	checkListReports(t, backend, user2, []string{})
+	checkListAuthorReports(t, backend, user1, []string{"report1"})
+	checkListAuthorReports(t, backend, user2, []string{})
 
-	if _, err := getReport(backend, user2, report.Id); !errors.Is(err, ErrUnauthorized) {
+	if _, err := getAuthorReport(backend, user2, report.Id); !errors.Is(err, ErrUnauthorized) {
 		t.Fatalf("should be unauthorized: %v", err)
 	}
 
-	reportData, err := getReport(backend, user1, report.Id)
+	reportData, err := getAuthorReport(backend, user1, report.Id)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	compareReport(t, reportData, "report1")
 
-	if _, err := createReport(backend, user2, "report2"); err != nil {
+	if _, err := createAuthorReport(backend, user2, "report2"); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := createReport(backend, user1, "report3"); err != nil {
+	if _, err := createAuthorReport(backend, user1, "report3"); err != nil {
 		t.Fatal(err)
 	}
 
-	checkListReports(t, backend, user1, []string{"report1", "report3"})
-	checkListReports(t, backend, user2, []string{"report2"})
+	checkListAuthorReports(t, backend, user1, []string{"report1", "report3"})
+	checkListAuthorReports(t, backend, user2, []string{"report2"})
+
+	if err := deleteAuthorReport(backend, user2, report.Id); err == nil || !strings.Contains(err.Error(), "report not found") {
+		t.Fatal(err)
+	}
+
+	checkListAuthorReports(t, backend, user1, []string{"report1", "report3"})
+	checkListAuthorReports(t, backend, user2, []string{"report2"})
+
+	if err := deleteAuthorReport(backend, user1, report.Id); err != nil {
+		t.Fatal(err)
+	}
+
+	checkListAuthorReports(t, backend, user1, []string{"report3"})
+	checkListAuthorReports(t, backend, user2, []string{"report2"})
+}
+
+func TestUniversityReportEndpoints(t *testing.T) {
+	backend, db := createBackend(t)
+	manager := reports.NewManager(db, reports.StaleReportThreshold)
+
+	admin := newAdmin()
+	user1, user2 := newUser(), newUser()
+
+	license, err := createLicense(backend, "test-license", admin)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := activateLicense(backend, user1, license.License); err != nil {
+		t.Fatal(err)
+	}
+
+	uniReportId, err := createUniversityReport(backend, user1, "uni-report1")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nextUniReport, err := manager.GetNextUniversityReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if nextUniReport == nil {
+		t.Fatal("next report should not be nil")
+	}
+
+	if err := manager.UpdateUniversityReport(nextUniReport.Id, schema.ReportCompleted, nextUniReport.UpdateDate, []reports.UniversityAuthorReport{
+		{AuthorId: "1", AuthorName: "author1", Source: api.OpenAlexSource},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	nextAuthorReport, err := manager.GetNextAuthorReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := manager.UpdateAuthorReport(nextAuthorReport.Id, schema.ReportCompleted, time.Now(), api.ReportContent{
+		api.HighRiskFunderType: []api.Flag{&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: "abc", PublicationDate: time.Now()}}},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	uniReport, err := getUniversityReport(backend, user1, uniReportId.Id)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if uniReport.UniversityId != "uni-report1-id" || uniReport.UniversityName != "uni-report1-name" || uniReport.Status != "complete" || len(uniReport.Content.Flags[api.HighRiskFunderType]) != 1 {
+		t.Fatal("invalid university report returned")
+	}
+
+	if _, err := getUniversityReport(backend, user2, uniReportId.Id); err == nil || !strings.Contains(err.Error(), "user cannot access report") {
+		t.Fatal(err)
+	}
+
+	checkListUniversityReports(t, backend, user1, []string{"uni-report1"})
+
+	if err := deleteUniversityReport(backend, user2, uniReport.Id); err == nil || !strings.Contains(err.Error(), "report not found") {
+		t.Fatal(err)
+	}
+	checkListUniversityReports(t, backend, user1, []string{"uni-report1"})
+
+	if err := deleteUniversityReport(backend, user1, uniReport.Id); err != nil {
+		t.Fatal(err)
+	}
+
+	checkListUniversityReports(t, backend, user1, []string{})
 }
 
 func TestAutocompleteAuthor(t *testing.T) {

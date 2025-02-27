@@ -44,7 +44,8 @@ const SearchComponent = () => {
 
     const result = await searchService.searchOpenalexAuthors(
       author.AuthorName,
-      institution.InstitutionId
+      institution.InstitutionId,
+      institution.InstitutionName
     );
     console.log('result in openAlex', result);
     setOpenAlexResults(result);
