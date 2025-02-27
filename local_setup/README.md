@@ -204,6 +204,14 @@ go run cmd/backend/main.go --config "./cmd/backend/config.yaml"
 <br>
 
 <details>
+<summary><h2 style="display: inline;">Setup Grobid</h2></summary>
+  <br>
+
+  Run the command ```docker run --rm --init --ulimit core=0 -p 8070:8070 grobid/grobid:0.8.0```. This will start Grobid on port ```8070```.
+</details>
+<br>
+
+<details>
   <summary><h2 style="display: inline;">Start the worker</h2></summary>
   <br>
 
@@ -233,7 +241,7 @@ ndb_data:
   aux: "<path to PRISM/data/auxiliary_webpages.json>"
 
 # Endpoint for grobid
-grobid_endpoint: "http://70.233.60.118:8070/" # for local setup
+grobid_endpoint: "http://localhost:8070/" # for local setup
   ```
 
   3. Start the worker:
