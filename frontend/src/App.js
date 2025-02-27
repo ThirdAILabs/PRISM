@@ -9,7 +9,7 @@ import { FaBars } from 'react-icons/fa';
 import SidePanel from './components/sidebar/SidePanel';
 import UniversityAssessment from './components/pages/UniversityAssessment';
 import { useLocation } from 'react-router-dom';
-
+import Error from './components/pages/Error';
 //CSS
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.js';
@@ -61,6 +61,7 @@ function AppContent() {
         <Route path="/report/:report_id" element={<ItemDetails />} />
         <Route path="/entity-lookup" element={<EntityLookup />} />
         <Route path="/university-assessment" element={<UniversityAssessment />} />
+        <Route path="/error" element={<Error />} />
       </Routes>
     </div>
   );

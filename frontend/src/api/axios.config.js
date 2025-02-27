@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { prismBaseUrl } from './constants';
 import UserService from '../services/userService';
+
 const axiosInstance = axios.create({
   baseURL: prismBaseUrl,
   headers: {
@@ -17,6 +18,15 @@ axiosInstance.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const errorMessage = error.response?.data?.message || error.message || 'An unexpected error occurred';
+    window.location.href = `/error?message=${encodeURIComponent(errorMessage)}`;
     return Promise.reject(error);
   }
 );
