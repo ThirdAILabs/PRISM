@@ -238,7 +238,7 @@ func TestAuthorReportAccessErrors(t *testing.T) {
 	}
 }
 
-func TestListReports(t *testing.T) {
+func TestListAuthorReports(t *testing.T) {
 	manager := setup(t)
 
 	user1, user2 := uuid.New(), uuid.New()
@@ -275,10 +275,10 @@ func TestListReports(t *testing.T) {
 		t.Fatal("should be 2 reports")
 	}
 
-	if reports1[0].Id != report1 || reports1[1].Id != report3 ||
-		reports1[0].AuthorId != "1" || reports1[1].AuthorId != "3" ||
-		reports1[0].AuthorName != "author1" || reports1[1].AuthorName != "author3" ||
-		reports1[0].Source != api.OpenAlexSource || reports1[1].Source != api.GoogleScholarSource ||
+	if reports1[0].Id != report3 || reports1[1].Id != report1 ||
+		reports1[0].AuthorId != "3" || reports1[1].AuthorId != "1" ||
+		reports1[0].AuthorName != "author3" || reports1[1].AuthorName != "author1" ||
+		reports1[0].Source != api.GoogleScholarSource || reports1[1].Source != api.OpenAlexSource ||
 		reports1[0].Status != "queued" || reports1[1].Status != "queued" {
 		t.Fatal("incorrect reports")
 	}
@@ -312,6 +312,10 @@ func TestListReports(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if err := manager.DeleteAuthorReport(user2, report1); err != reports.ErrReportNotFound {
+		t.Fatal("user cannot delete another user's report")
+	}
+
 	reports1, err = manager.ListAuthorReports(user1)
 	if err != nil {
 		t.Fatal(err)
@@ -320,13 +324,34 @@ func TestListReports(t *testing.T) {
 		t.Fatal("should be 2 reports")
 	}
 
-	if reports1[0].Id != report1 || reports1[1].Id != report3 ||
-		reports1[0].AuthorId != "1" || reports1[1].AuthorId != "3" ||
-		reports1[0].AuthorName != "author1" || reports1[1].AuthorName != "author3" ||
-		reports1[0].Source != "openalex" || reports1[1].Source != "google-scholar" ||
-		reports1[0].Status != "complete" || reports1[1].Status != "queued" {
+	if reports1[0].Id != report3 || reports1[1].Id != report1 ||
+		reports1[0].AuthorId != "3" || reports1[1].AuthorId != "1" ||
+		reports1[0].AuthorName != "author3" || reports1[1].AuthorName != "author1" ||
+		reports1[0].Source != api.GoogleScholarSource || reports1[1].Source != api.OpenAlexSource ||
+		reports1[0].Status != "queued" || reports1[1].Status != "complete" {
 		t.Fatal("incorrect reports")
 	}
+
+	if err := manager.DeleteAuthorReport(user1, report1); err != nil {
+		t.Fatal(err)
+	}
+
+	reports1, err = manager.ListAuthorReports(user1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(reports1) != 1 {
+		t.Fatal("should be 1 report")
+	}
+
+	if reports1[0].Id != report3 ||
+		reports1[0].AuthorId != "3" ||
+		reports1[0].AuthorName != "author3" ||
+		reports1[0].Source != api.GoogleScholarSource ||
+		reports1[0].Status != "queued" {
+		t.Fatal("incorrect reports")
+	}
+
 }
 
 func checkNextUniversityReport(t *testing.T, next *reports.UniversityReportUpdateTask, universityId, universityName string, updateDate time.Time) {
@@ -640,11 +665,11 @@ func TestListUniversityReport(t *testing.T) {
 		t.Fatal("should be 2 reports")
 	}
 
-	if reports1[0].Id != uniId1 || reports1[1].Id != uniId3 ||
-		reports1[0].UniversityId != "1" || reports1[1].UniversityId != "3" ||
-		reports1[0].UniversityName != "university1" || reports1[1].UniversityName != "university3" ||
+	if reports1[0].Id != uniId3 || reports1[1].Id != uniId1 ||
+		reports1[0].UniversityId != "3" || reports1[1].UniversityId != "1" ||
+		reports1[0].UniversityName != "university3" || reports1[1].UniversityName != "university1" ||
 		reports1[0].Status != "queued" || reports1[1].Status != "queued" {
-		t.Fatal("incorrect reports")
+		t.Fatalf("incorrect reports: %+v", reports1)
 	}
 
 	reports2, err := manager.ListUniversityReports(user2)
@@ -660,5 +685,43 @@ func TestListUniversityReport(t *testing.T) {
 		reports2[0].UniversityName != "university2" ||
 		reports2[0].Status != "queued" {
 		t.Fatal("incorrect report")
+	}
+
+	if err := manager.DeleteUniversityReport(user2, uniId3); err != reports.ErrReportNotFound {
+		t.Fatal("user cannot delete another user report")
+	}
+
+	reportsAfterInvalidDelete, err := manager.ListUniversityReports(user1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(reportsAfterInvalidDelete) != 2 {
+		t.Fatal("should be 2 reports")
+	}
+
+	if reportsAfterInvalidDelete[0].Id != uniId3 || reportsAfterInvalidDelete[1].Id != uniId1 ||
+		reportsAfterInvalidDelete[0].UniversityId != "3" || reportsAfterInvalidDelete[1].UniversityId != "1" ||
+		reportsAfterInvalidDelete[0].UniversityName != "university3" || reportsAfterInvalidDelete[1].UniversityName != "university1" ||
+		reportsAfterInvalidDelete[0].Status != "queued" || reportsAfterInvalidDelete[1].Status != "queued" {
+		t.Fatalf("incorrect reports: %+v", reports1)
+	}
+
+	if err := manager.DeleteUniversityReport(user1, uniId3); err != nil {
+		t.Fatal(err)
+	}
+
+	reportsAfterDelete, err := manager.ListUniversityReports(user1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(reportsAfterDelete) != 1 {
+		t.Fatal("should be 1 report")
+	}
+
+	if reportsAfterDelete[0].Id != uniId1 ||
+		reportsAfterDelete[0].UniversityId != "1" ||
+		reportsAfterDelete[0].UniversityName != "university1" ||
+		reportsAfterDelete[0].Status != "queued" {
+		t.Fatal("incorrect reports")
 	}
 }
