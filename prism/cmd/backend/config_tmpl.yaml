@@ -1,7 +1,7 @@
 # Uri for postgres db
-postgres_uri: ""
+postgres_uri: "postgresql://<username>:<password>@<host | localhost>:<port | 5432>/prism"
 
-# Path to the searchable_entities.json that contains the entities that we can search 
+# Path to the searchable_entities.json that contains the entities that we can search
 # in the match endpoint
 searchable_entities: ""
 
@@ -16,7 +16,7 @@ keycloak:
     verbose: false
 
 # Port to run backend server on
-port: 3000
+port: 8000
 
 # Logfile for backend
 logfile: "./prism_backend.log"

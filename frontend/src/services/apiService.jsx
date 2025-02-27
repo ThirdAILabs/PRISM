@@ -1,15 +1,8 @@
 // src/api/apiService.jsx
 import axios from 'axios';
 
-let API_BASE_URL;
-if (process.env.REACT_APP_BACKEND_ORIGIN === 'match') {
-  API_BASE_URL = window.location.origin.replace(
-    ':' + window.location.port,
-    ':' + process.env.REACT_APP_BACKEND_PORT
-  );
-} else {
-  API_BASE_URL = process.env.REACT_APP_BACKEND_ORIGIN;
-}
+let API_BASE_URL = window.location.origin;
+
 console.log(API_BASE_URL);
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
