@@ -479,7 +479,7 @@ func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.Uni
 			Select("author_reports.author_name, author_reports.author_id, author_reports.source, author_flags.flag_type, count(*) as count").
 			Joins("JOIN author_reports ON author_flags.report_id = author_reports.id").
 			Joins("JOIN university_authors ON author_reports.id = university_authors.author_report_id AND university_authors.university_report_id = ?", report.ReportId).
-			Where("author_flags.date IS NULL OR author_flags.date > ?", time.Now().AddDate(-5, 0, 0)).
+			Where("author_flags.date IS NULL OR author_flags.date > ?", time.Now().AddDate(-yearsInUniversityReport, 0, 0)).
 			Group("author_reports.id, author_flags.flag_type").
 			Find(&flags).Error; err != nil {
 			slog.Error("error querying flags for author reports linked to university report", "university_report_id", reportId, "error", err)
