@@ -1055,12 +1055,13 @@ const ItemDetails = () => {
             }}
           >
             {FLAG_ORDER.map((flag, index) => {
+              const flagCount = reportContent[flag] ? reportContent[flag].length : 0;
               return (
                 <ConcernVisualizer
                   title={TitlesAndDescriptions[flag].title}
                   hoverText={TitlesAndDescriptions[flag].desc}
-                  value={reportContent[flag] ? reportContent[flag].length : 0}
-                  onReview={() => setReview(flag)}
+                  value={flagCount}
+                  onReview={flagCount > 0 ? () => setReview(flag) : undefined}
                   key={index}
                 />
               );
