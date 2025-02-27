@@ -133,6 +133,9 @@ const SearchComponent = () => {
           setResults={setOpenAlexResults}
           canLoadMore={canLoadMore}
           loadMore={async () => {
+            if (!canLoadMore) {
+              return [];
+            }
             const result = await searchService.searchGoogleScholarAuthors(
               author.AuthorName,
               institution.InstitutionName,
