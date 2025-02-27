@@ -568,7 +568,7 @@ func (r *ReportManager) queueAuthorReportUpdatesForUniversityReport(txn *gorm.DB
 	staleCutoff := time.Now().UTC().Add(-r.staleReportThreshold)
 
 	result := txn.Model(&schema.AuthorReport{}).
-		Where("EXISTS (?)", txn.Table("university_authors").Where("university_authors.author_report_id == author_reports.id AND university_authors.university_report_id = ?", universityReportId)).
+		Where("EXISTS (?)", txn.Table("university_authors").Where("university_authors.author_report_id = author_reports.id AND university_authors.university_report_id = ?", universityReportId)).
 		Where("author_reports.last_updated_at < ?", staleCutoff).
 		Where("author_reports.status IN ?", []string{schema.ReportFailed, schema.ReportCompleted}).
 		Updates(map[string]any{"status": schema.ReportQueued, "queued_at": time.Now()})
