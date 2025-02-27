@@ -1,6 +1,7 @@
 package reports
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -41,7 +42,7 @@ func NewManager(db *gorm.DB, staleReportThreshold time.Duration) *ReportManager 
 func (r *ReportManager) ListAuthorReports(userId uuid.UUID) ([]api.Report, error) {
 	var reports []schema.UserAuthorReport
 
-	if err := r.db.Preload("Report").Order("created_at ASC").Find(&reports, "user_id = ?", userId).Error; err != nil {
+	if err := r.db.Preload("Report").Order("created_at DESC").Find(&reports, "user_id = ?", userId).Error; err != nil {
 		slog.Error("error finding list of reports ")
 		return nil, ErrReportAccessFailed
 	}
@@ -179,6 +180,18 @@ func (r *ReportManager) GetAuthorReport(userId, reportId uuid.UUID) (api.Report,
 	return convertReport(report)
 }
 
+func (r *ReportManager) DeleteAuthorReport(userId, reportId uuid.UUID) error {
+	result := r.db.Delete(&schema.UserAuthorReport{}, "id = ? AND user_id = ?", reportId, userId)
+	if result.Error != nil {
+		slog.Error("error deleting author report", "author_report_id", reportId, "error", result.Error)
+		return ErrReportAccessFailed
+	}
+	if result.RowsAffected != 1 {
+		return ErrReportNotFound
+	}
+	return nil
+}
+
 type ReportUpdateTask struct {
 	Id         uuid.UUID
 	AuthorId   string
@@ -296,11 +309,13 @@ func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTi
 							return fmt.Errorf("error serializing flag: %w", err)
 						}
 
+						date, dateValid := flag.Date()
 						newFlags = append(newFlags, schema.AuthorFlag{
 							Id:       uuid.New(),
 							ReportId: report.Id,
 							FlagType: flag.Type(),
 							FlagKey:  key,
+							Date:     sql.NullTime{Time: date, Valid: dateValid},
 							Data:     data,
 						})
 					}
@@ -343,7 +358,7 @@ func convertReport(report schema.UserAuthorReport) (api.Report, error) {
 func (r *ReportManager) ListUniversityReports(userId uuid.UUID) ([]api.UniversityReport, error) {
 	var reports []schema.UserUniversityReport
 
-	if err := r.db.Preload("Report").Order("created_at ASC").Find(&reports, "user_id = ?", userId).Error; err != nil {
+	if err := r.db.Preload("Report").Order("created_at DESC").Find(&reports, "user_id = ?", userId).Error; err != nil {
 		slog.Error("error finding list of reports ")
 		return nil, ErrReportAccessFailed
 	}
@@ -434,6 +449,11 @@ func (r *ReportManager) CreateUniversityReport(licenseId, userId uuid.UUID, univ
 	return userReportId, nil
 }
 
+const (
+	// The last N years of flags that will be added to the university report.
+	yearsInUniversityReport = 5
+)
+
 func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.UniversityReport, error) {
 	type universityAuthorFlags struct {
 		AuthorName string
@@ -488,6 +508,7 @@ func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.Uni
 			Select("author_reports.author_name, author_reports.author_id, author_reports.source, author_flags.flag_type, count(*) as count").
 			Joins("JOIN author_reports ON author_flags.report_id = author_reports.id").
 			Joins("JOIN university_authors ON author_reports.id = university_authors.author_report_id AND university_authors.university_report_id = ?", report.ReportId).
+			Where("author_flags.date IS NULL OR author_flags.date > ?", time.Now().AddDate(-yearsInUniversityReport, 0, 0)).
 			Group("author_reports.id, author_flags.flag_type").
 			Find(&flags).Error; err != nil {
 			slog.Error("error querying flags for author reports linked to university report", "university_report_id", reportId, "error", err)
@@ -521,6 +542,18 @@ func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.Uni
 	}
 
 	return convertUniversityReport(report, content), nil
+}
+
+func (r *ReportManager) DeleteUniversityReport(userId, reportId uuid.UUID) error {
+	result := r.db.Delete(&schema.UserUniversityReport{}, "id = ? AND user_id = ?", reportId, userId)
+	if result.Error != nil {
+		slog.Error("error deleting university report", "university_report_id", reportId, "error", result.Error)
+		return ErrReportAccessFailed
+	}
+	if result.RowsAffected != 1 {
+		return ErrReportNotFound
+	}
+	return nil
 }
 
 type UniversityReportUpdateTask struct {
@@ -575,24 +608,18 @@ func (r *ReportManager) GetNextUniversityReport() (*UniversityReportUpdateTask, 
 func (r *ReportManager) queueAuthorReportUpdatesForUniversityReport(txn *gorm.DB, universityReportId uuid.UUID) error {
 	staleCutoff := time.Now().UTC().Add(-r.staleReportThreshold)
 
-	var staleAuthorReports []schema.AuthorReport
-	if err := txn.Model(&schema.AuthorReport{}).
-		Joins("JOIN university_authors ON university_authors.author_report_id == author_reports.id AND university_authors.university_report_id = ?", universityReportId).
+	result := txn.Model(&schema.AuthorReport{}).
+		Where("EXISTS (?)", txn.Table("university_authors").Where("university_authors.author_report_id = author_reports.id AND university_authors.university_report_id = ?", universityReportId)).
 		Where("author_reports.last_updated_at < ?", staleCutoff).
 		Where("author_reports.status IN ?", []string{schema.ReportFailed, schema.ReportCompleted}).
-		Find(&staleAuthorReports).Error; err != nil {
-		slog.Error("error finding stale author reports for university report", "university_report_id", universityReportId, "error", err)
+		Updates(map[string]any{"status": schema.ReportQueued, "queued_at": time.Now()})
+
+	if result.Error != nil {
+		slog.Error("error queueing stale author reports for university report", "university_report_id", universityReportId, "error", result.Error)
 		return ErrReportAccessFailed
 	}
 
-	for _, author := range staleAuthorReports {
-		if err := txn.Model(author).Updates(map[string]any{"status": schema.ReportQueued, "queued_at": time.Now()}).Error; err != nil {
-			slog.Error("error queueing stale author reports for university report", "author_report_id", author.Id, "university_report_id", universityReportId, "error", err)
-			return ErrReportAccessFailed
-		}
-	}
-
-	slog.Info("queued updates for author reports for university report", "n_author_reports", len(staleAuthorReports), "university_report_id", universityReportId)
+	slog.Info("queued updates for author reports for university report", "n_author_reports", result.RowsAffected, "university_report_id", universityReportId)
 	return nil
 }
 
