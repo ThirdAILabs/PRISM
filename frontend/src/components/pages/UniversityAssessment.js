@@ -44,10 +44,9 @@ function UniversityAssessment() {
       UniversityName: institution.InstitutionName,
     };
     const reportId = await universityReportService.createReport(reportData);
-    console.log("University report id: ", reportId);
+    console.log('University report id: ', reportId);
     navigate(`report/${reportId.Id}`);
-  }
-
+  };
 
   return (
     <div className="basic-setup" style={{ color: 'white' }}>
@@ -65,7 +64,8 @@ function UniversityAssessment() {
         <div style={{ animation: 'fade-in 1s' }}>
           <div className="d-flex justify-content-center align-items-center">
             <div style={{ marginTop: 10, color: '#888888' }}>
-              We help you comply with research security requirements by automating university assessments.
+              We help you comply with research security requirements by automating university
+              assessments.
             </div>
           </div>
           <div className="d-flex justify-content-center align-items-center">
@@ -87,8 +87,7 @@ function UniversityAssessment() {
                 </div>
                 <div style={{ width: '10px' }} />
                 <div style={{ width: '200px' }}>
-                  <button className="button"
-                    onClick={handleSearch}>
+                  <button className="button" onClick={handleSearch}>
                     {isLoading ? 'Searching...' : 'Search'}
                   </button>
                 </div>
@@ -102,4 +101,3 @@ function UniversityAssessment() {
 }
 
 export default UniversityAssessment;
-

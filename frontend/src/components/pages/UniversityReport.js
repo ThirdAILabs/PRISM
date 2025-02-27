@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-    TALENT_CONTRACTS,
-    ASSOCIATIONS_WITH_DENIED_ENTITIES,
-    HIGH_RISK_FUNDERS,
-    AUTHOR_AFFILIATIONS,
-    POTENTIAL_AUTHOR_AFFILIATIONS,
-    MISC_HIGH_RISK_AFFILIATIONS,
-    COAUTHOR_AFFILIATIONS,
+  TALENT_CONTRACTS,
+  ASSOCIATIONS_WITH_DENIED_ENTITIES,
+  HIGH_RISK_FUNDERS,
+  AUTHOR_AFFILIATIONS,
+  POTENTIAL_AUTHOR_AFFILIATIONS,
+  MISC_HIGH_RISK_AFFILIATIONS,
+  COAUTHOR_AFFILIATIONS,
 } from '../../constants/constants.js';
 import ConcernVisualizer from '../ConcernVisualization.js';
 
@@ -15,146 +15,140 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider } fr
 import { universityReportService } from '../../api/universityReports.js';
 import styled from 'styled-components';
 
-
 const FLAG_ORDER = [
-    TALENT_CONTRACTS,
-    ASSOCIATIONS_WITH_DENIED_ENTITIES,
-    HIGH_RISK_FUNDERS,
-    AUTHOR_AFFILIATIONS,
-    POTENTIAL_AUTHOR_AFFILIATIONS,
-    MISC_HIGH_RISK_AFFILIATIONS,
-    COAUTHOR_AFFILIATIONS,
+  TALENT_CONTRACTS,
+  ASSOCIATIONS_WITH_DENIED_ENTITIES,
+  HIGH_RISK_FUNDERS,
+  AUTHOR_AFFILIATIONS,
+  POTENTIAL_AUTHOR_AFFILIATIONS,
+  MISC_HIGH_RISK_AFFILIATIONS,
+  COAUTHOR_AFFILIATIONS,
 ];
 
 const todayStr = new Date().toISOString().split('T')[0];
 
 const TitlesAndDescriptions = {
-    [TALENT_CONTRACTS]: {
-        title: 'Talent Contracts',
-        desc: 'Authors in these papers are recruited by talent programs that have close ties to high-risk foreign governments.',
-    },
-    [ASSOCIATIONS_WITH_DENIED_ENTITIES]: {
-        title: 'Funding from Denied Entities',
-        desc: 'Some of the parties involved in these works are in the denied entity lists of U.S. government agencies.',
-    },
-    [HIGH_RISK_FUNDERS]: {
-        title: 'High Risk Funding Sources',
-        desc: 'These papers are funded by funding sources that have close ties to high-risk foreign governments.',
-    },
-    [AUTHOR_AFFILIATIONS]: {
-        title: 'Affiliations with High Risk Foreign Institutes',
-        desc: 'Papers that list the queried author as being affiliated with a high-risk foreign institution or web pages that showcase official appointments at high-risk foreign institutions.',
-    },
-    [POTENTIAL_AUTHOR_AFFILIATIONS]: {
-        title: 'Appointments at High Risk Foreign Institutes*',
-        desc: 'The author may have an appointment at a high-risk foreign institutions.\n\n*Collated information from the web, might contain false positives.',
-    },
-    [MISC_HIGH_RISK_AFFILIATIONS]: {
-        title: 'Miscellaneous High Risk Connections*',
-        desc: 'The author or an associate may be mentioned in a press release.\n\n*Collated information from the web, might contain false positives.',
-    },
-    [COAUTHOR_AFFILIATIONS]: {
-        title: "Co-authors' affiliations with High Risk Foreign Institutes",
-        desc: 'Coauthors in these papers are affiliated with high-risk foreign institutions.',
-    },
+  [TALENT_CONTRACTS]: {
+    title: 'Talent Contracts',
+    desc: 'Authors in these papers are recruited by talent programs that have close ties to high-risk foreign governments.',
+  },
+  [ASSOCIATIONS_WITH_DENIED_ENTITIES]: {
+    title: 'Funding from Denied Entities',
+    desc: 'Some of the parties involved in these works are in the denied entity lists of U.S. government agencies.',
+  },
+  [HIGH_RISK_FUNDERS]: {
+    title: 'High Risk Funding Sources',
+    desc: 'These papers are funded by funding sources that have close ties to high-risk foreign governments.',
+  },
+  [AUTHOR_AFFILIATIONS]: {
+    title: 'Affiliations with High Risk Foreign Institutes',
+    desc: 'Papers that list the queried author as being affiliated with a high-risk foreign institution or web pages that showcase official appointments at high-risk foreign institutions.',
+  },
+  [POTENTIAL_AUTHOR_AFFILIATIONS]: {
+    title: 'Appointments at High Risk Foreign Institutes*',
+    desc: 'The author may have an appointment at a high-risk foreign institutions.\n\n*Collated information from the web, might contain false positives.',
+  },
+  [MISC_HIGH_RISK_AFFILIATIONS]: {
+    title: 'Miscellaneous High Risk Connections*',
+    desc: 'The author or an associate may be mentioned in a press release.\n\n*Collated information from the web, might contain false positives.',
+  },
+  [COAUTHOR_AFFILIATIONS]: {
+    title: "Co-authors' affiliations with High Risk Foreign Institutes",
+    desc: 'Coauthors in these papers are affiliated with high-risk foreign institutions.',
+  },
 };
 
-
-
 const ItemDetails = () => {
-    const navigate = useNavigate();
-    const { report_id } = useParams();
+  const navigate = useNavigate();
+  const { report_id } = useParams();
 
-    const [reportContent, setReportContent] = useState({});
-    const [instituteName, setInstituteName] = useState('');
-    // const [institutions, setInstitutions] = useState([]);
+  const [reportContent, setReportContent] = useState({});
+  const [instituteName, setInstituteName] = useState('');
+  // const [institutions, setInstitutions] = useState([]);
 
-
-    useEffect(() => {
-        let isMounted = true;
-        const poll = async () => {
-            const report = await universityReportService.getReport(report_id);
-            if (report.Status === 'complete' && isMounted) {
-                console.log('Report', report);
-                setInstituteName(report.AuthorName);
-                setReportContent(report.Content);
-                setLoading(false);
-            } else if (isMounted) {
-                // setTimeout(poll, 2000);
-            }
-        };
-
-        poll();
-
-        return () => {
-            isMounted = false;
-        };
-    }, []);
-
-    const [loading, setLoading] = useState(true);
-
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
-    const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
-    const handleStartDateChange = (e) => setStartDate(e.target.value);
-    const handleEndDateChange = (e) => setEndDate(e.target.value);
-
-    const toggleYearDropdown = () => {
-        setYearDropdownOpen(!yearDropdownOpen);
+  useEffect(() => {
+    let isMounted = true;
+    const poll = async () => {
+      const report = await universityReportService.getReport(report_id);
+      if (report.Status === 'complete' && isMounted) {
+        console.log('Report', report);
+        setInstituteName(report.AuthorName);
+        setReportContent(report.Content);
+        setLoading(false);
+      } else if (isMounted) {
+        // setTimeout(poll, 2000);
+      }
     };
 
-    const [review, setReview] = useState();
+    poll();
 
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
+  const [loading, setLoading] = useState(true);
 
-    return (
-        <div className="basic-setup">
-            <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-row">
-                    <div className="detail-header">
-                        <button
-                            onClick={() => navigate('/')}
-                            className="btn text-dark mb-3"
-                            style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}
-                        >
-                            <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                style={{ marginRight: '8px' }}
-                            >
-                                <path
-                                    d="M10 19L3 12L10 5"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                />
-                                <path
-                                    d="M3 12H21"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                />
-                            </svg>
-                            Back
-                        </button>
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
+  const handleStartDateChange = (e) => setStartDate(e.target.value);
+  const handleEndDateChange = (e) => setEndDate(e.target.value);
 
-                        <div className="d-flex w-80">
-                            <div className="text-start px-5">
-                                <div className="d-flex align-items-center mb-2">
-                                    <h5 className="m-0">{"Sample Institute"}</h5>
-                                </div>
-                                {/* <b className="m-0 p-0" style={{ fontSize: 'small' }}>
+  const toggleYearDropdown = () => {
+    setYearDropdownOpen(!yearDropdownOpen);
+  };
+
+  const [review, setReview] = useState();
+
+  return (
+    <div className="basic-setup">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-row">
+          <div className="detail-header">
+            <button
+              onClick={() => navigate('/')}
+              className="btn text-dark mb-3"
+              style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ marginRight: '8px' }}
+              >
+                <path
+                  d="M10 19L3 12L10 5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M3 12H21"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Back
+            </button>
+
+            <div className="d-flex w-80">
+              <div className="text-start px-5">
+                <div className="d-flex align-items-center mb-2">
+                  <h5 className="m-0">{'Sample Institute'}</h5>
+                </div>
+                {/* <b className="m-0 p-0" style={{ fontSize: 'small' }}>
                                     {institutions.join(', ')}
                                 </b> */}
-                            </div>
-                        </div>
+              </div>
+            </div>
 
-                        {/* <div>
+            {/* <div>
                             <div className="dropdown">
                                 <style>
                                     {` 
@@ -278,93 +272,88 @@ const ItemDetails = () => {
                                 )}
                             </div>
                         </div> */}
-                    </div>
-                </div>
-
-            </div>
-
-            <>
-                <div className="d-flex w-100 flex-column align-items-center">
-                    <div className="d-flex w-100 px-5 align-items-center my-2 mt-3 justify-content-between">
-                        <div style={{ width: '20px' }}>
-                            {loading && (
-                                <div
-                                    className="spinner-border text-primary spinner-border-sm"
-                                    role="status"
-                                ></div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                <div
-                    className="d-flex w-100 flex-column align-items-center"
-                    style={{ color: 'rgb(78, 78, 78)', marginTop: '0px' }}
-                >
-                    <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Score</div>
-                    <div style={{ fontSize: '60px', fontWeight: 'bold' }}>
-                        {Object.keys(reportContent || {})
-                            .map((name) => (reportContent[name] || []).length)
-                            .reduce((prev, curr) => prev + curr, 0)}
-                    </div>
-                </div>
-
-                <div
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'space-around',
-                        flexWrap: 'wrap',
-                        marginTop: '20px',
-                    }}
-                >
-                    {FLAG_ORDER.map((flag, index) => {
-                        return (
-                            <ConcernVisualizer
-                                title={TitlesAndDescriptions[flag].title}
-                                hoverText={TitlesAndDescriptions[flag].desc}
-                                value={reportContent[flag] ? reportContent[flag].length : 0}
-                                onReview={() => setReview(flag)}
-                                key={index}
-                            />
-                        );
-                    })}
-                </div>
-                {review && <div>HUE HUE HEU</div>}
-            </>
-
+          </div>
         </div>
-    );
+      </div>
+
+      <>
+        <div className="d-flex w-100 flex-column align-items-center">
+          <div className="d-flex w-100 px-5 align-items-center my-2 mt-3 justify-content-between">
+            <div style={{ width: '20px' }}>
+              {loading && (
+                <div className="spinner-border text-primary spinner-border-sm" role="status"></div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div
+          className="d-flex w-100 flex-column align-items-center"
+          style={{ color: 'rgb(78, 78, 78)', marginTop: '0px' }}
+        >
+          <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Score</div>
+          <div style={{ fontSize: '60px', fontWeight: 'bold' }}>
+            {Object.keys(reportContent || {})
+              .map((name) => (reportContent[name] || []).length)
+              .reduce((prev, curr) => prev + curr, 0)}
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-around',
+            flexWrap: 'wrap',
+            marginTop: '20px',
+          }}
+        >
+          {FLAG_ORDER.map((flag, index) => {
+            return (
+              <ConcernVisualizer
+                title={TitlesAndDescriptions[flag].title}
+                hoverText={TitlesAndDescriptions[flag].desc}
+                value={reportContent[flag] ? reportContent[flag].length : 0}
+                onReview={() => setReview(flag)}
+                key={index}
+              />
+            );
+          })}
+        </div>
+        {review && <div>HUE HUE HEU</div>}
+      </>
+    </div>
+  );
 };
 
 const popoverStyles = {
-    position: 'absolute',
-    top: '30px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    zIndex: 1,
-    backgroundColor: '#fff',
-    border: '1px solid rgba(0, 0, 0, 0.2)',
-    boxShadow: '0 0.5rem 1rem rgba(0, 0, 0, 0.15)',
-    borderRadius: '0.3rem',
-    padding: '0.5rem',
-    width: '200px',
+  position: 'absolute',
+  top: '30px',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  zIndex: 1,
+  backgroundColor: '#fff',
+  border: '1px solid rgba(0, 0, 0, 0.2)',
+  boxShadow: '0 0.5rem 1rem rgba(0, 0, 0, 0.15)',
+  borderRadius: '0.3rem',
+  padding: '0.5rem',
+  width: '200px',
 };
 
 const buttonStyles = {
-    marginLeft: '5px',
-    width: '14px',
-    height: '14px',
-    padding: '1px 0',
-    borderRadius: '7.5px',
-    textAlign: 'center',
-    fontSize: '8px',
-    lineHeight: '1.42857',
-    border: '1px solid grey',
-    borderWidth: '1px',
-    backgroundColor: 'transparent',
-    color: 'grey',
-    position: 'relative',
-    boxShadow: 'none',
+  marginLeft: '5px',
+  width: '14px',
+  height: '14px',
+  padding: '1px 0',
+  borderRadius: '7.5px',
+  textAlign: 'center',
+  fontSize: '8px',
+  lineHeight: '1.42857',
+  border: '1px solid grey',
+  borderWidth: '1px',
+  backgroundColor: 'transparent',
+  color: 'grey',
+  position: 'relative',
+  boxShadow: 'none',
 };
 
 const StyledWrapper = styled.div`
