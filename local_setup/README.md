@@ -256,6 +256,8 @@ grobid_endpoint: "http://70.233.60.118:8070/" # for local setup
 
   2. Create and configure the `.env` file:
 
+  __Important Note__: Please ensure that you enter the URL values without quotes and remove any inline comments that might appear on the same line.
+
   - For local development:
     ```bash
     REACT_APP_API_URL=http://localhost
