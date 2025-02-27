@@ -73,13 +73,13 @@ func checkNoNextAuthorReport(t *testing.T, manager *reports.ReportManager) {
 
 func dummyReportUpdate() api.ReportContent {
 	return api.ReportContent{
-		api.TalentContractType:               {&api.TalentContractFlag{Work: api.WorkSummary{WorkId: uuid.NewString()}}},
-		api.AssociationsWithDeniedEntityType: {&api.AssociationWithDeniedEntityFlag{Work: api.WorkSummary{WorkId: uuid.NewString()}}},
-		api.HighRiskFunderType:               {&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: uuid.NewString()}}},
-		api.AuthorAffiliationType:            {&api.AuthorAffiliationFlag{Work: api.WorkSummary{WorkId: uuid.NewString()}}},
+		api.TalentContractType:               {&api.TalentContractFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}}},
+		api.AssociationsWithDeniedEntityType: {&api.AssociationWithDeniedEntityFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}}},
+		api.HighRiskFunderType:               {&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}}},
+		api.AuthorAffiliationType:            {&api.AuthorAffiliationFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}}},
 		api.PotentialAuthorAffiliationType:   {&api.PotentialAuthorAffiliationFlag{University: uuid.NewString()}},
 		api.MiscHighRiskAssociationType:      {&api.MiscHighRiskAssociationFlag{DocTitle: uuid.NewString()}},
-		api.CoauthorAffiliationType:          {&api.CoauthorAffiliationFlag{Work: api.WorkSummary{WorkId: uuid.NewString()}}},
+		api.CoauthorAffiliationType:          {&api.CoauthorAffiliationFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}}},
 	}
 }
 
@@ -660,5 +660,58 @@ func TestListUniversityReport(t *testing.T) {
 		reports2[0].UniversityName != "university2" ||
 		reports2[0].Status != "queued" {
 		t.Fatal("incorrect report")
+	}
+}
+
+func TestUniversityReportsFilterFlagsByDate(t *testing.T) {
+	manager := setup(t)
+
+	user := uuid.New()
+	license := uuid.New()
+
+	uniId, err := manager.CreateUniversityReport(license, user, "1", "university1")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nextUni, err := manager.GetNextUniversityReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := manager.UpdateUniversityReport(nextUni.Id, "complete", nextUni.UpdateDate, []reports.UniversityAuthorReport{
+		{AuthorId: "1", AuthorName: "author1", Source: api.OpenAlexSource},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	nextAuthor, err := manager.GetNextAuthorReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	content := api.ReportContent{
+		// This should not be filtered because the date is recent
+		api.TalentContractType: {&api.TalentContractFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}}},
+		// This should be filtered because the date is too old
+		api.HighRiskFunderType: {&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now().AddDate(-6, 0, 0)}}},
+		// This should not be filtered because there is no date
+		api.MiscHighRiskAssociationType: {&api.MiscHighRiskAssociationFlag{DocTitle: uuid.NewString()}},
+	}
+
+	if err := manager.UpdateAuthorReport(nextAuthor.Id, "complete", nextAuthor.EndDate, content); err != nil {
+		t.Fatal(err)
+	}
+
+	report, err := manager.GetUniversityReport(user, uniId)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(report.Content.Flags) != 2 ||
+		len(report.Content.Flags[api.TalentContractType]) != 1 ||
+		len(report.Content.Flags[api.HighRiskFunderType]) != 0 ||
+		len(report.Content.Flags[api.MiscHighRiskAssociationType]) != 1 {
+		t.Fatalf("incorrect flags: %+v", report.Content.Flags)
 	}
 }
