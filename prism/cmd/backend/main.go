@@ -38,7 +38,7 @@ func (c *Config) logfile() string {
 
 func (c *Config) port() int {
 	if c.Port == 0 {
-		return 3000
+		return 8000
 	}
 	return c.Port
 }
