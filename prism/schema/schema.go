@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -33,6 +34,7 @@ type AuthorFlag struct {
 	ReportId uuid.UUID `gorm:"type:uuid"`
 	FlagType string    `gorm:"size:40;not null"`
 	FlagKey  string
+	Date     sql.NullTime
 	Data     []byte
 }
 

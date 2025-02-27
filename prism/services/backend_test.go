@@ -787,7 +787,7 @@ func TestUniversityReportEndpoints(t *testing.T) {
 	}
 
 	if err := manager.UpdateAuthorReport(nextAuthorReport.Id, schema.ReportCompleted, time.Now(), api.ReportContent{
-		api.HighRiskFunderType: []api.Flag{&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: "abc"}}},
+		api.HighRiskFunderType: []api.Flag{&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: "abc", PublicationDate: time.Now()}}},
 	}); err != nil {
 		t.Fatal(err)
 	}
