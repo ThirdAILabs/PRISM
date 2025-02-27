@@ -61,7 +61,7 @@ func (r *ReportManager) ListAuthorReports(userId uuid.UUID) ([]api.Report, error
 func (r *ReportManager) queueAuthorReportUpdateIfNeeded(txn *gorm.DB, report *schema.AuthorReport) error {
 	if time.Now().UTC().Sub(report.LastUpdatedAt) > r.staleReportThreshold &&
 		report.Status != schema.ReportInProgress && report.Status != schema.ReportQueued {
-		updates := map[string]any{"status": schema.ReportQueued, "queued_at": time.Now().UTC()}
+		updates := map[string]any{"status": schema.ReportQueued, "queued_at": time.Now().UTC(), "queued_by_user": true}
 		if err := txn.Model(&report).Updates(updates).Error; err != nil {
 			slog.Error("error queueing stale author report for update", "author_report_id", report.Id, "error", err)
 			return ErrReportAccessFailed
@@ -71,7 +71,7 @@ func (r *ReportManager) queueAuthorReportUpdateIfNeeded(txn *gorm.DB, report *sc
 	return nil
 }
 
-func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string) (schema.AuthorReport, error) {
+func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string, fromUserReq bool) (schema.AuthorReport, error) {
 	var report schema.AuthorReport
 	result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Limit(1).Find(&report, "author_id = ? AND source = ?", authorId, source)
 	if result.Error != nil {
@@ -87,6 +87,8 @@ func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string) 
 			AuthorName:    authorName,
 			Source:        source,
 			Status:        schema.ReportQueued,
+			QueuedAt:      time.Now(),
+			QueuedByUser:  fromUserReq,
 		}
 
 		if err := txn.Create(&report).Error; err != nil {
@@ -102,7 +104,7 @@ func (r *ReportManager) CreateAuthorReport(licenseId, userId uuid.UUID, authorId
 	userReportId := uuid.New()
 
 	err := r.db.Transaction(func(txn *gorm.DB) error {
-		report, err := createOrGetAuthorReport(txn, authorId, authorName, source)
+		report, err := createOrGetAuthorReport(txn, authorId, authorName, source, true /*fromUserReq*/)
 		if err != nil {
 			return err
 		}
@@ -183,29 +185,41 @@ type ReportUpdateTask struct {
 	EndDate    time.Time
 }
 
-func (r *ReportManager) GetNextAuthorReport() (*ReportUpdateTask, error) {
-	found := false
+func findNextAuthorReport(txn *gorm.DB) (*schema.AuthorReport, error) {
 	var report schema.AuthorReport
-
-	err := r.db.Transaction(func(txn *gorm.DB) error {
+	for _, queuedByUser := range [2]bool{true, false} {
 		result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
 			Limit(1).Order("queued_at ASC").
-			Find(&report, "status = ?", schema.ReportQueued)
+			Find(&report, "status = ? AND queued_by_user = ?", schema.ReportQueued, queuedByUser)
 		if result.Error != nil {
 			slog.Error("error getting next author report from queue", "error", result.Error)
-			return ErrReportAccessFailed
+			return nil, ErrReportAccessFailed
 		}
 
-		if result.RowsAffected != 1 {
-			return nil
+		if result.RowsAffected == 1 {
+			return &report, nil
+		}
+	}
+	return nil, nil
+}
+
+func (r *ReportManager) GetNextAuthorReport() (*ReportUpdateTask, error) {
+	var report *schema.AuthorReport
+
+	err := r.db.Transaction(func(txn *gorm.DB) error {
+		var err error
+		report, err = findNextAuthorReport(txn)
+		if err != nil {
+			return err
 		}
 
-		if err := txn.Model(&report).Update("status", schema.ReportInProgress).Error; err != nil {
-			slog.Error("error updating author report status to in progress", "error", err)
-			return ErrReportAccessFailed
+		if report != nil {
+			if err := txn.Model(report).Update("status", schema.ReportInProgress).Error; err != nil {
+				slog.Error("error updating author report status to in progress", "error", err)
+				return ErrReportAccessFailed
+			}
 		}
 
-		found = true
 		return nil
 	})
 
@@ -213,7 +227,7 @@ func (r *ReportManager) GetNextAuthorReport() (*ReportUpdateTask, error) {
 		return nil, err
 	}
 
-	if found {
+	if report != nil {
 		return &ReportUpdateTask{
 			Id:         report.Id,
 			AuthorId:   report.AuthorId,
@@ -606,7 +620,7 @@ func (r *ReportManager) UpdateUniversityReport(id uuid.UUID, status string, upda
 			var authorReports []schema.AuthorReport
 
 			for _, author := range authors {
-				report, err := createOrGetAuthorReport(txn, author.AuthorId, author.AuthorName, author.Source)
+				report, err := createOrGetAuthorReport(txn, author.AuthorId, author.AuthorName, author.Source, false /*fromUserReq*/)
 				if err != nil {
 					slog.Error("error getting author report to add to university report", "author_id", author.AuthorId, "university_report_id", id, "error", err)
 					return err

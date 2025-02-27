@@ -662,3 +662,54 @@ func TestListUniversityReport(t *testing.T) {
 		t.Fatal("incorrect report")
 	}
 }
+
+func TestTestUserQueuedReportsArePrioritizedOverUniversityReports(t *testing.T) {
+	manager := setup(t)
+
+	user := uuid.New()
+	license := uuid.New()
+
+	if _, err := manager.CreateAuthorReport(license, user, "1", "author1", api.OpenAlexSource); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := manager.CreateUniversityReport(license, user, "1", "university1"); err != nil {
+		t.Fatal(err)
+	}
+
+	nextUni, err := manager.GetNextUniversityReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := manager.UpdateUniversityReport(nextUni.Id, "complete", nextUni.UpdateDate, []reports.UniversityAuthorReport{
+		{AuthorId: "1", AuthorName: "author1", Source: api.OpenAlexSource},
+		{AuthorId: "2", AuthorName: "author2", Source: api.OpenAlexSource},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := manager.CreateAuthorReport(license, user, "3", "author3", api.OpenAlexSource); err != nil {
+		t.Fatal(err)
+	}
+
+	// Author 1 report was queued by user
+	nextAuthor1, err := manager.GetNextAuthorReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkNextAuthorReport(t, nextAuthor1, "1", "author1", api.OpenAlexSource, reports.EarliestReportDate, time.Now())
+
+	// University report was queued first, but author report 3 was queued by user
+	nextAuthor3, err := manager.GetNextAuthorReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkNextAuthorReport(t, nextAuthor3, "3", "author3", api.OpenAlexSource, reports.EarliestReportDate, time.Now())
+
+	// Author 2 report was queued by university
+	nextAuthor2, err := manager.GetNextAuthorReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkNextAuthorReport(t, nextAuthor2, "2", "author2", api.OpenAlexSource, reports.EarliestReportDate, time.Now())
+}
