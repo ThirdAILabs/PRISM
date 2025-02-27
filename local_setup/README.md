@@ -26,6 +26,7 @@
   cd local_setup
   bash launch_traefik.sh
   ```
+  **Note: Ignore the error about non-empty provider endpoint.**
 </details>
 <br>
 <details>
