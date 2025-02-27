@@ -3,11 +3,10 @@ import Keycloak from 'keycloak-js';
 
 // Create a new Keycloak instance with the configuration object.
 const _kc = new Keycloak({
-    // url: process.env.REACT_APP_KEYCLOAK_URL,
-    url: process.env.REACT_APP_KEYCLOAK_URL,
-    realm: process.env.REACT_APP_KEYCLOAK_REALM,
-    clientId: process.env.REACT_APP_KEYCLOAK_CLIENT_ID,
-    redirectUri: window.location.origin
+  url: process.env.REACT_APP_KEYCLOAK_URL,
+  realm: process.env.REACT_APP_KEYCLOAK_REALM,
+  clientId: process.env.REACT_APP_KEYCLOAK_CLIENT_ID,
+  redirectUri: window.location.origin,
 });
 
 /**
