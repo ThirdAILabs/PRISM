@@ -9,7 +9,7 @@ import (
 )
 
 func createReport(t *testing.T, user *api.UserClient, authorId, authorName string) any {
-	reportId, err := user.CreateReport(api.CreateReportRequest{
+	reportId, err := user.CreateReport(api.CreateAuthorReportRequest{
 		AuthorId:   authorId,
 		AuthorName: authorName,
 		Source:     api.OpenAlexSource,

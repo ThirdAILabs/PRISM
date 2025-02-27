@@ -2,12 +2,12 @@ export const prismBaseUrl = 'http://localhost:8082';
 
 export const API_ROUTES = {
   REPORTS: {
-    LIST: '/api/v1/report/list',
-    CREATE: '/api/v1/report/create',
-    GET: (id) => `/api/v1/report/${id}`,
+    LIST: '/api/v1/report/author/list',
+    CREATE: '/api/v1/report/author/create',
+    GET: (id) => `/api/v1/report/author/${id}`,
     ACTIVATE_LICENSE: '/api/v1/report/activate-license',
-    CHECK_DISCLOSURE: (id) => `/api/v1/report/${id}/check-disclosure`,
-    DOWNLOAD: (id) => `/api/v1/report/${id}/download`,
+    CHECK_DISCLOSURE: (id) => `/api/v1/report/author/${id}/check-disclosure`,
+    DOWNLOAD: (id) => `/api/v1/report/author/${id}/download`,
   },
   LICENSES: {
     LIST: '/api/v1/license/list',
