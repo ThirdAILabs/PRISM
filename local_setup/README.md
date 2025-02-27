@@ -207,6 +207,8 @@ go run cmd/backend/main.go --config "./cmd/backend/config.yaml"
 <summary><h2 style="display: inline;">Setup Grobid</h2></summary>
   <br>
 
+  Grobid can be set up on Blade server and can be accessed by forwarding the port.
+  
   Run the command ```docker run --rm --init --ulimit core=0 -p 8070:8070 grobid/grobid:0.8.0```. This will start Grobid on port ```8070```.
 </details>
 <br>
