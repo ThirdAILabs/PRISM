@@ -91,11 +91,11 @@ func NewUserClient(backendUrl, keycloakUrl string) *UserClient {
 	}
 }
 
-func (client *UserClient) CreateReport(report CreateReportRequest) (uuid.UUID, error) {
+func (client *UserClient) CreateReport(report CreateAuthorReportRequest) (uuid.UUID, error) {
 	res, err := client.backend.R().
 		SetBody(report).
 		SetResult(&CreateReportResponse{}).
-		Post("/api/v1/report/create")
+		Post("/api/v1/report/author/create")
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("create report request failed: %w", err)
 	}
@@ -111,7 +111,7 @@ func (client *UserClient) GetReport(reportId uuid.UUID) (*Report, error) {
 	res, err := client.backend.R().
 		SetResult(&Report{}).
 		SetPathParam("report_id", reportId.String()).
-		Get("/api/v1/report/{report_id}")
+		Get("/api/v1/report/author/{report_id}")
 	if err != nil {
 		return nil, fmt.Errorf("get report request failed: %w", err)
 	}

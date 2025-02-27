@@ -39,6 +39,65 @@ func (c *Config) logfile() string {
 	return c.Logfile
 }
 
+func processNextAuthorReport(reportManager *reports.ReportManager, processor *flaggers.ReportProcessor) bool {
+	nextReport, err := reportManager.GetNextAuthorReport()
+	if err != nil {
+		slog.Error("error checking for next report", "error", err)
+		return false
+	}
+	if nextReport == nil {
+		return false
+	}
+
+	content, err := processor.ProcessReport(*nextReport)
+	if err != nil {
+		slog.Error("error processing report: %w")
+
+		if err := reportManager.UpdateAuthorReport(nextReport.Id, "failed", time.Time{}, api.ReportContent{}); err != nil {
+			slog.Error("error updating report status to failed", "error", err)
+		}
+		return true
+	}
+
+	if err := reportManager.UpdateAuthorReport(nextReport.Id, "complete", nextReport.EndDate, content); err != nil {
+		slog.Error("error updating report status to complete", "error", err)
+	}
+	return true
+}
+
+func processNextUniversityReport(reportManager *reports.ReportManager, processor *flaggers.ReportProcessor) bool {
+	nextReport, err := reportManager.GetNextUniversityReport()
+	if err != nil {
+		slog.Error("error checking for next report", "error", err)
+		return false
+	}
+	if nextReport == nil {
+		return false
+	}
+
+	slog.Info("processing university report", "report_id", nextReport.Id, "university_report_id", nextReport.UniversityId, "university_name", nextReport.UniversityName)
+
+	authors, err := processor.GetUniversityAuthors(*nextReport)
+	if err != nil {
+		slog.Error("error processing university report: %w")
+
+		if err := reportManager.UpdateUniversityReport(nextReport.Id, "failed", time.Time{}, nil); err != nil {
+			slog.Error("error updating report status to failed", "error", err)
+		}
+		return true
+	}
+
+	slog.Info("authors found for university report", "n_authors", len(authors))
+
+	if err := reportManager.UpdateUniversityReport(nextReport.Id, "complete", nextReport.UpdateDate, authors); err != nil {
+		slog.Error("error updating university report status to complete", "error", err)
+	}
+
+	slog.Info("university report complete", "report_id", nextReport.Id, "university_report_id", nextReport.UniversityId, "university_name", nextReport.UniversityName)
+
+	return true
+}
+
 func main() {
 	var config Config
 	cmd.LoadConfig(&config)
@@ -105,29 +164,9 @@ func main() {
 	reportManager := reports.NewManager(db, reports.StaleReportThreshold)
 
 	for {
-		time.Sleep(10 * time.Second)
-
-		nextReport, err := reportManager.GetNextReport()
-		if err != nil {
-			slog.Error("error checking for next report", "error", err)
-			continue
-		}
-		if nextReport == nil {
-			continue
-		}
-
-		content, err := processor.ProcessReport(*nextReport)
-		if err != nil {
-			slog.Error("error processing report: %w")
-
-			if err := reportManager.UpdateReport(nextReport.Id, "failed", time.Time{}, api.ReportContent{}); err != nil {
-				slog.Error("error updating report status to failed", "error", err)
-			}
-			continue
-		}
-
-		if err := reportManager.UpdateReport(nextReport.Id, "complete", nextReport.EndDate, content); err != nil {
-			slog.Error("error updating report status to complete", "error", err)
+		if !processNextAuthorReport(reportManager, processor) &&
+			!processNextUniversityReport(reportManager, processor) {
+			time.Sleep(10 * time.Second)
 		}
 	}
 }
