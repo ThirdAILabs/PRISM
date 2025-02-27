@@ -1,5 +1,5 @@
 # Uri for postgres db
-postgres_uri: ""
+postgres_uri: "postgresql://<username>:<password>@<host | localhost>:<port | 5432>/prism"
 
 # Logfile for backend
 logfile: "./worker.log"
