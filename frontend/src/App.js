@@ -8,6 +8,7 @@ import { useUser } from './store/userContext';
 import { FaBars } from 'react-icons/fa';
 import SidePanel from './components/sidebar/SidePanel';
 import UniversityAssessment from './components/pages/UniversityAssessment';
+import UniversityReport from './components/pages/UniversityReport';
 import { useLocation } from 'react-router-dom';
 import Error from './components/pages/Error';
 //CSS
@@ -58,9 +59,10 @@ function AppContent() {
       <SidePanel isOpen={isSidePanelOpen} onClose={() => setIsSidePanelOpen(false)} />
       <Routes>
         <Route path="/" element={<SearchComponent />} />
-        <Route path="/report/:report_id" element={<ItemDetails />} />
         <Route path="/entity-lookup" element={<EntityLookup />} />
-        <Route path="/university-assessment" element={<UniversityAssessment />} />
+        <Route path="/university" element={<UniversityAssessment />} />
+        <Route path="/report/:report_id" element={<ItemDetails />} />
+        <Route path="/university/report/:report_id" element={<UniversityReport />} />
         <Route path="/error" element={<Error />} />
       </Routes>
     </div>

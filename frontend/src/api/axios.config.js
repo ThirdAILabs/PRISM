@@ -26,7 +26,7 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     const errorMessage = error.response?.data?.message || error.message || 'An unexpected error occurred';
-    window.location.href = `/error?message=${encodeURIComponent(errorMessage)}`;
+    // window.location.href = `/error?message=${encodeURIComponent(errorMessage)}`;
     return Promise.reject(error);
   }
 );

@@ -5,8 +5,11 @@ import '../common/tools/button/button1.css';
 import AutocompleteSearchBar from '../../utils/autocomplete';
 import { autocompleteService } from '../../api/autocomplete';
 import useCallOnPause from '../../hooks/useCallOnPause';
+import { useNavigate } from 'react-router-dom';
+import universityReportService from '../../api/universityReports';
 
 function UniversityAssessment() {
+  const navigate = useNavigate();
   const [institution, setInstitution] = useState();
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,6 +33,22 @@ function UniversityAssessment() {
     },
     [debouncedSearch]
   );
+
+  const handleSearch = async () => {
+    if (!institution) {
+      alert('Please select an institution');
+      return;
+    }
+    const reportData = {
+      UniversityId: institution.InstitutionId,
+      UniversityName: institution.InstitutionName,
+    };
+    const reportId = await universityReportService.createReport(reportData);
+    console.log("University report id: ", reportId);
+    navigate(`report/${reportId.Id}`);
+  }
+
+
   return (
     <div className="basic-setup" style={{ color: 'white' }}>
       <div style={{ textAlign: 'center', marginTop: '5.5%', animation: 'fade-in 0.75s' }}>
@@ -66,9 +85,10 @@ function UniversityAssessment() {
                     type={'institute'}
                   />
                 </div>
-                <div style={{ width: '20px' }} />
+                <div style={{ width: '10px' }} />
                 <div style={{ width: '200px' }}>
-                  <button className="button">
+                  <button className="button"
+                    onClick={handleSearch}>
                     {isLoading ? 'Searching...' : 'Search'}
                   </button>
                 </div>

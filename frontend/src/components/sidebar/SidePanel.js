@@ -51,7 +51,7 @@ const SidePanel = ({ isOpen, onClose }) => {
   };
   const handleUniversityClick = () => {
     onClose();
-    navigate('/university-assessment');
+    navigate('/university');
   };
   const handleReportClick = (report) => {
     onClose();
@@ -92,7 +92,7 @@ const SidePanel = ({ isOpen, onClose }) => {
               <span className="nav-text">Individual Assessment</span>
             </li>
             <li
-              className={`nav-item ${currentLocation === '/university-assessment' ? 'active' : ''}`}
+              className={`nav-item ${currentLocation === '/university' ? 'active' : ''}`}
               onClick={handleUniversityClick}
             >
               <span className="nav-icon">
