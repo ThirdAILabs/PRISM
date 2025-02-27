@@ -27,11 +27,19 @@ type ReportService struct {
 func (s *ReportService) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/list", WrapRestHandler(s.List))
-	r.Post("/create", WrapRestHandler(s.CreateReport))
-	r.Get("/{report_id}", WrapRestHandler(s.GetReport))
-	r.Post("/{report_id}/check-disclosure", WrapRestHandler(s.CheckDisclosure))
-	r.Get("/{report_id}/download", s.DownloadReport)
+	r.Route("/author", func(r chi.Router) {
+		r.Get("/list", WrapRestHandler(s.List))
+		r.Post("/create", WrapRestHandler(s.CreateReport))
+		r.Get("/{report_id}", WrapRestHandler(s.GetReport))
+		r.Post("/{report_id}/check-disclosure", WrapRestHandler(s.CheckDisclosure))
+		r.Get("/{report_id}/download", s.DownloadReport)
+	})
+
+	r.Route("/university", func(r chi.Router) {
+		r.Get("/list", WrapRestHandler(s.ListUniversityReports))
+		r.Post("/create", WrapRestHandler(s.CreateUniversityReport))
+		r.Get("/{report_id}", WrapRestHandler(s.GetUniversityReport))
+	})
 
 	r.Post("/activate-license", WrapRestHandler(s.UseLicense))
 
@@ -44,7 +52,7 @@ func (s *ReportService) List(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	reports, err := s.manager.ListReports(userId)
+	reports, err := s.manager.ListAuthorReports(userId)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
@@ -58,7 +66,7 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	params, err := ParseRequestBody[api.CreateReportRequest](r)
+	params, err := ParseRequestBody[api.CreateAuthorReportRequest](r)
 	if err != nil {
 		return nil, CodedError(err, http.StatusBadRequest)
 	}
@@ -84,7 +92,7 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 		return nil, CodedError(err, licensingErrorStatus(err))
 	}
 
-	id, err := s.manager.CreateReport(licenseId, userId, params.AuthorId, params.AuthorName, params.Source)
+	id, err := s.manager.CreateAuthorReport(licenseId, userId, params.AuthorId, params.AuthorName, params.Source)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
@@ -103,7 +111,7 @@ func (s *ReportService) GetReport(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusBadRequest)
 	}
 
-	report, err := s.manager.GetReport(userId, id)
+	report, err := s.manager.GetAuthorReport(userId, id)
 	if err != nil {
 		return nil, CodedError(err, reportErrorStatus(err))
 	}
@@ -177,7 +185,7 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 		allFileTexts = append(allFileTexts, text)
 	}
 
-	report, err := s.manager.GetReport(userId, reportId)
+	report, err := s.manager.GetAuthorReport(userId, reportId)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
@@ -208,7 +216,7 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	report, err := s.manager.GetReport(userId, reportId)
+	report, err := s.manager.GetAuthorReport(userId, reportId)
 	if err != nil {
 		http.Error(w, err.Error(), reportErrorStatus(err))
 		return
@@ -263,4 +271,70 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 		slog.Error("error writing file bytes", "error", err)
 		http.Error(w, "error writing file", http.StatusInternalServerError)
 	}
+}
+
+func (s *ReportService) ListUniversityReports(r *http.Request) (any,error) {
+	userId, err := auth.GetUserId(r)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	reports, err := s.manager.ListUniversityReports(userId)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	return reports, nil
+}
+
+func (s *ReportService) CreateUniversityReport(r *http.Request) (any, error) {
+	userId, err := auth.GetUserId(r)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	params, err := ParseRequestBody[api.CreateUniversityReportRequest](r)
+	if err != nil {
+		return nil, CodedError(err, http.StatusBadRequest)
+	}
+
+	if params.UniversityId == "" {
+		return nil, CodedError(errors.New("UniversityId must be specified"), http.StatusUnprocessableEntity)
+	}
+
+	if params.UniversityName == "" {
+		return nil, CodedError(errors.New("UniversityName must be specified"), http.StatusUnprocessableEntity)
+	}
+
+	licenseId, err := licensing.VerifyLicenseForReport(s.db, userId)
+	if err != nil {
+		slog.Error("cannot create new report, unable to verify license", "error", err)
+		return nil, CodedError(err, licensingErrorStatus(err))
+	}
+
+	id, err := s.manager.CreateUniversityReport(licenseId, userId, params.UniversityId, params.UniversityName)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	return api.CreateReportResponse{Id: id}, nil
+}
+
+func (s *ReportService) GetUniversityReport(r *http.Request) (any, error) {
+	userId, err := auth.GetUserId(r)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	id, err := URLParamUUID(r, "report_id")
+	if err != nil {
+		return nil, CodedError(err, http.StatusBadRequest)
+	}
+
+	report, err := s.manager.GetUniversityReport(userId, id)
+	if err != nil {
+		return nil, CodedError(err, reportErrorStatus(err))
+	}
+
+	return report, nil
 }
