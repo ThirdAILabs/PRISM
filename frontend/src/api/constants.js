@@ -1,4 +1,4 @@
-export const prismBaseUrl = 'http://localhost:8082';
+export const prismBaseUrl = process.env.REACT_APP_BACKEND_ORIGIN;
 
 export const API_ROUTES = {
   REPORTS: {
