@@ -78,6 +78,7 @@ type Author struct {
 	AuthorName   string
 	Institutions []string
 	Source       string
+	Interests    []string
 }
 
 type GScholarSearchResults struct {

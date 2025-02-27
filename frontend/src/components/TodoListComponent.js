@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { reportService } from '../api/reports';
 
-const TodoListComponent = ({ results, canLoadMore, loadMore }) => {
+const TodoListComponent = ({ results, setResults, canLoadMore, loadMore }) => {
   const navigate = useNavigate();
 
   const handleItemClick = async (result) => {
@@ -17,6 +17,12 @@ const TodoListComponent = ({ results, canLoadMore, loadMore }) => {
     return;
   };
 
+  const getMoreResults = async () => {
+    if (canLoadMore) {
+      setResults(results.concat(await loadMore()));
+    }
+  };
+
   return (
     <div className="d-flex flex-column align-items-center w-100 ">
       <>
@@ -27,13 +33,27 @@ const TodoListComponent = ({ results, canLoadMore, loadMore }) => {
                 <div className="d-flex align-items-center mb-2">
                   <h5 className="m-0">{result.AuthorName}</h5>
                 </div>
-                <b className="m-0 p-0" style={{ fontSize: 'small' }}>
+                <p className="m-0 p-0" style={{ fontSize: 'small' }}>
+                  <b>Affiliations: </b>
                   {result.Institutions.join(', ')}
-                </b>
+                </p>
+                {result.Interests && result.Interests.length > 0 && (
+                  <div>
+                    <p className="m-0 p-0 pt-1" style={{ fontSize: 'small' }}>
+                      <b>Research Interests: </b>
+                      {result.Interests.slice(0, 3).join(', ')}
+                    </p>
+                  </div>
+                )}
               </div>
             </li>
           ))}
         </ul>
+        {canLoadMore && (
+          <button className="button" onClick={getMoreResults}>
+            Show More
+          </button>
+        )}
       </>
     </div>
   );

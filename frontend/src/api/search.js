@@ -13,9 +13,9 @@ export const searchService = {
     return response.data;
   },
 
-  searchGoogleScholarAuthors: async (query, cursor) => {
+  searchGoogleScholarAuthors: async (authorName, institutionName, cursor) => {
     const response = await axiosInstance.get(API_ROUTES.SEARCH.ADVANCED, {
-      params: { query, cursor },
+      params: { author_name: authorName, institution_name: institutionName, cursor: cursor },
     });
     return response.data;
   },
