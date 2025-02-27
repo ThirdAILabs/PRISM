@@ -58,6 +58,9 @@ func (r *ReportManager) ListAuthorReports(userId uuid.UUID) ([]api.Report, error
 	return results, nil
 }
 
+// This function is only called from GetAuthorReport or CreateAuthorReport. The university reports
+// use a different methods that can check all the author reports associated with the university report
+// at once.
 func (r *ReportManager) queueAuthorReportUpdateIfNeeded(txn *gorm.DB, report *schema.AuthorReport) error {
 	if time.Now().UTC().Sub(report.LastUpdatedAt) > r.staleReportThreshold &&
 		report.Status != schema.ReportInProgress && report.Status != schema.ReportQueued {
