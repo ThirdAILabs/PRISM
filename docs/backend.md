@@ -98,6 +98,23 @@ Note: See the `report_format.md` for a description of the format of the report c
 }
 ```
 
+## Delete an Author Report
+
+| Method | Path | Auth Required | Permissions |
+| ------ | ---- | ------------- | ----------  |
+| `DELETE` | `/api/v1/report/author/{report_id}` | Yes | Token for Keycloak User Realm |
+
+Deletes an author report. The user must be the same one who create the report. 
+
+__Example Request__: 
+```
+No request body
+```
+__Example Response__:
+```
+No response body
+```
+
 ## Activate a License 
 
 | Method | Path | Auth Required | Permissions |
@@ -343,6 +360,23 @@ Notes:
         }
     }
 }
+```
+
+## Delete a University Report
+
+| Method | Path | Auth Required | Permissions |
+| ------ | ---- | ------------- | ----------  |
+| `DELETE` | `/api/v1/report/university/{report_id}` | Yes | Token for Keycloak User Realm |
+
+Deletes a univeristy report. The user must be the same one who create the report. 
+
+__Example Request__: 
+```
+No request body
+```
+__Example Response__:
+```
+No response body
 ```
 
 # License Endpoints
