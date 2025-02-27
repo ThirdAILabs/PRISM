@@ -11,6 +11,7 @@ import (
 	"prism/prism/search"
 	"prism/prism/triangulation"
 	"sync"
+	"time"
 )
 
 type ReportProcessor struct {
@@ -208,4 +209,22 @@ func (processor *ReportProcessor) ProcessReport(report reports.ReportUpdateTask)
 	logger.Info("report complete", "n_flags", len(flagsSeen))
 
 	return content, nil
+}
+
+func (processor *ReportProcessor) GetUniversityAuthors(report reports.UniversityReportUpdateTask) ([]reports.UniversityAuthorReport, error) {
+	authors, err := processor.openalex.GetInstitutionAuthors(report.UniversityId, time.Now().AddDate(-4, 0, 0), time.Now())
+	if err != nil {
+		return nil, err
+	}
+
+	output := make([]reports.UniversityAuthorReport, 0, len(authors))
+	for _, author := range authors {
+		output = append(output, reports.UniversityAuthorReport{
+			AuthorId:   author.AuthorId,
+			AuthorName: author.AuthorName,
+			Source:     api.OpenAlexSource,
+		})
+	}
+
+	return output, nil
 }
