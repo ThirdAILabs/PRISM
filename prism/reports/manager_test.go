@@ -663,7 +663,7 @@ func TestListUniversityReport(t *testing.T) {
 	}
 }
 
-func TestTestUserQueuedReportsArePrioritizedOverUniversityReports(t *testing.T) {
+func TestUserQueuedReportsArePrioritizedOverUniversityReports(t *testing.T) {
 	manager := setup(t)
 
 	user := uuid.New()
