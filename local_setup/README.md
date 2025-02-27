@@ -255,16 +255,14 @@ grobid_endpoint: "http://70.233.60.118:8070/" # for local setup
 
   2. Create and configure the `.env` file:
 
-    - For local development:
-
-    ```
+  - For local development:
+    ```bash
     REACT_APP_API_URL=http://localhost
     REACT_APP_KEYCLOAK_URL=http://localhost/keycloak
     ```
 
-    - For hosted setup (replace example.com with your domain or IP):
-
-    ```
+  - For hosted setup (replace example.com with your domain or IP):
+    ```bash
     REACT_APP_API_URL=http://example.com
     REACT_APP_KEYCLOAK_URL=http://example.com/keycloak
     ```
