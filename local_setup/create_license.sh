@@ -8,13 +8,13 @@ LICENSE_URL="http://localhost/api/v1/license/create"
 ACTIVATE_LICENSE_URL="http://localhost/api/v1/report/activate-license"
 
 # Admin credentials for license creation
-ADMIN_USERNAME="admin_user" # To Change
-ADMIN_PASSWORD="admin_password" # To Change
+ADMIN_USERNAME="admin" # To Change
+ADMIN_PASSWORD="Password" # To Change
 ADMIN_CLIENT_ID="prism-admin-login-client"
 
 # User credentials for license activation
-USER_USERNAME="your_username" # To Change
-USER_PASSWORD="your_password" # To Change
+USER_USERNAME="pratik" # To Change
+USER_PASSWORD="Password" # To Change
 USER_CLIENT_ID="prism-user-login-client"
 
 # License details
