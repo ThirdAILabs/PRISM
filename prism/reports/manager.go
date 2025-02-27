@@ -41,7 +41,7 @@ func NewManager(db *gorm.DB, staleReportThreshold time.Duration) *ReportManager 
 func (r *ReportManager) ListAuthorReports(userId uuid.UUID) ([]api.Report, error) {
 	var reports []schema.UserAuthorReport
 
-	if err := r.db.Preload("Report").Order("created_at ASC").Find(&reports, "user_id = ?", userId).Error; err != nil {
+	if err := r.db.Preload("Report").Order("created_at DESC").Find(&reports, "user_id = ?", userId).Error; err != nil {
 		slog.Error("error finding list of reports ")
 		return nil, ErrReportAccessFailed
 	}
@@ -172,6 +172,18 @@ func (r *ReportManager) GetAuthorReport(userId, reportId uuid.UUID) (api.Report,
 	}
 
 	return convertReport(report)
+}
+
+func (r *ReportManager) DeleteAuthorReport(userId, reportId uuid.UUID) error {
+	result := r.db.Delete(&schema.UserAuthorReport{}, "id = ? AND user_id = ?", reportId, userId)
+	if result.Error != nil {
+		slog.Error("error deleting author report", "author_report_id", reportId, "error", result.Error)
+		return ErrReportAccessFailed
+	}
+	if result.RowsAffected != 1 {
+		return ErrReportNotFound
+	}
+	return nil
 }
 
 type ReportUpdateTask struct {
@@ -326,7 +338,7 @@ func convertReport(report schema.UserAuthorReport) (api.Report, error) {
 func (r *ReportManager) ListUniversityReports(userId uuid.UUID) ([]api.UniversityReport, error) {
 	var reports []schema.UserUniversityReport
 
-	if err := r.db.Preload("Report").Order("created_at ASC").Find(&reports, "user_id = ?", userId).Error; err != nil {
+	if err := r.db.Preload("Report").Order("created_at DESC").Find(&reports, "user_id = ?", userId).Error; err != nil {
 		slog.Error("error finding list of reports ")
 		return nil, ErrReportAccessFailed
 	}
@@ -504,6 +516,18 @@ func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.Uni
 	}
 
 	return convertUniversityReport(report, content), nil
+}
+
+func (r *ReportManager) DeleteUniversityReport(userId, reportId uuid.UUID) error {
+	result := r.db.Delete(&schema.UserUniversityReport{}, "id = ? AND user_id = ?", reportId, userId)
+	if result.Error != nil {
+		slog.Error("error deleting university report", "university_report_id", reportId, "error", result.Error)
+		return ErrReportAccessFailed
+	}
+	if result.RowsAffected != 1 {
+		return ErrReportNotFound
+	}
+	return nil
 }
 
 type UniversityReportUpdateTask struct {
