@@ -567,24 +567,18 @@ func (r *ReportManager) GetNextUniversityReport() (*UniversityReportUpdateTask, 
 func (r *ReportManager) queueAuthorReportUpdatesForUniversityReport(txn *gorm.DB, universityReportId uuid.UUID) error {
 	staleCutoff := time.Now().UTC().Add(-r.staleReportThreshold)
 
-	var staleAuthorReports []schema.AuthorReport
-	if err := txn.Model(&schema.AuthorReport{}).
-		Joins("JOIN university_authors ON university_authors.author_report_id == author_reports.id AND university_authors.university_report_id = ?", universityReportId).
+	result := txn.Model(&schema.AuthorReport{}).
+		Where("EXISTS (?)", txn.Table("university_authors").Where("university_authors.author_report_id == author_reports.id AND university_authors.university_report_id = ?", universityReportId)).
 		Where("author_reports.last_updated_at < ?", staleCutoff).
 		Where("author_reports.status IN ?", []string{schema.ReportFailed, schema.ReportCompleted}).
-		Find(&staleAuthorReports).Error; err != nil {
-		slog.Error("error finding stale author reports for university report", "university_report_id", universityReportId, "error", err)
+		Updates(map[string]any{"status": schema.ReportQueued, "queued_at": time.Now()})
+
+	if result.Error != nil {
+		slog.Error("error queueing stale author reports for university report", "university_report_id", universityReportId, "error", result.Error)
 		return ErrReportAccessFailed
 	}
 
-	for _, author := range staleAuthorReports {
-		if err := txn.Model(author).Updates(map[string]any{"status": schema.ReportQueued, "queued_at": time.Now()}).Error; err != nil {
-			slog.Error("error queueing stale author reports for university report", "author_report_id", author.Id, "university_report_id", universityReportId, "error", err)
-			return ErrReportAccessFailed
-		}
-	}
-
-	slog.Info("queued updates for author reports for university report", "n_author_reports", len(staleAuthorReports), "university_report_id", universityReportId)
+	slog.Info("queued updates for author reports for university report", "n_author_reports", result.RowsAffected, "university_report_id", universityReportId)
 	return nil
 }
 
