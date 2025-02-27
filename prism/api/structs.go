@@ -74,11 +74,11 @@ type UniversityReportContent struct {
 }
 
 type Author struct {
-	AuthorId          string
-	AuthorName        string
-	Institutions      []string
-	Source            string
-	Interests []string
+	AuthorId     string
+	AuthorName   string
+	Institutions []string
+	Source       string
+	Interests    []string
 }
 
 type GScholarSearchResults struct {

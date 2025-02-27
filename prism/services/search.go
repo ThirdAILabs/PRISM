@@ -141,7 +141,6 @@ func (s *SearchService) SearchGoogleScholar(r *http.Request) (any, error) {
 	}
 
 	return api.GScholarSearchResults{Authors: filterAuthorsBySimilarity(results, author), Cursor: nextCursor}, nil
-	// return api.GScholarSearchResults{Authors: results, Cursor: nextCursor}, nil
 }
 
 func cleanEntry(id uint64, text string) string {
