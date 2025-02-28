@@ -44,10 +44,21 @@
 
   5. Start the Keycloak server in development mode with the following command:
 
+  <details style="margin-left: 50px;">
+    <summary>For local setup on mac</summary>
+    
   ```bash
   bin/kc.sh start-dev --http-port=8180 --debug --bootstrap-admin-username temp_admin --bootstrap-admin-password password --hostname-strict false --proxy-headers forwarded --http-relative-path /keycloak
   ```
-
+  </details>
+  <details style="margin-left: 50px;">
+    <summary>For local setup on blade</summary>
+    
+  ```bash
+  bin/kc.sh start-dev --http-port=8180 --debug --bootstrap-admin-username temp_admin --bootstrap-admin-password password --hostname https://70.233.60.118/keycloak --hostname-admin https://70.233.60.118/keycloak  --hostname-backchannel-dynamic true  --http-relative-path /keycloak
+  ```
+  </details>
+  
   6. To view the admin dashboard go to `localhost:8180` in your browser and login with the credentials `temp_admin` and `password`.
 </details>
 <br>
@@ -103,7 +114,7 @@
   ```
   3. Make a copy of `cmd/backend/config_tmp.yaml`.
   ```bash
-  cp prism/cmd/backend/config_tmp.yaml prism/cmd/backend/config.yaml
+  cp prism/cmd/backend/config_tmpl.yaml prism/cmd/backend/config.yaml
   ```
   4. Fill in the `config.yaml`
 
@@ -209,7 +220,11 @@ go run cmd/backend/main.go --config "./cmd/backend/config.yaml"
 
   Grobid can be set up on Blade server and can be accessed by forwarding the port.
   
-  Run the command ```docker run --rm --init --ulimit core=0 -p 8070:8070 grobid/grobid:0.8.0```. This will start Grobid on port ```8070```.
+  Run the command 
+  ```bash
+  docker run --rm --init --ulimit core=0 -p 8070:8070 grobid/grobid:0.8.0
+  ```
+  This will start Grobid on port `8070`.
 </details>
 <br>
 
@@ -219,7 +234,7 @@ go run cmd/backend/main.go --config "./cmd/backend/config.yaml"
 
   1. Make a copy of `cmd/worker/config_tmp.yaml` and fill in the fields.
   ```bash
-  cp cmd/worker/config_tmp.yaml cmd/worker/config.yaml
+  cp cmd/worker/config_tmpl.yaml cmd/worker/config.yaml
   ```
 
   2. update the worker config `cmd/worker/config.yaml`:
@@ -265,14 +280,24 @@ grobid_endpoint: "http://localhost:8070/" # for local setup
   ```
 
   2. Create and configure the `.env` file:
+  ```bash
+  cp frontend/.env.example frontend/.env
+  ```
 
-  __Important Note__: Please ensure that you enter the URL values without quotes and remove any inline comments that might appear on the same line.
+  __Important Note__: Please ensure that you enter the URL values without quotes, no trailing spaces and remove any inline comments that might appear on the same line.
 
   - For local development:
     ```bash
     REACT_APP_API_URL=http://localhost
     REACT_APP_KEYCLOAK_URL=http://localhost/keycloak
     ```
+  
+  - For local development on blade:
+    ```bash
+    REACT_APP_API_URL=https://70.233.60.118
+    REACT_APP_KEYCLOAK_URL=https://70.233.60.118/keycloak
+    ```
+    - Add the entry `WDS_SOCKET_PORT=0` in frontend/.env
 
   - For hosted setup (replace example.com with your domain or IP):
     ```bash
@@ -294,3 +319,25 @@ grobid_endpoint: "http://localhost:8070/" # for local setup
 
   The frontend will be accessible at `http://localhost` in your browser.
 </details>
+<br>
+
+# Accessing the prism through blade public IP
+- **You need sudo access on node1 for this. Or ask any sudoer to follow these steps in the last**
+
+- `Node1` have been configured to route all https traffic on port 80 to `node5` port 80 (traefik entrypoint)
+<div style="margin-left: 30px;">
+
+  ### If local setup is on blade machine other than `node5`, 
+  Follow these steps on `node1`
+
+  1. open `/etc/nginx/sites-available/app-proxy` file with vim/nano and edit the line
+  ```bash
+  proxy_pass http://<blade machine's private IP running your setup>:80/;
+  ``` 
+  2. Run the command
+  ```bash
+  sudo systemctl reload nginx
+  ```
+</div>
+
+- You should be able to access the prism at `https://70.233.60.118:/`
