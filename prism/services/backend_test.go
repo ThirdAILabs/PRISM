@@ -824,7 +824,7 @@ func TestAutocompleteAuthor(t *testing.T) {
 
 	user := newUser()
 
-	var results []api.Author
+	var results []api.Autocompletion
 	err := mockRequest(backend, "GET", "/autocomplete/author?query="+url.QueryEscape("anshumali shriva"), user, nil, &results)
 	if err != nil {
 		t.Fatal(err)
@@ -835,9 +835,8 @@ func TestAutocompleteAuthor(t *testing.T) {
 	}
 
 	for _, res := range results {
-		if !strings.HasPrefix(res.AuthorId, "https://openalex.org/") ||
-			!strings.EqualFold(res.AuthorName, "Anshumali Shrivastava") ||
-			res.Source != "openalex" {
+		if !strings.HasPrefix(res.Id, "https://openalex.org/") ||
+			!strings.EqualFold(res.Name, "Anshumali Shrivastava") {
 			t.Fatal("invalid result")
 		}
 	}
@@ -848,7 +847,7 @@ func TestAutocompleteInstution(t *testing.T) {
 
 	user := newUser()
 
-	var results []api.Institution
+	var results []api.Autocompletion
 	err := mockRequest(backend, "GET", "/autocomplete/institution?query="+url.QueryEscape("rice univer"), user, nil, &results)
 	if err != nil {
 		t.Fatal(err)
@@ -859,11 +858,36 @@ func TestAutocompleteInstution(t *testing.T) {
 	}
 
 	for _, res := range results {
-		if !strings.HasPrefix(res.InstitutionId, "https://openalex.org/") ||
-			!strings.EqualFold(res.InstitutionName, "Rice University") ||
-			!strings.EqualFold(res.Location, "Houston, USA") {
+		if !strings.HasPrefix(res.Id, "https://openalex.org/") ||
+			!strings.EqualFold(res.Name, "Rice University") ||
+			!strings.EqualFold(res.Hint, "Houston, USA") {
 			t.Fatal("invalid result")
 		}
+	}
+}
+
+func TestAutocompletePaper(t *testing.T) {
+	backend, _ := createBackend(t)
+
+	user := newUser()
+
+	query := "From Research to Production: Towards Scalable and Sustainable Neural Recommendation"
+	var results []api.Autocompletion
+	err := mockRequest(backend, "GET", "/autocomplete/paper?query="+url.QueryEscape(query), user, nil, &results)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(results) != 1 {
+		t.Fatal("should have 1 result")
+	}
+
+	expectedTitle := "From Research to Production: Towards Scalable and Sustainable Neural Recommendation Models on Commodity CPU Hardware"
+
+	if !strings.HasPrefix(results[0].Id, "https://openalex.org/") ||
+		!strings.EqualFold(results[0].Name, expectedTitle) ||
+		!strings.HasPrefix(results[0].Hint, "Anshumali Shrivastava") {
+		t.Fatal("invalid result")
 	}
 }
 

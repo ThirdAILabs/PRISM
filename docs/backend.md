@@ -469,20 +469,14 @@ __Example Response__:
 ```json
 [
     {
-        "AuthorId": "https://openalex.org/A5108903505",
-        "AuthorName": "Anshumali Shrivastava",
-        "Institutions": [
-            ""
-        ],
-        "Source": "openalex"
+        "Id": "https://openalex.org/A5108903505",
+        "Name": "Anshumali Shrivastava",
+        "Hint": "",
     },
     {
-        "AuthorId": "https://openalex.org/A5024993683",
-        "AuthorName": "Anshumali Shrivastava",
-        "Institutions": [
-            "Rice University, USA"
-        ],
-        "Source": "openalex"
+        "Id": "https://openalex.org/A5024993683",
+        "Name": "Anshumali Shrivastava",
+        "Hint": "Rice University, USA"
     }
 ]
 ```
@@ -503,9 +497,32 @@ __Example Response__:
 ```json
 [
     {
-        "InstitutionId": "https://openalex.org/I74775410",
-        "InstitutionName": "Rice University",
-        "Location": "Houston, USA"
+        "Id": "https://openalex.org/I74775410",
+        "Name": "Rice University",
+        "Hint": "Houston, USA"
+    }
+]
+```
+
+## Autocomplete Papers
+
+| Method | Path | Auth Required | Permissions |
+| ------ | ---- | ------------- | ----------  |
+| `GET` | `/api/v1/autocomplete/paper?query=<start of paper title>` | Yes | Token for Keycloak User Realm |
+
+Generates autocompletion suggestions for the given paper title. The tile query is specified in the `query` url query parameter.
+
+__Example Request__: 
+```
+GET http://example.com/autocomplete/paper?query=From+Research+to+Production%3A+Towards+Scalable+and+Sustainable+Neural+Recommendation
+```
+__Example Response__:
+```json
+[
+    {
+        "Id": "https://openalex.org/W4386729297",
+        "Name": "From Research to Production: Towards Scalable and Sustainable Neural Recommendation Models on Commodity CPU Hardware",
+        "Hint": "Anshumali Shrivastava, Vihan Lakshman, Tharun Medini, et al."
     }
 ]
 ```

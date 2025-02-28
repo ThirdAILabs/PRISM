@@ -22,17 +22,12 @@ func TestAutocompleteAuthor(t *testing.T) {
 
 	found := false
 	for _, res := range results {
-		if !strings.HasPrefix(res.AuthorId, "https://openalex.org/") ||
-			!strings.EqualFold(res.DisplayName, "Anshumali Shrivastava") {
+		if !strings.HasPrefix(res.Id, "https://openalex.org/") ||
+			!strings.EqualFold(res.Name, "Anshumali Shrivastava") {
 			t.Fatal("invalid result")
 		}
-
-		for _, inst := range res.Institutions {
-			if !strings.HasPrefix(inst.InstitutionId, "https://openalex.org/") ||
-				strings.EqualFold(inst.InstitutionName, "Rice University, USA") {
-				found = true
-				break
-			}
+		if strings.EqualFold(res.Hint, "Rice University, USA") {
+			found = true
 		}
 	}
 
@@ -49,16 +44,35 @@ func TestAutocompleteInstitution(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(results) == 0 {
-		t.Fatal("should have some results")
+	if len(results) != 1 {
+		t.Fatal("should have 1 result")
 	}
 
-	for _, res := range results {
-		if !strings.HasPrefix(res.InstitutionId, "https://openalex.org/") ||
-			!strings.EqualFold(res.InstitutionName, "Rice University") ||
-			!strings.EqualFold(res.Location, "Houston, USA") {
-			t.Fatal("invalid result")
-		}
+	if !strings.HasPrefix(results[0].Id, "https://openalex.org/") ||
+		!strings.EqualFold(results[0].Name, "Rice University") ||
+		!strings.EqualFold(results[0].Hint, "Houston, USA") {
+		t.Fatal("invalid result")
+	}
+}
+
+func TestAutocompletePaper(t *testing.T) {
+	oa := openalex.NewRemoteKnowledgeBase()
+
+	results, err := oa.AutocompletePaper("From Research to Production: Towards Scalable and Sustainable Neural Recommendation")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(results) != 1 {
+		t.Fatal("should have 1 result")
+	}
+
+	expectedTitle := "From Research to Production: Towards Scalable and Sustainable Neural Recommendation Models on Commodity CPU Hardware"
+
+	if !strings.HasPrefix(results[0].Id, "https://openalex.org/") ||
+		!strings.EqualFold(results[0].Name, expectedTitle) ||
+		!strings.HasPrefix(results[0].Hint, "Anshumali Shrivastava") {
+		t.Fatal("invalid result")
 	}
 }
 

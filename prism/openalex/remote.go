@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"prism/prism/api"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -48,7 +49,7 @@ type oaAutocompletion struct {
 	Hint        string `json:"hint"`
 }
 
-func (oa *RemoteKnowledgeBase) autocompleteHelper(component, query string) ([]oaAutocompletion, error) {
+func (oa *RemoteKnowledgeBase) autocompleteHelper(component, query string) ([]api.Autocompletion, error) {
 	res, err := oa.client.R().
 		SetResult(&oaResults[oaAutocompletion]{}).
 		SetQueryParam("q", query).
@@ -64,43 +65,30 @@ func (oa *RemoteKnowledgeBase) autocompleteHelper(component, query string) ([]oa
 		return nil, fmt.Errorf("unable to get autocomplete suggestions")
 	}
 
-	return res.Result().(*oaResults[oaAutocompletion]).Results, nil
-}
+	results := res.Result().(*oaResults[oaAutocompletion])
 
-func (oa *RemoteKnowledgeBase) AutocompleteAuthor(query string) ([]Author, error) {
-	suggestions, err := oa.autocompleteHelper("authors", query)
-	if err != nil {
-		return nil, err
-	}
-
-	authors := make([]Author, 0, len(suggestions))
-	for _, author := range suggestions {
-		authors = append(authors, Author{
-			AuthorId:     author.Id,
-			DisplayName:  author.DisplayName,
-			Institutions: []Institution{{InstitutionName: author.Hint}},
+	autocompletions := make([]api.Autocompletion, 0, len(results.Results))
+	for _, result := range results.Results {
+		autocompletions = append(autocompletions, api.Autocompletion{
+			Id:   result.Id,
+			Name: result.DisplayName,
+			Hint: result.Hint,
 		})
 	}
 
-	return authors, nil
+	return autocompletions, nil
 }
 
-func (oa *RemoteKnowledgeBase) AutocompleteInstitution(query string) ([]Institution, error) {
-	suggestions, err := oa.autocompleteHelper("institutions", query)
-	if err != nil {
-		return nil, err
-	}
+func (oa *RemoteKnowledgeBase) AutocompleteAuthor(query string) ([]api.Autocompletion, error) {
+	return oa.autocompleteHelper("authors", query)
+}
 
-	institutions := make([]Institution, 0, len(suggestions))
-	for _, institution := range suggestions {
-		institutions = append(institutions, Institution{
-			InstitutionName: institution.DisplayName,
-			InstitutionId:   institution.Id,
-			Location:        institution.Hint,
-		})
-	}
+func (oa *RemoteKnowledgeBase) AutocompleteInstitution(query string) ([]api.Autocompletion, error) {
+	return oa.autocompleteHelper("institutions", query)
+}
 
-	return institutions, nil
+func (oa *RemoteKnowledgeBase) AutocompletePaper(query string) ([]api.Autocompletion, error) {
+	return oa.autocompleteHelper("works", query)
 }
 
 // Response Format: https://docs.openalex.org/api-entities/authors/get-lists-of-authors

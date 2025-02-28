@@ -73,6 +73,12 @@ type UniversityReportContent struct {
 	Flags           map[string][]UniversityAuthorFlag
 }
 
+type Autocompletion struct {
+	Id   string
+	Name string
+	Hint string
+}
+
 type Author struct {
 	AuthorId     string
 	AuthorName   string
