@@ -59,7 +59,7 @@ cd keycloak-26.0.0/
   
 
 ```bash
-  bin/kc.sh start-dev --http-port=8180 --debug --bootstrap-admin-username temp_admin --bootstrap-admin-password password --hostname-strict false --proxy-headers forwarded --http-relative-path /keycloak
+  bin/kc.sh start-dev --http-port=8180 --debug --bootstrap-admin-username temp_admin --bootstrap-admin-password password --hostname https://localhost/keycloak --hostname-admin https://localhost/keycloak  --hostname-backchannel-dynamic true  --http-relative-path /keycloak
   ```
 
   </details>
