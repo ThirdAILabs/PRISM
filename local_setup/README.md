@@ -358,7 +358,7 @@ The frontend will be accessible at `http://localhost` in your browser.
 </details>
 <br>
 
-# Updating the prism running on blade public IP
+# Updating the Prism running on Blade's public IP
 
 ## Frontend Changes
 
