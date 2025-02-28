@@ -4,7 +4,7 @@ import './SearchBar.css';
 import '../tools/button/button1.css';
 import useCallOnPause from '../../../hooks/useCallOnPause';
 
-function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
+function AutocompleteSearchBar({ title, autocomplete, onSelect, showHint }) {
   const [suggestions, setSuggestions] = useState([]);
   const [query, setQuery] = useState('');
 
@@ -16,15 +16,7 @@ function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
   function handleSelectSuggestion(suggestion) {
     return () => {
       setSuggestions([]);
-      setQuery(type === 'author' ? suggestion.AuthorName : suggestion.InstitutionName);
-      onSelect(suggestion);
-    };
-  }
-
-  function handleSelectSuggestionInstitute(suggestion) {
-    return () => {
-      setSuggestions([]);
-      setQuery(suggestion.InstitutionName);
+      setQuery(suggestion.Name);
       onSelect(suggestion);
     };
   }
@@ -42,20 +34,12 @@ function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
         // Autocomplete suggestion container. Column.
         <div className="suggestion-container">
           {suggestions.map((suggestion, index) =>
+          (
             // Clickable suggestion
-            type === 'author' ? (
-              <div className="suggestion" key={index} onClick={handleSelectSuggestion(suggestion)}>
-                {suggestion.AuthorName}
-              </div>
-            ) : (
-              <div
-                className="suggestion"
-                key={index}
-                onClick={handleSelectSuggestionInstitute(suggestion)}
-              >
-                {suggestion.InstitutionName}
-              </div>
-            )
+            <div className="suggestion" key={index} onClick={handleSelectSuggestion(suggestion)} style={{display: "flex", alignItems: 'end'}}>
+              <p style={{ marginRight: "20px"}}>{suggestion.Name}</p> {showHint && <p style={{  marginBottom: "16.5px", fontSize: 'small', fontStyle: "italic" }}>{suggestion.Hint}</p>}
+            </div>
+          )
           )}
         </div>
       )}
@@ -120,7 +104,7 @@ export function AuthorInstiutionSearchBar({ onSearch }) {
           title="Author"
           autocomplete={autocompleteAuthor}
           onSelect={setAuthor}
-          type={'author'}
+          showHint={false}
         />
       </div>
 
@@ -129,7 +113,7 @@ export function AuthorInstiutionSearchBar({ onSearch }) {
           title="Institution"
           autocomplete={autocompleteInstitution}
           onSelect={setInstitution}
-          type={'institute'}
+          showHint={true}
         />
       </div>
 
