@@ -883,27 +883,66 @@ func TestMatchEntities(t *testing.T) {
 	}
 }
 
-func TestSearchOpenalexAuthors(t *testing.T) {
+func TestSearchAuthors(t *testing.T) {
 	backend, _ := createBackend(t)
 
 	user := newUser()
 
-	authorName := "anshumali shrivastava"
-	insitutionId := "https://openalex.org/I74775410"
+	t.Run("Search By Author Name", func(t *testing.T) {
+		authorName := "anshumali shrivastava"
+		insitutionId := "https://openalex.org/I74775410"
+		institutionName := "Rice University"
 
-	url := fmt.Sprintf("/search/regular?author_name=%s&institution_id=%s", url.QueryEscape(authorName), url.QueryEscape(insitutionId))
-	var results []api.Author
-	err := mockRequest(backend, "GET", url, user, nil, &results)
-	if err != nil {
-		t.Fatal(err)
-	}
+		url := fmt.Sprintf("/search/authors?author_name=%s&institution_id=%s&institution_name=%s", url.QueryEscape(authorName), url.QueryEscape(insitutionId), url.QueryEscape(institutionName))
+		var results []api.Author
+		err := mockRequest(backend, "GET", url, user, nil, &results)
+		if err != nil {
+			t.Fatal(err)
+		}
 
-	if len(results) != 1 || !strings.HasPrefix(results[0].AuthorId, "https://openalex.org/") ||
-		results[0].AuthorName != "Anshumali Shrivastava" ||
-		len(results[0].Institutions) == 0 || !slices.Contains(results[0].Institutions, "Rice University") ||
-		results[0].Source != "openalex" {
-		t.Fatal("incorrect authors returned")
-	}
+		if len(results) != 1 || !strings.HasPrefix(results[0].AuthorId, "https://openalex.org/") ||
+			results[0].AuthorName != "Anshumali Shrivastava" ||
+			len(results[0].Institutions) == 0 || !slices.Contains(results[0].Institutions, "Rice University") ||
+			results[0].Source != "openalex" {
+			t.Fatal("incorrect authors returned")
+		}
+	})
+
+	t.Run("Search By ORCID", func(t *testing.T) {
+		orcidId := "0000-0002-5042-2856"
+
+		url := fmt.Sprintf("/search/authors?orcid=%s", url.QueryEscape(orcidId))
+		var results []api.Author
+		err := mockRequest(backend, "GET", url, user, nil, &results)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(results) != 1 || !strings.HasPrefix(results[0].AuthorId, "https://openalex.org/") ||
+			results[0].AuthorName != "Anshumali Shrivastava" ||
+			len(results[0].Institutions) == 0 || !slices.Contains(results[0].Institutions, "Rice University") ||
+			results[0].Source != "openalex" {
+			t.Fatal("incorrect authors returned")
+		}
+	})
+
+	t.Run("Search By Paper Title", func(t *testing.T) {
+		title := "From Research to Production: Towards Scalable and Sustainable Neural Recommendation Models on Commodity CPU Hardware"
+
+		url := fmt.Sprintf("/search/authors?paper_title=%s", url.QueryEscape(title))
+		var results []api.Author
+		err := mockRequest(backend, "GET", url, user, nil, &results)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(results) < 1 || !strings.HasPrefix(results[0].AuthorId, "https://openalex.org/") ||
+			results[0].AuthorName == "" ||
+			len(results[0].Institutions) == 0 ||
+			results[0].Source != "openalex" {
+			t.Fatal("expected > 0 results")
+		}
+	})
 }
 
 func TestSearchGoogleScholarAuthors(t *testing.T) {
@@ -913,7 +952,7 @@ func TestSearchGoogleScholarAuthors(t *testing.T) {
 
 	authorName := "anshumali shrivastava"
 
-	url := fmt.Sprintf("/search/advanced?author_name=%s&institution_name=%s", url.QueryEscape(authorName), url.QueryEscape("rice university"))
+	url := fmt.Sprintf("/search/authors-advanced?author_name=%s&institution_name=%s", url.QueryEscape(authorName), url.QueryEscape("rice university"))
 	var results api.GScholarSearchResults
 	err := mockRequest(backend, "GET", url, user, nil, &results)
 	if err != nil {
@@ -947,7 +986,7 @@ func TestSearchGoogleScholarAuthorsWithCursor(t *testing.T) {
 
 	authorName := "bill zhang"
 
-	url1 := fmt.Sprintf("/search/advanced?author_name=%s&institution_name=any", url.QueryEscape(authorName))
+	url1 := fmt.Sprintf("/search/authors-advanced?author_name=%s&institution_name=any", url.QueryEscape(authorName))
 	var results1 api.GScholarSearchResults
 	if err := mockRequest(backend, "GET", url1, user, nil, &results1); err != nil {
 		t.Fatal(err)
@@ -955,7 +994,7 @@ func TestSearchGoogleScholarAuthorsWithCursor(t *testing.T) {
 
 	checkQuery(results1.Authors)
 
-	url2 := fmt.Sprintf("/search/advanced?author_name=%s&institution_name=any&cursor=%s", url.QueryEscape(authorName), results1.Cursor)
+	url2 := fmt.Sprintf("/search/authors-advanced?author_name=%s&institution_name=any&cursor=%s", url.QueryEscape(authorName), results1.Cursor)
 	var results2 api.GScholarSearchResults
 	if err := mockRequest(backend, "GET", url2, user, nil, &results2); err != nil {
 		t.Fatal(err)

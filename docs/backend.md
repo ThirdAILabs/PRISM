@@ -512,17 +512,24 @@ __Example Response__:
 
 # Search Endpoints
 
-## Search Openalex Authors
+## Search Authors
 
 | Method | Path | Auth Required | Permissions |
 | ------ | ---- | ------------- | ----------  |
-| `GET` | `/api/v1/search/regular?author_name=<author name>&institution_id=<institution_id>` | Yes | Token for Keycloak User Realm |
+| `GET` | `/api/v1/search/authors` | Yes | Token for Keycloak User Realm |
 
-Searches for authors on openalex matching the given name and institution id. The `institution_id` and `author_name` are passed as url query parameters. The institution id can come from the `InstitutionId` field returned from the institution autocompletion endpoint.
+Searches for authors on openalex using one of the following filters. 
+1. Author Name: Must specify the only following query parameters `author_name`, `institution_id`, and `institution_name`. The institution id can come from the `InstitutionId` field returned from the institution autocompletion endpoint.
+2. ORCID: Must specify only the `orcid` query parameter. Will return a single author for the given orcid, or 404 if no author is found.
+3. Paper Title: Must specify only the `paper_title` query parameter. Will return the authors for the given paper, or 404 if no paper matching the title is found.
 
 __Example Request__: 
 ```
-GET http://example.com/search/regular?author_name=anshumali+shrivastava&institution_id=https%3A%2F%2Fopenalex.org%2FI74775410
+GET http://example.com/search/authors?author_name=anshumali+shrivastava&institution_id=https%3A%2F%2Fopenalex.org%2FI74775410&institution_name=Rice+University
+
+GET http://example.com/search/authors?orcid=0000-0002-5042-2856
+
+GET http://example.com/search/authors?paper_title=From+Research+to+Production%3A+Towards+Scalable+and+Sustainable+Neural+Recommendation+Models+on+Commodity+CPU+Hardware
 ```
 __Example Response__:
 ```json
