@@ -392,7 +392,6 @@ The frontend will be accessible at `http://localhost` in your browser.
 * `Node1` have been configured to route all https traffic on port 80 to `node5` port 80 (traefik entrypoint)
 
   + Follow these steps on `node1`:
-    How we are hosting:
 
         We are running an Nginx reverse proxy configuration that:
 
