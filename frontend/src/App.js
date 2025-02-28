@@ -5,6 +5,7 @@ import ItemDetails from './components/pages/itemDetails/page';
 import EntityLookup from './components/pages/entityLookup/page';
 import UserService from './services/userService';
 import { useUser } from './store/userContext';
+import SearchProviderWrapper from './components/SearchProviderWrapper';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.js';
@@ -26,8 +27,10 @@ function App() {
     <div className="App">
       <Router>
         <Routes>
-          <Route path="/" element={<SearchComponent />} />
-          <Route path="/:report_id" element={<ItemDetails />} />
+          <Route element={<SearchProviderWrapper />}>
+            <Route path="/" element={<SearchComponent />} />
+            <Route path="/:report_id" element={<ItemDetails />} />
+          </Route>
           <Route path="/entity-lookup" element={<EntityLookup />} />
         </Routes>
       </Router>

@@ -1,12 +1,16 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { autocompleteService } from '../../../api/autocomplete';
 import './SearchBar.css';
 import '../tools/button/button1.css';
 import useCallOnPause from '../../../hooks/useCallOnPause';
 
-function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
+function AutocompleteSearchBar({ title, autocomplete, onSelect, type, defaultValue = '' }) {
   const [suggestions, setSuggestions] = useState([]);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(defaultValue);
+
+  useEffect(() => {
+    setQuery(defaultValue);
+  }, [defaultValue]);
 
   function handleInputChange(e) {
     setQuery(e.target.value);
@@ -63,9 +67,9 @@ function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
   );
 }
 
-export function AuthorInstiutionSearchBar({ onSearch }) {
-  const [author, setAuthor] = useState();
-  const [institution, setInstitution] = useState();
+export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInstitution }) {
+  const [author, setAuthor] = useState(defaultAuthor || null);
+  const [institution, setInstitution] = useState(defaultInstitution || null);
   const [results, setResults] = useState([]);
   const debouncedSearch = useCallOnPause(300); // 300ms delay
 
@@ -121,6 +125,7 @@ export function AuthorInstiutionSearchBar({ onSearch }) {
           autocomplete={autocompleteAuthor}
           onSelect={setAuthor}
           type={'author'}
+          defaultValue={defaultAuthor ? defaultAuthor.AuthorName : ''}
         />
       </div>
 
@@ -130,6 +135,7 @@ export function AuthorInstiutionSearchBar({ onSearch }) {
           autocomplete={autocompleteInstitution}
           onSelect={setInstitution}
           type={'institute'}
+          defaultValue={defaultInstitution ? defaultInstitution.InstitutionName : ''}
         />
       </div>
 

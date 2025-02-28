@@ -1,5 +1,5 @@
 // src/SearchComponent.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import TodoListComponent from '../TodoListComponent';
 import { AuthorInstiutionSearchBar } from '../common/searchBar/SearchBar';
@@ -8,39 +8,37 @@ import '../common/searchBar/SearchBar.css';
 import '../common/tools/button/button1.css';
 import UserService from '../../services/userService';
 import { searchService } from '../../api/search';
-import { reportService } from '../../api/reports';
+import { SearchContext } from '../../store/searchContext';
 
 const SearchComponent = () => {
-  const [query, setQuery] = useState('');
-  const [author, setAuthor] = useState();
-  const [hasSearched, setHasSearched] = useState(false);
-  const [institution, setInstitution] = useState();
   const [results, setResults] = useState([]);
-  const [openAlexResults, setOpenAlexResults] = useState([]);
   const [isOALoading, setIsOALoading] = useState([]);
   const [loadMoreCount, setLoadMoreCount] = useState(0);
-  const [canLoadMore, setCanLoadMore] = useState(true);
+
+  const { searchState, setSearchState } = useContext(SearchContext);
+  const { query, author, institution, openAlexResults, hasSearched, canLoadMore } = searchState;
 
   const search = async (author, institution) => {
+    setSearchState((prev) => ({
+      ...prev,
+      author: author,
+      institution: institution,
+      query: `${author.AuthorName} ${institution ? institution.InstitutionName : ''}`,
+      openAlexResults: [],
+      hasSearched: false,
+      loadMoreCount: 0,
+      canLoadMore: true,
+    }));
     searchOpenAlex(author, institution);
     // setIsLoadingScopus(true);
-    setAuthor(author);
-    setInstitution(institution);
-    setHasSearched(false);
-    setQuery(`${author.AuthorName} ${institution ? institution.InstitutionName : ''}`);
-    setResults([]);
-    setLoadMoreCount(0);
-    setHasSearched(true);
-    setCanLoadMore(true);
   };
 
   const searchOpenAlex = async (author, institution) => {
-    setIsOALoading(true);
-    setAuthor(author);
-    setInstitution(institution);
-    setHasSearched(false);
-    setQuery(`${author.AuthorName} ${institution ? institution.InstitutionName : ''}`);
-    setResults([]);
+    setSearchState((prev) => ({
+      ...prev,
+      isOALoading: true,
+      query: `${author.AuthorName} ${institution ? institution.InstitutionName : ''}`,
+    }));
 
     const result = await searchService.searchOpenalexAuthors(
       author.AuthorName,
@@ -48,10 +46,13 @@ const SearchComponent = () => {
       institution.InstitutionName
     );
     console.log('result in openAlex', result);
-    setOpenAlexResults(result);
-    setIsOALoading(false);
-    setLoadMoreCount(0);
-    setHasSearched(true);
+    setSearchState((prev) => ({
+      ...prev,
+      openAlexResults: result,
+      isOALoading: false,
+      loadMoreCount: 0,
+      hasSearched: true,
+    }));
   };
 
   return (
@@ -123,14 +124,20 @@ const SearchComponent = () => {
         </div>
         <div className="d-flex justify-content-center align-items-center pt-5">
           <div style={{ width: '80%', animation: 'fade-in 1.25s' }}>
-            <AuthorInstiutionSearchBar onSearch={search} />
+            <AuthorInstiutionSearchBar
+              onSearch={search}
+              defaultAuthor={author}
+              defaultInstitution={institution}
+            />
           </div>
         </div>
       </div>
       {hasSearched && (
         <TodoListComponent
           results={openAlexResults}
-          setResults={setOpenAlexResults}
+          setResults={(newResults) =>
+            setSearchState((prev) => ({ ...prev, openAlexResults: newResults }))
+          }
           canLoadMore={canLoadMore}
           loadMore={async () => {
             if (!canLoadMore) {
@@ -141,7 +148,7 @@ const SearchComponent = () => {
               institution.InstitutionName,
               null
             );
-            setCanLoadMore(false);
+            setSearchState((prev) => ({ ...prev, canLoadMore: false }));
             return result.Authors;
           }}
         />
