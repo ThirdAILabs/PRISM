@@ -221,8 +221,6 @@ func filterMatchesWorker(task verificationTask) (verificationTask, error) {
 }
 
 func (store *EntityStore) SearchEntities(logger *slog.Logger, queries []string) (map[string]SourceToAliases, error) {
-	logger.Info("searching for entities", "queries", strings.Join(queries, ","))
-
 	queue := make(chan verificationTask, len(queries))
 	for _, query := range queries {
 		ndbMatches, err := store.ndbLookup(query)

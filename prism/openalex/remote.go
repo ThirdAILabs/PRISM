@@ -107,6 +107,7 @@ type oaAuthor struct {
 	DisplayNameAlternatives []string        `json:"display_name_alternatives"`
 	WorksCount              int             `json:"works_count"`
 	Affiliations            []oaAffiliation `json:"affiliations"`
+	Concepts                []oaConcept     `json:"x_concepts"`
 }
 
 type oaInstitution struct {
@@ -117,6 +118,10 @@ type oaInstitution struct {
 
 type oaAffiliation struct {
 	Institution oaInstitution `json:"institution"`
+}
+
+type oaConcept struct {
+	DisplayName string `json:"display_name"`
 }
 
 func (oa *RemoteKnowledgeBase) FindAuthors(authorName, institutionId string) ([]Author, error) {
@@ -151,12 +156,18 @@ func (oa *RemoteKnowledgeBase) FindAuthors(authorName, institutionId string) ([]
 				}
 			}
 
+			concepts := make([]string, 0, len(result.Concepts))
+			for _, concept := range result.Concepts {
+				concepts = append(concepts, concept.DisplayName)
+			}
+
 			authors = append(authors, Author{
 				AuthorId:                result.Id,
 				DisplayName:             result.DisplayName,
 				DisplayNameAlternatives: result.DisplayNameAlternatives,
 				RawAuthorName:           nil,
 				Institutions:            institutions,
+				Concepts:                concepts,
 			})
 		}
 	}

@@ -2,16 +2,20 @@ import axiosInstance from './axios.config';
 import { API_ROUTES } from './constants';
 
 export const searchService = {
-  searchOpenalexAuthors: async (authorName, institutionId) => {
+  searchOpenalexAuthors: async (authorName, institutionId, institutionName) => {
     const response = await axiosInstance.get(API_ROUTES.SEARCH.REGULAR, {
-      params: { author_name: authorName, institution_id: institutionId },
+      params: {
+        author_name: authorName,
+        institution_id: institutionId,
+        institution_name: institutionName,
+      },
     });
     return response.data;
   },
 
-  searchGoogleScholarAuthors: async (query, cursor) => {
+  searchGoogleScholarAuthors: async (authorName, institutionName, cursor) => {
     const response = await axiosInstance.get(API_ROUTES.SEARCH.ADVANCED, {
-      params: { query, cursor },
+      params: { author_name: authorName, institution_name: institutionName, cursor: cursor },
     });
     return response.data;
   },

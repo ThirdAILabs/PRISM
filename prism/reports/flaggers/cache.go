@@ -44,8 +44,6 @@ func (cache *DataCache[T]) Close() error {
 }
 
 func (cache *DataCache[T]) Lookup(key string) *T {
-	cache.logger.Info("checking cache", "key", key)
-
 	var entry *T
 	err := cache.db.View(func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket(cache.bucket)
@@ -65,18 +63,10 @@ func (cache *DataCache[T]) Lookup(key string) *T {
 		return nil // No error since cache update isn't critical
 	}
 
-	if entry != nil {
-		cache.logger.Info("found cached entry", "key", key)
-	} else {
-		cache.logger.Info("no cached entry found", "key", key)
-	}
-
 	return entry
 }
 
 func (cache *DataCache[T]) Update(key string, entry T) {
-	cache.logger.Info("updating cache", "key", key)
-
 	data, err := json.Marshal(entry)
 	if err != nil {
 		cache.logger.Error("error updating cache: error serializing data", "key", key, "error", err)
@@ -89,6 +79,4 @@ func (cache *DataCache[T]) Update(key string, entry T) {
 		cache.logger.Error("cache update failed", "key", key, "error", err)
 		return // No error since cache update isn't critical
 	}
-
-	cache.logger.Info("successfully updated cache", "key", key)
 }

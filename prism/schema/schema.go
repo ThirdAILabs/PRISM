@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -22,8 +23,9 @@ type AuthorReport struct {
 	AuthorName string
 	Source     string
 
-	QueuedAt time.Time
-	Status   string `gorm:"size:20;not null"`
+	QueuedAt     time.Time
+	Status       string `gorm:"size:20;not null"`
+	QueuedByUser bool
 
 	Flags []AuthorFlag `gorm:"foreignKey:ReportId;constraint:OnDelete:CASCADE"`
 }
@@ -33,6 +35,7 @@ type AuthorFlag struct {
 	ReportId uuid.UUID `gorm:"type:uuid"`
 	FlagType string    `gorm:"size:40;not null"`
 	FlagKey  string
+	Date     sql.NullTime
 	Data     []byte
 }
 

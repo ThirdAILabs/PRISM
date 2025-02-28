@@ -9,17 +9,55 @@ import (
 	"prism/prism/gscholar"
 	"prism/prism/llms"
 	"prism/prism/openalex"
+	"prism/prism/reports/flaggers"
 	"prism/prism/search"
+	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
 )
 
+const institutionNameSimilarityThreshold = 0.8
+
 type SearchService struct {
 	openalex openalex.KnowledgeBase
 
 	entityNdb search.NeuralDB
+}
+
+func hybridInstitutionNamesSort(originalInstitution string, institutionNames []string, similarityThreshold float64) []string {
+	// put the institutes with name similar to the Original Institution at the front
+	// sort the rest alphabetically
+
+	type InstitutionSimilarity struct {
+		Name       string
+		Similarity float64
+	}
+	var similarInstitutesSimilarity []InstitutionSimilarity
+	var differentInstitutes []string
+
+	for _, inst := range institutionNames {
+		if similarity := flaggers.JaroWinklerSimilarity(originalInstitution, inst); similarity >= similarityThreshold {
+			similarInstitutesSimilarity = append(similarInstitutesSimilarity, InstitutionSimilarity{Name: inst, Similarity: similarity})
+		} else {
+			differentInstitutes = append(differentInstitutes, inst)
+		}
+	}
+
+	// sort the similar institutes by similarity
+	sort.Slice(similarInstitutesSimilarity, func(i, j int) bool {
+		return similarInstitutesSimilarity[i].Similarity > similarInstitutesSimilarity[j].Similarity
+	})
+	similarInstitutes := make([]string, len(similarInstitutesSimilarity))
+	for i, inst := range similarInstitutesSimilarity {
+		similarInstitutes[i] = inst.Name
+	}
+
+	// sort the different institutes alphabetically
+	sort.Strings(differentInstitutes)
+	finalList := append(similarInstitutes, differentInstitutes...)
+	return finalList
 }
 
 func (s *SearchService) Routes() chi.Router {
@@ -36,7 +74,7 @@ var ErrSearchFailed = errors.New("error performing search")
 
 func (s *SearchService) SearchOpenAlex(r *http.Request) (any, error) {
 	query := r.URL.Query()
-	author, institution := query.Get("author_name"), query.Get("institution_id")
+	author, institution, institutionName := query.Get("author_name"), query.Get("institution_id"), query.Get("institution_name")
 
 	slog.Info("searching openalex", "author_name", author, "institution_id", institution)
 
@@ -47,24 +85,54 @@ func (s *SearchService) SearchOpenAlex(r *http.Request) (any, error) {
 
 	results := make([]api.Author, 0, len(authors))
 	for _, author := range authors {
+		sortedInstitutions := hybridInstitutionNamesSort(institutionName, author.InstitutionNames(), institutionNameSimilarityThreshold)
 		results = append(results, api.Author{
 			AuthorId:     author.AuthorId,
 			AuthorName:   author.DisplayName,
-			Institutions: author.InstitutionNames(),
+			Institutions: sortedInstitutions,
 			Source:       api.OpenAlexSource,
+			Interests:    author.Concepts,
 		})
 	}
 
 	return results, nil
 }
 
+func filterAuthorsBySimilarity(authors []api.Author, queryName string) []api.Author {
+	const minSimilarity = 0.5
+
+	type pair struct {
+		author *api.Author
+		sim    float64
+	}
+	authorSims := make([]pair, 0, len(authors))
+	for _, author := range authors {
+		sim := flaggers.IndelSimilarity(author.AuthorName, queryName)
+		if sim > minSimilarity {
+			authorSims = append(authorSims, pair{author: &author, sim: sim})
+		}
+	}
+	sort.Slice(authorSims, func(i, j int) bool {
+		return authorSims[i].sim > authorSims[j].sim
+	})
+
+	sortedAuthors := make([]api.Author, 0, len(authors))
+	for _, pair := range authorSims {
+		sortedAuthors = append(sortedAuthors, *pair.author)
+	}
+	return sortedAuthors
+}
+
 func (s *SearchService) SearchGoogleScholar(r *http.Request) (any, error) {
-	query := strings.ReplaceAll(strings.ToLower(r.URL.Query().Get("query")), "@", " ")
-	cursor := r.URL.Query().Get("cursor")
+	query := r.URL.Query()
+	author, institution, cursor := query.Get("author_name"), query.Get("institution_name"), r.URL.Query().Get("cursor")
+	if author == "" || institution == "" {
+		return nil, CodedError(errors.New("author_name and institution_name must be specified"), http.StatusBadRequest)
+	}
 
-	slog.Info("searching google scholar", "query", query, "cursor", cursor)
+	slog.Info("searching google scholar", "author_name", author, "institution_name", institution, "cursor", cursor)
 
-	results, nextCursor, err := gscholar.NextGScholarPage(query, cursor)
+	results, nextCursor, err := gscholar.NextGScholarPage(strings.ToLower(fmt.Sprintf("%s %s", author, institution)), cursor)
 	if err != nil {
 		if errors.Is(err, gscholar.ErrInvalidCursor) {
 			return nil, CodedError(err, http.StatusBadRequest)
@@ -72,7 +140,7 @@ func (s *SearchService) SearchGoogleScholar(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	return api.GScholarSearchResults{Authors: results, Cursor: nextCursor}, nil
+	return api.GScholarSearchResults{Authors: filterAuthorsBySimilarity(results, author), Cursor: nextCursor}, nil
 }
 
 func cleanEntry(id uint64, text string) string {

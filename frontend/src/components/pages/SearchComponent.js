@@ -13,26 +13,14 @@ const SearchComponent = () => {
   const [query, setQuery] = useState('');
   const [author, setAuthor] = useState();
   const [hasSearched, setHasSearched] = useState(false);
-  const [resultHeader, setResultHeader] = useState(null);
   const [institution, setInstitution] = useState();
   const [results, setResults] = useState([]);
   const [openAlexResults, setOpenAlexResults] = useState([]);
   const [isOALoading, setIsOALoading] = useState([]);
-  const [scholarResults, setScholarResults] = useState([]);
-  const [nextToken, setNextToken] = useState(null);
-  const [isDpLoading, setIsDpLoading] = useState(false);
-  const [triedDp, setTriedDp] = useState(false);
   const [loadMoreCount, setLoadMoreCount] = useState(0);
-  const [isLoadingScopus, setIsLoadingScopus] = useState(false);
-  const [showResultHeaders, setShowResultHeaders] = useState(false);
+  const [canLoadMore, setCanLoadMore] = useState(true);
 
   const search = async (author, institution) => {
-    // setShowResultHeaders(true);
-    handleDeepSearch(
-      `${author.AuthorName} ${institution.InstitutionName}`,
-      nextToken,
-      /* reset= */ false
-    );
     searchOpenAlex(author, institution);
     // setIsLoadingScopus(true);
     setAuthor(author);
@@ -42,6 +30,7 @@ const SearchComponent = () => {
     setResults([]);
     setLoadMoreCount(0);
     setHasSearched(true);
+    setCanLoadMore(true);
   };
 
   const searchOpenAlex = async (author, institution) => {
@@ -54,44 +43,14 @@ const SearchComponent = () => {
 
     const result = await searchService.searchOpenalexAuthors(
       author.AuthorName,
-      institution.InstitutionId
+      institution.InstitutionId,
+      institution.InstitutionName
     );
     console.log('result in openAlex', result);
     setOpenAlexResults(result);
     setIsOALoading(false);
     setLoadMoreCount(0);
     setHasSearched(true);
-  };
-
-  const handleDeepSearch = async (query, ntoken, reset = false) => {
-    if (reset) {
-      setScholarResults([]);
-    }
-    setIsDpLoading(true);
-    setTriedDp(true);
-
-    try {
-      let result;
-
-      console.log('N token is', ntoken);
-      if (ntoken !== null) {
-        result = await searchService.searchGoogleScholarAuthors(query, ntoken);
-        console.log('Old deep search with query', query);
-      } else {
-        console.log('New deep search with query', query);
-        result = await searchService.searchGoogleScholarAuthors(query, ntoken);
-        console.log('Got results', results);
-      }
-
-      setScholarResults(result.Authors);
-
-      setNextToken(result.next_page_token);
-
-      setIsDpLoading(false);
-    } catch (error) {
-      console.error('Error during deep search', error);
-      setIsDpLoading(false);
-    }
   };
 
   return (
@@ -127,40 +86,24 @@ const SearchComponent = () => {
           </div>
         </div>
       </div>
-      {showResultHeaders && (
-        <div
-          style={{ paddingTop: '30px', textAlign: 'center', fontSize: '24px', fontWeight: 'bold' }}
-        >
-          OpenAlex Results
-        </div>
-      )}
-      {isLoadingScopus && (
-        <div
-          className="spinner-border text-primary"
-          style={{ width: '3rem', height: '3rem' }}
-          role="status"
-        ></div>
-      )}
       {hasSearched && (
-        <TodoListComponent results={openAlexResults} canLoadMore={false} loadMore={() => {}} />
-      )}
-
-      {showResultHeaders && (
-        <div
-          style={{ paddingTop: '30px', textAlign: 'center', fontSize: '24px', fontWeight: 'bold' }}
-        >
-          Google Scholar Results
-        </div>
-      )}
-      {isDpLoading && (
-        <div
-          className="spinner-border text-primary"
-          style={{ width: '3rem', height: '3rem' }}
-          role="status"
-        ></div>
-      )}
-      {hasSearched && (
-        <TodoListComponent results={scholarResults} canLoadMore={false} loadMore={() => {}} />
+        <TodoListComponent
+          results={openAlexResults}
+          setResults={setOpenAlexResults}
+          canLoadMore={canLoadMore}
+          loadMore={async () => {
+            if (!canLoadMore) {
+              return [];
+            }
+            const result = await searchService.searchGoogleScholarAuthors(
+              author.AuthorName,
+              institution.InstitutionName,
+              null
+            );
+            setCanLoadMore(false);
+            return result.Authors;
+          }}
+        />
       )}
     </div>
   );
