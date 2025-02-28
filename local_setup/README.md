@@ -337,28 +337,32 @@ The frontend will be accessible at `http://localhost` in your browser.
 
 # Updating the prism running on blade public IP
 
+## Frontend Changes
+
+- Update the frontend/.env as:
+
+  ```bash
+  REACT_APP_API_URL=https://70.233.60.118
+  REACT_APP_KEYCLOAK_URL=https://70.233.60.118/keycloak
+  ```
+
+  - Add the entry `WDS_SOCKET_PORT=0` in frontend/.env
+
+## Keycloak Changes
+
+- Start keycloak with following command:
+
+  ```bash
+  bin/kc.sh start-dev --http-port=8180 --debug --bootstrap-admin-username temp_admin --bootstrap-admin-password password --hostname https://70.233.60.118/keycloak --hostname-admin https://70.233.60.118/keycloak  --hostname-backchannel-dynamic true  --http-relative-path /keycloak
+  ```
+
+- Keycloak admin UI can be accessed at https://70.233.60.118/keycloak/admin/master/console/
+
+## Nginx Changes on node 1
+
 - **You need sudo access on node1 for this. Or ask any sudo user to follow these steps in the last**
 
 - `Node1` have been configured to route all https traffic on port 80 to `node5` port 80 (traefik entrypoint)
-
-  ### If local setup is on blade machine other than `node5`,
-
-  - Update the frontend/.env as:
-
-    ```bash
-    REACT_APP_API_URL=https://70.233.60.118
-    REACT_APP_KEYCLOAK_URL=https://70.233.60.118/keycloak
-    ```
-
-    - Add the entry `WDS_SOCKET_PORT=0` in frontend/.env
-
-  - Start keycloak with following command:
-
-    ```bash
-    bin/kc.sh start-dev --http-port=8180 --debug --bootstrap-admin-username temp_admin --bootstrap-admin-password password --hostname https://70.233.60.118/keycloak --hostname-admin https://70.233.60.118/keycloak  --hostname-backchannel-dynamic true  --http-relative-path /keycloak
-    ```
-
-  - Keycloak admin UI can be accessed at https://70.233.60.118/keycloak/admin/master/console/
 
   - Follow these steps on `node1`:
 
