@@ -91,7 +91,7 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 
 		acks, err := extractor.extractAcknowledgments(workId, next)
 		if err != nil {
-			return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments: %w", err)
+			return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments for work %s: %w", next.WorkId, err)
 		}
 
 		extractor.cache.Update(workId, acks)
