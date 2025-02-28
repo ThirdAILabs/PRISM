@@ -200,29 +200,29 @@ const UniversityReport = () => {
     };
 
     useEffect(() => {
-        // let isMounted = true;
-        // const poll = async () => {
-        //     const report = await universityReportService.getReport(report_id);
-        //     if (report.Status === 'complete' && isMounted) {
-        //         console.log('Report', report);
-        //         setInstituteName(report.AuthorName);
-        //         setReportContent(report.Content);
-        //         setLoading(false);
-        //     } else if (isMounted) {
-        //         setTimeout(poll, 10000);
-        //     }
-        // };
+        let isMounted = true;
+        const poll = async () => {
+            const report = await universityReportService.getReport(report_id);
+            if (report.Status === 'complete' && isMounted) {
+                console.log('Report', report);
+                setInstituteName(report.UniversityName);
+                setReportContent(report.Content);
+                setLoading(false);
+            } else if (isMounted) {
+                setTimeout(poll, 10000);
+            }
+        };
 
-        // poll();
+        poll();
 
-        // return () => {
-        //     isMounted = false;
-        // };
-        const report = mockUniversityReport;
-        console.log('Report', report);
-        setInstituteName(report.UniversityName);
-        setReportContent(report.Content);
-        setLoading(false);
+        return () => {
+            isMounted = false;
+        };
+        // const report = mockUniversityReport;
+        // console.log('Report', report);
+        // setInstituteName(report.UniversityName);
+        // setReportContent(report.Content);
+        // setLoading(false);
     }, []);
 
     const [loading, setLoading] = useState(true);
@@ -296,9 +296,13 @@ const UniversityReport = () => {
                     className="d-flex w-100 flex-column align-items-center"
                     style={{ color: 'rgb(78, 78, 78)', marginTop: '0px' }}
                 >
-                    <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Faculties</div>
+                    <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Researchers</div>
                     <div style={{ fontSize: '60px', fontWeight: 'bold' }}>
                         {reportContent.TotalAuthors || 0}
+                    </div>
+                    <div style={{ fontSize: 'medium', fontWeight: 'bold' }}>Researchers Assessed</div>
+                    <div style={{ fontSize: '40px', fontWeight: 'bold' }}>
+                        {reportContent.AuthorsReviewed}
                     </div>
                 </div>
 
