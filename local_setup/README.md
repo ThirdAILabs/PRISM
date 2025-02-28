@@ -402,9 +402,8 @@ The frontend will be accessible at `http://localhost` in your browser.
         This setup enables secure external access while allowing flexible internal routing configuration.
 
     1. open `/etc/nginx/sites-available/app-proxy` file with vim/nano and edit the `proxy_pass` line to the IP you are using to host
-       
 
-```
+        ```
            server {
              listen 443 ssl;
 
@@ -435,9 +434,8 @@ The frontend will be accessible at `http://localhost` in your browser.
        ```
 
     2. Run the command
-       
 
-```bash
+      ```bash
        sudo systemctl reload nginx
        ```
 
