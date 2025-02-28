@@ -322,7 +322,7 @@ grobid_endpoint: "http://localhost:8070/" # for local setup
 <br>
 
 # Accessing the prism through blade public IP
-- **You need sudo access on node1 for this. Or ask any sudoer to follow these steps in the last**
+- **You need sudo access on node1 for this. Or ask any sudo user to follow these steps in the last**
 
 - `Node1` have been configured to route all https traffic on port 80 to `node5` port 80 (traefik entrypoint)
 <div style="margin-left: 30px;">
