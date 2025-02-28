@@ -72,6 +72,8 @@ type KnowledgeBase interface {
 
 	FindAuthors(authorName, institutionId string) ([]Author, error)
 
+	FindAuthorByOrcidId(orcidId string) (Author, error)
+
 	StreamWorks(authorId string, startDate, endDate time.Time) chan WorkBatch
 
 	FindWorksByTitle(titles []string, startDate, endDate time.Time) ([]Work, error)

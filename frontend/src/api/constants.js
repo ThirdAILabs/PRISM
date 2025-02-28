@@ -19,8 +19,8 @@ export const API_ROUTES = {
     INSTITUTION: '/api/v1/autocomplete/institution',
   },
   SEARCH: {
-    REGULAR: '/api/v1/search/regular',
-    ADVANCED: '/api/v1/search/advanced',
+    AUTHOR: '/api/v1/search/authors',
+    AUTHOR_ADVANCED: '/api/v1/search/authors-advanced',
     MATCH_ENTITIES: '/api/v1/search/match-entities',
   },
 };

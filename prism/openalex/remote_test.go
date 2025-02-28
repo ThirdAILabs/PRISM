@@ -83,6 +83,23 @@ func TestFindAuthors(t *testing.T) {
 	}
 }
 
+func TestFindAuthorsOrcidId(t *testing.T) {
+	oa := openalex.NewRemoteKnowledgeBase()
+
+	orcidId := "0000-0002-5042-2856"
+	result, err := oa.FindAuthorByOrcidId(orcidId)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !strings.HasPrefix(result.AuthorId, "https://openalex.org/") ||
+		result.DisplayName != "Anshumali Shrivastava" ||
+		len(result.Institutions) == 0 ||
+		!slices.Contains(result.InstitutionNames(), "Rice University") {
+		t.Fatal("incorrect author returned")
+	}
+}
+
 func yearStart(year int) time.Time {
 	return time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
 }
