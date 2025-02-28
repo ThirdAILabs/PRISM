@@ -1,7 +1,7 @@
 # Local Setup Instructions
 
 <details>
-  <summary><h2 style="display: inline;">Clone the repo</h2></summary>
+  <summary><h2 style="display: inline; ">Clone the repo</h2></summary>
   <br>
 
 Run the commands
@@ -14,7 +14,7 @@ cd PRISM
 </details>
 <br>
 <details>
-  <summary><h2 style="display: inline;">Launch Traefik</h2></summary>
+  <summary><h2 style="display: inline; ">Launch Traefik</h2></summary>
   <br>
 
 Run the commands
@@ -37,7 +37,7 @@ bash launch_traefik.sh
 </details>
 <br>
 <details>
-  <summary><h2 style="display: inline;">Setup Keycloak</h2></summary>
+  <summary><h2 style="display: inline; ">Setup Keycloak</h2></summary>
   <br>
 
 1. Download Keycloak version 26.0.0 from the official GitHub repository using this link: [Download Keycloak 26.0.0](https://thirdai-corp-public.s3.us-east-2.amazonaws.com/keycloak/keycloak-26.0.0.zip).
@@ -51,19 +51,24 @@ cd keycloak-26.0.0/
 
 5. Start the Keycloak server in development mode with the following command:
 
-  <details style="margin-left: 50px;">
+  <details style="margin-left: 50px; ">
+
     <summary>For local setup on mac</summary>
     
-  ```bash
+
+  
+
+```bash
   bin/kc.sh start-dev --http-port=8180 --debug --bootstrap-admin-username temp_admin --bootstrap-admin-password password --hostname-strict false --proxy-headers forwarded --http-relative-path /keycloak
   ```
+
   </details>
 
 6. To view the admin dashboard go to `localhost:8180` in your browser and login with the credentials `temp_admin` and `password`.
 </details>
 <br>
 <details>
-  <summary><h2 style="display: inline;">Building ThirdAI Libraries (Optional: Should not be needed for M1 mac os 15)</h2></summary>
+  <summary><h2 style="display: inline; ">Building ThirdAI Libraries (Optional: Should not be needed for M1 mac os 15)</h2></summary>
   <br>
 
 The following is for building the thirdai libraries needed for the neural db and flash bindings. This is an optional step, the repo has libraries built for `m1 mac os 15` already in it.
@@ -93,17 +98,20 @@ bin/build.py -f THIRDAI_BUILD_LICENSE THIRDAI_CHECK_LICENSE
    Note: if you build Universe without the licensing flags you will not have the `libcryptopp.a` library. You can skip this. In `PRISM/prism/search/search.go` on lines 3 & 4 you may have to delete the part that says `-lssl -lcrypto` on linux and `-L/opt/homebrew/Cellar/openssl@3/3.4.0/lib/ -lssl -lcrypto` for macos.
 
    - `Universe/build/libthirdai.a`
+
    - `Universe/build/deps/rocksdb/librocksdb.a`
+
    - `Universe/build/deps/utf8proc/libutf8proc.a`
+
    - `Universe/build/deps/cryptopp-cmake/cryptopp/libcryptopp.a`
 
 </details>
 <br>
 <details>
-  <summary><h2 style="display: inline;">Start the Backend</h2></summary>
+  <summary><h2 style="display: inline; ">Start the Backend</h2></summary>
   <br>
 
-Note: For macos the wheels assume that you have libomp installed in `/opt/homebrew/opt/libomp/lib/`, which should be the default if you install with homebrew. You will also need to have openssl3 installed at `/opt/homebrew/Cellar/openssl@3/3.4.0/lib/`. This should also be the default if you install with homebrew.
+Note: For macos the wheels assume that you have libomp installed in `/opt/homebrew/opt/libomp/lib/` , which should be the default if you install with homebrew. You will also need to have openssl3 installed at `/opt/homebrew/Cellar/openssl@3/3.4.0/lib/` . This should also be the default if you install with homebrew.
 
 Prism needs a database for working, create one if not already done.
 
@@ -129,9 +137,11 @@ cp prism/cmd/backend/config_tmpl.yaml prism/cmd/backend/config.yaml
 
    a. If using the keycloak setup described above, configure the keycloak args in the config file based on your hosting environment:
 
-  <details style="margin-left: 50px;">
+  <details style="margin-left: 50px; ">
+
     <summary>For local setup</summary>
     
+
 ```yaml
 keycloak:
   keycloak_server_url: "http://localhost/keycloak"
@@ -142,10 +152,13 @@ keycloak:
   ssl_login: false
   verbose: false
 ```
+
   </details>
-  <details style="margin-left: 50px;">
+  <details style="margin-left: 50px; ">
+
     <summary>For hosted setup (replace example.com with your domain or IP):</summary>
     
+
 ```yaml
 keycloak:
   keycloak_server_url: "http://example.com/keycloak"
@@ -156,17 +169,22 @@ keycloak:
   ssl_login: false
   verbose: false
 ```
+
       
+
   </details>
   <br>
-  <div style="margin-left: 40px;">
+  <div style="margin-left: 40px; ">
+
     b. <strong>Rest of the config</strong>
     
+
 ```yaml
 postgres_uri: postgresql://<username>:<password>@<host | localhost>:<port | 5432>/prism
 searchable_entities: <path to PRISM/data/searchable_entities.json>
 ndb_license: "Bolt license key"
 ```
+
   </div>
 
 5. Start the backend:
@@ -179,7 +197,7 @@ go run cmd/backend/main.go --config "./cmd/backend/config.yaml"
 <br>
 
 <details>
-  <summary><h2 style="display: inline;">Create a Keycloak User</h2></summary>
+  <summary><h2 style="display: inline; ">Create a Keycloak User</h2></summary>
   <br>
 
 1. Go to `localhost:8180/keycloak` and log in with the Keycloak admin credentials from step 6 of Keycloak setup.
@@ -190,11 +208,11 @@ go run cmd/backend/main.go --config "./cmd/backend/config.yaml"
 6. In the `Details` tab, remove the `Update Password` requirement under `Required User Actions`.
 7. The username and password can now be used to log in as a user with Keycloak.
 
-  <div style="margin-left: 20px;">
+  <div style="margin-left: 20px; ">
 
 ### **Adding an Admin User in the `prism-admin` Realm**
 
-Follow the same steps as above, but select the `prism-admin` realm instead of `prism-user`. Create an admin user with credentials that will be used in the Bash script.
+Follow the same steps as above, but select the `prism-admin` realm instead of `prism-user` . Create an admin user with credentials that will be used in the Bash script.
 
 ## Running the License Automation Script
 
@@ -219,16 +237,17 @@ brew install jq      # macOS
 
 The script will:
 
-- Fetch an admin access token from `prism-admin` realm and create a license.
-- Fetch a user access token from `prism-user` realm and activate the license for that user.
-- Print the activation response to confirm success.
+* Fetch an admin access token from `prism-admin` realm and create a license.
+* Fetch a user access token from `prism-user` realm and activate the license for that user.
+* Print the activation response to confirm success.
   </div>
 
     </details>
+
   <br>
 
 <details>
-<summary><h2 style="display: inline;">Setup Grobid</h2></summary>
+<summary><h2 style="display: inline; ">Setup Grobid</h2></summary>
   <br>
 
 Grobid can be set up on Blade server and can be accessed by forwarding the port.
@@ -239,13 +258,13 @@ Run the command
 docker run --rm --init --ulimit core=0 -p 8070:8070 grobid/grobid:0.8.0
 ```
 
-This will start Grobid on port `8070`.
+This will start Grobid on port `8070` .
 
 </details>
 <br>
 
 <details>
-  <summary><h2 style="display: inline;">Start the worker</h2></summary>
+  <summary><h2 style="display: inline; ">Start the worker</h2></summary>
   <br>
 
 1. Make a copy of `cmd/worker/config_tmp.yaml` and fill in the fields.
@@ -288,7 +307,7 @@ go run cmd/worker/main.go --config "./cmd/worker/config.yaml"
 </details>
 <br>
 <details>
-  <summary><h2 style="display: inline;">Start the Frontend</h2></summary>
+  <summary><h2 style="display: inline; ">Start the Frontend</h2></summary>
   <br>
 
 1. Navigate to the frontend folder:
@@ -305,15 +324,19 @@ cp frontend/.env.example frontend/.env
 
 **Important Note**: Please ensure that you enter the URL values without quotes, no trailing spaces and remove any inline comments that might appear on the same line.
 
-- For local development:
+* For local development:
 
-  ```bash
+  
+
+```bash
   REACT_APP_API_URL=http://localhost
   REACT_APP_KEYCLOAK_URL=http://localhost/keycloak
   ```
 
-- For hosted setup (replace example.com with your domain or IP):
-  ```bash
+* For hosted setup (replace example.com with your domain or IP):
+  
+
+```bash
   REACT_APP_API_URL=http://example.com
   REACT_APP_KEYCLOAK_URL=http://example.com/keycloak
   ```
@@ -339,46 +362,50 @@ The frontend will be accessible at `http://localhost` in your browser.
 
 ## Frontend Changes
 
-- Update the frontend/.env as:
+* Update the frontend/.env as:
 
-  ```bash
+  
+
+```bash
   REACT_APP_API_URL=https://70.233.60.118
   REACT_APP_KEYCLOAK_URL=https://70.233.60.118/keycloak
   ```
 
-  - Add the entry `WDS_SOCKET_PORT=0` in frontend/.env
+  + Add the entry `WDS_SOCKET_PORT=0` in frontend/.env
 
 ## Keycloak Changes
 
-- Start keycloak with following command:
+* Start keycloak with following command:
 
-  ```bash
+  
+
+```bash
   bin/kc.sh start-dev --http-port=8180 --debug --bootstrap-admin-username temp_admin --bootstrap-admin-password password --hostname https://70.233.60.118/keycloak --hostname-admin https://70.233.60.118/keycloak  --hostname-backchannel-dynamic true  --http-relative-path /keycloak
   ```
 
-- Keycloak admin UI can be accessed at https://70.233.60.118/keycloak/admin/master/console/
+* Keycloak admin UI can be accessed at https://70.233.60.118/keycloak/admin/master/console/
 
 ## Nginx Changes on node 1
 
-- **You need sudo access on node1 for this. Or ask any sudo user to follow these steps in the last**
+* **You need sudo access on node1 for this. Or ask any sudo user to follow these steps in the last**
 
-- `Node1` have been configured to route all https traffic on port 80 to `node5` port 80 (traefik entrypoint)
+* `Node1` have been configured to route all https traffic on port 80 to `node5` port 80 (traefik entrypoint)
 
-  - Follow these steps on `node1`:
-
+  + Follow these steps on `node1`:
     How we are hosting:
 
         We are running an Nginx reverse proxy configuration that:
+
         - Listens on port 443 (HTTPS)
         - Uses SSL certificates stored at `/etc/nginx/ssl/`
         - Forwards all incoming HTTPS requests to a configurable internal IP:PORT
         - Maintains secure communication with proper headers and protocols
-
         This setup enables secure external access while allowing flexible internal routing configuration.
 
     1. open `/etc/nginx/sites-available/app-proxy` file with vim/nano and edit the `proxy_pass` line to the IP you are using to host
+       
 
-       ```
+```
            server {
              listen 443 ssl;
 
@@ -409,9 +436,10 @@ The frontend will be accessible at `http://localhost` in your browser.
        ```
 
     2. Run the command
+       
 
-       ```bash
+```bash
        sudo systemctl reload nginx
        ```
 
-- You should be able to access the prism at `https://70.233.60.118:/`
+* You should be able to access the prism at `https://70.233.60.118:/`
