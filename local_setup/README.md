@@ -401,7 +401,7 @@ The frontend will be accessible at `http://localhost` in your browser.
         - Maintains secure communication with proper headers and protocols
         This setup enables secure external access while allowing flexible internal routing configuration.
 
-    1. open `/etc/nginx/sites-available/app-proxy` file with vim/nano and edit the `proxy_pass` line to the IP you are using to host
+    1. open `/etc/nginx/sites-available/app-proxy` file with vim/nano and edit the `proxy_pass` line to the IP/PORT you are using to host
 
         ```
            server {
