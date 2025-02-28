@@ -95,6 +95,42 @@ const mockUniversityReport = {
                     "AuthorName": "John Smith",
                     "Source": "IEEE",
                     "FlagCount": 3
+                },
+                {
+                    "AuthorId": "auth_123",
+                    "AuthorName": "John Smith",
+                    "Source": "IEEE",
+                    "FlagCount": 3
+                },
+                {
+                    "AuthorId": "auth_123",
+                    "AuthorName": "John Smith",
+                    "Source": "IEEE",
+                    "FlagCount": 3
+                },
+                {
+                    "AuthorId": "auth_123",
+                    "AuthorName": "John Smith",
+                    "Source": "IEEE",
+                    "FlagCount": 3
+                },
+                {
+                    "AuthorId": "auth_123",
+                    "AuthorName": "John Smith",
+                    "Source": "IEEE",
+                    "FlagCount": 3
+                },
+                {
+                    "AuthorId": "auth_123",
+                    "AuthorName": "John Smith",
+                    "Source": "IEEE",
+                    "FlagCount": 3
+                },
+                {
+                    "AuthorId": "auth_123",
+                    "AuthorName": "John Smith",
+                    "Source": "IEEE",
+                    "FlagCount": 3
                 }
             ],
             "AuthorAffiliations": [
@@ -194,7 +230,7 @@ const UniversityReport = () => {
         return null;
     }
     return (
-        <div className="basic-setup">
+        <div className="basic-setup" style={{ minHeight: '100vh', paddingBottom: '50px' }}>
             <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-row">
                     <div className="detail-header">
@@ -297,34 +333,26 @@ const UniversityReport = () => {
                     })}
                 </div>
                 {showModal && (
-                    // <div className="modal-overlay" style={{ marginTop: '100px' }} onClick={() => setShowModal(false)}>
-                    //     <div className="modal-content" onClick={e => e.stopPropagation()}>
-                    //         <h3>Author Details</h3>
-                    //         <table className="author-table">
-                    //             <thead>
-                    //                 <tr>
-                    //                     <th>Author Name</th>
-                    //                     <th>Source</th>
-                    //                     <th>Flag Count</th>
-                    //                 </tr>
-                    //             </thead>
-                    //             <tbody>
-                    //                 {selectedFlagData?.map((author, index) => (
-                    //                     <tr key={index}>
-                    //                         <td>{author.AuthorName}</td>
-                    //                         <td>{author.Source}</td>
-                    //                         <td>{author.FlagCount}</td>
-                    //                     </tr>
-                    //                 ))}
-                    //             </tbody>
-                    //         </table>
-                    //         <button onClick={() => setShowModal(false)}>Close</button>
-                    //     </div>
-                    // </div>
-                    <div style={{ display: 'flex', flex: 'wrap', gap: '20px', justifyContent: 'center' }}>
-                        {selectedFlagData?.map((author, index) => (
-                            <AuthorCard authorName={author.AuthorName} flagCount={author.FlagCount} />
-                        ))}
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        width: '100%'
+                    }}>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(4, minmax(250px, 1fr))',
+                            gap: '50px',
+                            justifyContent: 'center',
+                            marginTop: '100px',
+                            padding: '20px',
+                            overflow: 'auto',
+                            minHeight: '80vh',
+                            width: '80%',
+                        }}>
+                            {selectedFlagData?.map((author, index) => (
+                                <AuthorCard key={author.AuthorId} authorId={author.AuthorId} authorName={author.AuthorName} Source={author.Source} flagCount={author.FlagCount} />
+                            ))}
+                        </div>
                     </div>
                 )}
             </>
