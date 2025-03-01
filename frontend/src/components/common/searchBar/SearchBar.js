@@ -36,7 +36,13 @@ function AutocompleteSearchBar({ title, autocomplete, onSelect, type, placeholde
       <div className="autocomplete-search-bar-title">{title}</div>
 
       {/* Search bar */}
-      <input type="text" className="search-bar" placeholder={placeholder || ""} value={query} onChange={handleInputChange} />
+      <input
+        type="text"
+        className="search-bar"
+        placeholder={placeholder || ''}
+        value={query}
+        onChange={handleInputChange}
+      />
 
       {query && query.length && suggestions && suggestions.length > 0 && (
         // Autocomplete suggestion container. Column.

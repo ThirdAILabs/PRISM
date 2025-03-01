@@ -64,7 +64,9 @@ function EntityLookup() {
             animation: 'fade-in 0.5s',
           }}
         />
-        <h1 style={{ fontWeight: 'bold', marginTop: 20, animation: 'fade-in 0.75s' }}>Entity Lookup</h1>
+        <h1 style={{ fontWeight: 'bold', marginTop: 20, animation: 'fade-in 0.75s' }}>
+          Entity Lookup
+        </h1>
         <div style={{ animation: 'fade-in 1s' }}>
           <div className="d-flex justify-content-center align-items-center">
             <div style={{ marginTop: 10, color: '#888888' }}>
