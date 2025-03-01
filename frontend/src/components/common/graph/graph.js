@@ -85,11 +85,13 @@ function convertDataToGraphFormat(authorName, reportContent) {
             work.connections.push({
               title: reportContent[flagType][index2].Connections[1].DocTitle,
               url: reportContent[flagType][index2].Connections[1].DocUrl,
-              connections: [{
-                title: reportContent[flagType][index2].DocTitle,
-                url: reportContent[flagType][index2].DocUrl,
-                connections: [],
-              }],
+              connections: [
+                {
+                  title: reportContent[flagType][index2].DocTitle,
+                  url: reportContent[flagType][index2].DocUrl,
+                  connections: [],
+                },
+              ],
             });
           } else {
             work.connections.push({
