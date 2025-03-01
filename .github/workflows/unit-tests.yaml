@@ -27,10 +27,6 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '>=1.23.1'
-
-      - name: copy libraries for bindings
-        run: |
-          mkdir -p prism/search/lib/linux_x64
       
       - name: run unit tests
         env:
