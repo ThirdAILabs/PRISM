@@ -21,9 +21,9 @@
   brew install traefik
   ```
 
-  2. Navigate to the local_setup folder in the PRISM repository and run:
+  2. Navigate to the PRISM repository and run:
   ```bash
-  cd local_setup
+  cd docs/local_setup
   bash launch_traefik.sh
   ```
   **Note: Ignore the error about non-empty provider endpoint.**

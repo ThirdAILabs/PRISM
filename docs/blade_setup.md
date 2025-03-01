@@ -54,15 +54,6 @@ keycloak:
 go run cmd/backend/main.go --config "./cmd/backend/config.yaml"
 ```
 
-## Create a Keycloak User
-1. Go back to `localhost:8180` and login with the keycloak admin credentials like in step 6 of keycloak setup. 
-2. In the top left there should be a dropdown that defaults to `Keycloak master`. Click on it and select `prism-user` this is changing the realm. 
-3. Click on `Users` on the left hand side menu. 
-4. Click `Add user` and fill in the username field. Then click `Create` at the bottom. 
-5. This will display the user details. Click on `Credentials` at the top and then `Set password` then enter a password and save it.
-6. Go back to the `Details` menu (next to the `Credentials` menu) and click the `x` next to `Update Password` in the `Required user actions` section. If you don't do this it will say that the account setup is not complete hwen logging on. 
-7. The username and password can now be used to login as a user with keycloak.
-
 ## Start the Worker
 1. Navigate to the worker folder:
 ```bash
@@ -73,6 +64,15 @@ cd PRISM/prism/cmd/worker
 ```bash
 go run cmd/worker/main.go --config "./cmd/worker/config.yaml"
 ```
+
+## Create a Keycloak User
+1. Go back to `localhost:8180` and login with the keycloak admin credentials like in step 6 of keycloak setup. 
+2. In the top left there should be a dropdown that defaults to `Keycloak master`. Click on it and select `prism-user` this is changing the realm. 
+3. Click on `Users` on the left hand side menu. 
+4. Click `Add user` and fill in the username field. Then click `Create` at the bottom. 
+5. This will display the user details. Click on `Credentials` at the top and then `Set password` then enter a password and save it.
+6. Go back to the `Details` menu (next to the `Credentials` menu) and click the `x` next to `Update Password` in the `Required user actions` section. If you don't do this it will say that the account setup is not complete hwen logging on. 
+7. The username and password can now be used to login as a user with keycloak.
 
 ## Things to update in the Frontend
 1. Navigate to ```/PRISM/frontend/src/services/userService.js```. Assuming that Keycloak is running on port ```8180```, update ```_kc``` with something like this:
