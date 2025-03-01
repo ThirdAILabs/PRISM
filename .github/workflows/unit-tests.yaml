@@ -31,7 +31,6 @@ jobs:
       - name: copy libraries for bindings
         run: |
           mkdir -p prism/search/lib/linux_x64
-          cp prism/search/lib/gh_actions/* prism/search/lib/linux_x64
       
       - name: run unit tests
         env:
