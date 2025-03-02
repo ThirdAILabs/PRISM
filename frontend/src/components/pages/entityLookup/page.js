@@ -36,7 +36,7 @@ function EntityLookup() {
   };
 
   return (
-    <div className="basic-setup" style={{ color: 'white' }}>
+    <div className="basic-setup">
       <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
         <Link
           to="/"
@@ -64,6 +64,9 @@ function EntityLookup() {
             animation: 'fade-in 0.5s',
           }}
         />
+        <h1 style={{ fontWeight: 'bold', marginTop: 20, animation: 'fade-in 0.75s' }}>
+          Entity Lookup
+        </h1>
         <div style={{ animation: 'fade-in 1s' }}>
           <div className="d-flex justify-content-center align-items-center">
             <div style={{ marginTop: 10, color: '#888888' }}>
@@ -71,21 +74,22 @@ function EntityLookup() {
             </div>
           </div>
           <div className="d-flex justify-content-center align-items-center">
-            <div style={{ marginTop: 10, marginBottom: '2%', color: '#888888' }}>
-              Search for an entity to see if it is on any list if concerning entities.
+            <div style={{ marginTop: 10, marginBottom: '0%', color: '#888888' }}>
+              Search for an entity to see if it is on any list of concerning entities.
             </div>
           </div>
         </div>
         <div style={{ animation: 'fade-in 1s' }}>
           <div className="d-flex justify-content-center align-items-center pt-5">
             <div style={{ width: '80%' }}>
+              <div className="autocomplete-search-bar-title">Entity</div>
               <form onSubmit={handleSubmit} className="author-institution-search-bar">
                 <div className="autocomplete-search-bar">
                   <input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Enter query"
+                    placeholder="PQR Company"
                     className="search-bar"
                   />
                 </div>
@@ -103,7 +107,7 @@ function EntityLookup() {
       {isLoading && (
         <div
           className="spinner-border text-primary"
-          style={{ width: '3rem', height: '3rem' }}
+          style={{ width: '3rem', height: '3rem', marginTop: '20px' }}
           role="status"
         ></div>
       )}
