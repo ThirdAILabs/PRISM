@@ -82,6 +82,7 @@ function EntityLookup() {
         <div style={{ animation: 'fade-in 1s' }}>
           <div className="d-flex justify-content-center align-items-center pt-5">
             <div style={{ width: '80%' }}>
+              <div className="autocomplete-search-bar-title">Entity</div>
               <form onSubmit={handleSubmit} className="author-institution-search-bar">
                 <div className="autocomplete-search-bar">
                   <div className="autocomplete-search-bar-title">Entity</div>
