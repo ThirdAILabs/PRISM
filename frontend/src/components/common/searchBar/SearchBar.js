@@ -127,7 +127,7 @@ export function AuthorInstiutionSearchBar({ onSearch }) {
           autocomplete={autocompleteAuthor}
           onSelect={setAuthor}
           type={'author'}
-          placeholder={'John Doe'}
+          placeholder={'E.g. John Doe'}
         />
       </div>
 
@@ -137,7 +137,7 @@ export function AuthorInstiutionSearchBar({ onSearch }) {
           autocomplete={autocompleteInstitution}
           onSelect={setInstitution}
           type={'institute'}
-          placeholder={'University of Prism'}
+          placeholder={'E.g. University of Prism'}
         />
       </div>
 

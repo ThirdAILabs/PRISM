@@ -82,19 +82,19 @@ function EntityLookup() {
         <div style={{ animation: 'fade-in 1s' }}>
           <div className="d-flex justify-content-center align-items-center pt-5">
             <div style={{ width: '80%' }}>
-              <div className="autocomplete-search-bar-title">Entity</div>
               <form onSubmit={handleSubmit} className="author-institution-search-bar">
                 <div className="autocomplete-search-bar">
+                  <div className="autocomplete-search-bar-title">Entity</div>
                   <input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="PQR Company"
+                    placeholder="E.g. PQR Company"
                     className="search-bar"
                   />
                 </div>
                 <div style={{ width: '20px' }} />
-                <div style={{ width: '200px' }}>
+                <div className="author-institution-search-button-container">
                   <button type="submit" disabled={isLoading} className="button">
                     {isLoading ? 'Searching...' : 'Search'}
                   </button>
