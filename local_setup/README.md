@@ -145,7 +145,7 @@ KEYCLOAK_PRIVATE_HOSTNAME="http://example.com"
 ```bash
 DB_URI="postgresql://<username>:<password>@<host | localhost>:<port | 5432>/prism"
 SEARCHABLE_ENTITIES_DATA="<path to PRISM/data/searchable_entities.json>"
-NDB_LICENSE="Bolt license key"
+PRISM_LICENSE="Prism license key"
 ```
   </div>
 
@@ -233,8 +233,8 @@ go run cmd/backend/main.go --env "./cmd/backend/.env"
 # Uri for prism postgres db
 DB_URI="postgresql://<username>:<password>@<host | localhost>:<port | 5432>/prism"
 
-# License for NDB
-NDB_LICENSE="bolt license key"
+# License for PRISM
+PRISM_LICENSE="prism license key"
 
 # Work dir for worker, will store ndbs and caches etc.
 WORK_DIR="any empty directory"
