@@ -16,17 +16,36 @@ import (
 	"strings"
 	"time"
 
+	"github.com/caarlos0/env/v11"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 )
 
 type Config struct {
-	PostgresUri            string `yaml:"postgres_uri"`
-	SearchableEntitiesPath string `yaml:"searchable_entities"`
-	Keycloak               auth.KeycloakArgs
-	Port                   int
-	Logfile                string
-	NdbLicense             string `yaml:"ndb_license"`
+	PostgresUri string `env:"DB_URI,notEmpty,required"`
+	Logfile     string `env:"LOGFILE,notEmpty" envDefault:"prism_backend.log"`
+	NdbLicense  string `env:"NDB_LICENSE,notEmpty,required"`
+
+	Port int `env:"PORT" envDefault:"8000"`
+
+	SearchableEntitiesData string `env:"SEARCHABLE_ENTITIES_DATA,notEmpty,required"`
+
+	Keycloak struct {
+		ServerUrl string `env:"SERVER_URL,notEmpty,required"`
+
+		KeycloakAdminUsername string `env:"ADMIN_USERNAME,notEmpty,required"`
+		KeycloakAdminPassword string `env:"ADMIN_PASSWORD,notEmpty,required"`
+
+		PublicHostname  string `env:"PUBLIC_HOSTNAME,notEmpty,required"`
+		PrivateHostname string `env:"PRIVATE_HOSTNAME,notEmpty,required"`
+
+		SslInLogin bool `env:"SSL_IN_LOGIN" envDefault:"false"`
+		Verbose    bool `env:"VERBOSE" envDefault:"false"`
+	} `envPrefix:"KEYCLOAK_"`
+
+	// This variable is directly loaded by the openai client library, it is just
+	// listed here so that and error is raised if it's missing.
+	OpenaiKey string `env:"OPENAI_API_KEY,notEmpty,required"`
 }
 
 func (c *Config) logfile() string {
@@ -81,8 +100,12 @@ func buildEntityNdb(entityPath string) search.NeuralDB {
 }
 
 func main() {
+	cmd.LoadEnvFile()
+
 	var config Config
-	cmd.LoadConfig(&config)
+	if err := env.Parse(&config); err != nil {
+		log.Fatalf("error parsing config: %v", err)
+	}
 
 	logFile, err := os.OpenFile(config.logfile(), os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 	if err != nil {
@@ -106,16 +129,26 @@ func main() {
 		}
 	}
 
-	entityNdb := buildEntityNdb(config.SearchableEntitiesPath)
+	entityNdb := buildEntityNdb(config.SearchableEntitiesData)
 
 	db := cmd.InitDb(config.PostgresUri)
 
-	userAuth, err := auth.NewKeycloakAuth("prism-user", config.Keycloak)
+	keycloakArgs := auth.KeycloakArgs{
+		KeycloakServerUrl:     config.Keycloak.ServerUrl,
+		KeycloakAdminUsername: config.Keycloak.KeycloakAdminUsername,
+		KeycloakAdminPassword: config.Keycloak.KeycloakAdminPassword,
+		PublicHostname:        config.Keycloak.PublicHostname,
+		PrivateHostname:       config.Keycloak.PrivateHostname,
+		SslLogin:              config.Keycloak.SslInLogin,
+		Verbose:               config.Keycloak.Verbose,
+	}
+
+	userAuth, err := auth.NewKeycloakAuth("prism-user", keycloakArgs)
 	if err != nil {
 		log.Fatalf("error initializing keycloak user auth: %v", err)
 	}
 
-	adminAuth, err := auth.NewKeycloakAuth("prism-admin", config.Keycloak)
+	adminAuth, err := auth.NewKeycloakAuth("prism-admin", keycloakArgs)
 	if err != nil {
 		log.Fatalf("error initializing keycloak admin auth: %v", err)
 	}
