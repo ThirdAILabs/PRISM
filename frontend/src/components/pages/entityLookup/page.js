@@ -1,21 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { API_BASE_URL } from '../../../services/apiService';
+import React, { useState } from 'react';
 import '../../common/searchBar/SearchBar.css';
 import '../../common/tools/button/button1.css';
 import Logo from '../../../assets/images/prism-logo.png';
-import { useUser } from '../../../store/userContext';
+import '../../common/searchBar/SearchBar.css';
+import '../../common/tools/button/button1.css';
 import { searchService } from '../../../api/search';
 
 function EntityLookup() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [backendUrl, setBackendUrl] = useState('');
-
-  useEffect(() => {
-    setBackendUrl(API_BASE_URL);
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,23 +30,7 @@ function EntityLookup() {
   };
 
   return (
-    <div className="basic-setup">
-      <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
-        <Link
-          to="/"
-          className="button"
-          style={{
-            padding: '10px 15px',
-            fontSize: '14px',
-            whiteSpace: 'nowrap',
-            textDecoration: 'none',
-            display: 'inline-block',
-          }}
-        >
-          Go To Individual Assessment
-        </Link>
-      </div>
-
+    <div className="basic-setup" style={{ color: 'white' }}>
       <div style={{ textAlign: 'center', marginTop: '5.5%', animation: 'fade-in 0.75s' }}>
         <img
           src={Logo}
@@ -64,12 +42,19 @@ function EntityLookup() {
             animation: 'fade-in 0.5s',
           }}
         />
-        <h1 style={{ fontWeight: 'bold', marginTop: 20, animation: 'fade-in 0.75s' }}>
-          Entity Lookup
-        </h1>
         <div style={{ animation: 'fade-in 1s' }}>
           <div className="d-flex justify-content-center align-items-center">
-            <div style={{ marginTop: 10, color: '#888888' }}>
+            <div style={{ color: '#888888' }}>
+              <h1
+                style={{
+                  marginTop: 20,
+                  fontWeight: 'bold',
+                  color: 'black',
+                  animation: 'fade-in 0.75s',
+                }}
+              >
+                Entity Lookup
+              </h1>
               We help you comply with research security requirements.
             </div>
           </div>
@@ -93,7 +78,7 @@ function EntityLookup() {
                     className="search-bar"
                   />
                 </div>
-                <div style={{ width: '20px' }} />
+                <div style={{ width: '40px' }} />
                 <div className="author-institution-search-button-container">
                   <button type="submit" disabled={isLoading} className="button">
                     {isLoading ? 'Searching...' : 'Search'}
