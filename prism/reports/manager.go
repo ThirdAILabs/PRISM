@@ -42,7 +42,7 @@ func NewManager(db *gorm.DB, staleReportThreshold time.Duration) *ReportManager 
 func (r *ReportManager) ListAuthorReports(userId uuid.UUID) ([]api.Report, error) {
 	var reports []schema.UserAuthorReport
 
-	if err := r.db.Preload("Report").Order("last_updated_at DESC").Find(&reports, "user_id = ?", userId).Error; err != nil {
+	if err := r.db.Preload("Report").Order("last_accessed_at DESC").Find(&reports, "user_id = ?", userId).Error; err != nil {
 		slog.Error("error finding list of reports ")
 		return nil, ErrReportAccessFailed
 	}
@@ -128,18 +128,17 @@ func (r *ReportManager) CreateAuthorReport(licenseId, userId uuid.UUID, authorId
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			userReportId = uuid.New()
 			userReport = schema.UserAuthorReport{
-				Id:            userReportId,
-				UserId:        userId,
-				CreatedAt:     now,
-				LastUpdatedAt: now,
-				ReportId:      report.Id,
+				Id:             userReportId,
+				UserId:         userId,
+				LastAccessedAt: now,
+				ReportId:       report.Id,
 			}
 			if err := txn.Create(&userReport).Error; err != nil {
 				slog.Error("error creating new user author report", "error", err)
 				return ErrReportCreationFailed
 			}
 		} else {
-			userReport.LastUpdatedAt = now
+			userReport.LastAccessedAt = now
 			if err := txn.Save(&userReport).Error; err != nil {
 				slog.Error("error updating user author report", "error", err)
 				return ErrReportCreationFailed
@@ -365,21 +364,20 @@ func convertReport(report schema.UserAuthorReport) (api.Report, error) {
 	}
 
 	return api.Report{
-		Id:            report.Id,
-		CreatedAt:     report.CreatedAt,
-		LastUpdatedAt: report.LastUpdatedAt,
-		AuthorId:      report.Report.AuthorId,
-		AuthorName:    report.Report.AuthorName,
-		Source:        report.Report.Source,
-		Status:        report.Report.Status,
-		Content:       content,
+		Id:             report.Id,
+		LastAccessedAt: report.LastAccessedAt,
+		AuthorId:       report.Report.AuthorId,
+		AuthorName:     report.Report.AuthorName,
+		Source:         report.Report.Source,
+		Status:         report.Report.Status,
+		Content:        content,
 	}, nil
 }
 
 func (r *ReportManager) ListUniversityReports(userId uuid.UUID) ([]api.UniversityReport, error) {
 	var reports []schema.UserUniversityReport
 
-	if err := r.db.Preload("Report").Order("created_at DESC").Find(&reports, "user_id = ?", userId).Error; err != nil {
+	if err := r.db.Preload("Report").Order("last_accessed_at DESC").Find(&reports, "user_id = ?", userId).Error; err != nil {
 		slog.Error("error finding list of reports ")
 		return nil, ErrReportAccessFailed
 	}
@@ -406,7 +404,9 @@ func (r *ReportManager) queueUniversityReportUpdateIfNeeded(txn *gorm.DB, report
 }
 
 func (r *ReportManager) CreateUniversityReport(licenseId, userId uuid.UUID, universityId, universityName string) (uuid.UUID, error) {
-	userReportId := uuid.New()
+	var userReport schema.UserUniversityReport
+	var userReportId uuid.UUID
+	now := time.Now().UTC()
 
 	err := r.db.Transaction(func(txn *gorm.DB) error {
 		var report schema.UniversityReport
@@ -436,16 +436,32 @@ func (r *ReportManager) CreateUniversityReport(licenseId, userId uuid.UUID, univ
 			return err
 		}
 
-		userReport := schema.UserUniversityReport{
-			Id:        userReportId,
-			UserId:    userId,
-			CreatedAt: time.Now().UTC(),
-			ReportId:  report.Id,
+		result = txn.Where("user_id = ? AND report_id = ?", userId, report.Id).
+			First(&userReport)
+		if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			slog.Error("error finding existing user university report", "error", result.Error)
+			return ErrReportCreationFailed
 		}
 
-		if err := txn.Create(&userReport).Error; err != nil {
-			slog.Error("error creating new user university report", "error", err)
-			return ErrReportCreationFailed
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			userReportId = uuid.New()
+			userReport = schema.UserUniversityReport{
+				Id:             userReportId,
+				UserId:         userId,
+				ReportId:       report.Id,
+				LastAccessedAt: now,
+			}
+			if err := txn.Create(&userReport).Error; err != nil {
+				slog.Error("error creating new user university report", "error", err)
+				return ErrReportCreationFailed
+			}
+		} else {
+			userReport.LastAccessedAt = now
+			if err := txn.Save(&userReport).Error; err != nil {
+				slog.Error("error updating user university report", "error", err)
+				return ErrReportCreationFailed
+			}
+			userReportId = userReport.Id
 		}
 
 		usage := schema.LicenseUsage{
@@ -455,7 +471,9 @@ func (r *ReportManager) CreateUniversityReport(licenseId, userId uuid.UUID, univ
 			UserId:     userId,
 			Timestamp:  time.Now().UTC(),
 		}
-		if err := txn.Create(&usage).Error; err != nil {
+		if err := txn.Clauses(clause.OnConflict{
+			DoNothing: true,
+		}).Create(&usage).Error; err != nil {
 			slog.Error("error logging license usage", "error", err)
 			return errors.New("error updating license usage")
 		}
@@ -703,7 +721,7 @@ func (r *ReportManager) UpdateUniversityReport(id uuid.UUID, status string, upda
 func convertUniversityReport(report schema.UserUniversityReport, content api.UniversityReportContent) api.UniversityReport {
 	return api.UniversityReport{
 		Id:             report.Id,
-		CreatedAt:      report.CreatedAt,
+		LastAccessedAt: report.LastAccessedAt,
 		UniversityId:   report.Report.UniversityId,
 		UniversityName: report.Report.UniversityName,
 		Status:         report.Report.Status,
