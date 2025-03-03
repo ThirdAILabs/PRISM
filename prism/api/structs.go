@@ -96,8 +96,12 @@ type FormalRelationResponse struct {
 	HasFormalRelation bool
 }
 
-type MatchEntitiesResponse struct {
-	Entities []string
+type MatchedEntity struct {
+	Names    string
+	Address  string
+	Country  string
+	Type     string
+	Resource string
 }
 
 type CreateLicenseRequest struct {

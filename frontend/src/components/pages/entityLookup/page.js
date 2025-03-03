@@ -21,11 +21,8 @@ function EntityLookup() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await searchService.matchEntities(query);
-      console.log(response);
-      const entities = response.Entities.filter((entity) => entity.trim()).map((entity) =>
-        entity.replace('[ENTITY START]', '').replace('[ENTITY END]', '').trim()
-      );
+      const entities = await searchService.matchEntities(query);
+      console.log(entities);
       setResults(entities);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -110,7 +107,37 @@ function EntityLookup() {
       <div className="results" style={{ marginTop: '30px' }}>
         {results.map((entity, index) => (
           <div key={index} className="detail-item">
-            <pre>{entity}</pre>
+            <b>Names:</b>
+            <ul className="bulleted-list">
+              {entity.Names.split('\n').map((name, index2) => {
+                return <li key={`${index}-${index2}`}>{name}</li>;
+              })}
+            </ul>
+
+            {entity.Address && entity.Address.length > 0 && (
+              <>
+                <b>Address:</b>
+                <p>{entity.Address}</p>
+              </>
+            )}
+            {entity.Country && entity.Country.length > 0 && (
+              <>
+                <b>Country:</b>
+                <p>{entity.Country}</p>
+              </>
+            )}
+            {entity.Type && entity.Type.length > 0 && (
+              <>
+                <b>Type:</b>
+                <p>{entity.Type}</p>
+              </>
+            )}
+            {entity.Resource && entity.Resource.length > 0 && (
+              <>
+                <b>Resource:</b>
+                <p>{entity.Resource}</p>
+              </>
+            )}
           </div>
         ))}
       </div>
