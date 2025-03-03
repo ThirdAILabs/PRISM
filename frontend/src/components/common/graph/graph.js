@@ -194,28 +194,22 @@ function levelZeroNode(nodeId, name, riskScore, url) {
 }
 
 function levelOneNode(nodeId, title, url, count, connections) {
-  const fontSize = 20;
-  const padding = 5;
-  const textLength = Math.min(title.length, 50);
-  let dotString = '';
-  if (textLength < title.length) dotString += '...';
-  const calculatedWidth = Math.max(textLength * (fontSize * 0.3), 50) + padding;
   return {
     id: nodeId,
-    text: title.slice(0, textLength) + dotString + '(' + count.toString() + ')',
+    text: title + ' (' + count.toString() + ')',
     data: {
       url: url,
       text: title,
       allConnections: connections,
     },
     styleClass: { width: 'fit-content' },
-    width: calculatedWidth,
-    height: calculatedWidth,
+    width: 180,
+    height: 180,
     borderWidth: 3,
     color: 'transparent',
     borderColor: '#ff8c00',
     fontColor: '#ff8c00',
-    fontSize: fontSize,
+    fontSize: 20,
   };
 }
 
