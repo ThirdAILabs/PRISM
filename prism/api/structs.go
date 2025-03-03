@@ -9,7 +9,8 @@ import (
 type Report struct {
 	Id uuid.UUID
 
-	CreatedAt time.Time
+	CreatedAt     time.Time
+	LastUpdatedAt time.Time
 
 	AuthorId   string
 	AuthorName string

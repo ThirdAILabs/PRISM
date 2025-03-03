@@ -43,7 +43,8 @@ type UserAuthorReport struct {
 	Id     uuid.UUID `gorm:"type:uuid;primaryKey"`
 	UserId uuid.UUID `gorm:"type:uuid;not null;index"`
 
-	CreatedAt time.Time
+	CreatedAt     time.Time
+	LastUpdatedAt time.Time
 
 	ReportId uuid.UUID     `gorm:"type:uuid;not null"`
 	Report   *AuthorReport `gorm:"foreignKey:ReportId"`
