@@ -4,7 +4,7 @@ import './SearchBar.css';
 import '../tools/button/button1.css';
 import useCallOnPause from '../../../hooks/useCallOnPause';
 
-function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
+function AutocompleteSearchBar({ title, autocomplete, onSelect, type, placeholder }) {
   const [suggestions, setSuggestions] = useState([]);
   const [query, setQuery] = useState('');
 
@@ -36,7 +36,13 @@ function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
       <div className="autocomplete-search-bar-title">{title}</div>
 
       {/* Search bar */}
-      <input type="text" className="search-bar" value={query} onChange={handleInputChange} />
+      <input
+        type="text"
+        className="search-bar"
+        placeholder={placeholder || ''}
+        value={query}
+        onChange={handleInputChange}
+      />
 
       {query && query.length && suggestions && suggestions.length > 0 && (
         // Autocomplete suggestion container. Column.
@@ -121,6 +127,7 @@ export function AuthorInstiutionSearchBar({ onSearch }) {
           autocomplete={autocompleteAuthor}
           onSelect={setAuthor}
           type={'author'}
+          placeholder={'E.g. John Doe'}
         />
       </div>
 
@@ -130,6 +137,7 @@ export function AuthorInstiutionSearchBar({ onSearch }) {
           autocomplete={autocompleteInstitution}
           onSelect={setInstitution}
           type={'institute'}
+          placeholder={'E.g. University of Prism'}
         />
       </div>
 

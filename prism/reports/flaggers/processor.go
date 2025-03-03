@@ -116,14 +116,12 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 				defer wg.Done()
 
 				logger := logger.With("flagger", flagger.Name(), "batch", batch)
-				logger.Info("starting batch with flagger")
 
 				flags, err := flagger.Flag(logger, works, authorIds)
 				if err != nil {
 					logger.Error("flagger error", "error", err)
 				} else {
 					flagsCh <- flags
-					logger.Info("batch complete")
 				}
 			}(flagger, works.Works, works.TargetAuthorIds)
 		}
@@ -138,14 +136,12 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 			}
 
 			logger := logger.With("flagger", flagger.Name(), "batch", batch)
-			logger.Info("starting batch with flagger")
 
 			flags, err := flagger.Flag(logger, authorName, works)
 			if err != nil {
 				logger.Error("flagger error", "error", err)
 			} else {
 				flagsCh <- flags
-				logger.Info("batch complete")
 			}
 
 		}(batch, works.Works)
@@ -161,14 +157,12 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 		}
 
 		logger := logger.With("flagger", flagger.Name())
-		logger.Info("starting author faculty at eoc with flagger")
 
 		flags, err := flagger.Flag(logger, authorName)
 		if err != nil {
 			logger.Error("flagger error", "error", err)
 		} else {
 			flagsCh <- flags
-			logger.Info("batch complete")
 		}
 	}()
 
@@ -179,7 +173,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 func (processor *ReportProcessor) ProcessReport(report reports.ReportUpdateTask) (api.ReportContent, error) {
 	logger := slog.With("report_id", report.Id)
 
-	logger.Info("starting report processing")
+	logger.Info("starting report processing", "author_id", report.AuthorId, "author_name", report.AuthorName, "source", report.Source)
 
 	workStream, err := processor.getWorkStream(report)
 	if err != nil {
@@ -203,7 +197,13 @@ func (processor *ReportProcessor) ProcessReport(report reports.ReportUpdateTask)
 		}
 	}
 
-	logger.Info("report complete", "n_flags", len(flagsSeen))
+	attrs := make([]any, 0, len(content)+1)
+	attrs = append(attrs, slog.Int("n_flags", len(flagsSeen)))
+	for flagType, flags := range content {
+		attrs = append(attrs, slog.Int(flagType, len(flags)))
+	}
+
+	logger.Info("report complete", attrs...)
 
 	return content, nil
 }

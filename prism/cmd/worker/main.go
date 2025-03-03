@@ -164,8 +164,10 @@ func main() {
 	reportManager := reports.NewManager(db, reports.StaleReportThreshold)
 
 	for {
-		if !processNextAuthorReport(reportManager, processor) &&
-			!processNextUniversityReport(reportManager, processor) {
+		foundAuthorReport := processNextAuthorReport(reportManager, processor)
+		foundUniversityReport := processNextUniversityReport(reportManager, processor)
+
+		if !foundAuthorReport && !foundUniversityReport {
 			time.Sleep(10 * time.Second)
 		}
 	}

@@ -36,7 +36,7 @@ function EntityLookup() {
   };
 
   return (
-    <div className="basic-setup" style={{ color: 'white' }}>
+    <div className="basic-setup">
       <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
         <Link
           to="/"
@@ -64,6 +64,9 @@ function EntityLookup() {
             animation: 'fade-in 0.5s',
           }}
         />
+        <h1 style={{ fontWeight: 'bold', marginTop: 20, animation: 'fade-in 0.75s' }}>
+          Entity Lookup
+        </h1>
         <div style={{ animation: 'fade-in 1s' }}>
           <div className="d-flex justify-content-center align-items-center">
             <div style={{ marginTop: 10, color: '#888888' }}>
@@ -71,8 +74,8 @@ function EntityLookup() {
             </div>
           </div>
           <div className="d-flex justify-content-center align-items-center">
-            <div style={{ marginTop: 10, marginBottom: '2%', color: '#888888' }}>
-              Search for an entity to see if it is on any list if concerning entities.
+            <div style={{ marginTop: 10, marginBottom: '0%', color: '#888888' }}>
+              Search for an entity to see if it is on any list of concerning entities.
             </div>
           </div>
         </div>
@@ -81,16 +84,17 @@ function EntityLookup() {
             <div style={{ width: '80%' }}>
               <form onSubmit={handleSubmit} className="author-institution-search-bar">
                 <div className="autocomplete-search-bar">
+                  <div className="autocomplete-search-bar-title">Entity</div>
                   <input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Enter query"
+                    placeholder="E.g. PQR Company"
                     className="search-bar"
                   />
                 </div>
                 <div style={{ width: '20px' }} />
-                <div style={{ width: '200px' }}>
+                <div className="author-institution-search-button-container">
                   <button type="submit" disabled={isLoading} className="button">
                     {isLoading ? 'Searching...' : 'Search'}
                   </button>
@@ -103,7 +107,7 @@ function EntityLookup() {
       {isLoading && (
         <div
           className="spinner-border text-primary"
-          style={{ width: '3rem', height: '3rem' }}
+          style={{ width: '3rem', height: '3rem', marginTop: '20px' }}
           role="status"
         ></div>
       )}
