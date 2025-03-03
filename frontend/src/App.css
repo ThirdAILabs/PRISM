@@ -40,7 +40,8 @@
 }
 
 .detail-item {
-  margin: 10px;
+  margin: 10px auto;
+  max-width: 1000px;
   background-color: rgb(255, 255, 255);
   /* border: none; */
   color: black;
