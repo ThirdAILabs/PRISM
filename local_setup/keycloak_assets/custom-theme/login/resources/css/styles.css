@@ -1,0 +1,128 @@
+div.kc-logo-text {
+    height: 40px;
+    width: 400px;
+    background-color: white;
+    /* border-radius: 100%; */
+    /* margin-bottom: 10px; */
+}
+
+#kc-header-wrapper {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 4%;
+    padding-right: 0px;
+}
+
+.login-pf-page {
+    margin-top: 5%;
+    margin-left: 5%;
+    border-radius: 10px;
+    background-color: white;
+    /* border: 1px solid #3d3d3d; */
+
+}
+
+h1#kc-page-title {
+    margin-top: 0px;
+    font-weight: bold;
+    font-size: 29px;
+    padding-right: 125px;
+}
+
+.login-pf-page .login-pf-page-header {
+    margin-bottom: 0px;
+    margin-top: 5%;
+}
+
+.card-pf {
+    margin: 0 auto;
+    box-shadow: none;
+    padding: 0 20px;
+    max-width: 500px;
+    border-top: 0px;
+}
+
+#kc-info-wrapper {
+    font-size: 13px;
+    padding: 10px;
+    background-color: white;
+}
+
+/* Override global primary color 100 and 200*/
+:root {
+    --pf-global--primary-color--100: var(--pf-global--palette--blue-300);
+    --pf-global--primary-color--200: var(--pf-global--palette--blue-400);
+}
+
+.pf-c-form-control {
+    border-radius: 1rem;
+    /* Rounds the corners (adjust value for more/less rounding) */
+    border: 0.5px solid #007BFF;
+    /* Adjust border width and color */
+    padding: 1rem 1rem;
+    /* Ensure proper spacing inside the input box */
+    font-size: 12px;
+    /* Adjust font size */
+    outline: none;
+    box-shadow: none;
+    /* Remove the default outline */
+    transition: none;
+    /* Smooth transition effects */
+}
+
+/* Hover effect */
+.pf-c-form-control:hover {
+    border-color: #007BFF;
+    box-shadow: none;
+    /* Light blue border on hover */
+}
+
+/* Focus effect */
+.pf-c-form-control:focus {
+    border-color: #0bc24e;
+    transition: none;
+    --pf-c-form-control--BorderBottomColor: #0bc24e;
+    padding: 1rem;
+    border-bottom-width: 0.5px;
+}
+
+.pf-c-button.pf-m-primary {
+    border-radius: 1rem;
+}
+
+#kc-content {
+    width: 70%;
+}
+
+/* Container for password input and toggle */
+.password-input {
+    position: relative;
+    width: 300px;
+}
+
+/* Password toggle button */
+.password-input .pf-c-button {
+    position: absolute;
+    top: 50%;
+    right: 5px;
+    transform: translateY(-50%);
+    background-color: transparent;
+    border: 0px;
+    cursor: pointer;
+    font-size: 18px;
+    color: #666;
+    padding: 0px;
+    transition: color 0.3s ease;
+}
+
+.password-input .pf-c-button:hover {
+    color: #333;
+}
+
+.password-input .pf-c-button:focus {
+    outline: none;
+}
+
+.password-input .pf-c-button i {
+    vertical-align: middle;
+}
