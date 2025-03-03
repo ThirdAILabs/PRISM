@@ -37,23 +37,23 @@ const todayStr = new Date().toISOString().split('T')[0];
 const TitlesAndDescriptions = {
   [TALENT_CONTRACTS]: {
     title: 'Talent Contracts',
-    desc: 'Authors in these papers are recruited by talent programs that have close ties to high-risk foreign governments.',
+    desc: 'These papers are funded by talent programs run by foreign governents that intend to recruit high-performing researchers.',
   },
   [ASSOCIATIONS_WITH_DENIED_ENTITIES]: {
     title: 'Funding from Denied Entities',
-    desc: 'Some of the parties involved in these works are in the denied entity lists of U.S. government agencies.',
+    desc: 'Some of the parties involved in these papers are in denied entity lists of government agencies.',
   },
   [HIGH_RISK_FUNDERS]: {
     title: 'High Risk Funding Sources',
-    desc: 'These papers are funded by funding sources that have close ties to high-risk foreign governments.',
+    desc: 'These papers are funded by sources that have close ties to high-risk foreign governments.',
   },
   [AUTHOR_AFFILIATIONS]: {
     title: 'Affiliations with High Risk Foreign Institutes',
-    desc: 'Papers that list the queried author as being affiliated with a high-risk foreign institution or web pages that showcase official appointments at high-risk foreign institutions.',
+    desc: 'These papers list the queried author as being affiliated with a high-risk foreign institute.',
   },
   [POTENTIAL_AUTHOR_AFFILIATIONS]: {
     title: 'Appointments at High Risk Foreign Institutes*',
-    desc: 'The author may have an appointment at a high-risk foreign institutions.\n\n*Collated information from the web, might contain false positives.',
+    desc: 'The author may have an appointment at a high-risk foreign institute.\n\n*Collated information from the web, might contain false positives.',
   },
   [MISC_HIGH_RISK_AFFILIATIONS]: {
     title: 'Miscellaneous High Risk Connections*',
@@ -61,7 +61,7 @@ const TitlesAndDescriptions = {
   },
   [COAUTHOR_AFFILIATIONS]: {
     title: "Co-authors' affiliations with High Risk Foreign Institutes",
-    desc: 'Coauthors in these papers are affiliated with high-risk foreign institutions.',
+    desc: 'Co-authors in these papers are affiliated with high-risk foreign institutes.',
   },
 };
 
@@ -94,36 +94,6 @@ const ItemDetails = () => {
   const [institutions, setInstitutions] = useState([]);
   const [initialReprtContent, setInitialReportContent] = useState({});
   const [isDisclosureChecked, setDisclosureChecked] = useState(false);
-  // Add these states at the top with other states
-  // const [selectedFiles, setSelectedFiles] = useState([]);
-  // const [isUploading, setIsUploading] = useState(false);
-  // const [uploadError, setUploadError] = useState(null);
-
-  // // Add this function to handle file selection
-  // const handleFileSelect = (event) => {
-  //     setSelectedFiles([...event.target.files]);
-  //     setUploadError(null);
-  // };
-
-  // // Add this function to handle check disclosure
-  // const handleCheckDisclosure = async () => {
-  //     if (selectedFiles.length === 0) {
-  //         setUploadError('Please select at least one file');
-  //         return;
-  //     }
-
-  //     setIsUploading(true);
-  //     setUploadError(null);
-
-  //     try {
-  //         const result = await reportService.checkDisclosure(report_id, selectedFiles);
-  //         setInitialReportContent(result.Content);
-  //     } catch (error) {
-  //         setUploadError(error.message || 'Failed to check disclosure');
-  //     } finally {
-  //         setIsUploading(false);
-  //     }
-  // };
 
   // Add new states
   const [openDialog, setOpenDialog] = useState(false);
@@ -316,7 +286,7 @@ const ItemDetails = () => {
     return (
       <div key={index} className="p-3 px-5 w-75 detail-item">
         {withPublicationDate(
-          <h5 className="fw-bold mt-3">Funder is an entity of concern</h5>,
+          <h5 className="fw-bold mt-3">Funder is an Entity of Concern</h5>,
           flag
         )}
         <p>
@@ -333,7 +303,7 @@ const ItemDetails = () => {
           </ul>
           {flag.RawAcknowledements.length > 0 && (
             <>
-              <p>Acknowledgements Text:</p>
+              <strong>Acknowledgements Text</strong>
               <ul className="bulleted-list">
                 {flag.RawAcknowledements.map((item, index2) => {
                   const key = `ack-${index} ${index2}`;
@@ -361,7 +331,7 @@ const ItemDetails = () => {
     return (
       <div key={index} className="p-3 px-5 w-75 detail-item">
         {withPublicationDate(
-          <h5 className="fw-bold mt-3">Publisher is an entity of concern</h5>,
+          <h5 className="fw-bold mt-3">Publisher is an Entity of Concern</h5>,
           flag
         )}
         <p>
@@ -429,7 +399,7 @@ const ItemDetails = () => {
     return (
       <div key={index} className="p-3 px-5 w-75 detail-item">
         {withPublicationDate(
-          <h5 className="fw-bold mt-3">Co-authors are affiliated with entities of concern</h5>,
+          <h5 className="fw-bold mt-3">Co-authors are affiliated with Entities of Concern</h5>,
           flag
         )}
         <p>
@@ -444,7 +414,7 @@ const ItemDetails = () => {
               );
             })}
           </ul>
-          Affiliated authors:
+          <strong>Affiliated Authors</strong>
           <ul className="bulleted-list">
             {flag.Coauthors.map((item, index2) => {
               const key = `${index} ${index2}`;
@@ -474,12 +444,12 @@ const ItemDetails = () => {
     return (
       <div key={index} className="p-3 px-5 w-75 detail-item">
         {withPublicationDate(
-          <h5 className="fw-bold mt-3">Author is affiliated with entities of concern</h5>,
+          <h5 className="fw-bold mt-3">Author is affiliated with an Entity of Concern</h5>,
           flag
         )}
         <div>
-          {authorName} is affiliated with an entity of concern in {get_paper_url(flag)}. Detected
-          affiliations:
+          {authorName} is affiliated with an entity of concern in {get_paper_url(flag)}.<p></p>
+          <strong>Detected Affiliations</strong>
           <ul className="bulleted-list">
             {flag.Affiliations.map((item, index2) => {
               const key = `${index} ${index2}`;
@@ -509,7 +479,7 @@ const ItemDetails = () => {
     return (
       <div key={index} className="p-3 px-5 w-75 detail-item">
         {withPublicationDate(
-          <h5 className="fw-bold mt-3">Acknowledgements contain foreign influences</h5>,
+          <h5 className="fw-bold mt-3">Acknowledgements possibly contain Talent Contracts</h5>,
           flag
         )}
         <p>
@@ -535,7 +505,7 @@ const ItemDetails = () => {
               );
             })}
           </ul>
-          <p style={{ marginTop: '20px', fontWeight: 'bold' }}>Acknowledgement text:</p>
+          <strong>Acknowledgement Text</strong>
           {flag.RawAcknowledements.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
@@ -552,27 +522,6 @@ const ItemDetails = () => {
               Undisclosed
             </button>
           ))}
-
-        {/* DISCLOSURE */}
-        {/* <hr />
-                <div className="d-flex justify-content-between">
-                    {flag.metadata?.dislosed === true ? (
-                    <button type="button" className="btn btn-success">Disclosed</button>
-                    ) : flag.metadata?.dislosed === false ? (
-                    <button type="button" className="btn btn-danger">Undisclosed</button>
-                    ) : (
-                    // <button type="button" className="btn btn-secondary">No Disclosure Status</button> // Optional: Add a fallback state
-                    <></>
-                    )}
-                    {flag.metadata?.is_primary_recipient === true ? (
-                    <button type="button" className="btn btn-outline-success">Likely Not a Primary Recipient of Funds</button>
-                    ) : flag.metadata?.is_primary_recipeitn === false ? (
-                    <button type="button" className="btn btn-outline-danger">Likely a Primary Recipient of Funds</button>
-                    ) : (
-                    <></>
-                    // <button type="button" className="btn btn-outline-secondary">No Grant Information</button>
-                    )}
-                </div> */}
       </div>
     );
   }
@@ -585,7 +534,6 @@ const ItemDetails = () => {
         </h5>
         <p>
           {flag.Message}
-          <br />
           Relevant Webpage:{' '}
           <a href={flag.UniversityUrl} target="_blank" rel="noopener noreferrer">
             {flag.UniversityUrl}
@@ -677,15 +625,18 @@ const ItemDetails = () => {
         )}
         <p>
           {flag.Message}
+          <p />
           <>
-            <br />
             {connections.length === 0 ? (
               <>
-                Press Release:{' '}
-                <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">
-                  {flag.DocTitle}
-                </a>
-                <br />
+                <strong>Press Release</strong>
+                <ul className="bulleted-list">
+                  <li>
+                    <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">
+                      {flag.DocTitle}
+                    </a>
+                  </li>
+                </ul>
               </>
             ) : connections.length === 1 ? (
               <>
@@ -693,35 +644,52 @@ const ItemDetails = () => {
                   <>Frequent Coauthor: {flag.FrequentCoauthor}</>
                 ) : (
                   <>
-                    Relevant Document:{' '}
-                    <a href={flag.Connections[0].DocUrl} target="_blank" rel="noopener noreferrer">
-                      {flag.Connections[0].DocTitle}
-                    </a>
+                    <strong>Relevant Document</strong>
+                    <ul className="bulleted-list">
+                      <li>
+                        <a
+                          href={flag.Connections[0].DocUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {flag.Connections[0].DocTitle}
+                        </a>{' '}
+                      </li>
+                    </ul>
                   </>
                 )}
-                <br />
-                Press Release:{' '}
-                <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">
-                  {flag.DocTitle}
-                </a>
-                <br />
+                <strong>Press Release</strong>
+                <ul className="bulleted-list">
+                  <li>
+                    <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">
+                      {flag.DocTitle}
+                    </a>
+                  </li>
+                </ul>
               </>
             ) : connections.length == 2 ? (
               <>
-                Relevant Documents:{' '}
-                <a href={flag.Connections[0].DocUrl} target="_blank" rel="noopener noreferrer">
-                  {flag.Connections[0].DocTitle}
-                </a>
-                ,{' '}
-                <a href={flag.Connections[1].DocUrl} target="_blank" rel="noopener noreferrer">
-                  {flag.Connections[1].DocTitle}
-                </a>
-                <br />
-                Press Release:{' '}
-                <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">
-                  {flag.DocTitle}
-                </a>
-                <br />
+                <strong>Relevant Documents</strong>
+                <ul className="bulleted-list">
+                  <li>
+                    <a href={flag.Connections[0].DocUrl} target="_blank" rel="noopener noreferrer">
+                      {flag.Connections[0].DocTitle}
+                    </a>
+                  </li>
+                  <li>
+                    <a href={flag.Connections[1].DocUrl} target="_blank" rel="noopener noreferrer">
+                      {flag.Connections[1].DocTitle}
+                    </a>
+                  </li>
+                </ul>
+                <strong>Press Release</strong>
+                <ul className="bulleted-list">
+                  <li>
+                    <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">
+                      {flag.DocTitle}
+                    </a>
+                  </li>
+                </ul>
               </>
             ) : null}
           </>
@@ -1010,13 +978,13 @@ const ItemDetails = () => {
                           strokeLinejoin="round"
                         />
                       </svg>
-                      <p>Browse File to upload!</p>
+                      <p>Drag & drop your file!</p>
                     </div>
                     <label htmlFor="file" className="footer">
                       <p>
                         {selectedFiles.length
                           ? `${selectedFiles.length} files selected`
-                          : 'No file selected'}
+                          : 'Click here to upload your file.'}
                       </p>
                     </label>
                     <input
@@ -1087,12 +1055,13 @@ const ItemDetails = () => {
             }}
           >
             {FLAG_ORDER.map((flag, index) => {
+              const flagCount = reportContent[flag] ? reportContent[flag].length : 0;
               return (
                 <ConcernVisualizer
                   title={TitlesAndDescriptions[flag].title}
                   hoverText={TitlesAndDescriptions[flag].desc}
-                  value={reportContent[flag] ? reportContent[flag].length : 0}
-                  onReview={() => setReview(flag)}
+                  value={flagCount}
+                  onReview={flagCount > 0 ? () => setReview(flag) : undefined}
                   key={index}
                 />
               );
@@ -1110,19 +1079,19 @@ const ItemDetails = () => {
                     gap: '10px',
                   }}
                 >
-                  <span style={{ marginRight: '10px' }}>Sort by Date:</span>
+                  <span style={{ marginRight: '10px' }}>Sort by Date</span>
                   <ArrowUpwardIcon
                     onClick={() => setSortOrder('asc')}
                     style={{
                       cursor: 'pointer',
-                      color: sortOrder === 'asc' ? 'black' : 'lightgray',
+                      color: sortOrder === 'asc' ? 'lightgray' : 'black',
                     }}
                   />
                   <ArrowDownwardIcon
                     onClick={() => setSortOrder('desc')}
                     style={{
                       cursor: 'pointer',
-                      color: sortOrder === 'desc' ? 'black' : 'lightgray',
+                      color: sortOrder === 'desc' ? 'lightgray' : 'black',
                     }}
                   />
                 </div>

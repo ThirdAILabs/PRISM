@@ -199,6 +199,10 @@ func createAuthorReport(backend http.Handler, user, name string) (api.CreateRepo
 	return res, err
 }
 
+func deleteAuthorReport(backend http.Handler, user string, id uuid.UUID) error {
+	return Delete(backend, "/report/author/"+id.String(), user)
+}
+
 func checkListUniversityReports(t *testing.T, backend http.Handler, user string, expected []string) {
 	var reports []api.UniversityReport
 	if err := Get(backend, "/report/university/list", user, &reports); err != nil {
@@ -238,6 +242,10 @@ func createUniversityReport(backend http.Handler, user, name string) (api.Create
 	var res api.CreateReportResponse
 	err := Post(backend, "/report/university/create", user, req, &res)
 	return res, err
+}
+
+func deleteUniversityReport(backend http.Handler, user string, id uuid.UUID) error {
+	return Delete(backend, "/report/university/"+id.String(), user)
 }
 
 func createLicense(backend http.Handler, name, user string) (api.CreateLicenseResponse, error) {
@@ -668,7 +676,7 @@ func TestLicenseInvalidLicense(t *testing.T) {
 	}
 }
 
-func TestReportEndpoints(t *testing.T) {
+func TestAuthorReportEndpoints(t *testing.T) {
 	backend, _ := createBackend(t)
 
 	admin := newAdmin()
@@ -722,6 +730,20 @@ func TestReportEndpoints(t *testing.T) {
 
 	checkListAuthorReports(t, backend, user1, []string{"report1", "report3"})
 	checkListAuthorReports(t, backend, user2, []string{"report2"})
+
+	if err := deleteAuthorReport(backend, user2, report.Id); err == nil || !strings.Contains(err.Error(), "report not found") {
+		t.Fatal(err)
+	}
+
+	checkListAuthorReports(t, backend, user1, []string{"report1", "report3"})
+	checkListAuthorReports(t, backend, user2, []string{"report2"})
+
+	if err := deleteAuthorReport(backend, user1, report.Id); err != nil {
+		t.Fatal(err)
+	}
+
+	checkListAuthorReports(t, backend, user1, []string{"report3"})
+	checkListAuthorReports(t, backend, user2, []string{"report2"})
 }
 
 func TestUniversityReportEndpoints(t *testing.T) {
@@ -765,7 +787,7 @@ func TestUniversityReportEndpoints(t *testing.T) {
 	}
 
 	if err := manager.UpdateAuthorReport(nextAuthorReport.Id, schema.ReportCompleted, time.Now(), api.ReportContent{
-		api.HighRiskFunderType: []api.Flag{&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: "abc"}}},
+		api.HighRiskFunderType: []api.Flag{&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: "abc", PublicationDate: time.Now()}}},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -784,6 +806,17 @@ func TestUniversityReportEndpoints(t *testing.T) {
 	}
 
 	checkListUniversityReports(t, backend, user1, []string{"uni-report1"})
+
+	if err := deleteUniversityReport(backend, user2, uniReport.Id); err == nil || !strings.Contains(err.Error(), "report not found") {
+		t.Fatal(err)
+	}
+	checkListUniversityReports(t, backend, user1, []string{"uni-report1"})
+
+	if err := deleteUniversityReport(backend, user1, uniReport.Id); err != nil {
+		t.Fatal(err)
+	}
+
+	checkListUniversityReports(t, backend, user1, []string{})
 }
 
 func TestAutocompleteAuthor(t *testing.T) {
@@ -880,7 +913,7 @@ func TestSearchGoogleScholarAuthors(t *testing.T) {
 
 	authorName := "anshumali shrivastava"
 
-	url := fmt.Sprintf("/search/advanced?query=%s", url.QueryEscape(authorName))
+	url := fmt.Sprintf("/search/advanced?author_name=%s&institution_name=%s", url.QueryEscape(authorName), url.QueryEscape("rice university"))
 	var results api.GScholarSearchResults
 	err := mockRequest(backend, "GET", url, user, nil, &results)
 	if err != nil {
@@ -914,7 +947,7 @@ func TestSearchGoogleScholarAuthorsWithCursor(t *testing.T) {
 
 	authorName := "bill zhang"
 
-	url1 := fmt.Sprintf("/search/advanced?query=%s", url.QueryEscape(authorName))
+	url1 := fmt.Sprintf("/search/advanced?author_name=%s&institution_name=any", url.QueryEscape(authorName))
 	var results1 api.GScholarSearchResults
 	if err := mockRequest(backend, "GET", url1, user, nil, &results1); err != nil {
 		t.Fatal(err)
@@ -922,7 +955,7 @@ func TestSearchGoogleScholarAuthorsWithCursor(t *testing.T) {
 
 	checkQuery(results1.Authors)
 
-	url2 := fmt.Sprintf("/search/advanced?query=%s&cursor=%s", url.QueryEscape(authorName), results1.Cursor)
+	url2 := fmt.Sprintf("/search/advanced?author_name=%s&institution_name=any&cursor=%s", url.QueryEscape(authorName), results1.Cursor)
 	var results2 api.GScholarSearchResults
 	if err := mockRequest(backend, "GET", url2, user, nil, &results2); err != nil {
 		t.Fatal(err)

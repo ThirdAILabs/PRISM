@@ -31,6 +31,7 @@ func (s *ReportService) Routes() chi.Router {
 		r.Get("/list", WrapRestHandler(s.List))
 		r.Post("/create", WrapRestHandler(s.CreateReport))
 		r.Get("/{report_id}", WrapRestHandler(s.GetReport))
+		r.Delete("/{report_id}", WrapRestHandler(s.DeleteAuthorReport))
 		r.Post("/{report_id}/check-disclosure", WrapRestHandler(s.CheckDisclosure))
 		r.Get("/{report_id}/download", s.DownloadReport)
 	})
@@ -39,6 +40,7 @@ func (s *ReportService) Routes() chi.Router {
 		r.Get("/list", WrapRestHandler(s.ListUniversityReports))
 		r.Post("/create", WrapRestHandler(s.CreateUniversityReport))
 		r.Get("/{report_id}", WrapRestHandler(s.GetUniversityReport))
+		r.Delete("/{report_id}", WrapRestHandler(s.DeleteUniversityReport))
 	})
 
 	r.Post("/activate-license", WrapRestHandler(s.UseLicense))
@@ -117,6 +119,24 @@ func (s *ReportService) GetReport(r *http.Request) (any, error) {
 	}
 
 	return report, nil
+}
+
+func (s *ReportService) DeleteAuthorReport(r *http.Request) (any, error) {
+	userId, err := auth.GetUserId(r)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	id, err := URLParamUUID(r, "report_id")
+	if err != nil {
+		return nil, CodedError(err, http.StatusBadRequest)
+	}
+
+	if err := s.manager.DeleteAuthorReport(userId, id); err != nil {
+		return nil, CodedError(err, reportErrorStatus(err))
+	}
+
+	return nil, nil
 }
 
 func (s *ReportService) UseLicense(r *http.Request) (any, error) {
@@ -273,7 +293,7 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *ReportService) ListUniversityReports(r *http.Request) (any,error) {
+func (s *ReportService) ListUniversityReports(r *http.Request) (any, error) {
 	userId, err := auth.GetUserId(r)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
@@ -337,4 +357,22 @@ func (s *ReportService) GetUniversityReport(r *http.Request) (any, error) {
 	}
 
 	return report, nil
+}
+
+func (s *ReportService) DeleteUniversityReport(r *http.Request) (any, error) {
+	userId, err := auth.GetUserId(r)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	id, err := URLParamUUID(r, "report_id")
+	if err != nil {
+		return nil, CodedError(err, http.StatusBadRequest)
+	}
+
+	if err := s.manager.DeleteUniversityReport(userId, id); err != nil {
+		return nil, CodedError(err, reportErrorStatus(err))
+	}
+
+	return nil, nil
 }
