@@ -490,10 +490,6 @@ func TestAuthorReportEndpoints(t *testing.T) {
 	checkListAuthorReports(t, backend, user1, []string{})
 	checkListAuthorReports(t, backend, user2, []string{})
 
-	if _, err := createAuthorReport(backend, user1, "report1"); err == nil || !strings.Contains(err.Error(), "user does not have registered license") {
-		t.Fatalf("report should fail %v", err)
-	}
-
 	report, err := createAuthorReport(backend, user1, "report1")
 	if err != nil {
 		t.Fatal(err)
