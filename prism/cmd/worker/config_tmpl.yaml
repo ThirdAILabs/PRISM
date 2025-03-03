@@ -4,8 +4,8 @@ postgres_uri: "postgresql://<username>:<password>@<host | localhost>:<port | 543
 # Logfile for backend
 logfile: "./worker.log"
 
-# License for NDB
-ndb_license: "license path or key"
+# License for Prism
+prism_license: "license key"
 
 # Work dir for worker, will store ndbs and caches etc.
 work_dir: ""

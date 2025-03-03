@@ -8,18 +8,18 @@ import (
 	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/cmd"
+	"prism/prism/licensing"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers"
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/search"
-	"strings"
 	"time"
 )
 
 type Config struct {
-	PostgresUri string `yaml:"postgres_uri"`
-	Logfile     string `yaml:"logfile"`
-	NdbLicense  string `yaml:"ndb_license"`
+	PostgresUri  string `yaml:"postgres_uri"`
+	Logfile      string `yaml:"logfile"`
+	PrismLicense string `yaml:"prism_license"`
 
 	WorkDir string `yaml:"work_dir"`
 
@@ -110,16 +110,13 @@ func main() {
 
 	cmd.InitLogging(logFile)
 
-	if strings.HasPrefix(config.NdbLicense, "file ") {
-		err := search.SetLicensePath(strings.TrimPrefix(config.NdbLicense, "file "))
-		if err != nil {
-			log.Fatalf("error activating license at path '%s': %v", config.NdbLicense, err)
-		}
-	} else {
-		err := search.SetLicenseKey(config.NdbLicense)
-		if err != nil {
-			log.Fatalf("error activating license: %v", err)
-		}
+	licensing, err := licensing.NewLicenseVerifier(config.PrismLicense)
+	if err != nil {
+		log.Fatalf("error initializing licensing: %v", err)
+	}
+
+	if err := search.SetLicenseKey(config.PrismLicense); err != nil {
+		log.Fatalf("error activating license key: %v", err)
 	}
 
 	ndbDir := filepath.Join(config.WorkDir, "ndbs")
@@ -154,7 +151,7 @@ func main() {
 		WorkDir:        config.WorkDir,
 	}
 
-	processor, err := flaggers.NewReportProcessor(opts)
+	processor, err := flaggers.NewReportProcessor(opts, licensing)
 	if err != nil {
 		log.Fatalf("error creating work processor: %v", err)
 	}

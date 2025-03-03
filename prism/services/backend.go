@@ -2,6 +2,7 @@ package services
 
 import (
 	"net/http"
+	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/search"
@@ -16,17 +17,16 @@ type BackendService struct {
 	report       ReportService
 	search       SearchService
 	autocomplete AutocompleteService
-	licensing    LicenseService
 
-	userAuth  auth.TokenVerifier
-	adminAuth auth.TokenVerifier
+	userAuth auth.TokenVerifier
 }
 
-func NewBackend(db *gorm.DB, oa openalex.KnowledgeBase, entityNdb search.NeuralDB, userAuth, adminAuth auth.TokenVerifier) *BackendService {
+func NewBackend(db *gorm.DB, oa openalex.KnowledgeBase, entityNdb search.NeuralDB, userAuth auth.TokenVerifier, licensing *licensing.LicenseVerifier) *BackendService {
 	return &BackendService{
 		report: ReportService{
-			manager: reports.NewManager(db, reports.StaleReportThreshold),
-			db:      db,
+			manager:   reports.NewManager(db, reports.StaleReportThreshold),
+			db:        db,
+			licensing: licensing,
 		},
 		search: SearchService{
 			openalex:  oa,
@@ -35,11 +35,7 @@ func NewBackend(db *gorm.DB, oa openalex.KnowledgeBase, entityNdb search.NeuralD
 		autocomplete: AutocompleteService{
 			openalex: oa,
 		},
-		licensing: LicenseService{
-			db: db,
-		},
-		userAuth:  userAuth,
-		adminAuth: adminAuth,
+		userAuth: userAuth,
 	}
 }
 
@@ -52,8 +48,6 @@ func (s *BackendService) Routes() chi.Router {
 	r.With(auth.Middleware(s.userAuth)).Mount("/report", s.report.Routes())
 	r.With(auth.Middleware(s.userAuth)).Mount("/search", s.search.Routes())
 	r.With(auth.Middleware(s.userAuth)).Mount("/autocomplete", s.autocomplete.Routes())
-
-	r.With(auth.Middleware(s.adminAuth)).Mount("/license", s.licensing.Routes())
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

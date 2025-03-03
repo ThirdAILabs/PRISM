@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"prism/prism/api"
+	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers/eoc"
@@ -29,6 +30,14 @@ func yearEnd(year int) time.Time {
 	return time.Date(year, 12, 31, 0, 0, 0, 0, time.UTC)
 }
 
+func getLicensing(t *testing.T) *licensing.LicenseVerifier {
+	licensing, err := licensing.NewLicenseVerifier("AC013F-FD0B48-00B160-64836E-76E88D-V3")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return licensing
+}
+
 func TestProcessorCoauthorAffiliationCase1(t *testing.T) {
 	processor := ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
@@ -38,6 +47,7 @@ func TestProcessorCoauthorAffiliationCase1(t *testing.T) {
 				concerningInstitutions: eoc.LoadInstitutionEOC(),
 			},
 		},
+		licensing: getLicensing(t),
 	}
 
 	t.Run("Case1", func(t *testing.T) {
@@ -122,6 +132,7 @@ func TestProcessorAuthorAffiliation(t *testing.T) {
 				concerningInstitutions: eoc.LoadInstitutionEOC(),
 			},
 		},
+		licensing: getLicensing(t),
 	}
 
 	t.Run("Case1", func(t *testing.T) {
@@ -201,6 +212,7 @@ func TestProcessorUniversityFacultySeach(t *testing.T) {
 		authorFacultyAtEOC: &AuthorIsFacultyAtEOCFlagger{
 			universityNDB: universityNDB,
 		},
+		licensing: getLicensing(t),
 	}
 
 	t.Run("Case1", func(t *testing.T) {
@@ -271,6 +283,7 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 			docNDB: docNDB,
 			auxNDB: auxNDB,
 		},
+		licensing: getLicensing(t),
 	}
 
 	t.Run("PrimaryConnection", func(t *testing.T) {
@@ -410,6 +423,7 @@ func TestProcessorAcknowledgements(t *testing.T) {
 				sussyBakas:   eoc.LoadSussyBakas(),
 			},
 		},
+		licensing: getLicensing(t),
 	}
 
 	t.Run("Case1", func(t *testing.T) {

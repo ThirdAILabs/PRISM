@@ -9,11 +9,11 @@ import (
 	"net/http"
 	"os"
 	"prism/prism/cmd"
+	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/search"
 	"prism/prism/services"
 	"prism/prism/services/auth"
-	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -26,7 +26,7 @@ type Config struct {
 	Keycloak               auth.KeycloakArgs
 	Port                   int
 	Logfile                string
-	NdbLicense             string `yaml:"ndb_license"`
+	PrismLicense           string `yaml:"prism_license"`
 }
 
 func (c *Config) logfile() string {
@@ -94,16 +94,13 @@ func main() {
 
 	openalex := openalex.NewRemoteKnowledgeBase()
 
-	if strings.HasPrefix(config.NdbLicense, "file ") {
-		err := search.SetLicensePath(strings.TrimPrefix(config.NdbLicense, "file "))
-		if err != nil {
-			log.Fatalf("error activating license at path '%s': %v", config.NdbLicense, err)
-		}
-	} else {
-		err := search.SetLicenseKey(config.NdbLicense)
-		if err != nil {
-			log.Fatalf("error activating license: %v", err)
-		}
+	licensing, err := licensing.NewLicenseVerifier(config.PrismLicense)
+	if err != nil {
+		log.Fatalf("error initializing licensing: %v", err)
+	}
+
+	if err := search.SetLicenseKey(config.PrismLicense); err != nil {
+		log.Fatalf("error activating license key: %v", err)
 	}
 
 	entityNdb := buildEntityNdb(config.SearchableEntitiesPath)
@@ -115,12 +112,7 @@ func main() {
 		log.Fatalf("error initializing keycloak user auth: %v", err)
 	}
 
-	adminAuth, err := auth.NewKeycloakAuth("prism-admin", config.Keycloak)
-	if err != nil {
-		log.Fatalf("error initializing keycloak admin auth: %v", err)
-	}
-
-	backend := services.NewBackend(db, openalex, entityNdb, userAuth, adminAuth)
+	backend := services.NewBackend(db, openalex, entityNdb, userAuth, licensing)
 
 	r := chi.NewRouter()
 
