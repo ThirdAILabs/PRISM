@@ -49,6 +49,12 @@
   ```
 
   6. To view the admin dashboard go to `localhost:8180` in your browser and login with the credentials `temp_admin` and `password`.
+
+  7. Integrate Custom Theme in Login UI
+    1. Copy the custom-theme folder from keycloak-assets.
+    2. Navigate to the themes folder inside your keycloak-26.0.0 directory.
+    3. Paste the directory (named custom-theme) into the themes folder.
+
 </details>
 <br>
 <details>
@@ -142,6 +148,12 @@ SEARCHABLE_ENTITIES_DATA="<path to PRISM/data/searchable_entities.json>"
 NDB_LICENSE="Bolt license key"
 ```
   </div>
+
+5. For Entity search to work, we need to set the openai key as env variable before starting the backend.
+
+```bash
+export OPENAI_API_KEY=YOUR_OPENAI_KEY
+```
 
 5. Start the backend:
 
