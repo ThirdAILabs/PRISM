@@ -42,12 +42,12 @@ function EntityLookup() {
             animation: 'fade-in 0.5s',
           }}
         />
-        <h1 style={{ fontWeight: 'bold', marginTop: 20, animation: 'fade-in 0.75s' }}>
-          Entity Lookup
-        </h1>
         <div style={{ animation: 'fade-in 1s' }}>
           <div className="d-flex justify-content-center align-items-center">
-            <div style={{ marginTop: 10, color: '#888888' }}>
+            <div style={{ color: '#888888' }}>
+              <h1 style={{ marginTop: 20, fontWeight: 'bold', color: 'black', animation: 'fade-in 0.75s' }}>
+                Entity Lookup
+              </h1>
               We help you comply with research security requirements.
             </div>
           </div>

@@ -61,9 +61,13 @@ function UniversityAssessment() {
             animation: 'fade-in 0.5s',
           }}
         />
+
         <div style={{ animation: 'fade-in 1s' }}>
           <div className="d-flex justify-content-center align-items-center">
             <div style={{ marginTop: 10, color: '#888888' }}>
+              <h1 style={{ fontWeight: 'bold', color: 'black', marginTop: 20, animation: 'fade-in 0.75s' }}>
+                University Assessment
+              </h1>
               We help you comply with research security requirements by automating university
               assessments.
             </div>
