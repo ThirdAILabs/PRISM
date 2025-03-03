@@ -298,9 +298,13 @@ const UniversityReport = () => {
                     className="d-flex w-100 flex-column align-items-center"
                     style={{ color: 'rgb(78, 78, 78)', marginTop: '0px' }}
                 >
-                    <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Faculties</div>
+                    <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Researchers</div>
                     <div style={{ fontSize: '60px', fontWeight: 'bold' }}>
                         {reportContent.TotalAuthors || 0}
+                    </div>
+                    <div style={{ fontSize: 'medium', fontWeight: 'bold' }}>Researchers Assessed</div>
+                    <div style={{ fontSize: '40px', fontWeight: 'bold' }}>
+                        {reportContent.AuthorsReviewed}
                     </div>
                 </div>
 
