@@ -22,6 +22,7 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 
+
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
   ASSOCIATIONS_WITH_DENIED_ENTITIES,
@@ -88,7 +89,7 @@ const get_paper_url = (flag) => {
 const ItemDetails = () => {
   const navigate = useNavigate();
   const { report_id } = useParams();
-
+  const [dropdownOpen, setDropdownOpen] = useState(0);
   const [reportContent, setReportContent] = useState({});
   const [authorName, setAuthorName] = useState('');
   const [institutions, setInstitutions] = useState([]);
@@ -102,8 +103,16 @@ const ItemDetails = () => {
   const [uploadError, setUploadError] = useState(null);
 
   // Add handlers
+  const handleDropdownChange = (index) => {
+    if (index === dropdownOpen)
+      setDropdownOpen(0);
+    else
+      setDropdownOpen(index);
+  }
+
   const handleOpenDialog = () => setOpenDialog(true);
   const handleCloseDialog = () => {
+    handleDropdownChange(0);
     setOpenDialog(false);
     setSelectedFiles([]);
     setUploadError(null);
@@ -509,9 +518,9 @@ const ItemDetails = () => {
           {flag.RawAcknowledements.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
-          <p>{}</p>
+          <p>{ }</p>
         </p>
-        {}
+        { }
         {isDisclosureChecked &&
           (flag.Disclosed ? (
             <button type="button" className="btn btn-success">
@@ -756,7 +765,7 @@ const ItemDetails = () => {
   };
   function wrapLinks(origtext) {
     const linkStart = Math.max(origtext.indexOf('https://'), origtext.indexOf('http://'));
-    if (linkStart == -1) {
+    if (linkStart === -1) {
       return [origtext];
     }
     const message = origtext.slice(0, linkStart);
@@ -775,7 +784,7 @@ const ItemDetails = () => {
   );
 
   return (
-    <div className="basic-setup">
+    !loading && <div className="basic-setup">
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-row">
           <div className="detail-header">
@@ -832,7 +841,9 @@ const ItemDetails = () => {
                 <button
                   className="btn dropdown-toggle"
                   type="button"
-                  onClick={toggleYearDropdown}
+                  onClick={() => {
+                    handleDropdownChange(1);
+                  }}
                   style={{
                     backgroundColor: 'rgb(160, 160, 160)',
                     border: 'none',
@@ -844,7 +855,7 @@ const ItemDetails = () => {
                 >
                   Filter by Timeline
                 </button>
-                {yearDropdownOpen && (
+                {dropdownOpen === 1 && (
                   <div
                     className="dropdown-menu show p-3"
                     style={{
@@ -953,11 +964,13 @@ const ItemDetails = () => {
           <div className="d-flex justify-content-end mt-2 gap-2 px-2">
             <>
               <StyledWrapper>
-                <button className="cssbuttons-io-button" onClick={handleOpenDialog}>
+                <button className="cssbuttons-io-button" onClick={() => {
+                  handleDropdownChange(3);
+                }}>
                   Verify with Disclosures
                 </button>
               </StyledWrapper>
-              <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+              <Dialog open={dropdownOpen === 3} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
                 <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
                   Select files to check for disclosure
                 </DialogTitle>
@@ -1009,10 +1022,9 @@ const ItemDetails = () => {
             </>
             <DownloadButton
               reportId={report_id}
-              isOpen={isDownloadOpen}
-              setIsOpen={(value) => {
-                setIsDownloadOpen(value);
-                setYearDropdownOpen(false); // Close year dropdown
+              isOpen={dropdownOpen === 2}
+              setIsOpen={() => {
+                handleDropdownChange(2);
               }}
             />
           </div>
@@ -1056,13 +1068,15 @@ const ItemDetails = () => {
           >
             {FLAG_ORDER.map((flag, index) => {
               const flagCount = reportContent[flag] ? reportContent[flag].length : 0;
+              const isSelected = review === flag;
               return (
                 <ConcernVisualizer
                   title={TitlesAndDescriptions[flag].title}
                   hoverText={TitlesAndDescriptions[flag].desc}
                   value={flagCount}
-                  onReview={flagCount > 0 ? () => setReview(flag) : undefined}
+                  onReview={() => setReview(flag)}
                   key={index}
+                  selected={isSelected}
                 />
               );
             })}

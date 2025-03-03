@@ -10,7 +10,6 @@ import (
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/search"
 	"sync"
-	"time"
 )
 
 type ReportProcessor struct {
@@ -209,19 +208,31 @@ func (processor *ReportProcessor) ProcessReport(report reports.ReportUpdateTask)
 }
 
 func (processor *ReportProcessor) GetUniversityAuthors(report reports.UniversityReportUpdateTask) ([]reports.UniversityAuthorReport, error) {
-	authors, err := processor.openalex.GetInstitutionAuthors(report.UniversityId, time.Now().AddDate(-4, 0, 0), time.Now())
-	if err != nil {
-		return nil, err
-	}
+	// authors, err := processor.openalex.GetInstitutionAuthors(report.UniversityId, time.Now().AddDate(-4, 0, 0), time.Now())
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	output := make([]reports.UniversityAuthorReport, 0, len(authors))
-	for _, author := range authors {
-		output = append(output, reports.UniversityAuthorReport{
-			AuthorId:   author.AuthorId,
-			AuthorName: author.AuthorName,
+	// output := make([]reports.UniversityAuthorReport, 0, len(authors))
+	// for _, author := range authors {
+	// 	output = append(output, reports.UniversityAuthorReport{
+	// 		AuthorId:   author.AuthorId,
+	// 		AuthorName: author.AuthorName,
+	// 		Source:     api.OpenAlexSource,
+	// 	})
+	// }
+
+	// return output, nil
+	return []reports.UniversityAuthorReport{
+		{
+			AuthorId:   "https://openalex.org/A5016320004",
+			AuthorName: "David Zhang",
 			Source:     api.OpenAlexSource,
-		})
-	}
-
-	return output, nil
+		},
+		{
+			AuthorId:   "https://openalex.org/A5084836278",
+			AuthorName: "Charles M. Lieber",
+			Source:     api.OpenAlexSource,
+		},
+	}, nil
 }

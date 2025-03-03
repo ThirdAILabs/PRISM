@@ -14,6 +14,7 @@ import ConcernVisualizer from '../ConcernVisualization.js';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider } from '@mui/material';
 import { universityReportService } from '../../api/universityReports.js';
 import AuthorCard from '../common/cards/AuthorCard.js';
+
 import styled from 'styled-components';
 
 const FLAG_ORDER = [
@@ -200,35 +201,36 @@ const UniversityReport = () => {
     };
 
     useEffect(() => {
-        // let isMounted = true;
-        // const poll = async () => {
-        //     const report = await universityReportService.getReport(report_id);
-        //     if (report.Status === 'complete' && isMounted) {
-        //         console.log('Report', report);
-        //         setInstituteName(report.AuthorName);
-        //         setReportContent(report.Content);
-        //         setLoading(false);
-        //     } else if (isMounted) {
-        //         setTimeout(poll, 10000);
-        //     }
-        // };
+        let isMounted = true;
+        const poll = async () => {
+            const report = await universityReportService.getReport(report_id);
+            if (report.Status === 'complete' && isMounted) {
+                console.log('Report', report);
+                setInstituteName(report.AuthorName);
+                setReportContent(report.Content);
+                setLoading(false);
+            } else if (isMounted) {
+                setTimeout(poll, 10000);
+            }
+        };
 
-        // poll();
+        poll();
 
-        // return () => {
-        //     isMounted = false;
-        // };
-        const report = mockUniversityReport;
-        console.log('Report', report);
-        setInstituteName(report.UniversityName);
-        setReportContent(report.Content);
-        setLoading(false);
+        return () => {
+            isMounted = false;
+        };
+        // const report = mockUniversityReport;
+        // console.log('Report', report);
+        // setInstituteName(report.UniversityName);
+        // setReportContent(report.Content);
+        // setLoading(false);
     }, []);
 
     const [loading, setLoading] = useState(true);
-    if (reportContent === undefined) {
-        return null;
-    }
+    // if (loading) {
+    //     return null;
+    // }
+
     return (
         <div className="basic-setup" style={{ minHeight: '100vh', paddingBottom: '50px' }}>
             <div className="grid grid-cols-2 gap-4">
@@ -338,7 +340,7 @@ const UniversityReport = () => {
                         justifyContent: 'center',
                         width: '100%'
                     }}>
-                        <div style={{
+                        {/* <div style={{
                             display: 'grid',
                             gridTemplateColumns: 'repeat(4, minmax(250px, 1fr))',
                             gap: '50px',
@@ -348,15 +350,22 @@ const UniversityReport = () => {
                             overflow: 'auto',
                             minHeight: '80vh',
                             width: '80%',
-                        }}>
-                            {selectedFlagData?.map((author, index) => (
+                        }}> */}
+                        {/* {selectedFlagData?.map((author, index) => (
                                 <AuthorCard key={author.AuthorId} authorId={author.AuthorId} authorName={author.AuthorName} Source={author.Source} flagCount={author.FlagCount} />
-                            ))}
+                            ))} */}
+                        <div style={{
+                            marginTop: '100px',
+                        }}>
+                            <AuthorCard authors={selectedFlagData} />
                         </div>
+                        {/* <div style={{ marginTop: '200px' }}>
+                            <AuthorTable />
+                        </div> */}
                     </div>
                 )}
             </>
-        </div>
+        </div >
     );
 };
 
