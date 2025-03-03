@@ -8,7 +8,6 @@ import '../common/searchBar/SearchBar.css';
 import '../common/tools/button/button1.css';
 import UserService from '../../services/userService';
 import { searchService } from '../../api/search';
-import { SearchContext } from '../../store/searchContext';
 
 const SearchComponent = () => {
   const [results, setResults] = useState([]);
@@ -57,46 +56,6 @@ const SearchComponent = () => {
 
   return (
     <div className="basic-setup" style={{ color: 'black' }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          width: '100%',
-          padding: '20px',
-          position: 'relative',
-        }}
-      >
-        <Link
-          to="/entity-lookup"
-          className="button"
-          style={{
-            padding: '10px 15px',
-            fontSize: '14px',
-            whiteSpace: 'nowrap',
-            textDecoration: 'none',
-            display: 'inline-block',
-            width: '25%',
-          }}
-        >
-          Go To Entity Lookup
-        </Link>
-        <button
-          className="button"
-          style={{
-            padding: '10px 15px',
-            fontSize: '14px',
-            whiteSpace: 'nowrap',
-            textDecoration: 'none',
-            display: 'inline-block',
-            width: '10%',
-          }}
-          onClick={UserService.doLogout}
-        >
-          Logout
-        </button>
-      </div>
-
       <div style={{ textAlign: 'center', marginTop: '3%', animation: 'fade-in 0.75s' }}>
         <img
           src={Logo}
@@ -108,7 +67,9 @@ const SearchComponent = () => {
             animation: 'fade-in 0.5s',
           }}
         />
-        <h1 style={{ fontWeight: 'bold', marginTop: 20, animation: 'fade-in 0.75s' }}>Welcome</h1>
+        <h1 style={{ fontWeight: 'bold', marginTop: 20, animation: 'fade-in 0.75s' }}>
+          Individual Assessment
+        </h1>
         <div style={{ animation: 'fade-in 1s' }}>
           <div className="d-flex justify-content-center align-items-center">
             <div style={{ marginTop: 10, color: '#888888' }}>
