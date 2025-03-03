@@ -64,6 +64,7 @@ export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInst
           onSelect={setAuthor}
           type={'author'}
           placeholder={'E.g. John Doe'}
+          initialValue={defaultAuthor ? defaultAuthor.AuthorName : ''}
         />
       </div>
 
@@ -74,6 +75,7 @@ export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInst
           onSelect={setInstitution}
           type={'institute'}
           placeholder={'E.g. University of Prism'}
+          initialValue={defaultInstitution ? defaultInstitution.InstitutionName : ''}
         />
       </div>
 

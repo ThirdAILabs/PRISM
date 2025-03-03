@@ -8,6 +8,7 @@ import '../common/searchBar/SearchBar.css';
 import '../common/tools/button/button1.css';
 import UserService from '../../services/userService';
 import { searchService } from '../../api/search';
+import { SearchContext } from '../../store/searchContext';
 
 const SearchComponent = () => {
   const [results, setResults] = useState([]);

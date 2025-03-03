@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useContext } from 'react';
 import Logo from '../../assets/images/prism-logo.png';
 import '../common/searchBar/SearchBar.css';
 import '../common/tools/button/button1.css';
@@ -7,10 +7,13 @@ import { autocompleteService } from '../../api/autocomplete';
 import useCallOnPause from '../../hooks/useCallOnPause';
 import { useNavigate } from 'react-router-dom';
 import universityReportService from '../../api/universityReports';
+import { UniversityContext } from '../../store/universityContext';
 
 function UniversityAssessment() {
   const navigate = useNavigate();
-  const [institution, setInstitution] = useState();
+  const { universityState, setUniversityState } = useContext(UniversityContext);
+
+  const [institution, setInstitution] = useState(universityState.institution || null);
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -39,6 +42,9 @@ function UniversityAssessment() {
       alert('Please select an institution');
       return;
     }
+
+    setUniversityState((prev) => ({ ...prev, institution }));
+
     const reportData = {
       UniversityId: institution.InstitutionId,
       UniversityName: institution.InstitutionName,
@@ -92,9 +98,14 @@ function UniversityAssessment() {
                 <div className="autocomplete-search-bar">
                   <AutocompleteSearchBar
                     autocomplete={autocompleteInstitution}
-                    onSelect={setInstitution}
+                    onSelect={(selected) => {
+                      setInstitution(selected);
+                      setUniversityState((prev) => ({ ...prev, institution: selected }));
+                    }}
                     type={'institute'}
                     title={'University'}
+                    placeholder={'E.g. University of Prism'}
+                    initialValue={institution ? institution.InstitutionName : ''}
                   />
                 </div>
                 <div style={{ width: '40px' }} />
