@@ -14,7 +14,6 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { onFlagsUpdate } from '../../../services/streamStore.js';
 import { AUTHOR_AFFILIATIONS } from '../../../constants/constants.js';
 
 function getNodeTitle(flagType, flag) {
@@ -487,13 +486,12 @@ const Graph = ({ authorName, reportContent }) => {
           marginLeft: '5%',
           overflow: 'hidden',
           position: 'relative',
-          backgroundColor: '#000000',
         }}
       >
         <RelationGraph ref={graphRef} options={graphOptions} onNodeClick={onNodeClick} />
         <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm">
           <DialogTitle sx={{ bgcolor: '#2A2A2A', color: 'white' }}>
-            {selectedNode?.data.text}
+            {'Detailed Information'}
           </DialogTitle>
           <Divider
             sx={{
