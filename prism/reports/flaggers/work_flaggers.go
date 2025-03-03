@@ -375,38 +375,56 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 
 func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
 	logger *slog.Logger, acknowledgements []Acknowledgement, allAuthorNames []string,
-) (bool, error) {
+) (map[string]bool, error) {
 	if flagger.triangulationDB.GetTriangulationDB() == nil {
 		logger.Error("triangulation db is not set")
-		return false, fmt.Errorf("triangulation db is not set")
+		return nil, fmt.Errorf("triangulation db is not set")
 	}
-
-	var grantNumbers []string
 
 	for _, ack := range acknowledgements {
 		for _, entity := range ack.SearchableEntities {
-			if entity.EntityType == "grantNumber" {
-				grantNumbers = append(grantNumbers, entity.EntityText)
-			}
+			logger.Info("Found entity", "entity", entity)
 		}
 	}
 
-	for _, grantNumber := range grantNumbers {
-		for _, authorName := range allAuthorNames {
-			result, err := flagger.triangulationDB.GetAuthorFundCodeResult(authorName, grantNumber)
-			if err != nil {
-				logger.Error("error executing triangulation query", "error", err)
-				return false, fmt.Errorf("error executing triangulation query: %w", err)
-			}
-			if result != nil {
-				if float64(result.NumPapersByAuthor)/float64(result.NumPapers) >= 0.4 {
-					return true, nil
+	var funders []Entity
+	triangulationResults := make(map[string]bool)
+
+	for _, ack := range acknowledgements {
+		for _, entity := range ack.SearchableEntities {
+			if entity.EntityType == "funder" {
+				funders = append(funders, entity)
+			} else if entity.EntityType == "grantName" && len(funders) > 0 && funders[len(funders)-1].EntityType == "funder" {
+				funders[len(funders)-1].EntityText = funders[len(funders)-1].EntityText + " " + entity.EntityText
+			} else if entity.EntityType == "grantNumber" {
+				for _, sussyBaka := range flagger.sussyBakas {
+					if len(funders) > 0 {
+						if strings.Contains(" "+strings.ToLower(funders[len(funders)-1].EntityText)+" ", fmt.Sprintf(" %s ", sussyBaka)) {
+							logger.Info("Found a concerning grant number", "funder", funders[len(funders)-1].EntityText, "grantNumber", entity.EntityText)
+							triangulationResults[entity.EntityText] = false
+						}
+					}
 				}
 			}
 		}
 	}
 
-	return false, nil
+	for grantNumber := range triangulationResults {
+		for _, authorName := range allAuthorNames {
+			result, err := flagger.triangulationDB.GetAuthorFundCodeResult(authorName, grantNumber)
+			if err != nil {
+				logger.Error("error executing triangulation query", "error", err)
+				continue
+			}
+			if result != nil {
+				if float64(result.NumPapersByAuthor)/float64(result.NumPapers) >= 0.4 {
+					triangulationResults[grantNumber] = true
+				}
+			}
+		}
+	}
+
+	return triangulationResults, nil
 }
 
 var talentPrograms = []string{
@@ -429,22 +447,22 @@ func containsSource(entities []api.AcknowledgementEntity, sourcesOfInterest []st
 	return false
 }
 
-func createAcknowledgementFlag(work openalex.Work, message string, entities []api.AcknowledgementEntity, rawAcks []string, isLikelyGrantRecipient bool) api.Flag {
+func createAcknowledgementFlag(work openalex.Work, message string, entities []api.AcknowledgementEntity, rawAcks []string, triangulationResults map[string]bool) api.Flag {
 	if strings.Contains(message, "talent") || strings.Contains(message, "Talent") || containsSource(entities, talentPrograms) {
 		return &api.TalentContractFlag{
-			Message:              message,
-			Work:                 getWorkSummary(work),
-			Entities:             entities,
-			RawAcknowledements:   rawAcks,
-			LikelyGrantRecipient: isLikelyGrantRecipient,
+			Message:               message,
+			Work:                  getWorkSummary(work),
+			Entities:              entities,
+			RawAcknowledements:    rawAcks,
+			FundCodeTriangulation: triangulationResults,
 		}
 	} else if containsSource(entities, deniedEntities) {
 		return &api.AssociationWithDeniedEntityFlag{
-			Message:              message,
-			Work:                 getWorkSummary(work),
-			Entities:             entities,
-			RawAcknowledements:   rawAcks,
-			LikelyGrantRecipient: isLikelyGrantRecipient,
+			Message:               message,
+			Work:                  getWorkSummary(work),
+			Entities:              entities,
+			RawAcknowledements:    rawAcks,
+			FundCodeTriangulation: triangulationResults,
 		}
 	} else {
 		entityNames := make([]string, 0, len(entities))
@@ -452,11 +470,11 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			entityNames = append(entityNames, entity.Entity)
 		}
 		return &api.HighRiskFunderFlag{
-			Message:              message,
-			Work:                 getWorkSummary(work),
-			Funders:              entityNames,
-			RawAcknowledements:   rawAcks,
-			LikelyGrantRecipient: isLikelyGrantRecipient,
+			Message:               message,
+			Work:                  getWorkSummary(work),
+			Funders:               entityNames,
+			RawAcknowledements:    rawAcks,
+			FundCodeTriangulation: triangulationResults,
 		}
 	}
 }
@@ -514,11 +532,11 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 
 		workLogger.Info("found flagged entities in acknowledgements", "n_entities", len(flaggedEntities))
 
-		isLikelyGrantRecipient := false
+		var triangulationResults map[string]bool
 
 		if flagged {
 			var err error
-			isLikelyGrantRecipient, err = flagger.checkForGrantRecipient(
+			triangulationResults, err = flagger.checkForGrantRecipient(
 				workLogger, acks.Result.Acknowledgements, allAuthorNames,
 			)
 			if err != nil {
@@ -548,7 +566,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 				fmt.Sprintf("%s\n%s", message, strings.Join(ackTexts, "\n")),
 				entities,
 				ackTexts,
-				isLikelyGrantRecipient))
+				triangulationResults))
 		}
 	}
 

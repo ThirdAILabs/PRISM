@@ -107,11 +107,11 @@ type AcknowledgementEntity struct {
 
 type TalentContractFlag struct {
 	DisclosableFlag
-	Message              string
-	Work                 WorkSummary
-	Entities             []AcknowledgementEntity
-	RawAcknowledements   []string
-	LikelyGrantRecipient bool
+	Message               string
+	Work                  WorkSummary
+	Entities              []AcknowledgementEntity
+	RawAcknowledements    []string
+	FundCodeTriangulation map[string]bool
 }
 
 func (flag *TalentContractFlag) Type() string {
@@ -151,11 +151,11 @@ func (flag *TalentContractFlag) Date() (time.Time, bool) {
 
 type AssociationWithDeniedEntityFlag struct {
 	DisclosableFlag
-	Message              string
-	Work                 WorkSummary
-	Entities             []AcknowledgementEntity
-	RawAcknowledements   []string
-	LikelyGrantRecipient bool
+	Message               string
+	Work                  WorkSummary
+	Entities              []AcknowledgementEntity
+	RawAcknowledements    []string
+	FundCodeTriangulation map[string]bool
 }
 
 func (flag *AssociationWithDeniedEntityFlag) Type() string {
@@ -195,11 +195,11 @@ func (flag *AssociationWithDeniedEntityFlag) Date() (time.Time, bool) {
 
 type HighRiskFunderFlag struct {
 	DisclosableFlag
-	Message              string
-	Work                 WorkSummary
-	Funders              []string
-	RawAcknowledements   []string
-	LikelyGrantRecipient bool
+	Message               string
+	Work                  WorkSummary
+	Funders               []string
+	RawAcknowledements    []string
+	FundCodeTriangulation map[string]bool
 }
 
 func (flag *HighRiskFunderFlag) Type() string {

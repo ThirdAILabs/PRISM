@@ -313,16 +313,72 @@ const ItemDetails = () => {
             </>
           )}
         </p>
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
+        <div className="d-flex justify-content-between align-items-center w-100">
+          <div>
+            {isDisclosureChecked &&
+              (flag.Disclosed ? (
+                <button type="button" className="btn btn-success">
+                  Disclosed
+                </button>
+              ) : (
+                <button type="button" className="btn btn-danger">
+                  Undisclosed
+                </button>
+              ))}
+          </div>
+
+          <div>
+            {flag.FundCodeTriangulation &&
+              ((flag.FundCodeTriangulation instanceof Map && flag.FundCodeTriangulation.size > 0) ||
+                (typeof flag.FundCodeTriangulation === 'object' &&
+                  Object.keys(flag.FundCodeTriangulation).length > 0)) && (
+                <>
+                  <h6 className="mt-2 mb-3 fw-bold">High-Risk Grants</h6>
+                  <ul className="non-bulleted-list">
+                    {flag.FundCodeTriangulation instanceof Map
+                      ? Array.from(flag.FundCodeTriangulation).map(([key, value], index4) => (
+                          <li key={`fund-${index}-${index4}`} className="mb-2">
+                            {typeof value === 'boolean' ? (
+                              <button
+                                type="button"
+                                className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
+                                style={{ minWidth: '180px', textAlign: 'center' }}
+                                title={`${key}: ${value ? 'The author likely IS the primary recipient of this grant.' : 'The author likely IS NOT the primary recipient of this grant.'}`}
+                              >
+                                {key}: {value ? 'Yes' : 'No'}
+                              </button>
+                            ) : (
+                              <>
+                                <strong>{key}:</strong> {JSON.stringify(value)}
+                              </>
+                            )}
+                          </li>
+                        ))
+                      : Object.entries(flag.FundCodeTriangulation || {}).map(
+                          ([key, value], index4) => (
+                            <li key={`fund-${index}-${index4}`} className="mb-2">
+                              {typeof value === 'boolean' ? (
+                                <button
+                                  type="button"
+                                  className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
+                                  style={{ minWidth: '180px', textAlign: 'center' }}
+                                  title={`${key}: ${value ? 'The author likely IS the primary recipient of this grant.' : 'The author likely IS NOT the primary recipient of this grant.'}`}
+                                >
+                                  {key}: {value ? 'Yes' : 'No'}
+                                </button>
+                              ) : (
+                                <>
+                                  <strong>{key}:</strong> {JSON.stringify(value)}
+                                </>
+                              )}
+                            </li>
+                          )
+                        )}
+                  </ul>
+                </>
+              )}
+          </div>
+        </div>
       </div>
     );
   }
@@ -527,15 +583,55 @@ const ItemDetails = () => {
           </div>
 
           <div>
-            {flag.LikelyGrantRecipient ? (
-              <button type="button" className="btn btn-outline-danger">
-                Likely Grant Recipient
-              </button>
-            ) : (
-              <button type="button" className="btn btn-outline-success">
-                Likely NOT Grant Recipient
-              </button>
-            )}
+            {flag.FundCodeTriangulation &&
+              ((flag.FundCodeTriangulation instanceof Map && flag.FundCodeTriangulation.size > 0) ||
+                (typeof flag.FundCodeTriangulation === 'object' &&
+                  Object.keys(flag.FundCodeTriangulation).length > 0)) && (
+                <>
+                  <h6 className="mt-2 mb-3 fw-bold">High-Risk Grants</h6>
+                  <ul className="non-bulleted-list">
+                    {flag.FundCodeTriangulation instanceof Map
+                      ? Array.from(flag.FundCodeTriangulation).map(([key, value], index4) => (
+                          <li key={`fund-${index}-${index4}`} className="mb-2">
+                            {typeof value === 'boolean' ? (
+                              <button
+                                type="button"
+                                className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
+                                style={{ minWidth: '180px', textAlign: 'center' }}
+                                title={`${key}: ${value ? 'The author likely IS the primary recipient of this grant.' : 'The author likely IS NOT the primary recipient of this grant.'}`}
+                              >
+                                {key}: {value ? 'Yes' : 'No'}
+                              </button>
+                            ) : (
+                              <>
+                                <strong>{key}:</strong> {JSON.stringify(value)}
+                              </>
+                            )}
+                          </li>
+                        ))
+                      : Object.entries(flag.FundCodeTriangulation || {}).map(
+                          ([key, value], index4) => (
+                            <li key={`fund-${index}-${index4}`} className="mb-2">
+                              {typeof value === 'boolean' ? (
+                                <button
+                                  type="button"
+                                  className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
+                                  style={{ minWidth: '180px', textAlign: 'center' }}
+                                  title={`${key}: ${value ? 'The author likely IS the primary recipient of this grant.' : 'The author likely IS NOT the primary recipient of this grant.'}`}
+                                >
+                                  {key}: {value ? 'Yes' : 'No'}
+                                </button>
+                              ) : (
+                                <>
+                                  <strong>{key}:</strong> {JSON.stringify(value)}
+                                </>
+                              )}
+                            </li>
+                          )
+                        )}
+                  </ul>
+                </>
+              )}
           </div>
         </div>
       </div>
