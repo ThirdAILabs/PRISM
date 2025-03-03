@@ -38,16 +38,11 @@ func init() {
 }
 
 const (
-	userPrefix  = "user"
-	adminPrefix = "admin"
+	userPrefix = "user"
 )
 
 func newUser() string {
 	return userPrefix + uuid.NewString()
-}
-
-func newAdmin() string {
-	return adminPrefix + uuid.NewString()
 }
 
 type MockTokenVerifier struct {
