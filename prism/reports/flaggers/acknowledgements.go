@@ -89,9 +89,9 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 	worker := func(next openalex.Work) (Acknowledgements, error) {
 		workId := parseOpenAlexId(next)
 
-		acks, err := extractor.extractAcknowledgments(logger, workId, next)
+		acks, err := extractor.extractAcknowledgments(workId, next)
 		if err != nil {
-			return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments: %w", err)
+			return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments for work %s: %w", next.WorkId, err)
 		}
 
 		extractor.cache.Update(workId, acks)
@@ -106,32 +106,24 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 	return outputCh
 }
 
-func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(logger *slog.Logger, workId string, work openalex.Work) (Acknowledgements, error) {
-	logger.Info("extracting acknowledgments from", "work_id", work.WorkId, "work_name", work.DisplayName)
-
+func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId string, work openalex.Work) (Acknowledgements, error) {
 	destPath := filepath.Join(extractor.downloadDir, uuid.NewString()+".pdf")
 	pdf, err := downloadPdf(work.DownloadUrl, destPath)
 	if err != nil {
-		logger.Error("error downloading pdf", "work_id", work.WorkId, "work_name", work.DisplayName, "error", err)
 		return Acknowledgements{}, err
 	}
 	defer pdf.Close()
 
-	logger.Info("pdf download completed", "work_id", work.WorkId, "work_name", work.DisplayName)
-
 	defer func() {
 		if err := os.Remove(destPath); err != nil && !errors.Is(err, os.ErrNotExist) {
-			logger.Error("error removing temp download file", "error", err)
+			slog.Error("error removing temp download file", "error", err)
 		}
 	}()
 
 	acks, err := extractor.processPdfWithGrobid(pdf)
 	if err != nil {
-		logger.Error("error processing pdf with grobid", "work_id", work.WorkId, "name", work.DisplayName, "error", err)
 		return Acknowledgements{}, err
 	}
-
-	logger.Info("processed pdf with grobid", "work_id", work.WorkId, "work_name", work.DisplayName)
 
 	return Acknowledgements{WorkId: workId, Acknowledgements: acks}, nil
 }

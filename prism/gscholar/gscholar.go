@@ -41,14 +41,22 @@ type gscholarProfile struct {
 	Name          string  `json:"name"`
 	Email         *string `json:"email"`
 	Affilliations string  `json:"affiliations"`
+	Interests     []struct {
+		Title string `json:"title"`
+	} `json:"interests"`
 }
 
 func profileToAuthor(profile gscholarProfile) api.Author {
+	interests := make([]string, 0, len(profile.Interests))
+	for _, interest := range profile.Interests {
+		interests = append(interests, interest.Title)
+	}
 	return api.Author{
 		AuthorId:     profile.AuthorId,
 		AuthorName:   profile.Name,
 		Institutions: strings.Split(profile.Affilliations, ", "),
 		Source:       api.GoogleScholarSource,
+		Interests:    interests,
 	}
 }
 

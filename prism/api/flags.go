@@ -27,9 +27,9 @@ type Flag interface {
 	GetDetailFields() []KeyValue
 
 	GetHeading() string
-	Before(time.Time) bool
 
-	After(time.Time) bool
+	// The second arg indicates if the flag can be filtered by date.
+	Date() (time.Time, bool)
 }
 
 const (
@@ -145,12 +145,8 @@ func (flag *TalentContractFlag) GetDetailFields() []KeyValue {
 	}
 }
 
-func (flag *TalentContractFlag) Before(t time.Time) bool {
-	return flag.Work.PublicationDate.Before(t)
-}
-
-func (flag *TalentContractFlag) After(t time.Time) bool {
-	return flag.Work.PublicationDate.After(t)
+func (flag *TalentContractFlag) Date() (time.Time, bool) {
+	return flag.Work.PublicationDate, true
 }
 
 type AssociationWithDeniedEntityFlag struct {
@@ -193,12 +189,8 @@ func (flag *AssociationWithDeniedEntityFlag) GetDetailFields() []KeyValue {
 	}
 }
 
-func (flag *AssociationWithDeniedEntityFlag) Before(t time.Time) bool {
-	return flag.Work.PublicationDate.Before(t)
-}
-
-func (flag *AssociationWithDeniedEntityFlag) After(t time.Time) bool {
-	return flag.Work.PublicationDate.After(t)
+func (flag *AssociationWithDeniedEntityFlag) Date() (time.Time, bool) {
+	return flag.Work.PublicationDate, true
 }
 
 type HighRiskFunderFlag struct {
@@ -237,12 +229,8 @@ func (flag *HighRiskFunderFlag) GetDetailFields() []KeyValue {
 	}
 }
 
-func (flag *HighRiskFunderFlag) Before(t time.Time) bool {
-	return flag.Work.PublicationDate.Before(t)
-}
-
-func (flag *HighRiskFunderFlag) After(t time.Time) bool {
-	return flag.Work.PublicationDate.After(t)
+func (flag *HighRiskFunderFlag) Date() (time.Time, bool) {
+	return flag.Work.PublicationDate, true
 }
 
 type AuthorAffiliationFlag struct {
@@ -279,12 +267,8 @@ func (flag *AuthorAffiliationFlag) GetDetailFields() []KeyValue {
 	}
 }
 
-func (flag *AuthorAffiliationFlag) Before(t time.Time) bool {
-	return flag.Work.PublicationDate.Before(t)
-}
-
-func (flag *AuthorAffiliationFlag) After(t time.Time) bool {
-	return flag.Work.PublicationDate.After(t)
+func (flag *AuthorAffiliationFlag) Date() (time.Time, bool) {
+	return flag.Work.PublicationDate, true
 }
 
 type PotentialAuthorAffiliationFlag struct {
@@ -318,14 +302,9 @@ func (flag *PotentialAuthorAffiliationFlag) GetDetailFields() []KeyValue {
 	}
 }
 
-func (flag *PotentialAuthorAffiliationFlag) Before(t time.Time) bool {
-	// TODO: add date information to this flag and check it here
-	return true
-}
-
-func (flag *PotentialAuthorAffiliationFlag) After(t time.Time) bool {
-	// TODO: add date information to this flag and check it here
-	return true
+func (flag *PotentialAuthorAffiliationFlag) Date() (time.Time, bool) {
+	// TODO: add date information to this flag and return it here
+	return time.Time{}, false
 }
 
 type Connection struct {
@@ -388,14 +367,9 @@ func (flag *MiscHighRiskAssociationFlag) GetDetailFields() []KeyValue {
 	return fields
 }
 
-func (flag *MiscHighRiskAssociationFlag) Before(t time.Time) bool {
-	// TODO: add date information to this flag and check it here
-	return true
-}
-
-func (flag *MiscHighRiskAssociationFlag) After(t time.Time) bool {
-	// TODO: add date information to this flag and check it here
-	return true
+func (flag *MiscHighRiskAssociationFlag) Date() (time.Time, bool) {
+	// TODO: add date information to this flag and return it here
+	return time.Time{}, false
 }
 
 type CoauthorAffiliationFlag struct {
@@ -434,12 +408,8 @@ func (flag *CoauthorAffiliationFlag) GetDetailFields() []KeyValue {
 	}
 }
 
-func (flag *CoauthorAffiliationFlag) Before(t time.Time) bool {
-	return flag.Work.PublicationDate.Before(t)
-}
-
-func (flag *CoauthorAffiliationFlag) After(t time.Time) bool {
-	return flag.Work.PublicationDate.After(t)
+func (flag *CoauthorAffiliationFlag) Date() (time.Time, bool) {
+	return flag.Work.PublicationDate, true
 }
 
 type ReportContent map[string][]Flag
@@ -481,12 +451,8 @@ func (flag *MultipleAffiliationFlag) GetDetailFields() []KeyValue {
 	}
 }
 
-func (flag *MultipleAffiliationFlag) Before(t time.Time) bool {
-	return flag.Work.PublicationDate.Before(t)
-}
-
-func (flag *MultipleAffiliationFlag) After(t time.Time) bool {
-	return flag.Work.PublicationDate.After(t)
+func (flag *MultipleAffiliationFlag) Date() (time.Time, bool) {
+	return flag.Work.PublicationDate, true
 }
 
 type HighRiskPublisherFlag struct {
@@ -523,12 +489,8 @@ func (flag *HighRiskPublisherFlag) GetDetailFields() []KeyValue {
 	}
 }
 
-func (flag *HighRiskPublisherFlag) Before(t time.Time) bool {
-	return flag.Work.PublicationDate.Before(t)
-}
-
-func (flag *HighRiskPublisherFlag) After(t time.Time) bool {
-	return flag.Work.PublicationDate.After(t)
+func (flag *HighRiskPublisherFlag) Date() (time.Time, bool) {
+	return flag.Work.PublicationDate, true
 }
 
 type HighRiskCoauthorFlag struct {
@@ -565,10 +527,6 @@ func (flag *HighRiskCoauthorFlag) GetDetailFields() []KeyValue {
 	}
 }
 
-func (flag *HighRiskCoauthorFlag) Before(t time.Time) bool {
-	return flag.Work.PublicationDate.Before(t)
-}
-
-func (flag *HighRiskCoauthorFlag) After(t time.Time) bool {
-	return flag.Work.PublicationDate.After(t)
+func (flag *HighRiskCoauthorFlag) Date() (time.Time, bool) {
+	return flag.Work.PublicationDate, true
 }

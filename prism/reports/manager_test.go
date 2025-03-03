@@ -73,13 +73,13 @@ func checkNoNextAuthorReport(t *testing.T, manager *reports.ReportManager) {
 
 func dummyReportUpdate() api.ReportContent {
 	return api.ReportContent{
-		api.TalentContractType:               {&api.TalentContractFlag{Work: api.WorkSummary{WorkId: uuid.NewString()}}},
-		api.AssociationsWithDeniedEntityType: {&api.AssociationWithDeniedEntityFlag{Work: api.WorkSummary{WorkId: uuid.NewString()}}},
-		api.HighRiskFunderType:               {&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: uuid.NewString()}}},
-		api.AuthorAffiliationType:            {&api.AuthorAffiliationFlag{Work: api.WorkSummary{WorkId: uuid.NewString()}}},
+		api.TalentContractType:               {&api.TalentContractFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}}},
+		api.AssociationsWithDeniedEntityType: {&api.AssociationWithDeniedEntityFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}}},
+		api.HighRiskFunderType:               {&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}}},
+		api.AuthorAffiliationType:            {&api.AuthorAffiliationFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}}},
 		api.PotentialAuthorAffiliationType:   {&api.PotentialAuthorAffiliationFlag{University: uuid.NewString()}},
 		api.MiscHighRiskAssociationType:      {&api.MiscHighRiskAssociationFlag{DocTitle: uuid.NewString()}},
-		api.CoauthorAffiliationType:          {&api.CoauthorAffiliationFlag{Work: api.WorkSummary{WorkId: uuid.NewString()}}},
+		api.CoauthorAffiliationType:          {&api.CoauthorAffiliationFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}}},
 	}
 }
 
@@ -238,7 +238,7 @@ func TestAuthorReportAccessErrors(t *testing.T) {
 	}
 }
 
-func TestListReports(t *testing.T) {
+func TestListAuthorReports(t *testing.T) {
 	manager := setup(t)
 
 	user1, user2 := uuid.New(), uuid.New()
@@ -275,10 +275,10 @@ func TestListReports(t *testing.T) {
 		t.Fatal("should be 2 reports")
 	}
 
-	if reports1[0].Id != report1 || reports1[1].Id != report3 ||
-		reports1[0].AuthorId != "1" || reports1[1].AuthorId != "3" ||
-		reports1[0].AuthorName != "author1" || reports1[1].AuthorName != "author3" ||
-		reports1[0].Source != api.OpenAlexSource || reports1[1].Source != api.GoogleScholarSource ||
+	if reports1[0].Id != report3 || reports1[1].Id != report1 ||
+		reports1[0].AuthorId != "3" || reports1[1].AuthorId != "1" ||
+		reports1[0].AuthorName != "author3" || reports1[1].AuthorName != "author1" ||
+		reports1[0].Source != api.GoogleScholarSource || reports1[1].Source != api.OpenAlexSource ||
 		reports1[0].Status != "queued" || reports1[1].Status != "queued" {
 		t.Fatal("incorrect reports")
 	}
@@ -312,6 +312,10 @@ func TestListReports(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if err := manager.DeleteAuthorReport(user2, report1); err != reports.ErrReportNotFound {
+		t.Fatal("user cannot delete another user's report")
+	}
+
 	reports1, err = manager.ListAuthorReports(user1)
 	if err != nil {
 		t.Fatal(err)
@@ -320,13 +324,34 @@ func TestListReports(t *testing.T) {
 		t.Fatal("should be 2 reports")
 	}
 
-	if reports1[0].Id != report1 || reports1[1].Id != report3 ||
-		reports1[0].AuthorId != "1" || reports1[1].AuthorId != "3" ||
-		reports1[0].AuthorName != "author1" || reports1[1].AuthorName != "author3" ||
-		reports1[0].Source != "openalex" || reports1[1].Source != "google-scholar" ||
-		reports1[0].Status != "complete" || reports1[1].Status != "queued" {
+	if reports1[0].Id != report3 || reports1[1].Id != report1 ||
+		reports1[0].AuthorId != "3" || reports1[1].AuthorId != "1" ||
+		reports1[0].AuthorName != "author3" || reports1[1].AuthorName != "author1" ||
+		reports1[0].Source != api.GoogleScholarSource || reports1[1].Source != api.OpenAlexSource ||
+		reports1[0].Status != "queued" || reports1[1].Status != "complete" {
 		t.Fatal("incorrect reports")
 	}
+
+	if err := manager.DeleteAuthorReport(user1, report1); err != nil {
+		t.Fatal(err)
+	}
+
+	reports1, err = manager.ListAuthorReports(user1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(reports1) != 1 {
+		t.Fatal("should be 1 report")
+	}
+
+	if reports1[0].Id != report3 ||
+		reports1[0].AuthorId != "3" ||
+		reports1[0].AuthorName != "author3" ||
+		reports1[0].Source != api.GoogleScholarSource ||
+		reports1[0].Status != "queued" {
+		t.Fatal("incorrect reports")
+	}
+
 }
 
 func checkNextUniversityReport(t *testing.T, next *reports.UniversityReportUpdateTask, universityId, universityName string, updateDate time.Time) {
@@ -640,11 +665,11 @@ func TestListUniversityReport(t *testing.T) {
 		t.Fatal("should be 2 reports")
 	}
 
-	if reports1[0].Id != uniId1 || reports1[1].Id != uniId3 ||
-		reports1[0].UniversityId != "1" || reports1[1].UniversityId != "3" ||
-		reports1[0].UniversityName != "university1" || reports1[1].UniversityName != "university3" ||
+	if reports1[0].Id != uniId3 || reports1[1].Id != uniId1 ||
+		reports1[0].UniversityId != "3" || reports1[1].UniversityId != "1" ||
+		reports1[0].UniversityName != "university3" || reports1[1].UniversityName != "university1" ||
 		reports1[0].Status != "queued" || reports1[1].Status != "queued" {
-		t.Fatal("incorrect reports")
+		t.Fatalf("incorrect reports: %+v", reports1)
 	}
 
 	reports2, err := manager.ListUniversityReports(user2)
@@ -661,4 +686,146 @@ func TestListUniversityReport(t *testing.T) {
 		reports2[0].Status != "queued" {
 		t.Fatal("incorrect report")
 	}
+
+	if err := manager.DeleteUniversityReport(user2, uniId3); err != reports.ErrReportNotFound {
+		t.Fatal("user cannot delete another user report")
+	}
+
+	reportsAfterInvalidDelete, err := manager.ListUniversityReports(user1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(reportsAfterInvalidDelete) != 2 {
+		t.Fatal("should be 2 reports")
+	}
+
+	if reportsAfterInvalidDelete[0].Id != uniId3 || reportsAfterInvalidDelete[1].Id != uniId1 ||
+		reportsAfterInvalidDelete[0].UniversityId != "3" || reportsAfterInvalidDelete[1].UniversityId != "1" ||
+		reportsAfterInvalidDelete[0].UniversityName != "university3" || reportsAfterInvalidDelete[1].UniversityName != "university1" ||
+		reportsAfterInvalidDelete[0].Status != "queued" || reportsAfterInvalidDelete[1].Status != "queued" {
+		t.Fatalf("incorrect reports: %+v", reports1)
+	}
+
+	if err := manager.DeleteUniversityReport(user1, uniId3); err != nil {
+		t.Fatal(err)
+	}
+
+	reportsAfterDelete, err := manager.ListUniversityReports(user1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(reportsAfterDelete) != 1 {
+		t.Fatal("should be 1 report")
+	}
+
+	if reportsAfterDelete[0].Id != uniId1 ||
+		reportsAfterDelete[0].UniversityId != "1" ||
+		reportsAfterDelete[0].UniversityName != "university1" ||
+		reportsAfterDelete[0].Status != "queued" {
+		t.Fatal("incorrect reports")
+	}
+}
+
+func TestUniversityReportsFilterFlagsByDate(t *testing.T) {
+	manager := setup(t)
+
+	user := uuid.New()
+	license := uuid.New()
+
+	uniId, err := manager.CreateUniversityReport(license, user, "1", "university1")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nextUni, err := manager.GetNextUniversityReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := manager.UpdateUniversityReport(nextUni.Id, "complete", nextUni.UpdateDate, []reports.UniversityAuthorReport{
+		{AuthorId: "1", AuthorName: "author1", Source: api.OpenAlexSource},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	nextAuthor, err := manager.GetNextAuthorReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	content := api.ReportContent{
+		// This should not be filtered because the date is recent
+		api.TalentContractType: {&api.TalentContractFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}}},
+		// This should be filtered because the date is too old
+		api.HighRiskFunderType: {&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now().AddDate(-6, 0, 0)}}},
+		// This should not be filtered because there is no date
+		api.MiscHighRiskAssociationType: {&api.MiscHighRiskAssociationFlag{DocTitle: uuid.NewString()}},
+	}
+
+	if err := manager.UpdateAuthorReport(nextAuthor.Id, "complete", nextAuthor.EndDate, content); err != nil {
+		t.Fatal(err)
+	}
+
+	report, err := manager.GetUniversityReport(user, uniId)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(report.Content.Flags) != 2 ||
+		len(report.Content.Flags[api.TalentContractType]) != 1 ||
+		len(report.Content.Flags[api.HighRiskFunderType]) != 0 ||
+		len(report.Content.Flags[api.MiscHighRiskAssociationType]) != 1 {
+		t.Fatalf("incorrect flags: %+v", report.Content.Flags)
+	}
+}
+
+func TestUserQueuedReportsArePrioritizedOverUniversityReports(t *testing.T) {
+	manager := setup(t)
+
+	user := uuid.New()
+	license := uuid.New()
+
+	if _, err := manager.CreateAuthorReport(license, user, "1", "author1", api.OpenAlexSource); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := manager.CreateUniversityReport(license, user, "1", "university1"); err != nil {
+		t.Fatal(err)
+	}
+
+	nextUni, err := manager.GetNextUniversityReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := manager.UpdateUniversityReport(nextUni.Id, "complete", nextUni.UpdateDate, []reports.UniversityAuthorReport{
+		{AuthorId: "1", AuthorName: "author1", Source: api.OpenAlexSource},
+		{AuthorId: "2", AuthorName: "author2", Source: api.OpenAlexSource},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := manager.CreateAuthorReport(license, user, "3", "author3", api.OpenAlexSource); err != nil {
+		t.Fatal(err)
+	}
+
+	// Author 1 report was queued by user
+	nextAuthor1, err := manager.GetNextAuthorReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkNextAuthorReport(t, nextAuthor1, "1", "author1", api.OpenAlexSource, reports.EarliestReportDate, time.Now())
+
+	// University report was queued first, but author report 3 was queued by user
+	nextAuthor3, err := manager.GetNextAuthorReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkNextAuthorReport(t, nextAuthor3, "3", "author3", api.OpenAlexSource, reports.EarliestReportDate, time.Now())
+
+	// Author 2 report was queued by university
+	nextAuthor2, err := manager.GetNextAuthorReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkNextAuthorReport(t, nextAuthor2, "2", "author2", api.OpenAlexSource, reports.EarliestReportDate, time.Now())
 }
