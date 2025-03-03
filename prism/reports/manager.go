@@ -191,6 +191,13 @@ func (r *ReportManager) GetAuthorReport(userId, reportId uuid.UUID) (api.Report,
 		if err := r.queueAuthorReportUpdateIfNeeded(txn, report.Report); err != nil {
 			return err
 		}
+
+		report.LastAccessedAt = time.Now().UTC()
+		if err := txn.Save(&report).Error; err != nil {
+			slog.Error("error updating user author report last_accessed_at", "error", err)
+			return ErrReportAccessFailed
+		}
+
 		return nil
 	}); err != nil {
 		return api.Report{}, err
@@ -529,6 +536,12 @@ func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.Uni
 
 		if err := r.queueUniversityReportUpdateIfNeeded(txn, report.Report); err != nil {
 			return err
+		}
+
+		report.LastAccessedAt = time.Now().UTC()
+		if err := txn.Save(&report).Error; err != nil {
+			slog.Error("error updating user university report last_accessed_at", "error", err)
+			return ErrReportAccessFailed
 		}
 
 		if err := txn.Model(&schema.AuthorReport{}).
