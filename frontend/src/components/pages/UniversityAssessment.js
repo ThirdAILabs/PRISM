@@ -50,12 +50,12 @@ function UniversityAssessment() {
 
   return (
     <div className="basic-setup" style={{ color: 'white' }}>
-      <div style={{ textAlign: 'center', marginTop: '5.5%', animation: 'fade-in 0.75s' }}>
+      <div style={{ textAlign: 'center', marginTop: '5%', animation: 'fade-in 0.75s' }}>
         <img
           src={Logo}
           style={{
             width: '320px',
-            marginTop: '5%',
+            marginTop: '1%',
             marginBottom: '1%',
             marginRight: '2%',
             animation: 'fade-in 0.5s',
@@ -65,7 +65,14 @@ function UniversityAssessment() {
         <div style={{ animation: 'fade-in 1s' }}>
           <div className="d-flex justify-content-center align-items-center">
             <div style={{ marginTop: 10, color: '#888888' }}>
-              <h1 style={{ fontWeight: 'bold', color: 'black', marginTop: 20, animation: 'fade-in 0.75s' }}>
+              <h1
+                style={{
+                  fontWeight: 'bold',
+                  color: 'black',
+                  marginTop: 20,
+                  animation: 'fade-in 0.75s',
+                }}
+              >
                 University Assessment
               </h1>
               We help you comply with research security requirements by automating university
@@ -79,7 +86,7 @@ function UniversityAssessment() {
           </div>
         </div>
         <div style={{ animation: 'fade-in 1s' }}>
-          <div className="d-flex justify-content-center align-items-center pt-5">
+          <div className="d-flex justify-content-center align-items-center">
             <div style={{ width: '80%' }}>
               <div className="author-institution-search-bar">
                 <div className="autocomplete-search-bar">
@@ -87,10 +94,11 @@ function UniversityAssessment() {
                     autocomplete={autocompleteInstitution}
                     onSelect={setInstitution}
                     type={'institute'}
+                    title={'University'}
                   />
                 </div>
-                <div style={{ width: '10px' }} />
-                <div style={{ width: '200px' }}>
+                <div style={{ width: '40px' }} />
+                <div style={{ width: '200px', marginTop: '40px' }}>
                   <button className="button" onClick={handleSearch}>
                     {isLoading ? 'Searching...' : 'Search'}
                   </button>

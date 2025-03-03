@@ -54,19 +54,5 @@
 
 .author-institution-search-button-container {
   width: 10%;
-  padding-top: 36px;
-}
-
-.author-institution-search-button {
-  width: 100%;
-  padding: 10px;
-  border-radius: 50px;
-  border: 2px solid #45037b;
-  background-color: #59059e;
-  color: white;
-}
-
-.author-institution-search-button:hover {
-  background-color: rgba(138, 24, 169, 0.5);
-  transition: background-color 0.3s ease;
+  margin-top: 40px;
 }

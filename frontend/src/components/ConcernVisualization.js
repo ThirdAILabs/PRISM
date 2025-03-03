@@ -45,7 +45,11 @@ export default function ConcernVisualizer({ title, hoverText, value, scale, onRe
         {title} <Hover text={hoverText} />
       </div>
       {onReview && (
-        <button className={`btn ${selected ? 'btn-dark' : 'btn-light'} rounded rounded-5 px-4`} disabled={!value} onClick={onReview}>
+        <button
+          className={`btn ${selected ? 'btn-dark' : 'btn-light'} rounded rounded-5 px-4`}
+          disabled={!value}
+          onClick={onReview}
+        >
           Review
         </button>
       )}

@@ -5,7 +5,6 @@ import '../tools/button/button1.css';
 import useCallOnPause from '../../../hooks/useCallOnPause';
 import AutocompleteSearchBar from '../../../utils/autocomplete';
 
-
 export function AuthorInstiutionSearchBar({ onSearch }) {
   const [author, setAuthor] = useState();
   const [institution, setInstitution] = useState();

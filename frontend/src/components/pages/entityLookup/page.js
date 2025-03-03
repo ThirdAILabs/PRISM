@@ -45,7 +45,14 @@ function EntityLookup() {
         <div style={{ animation: 'fade-in 1s' }}>
           <div className="d-flex justify-content-center align-items-center">
             <div style={{ color: '#888888' }}>
-              <h1 style={{ marginTop: 20, fontWeight: 'bold', color: 'black', animation: 'fade-in 0.75s' }}>
+              <h1
+                style={{
+                  marginTop: 20,
+                  fontWeight: 'bold',
+                  color: 'black',
+                  animation: 'fade-in 0.75s',
+                }}
+              >
                 Entity Lookup
               </h1>
               We help you comply with research security requirements.
@@ -71,7 +78,7 @@ function EntityLookup() {
                     className="search-bar"
                   />
                 </div>
-                <div style={{ width: '20px' }} />
+                <div style={{ width: '40px' }} />
                 <div className="author-institution-search-button-container">
                   <button type="submit" disabled={isLoading} className="button">
                     {isLoading ? 'Searching...' : 'Search'}

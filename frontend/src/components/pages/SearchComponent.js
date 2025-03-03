@@ -20,7 +20,6 @@ const SearchComponent = () => {
   const [loadMoreCount, setLoadMoreCount] = useState(0);
   const [canLoadMore, setCanLoadMore] = useState(true);
 
-
   const search = async (author, institution) => {
     searchOpenAlex(author, institution);
     // setIsLoadingScopus(true);

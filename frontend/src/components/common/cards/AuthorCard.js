@@ -1,24 +1,23 @@
 import React from 'react';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
-import { TbReportSearch } from "react-icons/tb";
+import { TbReportSearch } from 'react-icons/tb';
 
 const AuthorCard = ({ authors }) => {
   const columns = [
     {
       field: 'authorName',
       headerName: 'Author Name',
-      flex: 1
+      flex: 1,
     },
     {
       field: 'source',
       headerName: 'Source',
-      flex: 1
+      flex: 1,
     },
     {
       field: 'flagCount',
       headerName: 'Flag Count',
       width: 230,
-
     },
     {
       field: 'actions',
@@ -34,8 +33,8 @@ const AuthorCard = ({ authors }) => {
           <TbReportSearch />
           <span style={{ marginLeft: '8px' }}>View Report</span>
         </a>
-      )
-    }
+      ),
+    },
   ];
 
   const rows = authors.map((author, index) => ({
@@ -43,7 +42,7 @@ const AuthorCard = ({ authors }) => {
     authorName: author.AuthorName,
     source: author.Source,
     flagCount: author.FlagCount,
-    reportId: author.reportId
+    reportId: author.reportId,
   }));
 
   const handlePaginationList = () => {
@@ -55,7 +54,7 @@ const AuthorCard = ({ authors }) => {
       pageSizeOptionsList.push(25);
     }
     return pageSizeOptionsList;
-  }
+  };
 
   const CustomToolbar = () => {
     return (
@@ -64,10 +63,11 @@ const AuthorCard = ({ authors }) => {
         quickFilterProps={{ debounceMs: 500 }}
         sx={{
           '& .MuiButton-root': {
-            display: 'none'
+            display: 'none',
           },
-          '& .MuiButton-root:nth-of-type(2)': { // Filter button
-            display: 'inline-flex'
+          '& .MuiButton-root:nth-of-type(2)': {
+            // Filter button
+            display: 'inline-flex',
           },
           // '& .MuiButton-root:nth-of-type(4)': { // Export button
           //   display: 'inline-flex'
@@ -86,7 +86,7 @@ const AuthorCard = ({ authors }) => {
         density="comfortable"
         initialState={{
           pagination: {
-            paginationModel: { pageSize: 10 }
+            paginationModel: { pageSize: 10 },
           },
         }}
         pageSizeOptions={handlePaginationList()}
