@@ -44,10 +44,11 @@ export default function ConcernVisualizer({ title, hoverText, value, scale, onRe
       <div className="mt-3 mb-4 text-dark" style={{ height: '50px' }}>
         {title} <Hover text={hoverText} />
       </div>
-
-      <button className="btn btn-light rounded rounded-5 px-4" onClick={onReview}>
-        Review
-      </button>
+      {onReview && (
+        <button className="btn btn-light rounded rounded-5 px-4" onClick={onReview}>
+          Review
+        </button>
+      )}
     </div>
   );
 }

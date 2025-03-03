@@ -8,10 +8,16 @@ import AutocompleteSearchBar from '../../../utils/autocomplete';
 //   const [suggestions, setSuggestions] = useState([]);
 //   const [query, setQuery] = useState('');
 
+<<<<<<< HEAD
 //   function handleInputChange(e) {
 //     setQuery(e.target.value);
 //     autocomplete(e.target.value).then(setSuggestions);
 //   }
+=======
+function AutocompleteSearchBar({ title, autocomplete, onSelect, type, placeholder }) {
+  const [suggestions, setSuggestions] = useState([]);
+  const [query, setQuery] = useState('');
+>>>>>>> origin/main
 
 //   function handleSelectSuggestion(suggestion) {
 //     return () => {
@@ -38,6 +44,7 @@ import AutocompleteSearchBar from '../../../utils/autocomplete';
 //       {/* Search bar */}
 //       <input type="text" className="search-bar" value={query} onChange={handleInputChange} />
 
+<<<<<<< HEAD
 //       {query && query.length && suggestions && suggestions.length > 0 && (
 //         // Autocomplete suggestion container. Column.
 //         <div className="suggestion-container">
@@ -62,6 +69,41 @@ import AutocompleteSearchBar from '../../../utils/autocomplete';
 //     </div>
 //   );
 // }
+=======
+      {/* Search bar */}
+      <input
+        type="text"
+        className="search-bar"
+        placeholder={placeholder || ''}
+        value={query}
+        onChange={handleInputChange}
+      />
+
+      {query && query.length && suggestions && suggestions.length > 0 && (
+        // Autocomplete suggestion container. Column.
+        <div className="suggestion-container">
+          {suggestions.map((suggestion, index) =>
+            // Clickable suggestion
+            type === 'author' ? (
+              <div className="suggestion" key={index} onClick={handleSelectSuggestion(suggestion)}>
+                {suggestion.AuthorName}
+              </div>
+            ) : (
+              <div
+                className="suggestion"
+                key={index}
+                onClick={handleSelectSuggestionInstitute(suggestion)}
+              >
+                {suggestion.InstitutionName}
+              </div>
+            )
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+>>>>>>> origin/main
 
 export function AuthorInstiutionSearchBar({ onSearch }) {
   const [author, setAuthor] = useState();
@@ -121,6 +163,7 @@ export function AuthorInstiutionSearchBar({ onSearch }) {
           autocomplete={autocompleteAuthor}
           onSelect={setAuthor}
           type={'author'}
+          placeholder={'E.g. John Doe'}
         />
       </div>
 
@@ -130,6 +173,7 @@ export function AuthorInstiutionSearchBar({ onSearch }) {
           autocomplete={autocompleteInstitution}
           onSelect={setInstitution}
           type={'institute'}
+          placeholder={'E.g. University of Prism'}
         />
       </div>
 
