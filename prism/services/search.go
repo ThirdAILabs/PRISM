@@ -215,19 +215,6 @@ func (es *EntitySearch) Free() {
 	es.ndb.Free()
 }
 
-func cleanEntry(id uint64, text string) string {
-	lines := strings.Split(text, "\n")
-	for i, line := range lines {
-		if strings.Contains(line, "[ADDRESS]") {
-			// TODO(question): this used split before, is Cut ok?
-			_, addr, _ := strings.Cut(line, "[ADDRESS]")
-			addr, _, _ = strings.Cut(addr, ";")
-			lines[i] = "[ADDRESS] " + addr
-		}
-	}
-	return fmt.Sprintf("[ID] %d\n", id) + strings.Join(lines, "\n")
-}
-
 const (
 	matchEntitiesPrompt = `I will give you a list of entities, each formatted as a '[ID] <id value> [ENTITY START] ... [ENTITY END]' block. Each block contains known aliases of the entity, the address, and some other information.
     If "%s" in the list of entities, return the value of the [ID] tag of all blocks that contain the entity, formatting it in a CSV list like this:
