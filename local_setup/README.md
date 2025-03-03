@@ -155,6 +155,12 @@ ndb_license: "Bolt license key"
 ```
   </div>
 
+5. For Entity search to work, we need to set the openai key as env variable before starting the backend.
+
+```bash
+export OPENAI_API_KEY=YOUR_OPENAI_KEY
+```
+
 5. Start the backend:
 
 ```bash

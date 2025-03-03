@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"prism/prism/api"
 	"prism/prism/cmd"
 	"prism/prism/licensing"
 	"prism/prism/openalex"
@@ -43,7 +44,7 @@ func (c *Config) port() int {
 	return c.Port
 }
 
-func buildEntityNdb(entityPath string) search.NeuralDB {
+func buildEntityNdb(entityPath string) services.EntitySearch {
 	const entityNdbPath = "searchable_entities.ndb"
 	if err := os.RemoveAll(entityNdbPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		log.Fatalf("error deleting existing ndb: %v", err)
@@ -56,7 +57,7 @@ func buildEntityNdb(entityPath string) search.NeuralDB {
 		log.Fatalf("error opening searchable entities: %v", err)
 	}
 
-	var entities []string
+	var entities []api.MatchedEntity
 	if err := json.NewDecoder(file).Decode(&entities); err != nil {
 		log.Fatalf("error parsing searchable entities: %v", err)
 	}
@@ -64,12 +65,12 @@ func buildEntityNdb(entityPath string) search.NeuralDB {
 	log.Printf("loaded %d searchable entities", len(entities))
 
 	s := time.Now()
-	ndb, err := search.NewNeuralDB(entityNdbPath)
+	es, err := services.NewEntitySearch(entityNdbPath)
 	if err != nil {
 		log.Fatalf("error openning ndb: %v", err)
 	}
 
-	if err := ndb.Insert("entities", "id", entities, nil, nil); err != nil {
+	if err := es.Insert(entities); err != nil {
 		log.Fatalf("error inserting into ndb: %v", err)
 	}
 
@@ -77,7 +78,7 @@ func buildEntityNdb(entityPath string) search.NeuralDB {
 
 	log.Printf("searchable entity ndb construction time=%.3f", e.Sub(s).Seconds())
 
-	return ndb
+	return es
 }
 
 func main() {
@@ -103,7 +104,7 @@ func main() {
 		log.Fatalf("error activating license key: %v", err)
 	}
 
-	entityNdb := buildEntityNdb(config.SearchableEntitiesPath)
+	entitySearch := buildEntityNdb(config.SearchableEntitiesPath)
 
 	db := cmd.InitDb(config.PostgresUri)
 
@@ -112,7 +113,7 @@ func main() {
 		log.Fatalf("error initializing keycloak user auth: %v", err)
 	}
 
-	backend := services.NewBackend(db, openalex, entityNdb, userAuth, licensing)
+	backend := services.NewBackend(db, openalex, entitySearch, userAuth, licensing)
 
 	r := chi.NewRouter()
 

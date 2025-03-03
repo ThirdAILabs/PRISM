@@ -79,16 +79,16 @@ func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 	}
 
 	ndbPath := filepath.Join(t.TempDir(), "entity.ndb")
-	ndb, err := search.NewNeuralDB(ndbPath)
+	entitySearch, err := services.NewEntitySearch(ndbPath)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
-		ndb.Free()
+		entitySearch.Free()
 	})
 
-	entities := []string{"abc university", "institute of xyz", "123 org"}
-	if err := ndb.Insert("doc", "id", entities, nil, nil); err != nil {
+	entities := []api.MatchedEntity{{Names: "abc university"}, {Names: "institute of xyz"}, {Names: "123 org"}}
+	if err := entitySearch.Insert(entities); err != nil {
 		t.Fatal(err)
 	}
 
@@ -98,7 +98,7 @@ func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 	}
 
 	backend := services.NewBackend(
-		db, openalex.NewRemoteKnowledgeBase(), ndb, &MockTokenVerifier{prefix: userPrefix}, licensing,
+		db, openalex.NewRemoteKnowledgeBase(), entitySearch, &MockTokenVerifier{prefix: userPrefix}, licensing,
 	)
 
 	return backend.Routes(), db
@@ -660,14 +660,14 @@ func TestMatchEntities(t *testing.T) {
 
 	user := newUser()
 
-	var results api.MatchEntitiesResponse
+	var results []api.MatchedEntity
 	err := mockRequest(backend, "GET", "/search/match-entities?query="+url.QueryEscape("xyz"), user, nil, &results)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(results.Entities) != 1 || results.Entities[0] != "institute of xyz" {
-		t.Fatalf("incorrect entities matched: %v", results.Entities)
+	if len(results) != 1 || results[0].Names != "institute of xyz" {
+		t.Fatalf("incorrect entities matched: %v", results)
 	}
 }
 

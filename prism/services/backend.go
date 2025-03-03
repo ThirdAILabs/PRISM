@@ -5,7 +5,6 @@ import (
 	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/reports"
-	"prism/prism/search"
 	"prism/prism/services/auth"
 
 	"github.com/go-chi/chi/v5"
@@ -21,7 +20,7 @@ type BackendService struct {
 	userAuth auth.TokenVerifier
 }
 
-func NewBackend(db *gorm.DB, oa openalex.KnowledgeBase, entityNdb search.NeuralDB, userAuth auth.TokenVerifier, licensing *licensing.LicenseVerifier) *BackendService {
+func NewBackend(db *gorm.DB, oa openalex.KnowledgeBase, entitySearch EntitySearch, userAuth auth.TokenVerifier, licensing *licensing.LicenseVerifier) *BackendService {
 	return &BackendService{
 		report: ReportService{
 			manager:   reports.NewManager(db, reports.StaleReportThreshold),
@@ -29,8 +28,8 @@ func NewBackend(db *gorm.DB, oa openalex.KnowledgeBase, entityNdb search.NeuralD
 			licensing: licensing,
 		},
 		search: SearchService{
-			openalex:  oa,
-			entityNdb: entityNdb,
+			openalex:     oa,
+			entitySearch: entitySearch,
 		},
 		autocomplete: AutocompleteService{
 			openalex: oa,

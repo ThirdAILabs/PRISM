@@ -9,7 +9,7 @@ import (
 type Report struct {
 	Id uuid.UUID
 
-	CreatedAt time.Time
+	LastAccessedAt time.Time
 
 	AuthorId   string
 	AuthorName string
@@ -57,7 +57,7 @@ type UniversityReportFlag struct {
 type UniversityReport struct {
 	Id uuid.UUID
 
-	CreatedAt time.Time
+	LastAccessedAt time.Time
 
 	UniversityId   string
 	UniversityName string
@@ -96,8 +96,12 @@ type FormalRelationResponse struct {
 	HasFormalRelation bool
 }
 
-type MatchEntitiesResponse struct {
-	Entities []string
+type MatchedEntity struct {
+	Names    string
+	Address  string
+	Country  string
+	Type     string
+	Resource string
 }
 
 type CreateLicenseRequest struct {
