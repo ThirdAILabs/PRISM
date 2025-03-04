@@ -10,7 +10,7 @@ import SidePanel from './components/sidebar/SidePanel';
 import UniversityAssessment from './components/pages/UniversityAssessment';
 import UniversityReport from './components/pages/UniversityReport';
 import { useLocation } from 'react-router-dom';
-import Error from './components/pages/Error';
+import Error from './components/pages/error/Error.js';
 import { GetShowMenuIcon } from './utils/helper.js';
 //CSS
 import 'bootstrap/dist/css/bootstrap.css';
