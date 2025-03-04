@@ -1040,24 +1040,10 @@ const ItemDetails = () => {
         </div>
 
         {activeTab === 0 &&
-          // loading ? (<div style={{ width: '100%', height: '300px' }}>
-          //   <Shimmer />
-          // </div>) : 
-          (
+          ((loading) ? (<div style={{ width: '100%', height: '300px' }}>
+            <Shimmer />
+          </div>) : (
             <>
-              {/* <div className="d-flex w-100 flex-column align-items-center">
-                <div className="d-flex w-100 px-5 align-items-center my-2 mt-3 justify-content-between">
-                  <div style={{ width: '20px' }}>
-                    {loading && (
-                      <div
-                        className="spinner-border text-primary spinner-border-sm"
-                        role="status"
-                      ></div>
-                    )}
-                  </div>
-                </div>
-              </div> */}
-
               <div
                 className="d-flex w-100 flex-column align-items-center"
                 style={{ color: 'rgb(78, 78, 78)', marginTop: '0px' }}
@@ -1266,7 +1252,8 @@ const ItemDetails = () => {
                 </div>
               )}
             </>
-          )}
+          ))
+        }
 
         {activeTab === 1 && (
           <>

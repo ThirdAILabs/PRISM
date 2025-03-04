@@ -14,6 +14,7 @@ import ConcernVisualizer from '../ConcernVisualization.js';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider } from '@mui/material';
 import { universityReportService } from '../../api/universityReports.js';
 import AuthorCard from '../common/cards/AuthorCard.js';
+import Shimmer from './itemDetails/Shimmer.js';
 
 import styled from 'styled-components';
 
@@ -266,17 +267,6 @@ const UniversityReport = () => {
               </svg>
               Back
             </button>
-
-            {/* <div className="d-flex w-80">
-                            <div className="text-start px-5">
-                                <div className="d-flex align-items-center mb-2">
-                                    <h5 className="m-0">{'Sample Institute'}</h5>
-                                </div>
-                                <b className="m-0 p-0" style={{ fontSize: 'small' }}>
-                                    {institutions.join(', ')}
-                                </b>
-                            </div>
-                        </div> */}
             <h5 style={{ marginRight: '43.5%' }}>{instituteName}</h5>
           </div>
         </div>
@@ -346,20 +336,6 @@ const UniversityReport = () => {
               width: '100%',
             }}
           >
-            {/* <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(4, minmax(250px, 1fr))',
-                            gap: '50px',
-                            justifyContent: 'center',
-                            marginTop: '100px',
-                            padding: '20px',
-                            overflow: 'auto',
-                            minHeight: '80vh',
-                            width: '80%',
-                        }}> */}
-            {/* {selectedFlagData?.map((author, index) => (
-                                <AuthorCard key={author.AuthorId} authorId={author.AuthorId} authorName={author.AuthorName} Source={author.Source} flagCount={author.FlagCount} />
-                            ))} */}
             <div
               style={{
                 marginTop: '100px',
@@ -367,9 +343,6 @@ const UniversityReport = () => {
             >
               <AuthorCard authors={selectedFlagData} />
             </div>
-            {/* <div style={{ marginTop: '200px' }}>
-                            <AuthorTable />
-                        </div> */}
           </div>
         )}
       </>
