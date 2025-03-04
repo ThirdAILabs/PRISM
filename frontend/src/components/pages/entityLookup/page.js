@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import '../../common/searchBar/SearchBar.css';
 import '../../common/tools/button/button1.css';
+import './entityLookup.css';
 import Logo from '../../../assets/images/prism-logo.png';
-import '../../common/searchBar/SearchBar.css';
-import '../../common/tools/button/button1.css';
 import { searchService } from '../../../api/search';
 
 function EntityLookup() {
@@ -65,7 +64,7 @@ function EntityLookup() {
           <div className="d-flex justify-content-center align-items-center pt-5">
             <div style={{ width: '80%' }}>
               <form onSubmit={handleSubmit} className="author-institution-search-bar">
-                <div className="autocomplete-search-bar">
+                <div className="entity-lookup-search-bar-container">
                   <div className="autocomplete-search-bar-title">Entity</div>
                   <input
                     type="text"
@@ -75,7 +74,6 @@ function EntityLookup() {
                     className="search-bar"
                   />
                 </div>
-                <div style={{ width: '40px' }} />
                 <div className="author-institution-search-button-container">
                   <button type="submit" disabled={isLoading} className="button">
                     {isLoading ? 'Searching...' : 'Search'}
@@ -93,9 +91,9 @@ function EntityLookup() {
           role="status"
         ></div>
       )}
-      <div className="results" style={{ marginTop: '30px' }}>
+      <div className="entity-lookup-results">
         {results.map((entity, index) => (
-          <div key={index} className="detail-item">
+          <div key={index} className="entity-lookup-items">
             <b>Names:</b>
             <ul className="bulleted-list">
               {entity.Names.split('\n').map((name, index2) => {
