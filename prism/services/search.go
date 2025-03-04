@@ -9,11 +9,13 @@ import (
 	"prism/prism/gscholar"
 	"prism/prism/llms"
 	"prism/prism/openalex"
+	"prism/prism/reports"
 	"prism/prism/reports/flaggers"
 	"prism/prism/search"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -63,8 +65,8 @@ func hybridInstitutionNamesSort(originalInstitution string, institutionNames []s
 func (s *SearchService) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/regular", WrapRestHandler(s.SearchOpenAlex))
-	r.Get("/advanced", WrapRestHandler(s.SearchGoogleScholar))
+	r.Get("/authors", WrapRestHandler(s.SearchOpenAlex))
+	r.Get("/authors-advanced", WrapRestHandler(s.SearchGoogleScholar))
 	r.Get("/match-entities", WrapRestHandler(s.MatchEntities))
 
 	return r
@@ -74,28 +76,71 @@ var ErrSearchFailed = errors.New("error performing search")
 
 func (s *SearchService) SearchOpenAlex(r *http.Request) (any, error) {
 	query := r.URL.Query()
-	author, institution, institutionName := query.Get("author_name"), query.Get("institution_id"), query.Get("institution_name")
 
-	slog.Info("searching openalex", "author_name", author, "institution_id", institution)
+	if query.Get("author_name") != "" {
+		author, institution, institutionName := query.Get("author_name"), query.Get("institution_id"), query.Get("institution_name")
+		if institution == "" || institutionName == "" {
+			return nil, CodedError(errors.New("institution_id and institution_name must be specified when searching by author name"), http.StatusBadRequest)
+		}
+		authors, err := s.openalex.FindAuthors(author, institution)
+		if err != nil {
+			return nil, CodedError(err, http.StatusInternalServerError)
+		}
 
-	authors, err := s.openalex.FindAuthors(author, institution)
-	if err != nil {
-		return nil, CodedError(err, http.StatusInternalServerError)
-	}
+		results := make([]api.Author, 0, len(authors))
+		for _, author := range authors {
+			sortedInstitutions := hybridInstitutionNamesSort(institutionName, author.InstitutionNames(), institutionNameSimilarityThreshold)
+			results = append(results, api.Author{
+				AuthorId:     author.AuthorId,
+				AuthorName:   author.DisplayName,
+				Institutions: sortedInstitutions,
+				Source:       api.OpenAlexSource,
+				Interests:    author.Concepts,
+			})
+		}
 
-	results := make([]api.Author, 0, len(authors))
-	for _, author := range authors {
-		sortedInstitutions := hybridInstitutionNamesSort(institutionName, author.InstitutionNames(), institutionNameSimilarityThreshold)
-		results = append(results, api.Author{
+		return results, nil
+	} else if query.Get("orcid") != "" {
+		author, err := s.openalex.FindAuthorByOrcidId(query.Get("orcid"))
+		if err != nil {
+			if errors.Is(err, openalex.ErrAuthorNotFound) {
+				return nil, CodedError(err, http.StatusNotFound)
+			}
+			return nil, CodedError(err, http.StatusInternalServerError)
+		}
+		return []api.Author{{
 			AuthorId:     author.AuthorId,
 			AuthorName:   author.DisplayName,
-			Institutions: sortedInstitutions,
+			Institutions: author.InstitutionNames(),
 			Source:       api.OpenAlexSource,
 			Interests:    author.Concepts,
-		})
+		}}, nil
+	} else if query.Get("paper_title") != "" {
+		papers, err := s.openalex.FindWorksByTitle([]string{query.Get("paper_title")}, reports.EarliestReportDate, time.Now())
+		if err != nil {
+			return nil, CodedError(err, http.StatusInternalServerError)
+		}
+
+		if len(papers) < 1 {
+			return nil, CodedError(errors.New("no papers found for title"), http.StatusNotFound)
+		}
+
+		authors := make([]api.Author, 0, len(papers[0].Authors))
+		for _, author := range papers[0].Authors {
+			authors = append(authors, api.Author{
+				AuthorId:     author.AuthorId,
+				AuthorName:   author.DisplayName,
+				Institutions: author.InstitutionNames(),
+				Source:       api.OpenAlexSource,
+				Interests:    author.Concepts,
+			})
+		}
+
+		return authors, nil
+	} else {
+		return nil, CodedError(errors.New("one of 'author_name', 'orcid', or 'paper_title' query parameters must be specified"), http.StatusBadRequest)
 	}
 
-	return results, nil
 }
 
 func filterAuthorsBySimilarity(authors []api.Author, queryName string) []api.Author {

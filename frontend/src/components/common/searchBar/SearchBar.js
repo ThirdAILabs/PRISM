@@ -1,13 +1,13 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { autocompleteService } from '../../../api/autocomplete';
 import './SearchBar.css';
 import '../tools/button/button1.css';
 import useCallOnPause from '../../../hooks/useCallOnPause';
 import AutocompleteSearchBar from '../../../utils/autocomplete';
 
-export function AuthorInstiutionSearchBar({ onSearch }) {
-  const [author, setAuthor] = useState();
-  const [institution, setInstitution] = useState();
+export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInstitution }) {
+  const [author, setAuthor] = useState(defaultAuthor || null);
+  const [institution, setInstitution] = useState(defaultInstitution || null);
   const [results, setResults] = useState([]);
   const debouncedSearch = useCallOnPause(300); // 300ms delay
 
@@ -62,8 +62,9 @@ export function AuthorInstiutionSearchBar({ onSearch }) {
           title="Author"
           autocomplete={autocompleteAuthor}
           onSelect={setAuthor}
-          type={'author'}
+          showHint={false}
           placeholder={'E.g. John Doe'}
+          initialValue={defaultAuthor ? defaultAuthor.Name : ''}
         />
       </div>
 
@@ -72,8 +73,9 @@ export function AuthorInstiutionSearchBar({ onSearch }) {
           title="Institution"
           autocomplete={autocompleteInstitution}
           onSelect={setInstitution}
-          type={'institute'}
-          placeholder={'E.g. University of Prism'}
+          showHint={true}
+          placeholder={'E.g. University of XYZ'}
+          initialValue={defaultInstitution ? defaultInstitution.Name : ''}
         />
       </div>
 
