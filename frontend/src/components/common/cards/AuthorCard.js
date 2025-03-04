@@ -7,12 +7,7 @@ const AuthorCard = ({ authors }) => {
     {
       field: 'authorName',
       headerName: 'Author Name',
-      flex: 1,
-    },
-    {
-      field: 'source',
-      headerName: 'Source',
-      flex: 1,
+      width: 450,
     },
     {
       field: 'flagCount',
@@ -40,11 +35,10 @@ const AuthorCard = ({ authors }) => {
   const rows = authors.map((author, index) => ({
     id: index,
     authorName: author.AuthorName,
-    source: author.Source,
     flagCount: author.FlagCount,
     reportId: author.reportId,
   }));
-
+  console.log("Rows in AuthorCard", rows, authors);
   const handlePaginationList = () => {
     const pageSizeOptionsList = [5];
     if (authors.length > 5) {

@@ -216,6 +216,8 @@ const UniversityReport = () => {
         console.log('Report', report);
         setInstituteName(report.UniversityName);
         setReportContent(report.Content);
+        setTotalResearchers(report.Content.TotalAuthors);
+        setResearchersAssessed(report.Content.AuthorsReviewed);
         setLoading(false);
       } else if (isMounted) {
         setTimeout(poll, 10000);
@@ -274,27 +276,30 @@ const UniversityReport = () => {
               </svg>
               Back
             </button>
-            <h5 style={{ marginRight: '43.5%' }}>{instituteName}</h5>
+            <h5 style={{ marginRight: 'auto', marginLeft: 'auto' }}>{instituteName}</h5>
           </div>
         </div>
       </div>
 
       <>
-        <div
+        {!loading && <div
           className="d-flex w-100 flex-column align-items-center"
-          style={{ color: 'rgb(78, 78, 78)', marginTop: '50px' }}
+          style={{ color: 'rgb(78, 78, 78)', marginTop: '20px' }}
         >
           <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Researchers</div>
-          <div style={{ fontSize: '60px', fontWeight: 'bold' }}>{toatlResearchers}</div>
+          <div style={{ fontSize: '60px', fontWeight: 'bold' }}>
+            {reportContent.TotalAuthors || 0}
+          </div>
           <div style={{ fontSize: 'medium', fontWeight: 'bold' }}>Researchers Assessed</div>
-          <div style={{ fontSize: '50px', fontWeight: 'bold' }}>{researchersAssessed}</div>
-        </div>
+          <div style={{ fontSize: '50px', fontWeight: 'bold' }}>
+            {reportContent.AuthorsReviewed || 0}
+          </div>
+        </div>}
 
         {loading ? (
-          <div style={{ marginTop: '10%', marginLeft: '62%' }}>
-            <Loader />
-          </div>
-        ) : (
+          <div style={{ marginTop: '15%', display: 'flex', justifyContent: 'center' }}>
+            <Loader size={100} />
+          </div>) :
           <div
             style={{
               display: 'flex',
@@ -325,8 +330,7 @@ const UniversityReport = () => {
                   />
                 );
               })}
-          </div>
-        )}
+          </div>}
         {showModal && (
           <div
             style={{
