@@ -285,19 +285,16 @@ const UniversityReport = () => {
           style={{ color: 'rgb(78, 78, 78)', marginTop: '50px' }}
         >
           <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Researchers</div>
-          <div style={{ fontSize: '60px', fontWeight: 'bold' }}>
-            {toatlResearchers}
-          </div>
+          <div style={{ fontSize: '60px', fontWeight: 'bold' }}>{toatlResearchers}</div>
           <div style={{ fontSize: 'medium', fontWeight: 'bold' }}>Researchers Assessed</div>
-          <div style={{ fontSize: '50px', fontWeight: 'bold' }}>
-            {researchersAssessed}
-          </div>
+          <div style={{ fontSize: '50px', fontWeight: 'bold' }}>{researchersAssessed}</div>
         </div>
 
         {loading ? (
           <div style={{ marginTop: '10%', marginLeft: '62%' }}>
             <Loader />
-          </div>) :
+          </div>
+        ) : (
           <div
             style={{
               display: 'flex',
@@ -328,7 +325,8 @@ const UniversityReport = () => {
                   />
                 );
               })}
-          </div>}
+          </div>
+        )}
         {showModal && (
           <div
             style={{

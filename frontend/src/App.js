@@ -38,7 +38,6 @@ function AppContent() {
     }
   }, []);
 
-
   const showMenuIcon = GetShowMenuIcon();
 
   return (

@@ -16,9 +16,8 @@ export default function Error() {
     408: ['Request Timeout', 'Request The server timed out waiting for the request.'],
     422: ['Unprocessable Entity', 'The request was well-formed but contained semantic errors.'],
     500: ['Internal Server Error', 'Something went wrong on our side.'],
-    503: ['Service Unavailable', 'The server is currently unable to handle the request.']
+    503: ['Service Unavailable', 'The server is currently unable to handle the request.'],
   };
-
 
   return (
     <div class="error-page d-flex align-items-center justify-content-center">
@@ -28,8 +27,10 @@ export default function Error() {
         <p class="lead error-message mb-5">{errorMessages[status][1]}</p>
         <div class="d-flex justify-content-center gap-3">
           <button
-            className='button'
-            onClick={() => { navigate("/") }}
+            className="button"
+            onClick={() => {
+              navigate('/');
+            }}
             style={{ width: '250px' }}
           >
             Return home
