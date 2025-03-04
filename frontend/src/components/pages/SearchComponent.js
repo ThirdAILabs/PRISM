@@ -18,6 +18,7 @@ const SearchComponent = () => {
   const [isOALoading, setIsOALoading] = useState([]);
   const [loadMoreCount, setLoadMoreCount] = useState(0);
   const [canLoadMore, setCanLoadMore] = useState(true);
+  const [noResultFound, setNoResultFound] = useState(false);
 
   const search = async (author, institution) => {
     searchOpenAlex(author, institution);
@@ -28,7 +29,6 @@ const SearchComponent = () => {
     setResults([]);
     setLoadMoreCount(0);
     setHasSearched(true);
-    setCanLoadMore(true);
   };
 
   const searchOpenAlex = async (author, institution) => {
@@ -48,6 +48,8 @@ const SearchComponent = () => {
     setIsOALoading(false);
     setLoadMoreCount(0);
     setHasSearched(true);
+    setCanLoadMore(result.length > 0);
+    setNoResultFound(result.length === 0);
   };
 
   return (
@@ -102,6 +104,7 @@ const SearchComponent = () => {
             setCanLoadMore(false);
             return result.Authors;
           }}
+          noResultFound={noResultFound}
         />
       )}
     </div>
