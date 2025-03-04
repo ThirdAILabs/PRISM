@@ -203,7 +203,7 @@ func (r *ReportManager) GetAuthorReport(userId, reportId uuid.UUID) (api.Report,
 		return api.Report{}, err
 	}
 
-	slog.Info("GET AUTHOR REPORT", "report", fmt.Sprintf("%+v", report))
+	slog.Info("GET AUTHOR REPORT", "report", fmt.Sprintf("%+v", *report.Report))
 
 	return convertReport(report)
 }
