@@ -24,7 +24,7 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, noResul
         const moreResults = await loadMore();
         setResults(results.concat(moreResults));
       } catch (error) {
-        console.error("Error loading more results:", error);
+        console.error('Error loading more results:', error);
       } finally {
         setIsLoadingMore(false);
       }
@@ -61,12 +61,8 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, noResul
             </ul>
             {canLoadMore && (
               <div className="d-flex flex-column align-items-center pb-4">
-                <button 
-                  className="button" 
-                  onClick={getMoreResults} 
-                  disabled={isLoadingMore}
-                >
-                  {isLoadingMore ? "Loading..." : "Show More"}
+                <button className="button" onClick={getMoreResults} disabled={isLoadingMore}>
+                  {isLoadingMore ? 'Loading...' : 'Show More'}
                 </button>
                 {isLoadingMore && (
                   <div className="mt-2">
@@ -79,8 +75,17 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, noResul
             )}
           </>
         ) : (
-          <div className="d-flex justify-content-center mt-4" style={{ textAlign: 'center', padding: '2rem', color: '#4a5568', fontSize: '1.1rem', width: '100%' }}>
-            <p>{noResultFound ? "No results found" : "Loading..."}</p>
+          <div
+            className="d-flex justify-content-center mt-4"
+            style={{
+              textAlign: 'center',
+              padding: '2rem',
+              color: '#4a5568',
+              fontSize: '1.1rem',
+              width: '100%',
+            }}
+          >
+            <p>{noResultFound ? 'No results found' : 'Loading...'}</p>
           </div>
         )}
       </>

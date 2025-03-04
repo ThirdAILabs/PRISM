@@ -63,20 +63,17 @@ const SidePanel = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div 
-      className={`side-panel ${isOpen ? 'open' : ''}`}
-      onMouseLeave={handleMouseLeave}
-    >
+    <div className={`side-panel ${isOpen ? 'open' : ''}`} onMouseLeave={handleMouseLeave}>
       <div className="panel-content">
         {/* Header */}
         <div className="side-panel-header">
           <img
             src={PRISM_LOGO}
             alt="PRISM"
-            style={{ 
-              height: '30px', 
+            style={{
+              height: '30px',
               width: 'auto',
-              objectFit: 'contain'
+              objectFit: 'contain',
             }}
           />
         </div>
