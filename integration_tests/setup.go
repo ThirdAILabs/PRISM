@@ -13,13 +13,13 @@ const (
 
 	keycloakUrl           = "http://localhost/keycloak"
 	keycloakAdminUsername = "kc-admin"
-	keycloakAdminPassword = "kc-admin-pwd"
+	keycloakAdminPassword = "KC-admin-pwd@1"
 
 	regularUserUsername = "regular-user"
-	regularUserPassword = "regular-user-pwd"
+	regularUserPassword = "Regular-user-pwd@1"
 
 	adminUserUsername = "admin-user"
-	adminUserPassword = "admin-user-pwd"
+	adminUserPassword = "Admin-user-pwd@1"
 )
 
 func setupKeycloakUsers(t *testing.T) {
