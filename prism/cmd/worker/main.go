@@ -3,10 +3,8 @@ package main
 import (
 	"errors"
 	"log"
-	"log/slog"
 	"os"
 	"path/filepath"
-	"prism/prism/api"
 	"prism/prism/cmd"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers"
@@ -41,65 +39,6 @@ func (c *Config) logfile() string {
 		return "prism_backend.log"
 	}
 	return c.Logfile
-}
-
-func processNextAuthorReport(reportManager *reports.ReportManager, processor *flaggers.ReportProcessor) bool {
-	nextReport, err := reportManager.GetNextAuthorReport()
-	if err != nil {
-		slog.Error("error checking for next report", "error", err)
-		return false
-	}
-	if nextReport == nil {
-		return false
-	}
-
-	content, err := processor.ProcessReport(*nextReport)
-	if err != nil {
-		slog.Error("error processing report: %w")
-
-		if err := reportManager.UpdateAuthorReport(nextReport.Id, "failed", time.Time{}, api.ReportContent{}); err != nil {
-			slog.Error("error updating report status to failed", "error", err)
-		}
-		return true
-	}
-
-	if err := reportManager.UpdateAuthorReport(nextReport.Id, "complete", nextReport.EndDate, content); err != nil {
-		slog.Error("error updating report status to complete", "error", err)
-	}
-	return true
-}
-
-func processNextUniversityReport(reportManager *reports.ReportManager, processor *flaggers.ReportProcessor) bool {
-	nextReport, err := reportManager.GetNextUniversityReport()
-	if err != nil {
-		slog.Error("error checking for next report", "error", err)
-		return false
-	}
-	if nextReport == nil {
-		return false
-	}
-
-	slog.Info("processing university report", "report_id", nextReport.Id, "university_report_id", nextReport.UniversityId, "university_name", nextReport.UniversityName)
-
-	authors, err := processor.GetUniversityAuthors(*nextReport)
-	if err != nil {
-		slog.Error("error processing university report: %w")
-
-		if err := reportManager.UpdateUniversityReport(nextReport.Id, "failed", time.Time{}, nil); err != nil {
-			slog.Error("error updating report status to failed", "error", err)
-		}
-		return true
-	}
-
-	slog.Info("authors found for university report", "n_authors", len(authors))
-
-	if err := reportManager.UpdateUniversityReport(nextReport.Id, "complete", nextReport.UpdateDate, authors); err != nil {
-		slog.Error("error updating university report status to complete", "error", err)
-	}
-
-	slog.Info("university report complete", "report_id", nextReport.Id, "university_report_id", nextReport.UniversityId, "university_name", nextReport.UniversityName)
-
-	return true
 }
 
 func main() {
@@ -162,18 +101,18 @@ func main() {
 		WorkDir:        config.WorkDir,
 	}
 
-	processor, err := flaggers.NewReportProcessor(opts)
-	if err != nil {
-		log.Fatalf("error creating work processor: %v", err)
-	}
-
 	db := cmd.InitDb(config.PostgresUri)
 
 	reportManager := reports.NewManager(db, reports.StaleReportThreshold)
 
+	processor, err := flaggers.NewReportProcessor(reportManager, opts)
+	if err != nil {
+		log.Fatalf("error creating work processor: %v", err)
+	}
+
 	for {
-		foundAuthorReport := processNextAuthorReport(reportManager, processor)
-		foundUniversityReport := processNextUniversityReport(reportManager, processor)
+		foundAuthorReport := processor.ProcessNextAuthorReport()
+		foundUniversityReport := processor.ProcessNextUniversityReport()
 
 		if !foundAuthorReport && !foundUniversityReport {
 			time.Sleep(10 * time.Second)

@@ -150,12 +150,14 @@ const ItemDetails = () => {
     let isMounted = true;
     const poll = async () => {
       const report = await reportService.getReport(report_id);
-      if (report.Status === 'complete' && isMounted) {
+      if (report.Content && Object.keys(report.Content).length > 0 && isMounted) {
         console.log('Report', report);
         setAuthorName(report.AuthorName);
         setReportContent(report.Content);
         setInitialReportContent(report.Content);
-        setLoading(false);
+        if (report.Status == "complete") {
+          setLoading(false);
+        }
       } else if (isMounted) {
         setTimeout(poll, 2000);
       }
@@ -515,9 +517,9 @@ const ItemDetails = () => {
           {flag.RawAcknowledements.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
-          <p>{}</p>
+          <p>{ }</p>
         </p>
-        {}
+        { }
         {isDisclosureChecked &&
           (flag.Disclosed ? (
             <button type="button" className="btn btn-success">

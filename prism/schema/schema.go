@@ -31,10 +31,9 @@ type AuthorReport struct {
 }
 
 type AuthorFlag struct {
-	Id       uuid.UUID `gorm:"type:uuid;primaryKey"`
-	ReportId uuid.UUID `gorm:"type:uuid"`
+	ReportId uuid.UUID `gorm:"type:uuid;primaryKey"`
+	FlagHash string    `gorm:"type:char(64);primaryKey"` // This will be the sha256 hash of the flag data (or enough of the flag data to uniquly identify the flag)
 	FlagType string    `gorm:"size:40;not null"`
-	FlagKey  string
 	Date     sql.NullTime
 	Data     []byte
 }

@@ -382,34 +382,30 @@ func TestCheckDisclosure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	content := api.ReportContent{
-		"TalentContracts": []api.Flag{
-			&api.TalentContractFlag{
-				DisclosableFlag: api.DisclosableFlag{},
-				Message:         "Test disclosure flag - TalentContract",
-				Work: api.WorkSummary{
-					WorkId:          "work-1",
-					DisplayName:     "Test Work",
-					WorkUrl:         "http://example.com/work-1",
-					OaUrl:           "http://example.com/oa/work-1",
-					PublicationDate: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
-				},
-				Entities: []api.AcknowledgementEntity{{Entity: "discloseme"}},
+	content := []api.Flag{
+		&api.TalentContractFlag{
+			DisclosableFlag: api.DisclosableFlag{},
+			Message:         "Test disclosure flag - TalentContract",
+			Work: api.WorkSummary{
+				WorkId:          "work-1",
+				DisplayName:     "Test Work",
+				WorkUrl:         "http://example.com/work-1",
+				OaUrl:           "http://example.com/oa/work-1",
+				PublicationDate: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
+			Entities: []api.AcknowledgementEntity{{Entity: "discloseme"}},
 		},
-		"AssociationsWithDeniedEntities": []api.Flag{
-			&api.AssociationWithDeniedEntityFlag{
-				DisclosableFlag: api.DisclosableFlag{},
-				Message:         "Test disclosure flag - Association",
-				Work: api.WorkSummary{
-					WorkId:          "work-2",
-					DisplayName:     "Test Work 2",
-					WorkUrl:         "http://example.com/work-2",
-					OaUrl:           "http://example.com/oa/work-2",
-					PublicationDate: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
-				},
-				Entities: []api.AcknowledgementEntity{{Entity: "nonmatching"}},
+		&api.AssociationWithDeniedEntityFlag{
+			DisclosableFlag: api.DisclosableFlag{},
+			Message:         "Test disclosure flag - Association",
+			Work: api.WorkSummary{
+				WorkId:          "work-2",
+				DisplayName:     "Test Work 2",
+				WorkUrl:         "http://example.com/work-2",
+				OaUrl:           "http://example.com/oa/work-2",
+				PublicationDate: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
+			Entities: []api.AcknowledgementEntity{{Entity: "nonmatching"}},
 		},
 	}
 
@@ -494,20 +490,18 @@ func TestDownloadReportAllFormats(t *testing.T) {
 
 	manager := reports.NewManager(db, reports.StaleReportThreshold)
 
-	content := api.ReportContent{
-		"TalentContracts": []api.Flag{
-			&api.TalentContractFlag{
-				DisclosableFlag: api.DisclosableFlag{},
-				Message:         "Test Talent Contract",
-				Work: api.WorkSummary{
-					WorkId:          "work-1",
-					DisplayName:     "Test Work",
-					WorkUrl:         "http://example.com/work-1",
-					OaUrl:           "http://example.com/oa/work-1",
-					PublicationDate: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
-				},
-				RawAcknowledements: []string{"flag-content"},
+	content := []api.Flag{
+		&api.TalentContractFlag{
+			DisclosableFlag: api.DisclosableFlag{},
+			Message:         "Test Talent Contract",
+			Work: api.WorkSummary{
+				WorkId:          "work-1",
+				DisplayName:     "Test Work",
+				WorkUrl:         "http://example.com/work-1",
+				OaUrl:           "http://example.com/oa/work-1",
+				PublicationDate: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
+			RawAcknowledements: []string{"flag-content"},
 		},
 	}
 
@@ -786,8 +780,8 @@ func TestUniversityReportEndpoints(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := manager.UpdateAuthorReport(nextAuthorReport.Id, schema.ReportCompleted, time.Now(), api.ReportContent{
-		api.HighRiskFunderType: []api.Flag{&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: "abc", PublicationDate: time.Now()}}},
+	if err := manager.UpdateAuthorReport(nextAuthorReport.Id, schema.ReportCompleted, time.Now(), []api.Flag{
+		&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: "abc", PublicationDate: time.Now()}},
 	}); err != nil {
 		t.Fatal(err)
 	}

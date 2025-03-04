@@ -2,6 +2,7 @@ package reports
 
 import (
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -192,8 +193,7 @@ func (r *ReportManager) GetAuthorReport(userId, reportId uuid.UUID) (api.Report,
 			return err
 		}
 
-		report.LastAccessedAt = time.Now().UTC()
-		if err := txn.Save(&report).Error; err != nil {
+		if err := txn.Model(&report).Update("last_accessed_at", time.Now().UTC()).Error; err != nil {
 			slog.Error("error updating user author report last_accessed_at", "error", err)
 			return ErrReportAccessFailed
 		}
@@ -301,65 +301,53 @@ func flagsToReportContent(flags []schema.AuthorFlag) (api.ReportContent, error) 
 	return content, nil
 }
 
-func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTime time.Time, updateContent api.ReportContent) error {
+func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTime time.Time, updateFlags []api.Flag) error {
 	return r.db.Transaction(func(txn *gorm.DB) error {
-		var report schema.AuthorReport
-
-		if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Preload("Flags").First(&report, "id = ?", id).Error; err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				slog.Error("cannot update status of author report, report not found", "author_report_id", id, "status", status)
-				return ErrReportNotFound
-			}
-			slog.Error("error getting author report to update status", "author_report_id", id, "status", status, "error", err)
-			return ErrReportAccessFailed
-		}
-
 		updates := map[string]any{"status": status}
-
 		if status == schema.ReportCompleted {
 			updates["last_updated_at"] = updateTime
-
-			seen := make(map[string]bool)
-			for _, flag := range report.Flags {
-				seen[flag.FlagKey] = true
-			}
-
-			newFlags := make([]schema.AuthorFlag, 0)
-			for _, flags := range updateContent {
-				for _, flag := range flags {
-					if key := flag.Key(); !seen[key] {
-						seen[key] = true
-
-						data, err := json.Marshal(flag)
-						if err != nil {
-							return fmt.Errorf("error serializing flag: %w", err)
-						}
-
-						date, dateValid := flag.Date()
-						newFlags = append(newFlags, schema.AuthorFlag{
-							Id:       uuid.New(),
-							ReportId: report.Id,
-							FlagType: flag.Type(),
-							FlagKey:  key,
-							Date:     sql.NullTime{Time: date, Valid: dateValid},
-							Data:     data,
-						})
-					}
-				}
-			}
-
-			if len(newFlags) > 0 {
-				if err := txn.Save(newFlags).Error; err != nil {
-					slog.Error("error adding new flags to author report", "author_report_id", id, "error", err)
-					return ErrReportAccessFailed
-				}
-			}
 		}
 
-		if err := txn.Model(&report).Updates(updates).Error; err != nil {
-			slog.Error("error updating author report status", "author_report_id", id, "error", err)
+		result := txn.Model(&schema.AuthorReport{Id: id}).Updates(updates)
+		if result.Error != nil {
+			slog.Error("error updating author report status", "author_report_id", id, "error", result.Error)
 			return ErrReportAccessFailed
 		}
+
+		if result.RowsAffected != 1 {
+			slog.Error("cannot update status of author report, report not found", "author_report_id", id, "status", status)
+			return ErrReportNotFound
+		}
+
+		if len(updateFlags) == 0 {
+			return nil
+		}
+
+		newFlags := make([]schema.AuthorFlag, 0)
+		for _, flag := range updateFlags {
+			data, err := json.Marshal(flag)
+			if err != nil {
+				return fmt.Errorf("error serializing flag: %w", err)
+			}
+
+			flagHash := flag.Hash()
+
+			date, dateValid := flag.Date()
+
+			newFlags = append(newFlags, schema.AuthorFlag{
+				ReportId: id,
+				FlagHash: hex.EncodeToString(flagHash[:]),
+				FlagType: flag.Type(),
+				Date:     sql.NullTime{Time: date, Valid: dateValid},
+				Data:     data,
+			})
+		}
+
+		if err := txn.Save(&newFlags).Error; err != nil {
+			slog.Error("error adding new flags to author report", "author_report_id", id, "error", err)
+			return ErrReportAccessFailed
+		}
+
 		return nil
 	})
 }
@@ -463,11 +451,11 @@ func (r *ReportManager) CreateUniversityReport(licenseId, userId uuid.UUID, univ
 				return ErrReportCreationFailed
 			}
 		} else {
-			userReport.LastAccessedAt = now
-			if err := txn.Save(&userReport).Error; err != nil {
-				slog.Error("error updating user university report", "error", err)
+			if err := txn.Model(&userReport).Update("last_accessed_at", now).Error; err != nil {
+				slog.Error("error updating user university report last_accessed_at", "error", err)
 				return ErrReportCreationFailed
 			}
+
 			userReportId = userReport.Id
 		}
 

@@ -1,6 +1,7 @@
 package flaggers
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"log/slog"
 	"path/filepath"
@@ -8,6 +9,7 @@ import (
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers/eoc"
+	"prism/prism/schema"
 	"prism/prism/search"
 	"sync"
 	"time"
@@ -18,6 +20,7 @@ type ReportProcessor struct {
 	workFlaggers            []WorkFlagger
 	authorFacultyAtEOC      *AuthorIsFacultyAtEOCFlagger
 	authorAssociatedWithEOC *AuthorIsAssociatedWithEOCFlagger
+	manager                 *reports.ReportManager
 }
 
 type ReportProcessorOptions struct {
@@ -40,7 +43,7 @@ type ReportProcessorOptions struct {
 }
 
 // TODO(Nicholas): How to do cleanup for this, or just let it get cleaned up at the end of the process?
-func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
+func NewReportProcessor(manager *reports.ReportManager, opts ReportProcessorOptions) (*ReportProcessor, error) {
 	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(opts.WorkDir, "authors.cache"))
 	if err != nil {
 		return nil, fmt.Errorf("error loading author cache: %w", err)
@@ -80,6 +83,7 @@ func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
 			docNDB: opts.DocNDB,
 			auxNDB: opts.AuxNDB,
 		},
+		manager: manager,
 	}, nil
 }
 
@@ -170,45 +174,67 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 	close(flagsCh)
 }
 
-func (processor *ReportProcessor) ProcessReport(report reports.ReportUpdateTask) (api.ReportContent, error) {
+func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdateTask) {
 	logger := slog.With("report_id", report.Id)
 
 	logger.Info("starting report processing", "author_id", report.AuthorId, "author_name", report.AuthorName, "source", report.Source)
 
 	workStream, err := processor.getWorkStream(report)
 	if err != nil {
-		logger.Error("unable to get work stream", "error", err)
-		return api.ReportContent{}, fmt.Errorf("unable to get works: %w", err)
+		logger.Error("report failed: unable to get author works", "error", err)
+		if err := processor.manager.UpdateAuthorReport(report.Id, schema.ReportFailed, time.Time{}, nil); err != nil {
+			slog.Error("error updating author report status to failed", "error", err)
+		}
+		return
 	}
 
-	flagsSeen := make(map[string]bool)
 	flagsCh := make(chan []api.Flag, 100)
-
 	go processor.processWorks(logger, report.AuthorName, workStream, flagsCh)
 
-	content := make(api.ReportContent)
+	seen := make(map[[sha256.Size]byte]struct{})
+	flagCounts := make(map[string]int)
 	for flags := range flagsCh {
 		for _, flag := range flags {
-			if key := flag.Key(); !flagsSeen[key] {
-				flagsSeen[key] = true
-
-				content[string(flag.Type())] = append(content[string(flag.Type())], flag)
+			hash := flag.Hash()
+			if _, ok := seen[hash]; !ok {
+				seen[hash] = struct{}{}
+				flagCounts[flag.Type()]++
 			}
+		}
+		if err := processor.manager.UpdateAuthorReport(report.Id, schema.ReportInProgress, report.EndDate, flags); err != nil {
+			slog.Error("error updating author report status for partial flags", "error", err)
 		}
 	}
 
-	attrs := make([]any, 0, len(content)+1)
-	attrs = append(attrs, slog.Int("n_flags", len(flagsSeen)))
-	for flagType, flags := range content {
-		attrs = append(attrs, slog.Int(flagType, len(flags)))
+	attrs := make([]any, 0, len(flagCounts)+1)
+	attrs = append(attrs, slog.Int("n_flags", len(seen)))
+	for flagType, count := range flagCounts {
+		attrs = append(attrs, slog.Int(flagType, count))
 	}
 
 	logger.Info("report complete", attrs...)
 
-	return content, nil
+	if err := processor.manager.UpdateAuthorReport(report.Id, schema.ReportCompleted, report.EndDate, nil); err != nil {
+		slog.Error("error updating author report status to complete", "error", err)
+	}
 }
 
-func (processor *ReportProcessor) GetUniversityAuthors(report reports.UniversityReportUpdateTask) ([]reports.UniversityAuthorReport, error) {
+func (processor *ReportProcessor) ProcessNextAuthorReport() bool {
+	report, err := processor.manager.GetNextAuthorReport()
+	if err != nil {
+		slog.Error("error checking for next report", "error", err)
+		return false
+	}
+	if report == nil {
+		return false
+	}
+
+	processor.ProcessAuthorReport(*report)
+
+	return true
+}
+
+func (processor *ReportProcessor) getUniversityAuthors(report reports.UniversityReportUpdateTask) ([]reports.UniversityAuthorReport, error) {
 	authors, err := processor.openalex.GetInstitutionAuthors(report.UniversityId, time.Now().AddDate(-4, 0, 0), time.Now())
 	if err != nil {
 		return nil, err
@@ -224,4 +250,37 @@ func (processor *ReportProcessor) GetUniversityAuthors(report reports.University
 	}
 
 	return output, nil
+}
+
+func (processor *ReportProcessor) ProcessNextUniversityReport() bool {
+	nextReport, err := processor.manager.GetNextUniversityReport()
+	if err != nil {
+		slog.Error("error checking for next report", "error", err)
+		return false
+	}
+	if nextReport == nil {
+		return false
+	}
+
+	slog.Info("processing university report", "report_id", nextReport.Id, "university_report_id", nextReport.UniversityId, "university_name", nextReport.UniversityName)
+
+	authors, err := processor.getUniversityAuthors(*nextReport)
+	if err != nil {
+		slog.Error("error processing university report: %w")
+
+		if err := processor.manager.UpdateUniversityReport(nextReport.Id, schema.ReportFailed, time.Time{}, nil); err != nil {
+			slog.Error("error updating report status to failed", "error", err)
+		}
+		return true
+	}
+
+	slog.Info("authors found for university report", "n_authors", len(authors))
+
+	if err := processor.manager.UpdateUniversityReport(nextReport.Id, schema.ReportCompleted, nextReport.UpdateDate, authors); err != nil {
+		slog.Error("error updating university report status to complete", "error", err)
+	}
+
+	slog.Info("university report complete", "report_id", nextReport.Id, "university_report_id", nextReport.UniversityId, "university_name", nextReport.UniversityName)
+
+	return true
 }
