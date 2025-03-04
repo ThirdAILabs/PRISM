@@ -1,5 +1,6 @@
 .result-item {
-  width: 40%; /* Matches the width of author search bar container */
+  width: 40%;
+  /* Matches the width of author search bar container */
   background-color: rgb(245, 240, 240);
   border: none;
   color: black;
@@ -30,7 +31,7 @@
 }
 
 .show-more-results-button {
-  width:20%;
+  width: 20%;
   margin-left: 45%;
   margin-top: 20px;
 }
