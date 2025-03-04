@@ -247,7 +247,7 @@ const ItemDetails = () => {
         })
       : 'today';
 
-    setFilterMessage(`From ${displayStart} to ${displayEnd}`);
+    setFilterMessage(`${displayStart} to ${displayEnd}`);
 
     setStartDate('');
     setEndDate('');
@@ -719,7 +719,16 @@ const ItemDetails = () => {
     <div className="basic-setup">
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-row">
-          <div className="detail-header">
+          <div
+            className="detail-header"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              margin: '0 auto',
+              padding: '10px 0', // reduce padding
+            }}
+          >
             <button
               onClick={() => navigate(-1)}
               className="btn text-dark mb-3"
@@ -750,32 +759,25 @@ const ItemDetails = () => {
               </svg>
               Back
             </button>
-
-            <div className="d-flex w-80">
-              <div className="text-start px-5">
-                <div className="d-flex align-items-center mb-2">
-                  <h5 className="m-0">{authorName}</h5>
-                </div>
-                <b className="m-0 p-0" style={{ fontSize: 'small' }}>
-                  {institutions.join(', ')}
-                </b>
-              </div>
+            <div style={{ textAlign: 'center' }}>
+              <h5 className="m-0">{authorName}</h5>
+              <b className="m-0 p-0" style={{ fontSize: 'small' }}>
+                {institutions.join(', ')}
+              </b>
             </div>
-
             <div>
               <div className="dropdown">
                 <style>
-                  {` 
-                    .form-control::placeholder { 
-                        color: #888; 
-                    }`}
+                  {`
+                    .form-control::placeholder {
+                      color: #888;
+                    }
+                  `}
                 </style>
                 <button
                   className="btn dropdown-toggle"
                   type="button"
-                  onClick={() => {
-                    handleDropdownChange(1);
-                  }}
+                  onClick={() => handleDropdownChange(1)}
                   style={{
                     backgroundColor: 'rgb(160, 160, 160)',
                     border: 'none',
@@ -864,7 +866,7 @@ const ItemDetails = () => {
               </div>
             </div>
           </div>
-          {/* Comment the following to get rid of the graph tab */}
+          {/* Render the Tabs with the filterMessage */}
           <Tabs
             activeTab={activeTab}
             handleTabChange={handleTabChange}
@@ -873,73 +875,66 @@ const ItemDetails = () => {
         </div>
         {activeTab === 0 && (
           <div className="d-flex justify-content-end mt-2 gap-2 px-2">
-            <>
-              <StyledWrapper>
-                <button
-                  className="cssbuttons-io-button"
-                  onClick={() => {
-                    handleDropdownChange(3);
-                  }}
+            <StyledWrapper>
+              <button className="cssbuttons-io-button" onClick={() => handleDropdownChange(3)}>
+                Verify with Disclosures
+              </button>
+            </StyledWrapper>
+
+            <Dialog open={dropdownOpen === 3} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+              <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+                Select files to check for disclosure
+              </DialogTitle>
+              <Divider sx={{ color: 'black', backgroundColor: '#000000' }} />
+              <DialogContent>
+                <div
+                  className="container"
+                  onDrop={handleDrop}
+                  onDragOver={(e) => e.preventDefault()}
                 >
-                  Verify with Disclosures
-                </button>
-              </StyledWrapper>
-              <Dialog open={dropdownOpen === 3} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-                <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-                  Select files to check for disclosure
-                </DialogTitle>
-                <Divider sx={{ color: 'black', backgroundColor: '#000000' }} />
-                <DialogContent>
-                  <div
-                    className="container"
-                    onDrop={handleDrop}
-                    onDragOver={(e) => e.preventDefault()}
-                  >
-                    <div className="header">
-                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                          d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15"
-                          stroke="#000000"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      <p>Drag & drop your file!</p>
-                    </div>
-                    <label htmlFor="file" className="footer">
-                      <p>
-                        {selectedFiles.length
-                          ? `${selectedFiles.length} files selected`
-                          : 'Click here to upload your file.'}
-                      </p>
-                    </label>
-                    <input
-                      id="file"
-                      type="file"
-                      multiple
-                      onChange={handleFileSelect}
-                      accept=".txt,.doc,.docx,.pdf"
-                    />
+                  <div className="header">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15"
+                        stroke="#000000"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    <p>Drag & drop your file!</p>
                   </div>
-                  {uploadError && (
-                    <div style={{ color: 'red', marginTop: '10px' }}>{uploadError}</div>
-                  )}
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleCloseDialog}>Cancel</Button>
-                  <Button onClick={handleSubmit} disabled={isUploading} variant="contained">
-                    {isUploading ? 'Uploading...' : 'Submit'}
-                  </Button>
-                </DialogActions>
-              </Dialog>
-            </>
+                  <label htmlFor="file" className="footer">
+                    <p>
+                      {selectedFiles.length
+                        ? `${selectedFiles.length} files selected`
+                        : 'Click here to upload your file.'}
+                    </p>
+                  </label>
+                  <input
+                    id="file"
+                    type="file"
+                    multiple
+                    onChange={handleFileSelect}
+                    accept=".txt,.doc,.docx,.pdf"
+                  />
+                </div>
+                {uploadError && (
+                  <div style={{ color: 'red', marginTop: '10px' }}>{uploadError}</div>
+                )}
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleCloseDialog}>Cancel</Button>
+                <Button onClick={handleSubmit} disabled={isUploading} variant="contained">
+                  {isUploading ? 'Uploading...' : 'Submit'}
+                </Button>
+              </DialogActions>
+            </Dialog>
+
             <DownloadButton
               reportId={report_id}
               isOpen={dropdownOpen === 2}
-              setIsOpen={() => {
-                handleDropdownChange(2);
-              }}
+              setIsOpen={() => handleDropdownChange(2)}
             />
           </div>
         )}
@@ -989,33 +984,43 @@ const ItemDetails = () => {
             </div>
             {review && (
               <div style={{ width: '100%', textAlign: 'center', marginTop: '50px' }}>
-                {hasDates && (
-                  <div
-                    style={{
-                      marginBottom: '20px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '10px',
-                    }}
-                  >
-                    <span style={{ marginRight: '10px' }}>Sort by Date</span>
-                    <ArrowUpwardIcon
-                      onClick={() => setSortOrder('asc')}
+                {(() => {
+                  const items = reportContent[review] || [];
+                  const hasDates = items.some(
+                    (item) =>
+                      item?.Work?.PublicationDate &&
+                      !isNaN(new Date(item.Work.PublicationDate).getTime())
+                  );
+                  if (!hasDates) return null;
+                  return (
+                    <div
                       style={{
-                        cursor: 'pointer',
-                        color: sortOrder === 'asc' ? 'lightgray' : 'black',
+                        marginBottom: '20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px',
                       }}
-                    />
-                    <ArrowDownwardIcon
-                      onClick={() => setSortOrder('desc')}
-                      style={{
-                        cursor: 'pointer',
-                        color: sortOrder === 'desc' ? 'lightgray' : 'black',
-                      }}
-                    />
-                  </div>
-                )}
+                    >
+                      <span style={{ marginRight: '10px' }}>Sort by Date</span>
+                      <ArrowUpwardIcon
+                        onClick={() => setSortOrder('asc')}
+                        style={{
+                          cursor: 'pointer',
+                          color: sortOrder === 'asc' ? 'lightgray' : 'black',
+                        }}
+                      />
+                      <ArrowDownwardIcon
+                        onClick={() => setSortOrder('desc')}
+                        style={{
+                          cursor: 'pointer',
+                          color: sortOrder === 'desc' ? 'lightgray' : 'black',
+                        }}
+                      />
+                    </div>
+                  );
+                })()}
+
                 {isDisclosureChecked ? (
                   <>
                     {disclosedItems.length > 0 ? (
@@ -1143,7 +1148,6 @@ const ItemDetails = () => {
                     )}
                   </>
                 ) : (
-                  // When no disclosure check has been done, just show all items in one list.
                   <div
                     style={{
                       width: '100%',
@@ -1162,11 +1166,7 @@ const ItemDetails = () => {
           </>
         ))}
 
-      {activeTab === 1 && (
-        <>
-          <Graph authorName={authorName} reportContent={reportContent} />
-        </>
-      )}
+      {activeTab === 1 && <Graph authorName={authorName} reportContent={reportContent} />}
     </div>
   );
 };

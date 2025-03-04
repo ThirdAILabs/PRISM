@@ -77,7 +77,6 @@ const CustomTabs = ({ activeTab, handleTabChange, filterMessage }) => {
             sx={{
               position: 'absolute',
               right: '16px',
-              fontWeight: 'bold',
               top: '50%',
               transform: 'translateY(-50%)',
             }}
