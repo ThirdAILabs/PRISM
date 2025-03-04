@@ -67,6 +67,36 @@ export function Value({ value }) {
   );
 }
 
+const CustomValue = ({ value }) => {
+  const getFontSize = (value) => {
+    // Base font size for single digit (largest size)
+    const baseFontSize = 48;
+
+    const digits = String(value).length;
+    // Each additional digit reduces size by 4px
+    const newSize = baseFontSize - (digits - 1) * 4;
+
+    return `${Math.max(newSize, 28)}px`;
+  };
+
+  return (
+    <text
+      className="gauge-value-text"
+      x="50%"
+      y="65%"
+      style={{
+        fontSize: getFontSize(value),
+        fontWeight: 'bold',
+        fill: '#555',
+        dominantBaseline: 'middle',
+        textAnchor: 'middle',
+      }}
+    >
+      {value}
+    </text>
+  );
+};
+
 export function Speedometer({ scale, value }) {
   function transformValue(value) {
     if (value >= scale[scale.length - 1]) {
@@ -99,7 +129,7 @@ export function Speedometer({ scale, value }) {
       >
         <Ticks fill={'white'} scale={scale} />
         <GradientValueGauge />
-        <Value value={value} />
+        <CustomValue value={value} />
       </Gauge>
     </div>
   );
