@@ -120,13 +120,13 @@ func (r *ReportManager) CreateAuthorReport(licenseId, userId uuid.UUID, authorId
 			return err
 		}
 
-		result := txn.Where("user_id = ? AND report_id = ?", userId, report.Id).First(&userReport)
-		if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		result := txn.Where("user_id = ? AND report_id = ?", userId, report.Id).Limit(1).Find(&userReport)
+		if result.Error != nil {
 			slog.Error("error finding existing user author report", "error", result.Error)
 			return ErrReportCreationFailed
 		}
 
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		if result.RowsAffected == 0 {
 			userReportId = uuid.New()
 			userReport = schema.UserAuthorReport{
 				Id:             userReportId,
@@ -432,13 +432,13 @@ func (r *ReportManager) CreateUniversityReport(licenseId, userId uuid.UUID, univ
 		}
 
 		result = txn.Where("user_id = ? AND report_id = ?", userId, report.Id).
-			First(&userReport)
-		if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			Limit(1).Find(&userReport)
+		if result.Error != nil {
 			slog.Error("error finding existing user university report", "error", result.Error)
 			return ErrReportCreationFailed
 		}
 
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		if result.RowsAffected == 0 {
 			userReportId = uuid.New()
 			userReport = schema.UserUniversityReport{
 				Id:             userReportId,
