@@ -12,6 +12,8 @@ import UniversityReport from './components/pages/UniversityReport';
 import { useLocation } from 'react-router-dom';
 import Error from './components/pages/error/Error.js';
 import { GetShowMenuIcon } from './utils/helper.js';
+import SearchProviderWrapper from './services/SearchProviderWrapper';
+import UniversityProviderWrapper from './services/UniversityProviderWrapper';
 //CSS
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.js';
@@ -58,11 +60,15 @@ function AppContent() {
       )}
       <SidePanel isOpen={isSidePanelOpen} onClose={() => setIsSidePanelOpen(false)} />
       <Routes>
-        <Route path="/" element={<SearchComponent />} />
+        <Route element={<SearchProviderWrapper />}>
+          <Route path="/" element={<SearchComponent />} />
+          <Route path="/report/:report_id" element={<ItemDetails />} />
+        </Route>
         <Route path="/entity-lookup" element={<EntityLookup />} />
-        <Route path="/university" element={<UniversityAssessment />} />
-        <Route path="/report/:report_id" element={<ItemDetails />} />
-        <Route path="/university/report/:report_id" element={<UniversityReport />} />
+        <Route element={<UniversityProviderWrapper />}>
+          <Route path="/university" element={<UniversityAssessment />} />
+          <Route path="/university/report/:report_id" element={<UniversityReport />} />
+        </Route>
         <Route path="/error" element={<Error />} />
       </Routes>
     </div>
