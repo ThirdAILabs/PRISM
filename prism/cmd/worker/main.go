@@ -159,7 +159,7 @@ func main() {
 		WorkDir:        config.WorkDir,
 	}
 
-	processor, err := flaggers.NewReportProcessor(opts, licensing)
+	processor, err := flaggers.NewReportProcessor(opts)
 	if err != nil {
 		log.Fatalf("error creating work processor: %v", err)
 	}
@@ -169,6 +169,11 @@ func main() {
 	reportManager := reports.NewManager(db, reports.StaleReportThreshold)
 
 	for {
+		if err := licensing.VerifyLicense(); err != nil {
+			slog.Error("error verifying license", "error", err)
+			time.Sleep(10 * time.Second)
+		}
+
 		foundAuthorReport := processNextAuthorReport(reportManager, processor)
 		foundUniversityReport := processNextUniversityReport(reportManager, processor)
 

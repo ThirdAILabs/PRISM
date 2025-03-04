@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"path/filepath"
 	"prism/prism/api"
-	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers/eoc"
@@ -19,7 +18,6 @@ type ReportProcessor struct {
 	workFlaggers            []WorkFlagger
 	authorFacultyAtEOC      *AuthorIsFacultyAtEOCFlagger
 	authorAssociatedWithEOC *AuthorIsAssociatedWithEOCFlagger
-	licensing               *licensing.LicenseVerifier
 }
 
 type ReportProcessorOptions struct {
@@ -42,7 +40,7 @@ type ReportProcessorOptions struct {
 }
 
 // TODO(Nicholas): How to do cleanup for this, or just let it get cleaned up at the end of the process?
-func NewReportProcessor(opts ReportProcessorOptions, licensing *licensing.LicenseVerifier) (*ReportProcessor, error) {
+func NewReportProcessor(opts ReportProcessorOptions) (*ReportProcessor, error) {
 	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(opts.WorkDir, "authors.cache"))
 	if err != nil {
 		return nil, fmt.Errorf("error loading author cache: %w", err)
@@ -82,7 +80,6 @@ func NewReportProcessor(opts ReportProcessorOptions, licensing *licensing.Licens
 			docNDB: opts.DocNDB,
 			auxNDB: opts.AuxNDB,
 		},
-		licensing: licensing,
 	}, nil
 }
 
@@ -178,11 +175,6 @@ func (processor *ReportProcessor) ProcessReport(report reports.ReportUpdateTask)
 
 	logger.Info("starting report processing", "author_id", report.AuthorId, "author_name", report.AuthorName, "source", report.Source)
 
-	if err := processor.licensing.VerifyLicense(); err != nil {
-		slog.Error("error verifying license", "error", err)
-		return nil, err
-	}
-
 	workStream, err := processor.getWorkStream(report)
 	if err != nil {
 		logger.Error("unable to get work stream", "error", err)
@@ -217,11 +209,6 @@ func (processor *ReportProcessor) ProcessReport(report reports.ReportUpdateTask)
 }
 
 func (processor *ReportProcessor) GetUniversityAuthors(report reports.UniversityReportUpdateTask) ([]reports.UniversityAuthorReport, error) {
-	if err := processor.licensing.VerifyLicense(); err != nil {
-		slog.Error("error verifying license", "error", err)
-		return nil, err
-	}
-
 	authors, err := processor.openalex.GetInstitutionAuthors(report.UniversityId, time.Now().AddDate(-4, 0, 0), time.Now())
 	if err != nil {
 		return nil, err
