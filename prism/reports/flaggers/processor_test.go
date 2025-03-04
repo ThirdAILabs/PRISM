@@ -29,7 +29,14 @@ func setupReportManager(t *testing.T) *reports.ReportManager {
 		t.Fatal(err)
 	}
 
-	return reports.NewManager(db, time.Second)
+	// We're using old date ranges for these so they only process works around the
+	// date of the flagged work, particularly for the acknowledgements flagger, this
+	// ensures the tests don't take too long to run. However this means that the reports
+	// are viewed as stale and will be reprocessed on the next test. Setting a large
+	// threshold here fixes it. In ~100 years this threshold would again be too small,
+	// but at that point this code will likely not be in use, or if it is, then it
+	// will be someone else's problem (or more likely an AI).
+	return reports.NewManager(db, 100*365*24*time.Hour)
 }
 
 func eqOrderInvariant(a, b []string) bool {

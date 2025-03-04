@@ -92,7 +92,7 @@ func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string, 
 			AuthorName:    authorName,
 			Source:        source,
 			Status:        schema.ReportQueued,
-			QueuedAt:      time.Now(),
+			QueuedAt:      time.Now().UTC(),
 			QueuedByUser:  fromUserReq,
 		}
 
@@ -203,8 +203,6 @@ func (r *ReportManager) GetAuthorReport(userId, reportId uuid.UUID) (api.Report,
 		return api.Report{}, err
 	}
 
-	slog.Info("GET AUTHOR REPORT", "report", fmt.Sprintf("%+v", *report.Report))
-
 	return convertReport(report)
 }
 
@@ -285,26 +283,8 @@ func (r *ReportManager) GetNextAuthorReport() (*ReportUpdateTask, error) {
 	return nil, nil
 }
 
-func flagsToReportContent(flags []schema.AuthorFlag) (api.ReportContent, error) {
-	content := make(api.ReportContent)
-
-	for _, flag := range flags {
-		output, err := api.EmptyFlag(flag.FlagType)
-		if err != nil {
-			slog.Error("error creating empty flag", "error", err)
-			return nil, err
-		}
-		if err := json.Unmarshal(flag.Data, output); err != nil {
-			return nil, fmt.Errorf("error deserializing flag: %w", err)
-		}
-		content[output.Type()] = append(content[output.Type()], output)
-	}
-
-	return content, nil
-}
-
 func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTime time.Time, updateFlags []api.Flag) error {
-	e := r.db.Transaction(func(txn *gorm.DB) error {
+	return r.db.Transaction(func(txn *gorm.DB) error {
 		updates := map[string]any{"status": status}
 		if status == schema.ReportCompleted {
 			updates["last_updated_at"] = updateTime
@@ -352,10 +332,24 @@ func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTi
 
 		return nil
 	})
+}
 
-	slog.Info("REPORT UPDATE COMPLETED", "id", id, "status", status, "update_flags", updateFlags)
+func flagsToReportContent(flags []schema.AuthorFlag) (api.ReportContent, error) {
+	content := make(api.ReportContent)
 
-	return e
+	for _, flag := range flags {
+		output, err := api.EmptyFlag(flag.FlagType)
+		if err != nil {
+			slog.Error("error creating empty flag", "error", err)
+			return nil, err
+		}
+		if err := json.Unmarshal(flag.Data, output); err != nil {
+			return nil, fmt.Errorf("error deserializing flag: %w", err)
+		}
+		content[output.Type()] = append(content[output.Type()], output)
+	}
+
+	return content, nil
 }
 
 func convertReport(report schema.UserAuthorReport) (api.Report, error) {
@@ -658,7 +652,7 @@ func (r *ReportManager) queueAuthorReportUpdatesForUniversityReport(txn *gorm.DB
 		Where("EXISTS (?)", txn.Table("university_authors").Where("university_authors.author_report_id = author_reports.id AND university_authors.university_report_id = ?", universityReportId)).
 		Where("author_reports.last_updated_at < ?", staleCutoff).
 		Where("author_reports.status IN ?", []string{schema.ReportFailed, schema.ReportCompleted}).
-		Updates(map[string]any{"status": schema.ReportQueued, "queued_at": time.Now()})
+		Updates(map[string]any{"status": schema.ReportQueued, "queued_at": time.Now().UTC()})
 
 	if result.Error != nil {
 		slog.Error("error queueing stale author reports for university report", "university_report_id", universityReportId, "error", result.Error)
