@@ -11,7 +11,6 @@ import {
 } from '../../constants/constants.js';
 import ConcernVisualizer from '../ConcernVisualization.js';
 
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider } from '@mui/material';
 import { universityReportService } from '../../api/universityReports.js';
 import AuthorCard from '../common/cards/AuthorCard.js';
 
@@ -61,132 +60,6 @@ const TitlesAndDescriptions = {
   },
 };
 
-//Mock University report.
-const mockUniversityReport = {
-  Id: 'e42ba4dd-f56b-4916-835b-034679df2d4b',
-  CreatedAt: '2024-03-11T20:21:49.387547Z',
-  UniversityId: 'stanford-university-123',
-  UniversityName: 'Stanford University',
-  Status: 'complete',
-  FacultyCount: 200,
-  Content: {
-    TotalAuthors: 4,
-    AuthorsReviewed: 3,
-    Flags: {
-      AssociationsWithDeniedEntities: [
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-      ],
-      AuthorAffiliations: [
-        {
-          AuthorId: 'auth_124',
-          AuthorName: 'Maria Garcia',
-          Source: 'Scopus',
-          FlagCount: 2,
-        },
-      ],
-      CoauthorAffiliations: [
-        {
-          AuthorId: 'auth_125',
-          AuthorName: 'David Chen',
-          Source: 'Web of Science',
-          FlagCount: 4,
-        },
-      ],
-      HighRiskFunders: [
-        {
-          AuthorId: 'auth_126',
-          AuthorName: 'Sarah Johnson',
-          Source: 'NIH Database',
-          FlagCount: 1,
-        },
-      ],
-      MiscHighRiskAssociations: [
-        {
-          AuthorId: 'auth_127',
-          AuthorName: 'Michael Brown',
-          Source: 'ArXiv',
-          FlagCount: 2,
-        },
-      ],
-      PotentialAuthorAffiliations: [
-        {
-          AuthorId: 'auth_128',
-          AuthorName: 'Lisa Anderson',
-          Source: 'Google Scholar',
-          FlagCount: 3,
-        },
-      ],
-      TalentContracts: [
-        {
-          AuthorId: 'auth_129',
-          AuthorName: 'Robert Wilson',
-          Source: 'Research Gate',
-          FlagCount: 2,
-        },
-      ],
-    },
-  },
-};
-
 const UniversityReport = () => {
   const navigate = useNavigate();
   const { report_id } = useParams();
@@ -207,11 +80,7 @@ const UniversityReport = () => {
     let isMounted = true;
     const poll = async () => {
       const report = await universityReportService.getReport(report_id);
-      if (report.Status === 'in-progress') {
-        setInstituteName(report.UniversityName);
-        setTotalResearchers(report.Content.TotalAuthors);
-        setResearchersAssessed(report.Content.AuthorsReviewed);
-      }
+
       if (report.Status === 'complete' && isMounted) {
         console.log('Report', report);
         setInstituteName(report.UniversityName);
@@ -219,6 +88,10 @@ const UniversityReport = () => {
         setTotalResearchers(report.Content.TotalAuthors);
         setResearchersAssessed(report.Content.AuthorsReviewed);
         setLoading(false);
+      } else if (report.Status === 'in-progress') {
+        setInstituteName(report.UniversityName);
+        setTotalResearchers(report.Content.TotalAuthors);
+        setResearchersAssessed(report.Content.AuthorsReviewed);
       } else if (isMounted) {
         setTimeout(poll, 10000);
       }
@@ -229,27 +102,19 @@ const UniversityReport = () => {
     return () => {
       isMounted = false;
     };
-    // const report = mockUniversityReport;
-    // console.log('Report', report);
-    // setInstituteName(report.UniversityName);
-    // setReportContent(report.Content);
-    // setLoading(false);
   }, []);
 
   const [loading, setLoading] = useState(true);
-  // if (loading) {
-  //     return null;
-  // }
 
   return (
     <div className="basic-setup" style={{ minHeight: '100vh', paddingBottom: '50px' }}>
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-row">
-          <div className="detail-header">
+          <div className="detail-header" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
             <button
               onClick={() => navigate(-1)}
               className="btn text-dark mb-3"
-              style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}
+              style={{ minWidth: '80px', display: 'flex', alignItems: 'center', position: 'absolute', left: '10px' }}
             >
               <svg
                 width="16"
@@ -276,7 +141,7 @@ const UniversityReport = () => {
               </svg>
               Back
             </button>
-            <h5 style={{ marginRight: 'auto', marginLeft: 'auto' }}>{instituteName}</h5>
+            <h5 style={{ margin: '0 auto' }}>{instituteName}</h5>
           </div>
         </div>
       </div>
