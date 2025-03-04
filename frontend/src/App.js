@@ -10,7 +10,8 @@ import SidePanel from './components/sidebar/SidePanel';
 import UniversityAssessment from './components/pages/UniversityAssessment';
 import UniversityReport from './components/pages/UniversityReport';
 import { useLocation } from 'react-router-dom';
-import Error from './components/pages/Error';
+import Error from './components/pages/error/Error.js';
+import { GetShowMenuIcon } from './utils/helper.js';
 import SearchProviderWrapper from './services/SearchProviderWrapper';
 import UniversityProviderWrapper from './services/UniversityProviderWrapper';
 //CSS
@@ -28,7 +29,6 @@ function App() {
 
 function AppContent() {
   const { updateUserInfo } = useUser();
-  const location = useLocation();
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ function AppContent() {
     }
   }, []);
 
-  const showMenuIcon = !location.pathname.includes('report');
+  const showMenuIcon = GetShowMenuIcon();
 
   return (
     <div className="App">

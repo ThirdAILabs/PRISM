@@ -32,7 +32,7 @@
                                             aria-invalid=""
                                         >
                                         <button 
-                                            class="pf-c-button pf-m-control" 
+                                            class="pf-c-button" 
                                             type="button" 
                                             aria-label="Show password" 
                                             aria-controls="password" 
@@ -72,7 +72,7 @@
                                            aria-invalid="<#if messagesPerField.existsError('password-confirm')>true</#if>"
                                         >
                                         <button 
-                                            class="pf-c-button pf-m-control" 
+                                            class="pf-c-button" 
                                              type="button" aria-label="${msg('showPassword')}"
                                             aria-controls="password-confirm"  data-password-toggle
                                             data-icon-show="${properties.kcFormPasswordVisibilityIconShow!}" data-icon-hide="${properties.kcFormPasswordVisibilityIconHide!}"

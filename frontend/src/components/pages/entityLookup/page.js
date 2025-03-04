@@ -19,7 +19,6 @@ function EntityLookup() {
       setResults(entities);
     } catch (error) {
       console.error('Error fetching data:', error);
-      alert('Error fetching data: ' + error.message);
     } finally {
       setIsLoading(false);
     }
