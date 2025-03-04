@@ -93,8 +93,9 @@ function UniversityAssessment() {
                   <AutocompleteSearchBar
                     autocomplete={autocompleteInstitution}
                     onSelect={setInstitution}
-                    type={'institute'}
                     title={'University'}
+                    showHint={true}
+                    placeholder={'E.g. University of XYZ'}
                   />
                 </div>
                 <div style={{ width: '40px' }} />

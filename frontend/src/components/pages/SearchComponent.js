@@ -10,7 +10,6 @@ import UserService from '../../services/userService';
 import { searchService } from '../../api/search';
 
 const SearchComponent = () => {
-  const [query, setQuery] = useState('');
   const [author, setAuthor] = useState();
   const [hasSearched, setHasSearched] = useState(false);
   const [institution, setInstitution] = useState();
@@ -26,7 +25,6 @@ const SearchComponent = () => {
     setAuthor(author);
     setInstitution(institution);
     setHasSearched(false);
-    setQuery(`${author.AuthorName} ${institution ? institution.InstitutionName : ''}`);
     setResults([]);
     setLoadMoreCount(0);
     setHasSearched(true);
@@ -38,13 +36,12 @@ const SearchComponent = () => {
     setAuthor(author);
     setInstitution(institution);
     setHasSearched(false);
-    setQuery(`${author.AuthorName} ${institution ? institution.InstitutionName : ''}`);
     setResults([]);
 
     const result = await searchService.searchOpenalexAuthors(
-      author.AuthorName,
-      institution.InstitutionId,
-      institution.InstitutionName
+      author.Name,
+      institution.Id,
+      institution.Name
     );
     console.log('result in openAlex', result);
     setOpenAlexResults(result);
@@ -98,8 +95,8 @@ const SearchComponent = () => {
               return [];
             }
             const result = await searchService.searchGoogleScholarAuthors(
-              author.AuthorName,
-              institution.InstitutionName,
+              author.Name,
+              institution.Name,
               null
             );
             setCanLoadMore(false);
