@@ -22,16 +22,19 @@ const useStyles = makeStyles({
   },
 });
 
-const CustomTabs = ({ activeTab, handleTabChange }) => {
+const CustomTabs = ({ activeTab, handleTabChange, filterMessage }) => {
   const classes = useStyles();
 
   return (
     <Box>
       <Box
         sx={{
+          position: 'relative',
           display: 'flex',
           justifyContent: 'center', // Center the Tabs horizontally
+          alignItems: 'center',
           borderBottom: 0,
+          minHeight: '48px',
         }}
       >
         <Tabs
@@ -69,6 +72,19 @@ const CustomTabs = ({ activeTab, handleTabChange }) => {
             }}
           />
         </Tabs>
+        {filterMessage && (
+          <Box
+            sx={{
+              position: 'absolute',
+              right: '16px',
+              fontWeight: 'bold',
+              top: '50%',
+              transform: 'translateY(-50%)',
+            }}
+          >
+            {filterMessage}
+          </Box>
+        )}
       </Box>
       {/* Added white divider below tabs */}
       <Divider

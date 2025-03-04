@@ -862,15 +862,14 @@ const ItemDetails = () => {
                   </div>
                 )}
               </div>
-              {filterMessage && (
-                <div style={{ textAlign: 'right', marginTop: '20px', fontWeight: 'bold' }}>
-                  {filterMessage}
-                </div>
-              )}
             </div>
           </div>
           {/* Comment the following to get rid of the graph tab */}
-          <Tabs activeTab={activeTab} handleTabChange={handleTabChange} />
+          <Tabs
+            activeTab={activeTab}
+            handleTabChange={handleTabChange}
+            filterMessage={filterMessage}
+          />
         </div>
         {activeTab === 0 && (
           <div className="d-flex justify-content-end mt-2 gap-2 px-2">
