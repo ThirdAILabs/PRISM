@@ -17,7 +17,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build -o bin/worker -v ./prism/cmd/worker/main.g
 FROM gcr.io/distroless/base-debian11 AS build-release-stage
 WORKDIR /app
 
-COPY --from=build-stage /app/bin/* .
+COPY --from=build-stage /app/bin/* ./
 
 # Copy SSL libraries from their actual location
 COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libssl.so* /lib/x86_64-linux-gnu/
@@ -29,3 +29,6 @@ COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libgomp.so* /lib/x86_64-linux-
 COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libgcc_s.so* /lib/x86_64-linux-gnu/
 COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libc.so* /lib/x86_64-linux-gnu/
 COPY --from=build-stage /usr/lib64/ld-linux-x86-64.so* /lib64/
+
+# Copy application data
+COPY data data

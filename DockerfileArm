@@ -29,3 +29,6 @@ COPY --from=build-stage /usr/lib/aarch64-linux-gnu/libgomp.so* /lib/aarch64-linu
 COPY --from=build-stage /usr/lib/aarch64-linux-gnu/libgcc_s.so* /lib/aarch64-linux-gnu/
 COPY --from=build-stage /usr/lib/aarch64-linux-gnu/libc.so* /lib/aarch64-linux-gnu/
 COPY --from=build-stage /usr/lib/ld-linux-aarch64.so* /lib/
+
+# Copy application data
+COPY data data

@@ -1,0 +1,12 @@
+azure:
+  branches:
+    test-docker:
+      pull_credentials:
+        password: y3ATmxOBiPrHeQYqRLS4obJ2rn2RkNavlqAsKclu0H+ACRCPe12P
+        username: prism-pull-test-docker
+      push_credentials:
+        password: woQh5tTYczBGMjDrU04DmKHNHx2WhCLQItTJ79ktDR+ACRCN9Ott
+        username: prism-push-test-docker
+      version: 0.0.1
+  registry: prismresearchsecurity.azurecr.io
+provider: azure
