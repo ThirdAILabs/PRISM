@@ -168,10 +168,15 @@ func main() {
 
 	reportManager := reports.NewManager(db, reports.StaleReportThreshold)
 
+	lastLicenseCheck := time.Now()
 	for {
-		if err := licensing.VerifyLicense(); err != nil {
-			slog.Error("error verifying license", "error", err)
-			time.Sleep(10 * time.Second)
+		if time.Since(lastLicenseCheck) > 10*time.Minute {
+			if err := licensing.VerifyLicense(); err != nil {
+				slog.Error("error verifying license", "error", err)
+				time.Sleep(5 * time.Minute)
+				continue
+			}
+			lastLicenseCheck = time.Now()
 		}
 
 		foundAuthorReport := processNextAuthorReport(reportManager, processor)
