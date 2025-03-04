@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"prism/prism/schema"
+	"prism/prism/triangulation"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -39,6 +40,23 @@ func InitDb(uri string) *gorm.DB {
 	)
 	if err != nil {
 		log.Fatalf("error migrating db schema: %v", err)
+	}
+
+	return db
+}
+
+func InitTriangulationDb(uri string) *gorm.DB {
+	db, err := gorm.Open(postgres.Open(uriToDsn(uri)), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("error opening triangulation database connection: %v", err)
+	}
+
+	err = db.AutoMigrate(
+		&triangulation.Author{},
+		&triangulation.FundCode{},
+	)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	return db

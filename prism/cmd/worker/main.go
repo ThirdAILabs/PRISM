@@ -144,7 +144,7 @@ func main() {
 		UniversityNDB:   flaggers.BuildUniversityNDB(config.NDBData.University, filepath.Join(ndbDir, "university.ndb")),
 		DocNDB:          flaggers.BuildDocNDB(config.NDBData.Doc, filepath.Join(ndbDir, "doc.ndb")),
 		AuxNDB:          flaggers.BuildAuxNDB(config.NDBData.Aux, filepath.Join(ndbDir, "aux.ndb")),
-		TriangulationDB: triangulation.CreateTriangulationDB(cmd.InitDb(config.FundcodeTriangulationUri)),
+		TriangulationDB: triangulation.CreateTriangulationDB(cmd.InitTriangulationDb(config.FundcodeTriangulationUri)),
 
 		EntityLookup: entityStore,
 
