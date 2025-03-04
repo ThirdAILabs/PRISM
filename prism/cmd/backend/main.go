@@ -10,11 +10,11 @@ import (
 	"os"
 	"prism/prism/api"
 	"prism/prism/cmd"
+	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/search"
 	"prism/prism/services"
 	"prism/prism/services/auth"
-	"strings"
 	"time"
 
 	"github.com/caarlos0/env/v11"
@@ -23,9 +23,9 @@ import (
 )
 
 type Config struct {
-	PostgresUri string `env:"DB_URI,notEmpty,required"`
-	Logfile     string `env:"LOGFILE,notEmpty" envDefault:"prism_backend.log"`
-	NdbLicense  string `env:"NDB_LICENSE,notEmpty,required"`
+	PostgresUri  string `env:"DB_URI,notEmpty,required"`
+	Logfile      string `env:"LOGFILE,notEmpty" envDefault:"prism_backend.log"`
+	PrismLicense string `env:"PRISM_LICENSE,notEmpty,required"`
 
 	Port int `env:"PORT" envDefault:"8000"`
 
@@ -118,16 +118,13 @@ func main() {
 
 	openalex := openalex.NewRemoteKnowledgeBase()
 
-	if strings.HasPrefix(config.NdbLicense, "file ") {
-		err := search.SetLicensePath(strings.TrimPrefix(config.NdbLicense, "file "))
-		if err != nil {
-			log.Fatalf("error activating license at path '%s': %v", config.NdbLicense, err)
-		}
-	} else {
-		err := search.SetLicenseKey(config.NdbLicense)
-		if err != nil {
-			log.Fatalf("error activating license: %v", err)
-		}
+	licensing, err := licensing.NewLicenseVerifier(config.PrismLicense)
+	if err != nil {
+		log.Fatalf("error initializing licensing: %v", err)
+	}
+
+	if err := search.SetLicenseKey(config.PrismLicense); err != nil {
+		log.Fatalf("error activating license key: %v", err)
 	}
 
 	entitySearch := buildEntityNdb(config.SearchableEntitiesData)
@@ -149,12 +146,7 @@ func main() {
 		log.Fatalf("error initializing keycloak user auth: %v", err)
 	}
 
-	adminAuth, err := auth.NewKeycloakAuth("prism-admin", keycloakArgs)
-	if err != nil {
-		log.Fatalf("error initializing keycloak admin auth: %v", err)
-	}
-
-	backend := services.NewBackend(db, openalex, entitySearch, userAuth, adminAuth)
+	backend := services.NewBackend(db, openalex, entitySearch, userAuth, licensing)
 
 	r := chi.NewRouter()
 
