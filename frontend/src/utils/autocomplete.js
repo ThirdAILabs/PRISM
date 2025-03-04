@@ -2,27 +2,27 @@ import React, { useState } from 'react';
 import '../components/common/searchBar/SearchBar.css';
 import '../components/common/tools/button/button1.css';
 
-function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
+function AutocompleteSearchBar({
+  title,
+  autocomplete,
+  onSelect,
+  placeholder,
+  showHint,
+  initialValue = '',
+}) {
   const [suggestions, setSuggestions] = useState([]);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialValue);
 
   function handleInputChange(e) {
-    setQuery(e.target.value);
-    autocomplete(e.target.value).then(setSuggestions);
+    const newValue = e.target.value;
+    setQuery(newValue);
+    autocomplete(newValue).then(setSuggestions);
   }
 
   function handleSelectSuggestion(suggestion) {
     return () => {
       setSuggestions([]);
-      setQuery(type === 'author' ? suggestion.AuthorName : suggestion.InstitutionName);
-      onSelect(suggestion);
-    };
-  }
-
-  function handleSelectSuggestionInstitute(suggestion) {
-    return () => {
-      setSuggestions([]);
-      setQuery(suggestion.InstitutionName);
+      setQuery(suggestion.Name);
       onSelect(suggestion);
     };
   }
@@ -36,7 +36,7 @@ function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
       {/* Search bar */}
       <input
         type="text"
-        placeholder={title === 'Author' ? 'E.g. John Doe' : 'E.g. University of XYZ'}
+        placeholder={placeholder}
         className="search-bar"
         value={query}
         onChange={handleInputChange}
@@ -45,22 +45,22 @@ function AutocompleteSearchBar({ title, autocomplete, onSelect, type }) {
       {query && query.length && suggestions && suggestions.length > 0 && (
         // Autocomplete suggestion container. Column.
         <div className="suggestion-container">
-          {suggestions.map((suggestion, index) =>
+          {suggestions.map((suggestion, index) => (
             // Clickable suggestion
-            type === 'author' ? (
-              <div className="suggestion" key={index} onClick={handleSelectSuggestion(suggestion)}>
-                {suggestion.AuthorName}
-              </div>
-            ) : (
-              <div
-                className="suggestion"
-                key={index}
-                onClick={handleSelectSuggestionInstitute(suggestion)}
-              >
-                {suggestion.InstitutionName}
-              </div>
-            )
-          )}
+            <div
+              className="suggestion"
+              key={index}
+              onClick={handleSelectSuggestion(suggestion)}
+              style={{ display: 'flex', alignItems: 'end' }}
+            >
+              <p style={{ marginRight: '20px' }}>{suggestion.Name}</p>{' '}
+              {showHint && (
+                <p style={{ marginBottom: '16.5px', fontSize: 'small', fontStyle: 'italic' }}>
+                  {suggestion.Hint}
+                </p>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>

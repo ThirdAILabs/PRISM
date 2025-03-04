@@ -274,16 +274,6 @@ const ItemDetails = () => {
             })}
           </ul>
         </p>
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
       </div>
     );
   }
@@ -319,16 +309,6 @@ const ItemDetails = () => {
             </>
           )}
         </p>
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
       </div>
     );
   }
@@ -353,16 +333,6 @@ const ItemDetails = () => {
             })}
           </ul>
         </p>
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
       </div>
     );
   }
@@ -387,16 +357,6 @@ const ItemDetails = () => {
             })}
           </ul>
         </p>
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
       </div>
     );
   }
@@ -432,16 +392,6 @@ const ItemDetails = () => {
             })}
           </ul>
         </p>
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
       </div>
     );
   }
@@ -467,16 +417,6 @@ const ItemDetails = () => {
             })}
           </ul>
         </div>
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
       </div>
     );
   }
@@ -517,17 +457,6 @@ const ItemDetails = () => {
           })}
           <p>{}</p>
         </p>
-        {}
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
       </div>
     );
   }
@@ -545,16 +474,6 @@ const ItemDetails = () => {
             {flag.UniversityUrl}
           </a>
         </p>
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
       </div>
     );
   }
@@ -726,16 +645,6 @@ const ItemDetails = () => {
             })}
           </ul>
         </p>
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
       </div>
     );
   }
@@ -857,6 +766,7 @@ const ItemDetails = () => {
                     <div
                       className="dropdown-menu show p-3"
                       style={{
+                        width: '200px',
                         backgroundColor: 'rgb(160, 160, 160)',
                         border: 'none',
                         right: 0,
