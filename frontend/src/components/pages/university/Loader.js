@@ -11,7 +11,7 @@ const Loader = () => {
             </div>
         </StyledWrapper>
     );
-}
+};
 
 const StyledWrapper = styled.div`
   .typewriter {
@@ -23,6 +23,9 @@ const StyledWrapper = styled.div`
     --tool: #FBC56C;
     --duration: 3s;
     position: relative;
+    /* Increase overall size by scaling up further */
+    transform: scale(2);
+    transform-origin: top center;
     -webkit-animation: bounce05 var(--duration) linear infinite;
     animation: bounce05 var(--duration) linear infinite;
   }
@@ -141,15 +144,13 @@ const StyledWrapper = styled.div`
 
   @keyframes bounce05 {
     85%, 92%, 100% {
-      transform: translateY(0);
+      transform: translateY(0) scale(2);
     }
-
     89% {
-      transform: translateY(-4px);
+      transform: translateY(-4px) scale(2);
     }
-
     95% {
-      transform: translateY(2px);
+      transform: translateY(2px) scale(2);
     }
   }
 
@@ -157,23 +158,18 @@ const StyledWrapper = styled.div`
     5% {
       transform: translateX(14px);
     }
-
     15%, 30% {
       transform: translateX(6px);
     }
-
     40%, 55% {
       transform: translateX(0);
     }
-
     65%, 70% {
       transform: translateX(-4px);
     }
-
     80%, 89% {
       transform: translateX(-12px);
     }
-
     100% {
       transform: translateX(14px);
     }
@@ -183,23 +179,18 @@ const StyledWrapper = styled.div`
     5% {
       transform: translateY(46px);
     }
-
     20%, 30% {
       transform: translateY(34px);
     }
-
     40%, 55% {
       transform: translateY(22px);
     }
-
     65%, 70% {
       transform: translateY(10px);
     }
-
     80%, 85% {
       transform: translateY(0);
     }
-
     92%, 100% {
       transform: translateY(46px);
     }
@@ -209,42 +200,34 @@ const StyledWrapper = styled.div`
     5%, 12%, 21%, 30%, 39%, 48%, 57%, 66%, 75%, 84% {
       box-shadow: 15px 0 0 var(--key), 30px 0 0 var(--key), 45px 0 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 10px 0 var(--key), 37px 10px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 10px 0 var(--key);
     }
-
     9% {
       box-shadow: 15px 2px 0 var(--key), 30px 0 0 var(--key), 45px 0 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 10px 0 var(--key), 37px 10px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 10px 0 var(--key);
     }
-
     18% {
       box-shadow: 15px 0 0 var(--key), 30px 0 0 var(--key), 45px 0 0 var(--key), 60px 2px 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 10px 0 var(--key), 37px 10px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 10px 0 var(--key);
     }
-
     27% {
       box-shadow: 15px 0 0 var(--key), 30px 0 0 var(--key), 45px 0 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 12px 0 var(--key), 37px 10px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 10px 0 var(--key);
     }
-
     36% {
       box-shadow: 15px 0 0 var(--key), 30px 0 0 var(--key), 45px 0 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 10px 0 var(--key), 37px 10px 0 var(--key), 52px 12px 0 var(--key), 60px 12px 0 var(--key), 68px 12px 0 var(--key), 83px 10px 0 var(--key);
     }
-
     45% {
       box-shadow: 15px 0 0 var(--key), 30px 0 0 var(--key), 45px 0 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 2px 0 var(--key), 22px 10px 0 var(--key), 37px 10px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 10px 0 var(--key);
     }
-
     54% {
       box-shadow: 15px 0 0 var(--key), 30px 2px 0 var(--key), 45px 0 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 10px 0 var(--key), 37px 10px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 10px 0 var(--key);
     }
-
     63% {
       box-shadow: 15px 0 0 var(--key), 30px 0 0 var(--key), 45px 0 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 10px 0 var(--key), 37px 10px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 12px 0 var(--key);
     }
-
     72% {
       box-shadow: 15px 0 0 var(--key), 30px 0 0 var(--key), 45px 2px 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 10px 0 var(--key), 37px 10px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 10px 0 var(--key);
     }
-
     81% {
       box-shadow: 15px 0 0 var(--key), 30px 0 0 var(--key), 45px 0 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 10px 0 var(--key), 37px 12px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 10px 0 var(--key);
     }
-  }`;
+  }
+`;
 
 export default Loader;

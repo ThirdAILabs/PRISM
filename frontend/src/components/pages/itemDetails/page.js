@@ -157,7 +157,11 @@ const ItemDetails = () => {
         setReportContent(report.Content);
         setInitialReportContent(report.Content);
         setLoading(false);
-      } else if (isMounted) {
+      }
+      else if (report.Status === 'in-progress' && isMounted) {
+        setAuthorName(report.AuthorName);
+      }
+      else if (isMounted) {
         setTimeout(poll, 2000);
       }
     };

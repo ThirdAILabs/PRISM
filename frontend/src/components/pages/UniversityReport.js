@@ -193,6 +193,8 @@ const UniversityReport = () => {
 
   const [reportContent, setReportContent] = useState({});
   const [instituteName, setInstituteName] = useState('');
+  const [toatlResearchers, setTotalResearchers] = useState(0);
+  const [researchersAssessed, setResearchersAssessed] = useState(0);
   const [selectedFlagData, setSelectedFlagData] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -205,9 +207,14 @@ const UniversityReport = () => {
     let isMounted = true;
     const poll = async () => {
       const report = await universityReportService.getReport(report_id);
+      if (report.Status === 'in-progress') {
+        setInstituteName(report.UniversityName);
+        setTotalResearchers(report.Content.TotalAuthors);
+        setResearchersAssessed(report.Content.AuthorsReviewed);
+      }
       if (report.Status === 'complete' && isMounted) {
         console.log('Report', report);
-        setInstituteName(report.AuthorName);
+        setInstituteName(report.UniversityName);
         setReportContent(report.Content);
         setLoading(false);
       } else if (isMounted) {
@@ -275,21 +282,22 @@ const UniversityReport = () => {
       <>
         <div
           className="d-flex w-100 flex-column align-items-center"
-          style={{ color: 'rgb(78, 78, 78)', marginTop: '0px' }}
+          style={{ color: 'rgb(78, 78, 78)', marginTop: '50px' }}
         >
           <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Researchers</div>
           <div style={{ fontSize: '60px', fontWeight: 'bold' }}>
-            {reportContent.TotalAuthors || 0}
+            {toatlResearchers}
           </div>
           <div style={{ fontSize: 'medium', fontWeight: 'bold' }}>Researchers Assessed</div>
-          <div style={{ fontSize: '40px', fontWeight: 'bold' }}>
-            {reportContent.AuthorsReviewed}
+          <div style={{ fontSize: '50px', fontWeight: 'bold' }}>
+            {researchersAssessed}
           </div>
         </div>
 
-        {loading ? (<div>
-          <Loader />
-        </div>) :
+        {loading ? (
+          <div style={{ marginTop: '10%', marginLeft: '62%' }}>
+            <Loader />
+          </div>) :
           <div
             style={{
               display: 'flex',
