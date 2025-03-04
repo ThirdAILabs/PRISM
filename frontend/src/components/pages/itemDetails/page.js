@@ -228,7 +228,7 @@ const ItemDetails = () => {
           return true;
         });
       } else {
-        filteredContent[flag] = null;
+        filteredContent[flag] = [];
       }
     });
 
