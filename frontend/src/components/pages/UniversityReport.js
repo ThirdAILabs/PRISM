@@ -14,9 +14,9 @@ import ConcernVisualizer from '../ConcernVisualization.js';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider } from '@mui/material';
 import { universityReportService } from '../../api/universityReports.js';
 import AuthorCard from '../common/cards/AuthorCard.js';
-import Shimmer from './itemDetails/Shimmer.js';
 
 import styled from 'styled-components';
+import Loader from './university/Loader.js';
 
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
@@ -273,16 +273,6 @@ const UniversityReport = () => {
       </div>
 
       <>
-        <div className="d-flex w-100 flex-column align-items-center">
-          <div className="d-flex w-100 px-5 align-items-center my-2 mt-3 justify-content-between">
-            <div style={{ width: '20px' }}>
-              {loading && (
-                <div className="spinner-border text-primary spinner-border-sm" role="status"></div>
-              )}
-            </div>
-          </div>
-        </div>
-
         <div
           className="d-flex w-100 flex-column align-items-center"
           style={{ color: 'rgb(78, 78, 78)', marginTop: '0px' }}
@@ -297,37 +287,40 @@ const UniversityReport = () => {
           </div>
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-around',
-            flexWrap: 'wrap',
-            marginTop: '20px',
-          }}
-        >
-          {reportContent?.Flags &&
-            FLAG_ORDER.map((flag, index) => {
-              let value = 0;
-              const flagData = reportContent.Flags[flag] || [];
+        {loading ? (<div>
+          <Loader />
+        </div>) :
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-around',
+              flexWrap: 'wrap',
+              marginTop: '20px',
+            }}
+          >
+            {reportContent?.Flags &&
+              FLAG_ORDER.map((flag, index) => {
+                let value = 0;
+                const flagData = reportContent.Flags[flag] || [];
 
-              if (flagData.length > 0) {
-                for (let authorIndex = 0; authorIndex < flagData.length; authorIndex++) {
-                  const author = flagData[authorIndex];
-                  value += author.FlagCount;
+                if (flagData.length > 0) {
+                  for (let authorIndex = 0; authorIndex < flagData.length; authorIndex++) {
+                    const author = flagData[authorIndex];
+                    value += author.FlagCount;
+                  }
                 }
-              }
 
-              return (
-                <ConcernVisualizer
-                  title={TitlesAndDescriptions[flag].title}
-                  hoverText={TitlesAndDescriptions[flag].desc}
-                  value={value || 0}
-                  onReview={() => handleReview(flag)}
-                  key={index}
-                />
-              );
-            })}
-        </div>
+                return (
+                  <ConcernVisualizer
+                    title={TitlesAndDescriptions[flag].title}
+                    hoverText={TitlesAndDescriptions[flag].desc}
+                    value={value || 0}
+                    onReview={() => handleReview(flag)}
+                    key={index}
+                  />
+                );
+              })}
+          </div>}
         {showModal && (
           <div
             style={{
