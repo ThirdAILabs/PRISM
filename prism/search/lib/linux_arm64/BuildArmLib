@@ -1,0 +1,17 @@
+# This docker image will contain the linux arm64 libraries when run an apple silicon mac.
+
+FROM golang:1.23 AS build-stage
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    libssl-dev \
+    libssl3
+
+RUN apt-get install python3-pipR
+RUN python3 -m pip config set global.break-system-packages true
+
+RUN apt-get install cmake
+
+COPY Universe .
+
+RUN bin/build.py -f THIRDAI_BUILD_LICENSE THIRDAI_CHECK_LICENSE

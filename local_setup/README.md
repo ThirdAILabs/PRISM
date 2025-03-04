@@ -49,6 +49,12 @@
   ```
 
   6. To view the admin dashboard go to `localhost:8180` in your browser and login with the credentials `temp_admin` and `password`.
+
+  7. Integrate Custom Theme in Login UI
+    1. Copy the custom-theme folder from keycloak-assets.
+    2. Navigate to the themes folder inside your keycloak-26.0.0 directory.
+    3. Paste the directory (named custom-theme) into the themes folder.
+
 </details>
 <br>
 <details>
@@ -101,40 +107,34 @@
   ```sql
   create database prism;
   ```
-  3. Make a copy of `cmd/backend/config_tmp.yaml`.
+  3. Make a copy of `cmd/backend/.env.example`.
   ```bash
-  cp prism/cmd/backend/config_tmp.yaml prism/cmd/backend/config.yaml
+  cp prism/cmd/backend/.env.example prism/cmd/backend/.env
   ```
-  4. Fill in the `config.yaml`
+  4. Fill in the `.env` file
 
       a. If using the keycloak setup described above, configure the keycloak args in the config file based on your hosting environment:
   
   <details style="margin-left: 50px;">
     <summary>For local setup</summary>
     
-```yaml
-keycloak:
-  keycloak_server_url: "http://localhost/keycloak"
-  keycloak_admin_username: "temp_admin"
-  keycloak_admin_password: "password"
-  public_hostname: "http://localhost"
-  private_hostname: "http://localhost"
-  ssl_login: false
-  verbose: false
+```bash
+KEYCLOAK_SERVER_URL="http://localhost/keycloak"
+KEYCLOAK_ADMIN_USERNAME="temp_admin"
+KEYCLOAK_ADMIN_PASSWORD="password"
+KEYCLOAK_PUBLIC_HOSTNAME="http://localhost"
+KEYCLOAK_PRIVATE_HOSTNAME="http://localhost"
 ```
   </details>
   <details style="margin-left: 50px;">
     <summary>For hosted setup (replace example.com with your domain or IP):</summary>
     
-```yaml
-keycloak:
-  keycloak_server_url: "http://example.com/keycloak"
-  keycloak_admin_username: "temp_admin"
-  keycloak_admin_password: "password"
-  public_hostname: "http://example.com"
-  private_hostname: "http://example.com"
-  ssl_login: false
-  verbose: false
+```bash
+KEYCLOAK_SERVER_URL="http://example.com/keycloak"
+KEYCLOAK_ADMIN_USERNAME="temp_admin"
+KEYCLOAK_ADMIN_PASSWORD="password"
+KEYCLOAK_PUBLIC_HOSTNAME="http://example.com"
+KEYCLOAK_PRIVATE_HOSTNAME="http://example.com"
 ```
       
   </details>
@@ -142,17 +142,23 @@ keycloak:
   <div style="margin-left: 40px;">
     b. <strong>Rest of the config</strong>
     
-```yaml
-postgres_uri: postgresql://<username>:<password>@<host | localhost>:<port | 5432>/prism
-searchable_entities: <path to PRISM/data/searchable_entities.json>
-ndb_license: "Bolt license key"
+```bash
+DB_URI="postgresql://<username>:<password>@<host | localhost>:<port | 5432>/prism"
+SEARCHABLE_ENTITIES_DATA="<path to PRISM/data/searchable_entities.json>"
+NDB_LICENSE="Bolt license key"
 ```
   </div>
+
+5. For Entity search to work, we need to set the openai key as env variable before starting the backend.
+
+```bash
+export OPENAI_API_KEY=YOUR_OPENAI_KEY
+```
 
 5. Start the backend:
 
 ```bash
-go run cmd/backend/main.go --config "./cmd/backend/config.yaml"
+go run cmd/backend/main.go --env "./cmd/backend/.env"
 ```
 </details>
 <br>
@@ -217,39 +223,35 @@ go run cmd/backend/main.go --config "./cmd/backend/config.yaml"
   <summary><h2 style="display: inline;">Start the worker</h2></summary>
   <br>
 
-  1. Make a copy of `cmd/worker/config_tmp.yaml` and fill in the fields.
+  1. Make a copy of `cmd/worker/.env.example` and fill in the fields.
   ```bash
-  cp cmd/worker/config_tmp.yaml cmd/worker/config.yaml
+  cp cmd/worker/.env.example cmd/worker/.env
   ```
 
-  2. update the worker config `cmd/worker/config.yaml`:
-  ```yaml
+  2. update the worker config `cmd/worker/.env`:
+  ```bash
 # Uri for prism postgres db
-postgres_uri: "postgresql://<username>:<password>@<host | localhost>:<port | 5432>/prism"
-
-# Logfile for backend
-logfile: "./worker.log"
+DB_URI="postgresql://<username>:<password>@<host | localhost>:<port | 5432>/prism"
 
 # License for NDB
-ndb_license: "bolt license key"
+NDB_LICENSE="bolt license key"
 
 # Work dir for worker, will store ndbs and caches etc.
-work_dir: "any empty directory"
+WORK_DIR="any empty directory"
 
 # Path to load data to construct ndbs for author flaggers(update the following path from prism/data)
-ndb_data:
-  university: "<path to PRISM/data/university_webpages.json>"
-  doc: "<path to PRISM/data/doc_and_press_releases.json>"
-  aux: "<path to PRISM/data/auxiliary_webpages.json>"
+UNIVERSITY_DATA="<path to PRISM/data/university_webpages.json>"
+DOC_DATA="<path to PRISM/data/doc_and_press_releases.json>"
+AUX_DATA="<path to PRISM/data/auxiliary_webpages.json>"
 
 # Endpoint for grobid
-grobid_endpoint: "http://localhost:8070/" # for local setup
+GROBID_ENDPOINT="http://localhost:8070/" # for local setup
   ```
 
   3. Start the worker:
 
   ```bash
-  go run cmd/worker/main.go --config "./cmd/worker/config.yaml"
+  go run cmd/worker/main.go --env "./cmd/worker/.env"
   ```
 
 </details>

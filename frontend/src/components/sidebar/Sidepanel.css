@@ -1,0 +1,124 @@
+.side-panel {
+  position: fixed;
+  left: -300px;
+  top: 0;
+  width: 300px;
+  height: 100vh;
+  background: white;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  transition: left 0.2s ease;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.logout-section {
+  padding: 10px;
+  background: white;
+}
+
+.side-panel.open {
+  left: 0;
+}
+
+.side-panel-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1000;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-left: 2%;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 15px;
+}
+
+.navigation ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.navigation li {
+  padding: 5px 0;
+  cursor: pointer;
+}
+
+.nav-list {
+  list-style: none;
+  padding: 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.nav-item:hover {
+  background: #dcdcdc;
+}
+
+.nav-item.active {
+  background: #dcdcdc;
+}
+
+.nav-icon {
+  width: 24px;
+  display: flex;
+  justify-content: center;
+  margin-right: 12px;
+  margin-left: 5px;
+}
+
+.reports {
+  margin-top: 20px;
+  margin-left: 1%;
+}
+
+.report-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.report-item {
+  padding: 10px;
+  padding-bottom: 1px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-left: 4%;
+  cursor: pointer;
+}
+
+.report-item:hover {
+  background: #e6e6e6;
+}
+
+.status {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.status.queued {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status.in-progress {
+  background: #cce5ff;
+  color: #004085;
+}

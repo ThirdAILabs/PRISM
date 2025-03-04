@@ -20,15 +20,15 @@ type KeycloakAuth struct {
 }
 
 type KeycloakArgs struct {
-	KeycloakServerUrl string `yaml:"keycloak_server_url"`
+	KeycloakServerUrl string
 
-	KeycloakAdminUsername string `yaml:"keycloak_admin_username"`
-	KeycloakAdminPassword string `yaml:"keycloak_admin_password"`
+	KeycloakAdminUsername string
+	KeycloakAdminPassword string
 
-	PublicHostname  string `yaml:"public_hostname"`
-	PrivateHostname string `yaml:"private_hostname"`
+	PublicHostname  string
+	PrivateHostname string
 
-	SslLogin bool `yaml:"ssl_login"`
+	SslLogin bool
 
 	Verbose bool
 }

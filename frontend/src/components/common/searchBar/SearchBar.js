@@ -3,57 +3,7 @@ import { autocompleteService } from '../../../api/autocomplete';
 import './SearchBar.css';
 import '../tools/button/button1.css';
 import useCallOnPause from '../../../hooks/useCallOnPause';
-
-function AutocompleteSearchBar({ title, autocomplete, onSelect, showHint }) {
-  const [suggestions, setSuggestions] = useState([]);
-  const [query, setQuery] = useState('');
-
-  function handleInputChange(e) {
-    setQuery(e.target.value);
-    autocomplete(e.target.value).then(setSuggestions);
-  }
-
-  function handleSelectSuggestion(suggestion) {
-    return () => {
-      setSuggestions([]);
-      setQuery(suggestion.Name);
-      onSelect(suggestion);
-    };
-  }
-
-  return (
-    // Column
-    <div className="autocomplete-search-bar">
-      {/* Header 2 or 3, bold */}
-      <div className="autocomplete-search-bar-title">{title}</div>
-
-      {/* Search bar */}
-      <input type="text" className="search-bar" value={query} onChange={handleInputChange} />
-
-      {query && query.length && suggestions && suggestions.length > 0 && (
-        // Autocomplete suggestion container. Column.
-        <div className="suggestion-container">
-          {suggestions.map((suggestion, index) => (
-            // Clickable suggestion
-            <div
-              className="suggestion"
-              key={index}
-              onClick={handleSelectSuggestion(suggestion)}
-              style={{ display: 'flex', alignItems: 'end' }}
-            >
-              <p style={{ marginRight: '20px' }}>{suggestion.Name}</p>{' '}
-              {showHint && (
-                <p style={{ marginBottom: '16.5px', fontSize: 'small', fontStyle: 'italic' }}>
-                  {suggestion.Hint}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+import AutocompleteSearchBar from '../../../utils/autocomplete';
 
 export function AuthorInstiutionSearchBar({ onSearch }) {
   const [author, setAuthor] = useState();
@@ -113,6 +63,7 @@ export function AuthorInstiutionSearchBar({ onSearch }) {
           autocomplete={autocompleteAuthor}
           onSelect={setAuthor}
           showHint={false}
+          placeholder={'E.g. John Doe'}
         />
       </div>
 
@@ -122,6 +73,7 @@ export function AuthorInstiutionSearchBar({ onSearch }) {
           autocomplete={autocompleteInstitution}
           onSelect={setInstitution}
           showHint={true}
+          placeholder={'E.g. University of XYZ'}
         />
       </div>
 

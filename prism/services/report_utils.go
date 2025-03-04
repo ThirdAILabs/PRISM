@@ -95,7 +95,7 @@ func generateCSV(report api.Report) ([]byte, error) {
 
 	rows := [][]string{
 		{"Report ID", report.Id.String()},
-		{"Created At", report.CreatedAt.Format(time.RFC3339)},
+		{"Downloaded At", time.Now().Format(time.RFC3339)},
 		{"Author Name", report.AuthorName},
 	}
 
@@ -140,7 +140,7 @@ func generateExcel(report api.Report) ([]byte, error) {
 
 	summaryData := [][]interface{}{
 		{"Report ID", report.Id.String()},
-		{"Created At", report.CreatedAt.Format(time.RFC3339)},
+		{"Downloaded At", time.Now().Format(time.RFC3339)},
 		{"Author Name", report.AuthorName},
 	}
 
@@ -255,7 +255,7 @@ func generatePDF(report api.Report) ([]byte, error) {
 
 	details := [][]string{
 		{"Report ID", report.Id.String()},
-		{"Created At", report.CreatedAt.Format(time.RFC3339)},
+		{"Downloaded At", time.Now().Format(time.RFC3339)},
 		{"Author Name", report.AuthorName},
 	}
 	pdf.SetFont("Arial", "", 12)

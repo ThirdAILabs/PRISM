@@ -14,7 +14,6 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { onFlagsUpdate } from '../../../services/streamStore.js';
 import { AUTHOR_AFFILIATIONS } from '../../../constants/constants.js';
 
 function getNodeTitle(flagType, flag) {
@@ -85,6 +84,18 @@ function convertDataToGraphFormat(authorName, reportContent) {
             work.connections.push({
               title: reportContent[flagType][index2].Connections[1].DocTitle,
               url: reportContent[flagType][index2].Connections[1].DocUrl,
+              connections: [
+                {
+                  title: reportContent[flagType][index2].DocTitle,
+                  url: reportContent[flagType][index2].DocUrl,
+                  connections: [],
+                },
+              ],
+            });
+          } else {
+            work.connections.push({
+              title: reportContent[flagType][index2].DocTitle,
+              url: reportContent[flagType][index2].DocUrl,
               connections: [],
             });
           }
@@ -182,28 +193,22 @@ function levelZeroNode(nodeId, name, riskScore, url) {
 }
 
 function levelOneNode(nodeId, title, url, count, connections) {
-  const fontSize = 20;
-  const padding = 5;
-  const textLength = Math.min(title.length, 50);
-  let dotString = '';
-  if (textLength < title.length) dotString += '...';
-  const calculatedWidth = Math.max(textLength * (fontSize * 0.3), 50) + padding;
   return {
     id: nodeId,
-    text: title.slice(0, textLength) + dotString + '(' + count.toString() + ')',
+    text: title + ' (' + count.toString() + ')',
     data: {
       url: url,
       text: title,
       allConnections: connections,
     },
     styleClass: { width: 'fit-content' },
-    width: calculatedWidth,
-    height: calculatedWidth,
+    width: 180,
+    height: 180,
     borderWidth: 3,
     color: 'transparent',
     borderColor: '#ff8c00',
     fontColor: '#ff8c00',
-    fontSize: fontSize,
+    fontSize: 20,
   };
 }
 
@@ -481,13 +486,12 @@ const Graph = ({ authorName, reportContent }) => {
           marginLeft: '5%',
           overflow: 'hidden',
           position: 'relative',
-          backgroundColor: '#000000',
         }}
       >
         <RelationGraph ref={graphRef} options={graphOptions} onNodeClick={onNodeClick} />
         <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm">
           <DialogTitle sx={{ bgcolor: '#2A2A2A', color: 'white' }}>
-            {selectedNode?.data.text}
+            {'Detailed Information'}
           </DialogTitle>
           <Divider
             sx={{
