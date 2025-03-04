@@ -10,7 +10,10 @@ import SidePanel from './components/sidebar/SidePanel';
 import UniversityAssessment from './components/pages/UniversityAssessment';
 import UniversityReport from './components/pages/UniversityReport';
 import { useLocation } from 'react-router-dom';
-import Error from './components/pages/Error';
+import Error from './components/pages/error/Error.js';
+import { GetShowMenuIcon } from './utils/helper.js';
+import SearchProviderWrapper from './services/SearchProviderWrapper';
+import UniversityProviderWrapper from './services/UniversityProviderWrapper';
 //CSS
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.js';
@@ -26,7 +29,6 @@ function App() {
 
 function AppContent() {
   const { updateUserInfo } = useUser();
-  const location = useLocation();
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
 
   useEffect(() => {
@@ -38,7 +40,7 @@ function AppContent() {
     }
   }, []);
 
-  const showMenuIcon = !location.pathname.includes('report');
+  const showMenuIcon = GetShowMenuIcon();
 
   return (
     <div className="App">
@@ -58,11 +60,15 @@ function AppContent() {
       )}
       <SidePanel isOpen={isSidePanelOpen} onClose={() => setIsSidePanelOpen(false)} />
       <Routes>
-        <Route path="/" element={<SearchComponent />} />
+        <Route element={<SearchProviderWrapper />}>
+          <Route path="/" element={<SearchComponent />} />
+          <Route path="/report/:report_id" element={<ItemDetails />} />
+        </Route>
         <Route path="/entity-lookup" element={<EntityLookup />} />
-        <Route path="/university" element={<UniversityAssessment />} />
-        <Route path="/report/:report_id" element={<ItemDetails />} />
-        <Route path="/university/report/:report_id" element={<UniversityReport />} />
+        <Route element={<UniversityProviderWrapper />}>
+          <Route path="/university" element={<UniversityAssessment />} />
+          <Route path="/university/report/:report_id" element={<UniversityReport />} />
+        </Route>
         <Route path="/error" element={<Error />} />
       </Routes>
     </div>

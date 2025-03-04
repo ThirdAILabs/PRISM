@@ -21,6 +21,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import Shimmer from './Shimmer.js';
 
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
@@ -278,16 +279,6 @@ const ItemDetails = () => {
             })}
           </ul>
         </p>
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
       </div>
     );
   }
@@ -323,16 +314,6 @@ const ItemDetails = () => {
             </>
           )}
         </p>
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
       </div>
     );
   }
@@ -357,16 +338,6 @@ const ItemDetails = () => {
             })}
           </ul>
         </p>
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
       </div>
     );
   }
@@ -391,16 +362,6 @@ const ItemDetails = () => {
             })}
           </ul>
         </p>
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
       </div>
     );
   }
@@ -436,16 +397,6 @@ const ItemDetails = () => {
             })}
           </ul>
         </p>
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
       </div>
     );
   }
@@ -471,16 +422,6 @@ const ItemDetails = () => {
             })}
           </ul>
         </div>
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
       </div>
     );
   }
@@ -521,17 +462,6 @@ const ItemDetails = () => {
           })}
           <p>{}</p>
         </p>
-        {}
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
       </div>
     );
   }
@@ -549,16 +479,6 @@ const ItemDetails = () => {
             {flag.UniversityUrl}
           </a>
         </p>
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
       </div>
     );
   }
@@ -730,16 +650,6 @@ const ItemDetails = () => {
             })}
           </ul>
         </p>
-        {isDisclosureChecked &&
-          (flag.Disclosed ? (
-            <button type="button" className="btn btn-success">
-              Disclosed
-            </button>
-          ) : (
-            <button type="button" className="btn btn-danger">
-              Undisclosed
-            </button>
-          ))}
       </div>
     );
   }
@@ -785,278 +695,264 @@ const ItemDetails = () => {
   );
 
   return (
-    !loading && (
-      <div className="basic-setup">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-row">
-            <div className="detail-header">
-              <button
-                onClick={() => navigate('/')}
-                className="btn text-dark mb-3"
-                style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}
+    <div className="basic-setup">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-row">
+          <div className="detail-header">
+            <button
+              onClick={() => navigate(-1)}
+              className="btn text-dark mb-3"
+              style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ marginRight: '8px' }}
               >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  style={{ marginRight: '8px' }}
-                >
-                  <path
-                    d="M10 19L3 12L10 5"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M3 12H21"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                Back
-              </button>
+                <path
+                  d="M10 19L3 12L10 5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M3 12H21"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Back
+            </button>
 
-              <div className="d-flex w-80">
-                <div className="text-start px-5">
-                  <div className="d-flex align-items-center mb-2">
-                    <h5 className="m-0">{authorName}</h5>
-                  </div>
-                  <b className="m-0 p-0" style={{ fontSize: 'small' }}>
-                    {institutions.join(', ')}
-                  </b>
+            <div className="d-flex w-80">
+              <div className="text-start px-5">
+                <div className="d-flex align-items-center mb-2">
+                  <h5 className="m-0">{authorName}</h5>
                 </div>
+                <b className="m-0 p-0" style={{ fontSize: 'small' }}>
+                  {institutions.join(', ')}
+                </b>
               </div>
+            </div>
 
-              <div>
-                <div className="dropdown">
-                  <style>
-                    {` 
+            <div>
+              <div className="dropdown">
+                <style>
+                  {` 
                     .form-control::placeholder { 
                         color: #888; 
                     }`}
-                  </style>
-                  <button
-                    className="btn dropdown-toggle"
-                    type="button"
-                    onClick={() => {
-                      handleDropdownChange(1);
-                    }}
+                </style>
+                <button
+                  className="btn dropdown-toggle"
+                  type="button"
+                  onClick={() => {
+                    handleDropdownChange(1);
+                  }}
+                  style={{
+                    backgroundColor: 'rgb(160, 160, 160)',
+                    border: 'none',
+                    color: 'white',
+                    width: '200px',
+                    fontWeight: 'bold',
+                    fontSize: '14px',
+                  }}
+                >
+                  Filter by Timeline
+                </button>
+                {dropdownOpen === 1 && (
+                  <div
+                    className="dropdown-menu show p-3"
                     style={{
+                      width: '200px',
                       backgroundColor: 'rgb(160, 160, 160)',
                       border: 'none',
+                      right: 0,
+                      marginTop: '5px',
                       color: 'white',
-                      width: '200px',
                       fontWeight: 'bold',
                       fontSize: '14px',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      display: 'flex',
+                      flexDirection: 'column',
                     }}
                   >
-                    Filter by Timeline
-                  </button>
-                  {dropdownOpen === 1 && (
-                    <div
-                      className="dropdown-menu show p-3"
-                      style={{
-                        width: '200px',
-                        backgroundColor: 'rgb(160, 160, 160)',
-                        border: 'none',
-                        right: 0,
-                        marginTop: '5px',
-                        color: 'white',
-                        fontWeight: 'bold',
-                        fontSize: '14px',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }}
-                    >
-                      <div className="form-group mb-2">
-                        <label>Start Date</label>
-                        <input
-                          type="date"
-                          className="form-control"
-                          value={startDate}
-                          max={todayStr}
-                          onChange={handleStartDateChange}
-                          style={{
-                            backgroundColor: 'rgb(220, 220, 220)',
-                            border: 'none',
-                            outline: 'none',
-                            color: 'black',
-                            marginTop: '10px',
-                            width: '100%',
-                          }}
-                        />
-                      </div>
-                      <div style={{ height: '10px' }} />
-                      <div className="form-group">
-                        <label>End Date</label>
-                        <input
-                          type="date"
-                          value={endDate}
-                          max={todayStr}
-                          onChange={handleEndDateChange}
-                          className="form-control"
-                          style={{
-                            backgroundColor: 'rgb(220, 220, 220)',
-                            border: 'none',
-                            outline: 'none',
-                            color: 'black',
-                            marginTop: '10px',
-                          }}
-                        />
-                      </div>
-                      <div
-                        style={{
-                          marginTop: '20px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '10px',
-                        }}
-                      >
-                        <button
-                          className="form-control"
-                          onClick={handleResetFilter}
-                          style={{
-                            backgroundColor: 'rgb(220, 220, 220)',
-                            border: 'none',
-                            color: 'black',
-                            width: '100px',
-                            fontWeight: 'bold',
-                            fontSize: '14px',
-                            cursor: 'pointer',
-                            transition: 'background-color 0.3s',
-                          }}
-                        >
-                          Reset
-                        </button>
-
-                        <button
-                          className="form-control"
-                          type="submit"
-                          onClick={handleDateFilter}
-                          disabled={!(startDate || endDate)}
-                          style={{
-                            backgroundColor: 'black',
-                            border: 'none',
-                            color: 'white',
-                            width: '100px',
-                            fontWeight: 'bold',
-                            fontSize: '14px',
-                            cursor: startDate || endDate ? 'pointer' : 'default',
-                            transition: 'background-color 0.3s',
-                          }}
-                        >
-                          Submit
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-            {/* Comment the following to get rid of the graph tab */}
-            <Tabs activeTab={activeTab} handleTabChange={handleTabChange} />
-          </div>
-          {activeTab === 0 && (
-            <div className="d-flex justify-content-end mt-2 gap-2 px-2">
-              <>
-                <StyledWrapper>
-                  <button
-                    className="cssbuttons-io-button"
-                    onClick={() => {
-                      handleDropdownChange(3);
-                    }}
-                  >
-                    Verify with Disclosures
-                  </button>
-                </StyledWrapper>
-                <Dialog
-                  open={dropdownOpen === 3}
-                  onClose={handleCloseDialog}
-                  maxWidth="sm"
-                  fullWidth
-                >
-                  <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-                    Select files to check for disclosure
-                  </DialogTitle>
-                  <Divider sx={{ color: 'black', backgroundColor: '#000000' }} />
-                  <DialogContent>
-                    <div
-                      className="container"
-                      onDrop={handleDrop}
-                      onDragOver={(e) => e.preventDefault()}
-                    >
-                      <div className="header">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path
-                            d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15"
-                            stroke="#000000"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                        <p>Drag & drop your file!</p>
-                      </div>
-                      <label htmlFor="file" className="footer">
-                        <p>
-                          {selectedFiles.length
-                            ? `${selectedFiles.length} files selected`
-                            : 'Click here to upload your file.'}
-                        </p>
-                      </label>
+                    <div className="form-group mb-2">
+                      <label>Start Date</label>
                       <input
-                        id="file"
-                        type="file"
-                        multiple
-                        onChange={handleFileSelect}
-                        accept=".txt,.doc,.docx,.pdf"
+                        type="date"
+                        className="form-control"
+                        value={startDate}
+                        max={todayStr}
+                        onChange={handleStartDateChange}
+                        style={{
+                          backgroundColor: 'rgb(220, 220, 220)',
+                          border: 'none',
+                          outline: 'none',
+                          color: 'black',
+                          marginTop: '10px',
+                          width: '100%',
+                        }}
                       />
                     </div>
-                    {uploadError && (
-                      <div style={{ color: 'red', marginTop: '10px' }}>{uploadError}</div>
-                    )}
-                  </DialogContent>
-                  <DialogActions>
-                    <Button onClick={handleCloseDialog}>Cancel</Button>
-                    <Button onClick={handleSubmit} disabled={isUploading} variant="contained">
-                      {isUploading ? 'Uploading...' : 'Submit'}
-                    </Button>
-                  </DialogActions>
-                </Dialog>
-              </>
-              <DownloadButton
-                reportId={report_id}
-                isOpen={dropdownOpen === 2}
-                setIsOpen={() => {
-                  handleDropdownChange(2);
-                }}
-              />
-            </div>
-          )}
-        </div>
-
-        {activeTab === 0 && (
-          <>
-            <div className="d-flex w-100 flex-column align-items-center">
-              <div className="d-flex w-100 px-5 align-items-center my-2 mt-3 justify-content-between">
-                <div style={{ width: '20px' }}>
-                  {loading && (
+                    <div style={{ height: '10px' }} />
+                    <div className="form-group">
+                      <label>End Date</label>
+                      <input
+                        type="date"
+                        value={endDate}
+                        max={todayStr}
+                        onChange={handleEndDateChange}
+                        className="form-control"
+                        style={{
+                          backgroundColor: 'rgb(220, 220, 220)',
+                          border: 'none',
+                          outline: 'none',
+                          color: 'black',
+                          marginTop: '10px',
+                        }}
+                      />
+                    </div>
                     <div
-                      className="spinner-border text-primary spinner-border-sm"
-                      role="status"
-                    ></div>
-                  )}
-                </div>
+                      style={{
+                        marginTop: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px',
+                      }}
+                    >
+                      <button
+                        className="form-control"
+                        onClick={handleResetFilter}
+                        style={{
+                          backgroundColor: 'rgb(220, 220, 220)',
+                          border: 'none',
+                          color: 'black',
+                          width: '100px',
+                          fontWeight: 'bold',
+                          fontSize: '14px',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.3s',
+                        }}
+                      >
+                        Reset
+                      </button>
+
+                      <button
+                        className="form-control"
+                        type="submit"
+                        onClick={handleDateFilter}
+                        disabled={!(startDate || endDate)}
+                        style={{
+                          backgroundColor: 'black',
+                          border: 'none',
+                          color: 'white',
+                          width: '100px',
+                          fontWeight: 'bold',
+                          fontSize: '14px',
+                          cursor: startDate || endDate ? 'pointer' : 'default',
+                          transition: 'background-color 0.3s',
+                        }}
+                      >
+                        Submit
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
+          </div>
+          {/* Comment the following to get rid of the graph tab */}
+          <Tabs activeTab={activeTab} handleTabChange={handleTabChange} />
+        </div>
+        {activeTab === 0 && (
+          <div className="d-flex justify-content-end mt-2 gap-2 px-2">
+            <>
+              <StyledWrapper>
+                <button
+                  className="cssbuttons-io-button"
+                  onClick={() => {
+                    handleDropdownChange(3);
+                  }}
+                >
+                  Verify with Disclosures
+                </button>
+              </StyledWrapper>
+              <Dialog open={dropdownOpen === 3} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+                <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+                  Select files to check for disclosure
+                </DialogTitle>
+                <Divider sx={{ color: 'black', backgroundColor: '#000000' }} />
+                <DialogContent>
+                  <div
+                    className="container"
+                    onDrop={handleDrop}
+                    onDragOver={(e) => e.preventDefault()}
+                  >
+                    <div className="header">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15"
+                          stroke="#000000"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      <p>Drag & drop your file!</p>
+                    </div>
+                    <label htmlFor="file" className="footer">
+                      <p>
+                        {selectedFiles.length
+                          ? `${selectedFiles.length} files selected`
+                          : 'Click here to upload your file.'}
+                      </p>
+                    </label>
+                    <input
+                      id="file"
+                      type="file"
+                      multiple
+                      onChange={handleFileSelect}
+                      accept=".txt,.doc,.docx,.pdf"
+                    />
+                  </div>
+                  {uploadError && (
+                    <div style={{ color: 'red', marginTop: '10px' }}>{uploadError}</div>
+                  )}
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleCloseDialog}>Cancel</Button>
+                  <Button onClick={handleSubmit} disabled={isUploading} variant="contained">
+                    {isUploading ? 'Uploading...' : 'Submit'}
+                  </Button>
+                </DialogActions>
+              </Dialog>
+            </>
+            <DownloadButton
+              reportId={report_id}
+              isOpen={dropdownOpen === 2}
+              setIsOpen={() => {
+                handleDropdownChange(2);
+              }}
+            />
+          </div>
+        )}
+      </div>
 
+      {activeTab === 0 &&
+        (loading ? (
+          <div style={{ width: '100%', height: '300px' }}>
+            <Shimmer />
+          </div>
+        ) : (
+          <>
             <div
               className="d-flex w-100 flex-column align-items-center"
               style={{ color: 'rgb(78, 78, 78)', marginTop: '0px' }}
@@ -1265,15 +1161,14 @@ const ItemDetails = () => {
               </div>
             )}
           </>
-        )}
+        ))}
 
-        {activeTab === 1 && (
-          <>
-            <Graph authorName={authorName} reportContent={reportContent} />
-          </>
-        )}
-      </div>
-    )
+      {activeTab === 1 && (
+        <>
+          <Graph authorName={authorName} reportContent={reportContent} />
+        </>
+      )}
+    </div>
   );
 };
 
