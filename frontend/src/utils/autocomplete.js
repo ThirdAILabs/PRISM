@@ -45,9 +45,14 @@ function AutocompleteSearchBar({ title, autocomplete, onSelect, placeholder, sho
       {query && query.length && suggestions && suggestions.length > 0 && (
         // Autocomplete suggestion container. Column.
         <div className="suggestion-container">
-          {suggestions.map((suggestion, index) =>
+          {suggestions.map((suggestion, index) => (
             // Clickable suggestion
-            <div className="suggestion" key={index} onClick={handleSelectSuggestion(suggestion)} style={{ display: 'flex', alignItems: 'end' }}>
+            <div
+              className="suggestion"
+              key={index}
+              onClick={handleSelectSuggestion(suggestion)}
+              style={{ display: 'flex', alignItems: 'end' }}
+            >
               <p style={{ marginRight: '20px' }}>{suggestion.Name}</p>{' '}
               {showHint && (
                 <p style={{ marginBottom: '16.5px', fontSize: 'small', fontStyle: 'italic' }}>
@@ -55,7 +60,7 @@ function AutocompleteSearchBar({ title, autocomplete, onSelect, placeholder, sho
                 </p>
               )}
             </div>
-          )}
+          ))}
         </div>
       )}
     </div>
