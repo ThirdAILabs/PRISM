@@ -40,8 +40,8 @@ function UniversityAssessment() {
       return;
     }
     const reportData = {
-      UniversityId: institution.InstitutionId,
-      UniversityName: institution.InstitutionName,
+      UniversityId: institution.Id,
+      UniversityName: institution.Name,
     };
     const reportId = await universityReportService.createReport(reportData);
     console.log('University report id: ', reportId);
