@@ -383,7 +383,6 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
 	}
 
 	var funders []Entity
-	// triangulationResults := make(map[string]bool)
 	triangulationResults := make(map[string]map[string]bool)
 
 	for _, ack := range acknowledgements {
