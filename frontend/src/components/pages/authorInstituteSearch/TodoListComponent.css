@@ -1,0 +1,35 @@
+.result-item {
+  width: 40%; /* Matches the width of author search bar container */
+  background-color: rgb(245, 240, 240);
+  border: none;
+  color: black;
+  border-radius: 10px;
+  padding: 20px;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+.result-item:hover {
+  background-color: rgb(225, 220, 220);
+  color: black;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.result-wrapper {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  gap: 5%;
+}
+
+.show-more-results-button {
+  width: 20%;
+  align-self: center;
+  margin-top: 20px;
+}

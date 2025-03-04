@@ -1,13 +1,13 @@
 // src/SearchComponent.js
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import TodoListComponent from '../TodoListComponent';
-import { AuthorInstiutionSearchBar } from '../common/searchBar/SearchBar';
-import Logo from '../../assets/images/prism-logo.png';
-import '../common/searchBar/SearchBar.css';
-import '../common/tools/button/button1.css';
-import UserService from '../../services/userService';
-import { searchService } from '../../api/search';
+import TodoListComponent from './TodoListComponent';
+import { AuthorInstiutionSearchBar } from '../../common/searchBar/SearchBar';
+import Logo from '../../../assets/images/prism-logo.png';
+import '../../common/searchBar/SearchBar.css';
+import '../../common/tools/button/button1.css';
+import UserService from '../../../services/userService';
+import { searchService } from '../../../api/search';
 
 const SearchComponent = () => {
   const [query, setQuery] = useState('');
@@ -88,6 +88,8 @@ const SearchComponent = () => {
           </div>
         </div>
       </div>
+      <div className="d-flex justify-content-center align-items-center pt-5">
+          <div style={{ width: '80%', animation: 'fade-in 1.25s' }}>
       {hasSearched && (
         <TodoListComponent
           results={openAlexResults}
@@ -107,6 +109,8 @@ const SearchComponent = () => {
           }}
         />
       )}
+      </div>
+      </div>
     </div>
   );
 };
