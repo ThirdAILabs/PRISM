@@ -20,7 +20,7 @@ func setup(t *testing.T) *reports.ReportManager {
 	}
 
 	if err := db.AutoMigrate(&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{},
-		&schema.UniversityReport{}, &schema.UserUniversityReport{}, &schema.LicenseUsage{}); err != nil {
+		&schema.UniversityReport{}, &schema.UserUniversityReport{}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -91,16 +91,15 @@ func TestCreateGetAuthorReports(t *testing.T) {
 	manager := setup(t)
 
 	user1, user2 := uuid.New(), uuid.New()
-	license := uuid.New()
 
 	checkNoNextAuthorReport(t, manager)
 
-	reportId1, err := manager.CreateAuthorReport(license, user1, "1", "author1", api.OpenAlexSource)
+	reportId1, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	reportId2, err := manager.CreateAuthorReport(license, user2, "2", "author2", api.GoogleScholarSource)
+	reportId2, err := manager.CreateAuthorReport(user2, "2", "author2", api.GoogleScholarSource)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,7 +145,7 @@ func TestCreateGetAuthorReports(t *testing.T) {
 	checkNoNextAuthorReport(t, manager)
 
 	// Check that reports are reused
-	reportId3, err := manager.CreateAuthorReport(license, user1, "2", "author2", api.GoogleScholarSource)
+	reportId3, err := manager.CreateAuthorReport(user1, "2", "author2", api.GoogleScholarSource)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -183,7 +182,7 @@ func TestCreateGetAuthorReports(t *testing.T) {
 	checkAuthorReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "complete", 2)
 
 	// Create a new report from an old report and ensure that it is queued
-	reportId4, err := manager.CreateAuthorReport(license, user2, "1", "author1", api.OpenAlexSource)
+	reportId4, err := manager.CreateAuthorReport(user2, "1", "author1", api.OpenAlexSource)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -218,9 +217,8 @@ func TestAuthorReportAccessErrors(t *testing.T) {
 	manager := setup(t)
 
 	user1, user2 := uuid.New(), uuid.New()
-	license := uuid.New()
 
-	reportId, err := manager.CreateAuthorReport(license, user1, "1", "author1", api.OpenAlexSource)
+	reportId, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -242,9 +240,8 @@ func TestListAuthorReports(t *testing.T) {
 	manager := setup(t)
 
 	user1, user2 := uuid.New(), uuid.New()
-	license := uuid.New()
 
-	report1, err := manager.CreateAuthorReport(license, user1, "1", "author1", api.OpenAlexSource)
+	report1, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -257,12 +254,12 @@ func TestListAuthorReports(t *testing.T) {
 		t.Fatal("should be no reports for user2")
 	}
 
-	report2, err := manager.CreateAuthorReport(license, user2, "2", "author2", api.OpenAlexSource)
+	report2, err := manager.CreateAuthorReport(user2, "2", "author2", api.OpenAlexSource)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	report3, err := manager.CreateAuthorReport(license, user1, "3", "author3", api.GoogleScholarSource)
+	report3, err := manager.CreateAuthorReport(user1, "3", "author3", api.GoogleScholarSource)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -414,9 +411,8 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	manager := setup(t)
 
 	user1, user2 := uuid.New(), uuid.New()
-	license := uuid.New()
 
-	authorId1, err := manager.CreateAuthorReport(license, user1, "1", "author1", api.OpenAlexSource)
+	authorId1, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -433,7 +429,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	checkNoNextAuthorReport(t, manager)
 	checkNoNextUniversityReport(t, manager)
 
-	uniId1, err := manager.CreateUniversityReport(license, user1, "1", "university1")
+	uniId1, err := manager.CreateUniversityReport(user1, "1", "university1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -473,7 +469,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	checkNoNextUniversityReport(t, manager)
 
 	// Create another university report
-	uniId2, err := manager.CreateUniversityReport(license, user1, "2", "university2")
+	uniId2, err := manager.CreateUniversityReport(user1, "2", "university2")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -509,7 +505,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	checkNoNextUniversityReport(t, manager)
 
 	// Check that reports are reused
-	uniId3, err := manager.CreateUniversityReport(license, user1, "1", "university1")
+	uniId3, err := manager.CreateUniversityReport(user1, "1", "university1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -575,7 +571,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	checkNoNextUniversityReport(t, manager)
 
 	// Create a new report from an old report and ensure that it is queued
-	uniId4, err := manager.CreateUniversityReport(license, user2, "1", "university1")
+	uniId4, err := manager.CreateUniversityReport(user2, "1", "university1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -632,9 +628,8 @@ func TestListUniversityReport(t *testing.T) {
 	manager := setup(t)
 
 	user1, user2 := uuid.New(), uuid.New()
-	license := uuid.New()
 
-	uniId1, err := manager.CreateUniversityReport(license, user1, "1", "university1")
+	uniId1, err := manager.CreateUniversityReport(user1, "1", "university1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -647,12 +642,12 @@ func TestListUniversityReport(t *testing.T) {
 		t.Fatal("should be no reports for user2")
 	}
 
-	uniId2, err := manager.CreateUniversityReport(license, user2, "2", "university2")
+	uniId2, err := manager.CreateUniversityReport(user2, "2", "university2")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	uniId3, err := manager.CreateUniversityReport(license, user1, "3", "university3")
+	uniId3, err := manager.CreateUniversityReport(user1, "3", "university3")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -730,9 +725,8 @@ func TestUniversityReportsFilterFlagsByDate(t *testing.T) {
 	manager := setup(t)
 
 	user := uuid.New()
-	license := uuid.New()
 
-	uniId, err := manager.CreateUniversityReport(license, user, "1", "university1")
+	uniId, err := manager.CreateUniversityReport(user, "1", "university1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -783,13 +777,12 @@ func TestUserQueuedReportsArePrioritizedOverUniversityReports(t *testing.T) {
 	manager := setup(t)
 
 	user := uuid.New()
-	license := uuid.New()
 
-	if _, err := manager.CreateAuthorReport(license, user, "1", "author1", api.OpenAlexSource); err != nil {
+	if _, err := manager.CreateAuthorReport(user, "1", "author1", api.OpenAlexSource); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := manager.CreateUniversityReport(license, user, "1", "university1"); err != nil {
+	if _, err := manager.CreateUniversityReport(user, "1", "university1"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -804,7 +797,7 @@ func TestUserQueuedReportsArePrioritizedOverUniversityReports(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := manager.CreateAuthorReport(license, user, "3", "author3", api.OpenAlexSource); err != nil {
+	if _, err := manager.CreateAuthorReport(user, "3", "author3", api.OpenAlexSource); err != nil {
 		t.Fatal(err)
 	}
 

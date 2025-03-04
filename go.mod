@@ -14,7 +14,6 @@ require (
 	github.com/openai/openai-go v0.1.0-alpha.50
 	github.com/playwright-community/playwright-go v0.4902.0
 	go.etcd.io/bbolt v1.4.0
-	golang.org/x/crypto v0.33.0
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/driver/sqlite v1.5.7
 	gorm.io/gorm v1.25.12
@@ -26,6 +25,7 @@ require (
 	github.com/richardlehane/msoleps v1.0.4 // indirect
 	github.com/xuri/efp v0.0.0-20240408161823-9ad904a10d6d // indirect
 	github.com/xuri/nfp v0.0.0-20240318013403-ab9948c2c4a7 // indirect
+	golang.org/x/crypto v0.33.0 // indirect
 )
 
 require (
