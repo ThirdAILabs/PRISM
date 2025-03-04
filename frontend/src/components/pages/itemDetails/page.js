@@ -518,9 +518,9 @@ const ItemDetails = () => {
           {flag.RawAcknowledements.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
-          <p>{}</p>
+          <p>{ }</p>
         </p>
-        {}
+        { }
         {isDisclosureChecked &&
           (flag.Disclosed ? (
             <button type="button" className="btn btn-success">

@@ -110,7 +110,7 @@ const UniversityReport = () => {
     <div className="basic-setup" style={{ minHeight: '100vh', paddingBottom: '50px' }}>
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-row">
-          <div className="detail-header" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+          <div className="detail-header" style={{ display: 'flex', position: 'absolute', justifyContent: 'center', width: '100%' }}>
             <button
               onClick={() => navigate(-1)}
               className="btn text-dark mb-3"
@@ -153,11 +153,11 @@ const UniversityReport = () => {
         >
           <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Researchers</div>
           <div style={{ fontSize: '60px', fontWeight: 'bold' }}>
-            {reportContent.TotalAuthors || 0}
+            {toatlResearchers}
           </div>
           <div style={{ fontSize: 'medium', fontWeight: 'bold' }}>Researchers Assessed</div>
           <div style={{ fontSize: '50px', fontWeight: 'bold' }}>
-            {reportContent.AuthorsReviewed || 0}
+            {researchersAssessed}
           </div>
         </div>}
 
