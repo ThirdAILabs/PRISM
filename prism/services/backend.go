@@ -21,7 +21,7 @@ type BackendService struct {
 	adminAuth auth.TokenVerifier
 }
 
-func NewBackend(db *gorm.DB, oa openalex.KnowledgeBase, entitySearch EntitySearch, userAuth, adminAuth auth.TokenVerifier) *BackendService {
+func NewBackend(db *gorm.DB, oa openalex.KnowledgeBase, entitySearch EntitySearch, userAuth, adminAuth auth.TokenVerifier, resourceFolder string) *BackendService {
 	return &BackendService{
 		report: ReportService{
 			manager: reports.NewManager(db, reports.StaleReportThreshold),

@@ -20,8 +20,9 @@ import (
 )
 
 type ReportService struct {
-	manager *reports.ReportManager
-	db      *gorm.DB
+	manager        *reports.ReportManager
+	db             *gorm.DB
+	resourceFolder string
 }
 
 func (s *ReportService) Routes() chi.Router {
@@ -264,7 +265,7 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 		contentType = "text/csv"
 		filename = "report.csv"
 	case "pdf":
-		fileBytes, err = generatePDF(report)
+		fileBytes, err = generatePDF(report, s.resourceFolder)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
