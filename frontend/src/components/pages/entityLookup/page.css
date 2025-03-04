@@ -1,42 +1,37 @@
 .entity-lookup-container {
-  padding: 2rem;
-  min-height: 100vh;
-  background: #f8fafc;
-}
-
-.logo-section {
-  text-align: center;
-  margin-top: 2rem;
-  animation: fade-in 0.75s;
+  background: white;
+  margin-top: 5%;
 }
 
 .logo-section img {
-  width: 280px;
-  margin-bottom: 2rem;
-  animation: fade-in 0.5s;
+    width: 320px;
+    animation: fade-in 0.5s;
+    margin-top: 1%;
+    margin-bottom: 1%;
+    margin-right: 2%;
+    animation: fade-in 0.5s;
 }
 
 .header-section {
-  text-align: center;
-  animation: fade-in 1s;
+    animation: fade-in 1s;
+    margin-top: 10px;
+    color: #888888;
 }
 
 .header-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #1a202c;
-  margin-bottom: 1rem;
-}
-
-.header-subtitle {
-  color: #4a5568;
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: black;
+    margin-top: 20px;
+    animation: fade-in 0.75s;
 }
 
 .search-section {
   margin-top: 2rem;
   animation: fade-in 1s;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1rem;
 }
 
 .results-section {
@@ -97,17 +92,6 @@
 
 .bulleted-list li:last-child {
   border-bottom: none;
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .no-results {
