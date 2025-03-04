@@ -4,7 +4,6 @@ export const SearchContext = createContext();
 
 export const SearchProvider = ({ children }) => {
   const [searchState, setSearchState] = useState({
-    query: '',
     author: null,
     institution: null,
     openAlexResults: [],

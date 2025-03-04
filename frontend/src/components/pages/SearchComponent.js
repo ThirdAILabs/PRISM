@@ -11,19 +11,14 @@ import { searchService } from '../../api/search';
 import { SearchContext } from '../../store/searchContext';
 
 const SearchComponent = () => {
-  const [results, setResults] = useState([]);
-  const [isOALoading, setIsOALoading] = useState([]);
-  const [loadMoreCount, setLoadMoreCount] = useState(0);
-
   const { searchState, setSearchState } = useContext(SearchContext);
-  const { query, author, institution, openAlexResults, hasSearched, canLoadMore } = searchState;
+  const { author, institution, openAlexResults, hasSearched, canLoadMore } = searchState;
 
   const search = async (author, institution) => {
     setSearchState((prev) => ({
       ...prev,
       author: author,
       institution: institution,
-      query: `${author.AuthorName} ${institution ? institution.InstitutionName : ''}`,
       openAlexResults: [],
       hasSearched: false,
       loadMoreCount: 0,
@@ -37,7 +32,6 @@ const SearchComponent = () => {
     setSearchState((prev) => ({
       ...prev,
       isOALoading: true,
-      query: `${author.AuthorName} ${institution ? institution.InstitutionName : ''}`,
     }));
 
     const result = await searchService.searchOpenalexAuthors(
