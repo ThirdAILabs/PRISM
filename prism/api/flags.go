@@ -111,7 +111,7 @@ type TalentContractFlag struct {
 	Work                  WorkSummary
 	Entities              []AcknowledgementEntity
 	RawAcknowledements    []string
-	FundCodeTriangulation map[string]bool
+	FundCodeTriangulation map[string]map[string]bool
 }
 
 func (flag *TalentContractFlag) Type() string {
@@ -155,7 +155,7 @@ type AssociationWithDeniedEntityFlag struct {
 	Work                  WorkSummary
 	Entities              []AcknowledgementEntity
 	RawAcknowledements    []string
-	FundCodeTriangulation map[string]bool
+	FundCodeTriangulation map[string]map[string]bool
 }
 
 func (flag *AssociationWithDeniedEntityFlag) Type() string {
@@ -199,7 +199,7 @@ type HighRiskFunderFlag struct {
 	Work                  WorkSummary
 	Funders               []string
 	RawAcknowledements    []string
-	FundCodeTriangulation map[string]bool
+	FundCodeTriangulation map[string]map[string]bool
 }
 
 func (flag *HighRiskFunderFlag) Type() string {

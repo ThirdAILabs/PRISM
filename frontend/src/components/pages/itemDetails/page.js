@@ -313,71 +313,65 @@ const ItemDetails = () => {
             </>
           )}
         </p>
-        <div className="d-flex justify-content-between align-items-center w-100">
-          <div>
-            {isDisclosureChecked &&
-              (flag.Disclosed ? (
-                <button type="button" className="btn btn-success">
-                  Disclosed
-                </button>
-              ) : (
-                <button type="button" className="btn btn-danger">
-                  Undisclosed
-                </button>
-              ))}
-          </div>
-
-          <div>
-            {flag.FundCodeTriangulation &&
-              ((flag.FundCodeTriangulation instanceof Map && flag.FundCodeTriangulation.size > 0) ||
-                (typeof flag.FundCodeTriangulation === 'object' &&
-                  Object.keys(flag.FundCodeTriangulation).length > 0)) && (
-                <>
-                  <h6 className="mt-2 mb-3 fw-bold">High-Risk Grants</h6>
-                  <ul className="non-bulleted-list">
-                    {flag.FundCodeTriangulation instanceof Map
-                      ? Array.from(flag.FundCodeTriangulation).map(([key, value], index4) => (
-                          <li key={`fund-${index}-${index4}`} className="mb-2">
-                            {typeof value === 'boolean' ? (
-                              <button
-                                type="button"
-                                className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
-                                style={{ minWidth: '180px', textAlign: 'center' }}
-                                title={`${key}: ${value ? 'The author likely IS the primary recipient of this grant.' : 'The author likely IS NOT the primary recipient of this grant.'}`}
-                              >
-                                {key}: {value ? 'Yes' : 'No'}
-                              </button>
-                            ) : (
-                              <>
-                                <strong>{key}:</strong> {JSON.stringify(value)}
-                              </>
-                            )}
-                          </li>
-                        ))
-                      : Object.entries(flag.FundCodeTriangulation || {}).map(
-                          ([key, value], index4) => (
-                            <li key={`fund-${index}-${index4}`} className="mb-2">
+        <div>
+          {flag.FundCodeTriangulation &&
+            typeof flag.FundCodeTriangulation === 'object' &&
+            Object.keys(flag.FundCodeTriangulation).length > 0 && (
+              <>
+                <strong>High-Risk Grants</strong>
+                <ul className="bulleted-list">
+                  {Object.entries(flag.FundCodeTriangulation).map(
+                    ([outerKey, innerMap], index1) => (
+                      <li key={`fund-${index}-${index1}`} className="mb-3">
+                        {outerKey}
+                        <ul className="non-bulleted-list ms-3">
+                          {Object.entries(innerMap).map(([innerKey, value], index2) => (
+                            <li key={`fund-${index}-${index1}-${index2}`} className="mb-2">
                               {typeof value === 'boolean' ? (
                                 <button
                                   type="button"
                                   className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
                                   style={{ minWidth: '180px', textAlign: 'center' }}
-                                  title={`${key}: ${value ? 'The author likely IS the primary recipient of this grant.' : 'The author likely IS NOT the primary recipient of this grant.'}`}
+                                  title={`${innerKey}: ${
+                                    value
+                                      ? 'The author likely IS a primary recipient of this grant.'
+                                      : 'The author likely IS NOT a primary recipient of this grant.'
+                                  }`}
                                 >
-                                  {key}: {value ? 'Yes' : 'No'}
+                                  {innerKey}
+                                  {/* : {value ? 'Yes' : 'No'} */}
                                 </button>
                               ) : (
                                 <>
-                                  <strong>{key}:</strong> {JSON.stringify(value)}
+                                  <strong>{innerKey}:</strong> {JSON.stringify(value)}
                                 </>
                               )}
                             </li>
-                          )
-                        )}
-                  </ul>
-                </>
-              )}
-          </div>
+                          ))}
+                        </ul>
+                      </li>
+                    )
+                  )}
+                </ul>
+                {/* Legend Section */}
+                <div className="mt-4 d-flex flex-column small">
+                  <span className="me-3">
+                    <span
+                      className="rounded-circle d-inline-block me-2"
+                      style={{ width: '8px', height: '8px', backgroundColor: 'green' }}
+                    ></span>
+                    The author likely <b>is not</b> a recipient of these grants.
+                  </span>
+                  <span>
+                    <span
+                      className="rounded-circle d-inline-block me-2"
+                      style={{ width: '8px', height: '8px', backgroundColor: 'red' }}
+                    ></span>
+                    The author likely <b>is</b> a primary recipient of these grants.
+                  </span>
+                </div>
+              </>
+            )}
         </div>
       </div>
     );
@@ -568,71 +562,66 @@ const ItemDetails = () => {
           <p>{}</p>
         </p>
         {}
-        <div className="d-flex justify-content-between align-items-center w-100">
-          <div>
-            {isDisclosureChecked &&
-              (flag.Disclosed ? (
-                <button type="button" className="btn btn-success">
-                  Disclosed
-                </button>
-              ) : (
-                <button type="button" className="btn btn-danger">
-                  Undisclosed
-                </button>
-              ))}
-          </div>
 
-          <div>
-            {flag.FundCodeTriangulation &&
-              ((flag.FundCodeTriangulation instanceof Map && flag.FundCodeTriangulation.size > 0) ||
-                (typeof flag.FundCodeTriangulation === 'object' &&
-                  Object.keys(flag.FundCodeTriangulation).length > 0)) && (
-                <>
-                  <h6 className="mt-2 mb-3 fw-bold">High-Risk Grants</h6>
-                  <ul className="non-bulleted-list">
-                    {flag.FundCodeTriangulation instanceof Map
-                      ? Array.from(flag.FundCodeTriangulation).map(([key, value], index4) => (
-                          <li key={`fund-${index}-${index4}`} className="mb-2">
-                            {typeof value === 'boolean' ? (
-                              <button
-                                type="button"
-                                className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
-                                style={{ minWidth: '180px', textAlign: 'center' }}
-                                title={`${key}: ${value ? 'The author likely IS the primary recipient of this grant.' : 'The author likely IS NOT the primary recipient of this grant.'}`}
-                              >
-                                {key}: {value ? 'Yes' : 'No'}
-                              </button>
-                            ) : (
-                              <>
-                                <strong>{key}:</strong> {JSON.stringify(value)}
-                              </>
-                            )}
-                          </li>
-                        ))
-                      : Object.entries(flag.FundCodeTriangulation || {}).map(
-                          ([key, value], index4) => (
-                            <li key={`fund-${index}-${index4}`} className="mb-2">
+        <div>
+          {flag.FundCodeTriangulation &&
+            typeof flag.FundCodeTriangulation === 'object' &&
+            Object.keys(flag.FundCodeTriangulation).length > 0 && (
+              <>
+                <strong>High-Risk Grants</strong>
+                <ul className="bulleted-list">
+                  {Object.entries(flag.FundCodeTriangulation).map(
+                    ([outerKey, innerMap], index1) => (
+                      <li key={`fund-${index}-${index1}`} className="mb-3">
+                        {outerKey}
+                        <ul className="non-bulleted-list ms-3">
+                          {Object.entries(innerMap).map(([innerKey, value], index2) => (
+                            <li key={`fund-${index}-${index1}-${index2}`} className="mb-2">
                               {typeof value === 'boolean' ? (
                                 <button
                                   type="button"
                                   className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
                                   style={{ minWidth: '180px', textAlign: 'center' }}
-                                  title={`${key}: ${value ? 'The author likely IS the primary recipient of this grant.' : 'The author likely IS NOT the primary recipient of this grant.'}`}
+                                  title={`${innerKey}: ${
+                                    value
+                                      ? 'The author likely IS a primary recipient of this grant.'
+                                      : 'The author likely IS NOT a primary recipient of this grant.'
+                                  }`}
                                 >
-                                  {key}: {value ? 'Yes' : 'No'}
+                                  {innerKey}
+                                  {/* : {value ? 'Yes' : 'No'} */}
                                 </button>
                               ) : (
                                 <>
-                                  <strong>{key}:</strong> {JSON.stringify(value)}
+                                  <strong>{innerKey}:</strong> {JSON.stringify(value)}
                                 </>
                               )}
                             </li>
-                          )
-                        )}
-                  </ul>
-                </>
-              )}
-          </div>
+                          ))}
+                        </ul>
+                      </li>
+                    )
+                  )}
+                </ul>
+                {/* Legend Section */}
+                <div className="mt-4 d-flex flex-column small">
+                  <span className="me-3">
+                    <span
+                      className="rounded-circle d-inline-block me-2"
+                      style={{ width: '8px', height: '8px', backgroundColor: 'green' }}
+                    ></span>
+                    The author likely <b>is not</b> a recipient of these grants.
+                  </span>
+                  <span>
+                    <span
+                      className="rounded-circle d-inline-block me-2"
+                      style={{ width: '8px', height: '8px', backgroundColor: 'red' }}
+                    ></span>
+                    The author likely <b>is</b> a primary recipient of these grants.
+                  </span>
+                </div>
+              </>
+            )}
         </div>
       </div>
     );
