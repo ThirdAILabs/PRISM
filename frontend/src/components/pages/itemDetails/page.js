@@ -857,6 +857,7 @@ const ItemDetails = () => {
                     <div
                       className="dropdown-menu show p-3"
                       style={{
+                        width: '200px',
                         backgroundColor: 'rgb(160, 160, 160)',
                         border: 'none',
                         right: 0,

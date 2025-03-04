@@ -6,8 +6,8 @@ function AutocompleteSearchBar({
   title,
   autocomplete,
   onSelect,
-  type,
   placeholder,
+  showHint,
   initialValue = '',
 }) {
   const [suggestions, setSuggestions] = useState([]);
@@ -22,7 +22,7 @@ function AutocompleteSearchBar({
   function handleSelectSuggestion(suggestion) {
     return () => {
       setSuggestions([]);
-      setQuery(type === 'author' ? suggestion.AuthorName : suggestion.InstitutionName);
+      setQuery(suggestion.Name);
       onSelect(suggestion);
     };
   }
@@ -45,18 +45,22 @@ function AutocompleteSearchBar({
       {query && query.length && suggestions && suggestions.length > 0 && (
         // Autocomplete suggestion container. Column.
         <div className="suggestion-container">
-          {suggestions.map((suggestion, index) =>
+          {suggestions.map((suggestion, index) => (
             // Clickable suggestion
-            type === 'author' ? (
-              <div className="suggestion" key={index} onClick={handleSelectSuggestion(suggestion)}>
-                {suggestion.AuthorName}
-              </div>
-            ) : (
-              <div className="suggestion" key={index} onClick={handleSelectSuggestion(suggestion)}>
-                {suggestion.InstitutionName}
-              </div>
-            )
-          )}
+            <div
+              className="suggestion"
+              key={index}
+              onClick={handleSelectSuggestion(suggestion)}
+              style={{ display: 'flex', alignItems: 'end' }}
+            >
+              <p style={{ marginRight: '20px' }}>{suggestion.Name}</p>{' '}
+              {showHint && (
+                <p style={{ marginBottom: '16.5px', fontSize: 'small', fontStyle: 'italic' }}>
+                  {suggestion.Hint}
+                </p>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>

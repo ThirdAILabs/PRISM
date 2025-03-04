@@ -46,8 +46,8 @@ function UniversityAssessment() {
     setUniversityState((prev) => ({ ...prev, institution }));
 
     const reportData = {
-      UniversityId: institution.InstitutionId,
-      UniversityName: institution.InstitutionName,
+      UniversityId: institution.Id,
+      UniversityName: institution.Name,
     };
     const reportId = await universityReportService.createReport(reportData);
     console.log('University report id: ', reportId);
@@ -102,9 +102,9 @@ function UniversityAssessment() {
                       setInstitution(selected);
                       setUniversityState((prev) => ({ ...prev, institution: selected }));
                     }}
-                    type={'institute'}
                     title={'University'}
-                    placeholder={'E.g. University of Prism'}
+                    showHint={true}
+                    placeholder={'E.g. University of XYZ'}
                     initialValue={institution ? institution.InstitutionName : ''}
                   />
                 </div>

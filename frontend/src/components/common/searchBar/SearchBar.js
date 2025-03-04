@@ -62,9 +62,9 @@ export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInst
           title="Author"
           autocomplete={autocompleteAuthor}
           onSelect={setAuthor}
-          type={'author'}
+          showHint={false}
           placeholder={'E.g. John Doe'}
-          initialValue={defaultAuthor ? defaultAuthor.AuthorName : ''}
+          initialValue={defaultAuthor ? defaultAuthor.Name : ''}
         />
       </div>
 
@@ -73,9 +73,9 @@ export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInst
           title="Institution"
           autocomplete={autocompleteInstitution}
           onSelect={setInstitution}
-          type={'institute'}
-          placeholder={'E.g. University of Prism'}
-          initialValue={defaultInstitution ? defaultInstitution.InstitutionName : ''}
+          showHint={true}
+          placeholder={'E.g. University of XYZ'}
+          initialValue={defaultInstitution ? defaultInstitution.Name : ''}
         />
       </div>
 

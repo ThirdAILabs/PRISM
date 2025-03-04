@@ -41,9 +41,9 @@ const SearchComponent = () => {
     }));
 
     const result = await searchService.searchOpenalexAuthors(
-      author.AuthorName,
-      institution.InstitutionId,
-      institution.InstitutionName
+      author.Name,
+      institution.Id,
+      institution.Name
     );
     console.log('result in openAlex', result);
     setSearchState((prev) => ({
@@ -106,8 +106,8 @@ const SearchComponent = () => {
               return [];
             }
             const result = await searchService.searchGoogleScholarAuthors(
-              author.AuthorName,
-              institution.InstitutionName,
+              author.Name,
+              institution.Name,
               null
             );
             setSearchState((prev) => ({ ...prev, canLoadMore: false }));
