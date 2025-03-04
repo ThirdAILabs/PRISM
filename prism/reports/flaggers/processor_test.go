@@ -53,6 +53,15 @@ func getReportContent(t *testing.T, report reports.ReportUpdateTask, processor *
 		t.Fatal(err)
 	}
 
+	nextReport, err := manager.GetNextAuthorReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if nextReport == nil {
+		t.Fatal("expected next report")
+	}
+
+	report.Id = nextReport.Id
 	processor.ProcessAuthorReport(report)
 
 	content, err := manager.GetAuthorReport(user, reportId)
@@ -63,7 +72,7 @@ func getReportContent(t *testing.T, report reports.ReportUpdateTask, processor *
 	return content.Content
 }
 
-func TestProcessorCoauthorAffiliationCase1(t *testing.T) {
+func TestProcessorCoauthorAffiliation(t *testing.T) {
 	manager := setupReportManager(t)
 	processor := &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
