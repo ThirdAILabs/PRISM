@@ -2,27 +2,27 @@ import React, { useState } from 'react';
 import '../components/common/searchBar/SearchBar.css';
 import '../components/common/tools/button/button1.css';
 
-function AutocompleteSearchBar({ title, autocomplete, onSelect, placeholder, showHint }) {
+function AutocompleteSearchBar({
+  title,
+  autocomplete,
+  onSelect,
+  placeholder,
+  showHint,
+  initialValue = '',
+}) {
   const [suggestions, setSuggestions] = useState([]);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialValue);
 
   function handleInputChange(e) {
-    setQuery(e.target.value);
-    autocomplete(e.target.value).then(setSuggestions);
+    const newValue = e.target.value;
+    setQuery(newValue);
+    autocomplete(newValue).then(setSuggestions);
   }
 
   function handleSelectSuggestion(suggestion) {
     return () => {
       setSuggestions([]);
       setQuery(suggestion.Name);
-      onSelect(suggestion);
-    };
-  }
-
-  function handleSelectSuggestionInstitute(suggestion) {
-    return () => {
-      setSuggestions([]);
-      setQuery(suggestion.InstitutionName);
       onSelect(suggestion);
     };
   }

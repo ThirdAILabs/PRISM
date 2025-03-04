@@ -11,11 +11,11 @@ import {
 } from '../../constants/constants.js';
 import ConcernVisualizer from '../ConcernVisualization.js';
 
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider } from '@mui/material';
 import { universityReportService } from '../../api/universityReports.js';
 import AuthorCard from '../common/cards/AuthorCard.js';
 
 import styled from 'styled-components';
+import Loader from './university/Loader.js';
 
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
@@ -60,138 +60,14 @@ const TitlesAndDescriptions = {
   },
 };
 
-//Mock University report.
-const mockUniversityReport = {
-  Id: 'e42ba4dd-f56b-4916-835b-034679df2d4b',
-  CreatedAt: '2024-03-11T20:21:49.387547Z',
-  UniversityId: 'stanford-university-123',
-  UniversityName: 'Stanford University',
-  Status: 'complete',
-  FacultyCount: 200,
-  Content: {
-    TotalAuthors: 4,
-    AuthorsReviewed: 3,
-    Flags: {
-      AssociationsWithDeniedEntities: [
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-        {
-          AuthorId: 'auth_123',
-          AuthorName: 'John Smith',
-          Source: 'IEEE',
-          FlagCount: 3,
-        },
-      ],
-      AuthorAffiliations: [
-        {
-          AuthorId: 'auth_124',
-          AuthorName: 'Maria Garcia',
-          Source: 'Scopus',
-          FlagCount: 2,
-        },
-      ],
-      CoauthorAffiliations: [
-        {
-          AuthorId: 'auth_125',
-          AuthorName: 'David Chen',
-          Source: 'Web of Science',
-          FlagCount: 4,
-        },
-      ],
-      HighRiskFunders: [
-        {
-          AuthorId: 'auth_126',
-          AuthorName: 'Sarah Johnson',
-          Source: 'NIH Database',
-          FlagCount: 1,
-        },
-      ],
-      MiscHighRiskAssociations: [
-        {
-          AuthorId: 'auth_127',
-          AuthorName: 'Michael Brown',
-          Source: 'ArXiv',
-          FlagCount: 2,
-        },
-      ],
-      PotentialAuthorAffiliations: [
-        {
-          AuthorId: 'auth_128',
-          AuthorName: 'Lisa Anderson',
-          Source: 'Google Scholar',
-          FlagCount: 3,
-        },
-      ],
-      TalentContracts: [
-        {
-          AuthorId: 'auth_129',
-          AuthorName: 'Robert Wilson',
-          Source: 'Research Gate',
-          FlagCount: 2,
-        },
-      ],
-    },
-  },
-};
-
 const UniversityReport = () => {
   const navigate = useNavigate();
   const { report_id } = useParams();
 
   const [reportContent, setReportContent] = useState({});
   const [instituteName, setInstituteName] = useState('');
+  const [toatlResearchers, setTotalResearchers] = useState(0);
+  const [researchersAssessed, setResearchersAssessed] = useState(0);
   const [selectedFlagData, setSelectedFlagData] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -204,11 +80,18 @@ const UniversityReport = () => {
     let isMounted = true;
     const poll = async () => {
       const report = await universityReportService.getReport(report_id);
+
       if (report.Status === 'complete' && isMounted) {
         console.log('Report', report);
-        setInstituteName(report.AuthorName);
+        setInstituteName(report.UniversityName);
         setReportContent(report.Content);
+        setTotalResearchers(report.Content.TotalAuthors);
+        setResearchersAssessed(report.Content.AuthorsReviewed);
         setLoading(false);
+      } else if (report.Status === 'in-progress') {
+        setInstituteName(report.UniversityName);
+        setTotalResearchers(report.Content.TotalAuthors);
+        setResearchersAssessed(report.Content.AuthorsReviewed);
       } else if (isMounted) {
         setTimeout(poll, 10000);
       }
@@ -219,27 +102,33 @@ const UniversityReport = () => {
     return () => {
       isMounted = false;
     };
-    // const report = mockUniversityReport;
-    // console.log('Report', report);
-    // setInstituteName(report.UniversityName);
-    // setReportContent(report.Content);
-    // setLoading(false);
   }, []);
 
   const [loading, setLoading] = useState(true);
-  // if (loading) {
-  //     return null;
-  // }
 
   return (
     <div className="basic-setup" style={{ minHeight: '100vh', paddingBottom: '50px' }}>
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-row">
-          <div className="detail-header">
+          <div
+            className="detail-header"
+            style={{
+              display: 'flex',
+              position: 'absolute',
+              justifyContent: 'center',
+              width: '100%',
+            }}
+          >
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate(-1)}
               className="btn text-dark mb-3"
-              style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}
+              style={{
+                minWidth: '80px',
+                display: 'flex',
+                alignItems: 'center',
+                position: 'absolute',
+                left: '10px',
+              }}
             >
               <svg
                 width="16"
@@ -266,78 +155,61 @@ const UniversityReport = () => {
               </svg>
               Back
             </button>
-
-            {/* <div className="d-flex w-80">
-                            <div className="text-start px-5">
-                                <div className="d-flex align-items-center mb-2">
-                                    <h5 className="m-0">{'Sample Institute'}</h5>
-                                </div>
-                                <b className="m-0 p-0" style={{ fontSize: 'small' }}>
-                                    {institutions.join(', ')}
-                                </b>
-                            </div>
-                        </div> */}
-            <h5 style={{ marginRight: '43.5%' }}>{instituteName}</h5>
+            <h5 style={{ margin: '0 auto' }}>{instituteName}</h5>
           </div>
         </div>
       </div>
 
       <>
-        <div className="d-flex w-100 flex-column align-items-center">
-          <div className="d-flex w-100 px-5 align-items-center my-2 mt-3 justify-content-between">
-            <div style={{ width: '20px' }}>
-              {loading && (
-                <div className="spinner-border text-primary spinner-border-sm" role="status"></div>
-              )}
-            </div>
+        {!loading && (
+          <div
+            className="d-flex w-100 flex-column align-items-center"
+            style={{ color: 'rgb(78, 78, 78)', marginTop: '20px' }}
+          >
+            <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Researchers</div>
+            <div style={{ fontSize: '60px', fontWeight: 'bold' }}>{toatlResearchers}</div>
+            <div style={{ fontSize: 'medium', fontWeight: 'bold' }}>Researchers Assessed</div>
+            <div style={{ fontSize: '50px', fontWeight: 'bold' }}>{researchersAssessed}</div>
           </div>
-        </div>
+        )}
 
-        <div
-          className="d-flex w-100 flex-column align-items-center"
-          style={{ color: 'rgb(78, 78, 78)', marginTop: '0px' }}
-        >
-          <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Researchers</div>
-          <div style={{ fontSize: '60px', fontWeight: 'bold' }}>
-            {reportContent.TotalAuthors || 0}
+        {loading ? (
+          <div style={{ marginTop: '15%', display: 'flex', justifyContent: 'center' }}>
+            <Loader size={100} />
           </div>
-          <div style={{ fontSize: 'medium', fontWeight: 'bold' }}>Researchers Assessed</div>
-          <div style={{ fontSize: '40px', fontWeight: 'bold' }}>
-            {reportContent.AuthorsReviewed}
-          </div>
-        </div>
+        ) : (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-around',
+              flexWrap: 'wrap',
+              marginTop: '20px',
+            }}
+          >
+            {reportContent?.Flags &&
+              FLAG_ORDER.map((flag, index) => {
+                let value = 0;
+                const flagData = reportContent.Flags[flag] || [];
 
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-around',
-            flexWrap: 'wrap',
-            marginTop: '20px',
-          }}
-        >
-          {reportContent?.Flags &&
-            FLAG_ORDER.map((flag, index) => {
-              let value = 0;
-              const flagData = reportContent.Flags[flag] || [];
-
-              if (flagData.length > 0) {
-                for (let authorIndex = 0; authorIndex < flagData.length; authorIndex++) {
-                  const author = flagData[authorIndex];
-                  value += author.FlagCount;
+                if (flagData.length > 0) {
+                  for (let authorIndex = 0; authorIndex < flagData.length; authorIndex++) {
+                    const author = flagData[authorIndex];
+                    value += author.FlagCount;
+                  }
                 }
-              }
 
-              return (
-                <ConcernVisualizer
-                  title={TitlesAndDescriptions[flag].title}
-                  hoverText={TitlesAndDescriptions[flag].desc}
-                  value={value || 0}
-                  onReview={() => handleReview(flag)}
-                  key={index}
-                />
-              );
-            })}
-        </div>
+                return (
+                  <ConcernVisualizer
+                    title={TitlesAndDescriptions[flag].title}
+                    hoverText={TitlesAndDescriptions[flag].desc}
+                    value={value || 0}
+                    onReview={() => handleReview(flag)}
+                    key={index}
+                  />
+                );
+              })}
+          </div>
+        )}
         {showModal && (
           <div
             style={{
@@ -346,20 +218,6 @@ const UniversityReport = () => {
               width: '100%',
             }}
           >
-            {/* <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(4, minmax(250px, 1fr))',
-                            gap: '50px',
-                            justifyContent: 'center',
-                            marginTop: '100px',
-                            padding: '20px',
-                            overflow: 'auto',
-                            minHeight: '80vh',
-                            width: '80%',
-                        }}> */}
-            {/* {selectedFlagData?.map((author, index) => (
-                                <AuthorCard key={author.AuthorId} authorId={author.AuthorId} authorName={author.AuthorName} Source={author.Source} flagCount={author.FlagCount} />
-                            ))} */}
             <div
               style={{
                 marginTop: '100px',
@@ -367,9 +225,6 @@ const UniversityReport = () => {
             >
               <AuthorCard authors={selectedFlagData} />
             </div>
-            {/* <div style={{ marginTop: '200px' }}>
-                            <AuthorTable />
-                        </div> */}
           </div>
         )}
       </>
