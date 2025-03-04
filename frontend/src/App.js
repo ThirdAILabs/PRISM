@@ -11,8 +11,8 @@ import UniversityAssessment from './components/pages/UniversityAssessment';
 import UniversityReport from './components/pages/UniversityReport';
 import { useLocation } from 'react-router-dom';
 import Error from './components/pages/Error';
-import SearchProviderWrapper from './components/SearchProviderWrapper';
-import UniversityProviderWrapper from './components/UniversityProviderWrapper';
+import SearchProviderWrapper from './services/SearchProviderWrapper';
+import UniversityProviderWrapper from './services/UniversityProviderWrapper';
 //CSS
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.js';
