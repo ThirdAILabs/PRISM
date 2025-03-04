@@ -4,7 +4,6 @@ import { TbReportSearch } from 'react-icons/tb';
 import { reportService } from '../../../api/reports';
 
 const AuthorCard = ({ authors }) => {
-
   const handleClick = async (authorId, authorName, Source) => {
     const report = await reportService.createReport({
       AuthorId: authorId,
@@ -13,8 +12,8 @@ const AuthorCard = ({ authors }) => {
       StartYear: 1990,
     });
 
-    window.open("/report/" + report.Id, "_blank");
-  }
+    window.open('/report/' + report.Id, '_blank');
+  };
 
   const columns = [
     {
@@ -33,7 +32,9 @@ const AuthorCard = ({ authors }) => {
       width: 230,
       renderCell: (params) => (
         <span
-          onClick={() => { handleClick(params.row.authorId, params.row.authorName, params.row.source) }}
+          onClick={() => {
+            handleClick(params.row.authorId, params.row.authorName, params.row.source);
+          }}
           style={{
             color: 'inherit',
             textDecoration: 'none',
@@ -54,7 +55,7 @@ const AuthorCard = ({ authors }) => {
     authorId: author.AuthorId,
     source: author.Source,
   }));
-  console.log("Rows in AuthorCard", rows, authors);
+  console.log('Rows in AuthorCard', rows, authors);
 
   const handlePaginationList = () => {
     const pageSizeOptionsList = [5];

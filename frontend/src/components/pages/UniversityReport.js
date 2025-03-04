@@ -110,11 +110,25 @@ const UniversityReport = () => {
     <div className="basic-setup" style={{ minHeight: '100vh', paddingBottom: '50px' }}>
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-row">
-          <div className="detail-header" style={{ display: 'flex', position: 'absolute', justifyContent: 'center', width: '100%' }}>
+          <div
+            className="detail-header"
+            style={{
+              display: 'flex',
+              position: 'absolute',
+              justifyContent: 'center',
+              width: '100%',
+            }}
+          >
             <button
               onClick={() => navigate(-1)}
               className="btn text-dark mb-3"
-              style={{ minWidth: '80px', display: 'flex', alignItems: 'center', position: 'absolute', left: '10px' }}
+              style={{
+                minWidth: '80px',
+                display: 'flex',
+                alignItems: 'center',
+                position: 'absolute',
+                left: '10px',
+              }}
             >
               <svg
                 width="16"
@@ -147,24 +161,23 @@ const UniversityReport = () => {
       </div>
 
       <>
-        {!loading && <div
-          className="d-flex w-100 flex-column align-items-center"
-          style={{ color: 'rgb(78, 78, 78)', marginTop: '20px' }}
-        >
-          <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Researchers</div>
-          <div style={{ fontSize: '60px', fontWeight: 'bold' }}>
-            {toatlResearchers}
+        {!loading && (
+          <div
+            className="d-flex w-100 flex-column align-items-center"
+            style={{ color: 'rgb(78, 78, 78)', marginTop: '20px' }}
+          >
+            <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Researchers</div>
+            <div style={{ fontSize: '60px', fontWeight: 'bold' }}>{toatlResearchers}</div>
+            <div style={{ fontSize: 'medium', fontWeight: 'bold' }}>Researchers Assessed</div>
+            <div style={{ fontSize: '50px', fontWeight: 'bold' }}>{researchersAssessed}</div>
           </div>
-          <div style={{ fontSize: 'medium', fontWeight: 'bold' }}>Researchers Assessed</div>
-          <div style={{ fontSize: '50px', fontWeight: 'bold' }}>
-            {researchersAssessed}
-          </div>
-        </div>}
+        )}
 
         {loading ? (
           <div style={{ marginTop: '15%', display: 'flex', justifyContent: 'center' }}>
             <Loader size={100} />
-          </div>) :
+          </div>
+        ) : (
           <div
             style={{
               display: 'flex',
@@ -195,7 +208,8 @@ const UniversityReport = () => {
                   />
                 );
               })}
-          </div>}
+          </div>
+        )}
         {showModal && (
           <div
             style={{
