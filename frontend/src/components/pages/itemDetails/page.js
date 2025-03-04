@@ -96,6 +96,14 @@ const ItemDetails = () => {
   const [initialReprtContent, setInitialReportContent] = useState({});
   const [isDisclosureChecked, setDisclosureChecked] = useState(false);
 
+  // box shadow for disclosed/undisclosed buttons
+  const greenBoxShadow = '0 0px 10px rgb(0, 183, 46)';
+  const redBoxShadow = '0 0px 10px rgb(255, 0, 0)';
+
+  const toggleSortOrder = () => {
+    setSortOrder((prevOrder) => (prevOrder === 'asc' ? 'desc' : 'asc'));
+  };
+
   // Add new states
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -281,7 +289,13 @@ const ItemDetails = () => {
 
   function multipleAffiliationsFlag(flag, index) {
     return (
-      <div key={index} className="p-3 px-5 w-75 detail-item">
+      <div
+        key={index}
+        className="p-3 px-5 w-75 detail-item"
+        style={{
+          boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
+        }}
+      >
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Author has multiple affiliations</h5>,
           flag
@@ -306,7 +320,13 @@ const ItemDetails = () => {
 
   function funderFlag(flag, index) {
     return (
-      <div key={index} className="p-3 px-5 w-75 detail-item">
+      <div
+        key={index}
+        className="p-3 px-5 w-75 detail-item"
+        style={{
+          boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
+        }}
+      >
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Funder is an Entity of Concern</h5>,
           flag
@@ -341,7 +361,13 @@ const ItemDetails = () => {
 
   function publisherFlag(flag, index) {
     return (
-      <div key={index} className="p-3 px-5 w-75 detail-item">
+      <div
+        key={index}
+        className="p-3 px-5 w-75 detail-item"
+        style={{
+          boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
+        }}
+      >
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Publisher is an Entity of Concern</h5>,
           flag
@@ -365,7 +391,13 @@ const ItemDetails = () => {
 
   function coauthorFlag(flag, index) {
     return (
-      <div key={index} className="p-3 px-5 w-75 detail-item">
+      <div
+        key={index}
+        className="p-3 px-5 w-75 detail-item"
+        style={{
+          boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
+        }}
+      >
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Co-authors are high-risk entities</h5>,
           flag
@@ -389,7 +421,13 @@ const ItemDetails = () => {
 
   function coauthorAffiliationFlag(flag, index) {
     return (
-      <div key={index} className="p-3 px-5 w-75 detail-item">
+      <div
+        key={index}
+        className="p-3 px-5 w-75 detail-item"
+        style={{
+          boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
+        }}
+      >
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Co-authors are affiliated with Entities of Concern</h5>,
           flag
@@ -424,7 +462,13 @@ const ItemDetails = () => {
 
   function authorAffiliationFlag(flag, index) {
     return (
-      <div key={index} className="p-3 px-5 w-75 detail-item">
+      <div
+        key={index}
+        className="p-3 px-5 w-75 detail-item"
+        style={{
+          boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
+        }}
+      >
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Author is affiliated with an Entity of Concern</h5>,
           flag
@@ -449,7 +493,13 @@ const ItemDetails = () => {
 
   function acknowledgementFlag(flag, index) {
     return (
-      <div key={index} className="p-3 px-5 w-75 detail-item">
+      <div
+        key={index}
+        className="p-3 px-5 w-75 detail-item"
+        style={{
+          boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
+        }}
+      >
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Acknowledgements possibly contain Talent Contracts</h5>,
           flag
@@ -489,7 +539,13 @@ const ItemDetails = () => {
 
   function universityFacultyFlag(flag, index) {
     return (
-      <div key={index} className="p-3 px-5 w-75 detail-item">
+      <div
+        key={index}
+        className="p-3 px-5 w-75 detail-item"
+        style={{
+          boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
+        }}
+      >
         <h5 className="fw-bold mt-3">
           The author may potentially be linked with an Entity of Concern
         </h5>
@@ -504,8 +560,8 @@ const ItemDetails = () => {
     );
   }
 
-  const [showDisclosed, setShowDisclosed] = useState(true);
-  const [showUndisclosed, setShowUndisclosed] = useState(true);
+  const [showDisclosed, setShowDisclosed] = useState(false);
+  const [showUndisclosed, setShowUndisclosed] = useState(false);
   const disclosedItems = (reportContent[review] || []).filter((item) => item.Disclosed);
   const undisclosedItems = (reportContent[review] || []).filter((item) => !item.Disclosed);
   const [sortOrder, setSortOrder] = useState('desc');
@@ -549,7 +605,13 @@ const ItemDetails = () => {
   function PRFlag(flag, index) {
     const connections = flag.Connections || [];
     return (
-      <div key={index} className="p-3 px-5 w-75 detail-item">
+      <div
+        key={index}
+        className="p-3 px-5 w-75 detail-item"
+        style={{
+          boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
+        }}
+      >
         {true && (
           <>
             {connections.length == 0 ? (
@@ -1003,37 +1065,42 @@ const ItemDetails = () => {
                       }}
                     >
                       <span style={{ marginRight: '10px' }}>Sort by Date</span>
-                      <ArrowUpwardIcon
-                        onClick={() => setSortOrder('asc')}
-                        style={{
-                          cursor: 'pointer',
-                          color: sortOrder === 'asc' ? 'lightgray' : 'black',
-                        }}
-                      />
-                      <ArrowDownwardIcon
-                        onClick={() => setSortOrder('desc')}
-                        style={{
-                          cursor: 'pointer',
-                          color: sortOrder === 'desc' ? 'lightgray' : 'black',
-                        }}
-                      />
+                      <div onClick={toggleSortOrder} style={{ cursor: 'pointer' }}>
+                        {sortOrder === 'asc' ? (
+                          <ArrowUpwardIcon style={{ color: 'black' }} />
+                        ) : (
+                          <ArrowDownwardIcon style={{ color: 'black' }} />
+                        )}
+                      </div>
                     </div>
                   );
                 })()}
 
                 {isDisclosureChecked ? (
                   <>
-                    {disclosedItems.length > 0 ? (
-                      <>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        gap: '20px',
+                        margin: '10px auto',
+                        width: 'fit-content',
+                      }}
+                    >
+                      {/* Disclosed Button */}
+                      {disclosedItems.length > 0 ? (
                         <button
-                          onClick={() => setShowDisclosed(!showDisclosed)}
+                          onClick={() => {
+                            setShowDisclosed(!showDisclosed);
+                            if (!showDisclosed) setShowUndisclosed(false);
+                          }}
                           style={{
-                            backgroundColor: showDisclosed ? 'green' : 'transparent',
-                            color: showDisclosed ? 'white' : 'green',
+                            backgroundColor: 'transparent',
+                            color: 'green',
+                            boxShadow: showDisclosed ? '0 0px 10px rgb(0, 183, 46)' : 'none',
                             borderRadius: '20px',
                             border: '2px solid green',
-                            padding: '10px 20px',
-                            margin: '10px auto',
+                            padding: '10px 10px',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
@@ -1043,7 +1110,7 @@ const ItemDetails = () => {
                             transition: 'background-color 0.3s, color 0.3s',
                           }}
                         >
-                          Disclosed ({disclosedItems.length})
+                          <strong>Disclosed ({disclosedItems.length})</strong>
                           {showDisclosed ? (
                             <ArrowDropDownIcon
                               style={{ verticalAlign: 'middle', marginLeft: '8px' }}
@@ -1054,48 +1121,35 @@ const ItemDetails = () => {
                             />
                           )}
                         </button>
-                        {showDisclosed && (
-                          <div
-                            style={{
-                              width: '100%',
-                              maxWidth: '1200px',
-                              margin: '0 auto',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                            }}
-                          >
-                            {renderFlags(disclosedItems)}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div
-                        style={{
-                          color: 'green',
-                          margin: '10px auto',
-                          width: '200px',
-                          textAlign: 'center',
-                          padding: '10px 20px',
-                          border: '2px solid green',
-                          borderRadius: '20px',
-                        }}
-                      >
-                        Disclosed (0)
-                      </div>
-                    )}
-
-                    {undisclosedItems.length > 0 ? (
-                      <>
-                        <button
-                          onClick={() => setShowUndisclosed(!showUndisclosed)}
+                      ) : (
+                        <div
                           style={{
-                            backgroundColor: showUndisclosed ? 'red' : 'transparent',
-                            color: showUndisclosed ? 'white' : 'red',
+                            color: 'green',
+                            textAlign: 'center',
+                            padding: '10px 20px',
+                            border: '2px solid green',
+                            borderRadius: '20px',
+                            width: '200px',
+                          }}
+                        >
+                          <strong>Disclosed (0)</strong>
+                        </div>
+                      )}
+
+                      {/* Undisclosed Button */}
+                      {undisclosedItems.length > 0 ? (
+                        <button
+                          onClick={() => {
+                            setShowUndisclosed(!showUndisclosed);
+                            if (!showUndisclosed) setShowDisclosed(false);
+                          }}
+                          style={{
+                            backgroundColor: 'transparent',
+                            color: 'red',
+                            boxShadow: showUndisclosed ? '0 0px 10px rgb(255, 0, 0)' : 'none',
                             borderRadius: '20px',
                             border: '2px solid red',
-                            padding: '10px 20px',
-                            margin: '10px auto',
+                            padding: '10px 10px',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
@@ -1105,7 +1159,7 @@ const ItemDetails = () => {
                             transition: 'background-color 0.3s, color 0.3s',
                           }}
                         >
-                          Undisclosed ({undisclosedItems.length})
+                          <strong>Undisclosed ({undisclosedItems.length})</strong>
                           {showUndisclosed ? (
                             <ArrowDropDownIcon
                               style={{ verticalAlign: 'middle', marginLeft: '8px' }}
@@ -1116,36 +1170,55 @@ const ItemDetails = () => {
                             />
                           )}
                         </button>
-                        {showUndisclosed && (
-                          <div
-                            style={{
-                              width: '100%',
-                              maxWidth: '1200px',
-                              margin: '0 auto',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                            }}
-                          >
-                            {renderFlags(undisclosedItems)}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div
-                        style={{
-                          color: 'red',
-                          margin: '10px auto',
-                          width: '200px',
-                          textAlign: 'center',
-                          padding: '10px 20px',
-                          border: '2px solid red',
-                          borderRadius: '20px',
-                        }}
-                      >
-                        Undisclosed (0)
-                      </div>
-                    )}
+                      ) : (
+                        <div
+                          style={{
+                            color: 'red',
+                            textAlign: 'center',
+                            padding: '10px 20px',
+                            border: '2px solid red',
+                            borderRadius: '20px',
+                            width: '200px',
+                          }}
+                        >
+                          <strong>Undisclosed (0)</strong>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content areas for disclosed and undisclosed items */}
+                    {/* Display flags below buttons */}
+                    <div style={{ width: '100%', marginTop: '20px' }}>
+                      {showDisclosed && (
+                        <div
+                          style={{
+                            width: '100%',
+                            maxWidth: '1200px',
+                            margin: '10px auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                          }}
+                        >
+                          {renderFlags(disclosedItems)}
+                        </div>
+                      )}
+
+                      {showUndisclosed && (
+                        <div
+                          style={{
+                            width: '100%',
+                            maxWidth: '1200px',
+                            margin: '10px auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                          }}
+                        >
+                          {renderFlags(undisclosedItems)}
+                        </div>
+                      )}
+                    </div>
                   </>
                 ) : (
                   <div
