@@ -201,8 +201,12 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 				flagCounts[flag.Type()]++
 			}
 		}
-		if err := processor.manager.UpdateAuthorReport(report.Id, schema.ReportInProgress, report.EndDate, flags); err != nil {
-			slog.Error("error updating author report status for partial flags", "error", err)
+
+		if len(flags) > 0 {
+			slog.Info("received batch of flags", "type", flags[0].Type(), "n_flags", len(flags))
+			if err := processor.manager.UpdateAuthorReport(report.Id, schema.ReportInProgress, report.EndDate, flags); err != nil {
+				slog.Error("error updating author report status for partial flags", "error", err)
+			}
 		}
 	}
 

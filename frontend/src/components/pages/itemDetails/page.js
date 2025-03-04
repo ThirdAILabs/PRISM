@@ -149,16 +149,18 @@ const ItemDetails = () => {
   useEffect(() => {
     let isMounted = true;
     const poll = async () => {
+      let inProgress = true;
       const report = await reportService.getReport(report_id);
       if (report.Content && Object.keys(report.Content).length > 0 && isMounted) {
         console.log('Report', report);
         setAuthorName(report.AuthorName);
         setReportContent(report.Content);
         setInitialReportContent(report.Content);
-        if (report.Status == 'complete') {
-          setLoading(false);
-        }
-      } else if (isMounted) {
+        setLoading(false);
+        inProgress = report.Status === 'queued' || report.Status === 'in-progress';
+      }
+
+      if (inProgress) {
         setTimeout(poll, 2000);
       }
     };
