@@ -16,23 +16,27 @@ import (
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/search"
 	"prism/prism/triangulation"
+
+	"github.com/caarlos0/env/v11"
 )
 
 type Config struct {
-	PostgresUri              string `yaml:"postgres_uri"`
+	PostgresUri              string `env:"DB_URI,notEmpty,required"`
 	FundcodeTriangulationUri string `yaml:"fundcode_triangulation_postgres_uri"`
-	Logfile                  string `yaml:"logfile"`
-	NdbLicense               string `yaml:"ndb_license"`
+	Logfile                  string `env:"LOGFILE,notEmpty" envDefault:"prism_worker.log"`
+	NdbLicense               string `env:"NDB_LICENSE,notEmpty,required"`
 
-	WorkDir string `yaml:"work_dir"`
+	WorkDir string `env:"WORK_DIR,notEmpty" envDefault:"./work"`
 
-	NDBData struct {
-		University string `yaml:"university"`
-		Doc        string `yaml:"doc"`
-		Aux        string `yaml:"aux"`
-	} `yaml:"ndb_data"`
+	UniversityData string `env:"UNIVERSITY_DATA,notEmpty,required"`
+	DocData        string `env:"DOC_DATA,notEmpty,required"`
+	AuxData        string `env:"AUX_DATA,notEmpty,required"`
 
-	GrobidEndpoint string `yaml:"grobid_endpoint"`
+	GrobidEndpoint string `env:"GROBID_ENDPOINT,notEmpty,required"`
+
+	// This variable is directly loaded by the openai client library, it is just
+	// listed here so that and error is raised if it's missing.
+	OpenaiKey string `env:"OPENAI_API_KEY,notEmpty,required"`
 }
 
 func (c *Config) logfile() string {
@@ -102,8 +106,12 @@ func processNextUniversityReport(reportManager *reports.ReportManager, processor
 }
 
 func main() {
+	cmd.LoadEnvFile()
+
 	var config Config
-	cmd.LoadConfig(&config)
+	if err := env.Parse(&config); err != nil {
+		log.Fatalf("error parsing config: %v", err)
+	}
 
 	logFile, err := os.OpenFile(config.logfile(), os.O_CREATE|os.O_APPEND|os.O_RDWR, 0o666)
 	if err != nil {
@@ -141,9 +149,9 @@ func main() {
 	defer entityStore.Free()
 
 	opts := flaggers.ReportProcessorOptions{
-		UniversityNDB:   flaggers.BuildUniversityNDB(config.NDBData.University, filepath.Join(ndbDir, "university.ndb")),
-		DocNDB:          flaggers.BuildDocNDB(config.NDBData.Doc, filepath.Join(ndbDir, "doc.ndb")),
-		AuxNDB:          flaggers.BuildAuxNDB(config.NDBData.Aux, filepath.Join(ndbDir, "aux.ndb")),
+		UniversityNDB:   flaggers.BuildUniversityNDB(config.UniversityData, filepath.Join(ndbDir, "university.ndb")),
+		DocNDB:          flaggers.BuildDocNDB(config.DocData, filepath.Join(ndbDir, "doc.ndb")),
+		AuxNDB:          flaggers.BuildAuxNDB(config.AuxData, filepath.Join(ndbDir, "aux.ndb")),
 		TriangulationDB: triangulation.CreateTriangulationDB(cmd.InitTriangulationDb(config.FundcodeTriangulationUri)),
 
 		EntityLookup: entityStore,

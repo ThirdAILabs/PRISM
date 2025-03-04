@@ -12,7 +12,7 @@ import (
 	"prism/prism/triangulation"
 	"strings"
 
-	"gopkg.in/yaml.v3"
+	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -68,22 +68,20 @@ func InitLogging(logFile *os.File) {
 	slog.Info("logging initialized", "log_file", logFile.Name())
 }
 
-func LoadConfig(config any) {
+func LoadEnvFile() {
 	var configPath string
 
-	flag.StringVar(&configPath, "config", "", "path to load config from")
+	flag.StringVar(&configPath, "env", "", "path to load env from")
 	flag.Parse()
 
 	if configPath == "" {
-		log.Fatal("must specify config path")
+		log.Printf("no env file specified, using os.Environ only")
+		return
 	}
 
-	file, err := os.Open(configPath)
+	log.Printf("loading env from file %s", configPath)
+	err := godotenv.Load(configPath)
 	if err != nil {
-		log.Fatalf("unable to open config file: %v", err)
-	}
-
-	if err := yaml.NewDecoder(file).Decode(config); err != nil {
-		log.Fatalf("error parsing config: %v", err)
+		log.Fatalf("error loading .env file '%s': %v", configPath, err)
 	}
 }

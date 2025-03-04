@@ -9,6 +9,11 @@ export const API_ROUTES = {
     CHECK_DISCLOSURE: (id) => `/api/v1/report/author/${id}/check-disclosure`,
     DOWNLOAD: (id) => `/api/v1/report/author/${id}/download`,
   },
+  UNIVERSITY_REPORTS: {
+    LIST: '/api/v1/report/university/list',
+    CREATE: '/api/v1/report/university/create',
+    GET: (id) => `/api/v1/report/university/${id}`,
+  },
   LICENSES: {
     LIST: '/api/v1/license/list',
     CREATE: '/api/v1/license/create',
@@ -19,8 +24,8 @@ export const API_ROUTES = {
     INSTITUTION: '/api/v1/autocomplete/institution',
   },
   SEARCH: {
-    REGULAR: '/api/v1/search/regular',
-    ADVANCED: '/api/v1/search/advanced',
+    AUTHOR: '/api/v1/search/authors',
+    AUTHOR_ADVANCED: '/api/v1/search/authors-advanced',
     MATCH_ENTITIES: '/api/v1/search/match-entities',
   },
 };
