@@ -351,25 +351,29 @@ func generatePDF(report api.Report) ([]byte, error) {
 
 			// Add key-value pairs with better formatting
 			for _, kv := range flag.GetDetailFields() {
+				keyWidth := 50.0
+				pageWidth, _ := pdf.GetPageSize()
+				left, _, right, _ := pdf.GetMargins()
+				valueWidth := pageWidth - left - right - keyWidth
+
 				pdf.SetFont("Arial", "B", 11)
-				pdf.SetTextColor(80, 80, 80) // Dark gray for keys
-				pdf.CellFormat(0, 8, kv.Key, "", 1, "L", false, 0, "")
+				pdf.SetTextColor(80, 80, 80)
+				pdf.CellFormat(keyWidth, 8, kv.Key, "", 0, "L", false, 0, "")
 
-				// Value
-				pdf.SetX(pdf.GetX() + 10)
 				pdf.SetFont("Arial", "", 11)
-				pdf.SetTextColor(0, 0, 0) // Black for values
+				pdf.SetTextColor(0, 0, 0)
 
-				pdf.SetX(pdf.GetX() + 10)
 				if strings.EqualFold(kv.Key, "URL") || strings.HasSuffix(strings.ToLower(kv.Key), "url") {
-					pdf.SetTextColor(0, 0, 200) // Blue text for URLs
-					pdf.CellFormat(0, 8, "link", "", 1, "L", false, 0, kv.Value)
+					pdf.SetTextColor(0, 0, 200)
+					startX := pdf.GetX()
+					startY := pdf.GetY()
+					pdf.MultiCell(valueWidth, 8, kv.Value, "", "L", false)
+					pdf.LinkString(startX, startY, valueWidth, pdf.GetY()-startY, kv.Value)
 					pdf.SetTextColor(0, 0, 0)
 				} else {
-					pdf.MultiCell(0, 8, kv.Value, "", "L", false)
+					pdf.MultiCell(valueWidth, 8, kv.Value, "", "L", false)
+					pdf.SetXY(left, pdf.GetY())
 				}
-				pdf.SetX(pdf.GetX() - 10) // Reset indentation
-
 				pdf.Ln(2)
 			}
 
