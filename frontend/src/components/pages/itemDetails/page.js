@@ -366,7 +366,7 @@ const ItemDetails = () => {
                       className="rounded-circle d-inline-block me-2"
                       style={{ width: '8px', height: '8px', backgroundColor: 'green' }}
                     ></span>
-                    The author likely <b>is not</b> a recipient of these grants.
+                    The author likely <b>is not</b> a primary recipient of these grants.
                   </span>
                   <span>
                     <span
@@ -616,7 +616,7 @@ const ItemDetails = () => {
                       className="rounded-circle d-inline-block me-2"
                       style={{ width: '8px', height: '8px', backgroundColor: 'green' }}
                     ></span>
-                    The author likely <b>is not</b> a recipient of these grants.
+                    The author likely <b>is not</b> a primary recipient of these grants.
                   </span>
                   <span>
                     <span

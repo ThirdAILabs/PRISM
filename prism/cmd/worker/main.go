@@ -22,7 +22,7 @@ import (
 
 type Config struct {
 	PostgresUri              string `env:"DB_URI,notEmpty,required"`
-	FundcodeTriangulationUri string `yaml:"fundcode_triangulation_postgres_uri"`
+	FundcodeTriangulationUri string `env:"FUNDCODE_TRIANGULATION_DB_URI,notEmpty,required"`
 	Logfile                  string `env:"LOGFILE,notEmpty" envDefault:"prism_worker.log"`
 	NdbLicense               string `env:"NDB_LICENSE,notEmpty,required"`
 
