@@ -203,6 +203,8 @@ func (r *ReportManager) GetAuthorReport(userId, reportId uuid.UUID) (api.Report,
 		return api.Report{}, err
 	}
 
+	slog.Info("GET AUTHOR REPORT", "report", report)
+
 	return convertReport(report)
 }
 
@@ -302,7 +304,7 @@ func flagsToReportContent(flags []schema.AuthorFlag) (api.ReportContent, error) 
 }
 
 func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTime time.Time, updateFlags []api.Flag) error {
-	return r.db.Transaction(func(txn *gorm.DB) error {
+	e := r.db.Transaction(func(txn *gorm.DB) error {
 		updates := map[string]any{"status": status}
 		if status == schema.ReportCompleted {
 			updates["last_updated_at"] = updateTime
@@ -350,6 +352,10 @@ func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTi
 
 		return nil
 	})
+
+	slog.Info("REPORT UPDATE COMPLETED", "id", id, "status", status, "update_flags", updateFlags)
+
+	return e
 }
 
 func convertReport(report schema.UserAuthorReport) (api.Report, error) {
