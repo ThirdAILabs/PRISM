@@ -1,0 +1,92 @@
+.shimmer-card {
+  display: flex;
+  flex-direction: column;
+  /* border: 1px solid #ddd; */
+  /* border-radius: 6px; */
+  padding: 1rem;
+  width: 14%;
+  background-color: #fff;
+  margin: 1rem 1px;
+  overflow: hidden;
+  position: relative;
+}
+
+.shimmer-card-header {
+  height: 100px;
+  width: 10%;
+  margin-left: 40%;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  background-color: #f6f7f8;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer effect on header via pseudo-element */
+.shimmer-card-header::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 150%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(246, 247, 248, 0) 0%,
+    rgba(224, 224, 224, 0.5) 50%,
+    rgba(246, 247, 248, 0) 100%
+  );
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.shimmer-card-content {
+  height: 200px;
+  width: 100%;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  background-color: #f6f7f8;
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-card-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.shimmer-button {
+  height: 30px;
+  width: 80px;
+  border-radius: 2rem;
+  background-color: #f6f7f8;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer effect applied via pseudo-element */
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 150%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(246, 247, 248, 0) 0%,
+    rgba(224, 224, 224, 0.5) 50%,
+    rgba(246, 247, 248, 0) 100%
+  );
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
