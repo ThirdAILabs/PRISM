@@ -74,7 +74,7 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, noResul
               </div>
             )}
           </>
-        ) : ( noResultFound ? (
+        ) : noResultFound ? (
           <div className="no-results">
             <div className="no-results-icon">🔍</div>
             <h3>No Results Found</h3>
@@ -82,15 +82,15 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, noResul
           </div>
         ) : (
           <div className="d-flex flex-column align-items-center pt-4">
-          <p>Loading...</p>
-          <div className="spinner-border text-primary mt-2" role="status">
-            <span className="visually-hidden">Loading...</span>
+            <p>Loading...</p>
+            <div className="spinner-border text-primary mt-2" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
           </div>
-    </div>
-        ))}
+        )}
       </>
     </div>
   );
-}
+};
 
 export default TodoListComponent;

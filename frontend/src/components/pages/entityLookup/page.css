@@ -4,25 +4,25 @@
 }
 
 .logo-section img {
-    width: 320px;
-    animation: fade-in 0.5s;
-    margin-top: 1%;
-    margin-bottom: 1%;
-    margin-right: 2%;
-    animation: fade-in 0.5s;
+  width: 320px;
+  animation: fade-in 0.5s;
+  margin-top: 1%;
+  margin-bottom: 1%;
+  margin-right: 2%;
+  animation: fade-in 0.5s;
 }
 
 .header-section {
-    animation: fade-in 1s;
-    margin-top: 10px;
-    color: #888888;
+  animation: fade-in 1s;
+  margin-top: 10px;
+  color: #888888;
 }
 
 .header-title {
-    font-weight: bold;
-    color: black;
-    margin-top: 20px;
-    animation: fade-in 0.75s;
+  font-weight: bold;
+  color: black;
+  margin-top: 20px;
+  animation: fade-in 0.75s;
 }
 
 .search-section {

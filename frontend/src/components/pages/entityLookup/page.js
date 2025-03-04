@@ -61,7 +61,10 @@ function EntityLookup() {
       <div className="header-section">
         <h1 className="header-title">Entity Lookup</h1>
         <p className="header-subtitle">We help you comply with research security requirements.</p>
-        <p className="header-subtitle" style = {{ marginTop: '10', marginBottom: '2%', color: '#888888' }}>
+        <p
+          className="header-subtitle"
+          style={{ marginTop: '10', marginBottom: '2%', color: '#888888' }}
+        >
           Search for an entity to see if it is on any list of concerning entities.
         </p>
       </div>
