@@ -1065,20 +1065,13 @@ const ItemDetails = () => {
                     }}
                   >
                     <span style={{ marginRight: '10px' }}>Sort by Date</span>
-                    <ArrowUpwardIcon
-                      onClick={() => setSortOrder('asc')}
-                      style={{
-                        cursor: 'pointer',
-                        color: sortOrder === 'asc' ? 'lightgray' : 'black',
-                      }}
-                    />
-                    <ArrowDownwardIcon
-                      onClick={() => setSortOrder('desc')}
-                      style={{
-                        cursor: 'pointer',
-                        color: sortOrder === 'desc' ? 'lightgray' : 'black',
-                      }}
-                    />
+                    <div onClick={toggleSortOrder} style={{ cursor: 'pointer' }}>
+                      {sortOrder === 'asc' ? (
+                        <ArrowUpwardIcon style={{ color: 'black' }} />
+                      ) : (
+                        <ArrowDownwardIcon style={{ color: 'black' }} />
+                      )}
+                    </div>
                   </div>
                   );
                 })()}
