@@ -172,29 +172,32 @@ const ItemDetails = () => {
 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
+
+  const [filterMessage, setFilterMessage] = useState('');
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
   };
   const handleStartDateChange = (e) => setStartDate(e.target.value);
   const handleEndDateChange = (e) => setEndDate(e.target.value);
-  const toggleYearDropdown = () => {
-    setYearDropdownOpen(!yearDropdownOpen);
-    setIsDownloadOpen(false); // Close download dropdown
-  };
+
+  function parseLocalDate(dateStr) {
+    const [year, month, day] = dateStr.split('-');
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  }
 
   const handleDateFilter = () => {
     if (!startDate && !endDate) {
       setReportContent(initialReprtContent);
-      setYearDropdownOpen(false);
+      setFilterMessage('');
+      handleDropdownChange(1);
       return;
     }
 
-    let start = startDate ? new Date(startDate) : null;
-    let end = endDate ? new Date(endDate) : null;
+    let start = startDate ? parseLocalDate(startDate) : null;
+    let end = endDate ? parseLocalDate(endDate) : null;
 
     if (start && !end) {
       end = new Date();
@@ -226,8 +229,28 @@ const ItemDetails = () => {
       }
     });
 
+    const displayStart = startDate
+      ? parseLocalDate(startDate).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
+      : 'earliest';
+    const displayEnd = endDate
+      ? parseLocalDate(endDate).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
+      : 'today';
+
+    setFilterMessage(`From ${displayStart} to ${displayEnd}`);
+
+    setStartDate('');
+    setEndDate('');
+
     setReportContent(filteredContent);
-    setYearDropdownOpen(false);
+    handleDropdownChange(1);
   };
   const [instDropdownOpen, setInstDropdownOpen] = useState(false);
   const toggleInstDropdown = () => setInstDropdownOpen(!instDropdownOpen);
@@ -764,7 +787,7 @@ const ItemDetails = () => {
                   </button>
                   {dropdownOpen === 1 && (
                     <div
-                      className="dropdown-menu show p-3"
+                      className="dropdown-menu show p-2"
                       style={{
                         width: '200px',
                         backgroundColor: 'rgb(160, 160, 160)',
@@ -780,7 +803,7 @@ const ItemDetails = () => {
                         flexDirection: 'column',
                       }}
                     >
-                      <div className="form-group mb-2">
+                      <div className="form-group" style={{ marginBottom: '10px', width: '100%' }}>
                         <label>Start Date</label>
                         <input
                           type="date"
@@ -793,13 +816,12 @@ const ItemDetails = () => {
                             border: 'none',
                             outline: 'none',
                             color: 'black',
-                            marginTop: '10px',
+                            marginTop: '5px',
                             width: '100%',
                           }}
                         />
                       </div>
-                      <div style={{ height: '10px' }} />
-                      <div className="form-group">
+                      <div className="form-group" style={{ marginBottom: '10px', width: '100%' }}>
                         <label>End Date</label>
                         <input
                           type="date"
@@ -812,57 +834,37 @@ const ItemDetails = () => {
                             border: 'none',
                             outline: 'none',
                             color: 'black',
-                            marginTop: '10px',
+                            marginTop: '5px',
+                            width: '100%',
                           }}
                         />
                       </div>
-                      <div
+                      <button
+                        className="form-control"
+                        type="submit"
+                        onClick={handleDateFilter}
+                        disabled={!(startDate || endDate)}
                         style={{
-                          marginTop: '20px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '10px',
+                          backgroundColor: 'black',
+                          border: 'none',
+                          color: 'white',
+                          width: '100px',
+                          fontWeight: 'bold',
+                          fontSize: '14px',
+                          cursor: startDate || endDate ? 'pointer' : 'default',
+                          transition: 'background-color 0.3s',
                         }}
                       >
-                        <button
-                          className="form-control"
-                          onClick={handleResetFilter}
-                          style={{
-                            backgroundColor: 'rgb(220, 220, 220)',
-                            border: 'none',
-                            color: 'black',
-                            width: '100px',
-                            fontWeight: 'bold',
-                            fontSize: '14px',
-                            cursor: 'pointer',
-                            transition: 'background-color 0.3s',
-                          }}
-                        >
-                          Reset
-                        </button>
-
-                        <button
-                          className="form-control"
-                          type="submit"
-                          onClick={handleDateFilter}
-                          disabled={!(startDate || endDate)}
-                          style={{
-                            backgroundColor: 'black',
-                            border: 'none',
-                            color: 'white',
-                            width: '100px',
-                            fontWeight: 'bold',
-                            fontSize: '14px',
-                            cursor: startDate || endDate ? 'pointer' : 'default',
-                            transition: 'background-color 0.3s',
-                          }}
-                        >
-                          Submit
-                        </button>
-                      </div>
+                        Submit
+                      </button>
                     </div>
                   )}
                 </div>
+                {filterMessage && (
+                  <div style={{ textAlign: 'right', marginTop: '20px', fontWeight: 'bold' }}>
+                    {filterMessage}
+                  </div>
+                )}
               </div>
             </div>
             {/* Comment the following to get rid of the graph tab */}
