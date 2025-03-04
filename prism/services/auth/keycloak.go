@@ -19,16 +19,6 @@ type KeycloakAuth struct {
 	logger   *slog.Logger
 }
 
-func pArg[T any](value T) *T {
-	p := new(T)
-	*p = value
-	return p
-}
-
-var boolArg = pArg[bool]
-var intArg = pArg[int]
-var strArg = pArg[string]
-
 type KeycloakArgs struct {
 	KeycloakServerUrl string `yaml:"keycloak_server_url"`
 
@@ -135,14 +125,14 @@ func (auth *KeycloakAuth) createRealm(adminToken string) error {
 		RegistrationAllowed:          gocloak.BoolP(true),
 		ResetPasswordAllowed:         gocloak.BoolP(true),
 		AccessCodeLifespan:           gocloak.IntP(1500),
-		PasswordPolicy:               strArg("length(8) and digits(1) and lowerCase(1) and upperCase(1) and specialChars(1)"),
-		BruteForceProtected:          boolArg(true),
-		MaxFailureWaitSeconds:        intArg(900),
-		MinimumQuickLoginWaitSeconds: intArg(60),
-		WaitIncrementSeconds:         intArg(60),
-		QuickLoginCheckMilliSeconds:  pArg(int64(1000)),
-		MaxDeltaTimeSeconds:          intArg(43200),
-		FailureFactor:                intArg(30),
+		PasswordPolicy:               gocloak.StringP("length(8) and digits(1) and lowerCase(1) and upperCase(1) and specialChars(1)"),
+		BruteForceProtected:          gocloak.BoolP(true),
+		MaxFailureWaitSeconds:        gocloak.IntP(900),
+		MinimumQuickLoginWaitSeconds: gocloak.IntP(60),
+		WaitIncrementSeconds:         gocloak.IntP(60),
+		QuickLoginCheckMilliSeconds:  gocloak.Int64P(int64(1000)),
+		MaxDeltaTimeSeconds:          gocloak.IntP(43200),
+		FailureFactor:                gocloak.IntP(30),
 		SMTPServer: &map[string]string{
 			"host":     "smtp.sendgrid.net",
 			"port":     "465",
