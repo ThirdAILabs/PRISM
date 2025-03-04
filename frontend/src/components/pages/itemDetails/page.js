@@ -155,7 +155,7 @@ const ItemDetails = () => {
         setAuthorName(report.AuthorName);
         setReportContent(report.Content);
         setInitialReportContent(report.Content);
-        if (report.Status == "complete") {
+        if (report.Status == 'complete') {
           setLoading(false);
         }
       } else if (isMounted) {
