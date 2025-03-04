@@ -5,12 +5,16 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"prism/prism/api"
 	"time"
 
 	"github.com/go-resty/resty/v2"
 )
 
-var ErrSearchFailed = errors.New("error performing openalex search")
+var (
+	ErrSearchFailed   = errors.New("error performing openalex search")
+	ErrAuthorNotFound = errors.New("author not found")
+)
 
 type RemoteKnowledgeBase struct {
 	client *resty.Client
@@ -45,7 +49,7 @@ type oaAutocompletion struct {
 	Hint        string `json:"hint"`
 }
 
-func (oa *RemoteKnowledgeBase) autocompleteHelper(component, query string) ([]oaAutocompletion, error) {
+func (oa *RemoteKnowledgeBase) autocompleteHelper(component, query string) ([]api.Autocompletion, error) {
 	res, err := oa.client.R().
 		SetResult(&oaResults[oaAutocompletion]{}).
 		SetQueryParam("q", query).
@@ -61,43 +65,30 @@ func (oa *RemoteKnowledgeBase) autocompleteHelper(component, query string) ([]oa
 		return nil, fmt.Errorf("unable to get autocomplete suggestions")
 	}
 
-	return res.Result().(*oaResults[oaAutocompletion]).Results, nil
-}
+	results := res.Result().(*oaResults[oaAutocompletion])
 
-func (oa *RemoteKnowledgeBase) AutocompleteAuthor(query string) ([]Author, error) {
-	suggestions, err := oa.autocompleteHelper("authors", query)
-	if err != nil {
-		return nil, err
-	}
-
-	authors := make([]Author, 0, len(suggestions))
-	for _, author := range suggestions {
-		authors = append(authors, Author{
-			AuthorId:     author.Id,
-			DisplayName:  author.DisplayName,
-			Institutions: []Institution{{InstitutionName: author.Hint}},
+	autocompletions := make([]api.Autocompletion, 0, len(results.Results))
+	for _, result := range results.Results {
+		autocompletions = append(autocompletions, api.Autocompletion{
+			Id:   result.Id,
+			Name: result.DisplayName,
+			Hint: result.Hint,
 		})
 	}
 
-	return authors, nil
+	return autocompletions, nil
 }
 
-func (oa *RemoteKnowledgeBase) AutocompleteInstitution(query string) ([]Institution, error) {
-	suggestions, err := oa.autocompleteHelper("institutions", query)
-	if err != nil {
-		return nil, err
-	}
+func (oa *RemoteKnowledgeBase) AutocompleteAuthor(query string) ([]api.Autocompletion, error) {
+	return oa.autocompleteHelper("authors", query)
+}
 
-	institutions := make([]Institution, 0, len(suggestions))
-	for _, institution := range suggestions {
-		institutions = append(institutions, Institution{
-			InstitutionName: institution.DisplayName,
-			InstitutionId:   institution.Id,
-			Location:        institution.Hint,
-		})
-	}
+func (oa *RemoteKnowledgeBase) AutocompleteInstitution(query string) ([]api.Autocompletion, error) {
+	return oa.autocompleteHelper("institutions", query)
+}
 
-	return institutions, nil
+func (oa *RemoteKnowledgeBase) AutocompletePaper(query string) ([]api.Autocompletion, error) {
+	return oa.autocompleteHelper("works", query)
 }
 
 // Response Format: https://docs.openalex.org/api-entities/authors/get-lists-of-authors
@@ -124,6 +115,32 @@ type oaConcept struct {
 	DisplayName string `json:"display_name"`
 }
 
+func convertOpenalexAuthor(author oaAuthor) Author {
+	institutions := make([]Institution, 0, len(author.Affiliations))
+	for i, inst := range author.Affiliations {
+		if i < 3 || inst.Institution.CountryCode == "US" {
+			institutions = append(institutions, Institution{
+				InstitutionName: inst.Institution.DisplayName,
+				InstitutionId:   inst.Institution.Id,
+				Location:        inst.Institution.CountryCode,
+			})
+		}
+	}
+	concepts := make([]string, 0, len(author.Concepts))
+	for _, concept := range author.Concepts {
+		concepts = append(concepts, concept.DisplayName)
+	}
+
+	return Author{
+		AuthorId:                author.Id,
+		DisplayName:             author.DisplayName,
+		DisplayNameAlternatives: author.DisplayNameAlternatives,
+		RawAuthorName:           nil,
+		Institutions:            institutions,
+		Concepts:                concepts,
+	}
+}
+
 func (oa *RemoteKnowledgeBase) FindAuthors(authorName, institutionId string) ([]Author, error) {
 	res, err := oa.client.R().
 		SetResult(&oaResults[oaAuthor]{}).
@@ -145,34 +162,36 @@ func (oa *RemoteKnowledgeBase) FindAuthors(authorName, institutionId string) ([]
 	authors := make([]Author, 0, len(results.Results))
 	for _, result := range results.Results {
 		if result.WorksCount > 0 {
-			institutions := make([]Institution, 0)
-			for i, inst := range result.Affiliations {
-				if i < 3 || inst.Institution.CountryCode == "US" {
-					institutions = append(institutions, Institution{
-						InstitutionName: inst.Institution.DisplayName,
-						InstitutionId:   inst.Institution.Id,
-						Location:        inst.Institution.CountryCode,
-					})
-				}
-			}
-
-			concepts := make([]string, 0, len(result.Concepts))
-			for _, concept := range result.Concepts {
-				concepts = append(concepts, concept.DisplayName)
-			}
-
-			authors = append(authors, Author{
-				AuthorId:                result.Id,
-				DisplayName:             result.DisplayName,
-				DisplayNameAlternatives: result.DisplayNameAlternatives,
-				RawAuthorName:           nil,
-				Institutions:            institutions,
-				Concepts:                concepts,
-			})
+			authors = append(authors, convertOpenalexAuthor(result))
 		}
 	}
 
 	return authors, nil
+}
+
+func (oa *RemoteKnowledgeBase) FindAuthorByOrcidId(orcidId string) (Author, error) {
+	res, err := oa.client.R().
+		SetResult(&oaResults[oaAuthor]{}).
+		SetQueryParam("filter", fmt.Sprintf("orcid:%s", orcidId)).
+		Get("/authors")
+
+	if err != nil {
+		slog.Error("openalex: author search failed", "orcid_id", orcidId, "error", err)
+		return Author{}, ErrSearchFailed
+	}
+
+	if !res.IsSuccess() {
+		slog.Error("openalex: author search returned error", "status_code", res.StatusCode(), "body", res.String())
+		return Author{}, ErrSearchFailed
+	}
+
+	results := res.Result().(*oaResults[oaAuthor])
+
+	if len(results.Results) < 1 {
+		return Author{}, ErrAuthorNotFound
+	}
+
+	return convertOpenalexAuthor(results.Results[0]), nil
 }
 
 type oaMetadata struct {

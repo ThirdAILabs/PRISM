@@ -3,7 +3,7 @@ import { API_ROUTES } from './constants';
 
 export const searchService = {
   searchOpenalexAuthors: async (authorName, institutionId, institutionName) => {
-    const response = await axiosInstance.get(API_ROUTES.SEARCH.REGULAR, {
+    const response = await axiosInstance.get(API_ROUTES.SEARCH.AUTHOR, {
       params: {
         author_name: authorName,
         institution_id: institutionId,
@@ -14,7 +14,7 @@ export const searchService = {
   },
 
   searchGoogleScholarAuthors: async (authorName, institutionName, cursor) => {
-    const response = await axiosInstance.get(API_ROUTES.SEARCH.ADVANCED, {
+    const response = await axiosInstance.get(API_ROUTES.SEARCH.AUTHOR_ADVANCED, {
       params: { author_name: authorName, institution_name: institutionName, cursor: cursor },
     });
     return response.data;
