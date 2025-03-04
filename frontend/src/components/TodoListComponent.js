@@ -74,23 +74,23 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, noResul
               </div>
             )}
           </>
-        ) : (
-          <div
-            className="d-flex justify-content-center mt-4"
-            style={{
-              textAlign: 'center',
-              padding: '2rem',
-              color: '#4a5568',
-              fontSize: '1.1rem',
-              width: '100%',
-            }}
-          >
-            <p>{noResultFound ? 'No results found' : 'Loading...'}</p>
+        ) : ( noResultFound ? (
+          <div className="no-results">
+            <div className="no-results-icon">🔍</div>
+            <h3>No Results Found</h3>
+            <p>Try adjusting your search to find what you're looking for.</p>
           </div>
-        )}
+        ) : (
+          <div className="d-flex flex-column align-items-center pt-4">
+          <p>Loading...</p>
+          <div className="spinner-border text-primary mt-2" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+    </div>
+        ))}
       </>
     </div>
   );
-};
+}
 
 export default TodoListComponent;

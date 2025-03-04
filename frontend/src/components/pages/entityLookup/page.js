@@ -135,7 +135,9 @@ function EntityLookup() {
           : !isLoading &&
             hasSearched && (
               <div className="no-results">
-                <p>No results found</p>
+                <div className="no-results-icon">🔍</div>
+                <h3>No Results Found</h3>
+                <p>Try adjusting your search to find what you're looking for.</p>
               </div>
             )}
       </div>
