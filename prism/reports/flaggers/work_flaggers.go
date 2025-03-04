@@ -376,11 +376,6 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
 	logger *slog.Logger, acknowledgements []Acknowledgement, allAuthorNames []string,
 ) (map[string]bool, error) {
-	if flagger.triangulationDB.GetTriangulationDB() == nil {
-		logger.Error("triangulation db is not set")
-		return nil, fmt.Errorf("triangulation db is not set")
-	}
-
 	for _, ack := range acknowledgements {
 		for _, entity := range ack.SearchableEntities {
 			logger.Info("Found entity", "entity", entity)
