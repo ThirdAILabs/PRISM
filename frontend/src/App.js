@@ -11,6 +11,7 @@ import UniversityAssessment from './components/pages/UniversityAssessment';
 import UniversityReport from './components/pages/UniversityReport';
 import { useLocation } from 'react-router-dom';
 import Error from './components/pages/Error';
+import { GetShowMenuIcon } from './utils/helper.js';
 //CSS
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.js';
@@ -26,7 +27,6 @@ function App() {
 
 function AppContent() {
   const { updateUserInfo } = useUser();
-  const location = useLocation();
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
 
   useEffect(() => {
@@ -38,7 +38,8 @@ function AppContent() {
     }
   }, []);
 
-  const showMenuIcon = !location.pathname.includes('report');
+
+  const showMenuIcon = GetShowMenuIcon();
 
   return (
     <div className="App">

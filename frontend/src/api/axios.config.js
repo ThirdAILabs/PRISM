@@ -25,9 +25,20 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (error.response?.status === 401) {
+      UserService.doLogout();
+      return Promise.reject(error);
+    }
     const errorMessage =
       error.response?.data?.message || error.message || 'An unexpected error occurred';
-    // window.location.href = `/error?message=${encodeURIComponent(errorMessage)}`;
+
+    // Use a fallback value if status is null or undefined
+    const errorStatus = error.response?.status || 500;
+
+    window.location.href = `/error?message=${encodeURIComponent(
+      errorMessage
+    )}&status=${encodeURIComponent(errorStatus)}`;
+
     return Promise.reject(error);
   }
 );
