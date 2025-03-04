@@ -1056,23 +1056,23 @@ const ItemDetails = () => {
                   if (!hasDates) return null;
                   return (
                     <div
-                    style={{
-                      marginBottom: '20px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '10px',
-                    }}
-                  >
-                    <span style={{ marginRight: '10px' }}>Sort by Date</span>
-                    <div onClick={toggleSortOrder} style={{ cursor: 'pointer' }}>
-                      {sortOrder === 'asc' ? (
-                        <ArrowUpwardIcon style={{ color: 'black' }} />
-                      ) : (
-                        <ArrowDownwardIcon style={{ color: 'black' }} />
-                      )}
+                      style={{
+                        marginBottom: '20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px',
+                      }}
+                    >
+                      <span style={{ marginRight: '10px' }}>Sort by Date</span>
+                      <div onClick={toggleSortOrder} style={{ cursor: 'pointer' }}>
+                        {sortOrder === 'asc' ? (
+                          <ArrowUpwardIcon style={{ color: 'black' }} />
+                        ) : (
+                          <ArrowDownwardIcon style={{ color: 'black' }} />
+                        )}
+                      </div>
                     </div>
-                  </div>
                   );
                 })()}
 
