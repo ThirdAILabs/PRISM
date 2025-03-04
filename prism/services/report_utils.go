@@ -238,6 +238,10 @@ func generatePDF(report api.Report) ([]byte, error) {
 	pdf.SetMargins(20, 20, 20)
 	pdf.SetAutoPageBreak(true, 20)
 
+	pdf.SetHeaderFunc(func() {
+		printWatermark(pdf, "PRISM")
+	})
+
 	pdf.SetFooterFunc(func() {
 		pdf.SetY(-15)
 		pdf.SetFont("Arial", "I", 8)
@@ -329,36 +333,59 @@ func generatePDF(report api.Report) ([]byte, error) {
 		pdf.SetTextColor(0, 0, 0)
 	}
 
-	addFlagPage := func(flag api.Flag) error {
+	addFlagPages := func(flags []api.Flag) error {
+		if len(flags) == 0 {
+			return nil
+		}
 		pdf.AddPage()
-		printWatermark(pdf, "PRISM")
 		pdf.SetFont("Arial", "B", 14)
-		pdf.CellFormat(0, 10, flag.GetHeading(), "0", 1, "C", true, 0, "")
+		pdf.SetFillColor(200, 200, 255) // Light blue background for heading
+		pdf.CellFormat(0, 10, flags[0].GetHeading(), "0", 1, "C", true, 0, "")
 		pdf.Ln(3)
-		for _, kv := range flag.GetDetailFields() {
-			pdf.SetFont("Arial", "B", 12)
-			pdf.CellFormat(41, 8, kv.Key, "", 0, "L", false, 0, "")
-			pageWidth, _ := pdf.GetPageSize()
-			left, _, right, _ := pdf.GetMargins() // returns left, top, right, bottom
-			valueWidth := pageWidth - left - right - 41
-			pdf.SetFont("Arial", "", 12)
-			if strings.EqualFold(kv.Key, "URL") || strings.HasSuffix(strings.ToLower(kv.Key), "url") {
-				pdf.SetTextColor(0, 0, 255)
-				pdf.CellFormat(0, 8, "link", "", 1, "L", false, 0, kv.Value)
-				pdf.SetTextColor(0, 0, 0)
-			} else {
-				pdf.MultiCell(valueWidth, 8, kv.Value, "", "L", false)
+
+		for flagIndex, flag := range flags {
+			pdf.SetFont("Arial", "B", 13)
+			pdf.SetFillColor(230, 230, 230) // Light gray background for item heading
+			pdf.CellFormat(0, 10, fmt.Sprintf("Flagged Entity %d", flagIndex+1), "", 1, "L", true, 0, "")
+			pdf.Ln(3)
+
+			// Add key-value pairs with better formatting
+			for _, kv := range flag.GetDetailFields() {
+				pdf.SetFont("Arial", "B", 11)
+				pdf.SetTextColor(80, 80, 80) // Dark gray for keys
+				pdf.CellFormat(0, 8, kv.Key, "", 1, "L", false, 0, "")
+
+				// Value
+				pdf.SetX(pdf.GetX() + 10)
+				pdf.SetFont("Arial", "", 11)
+				pdf.SetTextColor(0, 0, 0) // Black for values
+
+				pdf.SetX(pdf.GetX() + 10)
+				if strings.EqualFold(kv.Key, "URL") || strings.HasSuffix(strings.ToLower(kv.Key), "url") {
+					pdf.SetTextColor(0, 0, 200) // Blue text for URLs
+					pdf.CellFormat(0, 8, "link", "", 1, "L", false, 0, kv.Value)
+					pdf.SetTextColor(0, 0, 0)
+				} else {
+					pdf.MultiCell(0, 8, kv.Value, "", "L", false)
+				}
+				pdf.SetX(pdf.GetX() - 10) // Reset indentation
+
+				pdf.Ln(2)
+			}
+
+			if flagIndex < len(flags)-1 {
+				pdf.Ln(3)
+				pdf.SetDrawColor(200, 200, 200)           // Light gray line
+				pdf.Line(20, pdf.GetY(), 190, pdf.GetY()) // Horizontal line across page
+				pdf.Ln(8)                                 // Space after divider
 			}
 		}
-		pdf.Ln(5)
 		return nil
 	}
 
 	for _, group := range headingsAndFlags {
-		for _, flag := range group.flags {
-			if err := addFlagPage(flag); err != nil {
-				return nil, err
-			}
+		if err := addFlagPages(group.flags); err != nil {
+			return nil, err
 		}
 	}
 
