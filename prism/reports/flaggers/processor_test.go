@@ -25,7 +25,7 @@ func setupReportManager(t *testing.T) *reports.ReportManager {
 	}
 
 	if err := db.AutoMigrate(&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{},
-		&schema.UniversityReport{}, &schema.UserUniversityReport{}, &schema.LicenseUsage{}); err != nil {
+		&schema.UniversityReport{}, &schema.UserUniversityReport{}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -55,7 +55,7 @@ func yearEnd(year int) time.Time {
 
 func getReportContent(t *testing.T, report reports.ReportUpdateTask, processor *ReportProcessor, manager *reports.ReportManager) api.ReportContent {
 	user := uuid.New()
-	reportId, err := manager.CreateAuthorReport(uuid.New(), user, report.AuthorId, report.AuthorName, report.Source)
+	reportId, err := manager.CreateAuthorReport(user, report.AuthorId, report.AuthorName, report.Source)
 	if err != nil {
 		t.Fatal(err)
 	}
