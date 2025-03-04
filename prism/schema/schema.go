@@ -72,31 +72,3 @@ type UserUniversityReport struct {
 	ReportId uuid.UUID         `gorm:"type:uuid;not null"`
 	Report   *UniversityReport `gorm:"foreignKey:ReportId"`
 }
-
-type License struct {
-	Id          uuid.UUID `gorm:"type:uuid;primaryKey"`
-	Secret      []byte
-	Name        string
-	Expiration  time.Time
-	Deactivated bool
-}
-
-type LicenseUser struct {
-	UserId    uuid.UUID `gorm:"type:uuid;primaryKey"`
-	LicenseId uuid.UUID `gorm:"type:uuid"`
-
-	License *License `gorm:"foreignKey:LicenseId"`
-}
-
-const (
-	UniversityReportType = "university"
-	AuthorReportType     = "author"
-)
-
-type LicenseUsage struct {
-	LicenseId  uuid.UUID `gorm:"type:uuid;primaryKey"`
-	ReportId   uuid.UUID `gorm:"type:uuid;primaryKey"`
-	ReportType string    `gorm:"size:40"`
-	UserId     uuid.UUID
-	Timestamp  time.Time
-}
