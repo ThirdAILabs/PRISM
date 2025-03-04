@@ -515,9 +515,9 @@ const ItemDetails = () => {
           {flag.RawAcknowledements.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
-          <p>{}</p>
+          <p>{ }</p>
         </p>
-        {}
+        { }
         {isDisclosureChecked &&
           (flag.Disclosed ? (
             <button type="button" className="btn btn-success">
@@ -781,13 +781,13 @@ const ItemDetails = () => {
   );
 
   return (
-    !loading && (
+    (
       <div className="basic-setup">
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-row">
             <div className="detail-header">
               <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate(-1)}
                 className="btn text-dark mb-3"
                 style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}
               >

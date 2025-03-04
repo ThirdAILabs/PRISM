@@ -237,7 +237,7 @@ const UniversityReport = () => {
         <div className="flex flex-row">
           <div className="detail-header">
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate(-1)}
               className="btn text-dark mb-3"
               style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}
             >
