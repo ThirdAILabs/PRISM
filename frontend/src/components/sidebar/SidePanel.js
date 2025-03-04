@@ -58,23 +58,25 @@ const SidePanel = ({ isOpen, onClose }) => {
     navigate(`/report/${report.Id}`);
   };
 
-  const handleMouseLeave = () => {
-    onClose();
-  };
-
   return (
-    <div className={`side-panel ${isOpen ? 'open' : ''}`} onMouseLeave={handleMouseLeave}>
+    <div className={`side-panel ${isOpen ? 'open' : ''}`}>
       <div className="panel-content">
         {/* Header */}
-        <div className="side-panel-header">
+        <div
+          className="side-panel-header"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '10px 20px',
+            paddingTop: '0',
+            borderBottom: '1px solid #e0e0e0',
+            gap: '20px',
+          }}
+        >
           <img
             src={PRISM_LOGO}
             alt="PRISM"
-            style={{
-              height: '30px',
-              width: 'auto',
-              objectFit: 'contain',
-            }}
+            style={{ width: '150px', height: '30px', marginLeft: '10%' }}
           />
         </div>
         {/* Navigation */}
