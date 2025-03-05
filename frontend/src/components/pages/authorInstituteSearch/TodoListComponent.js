@@ -1,7 +1,8 @@
 // src/TodoListComponent.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { reportService } from '../api/reports';
+import { reportService } from '../../../api/reports';
+import './TodoListComponent.css';
 
 const TodoListComponent = ({ results, setResults, canLoadMore, loadMore }) => {
   const navigate = useNavigate();
@@ -24,9 +25,9 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore }) => {
   };
 
   return (
-    <div className="d-flex flex-column align-items-center w-100 ">
+    <div className="d-flex flex-column w-100 ">
       <>
-        <ul className="result-wrapper d-flex flex-wrap mt-3">
+        <ul className="result-wrapper">
           {results.map((result, index) => (
             <li key={index} onClick={() => handleItemClick(result)} className="result-item">
               <div className="text-start px-5">
@@ -50,9 +51,11 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore }) => {
           ))}
         </ul>
         {canLoadMore && (
-          <button className="button" onClick={getMoreResults}>
-            Show More
-          </button>
+          <div className="show-more-results-button">
+            <button className="button" onClick={getMoreResults}>
+              Show More
+            </button>
+          </div>
         )}
       </>
     </div>
