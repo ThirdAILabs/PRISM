@@ -97,7 +97,7 @@ function EntityLookup() {
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="E.g. PQR Company"
                     className="search-bar"
-                    style ={{
+                    style={{
                       marginBottom: '20px',
                     }}
                   />

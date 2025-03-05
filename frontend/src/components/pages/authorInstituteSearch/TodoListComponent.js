@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { reportService } from '../../../api/reports';
 import './TodoListComponent.css';
 
-const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoading }) => {
+const TodoListComponent = ({ results, setResults, canLoadMore, loadMore }) => {
   const navigate = useNavigate();
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
@@ -30,17 +30,7 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadi
       }
     }
   };
-  if (isLoading) {
-    console.log('Showing loading spinner!');
-    return (
-      <div className="d-flex justify-content-center align-items-center p-5">
-        <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
-          <span className="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    );
-  }
-  
+
   return (
     <div className="d-flex flex-column w-100">
       {results.length > 0 ? (
