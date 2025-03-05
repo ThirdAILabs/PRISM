@@ -390,6 +390,15 @@ func containsSource(entities []api.AcknowledgementEntity, sourcesOfInterest []st
 	return false
 }
 
+// Grobid adds a header to acknowledgements (e.g. "Acknowledgments" or "Funding")
+// in the extracted text. For now, we remove that header using a regex on the text.
+// A better approach would be to fix the root cause in the Grobid response itself,
+// but that was giving unexpected results. We will revisit that when time permits.
+func cleanAckHeader(raw string) string {
+	re := regexp.MustCompile(`(?i)^(acknowledgements|acknowledgments|funding)[:\s-]*`)
+	return re.ReplaceAllString(raw, "")
+}
+
 func createAcknowledgementFlag(work openalex.Work, message string, entities []api.AcknowledgementEntity, rawAcks []string) api.Flag {
 	if strings.Contains(message, "talent") || strings.Contains(message, "Talent") || containsSource(entities, talentPrograms) {
 		return &api.TalentContractFlag{
@@ -473,7 +482,8 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 		if flagged {
 			ackTexts := make([]string, 0, len(acks.Result.Acknowledgements))
 			for _, ack := range acks.Result.Acknowledgements {
-				ackTexts = append(ackTexts, ack.RawText)
+				cleanedText := cleanAckHeader(ack.RawText)
+				ackTexts = append(ackTexts, cleanedText)
 			}
 
 			entities := make([]api.AcknowledgementEntity, 0, len(flaggedEntities))
