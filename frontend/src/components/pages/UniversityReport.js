@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import useGoBack from '../../hooks/useGoBack.js';
 import {
   TALENT_CONTRACTS,
   ASSOCIATIONS_WITH_DENIED_ENTITIES,
@@ -105,7 +106,7 @@ const UniversityReport = () => {
   }, []);
 
   const [loading, setLoading] = useState(true);
-
+  const goBack = useGoBack('/university');
   return (
     <div className="basic-setup" style={{ minHeight: '100vh', paddingBottom: '50px' }}>
       {/* <div className="grid grid-cols-2 gap-4"> */}
@@ -118,7 +119,7 @@ const UniversityReport = () => {
         }}
       >
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => goBack()}
           className="btn text-dark mb-3"
           style={{
             minWidth: '80px',
@@ -187,38 +188,38 @@ const UniversityReport = () => {
         >
           {reportContent?.Flags
             ? FLAG_ORDER.map((flag, index) => {
-                let value = 0;
-                const flagData = reportContent.Flags[flag] || [];
+              let value = 0;
+              const flagData = reportContent.Flags[flag] || [];
 
-                if (flagData.length > 0) {
-                  for (let authorIndex = 0; authorIndex < flagData.length; authorIndex++) {
-                    const author = flagData[authorIndex];
-                    value += author.FlagCount;
-                  }
+              if (flagData.length > 0) {
+                for (let authorIndex = 0; authorIndex < flagData.length; authorIndex++) {
+                  const author = flagData[authorIndex];
+                  value += author.FlagCount;
                 }
+              }
 
-                return (
-                  <ConcernVisualizer
-                    title={TitlesAndDescriptions[flag].title}
-                    hoverText={TitlesAndDescriptions[flag].desc}
-                    value={value || 0}
-                    onReview={() => handleReview(flag)}
-                    key={index}
-                  />
-                );
-              })
+              return (
+                <ConcernVisualizer
+                  title={TitlesAndDescriptions[flag].title}
+                  hoverText={TitlesAndDescriptions[flag].desc}
+                  value={value || 0}
+                  onReview={() => handleReview(flag)}
+                  key={index}
+                />
+              );
+            })
             : FLAG_ORDER.map((flag, index) => {
-                let value = 0;
-                return (
-                  <ConcernVisualizer
-                    title={TitlesAndDescriptions[flag].title}
-                    hoverText={TitlesAndDescriptions[flag].desc}
-                    value={value || 0}
-                    onReview={() => handleReview(flag)}
-                    key={index}
-                  />
-                );
-              })}
+              let value = 0;
+              return (
+                <ConcernVisualizer
+                  title={TitlesAndDescriptions[flag].title}
+                  hoverText={TitlesAndDescriptions[flag].desc}
+                  value={value || 0}
+                  onReview={() => handleReview(flag)}
+                  key={index}
+                />
+              );
+            })}
         </div>
 
         {showModal && (

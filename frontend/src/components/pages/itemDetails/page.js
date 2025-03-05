@@ -23,6 +23,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import Shimmer from './Shimmer.js';
 import MuiAlert from '@mui/material/Alert';
 import { Snackbar } from '@mui/material';
+import useGoBack from '../../../hooks/useGoBack.js';
 
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
@@ -268,17 +269,17 @@ const ItemDetails = () => {
 
     const displayStart = startDate
       ? parseLocalDate(startDate).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
       : 'earliest';
     const displayEnd = endDate
       ? parseLocalDate(endDate).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
       : 'today';
 
     setFilterMessage(`${displayStart} to ${displayEnd}`);
@@ -554,7 +555,7 @@ const ItemDetails = () => {
           {flag.RawAcknowledements.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
-          <p>{}</p>
+          <p>{ }</p>
         </p>
       </div>
     );
@@ -799,7 +800,7 @@ const ItemDetails = () => {
   const hasDates = items.some(
     (item) => item?.Work?.PublicationDate && !isNaN(new Date(item.Work.PublicationDate).getTime())
   );
-
+  const goBack = useGoBack('/');
   return (
     <div className="basic-setup">
       <div className="grid grid-cols-2 gap-4">
@@ -815,7 +816,7 @@ const ItemDetails = () => {
             }}
           >
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => goBack()}
               className="btn text-dark mb-3"
               style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}
             >
