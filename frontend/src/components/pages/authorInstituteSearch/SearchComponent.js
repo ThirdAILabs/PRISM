@@ -109,6 +109,7 @@ const SearchComponent = () => {
                 setSearchState((prev) => ({ ...prev, canLoadMore: false }));
                 return result.Authors;
               }}
+              isLoading={searchState.isOALoading}
             />
           )}
         </div>
