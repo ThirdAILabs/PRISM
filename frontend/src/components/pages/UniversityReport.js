@@ -108,59 +108,63 @@ const UniversityReport = () => {
 
   return (
     <div className="basic-setup" style={{ minHeight: '100vh', paddingBottom: '50px' }}>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-row">
-          <div
-            className="detail-header"
-            style={{
-              display: 'flex',
-              position: 'absolute',
-              justifyContent: 'center',
-              width: '100%',
-            }}
+      {/* <div className="grid grid-cols-2 gap-4"> */}
+      {/* <div className="flex flex-row"> */}
+      <div
+        className="detail-header"
+        style={{
+          // display: 'flex',
+          width: '100%',
+        }}
+      >
+        <button
+          onClick={() => navigate(-1)}
+          className="btn text-dark mb-3"
+          style={{
+            minWidth: '80px',
+            left: '10px',
+          }}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ marginRight: '8px' }}
           >
-            <button
-              onClick={() => navigate(-1)}
-              className="btn text-dark mb-3"
-              style={{
-                minWidth: '80px',
-                display: 'flex',
-                alignItems: 'center',
-                position: 'absolute',
-                left: '10px',
-              }}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                style={{ marginRight: '8px' }}
-              >
-                <path
-                  d="M10 19L3 12L10 5"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M3 12H21"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Back
-            </button>
-            <h5 style={{ margin: '0 auto' }}>{instituteName}</h5>
-          </div>
-        </div>
+            <path
+              d="M10 19L3 12L10 5"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M3 12H21"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          Back
+        </button>
+        <h5 style={{ margin: '0 auto' }}>{instituteName}</h5>
       </div>
+      {/* </div> */}
+      {/* </div> */}
 
       <>
+        <div className="d-flex w-100 flex-column align-items-center">
+          <div className="d-flex w-100 px-5 align-items-center my-2 mt-3 justify-content-between">
+            <div style={{ width: '20px' }}>
+              {loading && (
+                <div className="spinner-border text-primary spinner-border-sm" role="status"></div>
+              )}
+            </div>
+          </div>
+        </div>
         {(
           <div
             className="d-flex w-100 flex-column align-items-center"
@@ -181,7 +185,7 @@ const UniversityReport = () => {
             marginTop: '20px',
           }}
         >
-          {reportContent?.Flags &&
+          {reportContent?.Flags ?
             FLAG_ORDER.map((flag, index) => {
               let value = 0;
               const flagData = reportContent.Flags[flag] || [];
@@ -202,7 +206,19 @@ const UniversityReport = () => {
                   key={index}
                 />
               );
-            })}
+            }) : FLAG_ORDER.map((flag, index) => {
+              let value = 0;
+              return (
+                <ConcernVisualizer
+                  title={TitlesAndDescriptions[flag].title}
+                  hoverText={TitlesAndDescriptions[flag].desc}
+                  value={value || 0}
+                  onReview={() => handleReview(flag)}
+                  key={index}
+                />
+              );
+            })
+          }
         </div>
 
         {showModal && (
