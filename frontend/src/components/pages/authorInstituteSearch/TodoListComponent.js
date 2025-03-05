@@ -14,7 +14,11 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore }) => {
       Source: result.Source,
       StartYear: 1990,
     });
-    navigate(`/report/${response.Id}`);
+    navigate(`/report/${response.Id}`, {
+      state: {
+        canGoBack: true,
+      },
+    });
     return;
   };
 
