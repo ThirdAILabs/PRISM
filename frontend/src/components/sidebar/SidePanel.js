@@ -76,11 +76,19 @@ const SidePanel = ({ isOpen, onClose }) => {
   };
   const handleReportClick = (report) => {
     onClose();
-    navigate(`/report/${report.Id}`);
+    navigate(`/report/${report.Id}`, {
+      state: {
+        canGoBack: true,
+      },
+    });
   };
   const handleUniversityReportClick = (universityReport) => {
     onClose();
-    navigate(`/university/report/${universityReport.Id}`);
+    navigate(`/university/report/${universityReport.Id}`, {
+      state: {
+        canGoBack: true,
+      },
+    });
   };
   return (
     <>
@@ -236,7 +244,7 @@ const SidePanel = ({ isOpen, onClose }) => {
               <div className="collapsible-content">
                 {universityReports.map(
                   (universityReport, index) =>
-                    index < 10 && (
+                    index < 1000 && (
                       <div
                         key={universityReport.Id}
                         className="report-item"

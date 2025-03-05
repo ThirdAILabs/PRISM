@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import useGoBack from '../../hooks/useGoBack.js';
 import {
   TALENT_CONTRACTS,
   ASSOCIATIONS_WITH_DENIED_ENTITIES,
@@ -105,7 +106,7 @@ const UniversityReport = () => {
   }, []);
 
   const [loading, setLoading] = useState(true);
-
+  const goBack = useGoBack('/university');
   return (
     <div className="basic-setup" style={{ minHeight: '100vh', paddingBottom: '50px' }}>
       {/* <div className="grid grid-cols-2 gap-4"> */}
@@ -118,7 +119,7 @@ const UniversityReport = () => {
         }}
       >
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => goBack()}
           className="btn text-dark mb-3"
           style={{
             minWidth: '80px',
