@@ -315,10 +315,6 @@ func parseGrobidReponse(data io.Reader) ([]Acknowledgement, error) {
 		searchable := make([]Entity, 0)
 		misc := make([]Entity, 0)
 
-		fmt.Println("allEntities", allEntities)
-
-		fmt.Println("allEntities", mergeFundersAndFundCodes(allEntities))
-
 		for _, entity := range mergeFundersAndFundCodes(allEntities) {
 			if searchAbleEntityTypes[entity.EntityType] {
 				searchable = append(searchable, entity)
