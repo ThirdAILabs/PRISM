@@ -176,7 +176,7 @@ cython_debug/
 config.yaml
 model/
 
-*.csv
+**/*.csv
 *.txt
 *.py
 *.pdf

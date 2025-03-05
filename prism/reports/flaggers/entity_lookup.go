@@ -68,6 +68,10 @@ func createFlash(aliases []string) (search.Flash, error) {
 		return search.Flash{}, fmt.Errorf("error creating csv: %w", err)
 	}
 
+	defer func() {
+		os.Remove(csv)
+	}()
+
 	flash, err := search.NewFlash()
 	if err != nil {
 		return search.Flash{}, fmt.Errorf("error creating flash")
