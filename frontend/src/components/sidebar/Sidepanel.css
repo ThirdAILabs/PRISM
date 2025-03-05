@@ -122,3 +122,7 @@
   background: #cce5ff;
   color: #004085;
 }
+
+.refresh-icon {
+  cursor: pointer;
+}

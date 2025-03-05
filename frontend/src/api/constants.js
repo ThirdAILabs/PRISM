@@ -4,6 +4,7 @@ export const API_ROUTES = {
   REPORTS: {
     LIST: '/api/v1/report/author/list',
     CREATE: '/api/v1/report/author/create',
+    RECREATE: (id) => `/api/v1/report/author/${id}/recreate`,
     GET: (id) => `/api/v1/report/author/${id}`,
     ACTIVATE_LICENSE: '/api/v1/report/activate-license',
     CHECK_DISCLOSURE: (id) => `/api/v1/report/author/${id}/check-disclosure`,

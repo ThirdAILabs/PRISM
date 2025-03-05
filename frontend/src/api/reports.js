@@ -12,6 +12,11 @@ export const reportService = {
     return response.data;
   },
 
+  recreateReport: async (reportId) => {
+    const response = await axiosInstance.post(API_ROUTES.REPORTS.RECREATE(reportId));
+    return response.data;
+  },
+
   getReport: async (reportId) => {
     const response = await axiosInstance.get(API_ROUTES.REPORTS.GET(reportId));
     return response.data;

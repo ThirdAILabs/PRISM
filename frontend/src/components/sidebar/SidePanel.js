@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { reportService } from '../../api/reports';
 import './Sidepanel.css';
+import { IoRefresh } from "react-icons/io5";
 import RandomAvatar from '../../assets/images/RandomAvatar.jpg';
 import PRISM_LOGO from '../../assets/images/prism.png';
 import { FaRegUserCircle, FaUniversity, FaSearch } from 'react-icons/fa';
@@ -134,7 +135,13 @@ const SidePanel = ({ isOpen, onClose }) => {
                   onClick={handleReportClick.bind(null, report)}
                 >
                   <p>{report.AuthorName}</p>
-                  {/* <span><MdDelete style={15} /></span> */}
+                  <IoRefresh
+                    className='refresh-icon'
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // handleReloadReport(report.Id);
+                    }}
+                  />
                   <span className={`status ${report.Status}`}>{status[report.Status]}</span>
                 </div>
               )
