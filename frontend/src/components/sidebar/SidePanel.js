@@ -202,10 +202,10 @@ const SidePanel = ({ isOpen, onClose }) => {
                   className="collapsible-icon"
                 >
                   {showAuthorReports ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
+                  <span style={{ fontSize: 'medium', marginLeft: '10px', marginRight: '15px' }}>
+                    Author Report
+                  </span>
                 </div>
-                <span style={{ fontSize: 'medium', fontWeight: 'normal', marginLeft: '10px' }}>
-                  Author Report
-                </span>
               </div>
             </div>
             {showAuthorReports && (
@@ -236,8 +236,10 @@ const SidePanel = ({ isOpen, onClose }) => {
                   className="collapsible-icon"
                 >
                   {showUniversityReports ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
+                  <span style={{ fontSize: 'medium', marginLeft: '10px', marginRight: '15px' }}>
+                    University Report
+                  </span>
                 </div>
-                <span style={{ fontSize: 'medium', marginLeft: '10px' }}>University Report</span>
               </div>
             </div>
             {showUniversityReports && (
