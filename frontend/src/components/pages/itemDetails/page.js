@@ -118,7 +118,7 @@ const ItemDetails = () => {
   const [notification, setNotification] = useState({
     open: false,
     severity: '',
-    message: ''
+    message: '',
   });
 
   const fileInputRef = useRef(null);
@@ -135,7 +135,7 @@ const ItemDetails = () => {
       setNotification({
         open: true,
         severity: 'error',
-        message: 'No files selected'
+        message: 'No files selected',
       });
       return;
     }
@@ -147,7 +147,7 @@ const ItemDetails = () => {
       setNotification({
         open: true,
         severity: 'error',
-        message: 'No files selected'
+        message: 'No files selected',
       });
       return;
     }
@@ -163,13 +163,13 @@ const ItemDetails = () => {
       setNotification({
         open: true,
         severity: 'success',
-        message: 'Disclosure check succeeded!'
+        message: 'Disclosure check succeeded!',
       });
     } catch (error) {
       setNotification({
         open: true,
         severity: 'error',
-        message: error.response?.data?.message || 'Failed to check disclosure'
+        message: error.response?.data?.message || 'Failed to check disclosure',
       });
     }
   };
@@ -973,15 +973,15 @@ const ItemDetails = () => {
               onChange={handleFileSelect}
             />
             <Snackbar
-        open={notification.open}
-        autoHideDuration={6000}
-        onClose={handleCloseNotification}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={handleCloseNotification} severity={notification.severity}>
-          {notification.message}
-        </Alert>
-      </Snackbar>
+              open={notification.open}
+              autoHideDuration={2000}
+              onClose={handleCloseNotification}
+              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+              <Alert onClose={handleCloseNotification} severity={notification.severity}>
+                {notification.message}
+              </Alert>
+            </Snackbar>
             <DownloadButton
               reportId={report_id}
               isOpen={dropdownOpen === 2}
