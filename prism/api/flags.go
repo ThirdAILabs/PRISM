@@ -18,8 +18,9 @@ type Flag interface {
 
 	// This is used to deduplicate flags. Primarily for author flags, it is
 	// possible to have the same flag created for multiple works, for instance by
-	// finding the author is faculty at an EOC. For work flags, the key is just
-	// the flagger type and work id since we can only have 1 flag for a given work.
+	// finding the author is faculty at an EOC. For work flags, the key is just the 
+	// hash of the flagger type and work id since we can only have 1 flag for a 
+	// given work.
 	Hash() [sha256.Size]byte
 
 	GetEntities() []string
