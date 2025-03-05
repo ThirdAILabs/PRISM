@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import '../../common/searchBar/SearchBar.css';
 import '../../common/tools/button/button1.css';
+import './entityLookup.css';
 import Logo from '../../../assets/images/prism-logo.png';
-import '../../common/searchBar/SearchBar.css';
-import '../../common/tools/button/button1.css';
 import { searchService } from '../../../api/search';
 import './page.css';
 
@@ -46,48 +45,75 @@ function EntityLookup() {
       setResults(entities);
     } catch (error) {
       console.error('Error fetching data:', error);
-      alert('Error fetching data: ' + error.message);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="entity-lookup-container">
-      <div className="logo-section">
-        <img src={Logo} alt="PRISM Logo" />
-      </div>
-
-      <div className="header-section">
-        <h1 className="header-title">Entity Lookup</h1>
-        <p className="header-subtitle">We help you comply with research security requirements.</p>
-        <p
-          className="header-subtitle"
-          style={{ marginTop: '10', marginBottom: '2%', color: '#888888' }}
-        >
-          Search for an entity to see if it is on any list of concerning entities.
-        </p>
-      </div>
-
-      <div className="search-section">
-        <form onSubmit={handleSubmit} className="author-institution-search-bar">
-          <div className="autocomplete-search-bar">
-            <div className="autocomplete-search-bar-title">Entity</div>
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="E.g. PQR Company"
-              className="search-bar"
-            />
+    <div className="basic-setup" style={{ color: 'white' }}>
+      <div style={{ textAlign: 'center', marginTop: '5.5%', animation: 'fade-in 0.75s' }}>
+        <img
+          src={Logo}
+          alt="Logo"
+          style={{
+            width: '320px',
+            marginTop: '5%',
+            marginBottom: '1%',
+            marginRight: '2%',
+            animation: 'fade-in 0.5s',
+          }}
+        />
+        <div style={{ animation: 'fade-in 1s' }}>
+          <div className="d-flex justify-content-center align-items-center">
+            <div style={{ color: '#888888' }}>
+              <h1
+                style={{
+                  marginTop: 20,
+                  fontWeight: 'bold',
+                  color: 'black',
+                  animation: 'fade-in 0.75s',
+                }}
+              >
+                Entity Lookup
+              </h1>
+              <p>We help you comply with research security requirements.</p>
+            </div>
           </div>
-          <div style={{ width: '40px' }} />
-          <div className="author-institution-search-button-container">
-            <button type="submit" disabled={isLoading || query.length == 0} className="button">
-              {isLoading ? 'Searching...' : 'Search'}
-            </button>
+          <div className="d-flex justify-content-center align-items-center">
+            <div style={{ marginTop: 10, marginBottom: '0%', color: '#888888' }}>
+              Search for an entity to see if it is on any list of concerning entities.
+            </div>
           </div>
-        </form>
+        </div>
+
+        <div style={{ animation: 'fade-in 1s' }}>
+          <div className="d-flex justify-content-center align-items-center pt-5">
+            <div style={{ width: '80%' }}>
+              <form onSubmit={handleSubmit} className="author-institution-search-bar">
+                <div className="entity-lookup-search-bar-container">
+                  <div className="autocomplete-search-bar-title">Entity</div>
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="E.g. PQR Company"
+                    className="search-bar"
+                  />
+                </div>
+                <div className="author-institution-search-button-container">
+                  <button
+                    type="submit"
+                    disabled={isLoading || query.length === 0}
+                    className="button"
+                  >
+                    {isLoading ? 'Searching...' : 'Search'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
 
       {isLoading && (
