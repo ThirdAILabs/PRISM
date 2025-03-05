@@ -73,6 +73,12 @@ type UniversityReportContent struct {
 	Flags           map[string][]UniversityAuthorFlag
 }
 
+type Autocompletion struct {
+	Id   string
+	Name string
+	Hint string
+}
+
 type Author struct {
 	AuthorId     string
 	AuthorName   string
@@ -96,8 +102,12 @@ type FormalRelationResponse struct {
 	HasFormalRelation bool
 }
 
-type MatchEntitiesResponse struct {
-	Entities []string
+type MatchedEntity struct {
+	Names    string
+	Address  string
+	Country  string
+	Type     string
+	Resource string
 }
 
 type CreateLicenseRequest struct {

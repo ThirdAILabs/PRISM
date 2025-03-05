@@ -1,18 +1,25 @@
 import React from 'react';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { TbReportSearch } from 'react-icons/tb';
+import { reportService } from '../../../api/reports';
 
 const AuthorCard = ({ authors }) => {
+  const handleClick = async (authorId, authorName, Source) => {
+    const report = await reportService.createReport({
+      AuthorId: authorId,
+      AuthorName: authorName,
+      Source: Source,
+      StartYear: 1990,
+    });
+
+    window.open('/report/' + report.Id, '_blank');
+  };
+
   const columns = [
     {
       field: 'authorName',
       headerName: 'Author Name',
-      flex: 1,
-    },
-    {
-      field: 'source',
-      headerName: 'Source',
-      flex: 1,
+      width: 450,
     },
     {
       field: 'flagCount',
@@ -24,15 +31,19 @@ const AuthorCard = ({ authors }) => {
       headerName: 'Actions',
       width: 230,
       renderCell: (params) => (
-        <a
-          href={`/report/${params.row.reportId}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: 'inherit', textDecoration: 'none' }}
+        <span
+          onClick={() => {
+            handleClick(params.row.authorId, params.row.authorName, params.row.source);
+          }}
+          style={{
+            color: 'inherit',
+            textDecoration: 'none',
+            cursor: 'pointer',
+          }}
         >
           <TbReportSearch />
-          <span style={{ marginLeft: '8px' }}>View Report</span>
-        </a>
+          <span style={{ marginLeft: '10px' }}>View Report</span>
+        </span>
       ),
     },
   ];
@@ -40,10 +51,11 @@ const AuthorCard = ({ authors }) => {
   const rows = authors.map((author, index) => ({
     id: index,
     authorName: author.AuthorName,
-    source: author.Source,
     flagCount: author.FlagCount,
-    reportId: author.reportId,
+    authorId: author.AuthorId,
+    source: author.Source,
   }));
+  console.log('Rows in AuthorCard', rows, authors);
 
   const handlePaginationList = () => {
     const pageSizeOptionsList = [5];

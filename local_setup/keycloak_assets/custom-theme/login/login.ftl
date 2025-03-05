@@ -12,7 +12,7 @@
                             <input tabindex="2" id="username" class="${properties.kcInputClass!}" name="username" value="${(login.username!'')}"  type="text" autofocus autocomplete="username"
                                    aria-invalid="<#if messagesPerField.existsError('username','password')>true</#if>"
                                    dir="ltr"
-                                   placeholder="Email"
+                                   placeholder="Email / Username"
                             />
                             
                             <#if messagesPerField.existsError('username','password')>
@@ -39,7 +39,7 @@
                                     aria-invalid=""
                                 >
                                 <button 
-                                    class="pf-c-button pf-m-control" 
+                                    class="pf-c-button" 
                                     type="button" 
                                     aria-label="Show password" 
                                     aria-controls="password" 

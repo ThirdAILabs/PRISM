@@ -8,12 +8,13 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"prism/prism/api"
 	"prism/prism/cmd"
+	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/search"
 	"prism/prism/services"
 	"prism/prism/services/auth"
-	"strings"
 	"time"
 
 	"github.com/caarlos0/env/v11"
@@ -22,9 +23,15 @@ import (
 )
 
 type Config struct {
+<<<<<<< HEAD
 	PostgresUri string `env:"DB_URI,notEmpty,required"`
 	Logfile     string `env:"LOGFILE,notEmpty" envDefault:"prism_backend.log"`
 	NdbLicense  string `env:"NDB_LICENSE,notEmpty,required"`
+=======
+	PostgresUri  string `env:"DB_URI,notEmpty,required"`
+	Logfile      string `env:"LOGFILE,notEmpty" envDefault:"prism_backend.log"`
+	PrismLicense string `env:"PRISM_LICENSE,notEmpty,required"`
+>>>>>>> main
 
 	Port int `env:"PORT" envDefault:"8000"`
 
@@ -62,7 +69,7 @@ func (c *Config) port() int {
 	return c.Port
 }
 
-func buildEntityNdb(entityPath string) search.NeuralDB {
+func buildEntityNdb(entityPath string) services.EntitySearch {
 	const entityNdbPath = "searchable_entities.ndb"
 	if err := os.RemoveAll(entityNdbPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		log.Fatalf("error deleting existing ndb: %v", err)
@@ -75,7 +82,7 @@ func buildEntityNdb(entityPath string) search.NeuralDB {
 		log.Fatalf("error opening searchable entities: %v", err)
 	}
 
-	var entities []string
+	var entities []api.MatchedEntity
 	if err := json.NewDecoder(file).Decode(&entities); err != nil {
 		log.Fatalf("error parsing searchable entities: %v", err)
 	}
@@ -83,12 +90,12 @@ func buildEntityNdb(entityPath string) search.NeuralDB {
 	log.Printf("loaded %d searchable entities", len(entities))
 
 	s := time.Now()
-	ndb, err := search.NewNeuralDB(entityNdbPath)
+	es, err := services.NewEntitySearch(entityNdbPath)
 	if err != nil {
 		log.Fatalf("error openning ndb: %v", err)
 	}
 
-	if err := ndb.Insert("entities", "id", entities, nil, nil); err != nil {
+	if err := es.Insert(entities); err != nil {
 		log.Fatalf("error inserting into ndb: %v", err)
 	}
 
@@ -96,7 +103,7 @@ func buildEntityNdb(entityPath string) search.NeuralDB {
 
 	log.Printf("searchable entity ndb construction time=%.3f", e.Sub(s).Seconds())
 
-	return ndb
+	return es
 }
 
 func main() {
@@ -117,19 +124,16 @@ func main() {
 
 	openalex := openalex.NewRemoteKnowledgeBase()
 
-	if strings.HasPrefix(config.NdbLicense, "file ") {
-		err := search.SetLicensePath(strings.TrimPrefix(config.NdbLicense, "file "))
-		if err != nil {
-			log.Fatalf("error activating license at path '%s': %v", config.NdbLicense, err)
-		}
-	} else {
-		err := search.SetLicenseKey(config.NdbLicense)
-		if err != nil {
-			log.Fatalf("error activating license: %v", err)
-		}
+	licensing, err := licensing.NewLicenseVerifier(config.PrismLicense)
+	if err != nil {
+		log.Fatalf("error initializing licensing: %v", err)
 	}
 
-	entityNdb := buildEntityNdb(config.SearchableEntitiesData)
+	if err := search.SetLicenseKey(config.PrismLicense); err != nil {
+		log.Fatalf("error activating license key: %v", err)
+	}
+
+	entitySearch := buildEntityNdb(config.SearchableEntitiesData)
 
 	db := cmd.InitDb(config.PostgresUri)
 
@@ -148,12 +152,7 @@ func main() {
 		log.Fatalf("error initializing keycloak user auth: %v", err)
 	}
 
-	adminAuth, err := auth.NewKeycloakAuth("prism-admin", keycloakArgs)
-	if err != nil {
-		log.Fatalf("error initializing keycloak admin auth: %v", err)
-	}
-
-	backend := services.NewBackend(db, openalex, entityNdb, userAuth, adminAuth)
+	backend := services.NewBackend(db, openalex, entitySearch, userAuth, licensing)
 
 	r := chi.NewRouter()
 

@@ -104,7 +104,7 @@ func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string, 
 	return report, nil
 }
 
-func (r *ReportManager) CreateAuthorReport(licenseId, userId uuid.UUID, authorId, authorName, source string) (uuid.UUID, error) {
+func (r *ReportManager) CreateAuthorReport(userId uuid.UUID, authorId, authorName, source string) (uuid.UUID, error) {
 	var userReport schema.UserAuthorReport
 	var userReportId uuid.UUID
 	now := time.Now().UTC()
@@ -144,20 +144,6 @@ func (r *ReportManager) CreateAuthorReport(licenseId, userId uuid.UUID, authorId
 				return ErrReportCreationFailed
 			}
 			userReportId = userReport.Id
-		}
-
-		usage := schema.LicenseUsage{
-			LicenseId:  licenseId,
-			ReportId:   userReport.Id,
-			ReportType: schema.AuthorReportType,
-			UserId:     userId,
-			Timestamp:  time.Now().UTC(),
-		}
-		if err := txn.Clauses(clause.OnConflict{
-			DoNothing: true,
-		}).Create(&usage).Error; err != nil {
-			slog.Error("error logging license usage", "error", err)
-			return errors.New("error updating license usage")
 		}
 
 		return nil
@@ -410,7 +396,7 @@ func (r *ReportManager) queueUniversityReportUpdateIfNeeded(txn *gorm.DB, report
 	return nil
 }
 
-func (r *ReportManager) CreateUniversityReport(licenseId, userId uuid.UUID, universityId, universityName string) (uuid.UUID, error) {
+func (r *ReportManager) CreateUniversityReport(userId uuid.UUID, universityId, universityName string) (uuid.UUID, error) {
 	var userReport schema.UserUniversityReport
 	var userReportId uuid.UUID
 	now := time.Now().UTC()
@@ -469,20 +455,6 @@ func (r *ReportManager) CreateUniversityReport(licenseId, userId uuid.UUID, univ
 				return ErrReportCreationFailed
 			}
 			userReportId = userReport.Id
-		}
-
-		usage := schema.LicenseUsage{
-			LicenseId:  licenseId,
-			ReportId:   userReport.Id,
-			ReportType: schema.UniversityReportType,
-			UserId:     userId,
-			Timestamp:  time.Now().UTC(),
-		}
-		if err := txn.Clauses(clause.OnConflict{
-			DoNothing: true,
-		}).Create(&usage).Error; err != nil {
-			slog.Error("error logging license usage", "error", err)
-			return errors.New("error updating license usage")
 		}
 
 		return nil

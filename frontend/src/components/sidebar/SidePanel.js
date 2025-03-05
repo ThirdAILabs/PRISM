@@ -38,8 +38,16 @@ const SidePanel = ({ isOpen, onClose }) => {
       const data = await reportService.listReports();
       setReports(data);
     };
-    fetchReports();
-  }, []);
+    if (isOpen) {
+      fetchReports();
+
+      const pollingInterval = setInterval(() => {
+        fetchReports();
+      }, 10000);
+
+      return () => clearInterval(pollingInterval);
+    }
+  }, [isOpen]);
 
   const handleEntityClick = () => {
     onClose();
