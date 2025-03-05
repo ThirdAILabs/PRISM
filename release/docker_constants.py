@@ -27,7 +27,7 @@ images_to_build = [
     ),
     Image(
         key="prism_frontend",
-        name="frontend",
+        name="prism_frontend",
         dockerfile_path="Dockerfile",
         context_path="frontend",
     )
