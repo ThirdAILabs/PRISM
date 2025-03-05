@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/cmd"
 	"prism/prism/openalex"
@@ -47,6 +48,8 @@ type Config struct {
 	// This variable is directly loaded by the openai client library, it is just
 	// listed here so that and error is raised if it's missing.
 	OpenaiKey string `env:"OPENAI_API_KEY,notEmpty,required"`
+
+	ResourceFolder string `env:"RESOURCE_FOLDER,notEmpty,required"`
 }
 
 func (c *Config) logfile() string {
@@ -98,6 +101,28 @@ func buildEntityNdb(entityPath string) services.EntitySearch {
 	log.Printf("searchable entity ndb construction time=%.3f", e.Sub(s).Seconds())
 
 	return es
+}
+
+func verifyResourceFolder(resourceFolder string) {
+	info, err := os.Stat(resourceFolder)
+	if os.IsNotExist(err) {
+		log.Fatalf("resource folder '%s' does not exist", resourceFolder)
+	}
+
+	if !info.IsDir() {
+		log.Fatalf("resource folder '%s' is not a directory", resourceFolder)
+	}
+
+	logoPath := filepath.Join(resourceFolder, "prism-logo.png")
+	logo, err := os.ReadFile(logoPath)
+	if err != nil {
+		log.Fatalf("error reading logo: %v", err)
+	}
+
+	if len(logo) == 0 {
+		log.Fatalf("logo is empty")
+	}
+
 }
 
 func main() {
@@ -154,7 +179,9 @@ func main() {
 		log.Fatalf("error initializing keycloak admin auth: %v", err)
 	}
 
-	backend := services.NewBackend(db, openalex, entitySearch, userAuth, adminAuth)
+	verifyResourceFolder(config.ResourceFolder)
+
+	backend := services.NewBackend(db, openalex, entitySearch, userAuth, adminAuth, config.ResourceFolder)
 
 	r := chi.NewRouter()
 

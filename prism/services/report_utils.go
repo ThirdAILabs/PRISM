@@ -255,7 +255,9 @@ func generatePDF(report api.Report, resourceFolder string) ([]byte, error) {
 	pdf.AddPage()
 
 	logoPath := filepath.Join(resourceFolder, "prism-logo.png")
-	logoWidth := 200.0 // Width in mm, adjust as needed
+	logoWidth := 150.0 // Width in mm, adjust as needed
+
+	println(logoPath)
 
 	// Get page width to center the logo
 	pageWidth, _ := pdf.GetPageSize()
@@ -266,9 +268,10 @@ func generatePDF(report api.Report, resourceFolder string) ([]byte, error) {
 	xPos := (usableWidth-logoWidth)/2 + left
 
 	// Add the logo at position (xPos, 20) with width logoWidth
-	pdf.Image(logoPath, xPos, 20, logoWidth, 0, false, "", 0, "")
+	pdf.Image(logoPath, xPos, 50, logoWidth, 0, false, "", 0, "")
 	pdf.Ln(60)
 
+	pdf.SetY(200)
 	pdf.SetFont("Arial", "B", 14)
 	pdf.SetFillColor(200, 200, 255)
 	pdf.CellFormat(0, 10, "PRISM REPORT", "0", 1, "C", true, 0, "")

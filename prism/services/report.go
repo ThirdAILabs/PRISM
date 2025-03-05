@@ -265,6 +265,7 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 		contentType = "text/csv"
 		filename = "report.csv"
 	case "pdf":
+		println("resourceFolder", s.resourceFolder)
 		fileBytes, err = generatePDF(report, s.resourceFolder)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
