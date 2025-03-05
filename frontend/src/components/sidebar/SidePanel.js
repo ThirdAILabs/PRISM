@@ -48,7 +48,7 @@ const SidePanel = ({ isOpen, onClose }) => {
     const fetchUniversityReports = async () => {
       const data = await universityReportService.listReports();
       setUniversityReports(data);
-    }
+    };
     if (isOpen) {
       fetchReports();
       fetchUniversityReports();
@@ -187,47 +187,53 @@ const SidePanel = ({ isOpen, onClose }) => {
             <h5 className="report-header">
               <TbReportSearch /> Reports
             </h5>
-            <div
-              className="collapsible-header"
-
-            >
+            <div className="collapsible-header">
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div onClick={() => setShowAuthorReports(!showAuthorReports)}
-                  className='collapsible-icon'>{
-                    showAuthorReports ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
+                <div
+                  onClick={() => setShowAuthorReports(!showAuthorReports)}
+                  className="collapsible-icon"
+                >
+                  {showAuthorReports ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
                 </div>
-                <span style={{ fontSize: 'medium', fontWeight: 'normal', marginLeft: '10px' }}>Author Report</span>
+                <span style={{ fontSize: 'medium', fontWeight: 'normal', marginLeft: '10px' }}>
+                  Author Report
+                </span>
               </div>
             </div>
-            {showAuthorReports &&
-              <div className='collapsible-content'>{reports.map(
-                (report, index) =>
-                  index < 10 && (
-                    <div
-                      key={report.Id}
-                      className="report-item"
-                      onClick={handleReportClick.bind(null, report)}
-                    >
-                      <span>{report.AuthorName}</span>
-                      {/* <span><MdDelete style={15} /></span> */}
-                      <span className={`status ${report.Status}`}>{status[report.Status]}</span>
-                    </div>
-                  )
-              )}</div>}
+            {showAuthorReports && (
+              <div className="collapsible-content">
+                {reports.map(
+                  (report, index) =>
+                    index < 10 && (
+                      <div
+                        key={report.Id}
+                        className="report-item"
+                        onClick={handleReportClick.bind(null, report)}
+                      >
+                        <span>{report.AuthorName}</span>
+                        {/* <span><MdDelete style={15} /></span> */}
+                        <span className={`status ${report.Status}`}>{status[report.Status]}</span>
+                      </div>
+                    )
+                )}
+              </div>
+            )}
             <div
               className="collapsible-header"
-            // style={{ marginTop: '10px' }}
+              // style={{ marginTop: '10px' }}
             >
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div onClick={() => setShowUniversityReports(!showUniversityReports)}
-                  className='collapsible-icon'>{
-                    showUniversityReports ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
+                <div
+                  onClick={() => setShowUniversityReports(!showUniversityReports)}
+                  className="collapsible-icon"
+                >
+                  {showUniversityReports ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
                 </div>
                 <span style={{ fontSize: 'medium', marginLeft: '10px' }}>University Report</span>
               </div>
             </div>
             {showUniversityReports && (
-              <div className='collapsible-content'>
+              <div className="collapsible-content">
                 {universityReports.map(
                   (universityReport, index) =>
                     index < 10 && (
@@ -238,7 +244,9 @@ const SidePanel = ({ isOpen, onClose }) => {
                       >
                         <span>{universityReport.UniversityName}</span>
                         {/* <span><MdDelete style={15} /></span> */}
-                        <span className={`status ${universityReport.Status}`}>{status[universityReport.Status]}</span>
+                        <span className={`status ${universityReport.Status}`}>
+                          {status[universityReport.Status]}
+                        </span>
                       </div>
                     )
                 )}
@@ -268,7 +276,7 @@ const SidePanel = ({ isOpen, onClose }) => {
             <CiLogout /> Logout
           </button>
         </div>
-      </div >
+      </div>
     </>
   );
 };
