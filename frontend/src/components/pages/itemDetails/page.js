@@ -1,5 +1,5 @@
 // src/ItemDetails.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   TALENT_CONTRACTS,
@@ -14,7 +14,6 @@ import ConcernVisualizer from '../../ConcernVisualization.js';
 import Graph from '../../common/graph/graph.js';
 import Tabs from '../../common/tools/Tabs.js';
 import DownloadButton from '../../common/tools/button/downloadButton.js';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider } from '@mui/material';
 import { reportService } from '../../../api/reports.js';
 import styled from 'styled-components';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -22,6 +21,8 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import Shimmer from './Shimmer.js';
+import MuiAlert from '@mui/material/Alert';
+import { Snackbar } from '@mui/material';
 
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
@@ -32,6 +33,10 @@ const FLAG_ORDER = [
   MISC_HIGH_RISK_AFFILIATIONS,
   COAUTHOR_AFFILIATIONS,
 ];
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const todayStr = new Date().toISOString().split('T')[0];
 
@@ -104,55 +109,76 @@ const ItemDetails = () => {
     setSortOrder((prevOrder) => (prevOrder === 'asc' ? 'desc' : 'asc'));
   };
 
-  // Add new states
-  const [openDialog, setOpenDialog] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState(null);
-
   // Add handlers
   const handleDropdownChange = (index) => {
     if (index === dropdownOpen) setDropdownOpen(0);
     else setDropdownOpen(index);
   };
 
-  const handleOpenDialog = () => setOpenDialog(true);
-  const handleCloseDialog = () => {
-    handleDropdownChange(0);
-    setOpenDialog(false);
-    setSelectedFiles([]);
-    setUploadError(null);
+  const [notification, setNotification] = useState({
+    open: false,
+    severity: '',
+    message: '',
+  });
+
+  const fileInputRef = useRef(null);
+
+  const handleFileUploadClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
-  const handleDrop = (event) => {
-    event.preventDefault();
-    const files = Array.from(event.dataTransfer.files);
-    setSelectedFiles(files);
-  };
-
-  const handleFileSelect = (event) => {
+  const handleFileSelect = async (event) => {
     const files = Array.from(event.target.files);
-    setSelectedFiles(files);
+    if (files.length === 0) {
+      setNotification({
+        open: true,
+        severity: 'error',
+        message: 'No files selected',
+      });
+      return;
+    }
+    await handleSubmit(files);
   };
 
-  const handleSubmit = async () => {
-    if (selectedFiles.length === 0) {
-      setUploadError('Please select at least one file');
+  const handleSubmit = async (files) => {
+    if (!files || files.length === 0) {
+      setNotification({
+        open: true,
+        severity: 'error',
+        message: 'No files selected',
+      });
       return;
     }
 
-    setIsUploading(true);
     try {
-      const result = await reportService.checkDisclosure(report_id, selectedFiles);
+      const result = await reportService.checkDisclosure(report_id, files);
       setReportContent(result.Content);
       setInitialReportContent(result.Content);
       setDisclosureChecked(true);
-      handleCloseDialog();
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      setNotification({
+        open: true,
+        severity: 'success',
+        message: 'Disclosure check succeeded!',
+      });
     } catch (error) {
-      setUploadError(error.message || 'Failed to check disclosure');
-    } finally {
-      setIsUploading(false);
+      setNotification({
+        open: true,
+        severity: 'error',
+        message: error.response?.data?.message || 'Failed to check disclosure',
+      });
     }
+  };
+
+  const handleCloseNotification = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setNotification({ ...notification, open: false });
   };
 
   useEffect(() => {
@@ -183,7 +209,6 @@ const ItemDetails = () => {
 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [isDownloadOpen, setIsDownloadOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
 
   const [filterMessage, setFilterMessage] = useState('');
@@ -263,9 +288,6 @@ const ItemDetails = () => {
     setReportContent(filteredContent);
     handleDropdownChange(1);
   };
-  const [instDropdownOpen, setInstDropdownOpen] = useState(false);
-  const toggleInstDropdown = () => setInstDropdownOpen(!instDropdownOpen);
-
   const [review, setReview] = useState();
 
   function withPublicationDate(header, flag) {
@@ -938,61 +960,28 @@ const ItemDetails = () => {
         {activeTab === 0 && (
           <div className="d-flex justify-content-end mt-2 gap-2 px-2">
             <StyledWrapper>
-              <button className="cssbuttons-io-button" onClick={() => handleDropdownChange(3)}>
+              <button className="cssbuttons-io-button" onClick={handleFileUploadClick}>
                 Verify with Disclosures
               </button>
             </StyledWrapper>
-
-            <Dialog open={dropdownOpen === 3} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-              <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-                Select files to check for disclosure
-              </DialogTitle>
-              <Divider sx={{ color: 'black', backgroundColor: '#000000' }} />
-              <DialogContent>
-                <div
-                  className="container"
-                  onDrop={handleDrop}
-                  onDragOver={(e) => e.preventDefault()}
-                >
-                  <div className="header">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15"
-                        stroke="#000000"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <p>Drag & drop your file!</p>
-                  </div>
-                  <label htmlFor="file" className="footer">
-                    <p>
-                      {selectedFiles.length
-                        ? `${selectedFiles.length} files selected`
-                        : 'Click here to upload your file.'}
-                    </p>
-                  </label>
-                  <input
-                    id="file"
-                    type="file"
-                    multiple
-                    onChange={handleFileSelect}
-                    accept=".txt,.doc,.docx,.pdf"
-                  />
-                </div>
-                {uploadError && (
-                  <div style={{ color: 'red', marginTop: '10px' }}>{uploadError}</div>
-                )}
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleCloseDialog}>Cancel</Button>
-                <Button onClick={handleSubmit} disabled={isUploading} variant="contained">
-                  {isUploading ? 'Uploading...' : 'Submit'}
-                </Button>
-              </DialogActions>
-            </Dialog>
-
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              multiple
+              accept=".txt,.pdf"
+              onChange={handleFileSelect}
+            />
+            <Snackbar
+              open={notification.open}
+              autoHideDuration={2000}
+              onClose={handleCloseNotification}
+              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+              <Alert onClose={handleCloseNotification} severity={notification.severity}>
+                {notification.message}
+              </Alert>
+            </Snackbar>
             <DownloadButton
               reportId={report_id}
               isOpen={dropdownOpen === 2}
