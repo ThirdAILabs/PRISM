@@ -4,7 +4,6 @@ import '../../common/tools/button/button1.css';
 import './entityLookup.css';
 import Logo from '../../../assets/images/prism-logo.png';
 import { searchService } from '../../../api/search';
-import './page.css';
 
 const makeLinksClickable = (text) => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -86,7 +85,6 @@ function EntityLookup() {
             </div>
           </div>
         </div>
-
         <div style={{ animation: 'fade-in 1s' }}>
           <div className="d-flex justify-content-center align-items-center pt-5">
             <div style={{ width: '80%' }}>
@@ -99,6 +97,9 @@ function EntityLookup() {
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="E.g. PQR Company"
                     className="search-bar"
+                    style ={{
+                      marginBottom: '20px',
+                    }}
                   />
                 </div>
                 <div className="author-institution-search-button-container">
@@ -115,13 +116,12 @@ function EntityLookup() {
           </div>
         </div>
       </div>
-
       {isLoading && (
-        <div className="d-flex justify-content-center mt-4">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
+        <div
+          className="spinner-border text-primary"
+          style={{ width: '3rem', height: '3rem', marginTop: '20px' }}
+          role="status"
+        ></div>
       )}
 
       <div className="results-section">
