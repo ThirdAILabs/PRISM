@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { reportService } from '../../../api/reports';
 import './TodoListComponent.css';
 
-const TodoListComponent = ({ results, setResults, canLoadMore, loadMore }) => {
+const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadingMore }) => {
   const navigate = useNavigate();
 
   const handleItemClick = async (result) => {
@@ -56,8 +56,8 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore }) => {
         </ul>
         {canLoadMore && (
           <div className="show-more-results-button">
-            <button className="button" onClick={getMoreResults}>
-              Show More
+            <button className="button" onClick={getMoreResults} disabled={isLoadingMore}>
+              {isLoadingMore ? <div className="spinner"></div> : 'Show More'}
             </button>
           </div>
         )}

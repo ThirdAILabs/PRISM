@@ -1030,6 +1030,7 @@ const ItemDetails = () => {
                     title={TitlesAndDescriptions[flag].title}
                     hoverText={TitlesAndDescriptions[flag].desc}
                     value={flagCount}
+                    speedometerHoverText={`${flagCount} Issues`}
                     onReview={() => setReview(flag)}
                     key={index}
                     selected={isSelected}
