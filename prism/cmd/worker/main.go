@@ -8,20 +8,20 @@ import (
 	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/cmd"
+	"prism/prism/licensing"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers"
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/search"
-	"strings"
 	"time"
 
 	"github.com/caarlos0/env/v11"
 )
 
 type Config struct {
-	PostgresUri string `env:"DB_URI,notEmpty,required"`
-	Logfile     string `env:"LOGFILE,notEmpty" envDefault:"prism_worker.log"`
-	NdbLicense  string `env:"NDB_LICENSE,notEmpty,required"`
+	PostgresUri  string `env:"DB_URI,notEmpty,required"`
+	Logfile      string `env:"LOGFILE,notEmpty" envDefault:"prism_worker.log"`
+	PrismLicense string `env:"PRISM_LICENSE,notEmpty,required"`
 
 	WorkDir string `env:"WORK_DIR,notEmpty" envDefault:"./work"`
 
@@ -118,16 +118,13 @@ func main() {
 
 	cmd.InitLogging(logFile)
 
-	if strings.HasPrefix(config.NdbLicense, "file ") {
-		err := search.SetLicensePath(strings.TrimPrefix(config.NdbLicense, "file "))
-		if err != nil {
-			log.Fatalf("error activating license at path '%s': %v", config.NdbLicense, err)
-		}
-	} else {
-		err := search.SetLicenseKey(config.NdbLicense)
-		if err != nil {
-			log.Fatalf("error activating license: %v", err)
-		}
+	licensing, err := licensing.NewLicenseVerifier(config.PrismLicense)
+	if err != nil {
+		log.Fatalf("error initializing licensing: %v", err)
+	}
+
+	if err := search.SetLicenseKey(config.PrismLicense); err != nil {
+		log.Fatalf("error activating license key: %v", err)
 	}
 
 	ndbDir := filepath.Join(config.WorkDir, "ndbs")
@@ -171,7 +168,17 @@ func main() {
 
 	reportManager := reports.NewManager(db, reports.StaleReportThreshold)
 
+	lastLicenseCheck := time.Now()
 	for {
+		if time.Since(lastLicenseCheck) > 10*time.Minute {
+			if err := licensing.VerifyLicense(); err != nil {
+				slog.Error("error verifying license", "error", err)
+				time.Sleep(5 * time.Minute)
+				continue
+			}
+			lastLicenseCheck = time.Now()
+		}
+
 		foundAuthorReport := processNextAuthorReport(reportManager, processor)
 		foundUniversityReport := processNextUniversityReport(reportManager, processor)
 
