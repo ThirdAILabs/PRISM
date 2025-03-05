@@ -188,38 +188,38 @@ const UniversityReport = () => {
         >
           {reportContent?.Flags
             ? FLAG_ORDER.map((flag, index) => {
-              let value = 0;
-              const flagData = reportContent.Flags[flag] || [];
+                let value = 0;
+                const flagData = reportContent.Flags[flag] || [];
 
-              if (flagData.length > 0) {
-                for (let authorIndex = 0; authorIndex < flagData.length; authorIndex++) {
-                  const author = flagData[authorIndex];
-                  value += author.FlagCount;
+                if (flagData.length > 0) {
+                  for (let authorIndex = 0; authorIndex < flagData.length; authorIndex++) {
+                    const author = flagData[authorIndex];
+                    value += author.FlagCount;
+                  }
                 }
-              }
 
-              return (
-                <ConcernVisualizer
-                  title={TitlesAndDescriptions[flag].title}
-                  hoverText={TitlesAndDescriptions[flag].desc}
-                  value={value || 0}
-                  onReview={() => handleReview(flag)}
-                  key={index}
-                />
-              );
-            })
+                return (
+                  <ConcernVisualizer
+                    title={TitlesAndDescriptions[flag].title}
+                    hoverText={TitlesAndDescriptions[flag].desc}
+                    value={value || 0}
+                    onReview={() => handleReview(flag)}
+                    key={index}
+                  />
+                );
+              })
             : FLAG_ORDER.map((flag, index) => {
-              let value = 0;
-              return (
-                <ConcernVisualizer
-                  title={TitlesAndDescriptions[flag].title}
-                  hoverText={TitlesAndDescriptions[flag].desc}
-                  value={value || 0}
-                  onReview={() => handleReview(flag)}
-                  key={index}
-                />
-              );
-            })}
+                let value = 0;
+                return (
+                  <ConcernVisualizer
+                    title={TitlesAndDescriptions[flag].title}
+                    hoverText={TitlesAndDescriptions[flag].desc}
+                    value={value || 0}
+                    onReview={() => handleReview(flag)}
+                    key={index}
+                  />
+                );
+              })}
         </div>
 
         {showModal && (

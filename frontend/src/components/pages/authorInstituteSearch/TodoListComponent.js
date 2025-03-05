@@ -16,7 +16,7 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore }) => {
     });
     navigate(`/report/${response.Id}`, {
       state: {
-        canGoBack: true
+        canGoBack: true,
       },
     });
     return;

@@ -78,7 +78,7 @@ const SidePanel = ({ isOpen, onClose }) => {
     onClose();
     navigate(`/report/${report.Id}`, {
       state: {
-        canGoBack: true
+        canGoBack: true,
       },
     });
   };
@@ -86,7 +86,7 @@ const SidePanel = ({ isOpen, onClose }) => {
     onClose();
     navigate(`/university/report/${universityReport.Id}`, {
       state: {
-        canGoBack: true
+        canGoBack: true,
       },
     });
   };
@@ -228,7 +228,7 @@ const SidePanel = ({ isOpen, onClose }) => {
             )}
             <div
               className="collapsible-header"
-            // style={{ marginTop: '10px' }}
+              // style={{ marginTop: '10px' }}
             >
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <div

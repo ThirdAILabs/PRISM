@@ -53,7 +53,7 @@ function UniversityAssessment() {
     console.log('University report id: ', reportId);
     navigate(`report/${reportId.Id}`, {
       state: {
-        canGoBack: true
+        canGoBack: true,
       },
     });
   };
