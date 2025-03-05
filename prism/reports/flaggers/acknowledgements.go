@@ -53,6 +53,8 @@ type Entity struct {
 	EntityText    string
 	EntityType    string
 	StartPosition int
+
+	FundCodes []string
 }
 
 type Acknowledgement struct {
@@ -230,14 +232,60 @@ func downloadPdf(url, destPath string) (io.ReadCloser, error) {
 	return nil, fmt.Errorf("unable to download pdf, http error: %w, playwright error: %w", err1, err2)
 }
 
+const (
+	funderType      = "funder"
+	funderNameType  = "funderName"
+	grantNameType   = "grantName"
+	grantNumberType = "grantNumber"
+)
+
 var searchAbleEntityTypes = map[string]bool{
-	"affiliation": true,
-	"funderName":  true,
-	"grantName":   true,
-	"institution": true,
-	"programName": true,
-	"projectName": true,
-	"funder":      true,
+	funderType:     true,
+	funderNameType: true,
+	grantNameType:  true,
+	"affiliation":  true,
+	"institution":  true,
+	"programName":  true,
+	"projectName":  true,
+}
+
+func cleanAcknowledgementText(text string) string {
+	output := strings.TrimSpace(text)
+	output = strings.TrimPrefix(output, "Acknowledgments")
+	output = strings.TrimPrefix(output, "acknowledgments")
+	output = strings.TrimPrefix(output, ":")
+
+	return strings.TrimSpace(output)
+}
+
+func mergeFundersAndFundCodes(entities []Entity) []Entity {
+	merged := make([]Entity, 0)
+
+	for _, entity := range entities {
+		entityMerged := false
+
+		if entity.EntityType == grantNameType && len(merged) > 0 {
+			last := merged[len(merged)-1]
+
+			if last.EntityType == funderType || last.EntityType == funderNameType {
+				last.EntityText += " " + entity.EntityText
+				entityMerged = true
+			}
+		} else if entity.EntityType == grantNumberType && len(merged) > 0 {
+			last := merged[len(merged)-1]
+
+			if last.EntityType == funderType || last.EntityType == funderNameType || last.EntityType == grantNameType {
+				merged[len(merged)-1].FundCodes = append(merged[len(merged)-1].FundCodes, entity.EntityText)
+				entityMerged = true
+			}
+		}
+
+		if !entityMerged {
+			merged = append(merged, entity)
+		}
+	}
+
+	return merged
 }
 
 func parseGrobidReponse(data io.Reader) ([]Acknowledgement, error) {
@@ -249,12 +297,11 @@ func parseGrobidReponse(data io.Reader) ([]Acknowledgement, error) {
 	acks := make([]Acknowledgement, 0)
 
 	processor := func(i int, s *goquery.Selection) {
-		text := strings.TrimSpace(s.Text())
-
-		searchable := make([]Entity, 0)
-		misc := make([]Entity, 0)
+		text := cleanAcknowledgementText(s.Text())
 
 		last := 0
+
+		allEntities := make([]Entity, 0)
 
 		s.Find("rs").Each(func(i int, s *goquery.Selection) {
 			entityText := s.Text()
@@ -262,12 +309,23 @@ func parseGrobidReponse(data io.Reader) ([]Acknowledgement, error) {
 			start := strings.Index(text[last:], entityText) + last
 			last = start + len(entityText)
 
-			if searchAbleEntityTypes[entityType] {
-				searchable = append(searchable, Entity{EntityText: entityText, EntityType: entityType, StartPosition: start})
-			} else {
-				misc = append(misc, Entity{EntityText: entityText, EntityType: entityType, StartPosition: start})
-			}
+			allEntities = append(allEntities, Entity{EntityText: entityText, EntityType: entityType, StartPosition: start})
 		})
+
+		searchable := make([]Entity, 0)
+		misc := make([]Entity, 0)
+
+		fmt.Println("allEntities", allEntities)
+
+		fmt.Println("allEntities", mergeFundersAndFundCodes(allEntities))
+
+		for _, entity := range mergeFundersAndFundCodes(allEntities) {
+			if searchAbleEntityTypes[entity.EntityType] {
+				searchable = append(searchable, entity)
+			} else {
+				misc = append(misc, entity)
+			}
+		}
 
 		acks = append(acks, Acknowledgement{RawText: text, SearchableEntities: searchable, MiscEntities: misc})
 	}
