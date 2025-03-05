@@ -127,6 +127,7 @@ const ItemDetails = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
+    handleDropdownChange(0);
   };
 
   const handleFileSelect = async (event) => {
