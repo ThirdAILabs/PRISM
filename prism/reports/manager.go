@@ -62,8 +62,8 @@ func (r *ReportManager) ListAuthorReports(userId uuid.UUID) ([]api.Report, error
 // This function is only called from GetAuthorReport or CreateAuthorReport. The university reports
 // use a different methods that can check all the author reports associated with the university report
 // at once.
-func (r *ReportManager) queueAuthorReportUpdateIfNeeded(txn *gorm.DB, report *schema.AuthorReport) error {
-	if time.Now().UTC().Sub(report.LastUpdatedAt) > r.staleReportThreshold &&
+func (r *ReportManager) queueAuthorReportUpdateIfNeeded(txn *gorm.DB, report *schema.AuthorReport, force bool) error {
+	if (force || time.Now().UTC().Sub(report.LastUpdatedAt) > r.staleReportThreshold) &&
 		report.Status != schema.ReportInProgress && report.Status != schema.ReportQueued {
 		updates := map[string]any{"status": schema.ReportQueued, "queued_at": time.Now().UTC(), "queued_by_user": true}
 		if err := txn.Model(&report).Updates(updates).Error; err != nil {
@@ -115,7 +115,7 @@ func (r *ReportManager) CreateAuthorReport(userId uuid.UUID, authorId, authorNam
 			return err
 		}
 
-		if err := r.queueAuthorReportUpdateIfNeeded(txn, &report); err != nil {
+		if err := r.queueAuthorReportUpdateIfNeeded(txn, &report, false); err != nil {
 			return err
 		}
 
@@ -156,6 +156,47 @@ func (r *ReportManager) CreateAuthorReport(userId uuid.UUID, authorId, authorNam
 	return userReportId, nil
 }
 
+func (r *ReportManager) RecreateAuthorReport(userId, reportId uuid.UUID) error {
+	err := r.db.Transaction(func(txn *gorm.DB) error {
+		// check if the user has access to the report
+		var userReport schema.UserAuthorReport
+		if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Preload("Report").First(&userReport, "id = ?", reportId).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				slog.Error("cannot recreate author report, report not found", "author_report_id", reportId)
+				return ErrReportNotFound
+			}
+			slog.Error("error getting user author report to recreate", "author_report_id", reportId, "error", err)
+			return ErrReportAccessFailed
+		}
+		if userReport.UserId != userId {
+			return ErrUserCannotAccessReport
+		}
+
+		// check if the author report exists
+		var authorReport schema.AuthorReport
+		if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).First(&authorReport, "id = ?", reportId).Error; err != nil {
+			slog.Error("error getting author report to recreate", "author_report_id", reportId, "error", err)
+			return ErrReportAccessFailed
+		}
+
+		if err := r.queueAuthorReportUpdateIfNeeded(txn, &authorReport, true); err != nil {
+			return err
+		}
+
+		userReport.LastAccessedAt = time.Now().UTC()
+		if err := txn.Save(&userReport).Error; err != nil {
+			slog.Error("error updating user author report", "error", err)
+			return ErrReportCreationFailed
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (r *ReportManager) GetAuthorReport(userId, reportId uuid.UUID) (api.Report, error) {
 	var report schema.UserAuthorReport
 
@@ -174,7 +215,7 @@ func (r *ReportManager) GetAuthorReport(userId, reportId uuid.UUID) (api.Report,
 			return ErrUserCannotAccessReport
 		}
 
-		if err := r.queueAuthorReportUpdateIfNeeded(txn, report.Report); err != nil {
+		if err := r.queueAuthorReportUpdateIfNeeded(txn, report.Report, false); err != nil {
 			return err
 		}
 
