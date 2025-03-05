@@ -23,6 +23,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import Shimmer from './Shimmer.js';
 import MuiAlert from '@mui/material/Alert';
 import { Snackbar } from '@mui/material';
+import useGoBack from '../../../hooks/useGoBack.js';
 
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
@@ -127,6 +128,7 @@ const ItemDetails = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
+    handleDropdownChange(0);
   };
 
   const handleFileSelect = async (event) => {
@@ -184,16 +186,18 @@ const ItemDetails = () => {
   useEffect(() => {
     let isMounted = true;
     const poll = async () => {
+      let inProgress = true;
       const report = await reportService.getReport(report_id);
-      if (report.Status === 'complete' && isMounted) {
+      if (report.Content && Object.keys(report.Content).length > 0 && isMounted) {
         console.log('Report', report);
         setAuthorName(report.AuthorName);
         setReportContent(report.Content);
         setInitialReportContent(report.Content);
         setLoading(false);
-      } else if (report.Status === 'in-progress' && isMounted) {
-        setAuthorName(report.AuthorName);
-      } else if (isMounted) {
+        inProgress = report.Status === 'queued' || report.Status === 'in-progress';
+      }
+
+      if (inProgress) {
         setTimeout(poll, 2000);
       }
     };
@@ -798,7 +802,7 @@ const ItemDetails = () => {
   const hasDates = items.some(
     (item) => item?.Work?.PublicationDate && !isNaN(new Date(item.Work.PublicationDate).getTime())
   );
-
+  const goBack = useGoBack('/');
   return (
     <div className="basic-setup">
       <div className="grid grid-cols-2 gap-4">
@@ -814,7 +818,7 @@ const ItemDetails = () => {
             }}
           >
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => goBack()}
               className="btn text-dark mb-3"
               style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}
             >

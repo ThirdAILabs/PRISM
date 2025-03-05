@@ -71,15 +71,15 @@ func checkNoNextAuthorReport(t *testing.T, manager *reports.ReportManager) {
 	}
 }
 
-func dummyReportUpdate() api.ReportContent {
-	return api.ReportContent{
-		api.TalentContractType:               {&api.TalentContractFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}}},
-		api.AssociationsWithDeniedEntityType: {&api.AssociationWithDeniedEntityFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}}},
-		api.HighRiskFunderType:               {&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}}},
-		api.AuthorAffiliationType:            {&api.AuthorAffiliationFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}}},
-		api.PotentialAuthorAffiliationType:   {&api.PotentialAuthorAffiliationFlag{University: uuid.NewString()}},
-		api.MiscHighRiskAssociationType:      {&api.MiscHighRiskAssociationFlag{DocTitle: uuid.NewString()}},
-		api.CoauthorAffiliationType:          {&api.CoauthorAffiliationFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}}},
+func dummyReportUpdate() []api.Flag {
+	return []api.Flag{
+		&api.TalentContractFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}},
+		&api.AssociationWithDeniedEntityFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}},
+		&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}},
+		&api.AuthorAffiliationFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}},
+		&api.PotentialAuthorAffiliationFlag{University: uuid.NewString()},
+		&api.MiscHighRiskAssociationFlag{DocTitle: uuid.NewString()},
+		&api.CoauthorAffiliationFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}},
 	}
 }
 
@@ -305,7 +305,7 @@ func TestListAuthorReports(t *testing.T) {
 		t.Fatal("report should not be nil")
 	}
 
-	if err := manager.UpdateAuthorReport(next.Id, "complete", time.Now(), api.ReportContent{}); err != nil {
+	if err := manager.UpdateAuthorReport(next.Id, "complete", time.Now(), nil); err != nil {
 		t.Fatal(err)
 	}
 
@@ -747,13 +747,13 @@ func TestUniversityReportsFilterFlagsByDate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	content := api.ReportContent{
+	content := []api.Flag{
 		// This should not be filtered because the date is recent
-		api.TalentContractType: {&api.TalentContractFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}}},
+		&api.TalentContractFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now()}},
 		// This should be filtered because the date is too old
-		api.HighRiskFunderType: {&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now().AddDate(-6, 0, 0)}}},
+		&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: uuid.NewString(), PublicationDate: time.Now().AddDate(-6, 0, 0)}},
 		// This should not be filtered because there is no date
-		api.MiscHighRiskAssociationType: {&api.MiscHighRiskAssociationFlag{DocTitle: uuid.NewString()}},
+		&api.MiscHighRiskAssociationFlag{DocTitle: uuid.NewString()},
 	}
 
 	if err := manager.UpdateAuthorReport(nextAuthor.Id, "complete", nextAuthor.EndDate, content); err != nil {
