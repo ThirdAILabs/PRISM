@@ -239,7 +239,7 @@ const (
 	grantNumberType = "grantNumber"
 )
 
-var searchAbleEntityTypes = map[string]bool{
+var searchableEntityTypes = map[string]bool{
 	funderType:     true,
 	funderNameType: true,
 	grantNameType:  true,
@@ -316,7 +316,7 @@ func parseGrobidReponse(data io.Reader) ([]Acknowledgement, error) {
 		misc := make([]Entity, 0)
 
 		for _, entity := range mergeFundersAndFundCodes(allEntities) {
-			if searchAbleEntityTypes[entity.EntityType] {
+			if searchableEntityTypes[entity.EntityType] {
 				searchable = append(searchable, entity)
 			} else {
 				misc = append(misc, entity)
