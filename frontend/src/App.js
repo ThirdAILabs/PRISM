@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import SearchComponent from './components/pages/SearchComponent';
+import SearchComponent from './components/pages/authorInstituteSearch/SearchComponent';
 import ItemDetails from './components/pages/itemDetails/page';
 import EntityLookup from './components/pages/entityLookup/page';
 import UserService from './services/userService';
