@@ -16,7 +16,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func uriToDsn(uri string) string {
+func UriToDsn(uri string) string {
 	parts, err := url.Parse(uri)
 	if err != nil {
 		log.Fatalf("error parsing db uri: %v", err)
@@ -27,7 +27,7 @@ func uriToDsn(uri string) string {
 }
 
 func InitDb(uri string) *gorm.DB {
-	db, err := gorm.Open(postgres.Open(uriToDsn(uri)), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(UriToDsn(uri)), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("error opening database connection: %v", err)
 	}
