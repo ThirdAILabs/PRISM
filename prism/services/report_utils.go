@@ -224,40 +224,61 @@ func printWatermark(pdf *gofpdf.Fpdf, text string) {
 	pdf.SetFont("Arial", "B", 50)
 	pdf.SetAlpha(0.2, "Normal")
 	x, y := pdf.GetPageSize()
+
+	// Get text width to calculate center position
+	textWidth := pdf.GetStringWidth(text)
+
 	pdf.TransformBegin()
 	pdf.TransformRotate(45, x/2, y/2)
 	pdf.SetTextColor(200, 200, 200)
-	pdf.Text(x/4, y/2, text)
+	// Position text centered on page
+	pdf.Text(x/2-textWidth/2, y/2, text)
 	pdf.TransformEnd()
 
 	pdf.SetAlpha(1, "Normal")
 	pdf.SetTextColor(currR, currG, currB)
 }
 
-func generatePDF(report api.Report, resourceFolder string) ([]byte, error) {
-	pdf := gofpdf.New("P", "mm", "A4", "")
-	pdf.SetMargins(20, 20, 20)
-	pdf.SetAutoPageBreak(true, 20)
-
+func setupPDFHeader(pdf *gofpdf.Fpdf, resourceFolder string) {
 	pdf.SetHeaderFunc(func() {
+		currentR, currentG, currentB := pdf.GetTextColor()
+		pageWidth, _ := pdf.GetPageSize()
+
+		// add smaller logo to header
+		logoWidth := 15.0
+		pdf.Image(filepath.Join(resourceFolder, "prism-header-logo.png"), 20, 10, logoWidth, 0, false, "", 0, "")
+
+		// divider line
+		pdf.SetDrawColor(200, 200, 200)
+		pdf.Line(20, 30, pageWidth-20, 30)
+
+		// watermark
 		printWatermark(pdf, "PRISM")
-	})
 
+		// restore original settings
+		// assume we're using Arial 14 font
+		pdf.SetFont("Arial", "", 14)
+		pdf.SetTextColor(currentR, currentG, currentB)
+	})
+}
+
+func setupPDFFooter(pdf *gofpdf.Fpdf) {
 	pdf.SetFooterFunc(func() {
-		pdf.SetY(-15)
+		currentR, currentG, currentB := pdf.GetTextColor()
+		pdf.SetTextColor(0, 0, 0)
 		pdf.SetFont("Arial", "I", 8)
+		pdf.SetY(-15)
 		pdf.CellFormat(0, 10, fmt.Sprintf("Page %d of {nb}", pdf.PageNo()), "", 0, "C", false, 0, "")
+		pdf.SetTextColor(currentR, currentG, currentB)
 	})
+}
 
-	pdf.AliasNbPages("{nb}")
-
-	// Add cover page with report details
+func setupPDFCoverPage(pdf *gofpdf.Fpdf, report api.Report, resourceFolder string) {
 	pdf.AddPage()
 
+	// add prism logo to the front page
 	logoPath := filepath.Join(resourceFolder, "prism-logo.png")
 	logoWidth := 150.0 // Width in mm, adjust as needed
-
-	println(logoPath)
 
 	// Get page width to center the logo
 	pageWidth, _ := pdf.GetPageSize()
@@ -279,7 +300,7 @@ func generatePDF(report api.Report, resourceFolder string) ([]byte, error) {
 
 	details := [][]string{
 		{"Report ID", report.Id.String()},
-		{"Downloaded At", time.Now().Format(time.RFC3339)},
+		{"Downloaded At", time.Now().Format(time.DateOnly)},
 		{"Author Name", report.AuthorName},
 	}
 	pdf.SetFont("Arial", "", 12)
@@ -291,6 +312,71 @@ func generatePDF(report api.Report, resourceFolder string) ([]byte, error) {
 		pdf.CellFormat(0, 8, row[1], "1", 1, "L", false, 0, "")
 	}
 	pdf.Ln(5)
+}
+
+func setupPDFFlagGroup(pdf *gofpdf.Fpdf, flags []api.Flag) error {
+	if len(flags) == 0 {
+		return nil
+	}
+	pdf.AddPage()
+	pdf.SetFont("Arial", "B", 14)
+	pdf.SetFillColor(200, 200, 255)
+
+	pageWidth, _ := pdf.GetPageSize()
+	left, _, right, _ := pdf.GetMargins()
+	headerWidth := pageWidth - left - right
+
+	pdf.SetX(left)
+	pdf.CellFormat(headerWidth, 10, flags[0].GetHeading(), "0", 1, "C", true, 0, "")
+	pdf.Ln(3)
+
+	for flagIndex, flag := range flags {
+		pdf.SetFont("Arial", "B", 13)
+		pdf.SetFillColor(230, 230, 230)
+		pdf.CellFormat(0, 10, fmt.Sprintf("Issue %d", flagIndex+1), "", 1, "L", true, 0, "")
+		pdf.Ln(3)
+
+		for _, kv := range flag.GetDetailsFieldsForReport() {
+			keyWidth := 50.0
+			pageWidth, _ := pdf.GetPageSize()
+			left, _, right, _ := pdf.GetMargins()
+			valueWidth := pageWidth - left - right - keyWidth
+
+			pdf.SetFont("Arial", "B", 11)
+			pdf.SetTextColor(80, 80, 80)
+			pdf.CellFormat(keyWidth, 8, kv.Key, "", 0, "L", false, 0, "")
+
+			pdf.SetFont("Arial", "", 11)
+			pdf.SetTextColor(0, 0, 0)
+
+			if kv.Url != "" {
+				pdf.SetTextColor(0, 0, 200)
+				startX := pdf.GetX()
+				startY := pdf.GetY()
+				pdf.MultiCell(valueWidth, 8, kv.Value, "", "L", false)
+				pdf.LinkString(startX, startY, valueWidth, pdf.GetY()-startY, kv.Url)
+				pdf.SetTextColor(0, 0, 0)
+			} else {
+				pdf.MultiCell(valueWidth, 8, kv.Value, "", "L", false)
+			}
+			pdf.Ln(2)
+		}
+		pdf.Ln(5)
+	}
+	return nil
+}
+
+func generatePDF(report api.Report, resourceFolder string) ([]byte, error) {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetMargins(20, 32, 20)
+	pdf.SetAutoPageBreak(true, 20)
+
+	setupPDFCoverPage(pdf, report, resourceFolder)
+
+	// we set the footer here so that cover also has a page number
+	setupPDFFooter(pdf)
+
+	pdf.AliasNbPages("{nb}")
 
 	// Prepare heading and flags data
 	type headingAndFlag struct {
@@ -313,6 +399,8 @@ func generatePDF(report api.Report, resourceFolder string) ([]byte, error) {
 	})
 
 	// Reserve page for TOC (page 2)
+	// we set the header after the cover page so that header logo starts from page 2
+	setupPDFHeader(pdf, resourceFolder)
 	pdf.AddPage()
 	tocPage := pdf.PageNo()
 
@@ -323,59 +411,6 @@ func generatePDF(report api.Report, resourceFolder string) ([]byte, error) {
 	}
 	var sectionPages []sectionInfo
 
-	// Function to add content for a group of flags
-	addFlagPages := func(flags []api.Flag) error {
-		if len(flags) == 0 {
-			return nil
-		}
-		pdf.AddPage()
-		pdf.SetFont("Arial", "B", 14)
-		pdf.SetFillColor(200, 200, 255)
-		pdf.CellFormat(0, 10, flags[0].GetHeading(), "0", 1, "C", true, 0, "")
-		pdf.Ln(3)
-
-		for flagIndex, flag := range flags {
-			pdf.SetFont("Arial", "B", 13)
-			pdf.SetFillColor(230, 230, 230)
-			pdf.CellFormat(0, 10, fmt.Sprintf("Flagged Entity %d", flagIndex+1), "", 1, "L", true, 0, "")
-			pdf.Ln(3)
-
-			for _, kv := range flag.GetDetailFields() {
-				keyWidth := 50.0
-				pageWidth, _ := pdf.GetPageSize()
-				left, _, right, _ := pdf.GetMargins()
-				valueWidth := pageWidth - left - right - keyWidth
-
-				pdf.SetFont("Arial", "B", 11)
-				pdf.SetTextColor(80, 80, 80)
-				pdf.CellFormat(keyWidth, 8, kv.Key, "", 0, "L", false, 0, "")
-
-				pdf.SetFont("Arial", "", 11)
-				pdf.SetTextColor(0, 0, 0)
-
-				if strings.EqualFold(kv.Key, "URL") || strings.HasSuffix(strings.ToLower(kv.Key), "url") {
-					pdf.SetTextColor(0, 0, 200)
-					startX := pdf.GetX()
-					startY := pdf.GetY()
-					pdf.MultiCell(valueWidth, 8, kv.Value, "", "L", false)
-					pdf.LinkString(startX, startY, valueWidth, pdf.GetY()-startY, kv.Value)
-					pdf.SetTextColor(0, 0, 0)
-				} else {
-					pdf.MultiCell(valueWidth, 8, kv.Value, "", "L", false)
-				}
-				pdf.Ln(2)
-			}
-
-			if flagIndex < len(flags)-1 {
-				pdf.Ln(3)
-				pdf.SetDrawColor(200, 200, 200)
-				pdf.Line(20, pdf.GetY(), 190, pdf.GetY())
-				pdf.Ln(8)
-			}
-		}
-		return nil
-	}
-
 	// Generate all content pages
 	for _, group := range headingsAndFlags {
 		if len(group.flags) > 0 {
@@ -385,7 +420,7 @@ func generatePDF(report api.Report, resourceFolder string) ([]byte, error) {
 				startPage: startPage,
 			})
 
-			if err := addFlagPages(group.flags); err != nil {
+			if err := setupPDFFlagGroup(pdf, group.flags); err != nil {
 				return nil, err
 			}
 		}

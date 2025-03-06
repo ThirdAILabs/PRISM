@@ -13,6 +13,7 @@ import (
 	"prism/prism/services/auth"
 	"prism/prism/services/licensing"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -221,6 +222,7 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 		}
 	}
 
+	s.manager.UpdateAuthorReport(report.Id, schema.ReportCompleted, time.Now(), report.Content)
 	return report, nil
 }
 
@@ -265,7 +267,6 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 		contentType = "text/csv"
 		filename = "report.csv"
 	case "pdf":
-		println("resourceFolder", s.resourceFolder)
 		fileBytes, err = generatePDF(report, s.resourceFolder)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
