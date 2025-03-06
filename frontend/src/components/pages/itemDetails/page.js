@@ -24,6 +24,7 @@ import Shimmer from './Shimmer.js';
 import MuiAlert from '@mui/material/Alert';
 import { Snackbar } from '@mui/material';
 import useGoBack from '../../../hooks/useGoBack.js';
+import useOutsideClick from '../../../hooks/useOutsideClick.js';
 
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
@@ -803,6 +804,11 @@ const ItemDetails = () => {
     (item) => item?.Work?.PublicationDate && !isNaN(new Date(item.Work.PublicationDate).getTime())
   );
   const goBack = useGoBack('/');
+
+  const dropdownRef = useOutsideClick(() => {
+    handleDropdownChange(0);
+  });
+  console.log('The value of dropDownChange is ', dropdownOpen);
   return (
     <div className="basic-setup">
       <div className="grid grid-cols-2 gap-4">
@@ -894,6 +900,7 @@ const ItemDetails = () => {
                       display: 'flex',
                       flexDirection: 'column',
                     }}
+                    ref={dropdownRef}
                   >
                     <div className="form-group" style={{ marginBottom: '10px', width: '100%' }}>
                       <label>Start Date</label>
@@ -990,6 +997,7 @@ const ItemDetails = () => {
               reportId={report_id}
               isOpen={dropdownOpen === 2}
               setIsOpen={() => handleDropdownChange(2)}
+              dropdownRef={dropdownRef}
             />
           </div>
         )}

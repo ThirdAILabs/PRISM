@@ -65,7 +65,10 @@ function AppContent() {
           )}
         </div>
       )}
-      <SidePanel isOpen={isSidePanelOpen} onClose={() => setIsSidePanelOpen(false)} />
+      <SidePanel
+        isOpen={isSidePanelOpen && showMenuIcon}
+        onClose={() => setIsSidePanelOpen(false)}
+      />
       <Routes>
         <Route element={<SearchProviderWrapper />}>
           <Route path="/" element={<SearchComponent />} />
