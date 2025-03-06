@@ -42,15 +42,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: start grobid docker container
-        run: |
-          docker run --rm --init -d --ulimit core=0 -p 8070:8070 grobid/grobid:0.8.0
-
       - name: start keycloak docker container
         run: |
           echo "KEYCLOAK_ADMIN_USERNAME=kc-admin" >> "$GITHUB_ENV"
           echo "KEYCLOAK_ADMIN_PASSWORD=KC-admin-pwd@1" >> "$GITHUB_ENV"
           docker run --rm -d -p 8180:8080 -e KC_BOOTSTRAP_ADMIN_USERNAME=$KEYCLOAK_ADMIN_USERNAME -e KC_BOOTSTRAP_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD quay.io/keycloak/keycloak:26.0.0 start-dev
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
+      - name: start grobid docker container
+        run: |
+          docker run --rm --init -d --ulimit core=0 -p 8070:8070 grobid/grobid:0.8.0
 
       - name: set up go >=1.23.1
         uses: actions/setup-go@v5
