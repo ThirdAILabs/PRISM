@@ -8,6 +8,9 @@ RUN apt-get update && apt-get install -y \
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
+# Install Firefox with Playwright and its dependencies
+RUN go run github.com/playwright-community/playwright-go/cmd/playwright install --with-deps firefox
+
 COPY prism prism
 RUN echo ls -la
 RUN mkdir -p bin
