@@ -48,7 +48,7 @@ export function Ticks({ scale }) {
   );
 }
 
-export function Value({ value }) {
+export function Value({ value, speedometerHoverText }) {
   const { innerRadius, cx, cy } = useGaugeState();
   return (
     <g>
@@ -61,13 +61,14 @@ export function Value({ value }) {
         textAnchor="middle"
         dominantBaseline="middle"
       >
+        <title>{speedometerHoverText ? speedometerHoverText : null}</title>
         {value}
       </text>
     </g>
   );
 }
 
-export function Speedometer({ scale, value }) {
+export function Speedometer({ scale, value, speedometerHoverText }) {
   function transformValue(value) {
     if (value >= scale[scale.length - 1]) {
       return 100;
@@ -99,7 +100,7 @@ export function Speedometer({ scale, value }) {
       >
         <Ticks fill={'white'} scale={scale} />
         <GradientValueGauge />
-        <Value value={value} />
+        <Value value={value} speedometerHoverText={speedometerHoverText} />
       </Gauge>
     </div>
   );
