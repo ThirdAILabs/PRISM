@@ -56,7 +56,7 @@ const SidePanel = ({ isOpen, onClose }) => {
       const pollingInterval = setInterval(() => {
         fetchReports();
         fetchUniversityReports();
-      }, 1000);
+      }, 10000);
 
       return () => clearInterval(pollingInterval);
     }
@@ -90,53 +90,9 @@ const SidePanel = ({ isOpen, onClose }) => {
       },
     });
   };
+  console.log('reports', reports);
   return (
     <>
-      {/* {!isOpen && (
-        <div className="mini-nav" style={{
-          position: 'fixed',
-          left: 0,
-          top: '80px',
-          width: '60px',
-          backgroundColor: 'white',
-          boxShadow: '2px 0 5px rgba(0,0,0,0.1)',
-          zIndex: 100,
-          height: '100%'
-        }}>
-          <nav className="navigation">
-            <ul className="nav-list">
-              <li
-                className={`nav-item ${currentLocation === '/' ? 'active' : ''}`}
-                onClick={handleIndividualClick}
-                title="Individual Assessment"
-              >
-                <span className="nav-icon">
-                  <FaRegUserCircle size={24} />
-                </span>
-              </li>
-              <li
-                className={`nav-item ${currentLocation === '/university' ? 'active' : ''}`}
-                onClick={handleUniversityClick}
-                title="University Assessment"
-              >
-                <span className="nav-icon">
-                  <FaUniversity size={24} />
-                </span>
-              </li>
-              <li
-                className={`nav-item ${currentLocation === '/entity-lookup' ? 'active' : ''}`}
-                onClick={handleEntityClick}
-                title="Entity Lookup"
-              >
-                <span className="nav-icon">
-                  <FaSearch size={24} />
-                </span>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      )} */}
-
       <div className={`side-panel ${isOpen ? 'open' : ''}`}>
         <div className="panel-content">
           {/* Header */}
@@ -195,7 +151,7 @@ const SidePanel = ({ isOpen, onClose }) => {
             <h5 className="report-header">
               <TbReportSearch /> Reports
             </h5>
-            {reports?.length && (
+            {reports?.length ? (
               <div className="collapsible-header">
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <div
@@ -209,12 +165,12 @@ const SidePanel = ({ isOpen, onClose }) => {
                   </span>
                 </div>
               </div>
-            )}
+            ) : null}
             {showAuthorReports && (
               <div className="collapsible-content">
                 {reports.map(
                   (report, index) =>
-                    index < 10 && (
+                    index < 1000 && (
                       <div
                         key={report.Id}
                         className="report-item"
@@ -232,7 +188,7 @@ const SidePanel = ({ isOpen, onClose }) => {
               className="collapsible-header"
               // style={{ marginTop: '10px' }}
             >
-              {universityReports?.length && (
+              {universityReports?.length ? (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <div
                     onClick={() => setShowUniversityReports(!showUniversityReports)}
@@ -242,7 +198,7 @@ const SidePanel = ({ isOpen, onClose }) => {
                   </div>
                   <span style={{ fontSize: 'medium', marginLeft: '10px' }}>University Report</span>
                 </div>
-              )}
+              ) : null}
             </div>
             {showUniversityReports && (
               <div className="collapsible-content">
