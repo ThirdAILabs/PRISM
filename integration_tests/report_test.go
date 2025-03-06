@@ -55,7 +55,7 @@ func TestReportGeneration(t *testing.T) {
 	}
 
 	for i, reportId := range reportIds {
-		report, err := user.WaitForReport(reportId, 100*time.Second)
+		report, err := user.WaitForReport(reportId, 200*time.Second)
 		if err != nil {
 			t.Fatal(err)
 		}

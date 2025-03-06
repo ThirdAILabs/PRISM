@@ -37,6 +37,7 @@ func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downl
 		maxWorkers: 10,
 		grobid: resty.New().
 			SetBaseURL(grobidEndpoint).
+			SetRetryCount(2).
 			AddRetryCondition(func(response *resty.Response, err error) bool {
 				if err != nil {
 					return true // The err can be non nil for some network errors.
@@ -44,8 +45,8 @@ func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downl
 				// There's no reason to retry other 400 requests since the outcome should not change
 				return response != nil && (response.StatusCode() > 499 || response.StatusCode() == http.StatusTooManyRequests)
 			}).
-			SetRetryWaitTime(500 * time.Millisecond).
-			SetRetryMaxWaitTime(5 * time.Second),
+			SetRetryWaitTime(2 * time.Second).
+			SetRetryMaxWaitTime(10 * time.Second),
 		downloadDir: downloadDir,
 	}
 }
