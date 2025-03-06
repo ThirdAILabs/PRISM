@@ -66,7 +66,7 @@ const StyledWrapper = styled.div`
   }
 `;
 
-const Button = ({ reportId, isOpen, setIsOpen }) => {
+const Button = ({ reportId, isOpen, setIsOpen, dropdownRef }) => {
   const handleDownload = (format) => {
     reportService.downloadReport(reportId, format);
     setIsOpen(false);
@@ -83,7 +83,7 @@ const Button = ({ reportId, isOpen, setIsOpen }) => {
         </svg>
       </button>
       {isOpen && (
-        <div className="dropdown-container">
+        <div className="dropdown-container" ref={dropdownRef}>
           <div className="dropdown-item" onClick={() => handleDownload('pdf')}>
             <FaFilePdf color="#ff0000" />
             PDF

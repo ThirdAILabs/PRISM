@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"prism/prism/api"
 	"prism/prism/schema"
+	"sort"
 	"time"
 
 	"github.com/google/uuid"
@@ -542,6 +543,15 @@ func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.Uni
 			AuthorName: flag.AuthorName,
 			Source:     flag.Source,
 			FlagCount:  flag.Count,
+		})
+	}
+
+	for _, flagList := range content.Flags {
+		sort.Slice(flagList, func(i, j int) bool {
+			if flagList[i].FlagCount == flagList[j].FlagCount {
+				return flagList[i].AuthorName < flagList[j].AuthorName
+			}
+			return flagList[i].FlagCount > flagList[j].FlagCount
 		})
 	}
 
