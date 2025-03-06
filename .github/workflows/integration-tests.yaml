@@ -48,8 +48,20 @@ jobs:
           echo "KEYCLOAK_ADMIN_PASSWORD=KC-admin-pwd@1" >> "$GITHUB_ENV"
           docker run --rm -d -p 8180:8080 -e KC_BOOTSTRAP_ADMIN_USERNAME=$KEYCLOAK_ADMIN_USERNAME -e KC_BOOTSTRAP_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD quay.io/keycloak/keycloak:26.0.0 start-dev
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
+      - name: wait for keycloak to be ready
+        run: |
+          for i in {1..10}; do
+            if curl -is http://localhost:8180/admin/realms | grep "HTTP 401 Unauthorized"; then
+              echo "Keycloak is ready"
+              exit 0
+            fi
+            echo "Waiting for Keycloak to be ready..."
+            sleep 2
+          done
+          echo "Keycloak did not start in time"
+          exit 1
 
       - name: start grobid docker container
         run: |
@@ -78,17 +90,6 @@ jobs:
           echo "Grobid did not start in time"
           exit 1
 
-      - name: wait for keycloak to be ready
-        run: |
-          for i in {1..10}; do
-            if curl -i http://localhost:8180/admin/realms | grep "HTTP 401 Unauthorized"; then
-              echo "Keycloak is ready"
-              exit 0
-            fi
-            echo "Waiting for Keycloak to be ready..."
-            sleep 2
-          done
-          echo "Keycloak did not start in time"
      
       - name: start backend
         env:
