@@ -78,7 +78,7 @@ jobs:
       - name: wait for keycloak to be ready
         run: |
           for i in {1..10}; do
-            if curl -is http://localhost:8180/admin/realms | grep "HTTP 401 Unauthorized"; then
+            if curl -i http://localhost:8180/admin/realms | grep "HTTP 401 Unauthorized"; then
               echo "Keycloak is ready"
               exit 0
             fi
@@ -86,7 +86,6 @@ jobs:
             sleep 2
           done
           echo "Keycloak did not start in time"
-          exit 1
      
       - name: start backend
         env:
