@@ -106,8 +106,8 @@ jobs:
         run: |
           go build ./prism/cmd/backend/main.go
           go build ./prism/cmd/worker/main.go
-          nohup go run ./prism/cmd/backend/main.go 2>&1 &
-          nohup go run ./prism/cmd/worker/main.go 2>&1 &
+          nohup go run ./prism/cmd/backend/main.go > backend.log 2>&1 &
+          nohup go run ./prism/cmd/worker/main.go > worker.log 2>&1 &
 
       - name: wait for backend to be ready
         run: |
@@ -132,12 +132,12 @@ jobs:
       - name: display backend logs
         if: always()
         run: |
-          cat ./prism_backend.log
+          cat ./backend.log
 
       - name: display worker logs
         if: always()
         run: |
-          cat ./prism_worker.log
+          cat ./worker.log
 
       - name: stop grobid docker container
         if: always()
