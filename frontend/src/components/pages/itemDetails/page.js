@@ -100,8 +100,9 @@ const ItemDetails = () => {
   const [reportContent, setReportContent] = useState({});
   const [authorName, setAuthorName] = useState('');
   const [institutions, setInstitutions] = useState([]);
-  const [initialReprtContent, setInitialReportContent] = useState({});
+  const [initialReportContent, setInitialReportContent] = useState({});
   const [isDisclosureChecked, setDisclosureChecked] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // box shadow for disclosed/undisclosed buttons
   const greenBoxShadow = '0 0px 10px rgb(0, 183, 46)';
@@ -189,17 +190,19 @@ const ItemDetails = () => {
     const poll = async () => {
       let inProgress = true;
       const report = await reportService.getReport(report_id);
-      if (report.Content && Object.keys(report.Content).length > 0 && isMounted) {
+      if (isMounted) {
+        console.log(`Loading: ${loading}`);
         console.log('Report', report);
         setAuthorName(report.AuthorName);
         setReportContent(report.Content);
         setInitialReportContent(report.Content);
-        setLoading(false);
         inProgress = report.Status === 'queued' || report.Status === 'in-progress';
       }
 
       if (inProgress) {
         setTimeout(poll, 2000);
+      } else {
+        setLoading(false);
       }
     };
 
@@ -209,8 +212,6 @@ const ItemDetails = () => {
       isMounted = false;
     };
   }, []);
-
-  const [loading, setLoading] = useState(true);
 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -231,7 +232,7 @@ const ItemDetails = () => {
 
   const handleDateFilter = () => {
     if (!startDate && !endDate) {
-      setReportContent(initialReprtContent);
+      setReportContent(initialReportContent);
       setFilterMessage('');
       handleDropdownChange(1);
       return;
@@ -255,8 +256,8 @@ const ItemDetails = () => {
 
     const filteredContent = {};
     FLAG_ORDER.forEach((flag) => {
-      if (initialReprtContent[flag]) {
-        filteredContent[flag] = initialReprtContent[flag].filter((item) => {
+      if (initialReportContent[flag]) {
+        filteredContent[flag] = initialReportContent[flag].filter((item) => {
           if (!item?.Work?.PublicationDate) return true;
           const pubDate = new Date(item.Work.PublicationDate);
 
@@ -778,7 +779,7 @@ const ItemDetails = () => {
   const handleResetFilter = () => {
     setStartDate('');
     setEndDate('');
-    setReportContent(initialReprtContent);
+    setReportContent(initialReportContent);
   };
 
   const togglePopover = () => {
@@ -1002,244 +1003,239 @@ const ItemDetails = () => {
           </div>
         )}
       </div>
-
-      {activeTab === 0 &&
-        (loading ? (
-          <div style={{ width: '100%', height: '300px' }}>
-            <Shimmer />
+      {activeTab === 0 && (
+        <>
+          {loading && (
+            <div class="d-flex justify-content-start">
+              <div class="spinner-border ms-5 mb-3" role="status" />
+            </div>
+          )}
+          <div
+            className="d-flex w-100 flex-column align-items-center"
+            style={{ color: 'rgb(78, 78, 78)', marginTop: '0px' }}
+          >
+            <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Score</div>
+            <div style={{ fontSize: '60px', fontWeight: 'bold' }}>
+              {Object.keys(reportContent || {})
+                .map((name) => (reportContent[name] || []).length)
+                .reduce((prev, curr) => prev + curr, 0)}
+            </div>
           </div>
-        ) : (
-          <>
-            <div
-              className="d-flex w-100 flex-column align-items-center"
-              style={{ color: 'rgb(78, 78, 78)', marginTop: '0px' }}
-            >
-              <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Score</div>
-              <div style={{ fontSize: '60px', fontWeight: 'bold' }}>
-                {Object.keys(reportContent || {})
-                  .map((name) => (reportContent[name] || []).length)
-                  .reduce((prev, curr) => prev + curr, 0)}
-              </div>
-            </div>
 
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-around',
-                flexWrap: 'wrap',
-                marginTop: '20px',
-              }}
-            >
-              {FLAG_ORDER.map((flag, index) => {
-                const flagCount = reportContent[flag] ? reportContent[flag].length : 0;
-                const isSelected = review === flag;
-                return (
-                  <ConcernVisualizer
-                    title={TitlesAndDescriptions[flag].title}
-                    hoverText={TitlesAndDescriptions[flag].desc}
-                    value={flagCount}
-                    speedometerHoverText={`${flagCount} Issues`}
-                    onReview={() => setReview(flag)}
-                    key={index}
-                    selected={isSelected}
-                  />
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-around',
+              flexWrap: 'wrap',
+              marginTop: '20px',
+            }}
+          >
+            {FLAG_ORDER.map((flag, index) => {
+              const flagCount = reportContent[flag] ? reportContent[flag].length : 0;
+              const isSelected = review === flag;
+              return (
+                <ConcernVisualizer
+                  title={TitlesAndDescriptions[flag].title}
+                  hoverText={TitlesAndDescriptions[flag].desc}
+                  value={flagCount}
+                  speedometerHoverText={`${flagCount} Issues`}
+                  onReview={() => setReview(flag)}
+                  key={index}
+                  selected={isSelected}
+                />
+              );
+            })}
+          </div>
+          {review && (
+            <div style={{ width: '100%', textAlign: 'center', marginTop: '50px' }}>
+              {(() => {
+                const items = reportContent[review] || [];
+                const hasDates = items.some(
+                  (item) =>
+                    item?.Work?.PublicationDate &&
+                    !isNaN(new Date(item.Work.PublicationDate).getTime())
                 );
-              })}
-            </div>
-            {review && (
-              <div style={{ width: '100%', textAlign: 'center', marginTop: '50px' }}>
-                {(() => {
-                  const items = reportContent[review] || [];
-                  const hasDates = items.some(
-                    (item) =>
-                      item?.Work?.PublicationDate &&
-                      !isNaN(new Date(item.Work.PublicationDate).getTime())
-                  );
-                  if (!hasDates) return null;
-                  return (
-                    <div
-                      style={{
-                        marginBottom: '20px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '10px',
-                      }}
-                    >
-                      <span style={{ marginRight: '10px' }}>Sort by Date</span>
-                      <div onClick={toggleSortOrder} style={{ cursor: 'pointer' }}>
-                        {sortOrder === 'asc' ? (
-                          <ArrowUpwardIcon style={{ color: 'black' }} />
-                        ) : (
-                          <ArrowDownwardIcon style={{ color: 'black' }} />
-                        )}
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                {isDisclosureChecked ? (
-                  <>
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        gap: '20px',
-                        margin: '10px auto',
-                        width: 'fit-content',
-                      }}
-                    >
-                      {/* Disclosed Button */}
-                      {disclosedItems.length > 0 ? (
-                        <button
-                          onClick={() => {
-                            setShowDisclosed(!showDisclosed);
-                            if (!showDisclosed) setShowUndisclosed(false);
-                          }}
-                          style={{
-                            backgroundColor: 'transparent',
-                            color: 'green',
-                            boxShadow: showDisclosed ? '0 0px 10px rgb(0, 183, 46)' : 'none',
-                            borderRadius: '20px',
-                            border: '2px solid green',
-                            padding: '10px 10px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '200px',
-                            fontSize: '16px',
-                            transition: 'background-color 0.3s, color 0.3s',
-                          }}
-                        >
-                          <strong>Disclosed ({disclosedItems.length})</strong>
-                          {showDisclosed ? (
-                            <ArrowDropDownIcon
-                              style={{ verticalAlign: 'middle', marginLeft: '8px' }}
-                            />
-                          ) : (
-                            <ArrowRightIcon
-                              style={{ verticalAlign: 'middle', marginLeft: '8px' }}
-                            />
-                          )}
-                        </button>
-                      ) : (
-                        <div
-                          style={{
-                            color: 'green',
-                            textAlign: 'center',
-                            padding: '10px 20px',
-                            border: '2px solid green',
-                            borderRadius: '20px',
-                            width: '200px',
-                          }}
-                        >
-                          <strong>Disclosed (0)</strong>
-                        </div>
-                      )}
-
-                      {/* Undisclosed Button */}
-                      {undisclosedItems.length > 0 ? (
-                        <button
-                          onClick={() => {
-                            setShowUndisclosed(!showUndisclosed);
-                            if (!showUndisclosed) setShowDisclosed(false);
-                          }}
-                          style={{
-                            backgroundColor: 'transparent',
-                            color: 'red',
-                            boxShadow: showUndisclosed ? '0 0px 10px rgb(255, 0, 0)' : 'none',
-                            borderRadius: '20px',
-                            border: '2px solid red',
-                            padding: '10px 10px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '200px',
-                            fontSize: '16px',
-                            transition: 'background-color 0.3s, color 0.3s',
-                          }}
-                        >
-                          <strong>Undisclosed ({undisclosedItems.length})</strong>
-                          {showUndisclosed ? (
-                            <ArrowDropDownIcon
-                              style={{ verticalAlign: 'middle', marginLeft: '8px' }}
-                            />
-                          ) : (
-                            <ArrowRightIcon
-                              style={{ verticalAlign: 'middle', marginLeft: '8px' }}
-                            />
-                          )}
-                        </button>
-                      ) : (
-                        <div
-                          style={{
-                            color: 'red',
-                            textAlign: 'center',
-                            padding: '10px 20px',
-                            border: '2px solid red',
-                            borderRadius: '20px',
-                            width: '200px',
-                          }}
-                        >
-                          <strong>Undisclosed (0)</strong>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Content areas for disclosed and undisclosed items */}
-                    {/* Display flags below buttons */}
-                    <div style={{ width: '100%', marginTop: '20px' }}>
-                      {showDisclosed && (
-                        <div
-                          style={{
-                            width: '100%',
-                            maxWidth: '1200px',
-                            margin: '10px auto',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                          }}
-                        >
-                          {renderFlags(disclosedItems)}
-                        </div>
-                      )}
-
-                      {showUndisclosed && (
-                        <div
-                          style={{
-                            width: '100%',
-                            maxWidth: '1200px',
-                            margin: '10px auto',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                          }}
-                        >
-                          {renderFlags(undisclosedItems)}
-                        </div>
-                      )}
-                    </div>
-                  </>
-                ) : (
+                if (!hasDates) return null;
+                return (
                   <div
                     style={{
-                      width: '100%',
-                      maxWidth: '1200px',
-                      margin: '0 auto',
+                      marginBottom: '20px',
                       display: 'flex',
-                      flexDirection: 'column',
                       alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '10px',
                     }}
                   >
-                    {renderFlags(reportContent[review])}
+                    <span style={{ marginRight: '10px' }}>Sort by Date</span>
+                    <div onClick={toggleSortOrder} style={{ cursor: 'pointer' }}>
+                      {sortOrder === 'asc' ? (
+                        <ArrowUpwardIcon style={{ color: 'black' }} />
+                      ) : (
+                        <ArrowDownwardIcon style={{ color: 'black' }} />
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
-            )}
-          </>
-        ))}
+                );
+              })()}
+
+              {isDisclosureChecked ? (
+                <>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      gap: '20px',
+                      margin: '10px auto',
+                      width: 'fit-content',
+                    }}
+                  >
+                    {/* Disclosed Button */}
+                    {disclosedItems.length > 0 ? (
+                      <button
+                        onClick={() => {
+                          setShowDisclosed(!showDisclosed);
+                          if (!showDisclosed) setShowUndisclosed(false);
+                        }}
+                        style={{
+                          backgroundColor: 'transparent',
+                          color: 'green',
+                          boxShadow: showDisclosed ? '0 0px 10px rgb(0, 183, 46)' : 'none',
+                          borderRadius: '20px',
+                          border: '2px solid green',
+                          padding: '10px 10px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '200px',
+                          fontSize: '16px',
+                          transition: 'background-color 0.3s, color 0.3s',
+                        }}
+                      >
+                        <strong>Disclosed ({disclosedItems.length})</strong>
+                        {showDisclosed ? (
+                          <ArrowDropDownIcon
+                            style={{ verticalAlign: 'middle', marginLeft: '8px' }}
+                          />
+                        ) : (
+                          <ArrowRightIcon style={{ verticalAlign: 'middle', marginLeft: '8px' }} />
+                        )}
+                      </button>
+                    ) : (
+                      <div
+                        style={{
+                          color: 'green',
+                          textAlign: 'center',
+                          padding: '10px 20px',
+                          border: '2px solid green',
+                          borderRadius: '20px',
+                          width: '200px',
+                        }}
+                      >
+                        <strong>Disclosed (0)</strong>
+                      </div>
+                    )}
+
+                    {/* Undisclosed Button */}
+                    {undisclosedItems.length > 0 ? (
+                      <button
+                        onClick={() => {
+                          setShowUndisclosed(!showUndisclosed);
+                          if (!showUndisclosed) setShowDisclosed(false);
+                        }}
+                        style={{
+                          backgroundColor: 'transparent',
+                          color: 'red',
+                          boxShadow: showUndisclosed ? '0 0px 10px rgb(255, 0, 0)' : 'none',
+                          borderRadius: '20px',
+                          border: '2px solid red',
+                          padding: '10px 10px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '200px',
+                          fontSize: '16px',
+                          transition: 'background-color 0.3s, color 0.3s',
+                        }}
+                      >
+                        <strong>Undisclosed ({undisclosedItems.length})</strong>
+                        {showUndisclosed ? (
+                          <ArrowDropDownIcon
+                            style={{ verticalAlign: 'middle', marginLeft: '8px' }}
+                          />
+                        ) : (
+                          <ArrowRightIcon style={{ verticalAlign: 'middle', marginLeft: '8px' }} />
+                        )}
+                      </button>
+                    ) : (
+                      <div
+                        style={{
+                          color: 'red',
+                          textAlign: 'center',
+                          padding: '10px 20px',
+                          border: '2px solid red',
+                          borderRadius: '20px',
+                          width: '200px',
+                        }}
+                      >
+                        <strong>Undisclosed (0)</strong>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Content areas for disclosed and undisclosed items */}
+                  {/* Display flags below buttons */}
+                  <div style={{ width: '100%', marginTop: '20px' }}>
+                    {showDisclosed && (
+                      <div
+                        style={{
+                          width: '100%',
+                          maxWidth: '1200px',
+                          margin: '10px auto',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                        }}
+                      >
+                        {renderFlags(disclosedItems)}
+                      </div>
+                    )}
+
+                    {showUndisclosed && (
+                      <div
+                        style={{
+                          width: '100%',
+                          maxWidth: '1200px',
+                          margin: '10px auto',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                        }}
+                      >
+                        {renderFlags(undisclosedItems)}
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div
+                  style={{
+                    width: '100%',
+                    maxWidth: '1200px',
+                    margin: '0 auto',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                  }}
+                >
+                  {renderFlags(reportContent[review])}
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
 
       {activeTab === 1 && <Graph authorName={authorName} reportContent={reportContent} />}
     </div>
