@@ -1,4 +1,4 @@
-name: Unit Tests
+name: Integration Tests
 
 # Kills old jobs from the same pr if we push a new commit
 # See https://stackoverflow.com/questions/66335225/how-to-cancel-previous-runs-in-the-pr-when-you-push-new-commitsupdate-the-curre
@@ -78,7 +78,7 @@ jobs:
       - name: wait for keycloak to be ready
         run: |
           for i in {1..10}; do
-            if curl -s http://localhost/keycloak/admin/realms | grep "HTTP 401 Unauthorized"; then
+            if curl -is http://localhost:8180/admin/realms | grep "HTTP 401 Unauthorized"; then
               echo "Keycloak is ready"
               exit 0
             fi
