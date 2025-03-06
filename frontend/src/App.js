@@ -17,6 +17,9 @@ import SearchProviderWrapper from './services/SearchProviderWrapper';
 import UniversityProviderWrapper from './services/UniversityProviderWrapper';
 import { Tooltip } from '@mui/material';
 
+import { GoSidebarCollapse } from 'react-icons/go';
+import { GoSidebarExpand } from 'react-icons/go';
+
 //CSS
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.js';
@@ -70,18 +73,14 @@ function AppContent() {
               cursor: 'pointer',
               position: 'fixed',
               left: isSidePanelOpen ? '240px' : '20px',
-              top: '15px',
+              top: '10px',
               zIndex: 1000,
               transition: 'left 0.3s ease',
             }}
             onClick={() => setIsSidePanelOpen(!isSidePanelOpen)}
-            className="menu-icon"
+            className="sidebar-toggle"
           >
-            {isSidePanelOpen ? (
-              <TbLayoutSidebarRightExpand size={40} />
-            ) : (
-              <TbLayoutSidebarLeftExpand size={40} />
-            )}
+            {isSidePanelOpen ? <GoSidebarCollapse size={30} /> : <GoSidebarExpand size={30} />}
           </div>
         </Tooltip>
       )}

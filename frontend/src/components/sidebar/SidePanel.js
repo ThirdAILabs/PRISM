@@ -183,7 +183,7 @@ const SidePanel = ({ isOpen, onClose }) => {
                         className="report-item"
                         onClick={handleReportClick.bind(null, report)}
                       >
-                        <span>{report.AuthorName}</span>
+                        <span className="text-start">{report.AuthorName}</span>
                         {/* <span><MdDelete style={15} /></span> */}
                         <span className={`status ${report.Status}`}>{status[report.Status]}</span>
                       </div>
@@ -219,7 +219,7 @@ const SidePanel = ({ isOpen, onClose }) => {
                         className="report-item"
                         onClick={handleUniversityReportClick.bind(null, universityReport)}
                       >
-                        <span>{universityReport.UniversityName}</span>
+                        <span className="text-start">{universityReport.UniversityName}</span>
                         {/* <span><MdDelete style={15} /></span> */}
                         <span className={`status ${universityReport.Status}`}>
                           {status[universityReport.Status]}
