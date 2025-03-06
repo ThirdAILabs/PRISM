@@ -1,11 +1,16 @@
-FROM node:20-slim
+# Build the react app
+FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 COPY . .
+RUN npm run build
 
-EXPOSE 3000
+# Serve the static files with Nginx
+FROM nginx:stable-alpine
+COPY --from=builder /app/build /usr/share/nginx/html
 
-CMD ["npm", "start"]
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
