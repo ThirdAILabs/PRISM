@@ -245,12 +245,17 @@ func setupPDFHeader(pdf *gofpdf.Fpdf, resourceFolder string) {
 		pageWidth, _ := pdf.GetPageSize()
 
 		// add smaller logo to header
-		logoWidth := 15.0
+		logoWidth := 10.0
 		pdf.Image(filepath.Join(resourceFolder, "prism-header-logo.png"), 20, 10, logoWidth, 0, false, "", 0, "")
+
+		// prism report text
+		pdf.SetFont("Arial", "B", 14)
+		pdf.SetTextColor(0, 0, 200)
+		pdf.Text(pageWidth/2-pdf.GetStringWidth("PRISM REPORT")/2, 17, "PRISM REPORT")
 
 		// divider line
 		pdf.SetDrawColor(200, 200, 200)
-		pdf.Line(20, 30, pageWidth-20, 30)
+		pdf.Line(20, 25, pageWidth-20, 25)
 
 		// watermark
 		printWatermark(pdf, "PRISM")
@@ -368,7 +373,7 @@ func setupPDFFlagGroup(pdf *gofpdf.Fpdf, flags []api.Flag) error {
 
 func generatePDF(report api.Report, resourceFolder string) ([]byte, error) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
-	pdf.SetMargins(20, 32, 20)
+	pdf.SetMargins(20, 30, 20)
 	pdf.SetAutoPageBreak(true, 20)
 
 	setupPDFCoverPage(pdf, report, resourceFolder)
