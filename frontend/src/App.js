@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import SearchComponent from './components/pages/SearchComponent';
+import SearchComponent from './components/pages/authorInstituteSearch/SearchComponent';
 import ItemDetails from './components/pages/itemDetails/page';
 import EntityLookup from './components/pages/entityLookup/page';
 import UserService from './services/userService';
 import { useUser } from './store/userContext';
 import { FaBars } from 'react-icons/fa';
+import { TbLayoutSidebarLeftExpand, TbLayoutSidebarRightExpand } from 'react-icons/tb';
 import SidePanel from './components/sidebar/SidePanel';
 import UniversityAssessment from './components/pages/UniversityAssessment';
 import UniversityReport from './components/pages/UniversityReport';
@@ -14,6 +15,8 @@ import Error from './components/pages/error/Error.js';
 import { GetShowMenuIcon } from './utils/helper.js';
 import SearchProviderWrapper from './services/SearchProviderWrapper';
 import UniversityProviderWrapper from './services/UniversityProviderWrapper';
+import { Tooltip } from '@mui/material';
+
 //CSS
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.js';
@@ -45,20 +48,47 @@ function AppContent() {
   return (
     <div className="App">
       {showMenuIcon && (
-        <FaBars
-          size={30}
-          style={{
-            cursor: 'pointer',
-            position: 'fixed',
-            left: '20px',
-            top: '20px',
-            zIndex: 1000,
+        <Tooltip
+          title={isSidePanelOpen ? 'Close Sidebar' : 'Open Sidebar'}
+          placement="right"
+          arrow
+          componentsProps={{
+            tooltip: {
+              sx: {
+                bgcolor: 'rgba(60,60,60, 0.87)',
+                '& .MuiTooltip-arrow': {
+                  color: 'rgba(60, 60, 60, 0.87)',
+                },
+                padding: '8px 12px',
+                fontSize: '14px',
+              },
+            },
           }}
-          onClick={() => setIsSidePanelOpen(!isSidePanelOpen)}
-          className="hover:bg-gray-200"
-        />
+        >
+          <div
+            style={{
+              cursor: 'pointer',
+              position: 'fixed',
+              left: isSidePanelOpen ? '240px' : '20px',
+              top: '15px',
+              zIndex: 1000,
+              transition: 'left 0.3s ease',
+            }}
+            onClick={() => setIsSidePanelOpen(!isSidePanelOpen)}
+            className="menu-icon"
+          >
+            {isSidePanelOpen ? (
+              <TbLayoutSidebarRightExpand size={40} />
+            ) : (
+              <TbLayoutSidebarLeftExpand size={40} />
+            )}
+          </div>
+        </Tooltip>
       )}
-      <SidePanel isOpen={isSidePanelOpen} onClose={() => setIsSidePanelOpen(false)} />
+      <SidePanel
+        isOpen={isSidePanelOpen && showMenuIcon}
+        onClose={() => setIsSidePanelOpen(false)}
+      />
       <Routes>
         <Route element={<SearchProviderWrapper />}>
           <Route path="/" element={<SearchComponent />} />

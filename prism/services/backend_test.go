@@ -13,12 +13,12 @@ import (
 	"net/url"
 	"path/filepath"
 	"prism/prism/api"
+	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/schema"
 	"prism/prism/search"
 	"prism/prism/services"
-	"prism/prism/services/licensing"
 	"slices"
 	"strings"
 	"testing"
@@ -38,16 +38,11 @@ func init() {
 }
 
 const (
-	userPrefix  = "user"
-	adminPrefix = "admin"
+	userPrefix = "user"
 )
 
 func newUser() string {
 	return userPrefix + uuid.NewString()
-}
-
-func newAdmin() string {
-	return adminPrefix + uuid.NewString()
 }
 
 type MockTokenVerifier struct {
@@ -74,7 +69,6 @@ func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 	if err := db.AutoMigrate(
 		&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{},
 		&schema.UniversityReport{}, &schema.UserUniversityReport{},
-		&schema.License{}, &schema.LicenseUser{}, &schema.LicenseUsage{},
 	); err != nil {
 		t.Fatal(err)
 	}
@@ -93,8 +87,13 @@ func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 		t.Fatal(err)
 	}
 
+	licensing, err := licensing.NewLicenseVerifier("AC013F-FD0B48-00B160-64836E-76E88D-V3")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	backend := services.NewBackend(
-		db, openalex.NewRemoteKnowledgeBase(), entitySearch, &MockTokenVerifier{prefix: userPrefix}, &MockTokenVerifier{prefix: adminPrefix},
+		db, openalex.NewRemoteKnowledgeBase(), entitySearch, &MockTokenVerifier{prefix: userPrefix}, licensing,
 	)
 
 	return backend.Routes(), db
@@ -248,168 +247,42 @@ func deleteUniversityReport(backend http.Handler, user string, id uuid.UUID) err
 	return Delete(backend, "/report/university/"+id.String(), user)
 }
 
-func createLicense(backend http.Handler, name, user string) (api.CreateLicenseResponse, error) {
-	return createLicenseWithExp(backend, name, user, time.Now().UTC().Add(5*time.Minute))
-}
-
-func createLicenseWithExp(backend http.Handler, name, user string, exp time.Time) (api.CreateLicenseResponse, error) {
-	req := api.CreateLicenseRequest{
-		Name:       name,
-		Expiration: exp,
-	}
-	var res api.CreateLicenseResponse
-	err := Post(backend, "/license/create", user, req, &res)
-	return res, err
-}
-
-func listLicenses(backend http.Handler, user string) ([]api.License, error) {
-	var res []api.License
-	err := Get(backend, "/license/list", user, &res)
-	if err != nil {
-		return nil, err
-	}
-
-	slices.SortFunc(res, func(a, b api.License) int {
-		if a.Name < b.Name {
-			return -1
-		}
-		if a.Name > b.Name {
-			return 1
-		}
-		return 0
-	})
-
-	return res, nil
-}
-
-func activateLicense(backend http.Handler, user, license string) error {
-	req := api.ActivateLicenseRequest{
-		License: license,
-	}
-	return Post(backend, "/report/activate-license", user, req, nil)
-}
-
-func deactivateLicense(backend http.Handler, user string, id uuid.UUID) error {
-	return Delete(backend, "/license/"+id.String(), user)
-}
-
-func TestLicenseEndpoints(t *testing.T) {
-	backend, _ := createBackend(t)
-
-	admin := newAdmin()
-	user1, user2 := newUser(), newUser()
-
-	if _, err := createLicense(backend, "license-0", user1); !errors.Is(err, ErrUnauthorized) {
-		t.Fatal("users cannot create licenses")
-	}
-
-	license1, err := createLicense(backend, "xyz", admin)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	license2, err := createLicense(backend, "abc", admin)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if _, err := listLicenses(backend, user1); !errors.Is(err, ErrUnauthorized) {
-		t.Fatal("users cannot list licenses")
-	}
-
-	licenses, err := listLicenses(backend, admin)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(licenses) != 2 ||
-		licenses[0].Name != "abc" || licenses[0].Id != license2.Id ||
-		licenses[1].Name != "xyz" || licenses[1].Id != license1.Id {
-		t.Fatalf("incorrect licenses: %v", licenses)
-	}
-
-	if err := activateLicense(backend, user1, license1.License); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := deactivateLicense(backend, admin, license2.Id); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := activateLicense(backend, user2, license2.License); err == nil || !strings.Contains(err.Error(), "license is deactivated") {
-		t.Fatal("cannot use deactivated license")
-	}
-
-	if _, err := createAuthorReport(backend, user1, "report1"); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := deactivateLicense(backend, user2, license1.Id); !errors.Is(err, ErrUnauthorized) {
-		t.Fatal("users cannot deactivate licenses")
-	}
-
-	if _, err := createAuthorReport(backend, user1, "report1"); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := deactivateLicense(backend, admin, license1.Id); err != nil {
-		t.Fatal(err)
-	}
-
-	if _, err := createAuthorReport(backend, user1, "report1"); err == nil || !strings.Contains(err.Error(), "license is deactivated") {
-		t.Fatal("cannot use deactivated license")
-	}
-}
-
 func TestCheckDisclosure(t *testing.T) {
 	backend, db := createBackend(t)
 
-	admin := newAdmin()
 	user := newUser()
 
 	manager := reports.NewManager(db, reports.StaleReportThreshold)
-
-	license, err := createLicense(backend, "test-disclosure-license", admin)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := activateLicense(backend, user, license.License); err != nil {
-		t.Fatal(err)
-	}
 
 	reportResp, err := createAuthorReport(backend, user, "disclosure-report")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	content := api.ReportContent{
-		"TalentContracts": []api.Flag{
-			&api.TalentContractFlag{
-				DisclosableFlag: api.DisclosableFlag{},
-				Message:         "Test disclosure flag - TalentContract",
-				Work: api.WorkSummary{
-					WorkId:          "work-1",
-					DisplayName:     "Test Work",
-					WorkUrl:         "http://example.com/work-1",
-					OaUrl:           "http://example.com/oa/work-1",
-					PublicationDate: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
-				},
-				Entities: []api.AcknowledgementEntity{{Entity: "discloseme"}},
+	content := []api.Flag{
+		&api.TalentContractFlag{
+			DisclosableFlag: api.DisclosableFlag{},
+			Message:         "Test disclosure flag - TalentContract",
+			Work: api.WorkSummary{
+				WorkId:          "work-1",
+				DisplayName:     "Test Work",
+				WorkUrl:         "http://example.com/work-1",
+				OaUrl:           "http://example.com/oa/work-1",
+				PublicationDate: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
+			Entities: []api.AcknowledgementEntity{{Entity: "discloseme"}},
 		},
-		"AssociationsWithDeniedEntities": []api.Flag{
-			&api.AssociationWithDeniedEntityFlag{
-				DisclosableFlag: api.DisclosableFlag{},
-				Message:         "Test disclosure flag - Association",
-				Work: api.WorkSummary{
-					WorkId:          "work-2",
-					DisplayName:     "Test Work 2",
-					WorkUrl:         "http://example.com/work-2",
-					OaUrl:           "http://example.com/oa/work-2",
-					PublicationDate: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
-				},
-				Entities: []api.AcknowledgementEntity{{Entity: "nonmatching"}},
+		&api.AssociationWithDeniedEntityFlag{
+			DisclosableFlag: api.DisclosableFlag{},
+			Message:         "Test disclosure flag - Association",
+			Work: api.WorkSummary{
+				WorkId:          "work-2",
+				DisplayName:     "Test Work 2",
+				WorkUrl:         "http://example.com/work-2",
+				OaUrl:           "http://example.com/oa/work-2",
+				PublicationDate: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
+			Entities: []api.AcknowledgementEntity{{Entity: "nonmatching"}},
 		},
 	}
 
@@ -476,16 +349,7 @@ func TestCheckDisclosure(t *testing.T) {
 func TestDownloadReportAllFormats(t *testing.T) {
 	backend, db := createBackend(t)
 
-	admin := newAdmin()
 	user := newUser()
-
-	license, err := createLicense(backend, "download-license", admin)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := activateLicense(backend, user, license.License); err != nil {
-		t.Fatal(err)
-	}
 
 	reportResp, err := createAuthorReport(backend, user, "download-report")
 	if err != nil {
@@ -494,20 +358,18 @@ func TestDownloadReportAllFormats(t *testing.T) {
 
 	manager := reports.NewManager(db, reports.StaleReportThreshold)
 
-	content := api.ReportContent{
-		"TalentContracts": []api.Flag{
-			&api.TalentContractFlag{
-				DisclosableFlag: api.DisclosableFlag{},
-				Message:         "Test Talent Contract",
-				Work: api.WorkSummary{
-					WorkId:          "work-1",
-					DisplayName:     "Test Work",
-					WorkUrl:         "http://example.com/work-1",
-					OaUrl:           "http://example.com/oa/work-1",
-					PublicationDate: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
-				},
-				RawAcknowledements: []string{"flag-content"},
+	content := []api.Flag{
+		&api.TalentContractFlag{
+			DisclosableFlag: api.DisclosableFlag{},
+			Message:         "Test Talent Contract",
+			Work: api.WorkSummary{
+				WorkId:          "work-1",
+				DisplayName:     "Test Work",
+				WorkUrl:         "http://example.com/work-1",
+				OaUrl:           "http://example.com/oa/work-1",
+				PublicationDate: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
+			RawAcknowledements: []string{"flag-content"},
 		},
 	}
 
@@ -614,92 +476,13 @@ func TestDownloadReportAllFormats(t *testing.T) {
 	}
 }
 
-func TestLicenseExpiration(t *testing.T) {
-	backend, _ := createBackend(t)
-
-	admin := newAdmin()
-	user1, user2 := newUser(), newUser()
-
-	license, err := createLicenseWithExp(backend, "xyz", admin, time.Now().UTC().Add(500*time.Millisecond))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := activateLicense(backend, user1, license.License); err != nil {
-		t.Fatal(err)
-	}
-
-	if _, err := createAuthorReport(backend, user1, "report1"); err != nil {
-		t.Fatal(err)
-	}
-
-	time.Sleep(500 * time.Millisecond)
-
-	if _, err := createAuthorReport(backend, user1, "report1"); err == nil || !strings.Contains(err.Error(), "expired license") {
-		t.Fatal(err)
-	}
-
-	if err := activateLicense(backend, user2, license.License); err == nil || !strings.Contains(err.Error(), "expired license") {
-		t.Fatal(err)
-	}
-}
-
-func TestLicenseInvalidLicense(t *testing.T) {
-	backend, _ := createBackend(t)
-
-	admin := newAdmin()
-	user := newUser()
-
-	license, err := createLicense(backend, "xyz", admin)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	badSecretLicense := licensing.LicensePayload{Id: license.Id, Secret: []byte("invalid secret")}
-	badSecretKey, err := badSecretLicense.Serialize()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := activateLicense(backend, user, badSecretKey); !strings.Contains(err.Error(), "invalid license") {
-		t.Fatal(err)
-	}
-
-	badIdLicense := licensing.LicensePayload{Id: uuid.New(), Secret: []byte("invalid secret")}
-	badIdKey, err := badIdLicense.Serialize()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := activateLicense(backend, user, badIdKey); !strings.Contains(err.Error(), "license not found") {
-		t.Fatal(err)
-	}
-}
-
 func TestAuthorReportEndpoints(t *testing.T) {
 	backend, _ := createBackend(t)
 
-	admin := newAdmin()
 	user1, user2 := newUser(), newUser()
 
 	checkListAuthorReports(t, backend, user1, []string{})
 	checkListAuthorReports(t, backend, user2, []string{})
-
-	license, err := createLicense(backend, "test-license", admin)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if _, err := createAuthorReport(backend, user1, "report1"); err == nil || !strings.Contains(err.Error(), "user does not have registered license") {
-		t.Fatalf("report should fail %v", err)
-	}
-
-	if err := activateLicense(backend, user1, license.License); err != nil {
-		t.Fatal(err)
-	}
-	if err := activateLicense(backend, user2, license.License); err != nil {
-		t.Fatal(err)
-	}
 
 	report, err := createAuthorReport(backend, user1, "report1")
 	if err != nil {
@@ -750,17 +533,7 @@ func TestUniversityReportEndpoints(t *testing.T) {
 	backend, db := createBackend(t)
 	manager := reports.NewManager(db, reports.StaleReportThreshold)
 
-	admin := newAdmin()
 	user1, user2 := newUser(), newUser()
-
-	license, err := createLicense(backend, "test-license", admin)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := activateLicense(backend, user1, license.License); err != nil {
-		t.Fatal(err)
-	}
 
 	uniReportId, err := createUniversityReport(backend, user1, "uni-report1")
 	if err != nil {
@@ -786,8 +559,8 @@ func TestUniversityReportEndpoints(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := manager.UpdateAuthorReport(nextAuthorReport.Id, schema.ReportCompleted, time.Now(), api.ReportContent{
-		api.HighRiskFunderType: []api.Flag{&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: "abc", PublicationDate: time.Now()}}},
+	if err := manager.UpdateAuthorReport(nextAuthorReport.Id, schema.ReportCompleted, time.Now(), []api.Flag{
+		&api.HighRiskFunderFlag{Work: api.WorkSummary{WorkId: "abc", PublicationDate: time.Now()}},
 	}); err != nil {
 		t.Fatal(err)
 	}

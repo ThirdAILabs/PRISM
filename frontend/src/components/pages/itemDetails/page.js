@@ -1,5 +1,5 @@
 // src/ItemDetails.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   TALENT_CONTRACTS,
@@ -14,7 +14,6 @@ import ConcernVisualizer from '../../ConcernVisualization.js';
 import Graph from '../../common/graph/graph.js';
 import Tabs from '../../common/tools/Tabs.js';
 import DownloadButton from '../../common/tools/button/downloadButton.js';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider } from '@mui/material';
 import { reportService } from '../../../api/reports.js';
 import styled from 'styled-components';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -22,6 +21,10 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import Shimmer from './Shimmer.js';
+import MuiAlert from '@mui/material/Alert';
+import { Snackbar } from '@mui/material';
+import useGoBack from '../../../hooks/useGoBack.js';
+import useOutsideClick from '../../../hooks/useOutsideClick.js';
 
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
@@ -32,6 +35,10 @@ const FLAG_ORDER = [
   MISC_HIGH_RISK_AFFILIATIONS,
   COAUTHOR_AFFILIATIONS,
 ];
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const todayStr = new Date().toISOString().split('T')[0];
 
@@ -96,11 +103,13 @@ const ItemDetails = () => {
   const [initialReprtContent, setInitialReportContent] = useState({});
   const [isDisclosureChecked, setDisclosureChecked] = useState(false);
 
-  // Add new states
-  const [openDialog, setOpenDialog] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState(null);
+  // box shadow for disclosed/undisclosed buttons
+  const greenBoxShadow = '0 0px 10px rgb(0, 183, 46)';
+  const redBoxShadow = '0 0px 10px rgb(255, 0, 0)';
+
+  const toggleSortOrder = () => {
+    setSortOrder((prevOrder) => (prevOrder === 'asc' ? 'desc' : 'asc'));
+  };
 
   // Add handlers
   const handleDropdownChange = (index) => {
@@ -108,58 +117,88 @@ const ItemDetails = () => {
     else setDropdownOpen(index);
   };
 
-  const handleOpenDialog = () => setOpenDialog(true);
-  const handleCloseDialog = () => {
+  const [notification, setNotification] = useState({
+    open: false,
+    severity: '',
+    message: '',
+  });
+
+  const fileInputRef = useRef(null);
+
+  const handleFileUploadClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
     handleDropdownChange(0);
-    setOpenDialog(false);
-    setSelectedFiles([]);
-    setUploadError(null);
   };
 
-  const handleDrop = (event) => {
-    event.preventDefault();
-    const files = Array.from(event.dataTransfer.files);
-    setSelectedFiles(files);
-  };
-
-  const handleFileSelect = (event) => {
+  const handleFileSelect = async (event) => {
     const files = Array.from(event.target.files);
-    setSelectedFiles(files);
+    if (files.length === 0) {
+      setNotification({
+        open: true,
+        severity: 'error',
+        message: 'No files selected',
+      });
+      return;
+    }
+    await handleSubmit(files);
   };
 
-  const handleSubmit = async () => {
-    if (selectedFiles.length === 0) {
-      setUploadError('Please select at least one file');
+  const handleSubmit = async (files) => {
+    if (!files || files.length === 0) {
+      setNotification({
+        open: true,
+        severity: 'error',
+        message: 'No files selected',
+      });
       return;
     }
 
-    setIsUploading(true);
     try {
-      const result = await reportService.checkDisclosure(report_id, selectedFiles);
+      const result = await reportService.checkDisclosure(report_id, files);
       setReportContent(result.Content);
       setInitialReportContent(result.Content);
       setDisclosureChecked(true);
-      handleCloseDialog();
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      setNotification({
+        open: true,
+        severity: 'success',
+        message: 'Disclosure check succeeded!',
+      });
     } catch (error) {
-      setUploadError(error.message || 'Failed to check disclosure');
-    } finally {
-      setIsUploading(false);
+      setNotification({
+        open: true,
+        severity: 'error',
+        message: error.response?.data?.message || 'Failed to check disclosure',
+      });
     }
+  };
+
+  const handleCloseNotification = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setNotification({ ...notification, open: false });
   };
 
   useEffect(() => {
     let isMounted = true;
     const poll = async () => {
+      let inProgress = true;
       const report = await reportService.getReport(report_id);
-      if (report.Status === 'complete' && isMounted) {
+      if (report.Content && Object.keys(report.Content).length > 0 && isMounted) {
         console.log('Report', report);
         setAuthorName(report.AuthorName);
         setReportContent(report.Content);
         setInitialReportContent(report.Content);
         setLoading(false);
-      } else if (report.Status === 'in-progress' && isMounted) {
-        setAuthorName(report.AuthorName);
-      } else if (isMounted) {
+        inProgress = report.Status === 'queued' || report.Status === 'in-progress';
+      }
+
+      if (inProgress) {
         setTimeout(poll, 2000);
       }
     };
@@ -175,29 +214,31 @@ const ItemDetails = () => {
 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
-  const [isDownloadOpen, setIsDownloadOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
+
+  const [filterMessage, setFilterMessage] = useState('');
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
   };
   const handleStartDateChange = (e) => setStartDate(e.target.value);
   const handleEndDateChange = (e) => setEndDate(e.target.value);
-  const toggleYearDropdown = () => {
-    setYearDropdownOpen(!yearDropdownOpen);
-    setIsDownloadOpen(false); // Close download dropdown
-  };
+
+  function parseLocalDate(dateStr) {
+    const [year, month, day] = dateStr.split('-');
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  }
 
   const handleDateFilter = () => {
     if (!startDate && !endDate) {
       setReportContent(initialReprtContent);
-      setYearDropdownOpen(false);
+      setFilterMessage('');
+      handleDropdownChange(1);
       return;
     }
 
-    let start = startDate ? new Date(startDate) : null;
-    let end = endDate ? new Date(endDate) : null;
+    let start = startDate ? parseLocalDate(startDate) : null;
+    let end = endDate ? parseLocalDate(endDate) : null;
 
     if (start && !end) {
       end = new Date();
@@ -225,16 +266,33 @@ const ItemDetails = () => {
           return true;
         });
       } else {
-        filteredContent[flag] = null;
+        filteredContent[flag] = [];
       }
     });
 
-    setReportContent(filteredContent);
-    setYearDropdownOpen(false);
-  };
-  const [instDropdownOpen, setInstDropdownOpen] = useState(false);
-  const toggleInstDropdown = () => setInstDropdownOpen(!instDropdownOpen);
+    const displayStart = startDate
+      ? parseLocalDate(startDate).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
+      : 'earliest';
+    const displayEnd = endDate
+      ? parseLocalDate(endDate).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
+      : 'today';
 
+    setFilterMessage(`${displayStart} to ${displayEnd}`);
+
+    setStartDate('');
+    setEndDate('');
+
+    setReportContent(filteredContent);
+    handleDropdownChange(1);
+  };
   const [review, setReview] = useState();
 
   function withPublicationDate(header, flag) {
@@ -258,7 +316,13 @@ const ItemDetails = () => {
 
   function multipleAffiliationsFlag(flag, index) {
     return (
-      <div key={index} className="p-3 px-5 w-75 detail-item">
+      <div
+        key={index}
+        className="p-3 px-5 w-75 detail-item"
+        style={{
+          boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
+        }}
+      >
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Author has multiple affiliations</h5>,
           flag
@@ -283,7 +347,13 @@ const ItemDetails = () => {
 
   function funderFlag(flag, index) {
     return (
-      <div key={index} className="p-3 px-5 w-75 detail-item">
+      <div
+        key={index}
+        className="p-3 px-5 w-75 detail-item"
+        style={{
+          boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
+        }}
+      >
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Funder is an Entity of Concern</h5>,
           flag
@@ -378,7 +448,13 @@ const ItemDetails = () => {
 
   function publisherFlag(flag, index) {
     return (
-      <div key={index} className="p-3 px-5 w-75 detail-item">
+      <div
+        key={index}
+        className="p-3 px-5 w-75 detail-item"
+        style={{
+          boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
+        }}
+      >
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Publisher is an Entity of Concern</h5>,
           flag
@@ -402,7 +478,13 @@ const ItemDetails = () => {
 
   function coauthorFlag(flag, index) {
     return (
-      <div key={index} className="p-3 px-5 w-75 detail-item">
+      <div
+        key={index}
+        className="p-3 px-5 w-75 detail-item"
+        style={{
+          boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
+        }}
+      >
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Co-authors are high-risk entities</h5>,
           flag
@@ -426,7 +508,13 @@ const ItemDetails = () => {
 
   function coauthorAffiliationFlag(flag, index) {
     return (
-      <div key={index} className="p-3 px-5 w-75 detail-item">
+      <div
+        key={index}
+        className="p-3 px-5 w-75 detail-item"
+        style={{
+          boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
+        }}
+      >
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Co-authors are affiliated with Entities of Concern</h5>,
           flag
@@ -461,7 +549,13 @@ const ItemDetails = () => {
 
   function authorAffiliationFlag(flag, index) {
     return (
-      <div key={index} className="p-3 px-5 w-75 detail-item">
+      <div
+        key={index}
+        className="p-3 px-5 w-75 detail-item"
+        style={{
+          boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
+        }}
+      >
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Author is affiliated with an Entity of Concern</h5>,
           flag
@@ -486,7 +580,13 @@ const ItemDetails = () => {
 
   function acknowledgementFlag(flag, index) {
     return (
-      <div key={index} className="p-3 px-5 w-75 detail-item">
+      <div
+        key={index}
+        className="p-3 px-5 w-75 detail-item"
+        style={{
+          boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
+        }}
+      >
         {withPublicationDate(
           <h5 className="fw-bold mt-3">Acknowledgements possibly contain Talent Contracts</h5>,
           flag
@@ -588,7 +688,13 @@ const ItemDetails = () => {
 
   function universityFacultyFlag(flag, index) {
     return (
-      <div key={index} className="p-3 px-5 w-75 detail-item">
+      <div
+        key={index}
+        className="p-3 px-5 w-75 detail-item"
+        style={{
+          boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
+        }}
+      >
         <h5 className="fw-bold mt-3">
           The author may potentially be linked with an Entity of Concern
         </h5>
@@ -603,8 +709,8 @@ const ItemDetails = () => {
     );
   }
 
-  const [showDisclosed, setShowDisclosed] = useState(true);
-  const [showUndisclosed, setShowUndisclosed] = useState(true);
+  const [showDisclosed, setShowDisclosed] = useState(false);
+  const [showUndisclosed, setShowUndisclosed] = useState(false);
   const disclosedItems = (reportContent[review] || []).filter((item) => item.Disclosed);
   const undisclosedItems = (reportContent[review] || []).filter((item) => !item.Disclosed);
   const [sortOrder, setSortOrder] = useState('desc');
@@ -648,7 +754,13 @@ const ItemDetails = () => {
   function PRFlag(flag, index) {
     const connections = flag.Connections || [];
     return (
-      <div key={index} className="p-3 px-5 w-75 detail-item">
+      <div
+        key={index}
+        className="p-3 px-5 w-75 detail-item"
+        style={{
+          boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
+        }}
+      >
         {true && (
           <>
             {connections.length == 0 ? (
@@ -813,14 +925,28 @@ const ItemDetails = () => {
   const hasDates = items.some(
     (item) => item?.Work?.PublicationDate && !isNaN(new Date(item.Work.PublicationDate).getTime())
   );
+  const goBack = useGoBack('/');
 
+  const dropdownRef = useOutsideClick(() => {
+    handleDropdownChange(0);
+  });
+  console.log('The value of dropDownChange is ', dropdownOpen);
   return (
     <div className="basic-setup">
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-row">
-          <div className="detail-header">
+          <div
+            className="detail-header"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              margin: '0 auto',
+              padding: '10px 0', // reduce padding
+            }}
+          >
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => goBack()}
               className="btn text-dark mb-3"
               style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}
             >
@@ -849,32 +975,25 @@ const ItemDetails = () => {
               </svg>
               Back
             </button>
-
-            <div className="d-flex w-80">
-              <div className="text-start px-5">
-                <div className="d-flex align-items-center mb-2">
-                  <h5 className="m-0">{authorName}</h5>
-                </div>
-                <b className="m-0 p-0" style={{ fontSize: 'small' }}>
-                  {institutions.join(', ')}
-                </b>
-              </div>
+            <div style={{ textAlign: 'center' }}>
+              <h5 className="m-0">{authorName}</h5>
+              <b className="m-0 p-0" style={{ fontSize: 'small' }}>
+                {institutions.join(', ')}
+              </b>
             </div>
-
             <div>
               <div className="dropdown">
                 <style>
-                  {` 
-                    .form-control::placeholder { 
-                        color: #888; 
-                    }`}
+                  {`
+                    .form-control::placeholder {
+                      color: #888;
+                    }
+                  `}
                 </style>
                 <button
                   className="btn dropdown-toggle"
                   type="button"
-                  onClick={() => {
-                    handleDropdownChange(1);
-                  }}
+                  onClick={() => handleDropdownChange(1)}
                   style={{
                     backgroundColor: 'rgb(160, 160, 160)',
                     border: 'none',
@@ -888,7 +1007,7 @@ const ItemDetails = () => {
                 </button>
                 {dropdownOpen === 1 && (
                   <div
-                    className="dropdown-menu show p-3"
+                    className="dropdown-menu show p-2"
                     style={{
                       width: '200px',
                       backgroundColor: 'rgb(160, 160, 160)',
@@ -903,8 +1022,9 @@ const ItemDetails = () => {
                       display: 'flex',
                       flexDirection: 'column',
                     }}
+                    ref={dropdownRef}
                   >
-                    <div className="form-group mb-2">
+                    <div className="form-group" style={{ marginBottom: '10px', width: '100%' }}>
                       <label>Start Date</label>
                       <input
                         type="date"
@@ -917,13 +1037,12 @@ const ItemDetails = () => {
                           border: 'none',
                           outline: 'none',
                           color: 'black',
-                          marginTop: '10px',
+                          marginTop: '5px',
                           width: '100%',
                         }}
                       />
                     </div>
-                    <div style={{ height: '10px' }} />
-                    <div className="form-group">
+                    <div className="form-group" style={{ marginBottom: '10px', width: '100%' }}>
                       <label>End Date</label>
                       <input
                         type="date"
@@ -936,131 +1055,71 @@ const ItemDetails = () => {
                           border: 'none',
                           outline: 'none',
                           color: 'black',
-                          marginTop: '10px',
+                          marginTop: '5px',
+                          width: '100%',
                         }}
                       />
                     </div>
-                    <div
+                    <button
+                      className="form-control"
+                      type="submit"
+                      onClick={handleDateFilter}
+                      disabled={!(startDate || endDate)}
                       style={{
-                        marginTop: '20px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '10px',
+                        backgroundColor: 'black',
+                        border: 'none',
+                        color: 'white',
+                        width: '100px',
+                        fontWeight: 'bold',
+                        fontSize: '14px',
+                        cursor: startDate || endDate ? 'pointer' : 'default',
+                        transition: 'background-color 0.3s',
                       }}
                     >
-                      <button
-                        className="form-control"
-                        onClick={handleResetFilter}
-                        style={{
-                          backgroundColor: 'rgb(220, 220, 220)',
-                          border: 'none',
-                          color: 'black',
-                          width: '100px',
-                          fontWeight: 'bold',
-                          fontSize: '14px',
-                          cursor: 'pointer',
-                          transition: 'background-color 0.3s',
-                        }}
-                      >
-                        Reset
-                      </button>
-
-                      <button
-                        className="form-control"
-                        type="submit"
-                        onClick={handleDateFilter}
-                        disabled={!(startDate || endDate)}
-                        style={{
-                          backgroundColor: 'black',
-                          border: 'none',
-                          color: 'white',
-                          width: '100px',
-                          fontWeight: 'bold',
-                          fontSize: '14px',
-                          cursor: startDate || endDate ? 'pointer' : 'default',
-                          transition: 'background-color 0.3s',
-                        }}
-                      >
-                        Submit
-                      </button>
-                    </div>
+                      Submit
+                    </button>
                   </div>
                 )}
               </div>
             </div>
           </div>
-          {/* Comment the following to get rid of the graph tab */}
-          <Tabs activeTab={activeTab} handleTabChange={handleTabChange} />
+          {/* Render the Tabs with the filterMessage */}
+          <Tabs
+            activeTab={activeTab}
+            handleTabChange={handleTabChange}
+            filterMessage={filterMessage}
+          />
         </div>
         {activeTab === 0 && (
           <div className="d-flex justify-content-end mt-2 gap-2 px-2">
-            <>
-              <StyledWrapper>
-                <button
-                  className="cssbuttons-io-button"
-                  onClick={() => {
-                    handleDropdownChange(3);
-                  }}
-                >
-                  Verify with Disclosures
-                </button>
-              </StyledWrapper>
-              <Dialog open={dropdownOpen === 3} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-                <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-                  Select files to check for disclosure
-                </DialogTitle>
-                <Divider sx={{ color: 'black', backgroundColor: '#000000' }} />
-                <DialogContent>
-                  <div
-                    className="container"
-                    onDrop={handleDrop}
-                    onDragOver={(e) => e.preventDefault()}
-                  >
-                    <div className="header">
-                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                          d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15"
-                          stroke="#000000"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      <p>Drag & drop your file!</p>
-                    </div>
-                    <label htmlFor="file" className="footer">
-                      <p>
-                        {selectedFiles.length
-                          ? `${selectedFiles.length} files selected`
-                          : 'Click here to upload your file.'}
-                      </p>
-                    </label>
-                    <input
-                      id="file"
-                      type="file"
-                      multiple
-                      onChange={handleFileSelect}
-                      accept=".txt,.doc,.docx,.pdf"
-                    />
-                  </div>
-                  {uploadError && (
-                    <div style={{ color: 'red', marginTop: '10px' }}>{uploadError}</div>
-                  )}
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleCloseDialog}>Cancel</Button>
-                  <Button onClick={handleSubmit} disabled={isUploading} variant="contained">
-                    {isUploading ? 'Uploading...' : 'Submit'}
-                  </Button>
-                </DialogActions>
-              </Dialog>
-            </>
+            <StyledWrapper>
+              <button className="cssbuttons-io-button" onClick={handleFileUploadClick}>
+                Verify with Disclosures
+              </button>
+            </StyledWrapper>
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              multiple
+              accept=".txt,.pdf"
+              onChange={handleFileSelect}
+            />
+            <Snackbar
+              open={notification.open}
+              autoHideDuration={2000}
+              onClose={handleCloseNotification}
+              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+              <Alert onClose={handleCloseNotification} severity={notification.severity}>
+                {notification.message}
+              </Alert>
+            </Snackbar>
             <DownloadButton
               reportId={report_id}
               isOpen={dropdownOpen === 2}
-              setIsOpen={() => {
-                handleDropdownChange(2);
-              }}
+              setIsOpen={() => handleDropdownChange(2)}
+              dropdownRef={dropdownRef}
             />
           </div>
         )}
@@ -1101,6 +1160,7 @@ const ItemDetails = () => {
                     title={TitlesAndDescriptions[flag].title}
                     hoverText={TitlesAndDescriptions[flag].desc}
                     value={flagCount}
+                    speedometerHoverText={`${flagCount} Issues`}
                     onReview={() => setReview(flag)}
                     key={index}
                     selected={isSelected}
@@ -1110,46 +1170,61 @@ const ItemDetails = () => {
             </div>
             {review && (
               <div style={{ width: '100%', textAlign: 'center', marginTop: '50px' }}>
-                {hasDates && (
-                  <div
-                    style={{
-                      marginBottom: '20px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '10px',
-                    }}
-                  >
-                    <span style={{ marginRight: '10px' }}>Sort by Date</span>
-                    <ArrowUpwardIcon
-                      onClick={() => setSortOrder('asc')}
+                {(() => {
+                  const items = reportContent[review] || [];
+                  const hasDates = items.some(
+                    (item) =>
+                      item?.Work?.PublicationDate &&
+                      !isNaN(new Date(item.Work.PublicationDate).getTime())
+                  );
+                  if (!hasDates) return null;
+                  return (
+                    <div
                       style={{
-                        cursor: 'pointer',
-                        color: sortOrder === 'asc' ? 'lightgray' : 'black',
+                        marginBottom: '20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px',
                       }}
-                    />
-                    <ArrowDownwardIcon
-                      onClick={() => setSortOrder('desc')}
-                      style={{
-                        cursor: 'pointer',
-                        color: sortOrder === 'desc' ? 'lightgray' : 'black',
-                      }}
-                    />
-                  </div>
-                )}
+                    >
+                      <span style={{ marginRight: '10px' }}>Sort by Date</span>
+                      <div onClick={toggleSortOrder} style={{ cursor: 'pointer' }}>
+                        {sortOrder === 'asc' ? (
+                          <ArrowUpwardIcon style={{ color: 'black' }} />
+                        ) : (
+                          <ArrowDownwardIcon style={{ color: 'black' }} />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {isDisclosureChecked ? (
                   <>
-                    {disclosedItems.length > 0 ? (
-                      <>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        gap: '20px',
+                        margin: '10px auto',
+                        width: 'fit-content',
+                      }}
+                    >
+                      {/* Disclosed Button */}
+                      {disclosedItems.length > 0 ? (
                         <button
-                          onClick={() => setShowDisclosed(!showDisclosed)}
+                          onClick={() => {
+                            setShowDisclosed(!showDisclosed);
+                            if (!showDisclosed) setShowUndisclosed(false);
+                          }}
                           style={{
-                            backgroundColor: showDisclosed ? 'green' : 'transparent',
-                            color: showDisclosed ? 'white' : 'green',
+                            backgroundColor: 'transparent',
+                            color: 'green',
+                            boxShadow: showDisclosed ? '0 0px 10px rgb(0, 183, 46)' : 'none',
                             borderRadius: '20px',
                             border: '2px solid green',
-                            padding: '10px 20px',
-                            margin: '10px auto',
+                            padding: '10px 10px',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
@@ -1159,7 +1234,7 @@ const ItemDetails = () => {
                             transition: 'background-color 0.3s, color 0.3s',
                           }}
                         >
-                          Disclosed ({disclosedItems.length})
+                          <strong>Disclosed ({disclosedItems.length})</strong>
                           {showDisclosed ? (
                             <ArrowDropDownIcon
                               style={{ verticalAlign: 'middle', marginLeft: '8px' }}
@@ -1170,48 +1245,35 @@ const ItemDetails = () => {
                             />
                           )}
                         </button>
-                        {showDisclosed && (
-                          <div
-                            style={{
-                              width: '100%',
-                              maxWidth: '1200px',
-                              margin: '0 auto',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                            }}
-                          >
-                            {renderFlags(disclosedItems)}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div
-                        style={{
-                          color: 'green',
-                          margin: '10px auto',
-                          width: '200px',
-                          textAlign: 'center',
-                          padding: '10px 20px',
-                          border: '2px solid green',
-                          borderRadius: '20px',
-                        }}
-                      >
-                        Disclosed (0)
-                      </div>
-                    )}
-
-                    {undisclosedItems.length > 0 ? (
-                      <>
-                        <button
-                          onClick={() => setShowUndisclosed(!showUndisclosed)}
+                      ) : (
+                        <div
                           style={{
-                            backgroundColor: showUndisclosed ? 'red' : 'transparent',
-                            color: showUndisclosed ? 'white' : 'red',
+                            color: 'green',
+                            textAlign: 'center',
+                            padding: '10px 20px',
+                            border: '2px solid green',
+                            borderRadius: '20px',
+                            width: '200px',
+                          }}
+                        >
+                          <strong>Disclosed (0)</strong>
+                        </div>
+                      )}
+
+                      {/* Undisclosed Button */}
+                      {undisclosedItems.length > 0 ? (
+                        <button
+                          onClick={() => {
+                            setShowUndisclosed(!showUndisclosed);
+                            if (!showUndisclosed) setShowDisclosed(false);
+                          }}
+                          style={{
+                            backgroundColor: 'transparent',
+                            color: 'red',
+                            boxShadow: showUndisclosed ? '0 0px 10px rgb(255, 0, 0)' : 'none',
                             borderRadius: '20px',
                             border: '2px solid red',
-                            padding: '10px 20px',
-                            margin: '10px auto',
+                            padding: '10px 10px',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
@@ -1221,7 +1283,7 @@ const ItemDetails = () => {
                             transition: 'background-color 0.3s, color 0.3s',
                           }}
                         >
-                          Undisclosed ({undisclosedItems.length})
+                          <strong>Undisclosed ({undisclosedItems.length})</strong>
                           {showUndisclosed ? (
                             <ArrowDropDownIcon
                               style={{ verticalAlign: 'middle', marginLeft: '8px' }}
@@ -1232,39 +1294,57 @@ const ItemDetails = () => {
                             />
                           )}
                         </button>
-                        {showUndisclosed && (
-                          <div
-                            style={{
-                              width: '100%',
-                              maxWidth: '1200px',
-                              margin: '0 auto',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                            }}
-                          >
-                            {renderFlags(undisclosedItems)}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div
-                        style={{
-                          color: 'red',
-                          margin: '10px auto',
-                          width: '200px',
-                          textAlign: 'center',
-                          padding: '10px 20px',
-                          border: '2px solid red',
-                          borderRadius: '20px',
-                        }}
-                      >
-                        Undisclosed (0)
-                      </div>
-                    )}
+                      ) : (
+                        <div
+                          style={{
+                            color: 'red',
+                            textAlign: 'center',
+                            padding: '10px 20px',
+                            border: '2px solid red',
+                            borderRadius: '20px',
+                            width: '200px',
+                          }}
+                        >
+                          <strong>Undisclosed (0)</strong>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content areas for disclosed and undisclosed items */}
+                    {/* Display flags below buttons */}
+                    <div style={{ width: '100%', marginTop: '20px' }}>
+                      {showDisclosed && (
+                        <div
+                          style={{
+                            width: '100%',
+                            maxWidth: '1200px',
+                            margin: '10px auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                          }}
+                        >
+                          {renderFlags(disclosedItems)}
+                        </div>
+                      )}
+
+                      {showUndisclosed && (
+                        <div
+                          style={{
+                            width: '100%',
+                            maxWidth: '1200px',
+                            margin: '10px auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                          }}
+                        >
+                          {renderFlags(undisclosedItems)}
+                        </div>
+                      )}
+                    </div>
                   </>
                 ) : (
-                  // When no disclosure check has been done, just show all items in one list.
                   <div
                     style={{
                       width: '100%',
@@ -1283,11 +1363,7 @@ const ItemDetails = () => {
           </>
         ))}
 
-      {activeTab === 1 && (
-        <>
-          <Graph authorName={authorName} reportContent={reportContent} />
-        </>
-      )}
+      {activeTab === 1 && <Graph authorName={authorName} reportContent={reportContent} />}
     </div>
   );
 };

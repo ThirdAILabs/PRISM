@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"prism/prism/openalex"
+	"regexp"
 	"strings"
 	"time"
 
@@ -241,6 +242,15 @@ var searchAbleEntityTypes = map[string]bool{
 	"grantNumber": true,
 }
 
+// Grobid extracts header from acknowledgements (e.g. "Acknowledgments" or "Funding")
+// in the extracted text. For now, we remove that header using a regex on the text.
+// A better approach would be to fix the root cause in the Grobid response itself,
+// but that was giving unexpected results. We will revisit that when time permits.
+func cleanAckHeader(raw string) string {
+	re := regexp.MustCompile(`(?i)^\s*(acknowledgements|acknowledgments|funding)[:\s-]*`)
+	return re.ReplaceAllString(raw, "")
+}
+
 func parseGrobidReponse(data io.Reader) ([]Acknowledgement, error) {
 	doc, err := goquery.NewDocumentFromReader(data)
 	if err != nil {
@@ -251,6 +261,7 @@ func parseGrobidReponse(data io.Reader) ([]Acknowledgement, error) {
 
 	processor := func(i int, s *goquery.Selection) {
 		text := strings.TrimSpace(s.Text())
+		text = cleanAckHeader(text)
 
 		searchable := make([]Entity, 0)
 		misc := make([]Entity, 0)

@@ -145,7 +145,8 @@ KEYCLOAK_PRIVATE_HOSTNAME="http://example.com"
 ```bash
 DB_URI="postgresql://<username>:<password>@<host | localhost>:<port | 5432>/prism"
 SEARCHABLE_ENTITIES_DATA="<path to PRISM/data/searchable_entities.json>"
-NDB_LICENSE="Bolt license key"
+# License for PRISM, this should be a keygen license with the Full Access and Prism entitlements.
+PRISM_LICENSE="Prism license key"
 ```
   </div>
 
@@ -174,37 +175,6 @@ go run cmd/backend/main.go --env "./cmd/backend/.env"
   5. Go to the `Credentials` tab, click `Set password`, enter a password, and save it.
   6. In the `Details` tab, remove the `Update Password` requirement under `Required User Actions`.
   7. The username and password can now be used to log in as a user with Keycloak.
-
-  <div style="margin-left: 20px;">
-
-  ### **Adding an Admin User in the `prism-admin` Realm**
-
-  Follow the same steps as above, but select the `prism-admin` realm instead of `prism-user`. Create an admin user with credentials that will be used in the Bash script.
-
-  ## Running the License Automation Script
-
-  1. Navigate to the directory where the script is stored:
-  ```bash
-  cd PRISM/local_setup
-  ```
-
-  2. Ensure you have `jq` installed:
-  ```bash
-  sudo apt install jq  # Ubuntu/Debian
-  brew install jq      # macOS
-  ```
-
-  3. Run the script:
-  ```bash
-  ./create_license.sh
-  ```
-
-  The script will:
-
-  - Fetch an admin access token from `prism-admin` realm and create a license.
-  - Fetch a user access token from `prism-user` realm and activate the license for that user.
-  - Print the activation response to confirm success.
-  </div>
   
   </details>
 <br>
