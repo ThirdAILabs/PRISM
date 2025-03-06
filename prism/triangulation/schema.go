@@ -2,14 +2,14 @@ package triangulation
 
 type Author struct {
 	ID                int    `gorm:"primaryKey;column:id;autoIncrement"`
-	FundCodesID       *int   `gorm:"column:fundcode_id"`
+	FundCodeID        *int   `gorm:"column:fundcode_id"`
 	AuthorName        string `gorm:"column:authorname;type:text"`
 	NumPapersByAuthor int    `gorm:"column:numpapersbyauthor"`
 }
 
 type FundCode struct {
 	ID        int    `gorm:"primaryKey;column:id;autoIncrement"`
-	FundCodes string `gorm:"column:fundcodes;type:text"`
+	FundCode  string `gorm:"column:fundcode;type:text"`
 	NumPapers int    `gorm:"column:numpapers"`
 }
 
