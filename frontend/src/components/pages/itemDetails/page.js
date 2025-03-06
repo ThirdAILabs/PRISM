@@ -24,6 +24,7 @@ import Shimmer from './Shimmer.js';
 import MuiAlert from '@mui/material/Alert';
 import { Snackbar } from '@mui/material';
 import useGoBack from '../../../hooks/useGoBack.js';
+import useOutsideClick from '../../../hooks/useOutsideClick.js';
 
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
@@ -271,17 +272,17 @@ const ItemDetails = () => {
 
     const displayStart = startDate
       ? parseLocalDate(startDate).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
       : 'earliest';
     const displayEnd = endDate
       ? parseLocalDate(endDate).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
       : 'today';
 
     setFilterMessage(`${displayStart} to ${displayEnd}`);
@@ -557,7 +558,7 @@ const ItemDetails = () => {
           {flag.RawAcknowledements.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
-          <p>{}</p>
+          <p>{ }</p>
         </p>
       </div>
     );
@@ -803,6 +804,11 @@ const ItemDetails = () => {
     (item) => item?.Work?.PublicationDate && !isNaN(new Date(item.Work.PublicationDate).getTime())
   );
   const goBack = useGoBack('/');
+
+  const dropdownRef = useOutsideClick(() => {
+    handleDropdownChange(0);
+  });
+  console.log("The value of dropDownChange is ", dropdownOpen);
   return (
     <div className="basic-setup">
       <div className="grid grid-cols-2 gap-4">
@@ -854,7 +860,7 @@ const ItemDetails = () => {
               </b>
             </div>
             <div>
-              <div className="dropdown">
+              <div className="dropdown" ref={dropdownRef}>
                 <style>
                   {`
                     .form-control::placeholder {
@@ -990,6 +996,7 @@ const ItemDetails = () => {
               reportId={report_id}
               isOpen={dropdownOpen === 2}
               setIsOpen={() => handleDropdownChange(2)}
+              dropdownRef={dropdownRef}
             />
           </div>
         )}
