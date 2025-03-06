@@ -15,6 +15,8 @@ import Error from './components/pages/error/Error.js';
 import { GetShowMenuIcon } from './utils/helper.js';
 import SearchProviderWrapper from './services/SearchProviderWrapper';
 import UniversityProviderWrapper from './services/UniversityProviderWrapper';
+import { Tooltip } from '@mui/material';
+
 //CSS
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.js';
@@ -46,24 +48,42 @@ function AppContent() {
   return (
     <div className="App">
       {showMenuIcon && (
-        <div
-          style={{
-            cursor: 'pointer',
-            position: 'fixed',
-            left: isSidePanelOpen ? '240px' : '20px',
-            top: '15px',
-            zIndex: 1000,
-            transition: 'left 0.3s ease',
+        <Tooltip
+          title={isSidePanelOpen ? 'Close Sidebar' : 'Open Sidebar'}
+          placement="right"
+          arrow
+          componentsProps={{
+            tooltip: {
+              sx: {
+                bgcolor: 'rgba(60,60,60, 0.87)',
+                '& .MuiTooltip-arrow': {
+                  color: 'rgba(60, 60, 60, 0.87)',
+                },
+                padding: '8px 12px',
+                fontSize: '14px',
+              },
+            },
           }}
-          onClick={() => setIsSidePanelOpen(!isSidePanelOpen)}
-          className="menu-icon"
         >
-          {isSidePanelOpen ? (
-            <TbLayoutSidebarRightExpand size={40} />
-          ) : (
-            <TbLayoutSidebarLeftExpand size={40} />
-          )}
-        </div>
+          <div
+            style={{
+              cursor: 'pointer',
+              position: 'fixed',
+              left: isSidePanelOpen ? '240px' : '20px',
+              top: '15px',
+              zIndex: 1000,
+              transition: 'left 0.3s ease',
+            }}
+            onClick={() => setIsSidePanelOpen(!isSidePanelOpen)}
+            className="menu-icon"
+          >
+            {isSidePanelOpen ? (
+              <TbLayoutSidebarRightExpand size={40} />
+            ) : (
+              <TbLayoutSidebarLeftExpand size={40} />
+            )}
+          </div>
+        </Tooltip>
       )}
       <SidePanel
         isOpen={isSidePanelOpen && showMenuIcon}
