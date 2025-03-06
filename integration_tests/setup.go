@@ -1,8 +1,6 @@
 package tests
 
 import (
-	"fmt"
-	"os"
 	"testing"
 
 	"prism/prism/api"
@@ -23,10 +21,6 @@ func setupTestEnv(t *testing.T) *api.PrismClient {
 		username = "regular-user"
 		password = "Regular-user-pwd@1"
 	)
-
-	for _, env := range []string{"BACKEND_URL", "KEYCLOAK_URL", "KEYCLOAK_ADMIN_USERNAME", "KEYCLOAK_ADMIN_PASSWORD"} {
-		fmt.Printf("ENV: '%s' = '%s'\n", env, os.Getenv(env))
-	}
 
 	var vars testEnv
 	if err := env.Parse(&vars); err != nil {

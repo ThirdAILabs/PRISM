@@ -97,7 +97,7 @@ jobs:
           SEARCHABLE_ENTITIES_DATA: ${{ github.workspace }}/data/searchable_entities.json
           UNIVERSITY_DATA: ${{ github.workspace }}/data/university_webpages.json
           DOC_DATA: ${{ github.workspace }}/data/docs_and_press_releases.json
-          AUX_DATA: ${{ github.workspace }}/data/auxiliary_webpages.jsons
+          AUX_DATA: ${{ github.workspace }}/data/auxiliary_webpages.json
           KEYCLOAK_SERVER_URL: http://localhost:8180
           KEYCLOAK_PUBLIC_HOSTNAME: http://localhost
           KEYCLOAK_PRIVATE_HOSTNAME: http://localhost
@@ -106,8 +106,8 @@ jobs:
         run: |
           go build ./prism/cmd/backend/main.go
           go build ./prism/cmd/worker/main.go
-          nohup go run ./prism/cmd/backend/main.go &
-          nohup go run ./prism/cmd/worker/main.go &
+          nohup go run ./prism/cmd/backend/main.go 2>&1 &
+          nohup go run ./prism/cmd/worker/main.go 2>&1 &
 
       - name: wait for backend to be ready
         run: |
