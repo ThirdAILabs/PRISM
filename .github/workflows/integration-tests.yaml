@@ -79,7 +79,6 @@ jobs:
 
       - name: wait for keycloak to be ready
         run: |
-          docker ps -a
           for i in {1..30}; do
             if curl -is http://localhost:8180/admin/realms | grep "HTTP 401 Unauthorized"; then
               echo "Keycloak is ready"
@@ -95,11 +94,11 @@ jobs:
         env:
           DB_URI: postgres://postgres:password@localhost:5432/prism
           PRISM_LICENSE: ${{ secrets.PRISM_CI_LICENSE }}
-          SEARCHABLE_ENTITIES_DATA: ./data/searchable_entities.json
-          UNIVERSITY_DATA: ./data/university_webpages.json
-          DOC_DATA: ./data/docs_and_press_releases.json
-          AUX_DATA: ./data/auxiliary_webpages.jsons
-          KEYCLOAK_SERVER_URL: http://localhost/keycloak
+          SEARCHABLE_ENTITIES_DATA: ${{ github.workspace }}/data/searchable_entities.json
+          UNIVERSITY_DATA: ${{ github.workspace }}/data/university_webpages.json
+          DOC_DATA: ${{ github.workspace }}/data/docs_and_press_releases.json
+          AUX_DATA: ${{ github.workspace }}/data/auxiliary_webpages.jsons
+          KEYCLOAK_SERVER_URL: http://localhost:8180
           KEYCLOAK_PUBLIC_HOSTNAME: http://localhost
           KEYCLOAK_PRIVATE_HOSTNAME: http://localhost
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -112,7 +111,7 @@ jobs:
 
       - name: wait for backend to be ready
         run: |
-          for i in {1..10}; do
+          for i in {1..30}; do
             if curl -is http://localhost:8000/api/v1/health | grep "200 OK"; then
               echo "Backend is ready"
               exit 0
@@ -130,16 +129,6 @@ jobs:
         run: |
           go test -v ./integration_tests
 
-      - name: stop grobid docker container
-        if: always()
-        run: |
-          docker stop $(docker ps -q --filter ancestor=grobid/grobid:0.8.0)
-
-      - name: stop keycloak docker container
-        if: always()
-        run: |
-          docker stop $(docker ps -q --filter ancestor=quay.io/keycloak/keycloak:26.0.0)
-
       - name: display backend logs
         if: always()
         run: |
@@ -149,3 +138,13 @@ jobs:
         if: always()
         run: |
           cat ./prism_worker.log
+
+      - name: stop grobid docker container
+        if: always()
+        run: |
+          docker stop $(docker ps -q --filter ancestor=grobid/grobid:0.8.0)
+
+      - name: stop keycloak docker container
+        if: always()
+        run: |
+          docker stop $(docker ps -q --filter ancestor=quay.io/keycloak/keycloak:26.0.0)
