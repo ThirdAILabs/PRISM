@@ -1,0 +1,152 @@
+name: Unit Tests
+
+# Kills old jobs from the same pr if we push a new commit
+# See https://stackoverflow.com/questions/66335225/how-to-cancel-previous-runs-in-the-pr-when-you-push-new-commitsupdate-the-curre
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+  
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-22.04-8-cores
+
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: prism
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s 
+          --health-timeout 5s 
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: start grobid docker container
+        run: |
+          docker run --rm --init -d --ulimit core=0 -p 8070:8070 grobid/grobid:0.8.0
+
+      - name: start keycloak docker container
+        run: |
+          echo "KEYCLOAK_ADMIN_USERNAME=kc-admin" >> "$GITHUB_ENV"
+          echo "KEYCLOAK_ADMIN_PASSWORD=KC-admin-pwd@1" >> "$GITHUB_ENV"
+          docker run --rm -d -p 8180:8080 -e KC_BOOTSTRAP_ADMIN_USERNAME=$KEYCLOAK_ADMIN_USERNAME -e KC_BOOTSTRAP_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD quay.io/keycloak/keycloak:26.0.0 start-dev
+
+      - name: set up go >=1.23.1
+        uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.23.1'
+
+      - name: install dependencies
+        run: |
+          go mod download
+          go run github.com/playwright-community/playwright-go/cmd/playwright install --with-deps firefox
+    
+      - name: wait for grobid to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:8070/api/isalive | grep "true"; then
+              echo "Grobid is ready"
+              exit 0
+            fi
+            echo "Waiting for Grobid to be ready..."
+            sleep 2
+          done
+          echo "Grobid did not start in time"
+          exit 1
+
+      - name: wait for keycloak to be ready
+        run: |
+          for i in {1..10}; do
+            if curl -s http://localhost/keycloak/admin/realms | grep "HTTP 401 Unauthorized"; then
+              echo "Keycloak is ready"
+              exit 0
+            fi
+            echo "Waiting for Keycloak to be ready..."
+            sleep 2
+          done
+          echo "Keycloak did not start in time"
+          exit 1
+     
+      - name: start backend
+        env:
+          DB_URI: postgres://postgres:password@localhost:5432/prism
+          PRISM_LICENSE: ${{ secrets.PRISM_CI_LICENSE }}
+          SEARCHABLE_ENTITIES_DATA: $GITHUB_WORKSPACE/data/searchable_entities.json
+          UNIVERSITY_DATA: $GITHUB_WORKSPACE/path/to/PRISM/data/university_webpages.json
+          DOC_DATA: $GITHUB_WORKSPACE/path/to/PRISM/data/docs_and_press_releases.json
+          AUX_DATA: $GITHUB_WORKSPACE/path/to/PRISM/data/auxiliary_webpages.jsons
+          KEYCLOAK_SERVER_URL: http://localhost/keycloak
+          KEYCLOAK_ADMIN_USERNAME: kc-admin"
+          KEYCLOAK_ADMIN_PASSWORD: kc-admin-pwd
+          KEYCLOAK_PUBLIC_HOSTNAME: http://localhost
+          KEYCLOAK_PRIVATE_HOSTNAME: http://localhost
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GROBID_ENDPOINT: http://localhost:8070
+        run: |
+          go build ./prism/cmd/backend/main.go
+          go build ./prism/cmd/worker/main.go
+          nohup go run ./prism/cmd/backend/main.go &
+          nohup go run ./prism/cmd/worker/main.go &
+
+      - name: wait for backend to be ready
+        run: |
+          for i in {1..10}; do
+            if curl -is http://localhost:8000/api/v1/health | grep "200 OK"; then
+              echo "Backend is ready"
+              exit 0
+            fi
+            echo "Waiting for Backend to be ready..."
+            sleep 2
+          done
+          echo "Backend did not start in time"
+          exit 1
+
+      - name: run integration tests
+        env:
+          BACKEND_URL: "http://localhost:8000"
+          KEYCLOAK_URL: "http://localhost:8180"
+          KEYCLOAK_ADMIN_USERNAME: $KEYCLOAK_ADMIN_USERNAME
+          KEYCLOAK_ADMIN_PASSWORD: $KEYCLOAK_ADMIN_PASSWORD
+        run: |
+          go test -v ./integration_tests
+
+      - name: stop grobid docker container
+        if: always()
+        run: |
+          docker stop $(docker ps -q --filter ancestor=grobid/grobid:0.8.0)
+
+      - name: stop keycloak docker container
+        if: always()
+        run: |
+          docker stop $(docker ps -q --filter ancestor=quay.io/keycloak/keycloak:26.0.0)
+
+      - name: display backend logs
+        if: always()
+        run: |
+          cat ./prism_backend.log
+
+      - name: display worker logs
+        if: always()
+        run: |
+          cat ./prism_worker.log

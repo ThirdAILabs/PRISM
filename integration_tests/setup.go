@@ -1,36 +1,48 @@
 package tests
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
 	"prism/prism/api"
 	"prism/prism/services/auth"
+
+	"github.com/caarlos0/env/v11"
 )
 
-const (
-	backendUrl = "http://localhost"
+type testEnv struct {
+	BackendUrl            string `env:"BACKEND_URL" envDefault:"http://localhost"`
+	KeycloakUrl           string `env:"KEYCLOAK_URL" envDefault:"http://localhost/keycloak"`
+	KeycloakAdminUsername string `env:"KEYCLOAK_ADMIN_USERNAME" envDefault:"kc-admin"`
+	KeycloakAdminPassword string `env:"KEYCLOAK_ADMIN_PASSWORD" envDefault:"KC-admin-pwd@1"`
+}
 
-	keycloakUrl           = "http://localhost/keycloak"
-	keycloakAdminUsername = "kc-admin"
-	keycloakAdminPassword = "KC-admin-pwd@1"
+func setupTestEnv(t *testing.T) *api.PrismClient {
+	const (
+		username = "regular-user"
+		password = "Regular-user-pwd@1"
+	)
 
-	username = "regular-user"
-	password = "Regular-user-pwd@1"
-)
+	for _, env := range []string{"BACKEND_URL", "KEYCLOAK_URL", "KEYCLOAK_ADMIN_USERNAME", "KEYCLOAK_ADMIN_PASSWORD"} {
+		fmt.Printf("ENV: '%s' = '%s'\n", env, os.Getenv(env))
+	}
 
-func setupKeycloakUsers(t *testing.T) {
+	var vars testEnv
+	if err := env.Parse(&vars); err != nil {
+		t.Fatalf("error parsing env: %v", err)
+	}
+
 	auth, err := auth.NewKeycloakAuth("prism-user", auth.KeycloakArgs{
-		KeycloakServerUrl:     keycloakUrl,
-		KeycloakAdminUsername: keycloakAdminUsername,
-		KeycloakAdminPassword: keycloakAdminPassword,
-		PublicHostname:        "",
-		PrivateHostname:       "",
+		KeycloakServerUrl:     vars.KeycloakUrl,
+		KeycloakAdminUsername: vars.KeycloakAdminUsername,
+		KeycloakAdminPassword: vars.KeycloakAdminPassword,
 	})
 	if err != nil {
 		t.Fatalf("error connecting to keycloak: %v", err)
 	}
 
-	adminToken, err := auth.AdminLogin(keycloakAdminUsername, keycloakAdminPassword)
+	adminToken, err := auth.AdminLogin(vars.KeycloakAdminUsername, vars.KeycloakAdminPassword)
 	if err != nil {
 		t.Fatalf("keycloak admin login failed: %v", err)
 	}
@@ -39,12 +51,7 @@ func setupKeycloakUsers(t *testing.T) {
 		t.Fatalf("error creating user: %v", err)
 	}
 
-}
-
-func setupTestEnv(t *testing.T) *api.PrismClient {
-	setupKeycloakUsers(t)
-
-	user := api.NewUserClient(backendUrl, keycloakUrl)
+	user := api.NewUserClient(vars.BackendUrl, vars.KeycloakUrl)
 	if err := user.Login(username, password); err != nil {
 		t.Fatal(err)
 	}
