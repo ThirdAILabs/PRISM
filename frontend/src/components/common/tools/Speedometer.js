@@ -98,7 +98,6 @@ const CustomValue = ({ value }) => {
   );
 };
 
-export function Speedometer({ scale, value }) {
 export function Speedometer({ scale, value, speedometerHoverText }) {
   function transformValue(value) {
     if (value >= scale[scale.length - 1]) {

@@ -30,38 +30,46 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadi
 
   return (
     <div className="d-flex flex-column w-100 ">
-      <>
-        <ul className="result-wrapper">
-          {results.map((result, index) => (
-            <li key={index} onClick={() => handleItemClick(result)} className="result-item">
-              <div className="text-start px-5">
-                <div className="d-flex align-items-center mb-2">
-                  <h5 className="m-0">{result.AuthorName}</h5>
-                </div>
-                <p className="m-0 p-0" style={{ fontSize: 'small' }}>
-                  <b>Affiliations: </b>
-                  {result.Institutions.join(', ')}
-                </p>
-                {result.Interests && result.Interests.length > 0 && (
-                  <div>
-                    <p className="m-0 p-0 pt-1" style={{ fontSize: 'small' }}>
-                      <b>Research Interests: </b>
-                      {result.Interests.slice(0, 3).join(', ')}
-                    </p>
+      {results.length === 0 ? (
+        <div className="no-results">
+          <div className="no-results-icon">🔍</div>
+          <h3>No Results Found</h3>
+          <p>Try adjusting your search to find what you're looking for.</p>
+        </div>
+      ) : (
+        <>
+          <ul className="result-wrapper">
+            {results.map((result, index) => (
+              <li key={index} onClick={() => handleItemClick(result)} className="result-item">
+                <div className="text-start px-5">
+                  <div className="d-flex align-items-center mb-2">
+                    <h5 className="m-0">{result.AuthorName}</h5>
                   </div>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-        {canLoadMore && (
-          <div className="show-more-results-button">
-            <button className="button" onClick={getMoreResults} disabled={isLoadingMore}>
-              {isLoadingMore ? <div className="spinner"></div> : 'Show More'}
-            </button>
-          </div>
-        )}
-      </>
+                  <p className="m-0 p-0" style={{ fontSize: 'small' }}>
+                    <b>Affiliations: </b>
+                    {result.Institutions.join(', ')}
+                  </p>
+                  {result.Interests && result.Interests.length > 0 && (
+                    <div>
+                      <p className="m-0 p-0 pt-1" style={{ fontSize: 'small' }}>
+                        <b>Research Interests: </b>
+                        {result.Interests.slice(0, 3).join(', ')}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+          {canLoadMore && (
+            <div className="show-more-results-button">
+              <button className="button" onClick={getMoreResults} disabled={isLoadingMore}>
+                {isLoadingMore ? <div className="spinner"></div> : 'Show More'}
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };
