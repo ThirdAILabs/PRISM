@@ -154,7 +154,7 @@ const SidePanel = ({ isOpen, onClose }) => {
             <img
               src={PRISM_LOGO}
               alt="PRISM"
-              style={{ width: '150px', height: '30px', marginLeft: '10%' }}
+              style={{ width: '150px', height: '30px', marginLeft: '5%' }}
             />
           </div>
           {/* Navigation */}
@@ -195,19 +195,21 @@ const SidePanel = ({ isOpen, onClose }) => {
             <h5 className="report-header">
               <TbReportSearch /> Reports
             </h5>
-            <div className="collapsible-header">
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div
-                  onClick={() => setShowAuthorReports(!showAuthorReports)}
-                  className="collapsible-icon"
-                >
-                  {showAuthorReports ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
-                  <span style={{ fontSize: 'medium', marginLeft: '10px', marginRight: '15px' }}>
+            {reports?.length && (
+              <div className="collapsible-header">
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div
+                    onClick={() => setShowAuthorReports(!showAuthorReports)}
+                    className="collapsible-icon"
+                  >
+                    {showAuthorReports ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
+                  </div>
+                  <span style={{ fontSize: 'medium', fontWeight: 'normal', marginLeft: '10px' }}>
                     Author Report
                   </span>
                 </div>
               </div>
-            </div>
+            )}
             {showAuthorReports && (
               <div className="collapsible-content">
                 {reports.map(
@@ -230,17 +232,17 @@ const SidePanel = ({ isOpen, onClose }) => {
               className="collapsible-header"
               // style={{ marginTop: '10px' }}
             >
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div
-                  onClick={() => setShowUniversityReports(!showUniversityReports)}
-                  className="collapsible-icon"
-                >
-                  {showUniversityReports ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
-                  <span style={{ fontSize: 'medium', marginLeft: '10px', marginRight: '15px' }}>
-                    University Report
-                  </span>
+              {universityReports?.length && (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div
+                    onClick={() => setShowUniversityReports(!showUniversityReports)}
+                    className="collapsible-icon"
+                  >
+                    {showUniversityReports ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
+                  </div>
+                  <span style={{ fontSize: 'medium', marginLeft: '10px' }}>University Report</span>
                 </div>
-              </div>
+              )}
             </div>
             {showUniversityReports && (
               <div className="collapsible-content">

@@ -50,8 +50,8 @@ function AppContent() {
           style={{
             cursor: 'pointer',
             position: 'fixed',
-            left: isSidePanelOpen ? '310px' : '20px',
-            top: '20px',
+            left: isSidePanelOpen ? '240px' : '20px',
+            top: '15px',
             zIndex: 1000,
             transition: 'left 0.3s ease',
           }}
@@ -59,9 +59,9 @@ function AppContent() {
           className="menu-icon"
         >
           {isSidePanelOpen ? (
-            <TbLayoutSidebarRightExpand size={36} />
+            <TbLayoutSidebarRightExpand size={40} />
           ) : (
-            <TbLayoutSidebarLeftExpand size={36} />
+            <TbLayoutSidebarLeftExpand size={40} />
           )}
         </div>
       )}
