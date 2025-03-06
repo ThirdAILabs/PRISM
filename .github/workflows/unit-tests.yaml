@@ -32,10 +32,19 @@ jobs:
         run: |
           go mod download
           go run github.com/playwright-community/playwright-go/cmd/playwright install --with-deps firefox
-      
+    
+      - name: start grobid docker container
+        run: |
+          docker run --rm --init -d --ulimit core=0 -p 8070:8070 grobid/grobid:0.8.0
+
       - name: run unit tests
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          GROBID_ENDPOINT: ${{ vars.GROBID_ENDPOINT }}
+          GROBID_ENDPOINT: http://localhost:8070
         run: |
           go test -v ./prism/...
+
+      - name: stop grobid docker container
+        if: always()
+        run: |
+          docker stop $(docker ps -q --filter ancestor=grobid/grobid:0.8.0)
