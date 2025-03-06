@@ -65,7 +65,7 @@ export function Value({ value, speedometerHoverText }) {
       <text
         x={cx}
         y={cy * 1.1}
-        style={{ 
+        style={{
           fill: 'grey',
           fontSize: getFontSize(value),
           fontWeight: 'bold',
