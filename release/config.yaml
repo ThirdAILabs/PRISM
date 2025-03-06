@@ -7,6 +7,6 @@ azure:
       push_credentials:
         password: woQh5tTYczBGMjDrU04DmKHNHx2WhCLQItTJ79ktDR+ACRCN9Ott
         username: prism-push-test-docker
-      version: 0.0.4
+      version: 0.0.6
   registry: prismresearchsecurity.azurecr.io
 provider: azure
