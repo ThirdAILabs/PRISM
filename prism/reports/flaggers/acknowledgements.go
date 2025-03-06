@@ -34,7 +34,7 @@ type GrobidAcknowledgementsExtractor struct {
 func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downloadDir string) *GrobidAcknowledgementsExtractor {
 	return &GrobidAcknowledgementsExtractor{
 		cache:      cache,
-		maxWorkers: 10,
+		maxWorkers: 4,
 		grobid: resty.New().
 			SetBaseURL(grobidEndpoint).
 			SetRetryCount(2).
