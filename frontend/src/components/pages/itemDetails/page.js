@@ -191,7 +191,6 @@ const ItemDetails = () => {
       let inProgress = true;
       const report = await reportService.getReport(report_id);
       if (isMounted) {
-        console.log(`Loading: ${loading}`);
         console.log('Report', report);
         setAuthorName(report.AuthorName);
         setReportContent(report.Content);
@@ -1007,7 +1006,7 @@ const ItemDetails = () => {
         <>
           {loading && (
             <div class="d-flex justify-content-start">
-              <div class="spinner-border ms-5 mb-3" role="status" />
+              <div class="spinner-border text-secondary ms-5 mb-3" role="status" />
             </div>
           )}
           <div

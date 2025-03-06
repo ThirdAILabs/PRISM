@@ -72,6 +72,7 @@ const UniversityReport = () => {
   const [selectedFlag, setSelectedFlag] = useState(null);
   const [selectedFlagData, setSelectedFlagData] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const handleReview = (flag) => {
     setSelectedFlag(flag);
@@ -107,7 +108,6 @@ const UniversityReport = () => {
     };
   }, []);
 
-  const [loading, setLoading] = useState(true);
   const goBack = useGoBack('/university');
 
   return (
@@ -158,13 +158,18 @@ const UniversityReport = () => {
       </div>
 
       <>
-        <div className="d-flex w-100 flex-column align-items-center">
+        {/* <div className="d-flex w-100 flex-column align-items-center">
           <div className="d-flex w-100 px-5 align-items-center my-2 mt-3 justify-content-between">
             <div style={{ width: '20px' }}>
-              {loading && <div class="spinner-border" role="status" />}
+              {loading && <div class="spinner-border text-secondary" role="status" />}
             </div>
           </div>
-        </div>
+        </div> */}
+        {loading && (
+          <div class="d-flex justify-content-start">
+            <div class="spinner-border text-secondary ms-5 mt-3 mb-3" role="status" />
+          </div>
+        )}
         {
           <div
             className="d-flex w-100 flex-column align-items-center"
