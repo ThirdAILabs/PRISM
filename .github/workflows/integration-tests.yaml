@@ -95,10 +95,10 @@ jobs:
         env:
           DB_URI: postgres://postgres:password@localhost:5432/prism
           PRISM_LICENSE: ${{ secrets.PRISM_CI_LICENSE }}
-          SEARCHABLE_ENTITIES_DATA: $GITHUB_WORKSPACE/data/searchable_entities.json
-          UNIVERSITY_DATA: $GITHUB_WORKSPACE/path/to/PRISM/data/university_webpages.json
-          DOC_DATA: $GITHUB_WORKSPACE/path/to/PRISM/data/docs_and_press_releases.json
-          AUX_DATA: $GITHUB_WORKSPACE/path/to/PRISM/data/auxiliary_webpages.jsons
+          SEARCHABLE_ENTITIES_DATA: ./data/searchable_entities.json
+          UNIVERSITY_DATA: ./data/university_webpages.json
+          DOC_DATA: ./data/docs_and_press_releases.json
+          AUX_DATA: ./data/auxiliary_webpages.jsons
           KEYCLOAK_SERVER_URL: http://localhost/keycloak
           KEYCLOAK_PUBLIC_HOSTNAME: http://localhost
           KEYCLOAK_PRIVATE_HOSTNAME: http://localhost
