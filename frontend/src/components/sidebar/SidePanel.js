@@ -19,8 +19,8 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 
 const SidePanel = ({ isOpen, onClose }) => {
   const { userInfo } = useUser();
-  const [reports, setReports] = useState(null);
-  const [universityReports, setUniversityReports] = useState(null);
+  const [reports, setReports] = useState([]);
+  const [universityReports, setUniversityReports] = useState([]);
   const [showAuthorReports, setShowAuthorReports] = useState(false);
   const [showUniversityReports, setShowUniversityReports] = useState(false);
 
@@ -151,7 +151,7 @@ const SidePanel = ({ isOpen, onClose }) => {
             <h5 className="report-header">
               <TbReportSearch /> Reports
             </h5>
-            {reports && (
+            {reports?.length ? (
               <div className="collapsible-header">
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <div
@@ -165,7 +165,7 @@ const SidePanel = ({ isOpen, onClose }) => {
                   </span>
                 </div>
               </div>
-            )}
+            ) : null}
             {showAuthorReports && (
               <div className="collapsible-content">
                 {reports.map(
@@ -188,7 +188,7 @@ const SidePanel = ({ isOpen, onClose }) => {
               className="collapsible-header"
               // style={{ marginTop: '10px' }}
             >
-              {universityReports && (
+              {universityReports?.length ? (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <div
                     onClick={() => setShowUniversityReports(!showUniversityReports)}
@@ -198,7 +198,7 @@ const SidePanel = ({ isOpen, onClose }) => {
                   </div>
                   <span style={{ fontSize: 'medium', marginLeft: '10px' }}>University Report</span>
                 </div>
-              )}
+              ) : null}
             </div>
             {showUniversityReports && (
               <div className="collapsible-content">
