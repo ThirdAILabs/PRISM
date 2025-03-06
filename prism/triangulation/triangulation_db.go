@@ -1,8 +1,6 @@
 package triangulation
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"log/slog"
 
@@ -18,16 +16,12 @@ func (t *TriangulationDB) GetTriangulationDB() *gorm.DB {
 }
 
 func (t *TriangulationDB) GetAuthorFundCodeResult(authorName, fundCode string) (*AuthorFundCodeResult, error) {
-	hash := sha256.New()
-	hash.Write([]byte(fundCode))
-	fundCodeHash := hex.EncodeToString(hash.Sum(nil))
-
 	var result AuthorFundCodeResult
 
 	err := t.db.Table("authors a").
 		Select("a.numpapersbyauthor, f.numpapers").
-		Joins("JOIN fundcodes f ON a.fundcodes_id = f.id").
-		Where("a.authorname = ? AND a.fund_code_hash = ?", authorName, fundCodeHash).
+		Joins("JOIN fundcodes f ON a.fundcode_id = f.id").
+		Where("a.authorname = ? AND f.fundcodes = ?", authorName, fundCode).
 		Limit(1).
 		Scan(&result).Error
 

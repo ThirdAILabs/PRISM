@@ -1,9 +1,8 @@
 package triangulation
 
 type Author struct {
-	UniqueID          int    `gorm:"primaryKey;column:uniqueid;autoIncrement"`
-	FundCodesID       *int   `gorm:"column:fundcodes_id"`
-	FundCodeHash      string `gorm:"column:fund_code_hash;type:varchar(64)"`
+	ID                int    `gorm:"primaryKey;column:id;autoIncrement"`
+	FundCodesID       *int   `gorm:"column:fundcode_id"`
 	AuthorName        string `gorm:"column:authorname;type:text"`
 	NumPapersByAuthor int    `gorm:"column:numpapersbyauthor"`
 }
