@@ -2,16 +2,14 @@ package migrations
 
 import (
 	"log"
-	"prism/prism/cmd/backend/migrations/versions"
 	"prism/prism/schema"
+	"prism/prism/schema/migrations/versions"
 
 	"github.com/go-gormigrate/gormigrate/v2"
 	"gorm.io/gorm"
 )
 
-func RunMigrations(db *gorm.DB) {
-	log.Println("running db migrations")
-
+func GetMigrator(db *gorm.DB) *gormigrate.Gormigrate {
 	migrator := gormigrate.New(db, gormigrate.DefaultOptions, []*gormigrate.Migration{
 		{
 			ID:      "0",
@@ -31,6 +29,14 @@ func RunMigrations(db *gorm.DB) {
 			&schema.UniversityReport{}, &schema.UserUniversityReport{},
 		)
 	})
+
+	return migrator
+}
+
+func RunMigrations(db *gorm.DB) {
+	log.Println("running db migrations")
+
+	migrator := GetMigrator(db)
 
 	if err := migrator.Migrate(); err != nil {
 		log.Fatalf("db migration failed: %v", err)
