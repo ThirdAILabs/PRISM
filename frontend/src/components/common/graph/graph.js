@@ -422,7 +422,7 @@ const Graph = ({ authorName, reportContent }) => {
 
   const graphRef = useRef(null);
   const graphOptions = {
-    // Here you can refer to the parameters in "Graph Graph" for settings
+    allowShowMiniToolBar: false,
   };
 
   const graphData = generateGraphData(convertDataToGraphFormat(authorName, reportContent));

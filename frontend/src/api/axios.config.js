@@ -35,9 +35,8 @@ axiosInstance.interceptors.response.use(
     // Use a fallback value if status is null or undefined
     const errorStatus = error.response?.status || 500;
 
-    // window.location.href = `/error?message=${encodeURIComponent(
-    //   errorMessage
-    // )}&status=${encodeURIComponent(errorStatus)}`;
+    window.location.href = `/error?message=${encodeURIComponent(errorMessage)}
+      &status=${encodeURIComponent(errorStatus)}`;
 
     return Promise.reject(error);
   }

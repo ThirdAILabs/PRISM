@@ -224,3 +224,7 @@ li {
 #file {
   display: none;
 }
+
+.menu-icon {
+  color: rgb(80, 80, 80);
+}

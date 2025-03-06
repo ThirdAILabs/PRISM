@@ -51,7 +51,11 @@ function UniversityAssessment() {
     };
     const reportId = await universityReportService.createReport(reportData);
     console.log('University report id: ', reportId);
-    navigate(`report/${reportId.Id}`);
+    navigate(`report/${reportId.Id}`, {
+      state: {
+        canGoBack: true,
+      },
+    });
   };
 
   return (

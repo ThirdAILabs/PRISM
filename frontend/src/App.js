@@ -6,6 +6,7 @@ import EntityLookup from './components/pages/entityLookup/page';
 import UserService from './services/userService';
 import { useUser } from './store/userContext';
 import { FaBars } from 'react-icons/fa';
+import { TbLayoutSidebarLeftExpand, TbLayoutSidebarRightExpand } from 'react-icons/tb';
 import SidePanel from './components/sidebar/SidePanel';
 import UniversityAssessment from './components/pages/UniversityAssessment';
 import UniversityReport from './components/pages/UniversityReport';
@@ -45,20 +46,29 @@ function AppContent() {
   return (
     <div className="App">
       {showMenuIcon && (
-        <FaBars
-          size={30}
+        <div
           style={{
             cursor: 'pointer',
             position: 'fixed',
-            left: '20px',
-            top: '20px',
+            left: isSidePanelOpen ? '240px' : '20px',
+            top: '15px',
             zIndex: 1000,
+            transition: 'left 0.3s ease',
           }}
           onClick={() => setIsSidePanelOpen(!isSidePanelOpen)}
-          className="hover:bg-gray-200"
-        />
+          className="menu-icon"
+        >
+          {isSidePanelOpen ? (
+            <TbLayoutSidebarRightExpand size={40} />
+          ) : (
+            <TbLayoutSidebarLeftExpand size={40} />
+          )}
+        </div>
       )}
-      <SidePanel isOpen={isSidePanelOpen} onClose={() => setIsSidePanelOpen(false)} />
+      <SidePanel
+        isOpen={isSidePanelOpen && showMenuIcon}
+        onClose={() => setIsSidePanelOpen(false)}
+      />
       <Routes>
         <Route element={<SearchProviderWrapper />}>
           <Route path="/" element={<SearchComponent />} />
