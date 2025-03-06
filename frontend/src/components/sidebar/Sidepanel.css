@@ -64,25 +64,20 @@
   padding: 8px 0;
   cursor: pointer;
   background: white;
-  color: gray;
+  color: rgb(100, 100, 100);
   border-radius: 1rem;
   border: none;
 }
 
 .nav-item:hover {
-  /* background: #8fb8f6; */
-  /* color: #0c66e4; */
-  /* background: #8fb8f6; */
   background: rgb(245, 240, 240);
-  /* color: #0c66e4; */
-  color: #606060;
+  color: rgb(60, 60, 60);
 }
 
 .nav-item.active {
   /* background: #8fb8f6; */
   background: rgb(245, 240, 240);
-  /* color: #0c66e4; */
-  color: #606060;
+  color: rgb(60, 60, 60);
 }
 
 .nav-icon {
@@ -96,7 +91,7 @@
 .reports {
   margin-top: 20px;
   margin-left: 1%;
-  color: gray;
+  color: rgb(100, 100, 100);
 }
 
 .report-header {
@@ -115,7 +110,7 @@
   border-radius: 1rem;
   font-size: smaller;
   padding-block: 5px;
-  color: gray;
+  color: rgb(100, 100, 100);
 }
 
 .report-item:hover {
