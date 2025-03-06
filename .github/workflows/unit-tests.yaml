@@ -23,6 +23,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: start grobid docker container
+        run: |
+          docker run --rm --init -d --ulimit core=0 -p 8070:8070 grobid/grobid:0.8.0
+
       - name: set up go >=1.23.1
         uses: actions/setup-go@v5
         with:
@@ -32,10 +36,28 @@ jobs:
         run: |
           go mod download
           go run github.com/playwright-community/playwright-go/cmd/playwright install --with-deps firefox
-      
+    
+      - name: wait for grobid to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:8070/api/isalive | grep "true"; then
+              echo "Grobid is ready"
+              exit 0
+            fi
+            echo "Waiting for Grobid to be ready..."
+            sleep 2
+          done
+          echo "Grobid did not start in time"
+          exit 1
+
       - name: run unit tests
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          GROBID_ENDPOINT: ${{ vars.GROBID_ENDPOINT }}
+          GROBID_ENDPOINT: http://localhost:8070
         run: |
           go test -v ./prism/...
+
+      - name: stop grobid docker container
+        if: always()
+        run: |
+          docker stop $(docker ps -q --filter ancestor=grobid/grobid:0.8.0)
