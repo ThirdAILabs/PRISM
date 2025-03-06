@@ -36,17 +36,35 @@ const Hover = ({ text }) => {
   );
 };
 
-export default function ConcernVisualizer({ title, hoverText, value, scale, onReview, selected }) {
+export default function ConcernVisualizer({
+  title,
+  hoverText,
+  value,
+  scale,
+  onReview,
+  selected,
+  speedometerHoverText,
+}) {
   return (
     <div style={{ width: '200px', height: '300px', position: 'relative' }}>
-      <Speedometer scale={scale || [0, 1, 2, 3, 5, 10, 20]} value={value} />
+      <Speedometer
+        scale={scale || [0, 1, 2, 3, 5, 10, 20]}
+        value={value}
+        speedometerHoverText={speedometerHoverText}
+      />
 
       <div className="mt-3 mb-4 text-dark" style={{ height: '50px' }}>
         {title} <Hover text={hoverText} />
       </div>
       {onReview && (
         <button
-          className={`btn ${selected ? 'btn-dark' : 'btn-light'} rounded rounded-5 px-4`}
+          className={`btn btn-dark rounded rounded-5 px-4`}
+          style={{
+            background: !value ? 'ghostwhite' : 'lightgrey',
+            border: 'none',
+            color: 'black',
+            boxShadow: selected ? '0 0px 12px rgb(57, 57, 57)' : 'none',
+          }}
           disabled={!value}
           onClick={onReview}
         >

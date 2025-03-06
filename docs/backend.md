@@ -115,27 +115,6 @@ __Example Response__:
 No response body
 ```
 
-## Activate a License 
-
-| Method | Path | Auth Required | Permissions |
-| ------ | ---- | ------------- | ----------  |
-| `POST` | `/api/v1/report/activate-license` | Yes | Token for Keycloak User Realm |
-
-Activates a license for the given user. This will be stored so that the user can create reports in the future. If a user attempts to create a report before activating a license an error will be returned. The user id is determined from the provided access token.
-
-__Example Request__: 
-
-The license key should be passed in the license field of the request body.
-```json
-{
-    "License": "V1-Ln8DAQEOTGljZW5zZVBheWxvYWQB_4AAAQIBAklkAf-CAAEGU2VjcmV0AQoAAAAQ_4EGAQEEVVVJRAH_ggAAAEf_gAEQpAie_oymRTqsRgHBKV4PZQEwwkiCShClSaNJNZM1CVazo9lzqq9Opzulu9SCfkTksIsbftR0EpK8-P4PdeVa_xbeAA=="
-}
-```
-__Example Response__:
-```
-No response body
-```
-
 ## Check Disclosure
 
 | Method | Path | Auth Required | Permissions |
@@ -379,78 +358,6 @@ __Example Response__:
 No response body
 ```
 
-# License Endpoints
-
-## List licenses
-
-| Method | Path | Auth Required | Permissions |
-| ------ | ---- | ------------- | ----------  |
-| `GET` | `/api/v1/license/list` | Yes | Token for Keycloak Admin Realm |
-
-Lists all created licenses. 
-
-__Example Request__: 
-```
-No request body
-```
-__Example Response__:
-```json
-[
-    {
-        "Id": "a131b6ae-503c-4792-8755-2dd713b390ba",
-        "Name": "xyz",
-        "Expiration": "2025-02-11T20:43:25.798785Z",
-        "Deactivated": false
-    },
-    {
-        "Id": "5b34088d-cb2d-46ac-85a8-85e6e8a325ae",
-        "Name": "abc",
-        "Expiration": "2025-02-11T20:43:25.900165Z",
-        "Deactivated": false
-    }
-]
-```
-
-## Create a License
-
-| Method | Path | Auth Required | Permissions |
-| ------ | ---- | ------------- | ----------  |
-| `POST` | `/api/v1/license/create` | Yes | Token for Keycloak Admin Realm |
-
-Create a new license. The timezone of the expiration is treated as UTC. 
-
-__Example Request__: 
-```json
-{
-    "Name": "test-license",
-    "Expiration": "2025-02-11T20:37:49.004638Z"
-}
-```
-__Example Response__:
-```json
-{
-    "Id": "a4089efe-8ca6-453a-ac46-01c1295e0f65",
-    "License": "V1-Ln8DAQEOTGljZW5zZVBheWxvYWQB_4AAAQIBAklkAf-CAAEGU2VjcmV0AQoAAAAQ_4EGAQEEVVVJRAH_ggAAAEf_gAEQpAie_oymRTqsRgHBKV4PZQEwwkiCShClSaNJNZM1CVazo9lzqq9Opzulu9SCfkTksIsbftR0EpK8-P4PdeVa_xbeAA=="
-}
-```
-
-## Deactivate a License
-
-| Method | Path | Auth Required | Permissions |
-| ------ | ---- | ------------- | ----------  |
-| `DELETE` | `/api/v1/license/{license_id}` | Yes | Token for Keycloak Admin Realm |
-
-Deactivates a license. This is a soft delete, the license and all associated data is preserved, but the license is marked as deactivated and cannot be used.
-
-__Example Request__: 
-```
-No request body
-```
-__Example Response__:
-```
-No response body
-```
-
 # Autocomplete Endpoints
 
 ## Autocomplete Authors
@@ -469,20 +376,14 @@ __Example Response__:
 ```json
 [
     {
-        "AuthorId": "https://openalex.org/A5108903505",
-        "AuthorName": "Anshumali Shrivastava",
-        "Institutions": [
-            ""
-        ],
-        "Source": "openalex"
+        "Id": "https://openalex.org/A5108903505",
+        "Name": "Anshumali Shrivastava",
+        "Hint": "",
     },
     {
-        "AuthorId": "https://openalex.org/A5024993683",
-        "AuthorName": "Anshumali Shrivastava",
-        "Institutions": [
-            "Rice University, USA"
-        ],
-        "Source": "openalex"
+        "Id": "https://openalex.org/A5024993683",
+        "Name": "Anshumali Shrivastava",
+        "Hint": "Rice University, USA"
     }
 ]
 ```
@@ -503,26 +404,56 @@ __Example Response__:
 ```json
 [
     {
-        "InstitutionId": "https://openalex.org/I74775410",
-        "InstitutionName": "Rice University",
-        "Location": "Houston, USA"
+        "Id": "https://openalex.org/I74775410",
+        "Name": "Rice University",
+        "Hint": "Houston, USA"
+    }
+]
+```
+
+## Autocomplete Papers
+
+| Method | Path | Auth Required | Permissions |
+| ------ | ---- | ------------- | ----------  |
+| `GET` | `/api/v1/autocomplete/paper?query=<start of paper title>` | Yes | Token for Keycloak User Realm |
+
+Generates autocompletion suggestions for the given paper title. The tile query is specified in the `query` url query parameter.
+
+__Example Request__: 
+```
+GET http://example.com/autocomplete/paper?query=From+Research+to+Production%3A+Towards+Scalable+and+Sustainable+Neural+Recommendation
+```
+__Example Response__:
+```json
+[
+    {
+        "Id": "https://openalex.org/W4386729297",
+        "Name": "From Research to Production: Towards Scalable and Sustainable Neural Recommendation Models on Commodity CPU Hardware",
+        "Hint": "Anshumali Shrivastava, Vihan Lakshman, Tharun Medini, et al."
     }
 ]
 ```
 
 # Search Endpoints
 
-## Search Openalex Authors
+## Search Authors
 
 | Method | Path | Auth Required | Permissions |
 | ------ | ---- | ------------- | ----------  |
-| `GET` | `/api/v1/search/regular?author_name=<author name>&institution_id=<institution_id>` | Yes | Token for Keycloak User Realm |
+| `GET` | `/api/v1/search/authors` | Yes | Token for Keycloak User Realm |
 
-Searches for authors on openalex matching the given name and institution id. The `institution_id` and `author_name` are passed as url query parameters. The institution id can come from the `InstitutionId` field returned from the institution autocompletion endpoint.
+Searches for authors on openalex using one of the following filters. 
+1. Author Name: Must specify the only following query parameters `author_name`, `institution_id`, and `institution_name`. The institution id can come from the `InstitutionId` field returned from the institution autocompletion endpoint.
+2. ORCID: Must specify only the `orcid` query parameter. Will return a single author for the given orcid, or 404 if no author is found.
+3. Paper Title: Must specify only the `paper_title` query parameter. Will return the authors for the given paper, or 404 if no paper matching the title is found.
 
 __Example Request__: 
 ```
-GET http://example.com/search/regular?author_name=anshumali+shrivastava&institution_id=https%3A%2F%2Fopenalex.org%2FI74775410
+GET http://example.com/search/authors?author_name=anshumali+shrivastava&institution_id=https%3A%2F%2Fopenalex.org%2FI74775410&institution_name=Rice+University
+
+GET http://example.com/search/authors?orcid=0000-0002-5042-2856
+
+GET http://example.com/search/authors?paper_title=From+Research+to+Production%3A+Towards+Scalable+and+Sustainable+Neural+Recommendation+Models+on+Commodity+CPU+Hardware
 ```
 __Example Response__:
 ```json

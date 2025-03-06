@@ -51,7 +51,7 @@
   6. To view the admin dashboard go to `localhost:8180` in your browser and login with the credentials `temp_admin` and `password`.
 
   7. Integrate Custom Theme in Login UI
-    1. Copy the custom-theme folder from keycloak-assets.
+    1. Copy the custom-theme folder from the keycloak directory in this repo.
     2. Navigate to the themes folder inside your keycloak-26.0.0 directory.
     3. Paste the directory (named custom-theme) into the themes folder.
 
@@ -145,9 +145,16 @@ KEYCLOAK_PRIVATE_HOSTNAME="http://example.com"
 ```bash
 DB_URI="postgresql://<username>:<password>@<host | localhost>:<port | 5432>/prism"
 SEARCHABLE_ENTITIES_DATA="<path to PRISM/data/searchable_entities.json>"
-NDB_LICENSE="Bolt license key"
+# License for PRISM, this should be a keygen license with the Full Access and Prism entitlements.
+PRISM_LICENSE="Prism license key"
 ```
   </div>
+
+5. For Entity search to work, we need to set the openai key as env variable before starting the backend.
+
+```bash
+export OPENAI_API_KEY=YOUR_OPENAI_KEY
+```
 
 5. Start the backend:
 
@@ -168,37 +175,6 @@ go run cmd/backend/main.go --env "./cmd/backend/.env"
   5. Go to the `Credentials` tab, click `Set password`, enter a password, and save it.
   6. In the `Details` tab, remove the `Update Password` requirement under `Required User Actions`.
   7. The username and password can now be used to log in as a user with Keycloak.
-
-  <div style="margin-left: 20px;">
-
-  ### **Adding an Admin User in the `prism-admin` Realm**
-
-  Follow the same steps as above, but select the `prism-admin` realm instead of `prism-user`. Create an admin user with credentials that will be used in the Bash script.
-
-  ## Running the License Automation Script
-
-  1. Navigate to the directory where the script is stored:
-  ```bash
-  cd PRISM/local_setup
-  ```
-
-  2. Ensure you have `jq` installed:
-  ```bash
-  sudo apt install jq  # Ubuntu/Debian
-  brew install jq      # macOS
-  ```
-
-  3. Run the script:
-  ```bash
-  ./create_license.sh
-  ```
-
-  The script will:
-
-  - Fetch an admin access token from `prism-admin` realm and create a license.
-  - Fetch a user access token from `prism-user` realm and activate the license for that user.
-  - Print the activation response to confirm success.
-  </div>
   
   </details>
 <br>
@@ -227,8 +203,8 @@ go run cmd/backend/main.go --env "./cmd/backend/.env"
 # Uri for prism postgres db
 DB_URI="postgresql://<username>:<password>@<host | localhost>:<port | 5432>/prism"
 
-# License for NDB
-NDB_LICENSE="bolt license key"
+# License for PRISM, this should be a keygen license with the Full Access and Prism entitlements.
+PRISM_LICENSE="prism license key"
 
 # Work dir for worker, will store ndbs and caches etc.
 WORK_DIR="any empty directory"

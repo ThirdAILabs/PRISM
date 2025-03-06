@@ -2,6 +2,7 @@ package reports
 
 import (
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -91,7 +92,7 @@ func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string, 
 			AuthorName:    authorName,
 			Source:        source,
 			Status:        schema.ReportQueued,
-			QueuedAt:      time.Now(),
+			QueuedAt:      time.Now().UTC(),
 			QueuedByUser:  fromUserReq,
 		}
 
@@ -104,7 +105,7 @@ func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string, 
 	return report, nil
 }
 
-func (r *ReportManager) CreateAuthorReport(licenseId, userId uuid.UUID, authorId, authorName, source string) (uuid.UUID, error) {
+func (r *ReportManager) CreateAuthorReport(userId uuid.UUID, authorId, authorName, source string) (uuid.UUID, error) {
 	var userReport schema.UserAuthorReport
 	var userReportId uuid.UUID
 	now := time.Now().UTC()
@@ -119,13 +120,13 @@ func (r *ReportManager) CreateAuthorReport(licenseId, userId uuid.UUID, authorId
 			return err
 		}
 
-		result := txn.Where("user_id = ? AND report_id = ?", userId, report.Id).First(&userReport)
-		if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		result := txn.Where("user_id = ? AND report_id = ?", userId, report.Id).Limit(1).Find(&userReport)
+		if result.Error != nil {
 			slog.Error("error finding existing user author report", "error", result.Error)
 			return ErrReportCreationFailed
 		}
 
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		if result.RowsAffected == 0 {
 			userReportId = uuid.New()
 			userReport = schema.UserAuthorReport{
 				Id:             userReportId,
@@ -144,20 +145,6 @@ func (r *ReportManager) CreateAuthorReport(licenseId, userId uuid.UUID, authorId
 				return ErrReportCreationFailed
 			}
 			userReportId = userReport.Id
-		}
-
-		usage := schema.LicenseUsage{
-			LicenseId:  licenseId,
-			ReportId:   userReport.Id,
-			ReportType: schema.AuthorReportType,
-			UserId:     userId,
-			Timestamp:  time.Now().UTC(),
-		}
-		if err := txn.Clauses(clause.OnConflict{
-			DoNothing: true,
-		}).Create(&usage).Error; err != nil {
-			slog.Error("error logging license usage", "error", err)
-			return errors.New("error updating license usage")
 		}
 
 		return nil
@@ -192,8 +179,7 @@ func (r *ReportManager) GetAuthorReport(userId, reportId uuid.UUID) (api.Report,
 			return err
 		}
 
-		report.LastAccessedAt = time.Now().UTC()
-		if err := txn.Save(&report).Error; err != nil {
+		if err := txn.Model(&report).Update("last_accessed_at", time.Now().UTC()).Error; err != nil {
 			slog.Error("error updating user author report last_accessed_at", "error", err)
 			return ErrReportAccessFailed
 		}
@@ -283,6 +269,57 @@ func (r *ReportManager) GetNextAuthorReport() (*ReportUpdateTask, error) {
 	return nil, nil
 }
 
+func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTime time.Time, updateFlags []api.Flag) error {
+	return r.db.Transaction(func(txn *gorm.DB) error {
+		updates := map[string]any{"status": status}
+		if status == schema.ReportCompleted {
+			updates["last_updated_at"] = updateTime
+		}
+
+		result := txn.Model(&schema.AuthorReport{Id: id}).Updates(updates)
+		if result.Error != nil {
+			slog.Error("error updating author report status", "author_report_id", id, "error", result.Error)
+			return ErrReportAccessFailed
+		}
+
+		if result.RowsAffected != 1 {
+			slog.Error("cannot update status of author report, report not found", "author_report_id", id, "status", status)
+			return ErrReportNotFound
+		}
+
+		if len(updateFlags) == 0 {
+			return nil
+		}
+
+		newFlags := make([]schema.AuthorFlag, 0)
+		for _, flag := range updateFlags {
+			data, err := json.Marshal(flag)
+			if err != nil {
+				return fmt.Errorf("error serializing flag: %w", err)
+			}
+
+			flagHash := flag.Hash()
+
+			date, dateValid := flag.Date()
+
+			newFlags = append(newFlags, schema.AuthorFlag{
+				ReportId: id,
+				FlagHash: hex.EncodeToString(flagHash[:]),
+				FlagType: flag.Type(),
+				Date:     sql.NullTime{Time: date, Valid: dateValid},
+				Data:     data,
+			})
+		}
+
+		if err := txn.Save(&newFlags).Error; err != nil {
+			slog.Error("error adding new flags to author report", "author_report_id", id, "error", err)
+			return ErrReportAccessFailed
+		}
+
+		return nil
+	})
+}
+
 func flagsToReportContent(flags []schema.AuthorFlag) (api.ReportContent, error) {
 	content := make(api.ReportContent)
 
@@ -299,69 +336,6 @@ func flagsToReportContent(flags []schema.AuthorFlag) (api.ReportContent, error) 
 	}
 
 	return content, nil
-}
-
-func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTime time.Time, updateContent api.ReportContent) error {
-	return r.db.Transaction(func(txn *gorm.DB) error {
-		var report schema.AuthorReport
-
-		if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Preload("Flags").First(&report, "id = ?", id).Error; err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				slog.Error("cannot update status of author report, report not found", "author_report_id", id, "status", status)
-				return ErrReportNotFound
-			}
-			slog.Error("error getting author report to update status", "author_report_id", id, "status", status, "error", err)
-			return ErrReportAccessFailed
-		}
-
-		updates := map[string]any{"status": status}
-
-		if status == schema.ReportCompleted {
-			updates["last_updated_at"] = updateTime
-
-			seen := make(map[string]bool)
-			for _, flag := range report.Flags {
-				seen[flag.FlagKey] = true
-			}
-
-			newFlags := make([]schema.AuthorFlag, 0)
-			for _, flags := range updateContent {
-				for _, flag := range flags {
-					if key := flag.Key(); !seen[key] {
-						seen[key] = true
-
-						data, err := json.Marshal(flag)
-						if err != nil {
-							return fmt.Errorf("error serializing flag: %w", err)
-						}
-
-						date, dateValid := flag.Date()
-						newFlags = append(newFlags, schema.AuthorFlag{
-							Id:       uuid.New(),
-							ReportId: report.Id,
-							FlagType: flag.Type(),
-							FlagKey:  key,
-							Date:     sql.NullTime{Time: date, Valid: dateValid},
-							Data:     data,
-						})
-					}
-				}
-			}
-
-			if len(newFlags) > 0 {
-				if err := txn.Save(newFlags).Error; err != nil {
-					slog.Error("error adding new flags to author report", "author_report_id", id, "error", err)
-					return ErrReportAccessFailed
-				}
-			}
-		}
-
-		if err := txn.Model(&report).Updates(updates).Error; err != nil {
-			slog.Error("error updating author report status", "author_report_id", id, "error", err)
-			return ErrReportAccessFailed
-		}
-		return nil
-	})
 }
 
 func convertReport(report schema.UserAuthorReport) (api.Report, error) {
@@ -410,7 +384,7 @@ func (r *ReportManager) queueUniversityReportUpdateIfNeeded(txn *gorm.DB, report
 	return nil
 }
 
-func (r *ReportManager) CreateUniversityReport(licenseId, userId uuid.UUID, universityId, universityName string) (uuid.UUID, error) {
+func (r *ReportManager) CreateUniversityReport(userId uuid.UUID, universityId, universityName string) (uuid.UUID, error) {
 	var userReport schema.UserUniversityReport
 	var userReportId uuid.UUID
 	now := time.Now().UTC()
@@ -444,13 +418,13 @@ func (r *ReportManager) CreateUniversityReport(licenseId, userId uuid.UUID, univ
 		}
 
 		result = txn.Where("user_id = ? AND report_id = ?", userId, report.Id).
-			First(&userReport)
-		if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			Limit(1).Find(&userReport)
+		if result.Error != nil {
 			slog.Error("error finding existing user university report", "error", result.Error)
 			return ErrReportCreationFailed
 		}
 
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		if result.RowsAffected == 0 {
 			userReportId = uuid.New()
 			userReport = schema.UserUniversityReport{
 				Id:             userReportId,
@@ -463,26 +437,12 @@ func (r *ReportManager) CreateUniversityReport(licenseId, userId uuid.UUID, univ
 				return ErrReportCreationFailed
 			}
 		} else {
-			userReport.LastAccessedAt = now
-			if err := txn.Save(&userReport).Error; err != nil {
-				slog.Error("error updating user university report", "error", err)
+			if err := txn.Model(&userReport).Update("last_accessed_at", now).Error; err != nil {
+				slog.Error("error updating user university report last_accessed_at", "error", err)
 				return ErrReportCreationFailed
 			}
-			userReportId = userReport.Id
-		}
 
-		usage := schema.LicenseUsage{
-			LicenseId:  licenseId,
-			ReportId:   userReport.Id,
-			ReportType: schema.UniversityReportType,
-			UserId:     userId,
-			Timestamp:  time.Now().UTC(),
-		}
-		if err := txn.Clauses(clause.OnConflict{
-			DoNothing: true,
-		}).Create(&usage).Error; err != nil {
-			slog.Error("error logging license usage", "error", err)
-			return errors.New("error updating license usage")
+			userReportId = userReport.Id
 		}
 
 		return nil
@@ -664,7 +624,7 @@ func (r *ReportManager) queueAuthorReportUpdatesForUniversityReport(txn *gorm.DB
 		Where("EXISTS (?)", txn.Table("university_authors").Where("university_authors.author_report_id = author_reports.id AND university_authors.university_report_id = ?", universityReportId)).
 		Where("author_reports.last_updated_at < ?", staleCutoff).
 		Where("author_reports.status IN ?", []string{schema.ReportFailed, schema.ReportCompleted}).
-		Updates(map[string]any{"status": schema.ReportQueued, "queued_at": time.Now()})
+		Updates(map[string]any{"status": schema.ReportQueued, "queued_at": time.Now().UTC()})
 
 	if result.Error != nil {
 		slog.Error("error queueing stale author reports for university report", "university_report_id", universityReportId, "error", result.Error)

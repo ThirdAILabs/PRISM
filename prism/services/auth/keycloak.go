@@ -118,13 +118,32 @@ func (auth *KeycloakAuth) createRealm(adminToken string) error {
 	}
 
 	args := gocloak.RealmRepresentation{
-		Realm:                &auth.realm,
-		Enabled:              gocloak.BoolP(true),
-		IdentityProviders:    &[]interface{}{},
-		DefaultRoles:         &[]string{"user"},
-		RegistrationAllowed:  gocloak.BoolP(false),
-		ResetPasswordAllowed: gocloak.BoolP(true),
-		AccessCodeLifespan:   gocloak.IntP(1500),
+		Realm:                        &auth.realm,
+		Enabled:                      gocloak.BoolP(true),
+		IdentityProviders:            &[]interface{}{},
+		DefaultRoles:                 &[]string{"user"},
+		RegistrationAllowed:          gocloak.BoolP(false),
+		ResetPasswordAllowed:         gocloak.BoolP(true),
+		AccessCodeLifespan:           gocloak.IntP(1500),
+		PasswordPolicy:               gocloak.StringP("length(8) and digits(1) and lowerCase(1) and upperCase(1) and specialChars(1)"),
+		BruteForceProtected:          gocloak.BoolP(true),
+		MaxFailureWaitSeconds:        gocloak.IntP(900),
+		MinimumQuickLoginWaitSeconds: gocloak.IntP(60),
+		WaitIncrementSeconds:         gocloak.IntP(60),
+		QuickLoginCheckMilliSeconds:  gocloak.Int64P(int64(1000)),
+		MaxDeltaTimeSeconds:          gocloak.IntP(43200),
+		FailureFactor:                gocloak.IntP(30),
+		SMTPServer: &map[string]string{
+			"host":     "smtp.sendgrid.net",
+			"port":     "465",
+			"from":     "platform@thirdai.com",
+			"replyTo":  "platform@thirdai.com",
+			"ssl":      "true",
+			"starttls": "true",
+			"auth":     "true",
+			"user":     "apikey",
+			"password": "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",
+		},
 	}
 
 	if serverInfo.Themes != nil {
@@ -171,15 +190,15 @@ func (auth *KeycloakAuth) createClient(adminToken string, redirectUrls []string,
 	_, err = auth.keycloak.CreateClient(ctx, adminToken, auth.realm, gocloak.Client{
 		ClientID:                  &clientName,
 		Enabled:                   gocloak.BoolP(true),
-		PublicClient:              gocloak.BoolP(true),       // Public client that doesn't require a secret for authentication.
-		RedirectURIs:              &redirectUrls,             // URIs where the client will redirect after authentication.
-		RootURL:                   &rootUrl,                  // Root URL for the client application.
-		BaseURL:                   gocloak.StringP("/login"), // Base URL for the client application.
-		DirectAccessGrantsEnabled: gocloak.BoolP(true),       // Direct grants like password flow are enabled, this allows for login with username and password via keycloak.
-		ServiceAccountsEnabled:    gocloak.BoolP(false),      // Service accounts are disabled.
-		StandardFlowEnabled:       gocloak.BoolP(true),       // Standard authorization code flow is enabled.
-		ImplicitFlowEnabled:       gocloak.BoolP(false),      // Implicit flow is disabled.
-		FullScopeAllowed:          gocloak.BoolP(false),      // Limit access to only allowed scopes.
+		PublicClient:              gocloak.BoolP(true),  // Public client that doesn't require a secret for authentication.
+		RedirectURIs:              &redirectUrls,        // URIs where the client will redirect after authentication.
+		RootURL:                   &rootUrl,             // Root URL for the client application.
+		BaseURL:                   gocloak.StringP("/"), // Base URL for the client application.
+		DirectAccessGrantsEnabled: gocloak.BoolP(true),  // Direct grants like password flow are enabled, this allows for login with username and password via keycloak.
+		ServiceAccountsEnabled:    gocloak.BoolP(false), // Service accounts are disabled.
+		StandardFlowEnabled:       gocloak.BoolP(true),  // Standard authorization code flow is enabled.
+		ImplicitFlowEnabled:       gocloak.BoolP(false), // Implicit flow is disabled.
+		FullScopeAllowed:          gocloak.BoolP(false), // Limit access to only allowed scopes.
 		DefaultClientScopes:       &[]string{"profile", "email", "openid", "roles"},
 		OptionalClientScopes:      &[]string{"offline_access", "microprofile-jwt"},
 		ProtocolMappers: &[]gocloak.ProtocolMapperRepresentation{

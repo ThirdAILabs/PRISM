@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import '../../common/searchBar/SearchBar.css';
 import '../../common/tools/button/button1.css';
+import './entityLookup.css';
 import Logo from '../../../assets/images/prism-logo.png';
-import '../../common/searchBar/SearchBar.css';
-import '../../common/tools/button/button1.css';
 import { searchService } from '../../../api/search';
 
 function EntityLookup() {
@@ -15,15 +14,11 @@ function EntityLookup() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await searchService.matchEntities(query);
-      console.log(response);
-      const entities = response.Entities.filter((entity) => entity.trim()).map((entity) =>
-        entity.replace('[ENTITY START]', '').replace('[ENTITY END]', '').trim()
-      );
+      const entities = await searchService.matchEntities(query);
+      console.log(entities);
       setResults(entities);
     } catch (error) {
       console.error('Error fetching data:', error);
-      alert('Error fetching data: ' + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -68,7 +63,7 @@ function EntityLookup() {
           <div className="d-flex justify-content-center align-items-center pt-5">
             <div style={{ width: '80%' }}>
               <form onSubmit={handleSubmit} className="author-institution-search-bar">
-                <div className="autocomplete-search-bar">
+                <div className="entity-lookup-search-bar-container">
                   <div className="autocomplete-search-bar-title">Entity</div>
                   <input
                     type="text"
@@ -78,7 +73,6 @@ function EntityLookup() {
                     className="search-bar"
                   />
                 </div>
-                <div style={{ width: '40px' }} />
                 <div className="author-institution-search-button-container">
                   <button type="submit" disabled={isLoading} className="button">
                     {isLoading ? 'Searching...' : 'Search'}
@@ -96,10 +90,40 @@ function EntityLookup() {
           role="status"
         ></div>
       )}
-      <div className="results" style={{ marginTop: '30px' }}>
+      <div className="entity-lookup-results">
         {results.map((entity, index) => (
-          <div key={index} className="detail-item">
-            <pre>{entity}</pre>
+          <div key={index} className="entity-lookup-items">
+            <b>Names:</b>
+            <ul className="bulleted-list">
+              {entity.Names.split('\n').map((name, index2) => {
+                return <li key={`${index}-${index2}`}>{name}</li>;
+              })}
+            </ul>
+
+            {entity.Address && entity.Address.length > 0 && (
+              <>
+                <b>Address:</b>
+                <p>{entity.Address}</p>
+              </>
+            )}
+            {entity.Country && entity.Country.length > 0 && (
+              <>
+                <b>Country:</b>
+                <p>{entity.Country}</p>
+              </>
+            )}
+            {entity.Type && entity.Type.length > 0 && (
+              <>
+                <b>Type:</b>
+                <p>{entity.Type}</p>
+              </>
+            )}
+            {entity.Resource && entity.Resource.length > 0 && (
+              <>
+                <b>Resource:</b>
+                <p>{entity.Resource}</p>
+              </>
+            )}
           </div>
         ))}
       </div>

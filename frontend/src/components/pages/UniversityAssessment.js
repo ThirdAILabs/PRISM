@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useContext } from 'react';
 import Logo from '../../assets/images/prism-logo.png';
 import '../common/searchBar/SearchBar.css';
 import '../common/tools/button/button1.css';
@@ -7,10 +7,13 @@ import { autocompleteService } from '../../api/autocomplete';
 import useCallOnPause from '../../hooks/useCallOnPause';
 import { useNavigate } from 'react-router-dom';
 import universityReportService from '../../api/universityReports';
+import { UniversityContext } from '../../store/universityContext';
 
 function UniversityAssessment() {
   const navigate = useNavigate();
-  const [institution, setInstitution] = useState();
+  const { universityState, setUniversityState } = useContext(UniversityContext);
+
+  const [institution, setInstitution] = useState(universityState.institution || null);
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -39,13 +42,20 @@ function UniversityAssessment() {
       alert('Please select an institution');
       return;
     }
+
+    setUniversityState((prev) => ({ ...prev, institution }));
+
     const reportData = {
-      UniversityId: institution.InstitutionId,
-      UniversityName: institution.InstitutionName,
+      UniversityId: institution.Id,
+      UniversityName: institution.Name,
     };
     const reportId = await universityReportService.createReport(reportData);
     console.log('University report id: ', reportId);
-    navigate(`report/${reportId.Id}`);
+    navigate(`report/${reportId.Id}`, {
+      state: {
+        canGoBack: true,
+      },
+    });
   };
 
   return (
@@ -92,9 +102,14 @@ function UniversityAssessment() {
                 <div className="autocomplete-search-bar">
                   <AutocompleteSearchBar
                     autocomplete={autocompleteInstitution}
-                    onSelect={setInstitution}
-                    type={'institute'}
+                    onSelect={(selected) => {
+                      setInstitution(selected);
+                      setUniversityState((prev) => ({ ...prev, institution: selected }));
+                    }}
                     title={'University'}
+                    showHint={true}
+                    placeholder={'E.g. University of XYZ'}
+                    initialValue={institution ? institution.InstitutionName : ''}
                   />
                 </div>
                 <div style={{ width: '40px' }} />

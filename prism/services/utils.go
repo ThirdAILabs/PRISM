@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"prism/prism/licensing"
 	"prism/prism/reports"
-	"prism/prism/services/licensing"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -89,14 +89,17 @@ func URLParamUUID(r *http.Request, key string) (uuid.UUID, error) {
 
 func licensingErrorStatus(err error) int {
 	switch {
-	case errors.Is(err, licensing.ErrMissingLicense):
-		return http.StatusUnprocessableEntity
-	case errors.Is(err, licensing.ErrExpiredLicense), errors.Is(err, licensing.ErrDeactivatedLicense):
+	case errors.Is(err, licensing.ErrLicenseVerificationFailed):
+		return http.StatusInternalServerError
+
+	case errors.Is(err, licensing.ErrExpiredLicense):
 		return http.StatusForbidden
+
 	case errors.Is(err, licensing.ErrLicenseNotFound):
 		return http.StatusNotFound
+
 	case errors.Is(err, licensing.ErrInvalidLicense):
-		return http.StatusUnprocessableEntity
+		return http.StatusForbidden
 	}
 	return http.StatusInternalServerError
 }

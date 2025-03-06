@@ -7,13 +7,37 @@ import (
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers/eoc"
+	"prism/prism/schema"
 	"slices"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
+
+func setupReportManager(t *testing.T) *reports.ReportManager {
+	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := db.AutoMigrate(&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{},
+		&schema.UniversityReport{}, &schema.UserUniversityReport{}); err != nil {
+		t.Fatal(err)
+	}
+
+	// We're using old date ranges for these so they only process works around the
+	// date of the flagged work, particularly for the acknowledgements flagger, this
+	// ensures the tests don't take too long to run. However this means that the reports
+	// are viewed as stale and will be reprocessed on the next test. Setting a large
+	// threshold here fixes it. In ~100 years this threshold would again be too small,
+	// but at that point this code will likely not be in use, or if it is, then it
+	// will be someone else's problem (or more likely an AI).
+	return reports.NewManager(db, 100*365*24*time.Hour)
+}
 
 func eqOrderInvariant(a, b []string) bool {
 	slices.Sort(a)
@@ -29,8 +53,35 @@ func yearEnd(year int) time.Time {
 	return time.Date(year, 12, 31, 0, 0, 0, 0, time.UTC)
 }
 
-func TestProcessorCoauthorAffiliationCase1(t *testing.T) {
-	processor := ReportProcessor{
+func getReportContent(t *testing.T, report reports.ReportUpdateTask, processor *ReportProcessor, manager *reports.ReportManager) api.ReportContent {
+	user := uuid.New()
+	reportId, err := manager.CreateAuthorReport(user, report.AuthorId, report.AuthorName, report.Source)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nextReport, err := manager.GetNextAuthorReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if nextReport == nil {
+		t.Fatal("expected next report")
+	}
+
+	report.Id = nextReport.Id
+	processor.ProcessAuthorReport(report)
+
+	content, err := manager.GetAuthorReport(user, reportId)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return content.Content
+}
+
+func TestProcessorCoauthorAffiliation(t *testing.T) {
+	manager := setupReportManager(t)
+	processor := &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
 		workFlaggers: []WorkFlagger{
 			&OpenAlexCoauthorAffiliationIsEOC{
@@ -38,20 +89,22 @@ func TestProcessorCoauthorAffiliationCase1(t *testing.T) {
 				concerningInstitutions: eoc.LoadInstitutionEOC(),
 			},
 		},
+		manager: manager,
 	}
 
 	t.Run("Case1", func(t *testing.T) {
-		report, err := processor.ProcessReport(reports.ReportUpdateTask{
-			Id:         uuid.New(),
-			AuthorId:   "https://openalex.org/A5084836278",
-			AuthorName: "Charles M. Lieber",
-			Source:     api.OpenAlexSource,
-			StartDate:  yearStart(2019),
-			EndDate:    yearEnd(2019),
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
+		report := getReportContent(
+			t, reports.ReportUpdateTask{
+				Id:         uuid.New(),
+				AuthorId:   "https://openalex.org/A5084836278",
+				AuthorName: "Charles M. Lieber",
+				Source:     api.OpenAlexSource,
+				StartDate:  yearStart(2019),
+				EndDate:    yearEnd(2019),
+			},
+			processor,
+			manager,
+		)
 
 		if len(report[api.CoauthorAffiliationType]) != 1 {
 			t.Fatal("expected 1 flag")
@@ -65,17 +118,18 @@ func TestProcessorCoauthorAffiliationCase1(t *testing.T) {
 	})
 
 	t.Run("Case2", func(t *testing.T) {
-		report, err := processor.ProcessReport(reports.ReportUpdateTask{
-			Id:         uuid.New(),
-			AuthorId:   "https://openalex.org/A5075113943",
-			AuthorName: "Zijian Hong",
-			Source:     api.OpenAlexSource,
-			StartDate:  yearStart(2024),
-			EndDate:    yearEnd(2024),
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
+		report := getReportContent(
+			t, reports.ReportUpdateTask{
+				Id:         uuid.New(),
+				AuthorId:   "https://openalex.org/A5075113943",
+				AuthorName: "Zijian Hong",
+				Source:     api.OpenAlexSource,
+				StartDate:  yearStart(2024),
+				EndDate:    yearEnd(2024),
+			},
+			processor,
+			manager,
+		)
 
 		if len(report[api.CoauthorAffiliationType]) < 1 {
 			t.Fatal("expected >= 1 flag")
@@ -114,7 +168,9 @@ func TestProcessorCoauthorAffiliationCase1(t *testing.T) {
 }
 
 func TestProcessorAuthorAffiliation(t *testing.T) {
-	processor := ReportProcessor{
+	manager := setupReportManager(t)
+
+	processor := &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
 		workFlaggers: []WorkFlagger{
 			&OpenAlexAuthorAffiliationIsEOC{
@@ -122,20 +178,22 @@ func TestProcessorAuthorAffiliation(t *testing.T) {
 				concerningInstitutions: eoc.LoadInstitutionEOC(),
 			},
 		},
+		manager: manager,
 	}
 
 	t.Run("Case1", func(t *testing.T) {
-		report, err := processor.ProcessReport(reports.ReportUpdateTask{
-			Id:         uuid.New(),
-			AuthorId:   "https://openalex.org/A5084836278",
-			AuthorName: "Charles M. Lieber",
-			Source:     api.OpenAlexSource,
-			StartDate:  yearStart(2013),
-			EndDate:    yearEnd(2013),
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
+		report := getReportContent(
+			t, reports.ReportUpdateTask{
+				Id:         uuid.New(),
+				AuthorId:   "https://openalex.org/A5084836278",
+				AuthorName: "Charles M. Lieber",
+				Source:     api.OpenAlexSource,
+				StartDate:  yearStart(2013),
+				EndDate:    yearEnd(2013),
+			},
+			processor,
+			manager,
+		)
 
 		if len(report[api.AuthorAffiliationType]) < 1 {
 			t.Fatal("expected >= 1 flag")
@@ -158,17 +216,18 @@ func TestProcessorAuthorAffiliation(t *testing.T) {
 	})
 
 	t.Run("Case2", func(t *testing.T) {
-		report, err := processor.ProcessReport(reports.ReportUpdateTask{
-			Id:         uuid.New(),
-			AuthorId:   "https://openalex.org/A5075113943",
-			AuthorName: "Zijian Hong",
-			Source:     api.OpenAlexSource,
-			StartDate:  yearStart(2024),
-			EndDate:    yearEnd(2024),
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
+		report := getReportContent(
+			t, reports.ReportUpdateTask{
+				Id:         uuid.New(),
+				AuthorId:   "https://openalex.org/A5075113943",
+				AuthorName: "Zijian Hong",
+				Source:     api.OpenAlexSource,
+				StartDate:  yearStart(2024),
+				EndDate:    yearEnd(2024),
+			},
+			processor,
+			manager,
+		)
 
 		if len(report[api.AuthorAffiliationType]) < 1 {
 			t.Fatal("expected >= 1 flag")
@@ -196,25 +255,28 @@ func TestProcessorUniversityFacultySeach(t *testing.T) {
 	universityNDB := BuildUniversityNDB("../../../data/university_webpages.json", t.TempDir())
 	defer universityNDB.Free()
 
-	processor := ReportProcessor{
+	manager := setupReportManager(t)
+	processor := &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
 		authorFacultyAtEOC: &AuthorIsFacultyAtEOCFlagger{
 			universityNDB: universityNDB,
 		},
+		manager: manager,
 	}
 
 	t.Run("Case1", func(t *testing.T) {
-		report, err := processor.ProcessReport(reports.ReportUpdateTask{
-			Id:         uuid.New(),
-			AuthorId:   "https://openalex.org/A5019148940",
-			AuthorName: "Natalie Artzi",
-			Source:     api.OpenAlexSource,
-			StartDate:  yearStart(2024),
-			EndDate:    yearEnd(2024),
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
+		report := getReportContent(
+			t, reports.ReportUpdateTask{
+				Id:         uuid.New(),
+				AuthorId:   "https://openalex.org/A5019148940",
+				AuthorName: "Natalie Artzi",
+				Source:     api.OpenAlexSource,
+				StartDate:  yearStart(2024),
+				EndDate:    yearEnd(2024),
+			},
+			processor,
+			manager,
+		)
 
 		if len(report[api.PotentialAuthorAffiliationType]) != 1 {
 			t.Fatal("expected 1 flag")
@@ -228,17 +290,18 @@ func TestProcessorUniversityFacultySeach(t *testing.T) {
 	})
 
 	t.Run("Case2", func(t *testing.T) {
-		report, err := processor.ProcessReport(reports.ReportUpdateTask{
-			Id:         uuid.New(),
-			AuthorId:   "https://openalex.org/A5075113943",
-			AuthorName: "Zijian Hong",
-			Source:     api.OpenAlexSource,
-			StartDate:  yearStart(2024),
-			EndDate:    yearEnd(2024),
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
+		report := getReportContent(
+			t, reports.ReportUpdateTask{
+				Id:         uuid.New(),
+				AuthorId:   "https://openalex.org/A5075113943",
+				AuthorName: "Zijian Hong",
+				Source:     api.OpenAlexSource,
+				StartDate:  yearStart(2024),
+				EndDate:    yearEnd(2024),
+			},
+			processor,
+			manager,
+		)
 
 		if len(report[api.PotentialAuthorAffiliationType]) < 1 {
 			t.Fatal("expected >= 1 flag")
@@ -265,26 +328,29 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 	auxNDB := BuildAuxNDB("../../../data/auxiliary_webpages.json", t.TempDir())
 	defer auxNDB.Free()
 
-	processor := ReportProcessor{
+	manager := setupReportManager(t)
+	processor := &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
 		authorAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlagger{
 			docNDB: docNDB,
 			auxNDB: auxNDB,
 		},
+		manager: manager,
 	}
 
 	t.Run("PrimaryConnection", func(t *testing.T) {
-		report, err := processor.ProcessReport(reports.ReportUpdateTask{
-			Id:         uuid.New(),
-			AuthorId:   "https://openalex.org/A5084836278",
-			AuthorName: "Charles M. Lieber",
-			Source:     api.OpenAlexSource,
-			StartDate:  yearStart(2013),
-			EndDate:    yearEnd(2013),
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
+		report := getReportContent(
+			t, reports.ReportUpdateTask{
+				Id:         uuid.New(),
+				AuthorId:   "https://openalex.org/A5084836278",
+				AuthorName: "Charles M. Lieber",
+				Source:     api.OpenAlexSource,
+				StartDate:  yearStart(2013),
+				EndDate:    yearEnd(2013),
+			},
+			processor,
+			manager,
+		)
 
 		if len(report[api.MiscHighRiskAssociationType]) < 1 {
 			t.Fatal("expected >= 1 flag")
@@ -314,17 +380,18 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 	})
 
 	t.Run("SecondaryConnection", func(t *testing.T) {
-		report, err := processor.ProcessReport(reports.ReportUpdateTask{
-			Id:         uuid.New(),
-			AuthorId:   "https://openalex.org/A5012289937",
-			AuthorName: "Anqi Zhang",
-			Source:     api.OpenAlexSource,
-			StartDate:  yearStart(2015),
-			EndDate:    yearEnd(2020),
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
+		report := getReportContent(
+			t, reports.ReportUpdateTask{
+				Id:         uuid.New(),
+				AuthorId:   "https://openalex.org/A5012289937",
+				AuthorName: "Anqi Zhang",
+				Source:     api.OpenAlexSource,
+				StartDate:  yearStart(2015),
+				EndDate:    yearEnd(2020),
+			},
+			processor,
+			manager,
+		)
 
 		if len(report[api.MiscHighRiskAssociationType]) < 1 {
 			t.Fatal("expected >= 1 flag")
@@ -339,17 +406,18 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 	})
 
 	t.Run("TertiaryConnection", func(t *testing.T) {
-		report, err := processor.ProcessReport(reports.ReportUpdateTask{
-			Id:         uuid.New(),
-			AuthorId:   "https://openalex.org/A5016320004",
-			AuthorName: "David Zhang",
-			Source:     api.OpenAlexSource,
-			StartDate:  yearStart(2020),
-			EndDate:    yearEnd(2020),
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
+		report := getReportContent(
+			t, reports.ReportUpdateTask{
+				Id:         uuid.New(),
+				AuthorId:   "https://openalex.org/A5016320004",
+				AuthorName: "David Zhang",
+				Source:     api.OpenAlexSource,
+				StartDate:  yearStart(2020),
+				EndDate:    yearEnd(2020),
+			},
+			processor,
+			manager,
+		)
 
 		if len(report[api.MiscHighRiskAssociationType]) < 1 {
 			t.Fatal("expected >= 1 flag")
@@ -399,7 +467,8 @@ func TestProcessorAcknowledgements(t *testing.T) {
 	}
 	defer entityStore.Free()
 
-	processor := ReportProcessor{
+	manager := setupReportManager(t)
+	processor := &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
 		workFlaggers: []WorkFlagger{
 			&OpenAlexAcknowledgementIsEOC{
@@ -410,20 +479,22 @@ func TestProcessorAcknowledgements(t *testing.T) {
 				sussyBakas:   eoc.LoadSussyBakas(),
 			},
 		},
+		manager: manager,
 	}
 
 	t.Run("Case1", func(t *testing.T) {
-		report, err := processor.ProcessReport(reports.ReportUpdateTask{
-			Id:         uuid.New(),
-			AuthorId:   "https://openalex.org/A5084836278",
-			AuthorName: "Charles M. Lieber",
-			Source:     api.OpenAlexSource,
-			StartDate:  yearStart(2011),
-			EndDate:    yearEnd(2013),
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
+		report := getReportContent(
+			t, reports.ReportUpdateTask{
+				Id:         uuid.New(),
+				AuthorId:   "https://openalex.org/A5084836278",
+				AuthorName: "Charles M. Lieber",
+				Source:     api.OpenAlexSource,
+				StartDate:  yearStart(2011),
+				EndDate:    yearEnd(2013),
+			},
+			processor,
+			manager,
+		)
 
 		if len(report[api.TalentContractType]) != 3 || len(report[api.HighRiskFunderType]) != 1 {
 			t.Fatal("expected 4 acknowledgement flags")
@@ -452,17 +523,18 @@ func TestProcessorAcknowledgements(t *testing.T) {
 	})
 
 	t.Run("Case2", func(t *testing.T) {
-		report, err := processor.ProcessReport(reports.ReportUpdateTask{
-			Id:         uuid.New(),
-			AuthorId:   "https://openalex.org/A5075113943",
-			AuthorName: "Zijian Hong",
-			Source:     api.OpenAlexSource,
-			StartDate:  yearStart(2023),
-			EndDate:    yearEnd(2023),
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
+		report := getReportContent(
+			t, reports.ReportUpdateTask{
+				Id:         uuid.New(),
+				AuthorId:   "https://openalex.org/A5075113943",
+				AuthorName: "Zijian Hong",
+				Source:     api.OpenAlexSource,
+				StartDate:  yearStart(2023),
+				EndDate:    yearEnd(2023),
+			},
+			processor,
+			manager,
+		)
 
 		if len(report[api.HighRiskFunderType]) < 1 {
 			t.Fatal("expected >= 1 flags")

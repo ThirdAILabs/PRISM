@@ -27,15 +27,20 @@ images_to_build = [
     ),
     Image(
         key="prism_frontend",
-        name="frontend",
+        name="prism_frontend",
         dockerfile_path="Dockerfile",
         context_path="frontend",
+    ),
+    Image(
+        key="keycloak",
+        name="keycloak",
+        dockerfile_path="Dockerfile",
+        context_path="keycloak",
     )
 ]
 
 
 images_to_pull_from_private = [
     "grobid",
-    "keycloak",
     "traefik",
 ]

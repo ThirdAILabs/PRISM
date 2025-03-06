@@ -31,10 +31,9 @@ type AuthorReport struct {
 }
 
 type AuthorFlag struct {
-	Id       uuid.UUID `gorm:"type:uuid;primaryKey"`
-	ReportId uuid.UUID `gorm:"type:uuid"`
+	ReportId uuid.UUID `gorm:"type:uuid;primaryKey"`
+	FlagHash string    `gorm:"type:char(64);primaryKey"` // This will be the sha256 hash of the flag data (or enough of the flag data to uniquly identify the flag)
 	FlagType string    `gorm:"size:40;not null"`
-	FlagKey  string
 	Date     sql.NullTime
 	Data     []byte
 }
@@ -71,32 +70,4 @@ type UserUniversityReport struct {
 
 	ReportId uuid.UUID         `gorm:"type:uuid;not null"`
 	Report   *UniversityReport `gorm:"foreignKey:ReportId"`
-}
-
-type License struct {
-	Id          uuid.UUID `gorm:"type:uuid;primaryKey"`
-	Secret      []byte
-	Name        string
-	Expiration  time.Time
-	Deactivated bool
-}
-
-type LicenseUser struct {
-	UserId    uuid.UUID `gorm:"type:uuid;primaryKey"`
-	LicenseId uuid.UUID `gorm:"type:uuid"`
-
-	License *License `gorm:"foreignKey:LicenseId"`
-}
-
-const (
-	UniversityReportType = "university"
-	AuthorReportType     = "author"
-)
-
-type LicenseUsage struct {
-	LicenseId  uuid.UUID `gorm:"type:uuid;primaryKey"`
-	ReportId   uuid.UUID `gorm:"type:uuid;primaryKey"`
-	ReportType string    `gorm:"size:40"`
-	UserId     uuid.UUID
-	Timestamp  time.Time
 }

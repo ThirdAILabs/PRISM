@@ -9,11 +9,13 @@ import (
 	"prism/prism/gscholar"
 	"prism/prism/llms"
 	"prism/prism/openalex"
+	"prism/prism/reports"
 	"prism/prism/reports/flaggers"
 	"prism/prism/search"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -23,7 +25,7 @@ const institutionNameSimilarityThreshold = 0.8
 type SearchService struct {
 	openalex openalex.KnowledgeBase
 
-	entityNdb search.NeuralDB
+	entitySearch EntitySearch
 }
 
 func hybridInstitutionNamesSort(originalInstitution string, institutionNames []string, similarityThreshold float64) []string {
@@ -63,8 +65,8 @@ func hybridInstitutionNamesSort(originalInstitution string, institutionNames []s
 func (s *SearchService) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/regular", WrapRestHandler(s.SearchOpenAlex))
-	r.Get("/advanced", WrapRestHandler(s.SearchGoogleScholar))
+	r.Get("/authors", WrapRestHandler(s.SearchOpenAlex))
+	r.Get("/authors-advanced", WrapRestHandler(s.SearchGoogleScholar))
 	r.Get("/match-entities", WrapRestHandler(s.MatchEntities))
 
 	return r
@@ -74,28 +76,71 @@ var ErrSearchFailed = errors.New("error performing search")
 
 func (s *SearchService) SearchOpenAlex(r *http.Request) (any, error) {
 	query := r.URL.Query()
-	author, institution, institutionName := query.Get("author_name"), query.Get("institution_id"), query.Get("institution_name")
 
-	slog.Info("searching openalex", "author_name", author, "institution_id", institution)
+	if query.Get("author_name") != "" {
+		author, institution, institutionName := query.Get("author_name"), query.Get("institution_id"), query.Get("institution_name")
+		if institution == "" || institutionName == "" {
+			return nil, CodedError(errors.New("institution_id and institution_name must be specified when searching by author name"), http.StatusBadRequest)
+		}
+		authors, err := s.openalex.FindAuthors(author, institution)
+		if err != nil {
+			return nil, CodedError(err, http.StatusInternalServerError)
+		}
 
-	authors, err := s.openalex.FindAuthors(author, institution)
-	if err != nil {
-		return nil, CodedError(err, http.StatusInternalServerError)
-	}
+		results := make([]api.Author, 0, len(authors))
+		for _, author := range authors {
+			sortedInstitutions := hybridInstitutionNamesSort(institutionName, author.InstitutionNames(), institutionNameSimilarityThreshold)
+			results = append(results, api.Author{
+				AuthorId:     author.AuthorId,
+				AuthorName:   author.DisplayName,
+				Institutions: sortedInstitutions,
+				Source:       api.OpenAlexSource,
+				Interests:    author.Concepts,
+			})
+		}
 
-	results := make([]api.Author, 0, len(authors))
-	for _, author := range authors {
-		sortedInstitutions := hybridInstitutionNamesSort(institutionName, author.InstitutionNames(), institutionNameSimilarityThreshold)
-		results = append(results, api.Author{
+		return results, nil
+	} else if query.Get("orcid") != "" {
+		author, err := s.openalex.FindAuthorByOrcidId(query.Get("orcid"))
+		if err != nil {
+			if errors.Is(err, openalex.ErrAuthorNotFound) {
+				return nil, CodedError(err, http.StatusNotFound)
+			}
+			return nil, CodedError(err, http.StatusInternalServerError)
+		}
+		return []api.Author{{
 			AuthorId:     author.AuthorId,
 			AuthorName:   author.DisplayName,
-			Institutions: sortedInstitutions,
+			Institutions: author.InstitutionNames(),
 			Source:       api.OpenAlexSource,
 			Interests:    author.Concepts,
-		})
+		}}, nil
+	} else if query.Get("paper_title") != "" {
+		papers, err := s.openalex.FindWorksByTitle([]string{query.Get("paper_title")}, reports.EarliestReportDate, time.Now())
+		if err != nil {
+			return nil, CodedError(err, http.StatusInternalServerError)
+		}
+
+		if len(papers) < 1 {
+			return nil, CodedError(errors.New("no papers found for title"), http.StatusNotFound)
+		}
+
+		authors := make([]api.Author, 0, len(papers[0].Authors))
+		for _, author := range papers[0].Authors {
+			authors = append(authors, api.Author{
+				AuthorId:     author.AuthorId,
+				AuthorName:   author.DisplayName,
+				Institutions: author.InstitutionNames(),
+				Source:       api.OpenAlexSource,
+				Interests:    author.Concepts,
+			})
+		}
+
+		return authors, nil
+	} else {
+		return nil, CodedError(errors.New("one of 'author_name', 'orcid', or 'paper_title' query parameters must be specified"), http.StatusBadRequest)
 	}
 
-	return results, nil
 }
 
 func filterAuthorsBySimilarity(authors []api.Author, queryName string) []api.Author {
@@ -143,17 +188,76 @@ func (s *SearchService) SearchGoogleScholar(r *http.Request) (any, error) {
 	return api.GScholarSearchResults{Authors: filterAuthorsBySimilarity(results, author), Cursor: nextCursor}, nil
 }
 
-func cleanEntry(id uint64, text string) string {
-	lines := strings.Split(text, "\n")
-	for i, line := range lines {
-		if strings.Contains(line, "[ADDRESS]") {
-			// TODO(question): this used split before, is Cut ok?
-			_, addr, _ := strings.Cut(line, "[ADDRESS]")
-			addr, _, _ = strings.Cut(addr, ";")
-			lines[i] = "[ADDRESS] " + addr
-		}
+func formatForPrompt(e api.MatchedEntity, id int) string {
+	base := fmt.Sprintf("[ID] %d\n[ENTITY START]\n[NAMES START]\n%s\n[NAMES END]\n", id, e.Names)
+	if e.Address != "" {
+		addr, _, _ := strings.Cut(e.Address, ";")
+		base += "[ADDRESS] " + addr + "\n"
 	}
-	return fmt.Sprintf("[ID] %d\n", id) + strings.Join(lines, "\n")
+	if e.Country != "" {
+		base += "[COUNTRY] " + e.Country + "\n"
+	}
+	if e.Type != "" {
+		base += "[TYPE] " + e.Type + "\n"
+	}
+	if e.Resource != "" {
+		base += "[RESOURCE] " + e.Resource + "\n"
+	}
+
+	return base + "[ENTITY END]"
+}
+
+type EntitySearch struct {
+	ndb search.NeuralDB
+}
+
+func NewEntitySearch(path string) (EntitySearch, error) {
+	ndb, err := search.NewNeuralDB(path)
+	if err != nil {
+		return EntitySearch{}, err
+	}
+	return EntitySearch{ndb: ndb}, nil
+}
+
+func (es *EntitySearch) Insert(entities []api.MatchedEntity) error {
+	data := make([]string, 0, len(entities))
+	metadata := make([]map[string]interface{}, 0, len(entities))
+	for _, entity := range entities {
+		data = append(data, entity.Names)
+
+		metadata = append(metadata, map[string]interface{}{
+			"address":  entity.Address,
+			"country":  entity.Country,
+			"type":     entity.Type,
+			"resource": entity.Resource,
+		})
+	}
+
+	return es.ndb.Insert("entities", "id", data, metadata, nil)
+}
+
+func (es *EntitySearch) Query(query string, topk int) ([]api.MatchedEntity, error) {
+	results, err := es.ndb.Query(query, topk, nil)
+	if err != nil {
+		slog.Error("match entities: ndb search failed", "query", query, "error", err)
+		return nil, errors.New("entity search failed")
+	}
+
+	entities := make([]api.MatchedEntity, 0, len(results))
+	for i := range results {
+		entities = append(entities, api.MatchedEntity{
+			Names:    results[i].Text,
+			Address:  results[i].Metadata["address"].(string),
+			Country:  results[i].Metadata["country"].(string),
+			Type:     results[i].Metadata["type"].(string),
+			Resource: results[i].Metadata["resource"].(string),
+		})
+	}
+	return entities, nil
+}
+
+func (es *EntitySearch) Free() {
+	es.ndb.Free()
 }
 
 const (
@@ -169,18 +273,18 @@ const (
 func (s *SearchService) MatchEntities(r *http.Request) (any, error) {
 	query := r.URL.Query().Get("query")
 
-	results, err := s.entityNdb.Query(query, 15, nil)
+	results, err := s.entitySearch.Query(query, 15)
 	if err != nil {
 		slog.Error("match entities: ndb search failed", "query", query, "error", err)
 		return nil, CodedError(errors.New("entity search failed"), http.StatusInternalServerError)
 	}
 
-	idToText := make(map[uint64]string)
+	idToEntity := make(map[int]api.MatchedEntity)
 
 	candidates := make([]string, 0, len(results))
-	for _, result := range results {
-		idToText[result.Id] = result.Text
-		candidates = append(candidates, cleanEntry(result.Id, result.Text))
+	for id, entity := range results {
+		idToEntity[id] = entity
+		candidates = append(candidates, formatForPrompt(entity, id))
 	}
 
 	// TODO(question): does the prompt make sense with the entities in front?
@@ -192,11 +296,11 @@ func (s *SearchService) MatchEntities(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
-	entities := make([]string, 0)
+	entities := make([]api.MatchedEntity, 0)
 	for _, id := range strings.Split(strings.Trim(response, "`"), ",") {
-		parsed, err := strconv.ParseUint(id, 10, 64)
+		parsed, err := strconv.Atoi(id)
 		if err == nil {
-			if entity, ok := idToText[parsed]; ok {
+			if entity, ok := idToEntity[parsed]; ok {
 				entities = append(entities, entity)
 			} else {
 				slog.Error("match entities: invalid id returned from llm")
@@ -206,5 +310,5 @@ func (s *SearchService) MatchEntities(r *http.Request) (any, error) {
 		}
 	}
 
-	return api.MatchEntitiesResponse{Entities: entities}, nil
+	return entities, nil
 }
