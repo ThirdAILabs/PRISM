@@ -90,7 +90,7 @@ const SidePanel = ({ isOpen, onClose }) => {
       },
     });
   };
-  console.log("reports", reports);
+  console.log('reports', reports);
   return (
     <>
       <div className={`side-panel ${isOpen ? 'open' : ''}`}>
@@ -186,7 +186,7 @@ const SidePanel = ({ isOpen, onClose }) => {
             )}
             <div
               className="collapsible-header"
-            // style={{ marginTop: '10px' }}
+              // style={{ marginTop: '10px' }}
             >
               {universityReports && (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
