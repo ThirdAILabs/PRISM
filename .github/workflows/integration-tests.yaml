@@ -23,7 +23,7 @@ env:
   
 jobs:
   integration-tests:
-    runs-on: ubuntu-22.04-8-cores
+    runs-on: ubuntu-22.04-16-cores
 
     services:
       # Label used to access the service container
