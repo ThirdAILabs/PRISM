@@ -272,17 +272,17 @@ const ItemDetails = () => {
 
     const displayStart = startDate
       ? parseLocalDate(startDate).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
       : 'earliest';
     const displayEnd = endDate
       ? parseLocalDate(endDate).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
       : 'today';
 
     setFilterMessage(`${displayStart} to ${displayEnd}`);
@@ -558,7 +558,7 @@ const ItemDetails = () => {
           {flag.RawAcknowledements.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
-          <p>{ }</p>
+          <p>{}</p>
         </p>
       </div>
     );
@@ -808,7 +808,7 @@ const ItemDetails = () => {
   const dropdownRef = useOutsideClick(() => {
     handleDropdownChange(0);
   });
-  console.log("The value of dropDownChange is ", dropdownOpen);
+  console.log('The value of dropDownChange is ', dropdownOpen);
   return (
     <div className="basic-setup">
       <div className="grid grid-cols-2 gap-4">
@@ -860,7 +860,7 @@ const ItemDetails = () => {
               </b>
             </div>
             <div>
-              <div className="dropdown" ref={dropdownRef}>
+              <div className="dropdown">
                 <style>
                   {`
                     .form-control::placeholder {
@@ -900,6 +900,7 @@ const ItemDetails = () => {
                       display: 'flex',
                       flexDirection: 'column',
                     }}
+                    ref={dropdownRef}
                   >
                     <div className="form-group" style={{ marginBottom: '10px', width: '100%' }}>
                       <label>Start Date</label>
