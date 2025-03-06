@@ -10,6 +10,7 @@ import (
 	"os"
 	"prism/prism/api"
 	"prism/prism/cmd"
+	"prism/prism/cmd/backend/migrations"
 	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/search"
@@ -129,7 +130,8 @@ func main() {
 
 	entitySearch := buildEntityNdb(config.SearchableEntitiesData)
 
-	db := cmd.InitDb(config.PostgresUri)
+	db := cmd.OpenDB(config.PostgresUri)
+	migrations.RunMigrations(db)
 
 	keycloakArgs := auth.KeycloakArgs{
 		KeycloakServerUrl:     config.Keycloak.ServerUrl,
