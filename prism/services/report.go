@@ -14,6 +14,7 @@ import (
 	"prism/prism/schema"
 	"prism/prism/services/auth"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -27,70 +28,53 @@ type ReportService struct {
 	resourceFolder string
 }
 
-func downloadReportRequestToReportContent(data map[string]interface{}) (api.Report, error) {
-	id, err := GetUUIDFromMap(data, "Id")
+type ReportRequest struct {
+	Id                    string                     `json:"Id"`
+	LastAccessedAt        string                     `json:"LastAccessedAt"`
+	AuthorId              string                     `json:"AuthorId"`
+	AuthorName            string                     `json:"AuthorName"`
+	Source                string                     `json:"Source"`
+	Status                string                     `json:"Status"`
+	Content               map[string]json.RawMessage `json:"Content"`
+	ContainsReportContent bool                       `json:"ContainsReportContent"`
+}
+
+func downloadReportRequestToReportContent(request *ReportRequest) (api.Report, error) {
+
+	id, err := uuid.Parse(request.Id)
 	if err != nil {
 		return api.Report{}, fmt.Errorf("error parsing report id: %w", err)
 	}
 
-	lastAccessedAt, err := GetTimeFromMap(data, "LastAccessedAt")
+	lastAccessedAt, err := time.Parse(time.RFC3339, request.LastAccessedAt)
 	if err != nil {
 		return api.Report{}, fmt.Errorf("error parsing report last accessed at: %w", err)
-	}
-
-	authorId, err := GetStringFromMap(data, "AuthorId")
-	if err != nil {
-		return api.Report{}, fmt.Errorf("error parsing report author id: %w", err)
-	}
-
-	authorName, err := GetStringFromMap(data, "AuthorName")
-	if err != nil {
-		return api.Report{}, fmt.Errorf("error parsing report author name: %w", err)
-	}
-
-	source, err := GetStringFromMap(data, "Source")
-	if err != nil {
-		return api.Report{}, fmt.Errorf("error parsing report source: %w", err)
-	}
-
-	status, err := GetStringFromMap(data, "Status")
-	if err != nil {
-		return api.Report{}, fmt.Errorf("error parsing report status: %w", err)
 	}
 
 	report := api.Report{
 		Id:             id,
 		LastAccessedAt: lastAccessedAt,
-		AuthorId:       authorId,
-		AuthorName:     authorName,
-		Source:         source,
-		Status:         status,
+		AuthorId:       request.AuthorId,
+		AuthorName:     request.AuthorName,
+		Source:         request.Source,
+		Status:         request.Status,
 		Content:        make(map[string][]api.Flag),
 	}
 
-	contentData, ok := data["Content"].(map[string]interface{})
-	if !ok {
-		return api.Report{}, fmt.Errorf("error parsing report content: %w", errors.New("content is not a map"))
-	}
-
-	for flagType, flagsData := range contentData {
-		flagsArray, ok := flagsData.([]interface{})
-		if !ok {
-			return api.Report{}, fmt.Errorf("error parsing flags for flag type %s: %w", flagType, errors.New("flags are not an array"))
+	for flagType, flagsData := range request.Content {
+		var flagsArray []json.RawMessage
+		if err := json.Unmarshal(flagsData, &flagsArray); err != nil {
+			return api.Report{}, fmt.Errorf("error deserializing flags: %w", err)
 		}
 
 		flags := make([]api.Flag, 0, len(flagsArray))
-		for _, flagData := range flagsArray {
-			flagBytes, err := json.Marshal(flagData)
-			if err != nil {
-				return api.Report{}, fmt.Errorf("error serializing flag: %w", err)
-			}
-
+		for _, rawFlag := range flagsArray {
 			flag, err := api.EmptyFlag(flagType)
 			if err != nil {
 				return api.Report{}, fmt.Errorf("error creating empty flag of the type %s: %w", flagType, err)
 			}
-			if err := json.Unmarshal(flagBytes, flag); err != nil {
+
+			if err := json.Unmarshal(rawFlag, flag); err != nil {
 				return api.Report{}, fmt.Errorf("error deserializing flag of the type %s: %w", flagType, err)
 			}
 			flags = append(flags, flag)
@@ -289,27 +273,17 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	requestBody, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	var requestBody ReportRequest
+	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
+		http.Error(w, "Invalid request format", http.StatusBadRequest)
 		return
 	}
 
-	var requestBodyMap map[string]interface{}
-	if err := json.Unmarshal(requestBody, &requestBodyMap); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	containsReportContent, err := GetBoolFromMap(requestBodyMap, "contains_report_content")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	containsReportContent := requestBody.ContainsReportContent
 
 	var report api.Report
 	if containsReportContent {
-		report, err = downloadReportRequestToReportContent(requestBodyMap)
+		report, err = downloadReportRequestToReportContent(&requestBody)
 	} else {
 		report, err = s.manager.GetAuthorReport(userId, reportId)
 	}
