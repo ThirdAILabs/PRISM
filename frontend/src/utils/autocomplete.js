@@ -53,7 +53,7 @@ function AutocompleteSearchBar({
               onClick={handleSelectSuggestion(suggestion)}
               style={{ display: 'flex', alignItems: 'end' }}
             >
-              <p style={{ marginRight: '20px' }}>{suggestion.Name}</p>{' '}
+              <p style={{ marginRight: '10px' }}>{suggestion.Name}</p>{' '}
               {showHint && (
                 <p style={{ marginBottom: '16.5px', fontSize: 'small', fontStyle: 'italic' }}>
                   {suggestion.Hint}

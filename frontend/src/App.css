@@ -225,8 +225,6 @@ li {
   display: none;
 }
 
-/* .menu-icon:hover {
-  background: rgb(245, 240, 240);
-  padding: '100px';
-  border-radius: 2rem;
-} */
+.menu-icon {
+  color: rgb(80, 80, 80);
+}

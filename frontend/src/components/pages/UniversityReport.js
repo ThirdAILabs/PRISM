@@ -10,7 +10,7 @@ import {
   MISC_HIGH_RISK_AFFILIATIONS,
   COAUTHOR_AFFILIATIONS,
 } from '../../constants/constants.js';
-import ConcernVisualizer from '../ConcernVisualization.js';
+import ConcernVisualizer, { BaseFontSize, getFontSize } from '../ConcernVisualization.js';
 
 import { universityReportService } from '../../api/universityReports.js';
 import AuthorCard from '../common/cards/AuthorCard.js';
@@ -69,10 +69,13 @@ const UniversityReport = () => {
   const [instituteName, setInstituteName] = useState('');
   const [toatlResearchers, setTotalResearchers] = useState(0);
   const [researchersAssessed, setResearchersAssessed] = useState(0);
+  const [selectedFlag, setSelectedFlag] = useState(null);
   const [selectedFlagData, setSelectedFlagData] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [valueFontSize, setValueFontSize] = useState(`${BaseFontSize}px`);
 
   const handleReview = (flag) => {
+    setSelectedFlag(flag);
     setSelectedFlagData(reportContent?.Flags[flag] || []);
     setShowModal(true);
   };
@@ -89,10 +92,22 @@ const UniversityReport = () => {
         setTotalResearchers(report.Content.TotalAuthors);
         setResearchersAssessed(report.Content.AuthorsReviewed);
         setLoading(false);
+
+        // Set font size based on the maximum number of flag count
+        const newFontSize = `${getFontSize(
+          Math.max(...FLAG_ORDER.map((flag) => report.Content.Flags[flag]?.length || 0))
+        )}px`;
+        setValueFontSize(newFontSize);
       } else if (report.Status === 'in-progress') {
         setInstituteName(report.UniversityName);
         setTotalResearchers(report.Content.TotalAuthors);
         setResearchersAssessed(report.Content.AuthorsReviewed);
+
+        // Set font size based on the maximum number of flag count
+        const newFontSize = `${getFontSize(
+          Math.max(...FLAG_ORDER.map((flag) => report.Content.Flags[flag]?.length || 0))
+        )}px`;
+        setValueFontSize(newFontSize);
       } else if (isMounted) {
         setTimeout(poll, 10000);
       }
@@ -107,6 +122,7 @@ const UniversityReport = () => {
 
   const [loading, setLoading] = useState(true);
   const goBack = useGoBack('/university');
+
   return (
     <div className="basic-setup" style={{ minHeight: '100vh', paddingBottom: '50px' }}>
       {/* <div className="grid grid-cols-2 gap-4"> */}
@@ -153,8 +169,6 @@ const UniversityReport = () => {
         </button>
         <h5 style={{ margin: '0 auto' }}>{instituteName}</h5>
       </div>
-      {/* </div> */}
-      {/* </div> */}
 
       <>
         <div className="d-flex w-100 flex-column align-items-center">
@@ -188,35 +202,32 @@ const UniversityReport = () => {
         >
           {reportContent?.Flags
             ? FLAG_ORDER.map((flag, index) => {
-                let value = 0;
                 const flagData = reportContent.Flags[flag] || [];
-
-                if (flagData.length > 0) {
-                  for (let authorIndex = 0; authorIndex < flagData.length; authorIndex++) {
-                    const author = flagData[authorIndex];
-                    value += author.FlagCount;
-                  }
-                }
 
                 return (
                   <ConcernVisualizer
                     title={TitlesAndDescriptions[flag].title}
                     hoverText={TitlesAndDescriptions[flag].desc}
-                    value={value || 0}
+                    value={flagData.length || 0}
+                    speedometerHoverText={`${flagData.length} Authors`}
                     onReview={() => handleReview(flag)}
+                    selected={flag === selectedFlag}
                     key={index}
+                    valueFontSize={valueFontSize}
                   />
                 );
               })
             : FLAG_ORDER.map((flag, index) => {
-                let value = 0;
                 return (
                   <ConcernVisualizer
                     title={TitlesAndDescriptions[flag].title}
                     hoverText={TitlesAndDescriptions[flag].desc}
-                    value={value || 0}
+                    value={0}
+                    speedometerHoverText={`0 Authors`}
                     onReview={() => handleReview(flag)}
+                    selected={flag === selectedFlag}
                     key={index}
+                    valueFontSize={valueFontSize}
                   />
                 );
               })}

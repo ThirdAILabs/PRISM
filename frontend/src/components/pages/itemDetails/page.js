@@ -10,7 +10,7 @@ import {
   MISC_HIGH_RISK_AFFILIATIONS,
   COAUTHOR_AFFILIATIONS,
 } from '../../../constants/constants.js';
-import ConcernVisualizer from '../../ConcernVisualization.js';
+import ConcernVisualizer, { BaseFontSize, getFontSize } from '../../ConcernVisualization.js';
 import Graph from '../../common/graph/graph.js';
 import Tabs from '../../common/tools/Tabs.js';
 import DownloadButton from '../../common/tools/button/downloadButton.js';
@@ -24,6 +24,7 @@ import Shimmer from './Shimmer.js';
 import MuiAlert from '@mui/material/Alert';
 import { Snackbar } from '@mui/material';
 import useGoBack from '../../../hooks/useGoBack.js';
+import useOutsideClick from '../../../hooks/useOutsideClick.js';
 
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
@@ -101,6 +102,7 @@ const ItemDetails = () => {
   const [institutions, setInstitutions] = useState([]);
   const [initialReprtContent, setInitialReportContent] = useState({});
   const [isDisclosureChecked, setDisclosureChecked] = useState(false);
+  const [valueFontSize, setValueFontSize] = useState(`${BaseFontSize}px`);
 
   // box shadow for disclosed/undisclosed buttons
   const greenBoxShadow = '0 0px 10px rgb(0, 183, 46)';
@@ -167,6 +169,11 @@ const ItemDetails = () => {
         severity: 'success',
         message: 'Disclosure check succeeded!',
       });
+
+      const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
+      const newFontSize = `${getFontSize(maxLength)}px`;
+
+      setValueFontSize(newFontSize);
     } catch (error) {
       setNotification({
         open: true,
@@ -194,6 +201,12 @@ const ItemDetails = () => {
         setReportContent(report.Content);
         setInitialReportContent(report.Content);
         setLoading(false);
+
+        const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
+        const newFontSize = `${getFontSize(maxLength)}px`;
+
+        setValueFontSize(newFontSize);
+
         inProgress = report.Status === 'queued' || report.Status === 'in-progress';
       }
 
@@ -233,6 +246,11 @@ const ItemDetails = () => {
       setReportContent(initialReprtContent);
       setFilterMessage('');
       handleDropdownChange(1);
+
+      const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
+      const newFontSize = `${getFontSize(maxLength)}px`;
+
+      setValueFontSize(newFontSize);
       return;
     }
 
@@ -291,6 +309,11 @@ const ItemDetails = () => {
 
     setReportContent(filteredContent);
     handleDropdownChange(1);
+
+    const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
+    const newFontSize = `${getFontSize(maxLength)}px`;
+
+    setValueFontSize(newFontSize);
   };
   const [review, setReview] = useState();
 
@@ -803,6 +826,11 @@ const ItemDetails = () => {
     (item) => item?.Work?.PublicationDate && !isNaN(new Date(item.Work.PublicationDate).getTime())
   );
   const goBack = useGoBack('/');
+
+  const dropdownRef = useOutsideClick(() => {
+    handleDropdownChange(0);
+  });
+  console.log('The value of dropDownChange is ', dropdownOpen);
   return (
     <div className="basic-setup">
       <div className="grid grid-cols-2 gap-4">
@@ -894,6 +922,7 @@ const ItemDetails = () => {
                       display: 'flex',
                       flexDirection: 'column',
                     }}
+                    ref={dropdownRef}
                   >
                     <div className="form-group" style={{ marginBottom: '10px', width: '100%' }}>
                       <label>Start Date</label>
@@ -990,6 +1019,7 @@ const ItemDetails = () => {
               reportId={report_id}
               isOpen={dropdownOpen === 2}
               setIsOpen={() => handleDropdownChange(2)}
+              dropdownRef={dropdownRef}
             />
           </div>
         )}
@@ -1030,9 +1060,11 @@ const ItemDetails = () => {
                     title={TitlesAndDescriptions[flag].title}
                     hoverText={TitlesAndDescriptions[flag].desc}
                     value={flagCount}
+                    speedometerHoverText={`${flagCount} Issues`}
                     onReview={() => setReview(flag)}
                     key={index}
                     selected={isSelected}
+                    valueFontSize={valueFontSize}
                   />
                 );
               })}

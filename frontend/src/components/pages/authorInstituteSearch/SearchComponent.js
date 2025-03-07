@@ -14,6 +14,8 @@ const SearchComponent = () => {
   const { searchState, setSearchState } = useContext(SearchContext);
   const { author, institution, openAlexResults, hasSearched, canLoadMore } = searchState;
 
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
   const search = async (author, institution) => {
     setSearchState((prev) => ({
       ...prev,
@@ -97,15 +99,18 @@ const SearchComponent = () => {
                 setSearchState((prev) => ({ ...prev, openAlexResults: newResults }))
               }
               canLoadMore={canLoadMore}
+              isLoadingMore={isLoadingMore}
               loadMore={async () => {
                 if (!canLoadMore) {
                   return [];
                 }
+                setIsLoadingMore(true);
                 const result = await searchService.searchGoogleScholarAuthors(
                   author.Name,
                   institution.Name,
                   null
                 );
+                setIsLoadingMore(false);
                 setSearchState((prev) => ({ ...prev, canLoadMore: false }));
                 return result.Authors;
               }}
