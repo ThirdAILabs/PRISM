@@ -51,7 +51,10 @@ const AuthorInstitutionSearchComponent = () => {
         defaultAuthor={author}
         defaultInstitution={institution}
       />
-      {hasSearched && (
+      {hasSearched && !searchState.isOALoading && openAlexResults.length === 0 && (
+        <div>No results found.</div>
+      )}
+      {hasSearched && openAlexResults.length > 0 && (
         <TodoListComponent
           results={openAlexResults}
           setResults={(newResults) =>

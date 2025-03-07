@@ -15,10 +15,12 @@ export const SearchProvider = ({ children }) => {
     orcidResults: [],
     isOrcidLoading: false,
     hasSearchedOrcid: false,
+    orcidQuery: '',
     // Paper Title search state
     paperResults: [],
     isPaperLoading: false,
     hasSearchedPaper: false,
+    paperTitleQuery: '',
   });
 
   return (

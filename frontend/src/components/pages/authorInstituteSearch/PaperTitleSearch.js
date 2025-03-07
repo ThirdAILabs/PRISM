@@ -6,12 +6,13 @@ import { SingleSearchBar } from '../../common/searchBar/SearchBar';
 
 const PaperTitleSearchComponent = () => {
   const { searchState, setSearchState } = useContext(SearchContext);
-  const { paperResults, hasSearchedPaper } = searchState;
+  const { paperResults, hasSearchedPaper, paperTitleQuery } = searchState;
   const [isLoading, setIsLoading] = useState(false);
 
   const search = async (paperTitle) => {
     setSearchState((prev) => ({
       ...prev,
+      paperTitleQuery: paperTitle,
       paperResults: [],
       hasSearchedPaper: false,
     }));
@@ -38,10 +39,12 @@ const PaperTitleSearchComponent = () => {
           title="Paper Title"
           onSearch={search}
           placeholder="E.g. Deep Learning for NLP"
+          initialValue={paperTitleQuery}
         />
       </div>
       {isLoading && <div>Loading...</div>}
-      {hasSearchedPaper && <TodoListComponent results={paperResults} />}
+      {hasSearchedPaper && !isLoading && paperResults.length === 0 && <div>No results found.</div>}
+      {hasSearchedPaper && paperResults.length > 0 && <TodoListComponent results={paperResults} />}
     </div>
   );
 };

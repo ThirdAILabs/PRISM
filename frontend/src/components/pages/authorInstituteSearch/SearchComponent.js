@@ -35,11 +35,13 @@ const SearchComponent = () => {
       orcidResults: [],
       isOrcidLoading: false,
       hasSearchedOrcid: false,
+      orcidQuery: '',
 
       // paper data
       paperResults: [],
       isPaperLoading: false,
       hasSearchedPaper: false,
+      paperTitleQuery: '',
     }));
 
     navigate(`?type=${newType}`);
