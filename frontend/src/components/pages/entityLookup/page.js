@@ -124,8 +124,8 @@ function EntityLookup() {
       {results.length > 0 ? (
         <div className="entity-lookup-results">
           {results.map((entity, index) => (
-            <div key={index} className="detail-item">
-              <b>Names</b>
+            <div key={index} className="entity-lookup-items">
+              <b>Names:</b>
               <ul className="bulleted-list">
                 {entity.Names.split('\n').map((name, index2) => (
                   <li key={`${index}-${index2}`}>{name}</li>
@@ -134,25 +134,25 @@ function EntityLookup() {
 
               {entity.Address && (
                 <>
-                  <b>Address</b>
+                  <b>Address:</b>
                   <p>{entity.Address}</p>
                 </>
               )}
               {entity.Country && (
                 <>
-                  <b>Country</b>
+                  <b>Country:</b>
                   <p>{entity.Country}</p>
                 </>
               )}
               {entity.Type && (
                 <>
-                  <b>Type</b>
+                  <b>Type:</b>
                   <p>{entity.Type}</p>
                 </>
               )}
               {entity.Resource && (
                 <>
-                  <b>Resource</b>
+                  <b>Resource:</b>
                   <p>{makeLinksClickable(entity.Resource)}</p>
                 </>
               )}
