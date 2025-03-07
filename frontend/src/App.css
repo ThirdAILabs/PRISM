@@ -225,6 +225,10 @@ li {
   display: none;
 }
 
-.menu-icon {
-  color: rgb(80, 80, 80);
+.sidebar-toggle {
+  font-family: monospace; /* Makes the arrows look better */
+  font-weight: bold;
+  font-size: 2rem;
+  color: rgb(111, 111, 111);
+  cursor: pointer;
 }

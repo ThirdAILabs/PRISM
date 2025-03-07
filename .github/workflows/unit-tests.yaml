@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  go-unit-tests:
+  unit-tests:
     runs-on: ubuntu-22.04-8-cores
     steps:
       - uses: actions/checkout@v2

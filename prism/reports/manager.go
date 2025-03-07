@@ -359,14 +359,23 @@ func convertReport(report schema.UserAuthorReport) (api.Report, error) {
 func (r *ReportManager) ListUniversityReports(userId uuid.UUID) ([]api.UniversityReport, error) {
 	var reports []schema.UserUniversityReport
 
-	if err := r.db.Preload("Report").Order("last_accessed_at DESC").Find(&reports, "user_id = ?", userId).Error; err != nil {
+	if err := r.db.Preload("Report").Preload("Report.Authors").Order("last_accessed_at DESC").Find(&reports, "user_id = ?", userId).Error; err != nil {
 		slog.Error("error finding list of reports ")
 		return nil, ErrReportAccessFailed
 	}
 
 	results := make([]api.UniversityReport, 0, len(reports))
 	for _, report := range reports {
-		results = append(results, convertUniversityReport(report, api.UniversityReportContent{}))
+		content := api.UniversityReportContent{}
+		for _, author := range report.Report.Authors {
+			switch author.Status {
+			case schema.ReportCompleted, schema.ReportFailed:
+				content.AuthorsReviewed++
+			}
+			content.TotalAuthors++
+		}
+
+		results = append(results, convertUniversityReport(report, content))
 	}
 
 	return results, nil
