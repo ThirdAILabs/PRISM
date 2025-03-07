@@ -1,6 +1,7 @@
 package api
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"slices"
 	"strings"
@@ -20,11 +21,13 @@ type KeyValueURL struct {
 
 type Flag interface {
 	Type() string
+
 	// This is used to deduplicate flags. Primarily for author flags, it is
 	// possible to have the same flag created for multiple works, for instance by
-	// finding the author is faculty at an EOC. For work flags, the key is just
-	// the flagger type and work id since we can only have 1 flag for a given work.
-	Key() string
+	// finding the author is faculty at an EOC. For work flags, the key is just the 
+	// hash of the flagger type and work id since we can only have 1 flag for a 
+	// given work.
+	Hash() [sha256.Size]byte
 
 	GetEntities() []string
 
@@ -125,9 +128,9 @@ func (flag *TalentContractFlag) Type() string {
 	return TalentContractType
 }
 
-func (flag *TalentContractFlag) Key() string {
+func (flag *TalentContractFlag) Hash() [sha256.Size]byte {
 	// Assumes 1 flag per work
-	return fmt.Sprintf("talent-contract-%s", flag.Work.WorkId)
+	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
 func (flag *TalentContractFlag) GetEntities() []string {
@@ -176,9 +179,9 @@ func (flag *AssociationWithDeniedEntityFlag) Type() string {
 	return AssociationsWithDeniedEntityType
 }
 
-func (flag *AssociationWithDeniedEntityFlag) Key() string {
+func (flag *AssociationWithDeniedEntityFlag) Hash() [sha256.Size]byte {
 	// Assumes 1 flag per work
-	return fmt.Sprintf("association-with-denied-entity-%s", flag.Work.WorkId)
+	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
 func (flag *AssociationWithDeniedEntityFlag) GetEntities() []string {
@@ -227,9 +230,9 @@ func (flag *HighRiskFunderFlag) Type() string {
 	return HighRiskFunderType
 }
 
-func (flag *HighRiskFunderFlag) Key() string {
+func (flag *HighRiskFunderFlag) Hash() [sha256.Size]byte {
 	// Assumes 1 flag per work
-	return fmt.Sprintf("high-risk-funder-%s", flag.Work.WorkId)
+	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
 func (flag *HighRiskFunderFlag) GetEntities() []string {
@@ -273,9 +276,9 @@ func (flag *AuthorAffiliationFlag) Type() string {
 	return AuthorAffiliationType
 }
 
-func (flag *AuthorAffiliationFlag) Key() string {
+func (flag *AuthorAffiliationFlag) Hash() [sha256.Size]byte {
 	// Assumes 1 flag per work
-	return fmt.Sprintf("author-affiliation-%s", flag.Work.WorkId)
+	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
 func (flag *AuthorAffiliationFlag) GetEntities() []string {
@@ -319,8 +322,8 @@ func (flag *PotentialAuthorAffiliationFlag) Type() string {
 	return PotentialAuthorAffiliationType
 }
 
-func (flag *PotentialAuthorAffiliationFlag) Key() string {
-	return fmt.Sprintf("potential-author-affiliation-%s-%s", flag.University, flag.UniversityUrl)
+func (flag *PotentialAuthorAffiliationFlag) Hash() [sha256.Size]byte {
+	return sha256.Sum256([]byte(flag.Type() + flag.University + flag.UniversityUrl))
 }
 
 func (flag *PotentialAuthorAffiliationFlag) GetEntities() []string {
@@ -370,9 +373,12 @@ func (flag *MiscHighRiskAssociationFlag) Type() string {
 	return MiscHighRiskAssociationType
 }
 
-func (flag *MiscHighRiskAssociationFlag) Key() string {
-	// Assumes 1 flag per work
-	return fmt.Sprintf("misc-high-risk-associations-%s-%v-%s", flag.DocTitle, flag.Connections, flag.EntityMentioned)
+func (flag *MiscHighRiskAssociationFlag) Hash() [sha256.Size]byte {
+	data := flag.Type() + flag.DocTitle + flag.EntityMentioned
+	for _, conn := range flag.Connections {
+		data += conn.DocTitle
+	}
+	return sha256.Sum256([]byte(data))
 }
 
 func (flag *MiscHighRiskAssociationFlag) GetEntities() []string {
@@ -443,9 +449,9 @@ func (flag *CoauthorAffiliationFlag) Type() string {
 	return CoauthorAffiliationType
 }
 
-func (flag *CoauthorAffiliationFlag) Key() string {
+func (flag *CoauthorAffiliationFlag) Hash() [sha256.Size]byte {
 	// Assumes 1 flag per work
-	return fmt.Sprintf("coauthor-affiliation-%s", flag.Work.WorkId)
+	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
 func (flag *CoauthorAffiliationFlag) GetEntities() []string {
@@ -496,9 +502,9 @@ func (flag *MultipleAffiliationFlag) Type() string {
 	return MultipleAffiliationType
 }
 
-func (flag *MultipleAffiliationFlag) Key() string {
+func (flag *MultipleAffiliationFlag) Hash() [sha256.Size]byte {
 	// Assumes 1 flag per work
-	return fmt.Sprintf("multiple-affiliations-%s", flag.Work.WorkId)
+	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
 func (flag *MultipleAffiliationFlag) GetEntities() []string {
@@ -542,9 +548,9 @@ func (flag *HighRiskPublisherFlag) Type() string {
 	return HighRiskPublisherType
 }
 
-func (flag *HighRiskPublisherFlag) Key() string {
+func (flag *HighRiskPublisherFlag) Hash() [sha256.Size]byte {
 	// Assumes 1 flag per work
-	return fmt.Sprintf("high-risk-publisher-%s", flag.Work.WorkId)
+	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
 func (flag *HighRiskPublisherFlag) GetEntities() []string {
@@ -588,9 +594,9 @@ func (flag *HighRiskCoauthorFlag) Type() string {
 	return HighRiskCoauthorType
 }
 
-func (flag *HighRiskCoauthorFlag) Key() string {
+func (flag *HighRiskCoauthorFlag) Hash() [sha256.Size]byte {
 	// Assumes 1 flag per work
-	return fmt.Sprintf("high-risk-coauthor-%s", flag.Work.WorkId)
+	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
 func (flag *HighRiskCoauthorFlag) GetEntities() []string {

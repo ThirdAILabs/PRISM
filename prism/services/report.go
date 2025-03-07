@@ -8,10 +8,10 @@ import (
 	"net/http"
 	"path/filepath"
 	"prism/prism/api"
+	"prism/prism/licensing"
 	"prism/prism/reports"
 	"prism/prism/schema"
 	"prism/prism/services/auth"
-	"prism/prism/services/licensing"
 	"strings"
 	"time"
 
@@ -23,6 +23,7 @@ import (
 type ReportService struct {
 	manager        *reports.ReportManager
 	db             *gorm.DB
+	licensing      *licensing.LicenseVerifier
 	resourceFolder string
 }
 
@@ -44,8 +45,6 @@ func (s *ReportService) Routes() chi.Router {
 		r.Get("/{report_id}", WrapRestHandler(s.GetUniversityReport))
 		r.Delete("/{report_id}", WrapRestHandler(s.DeleteUniversityReport))
 	})
-
-	r.Post("/activate-license", WrapRestHandler(s.UseLicense))
 
 	return r
 }
@@ -90,13 +89,12 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 		return nil, CodedError(errors.New("invalid Source"), http.StatusUnprocessableEntity)
 	}
 
-	licenseId, err := licensing.VerifyLicenseForReport(s.db, userId)
-	if err != nil {
+	if err := s.licensing.VerifyLicense(); err != nil {
 		slog.Error("cannot create new report, unable to verify license", "error", err)
 		return nil, CodedError(err, licensingErrorStatus(err))
 	}
 
-	id, err := s.manager.CreateAuthorReport(licenseId, userId, params.AuthorId, params.AuthorName, params.Source)
+	id, err := s.manager.CreateAuthorReport(userId, params.AuthorId, params.AuthorName, params.Source)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
@@ -136,26 +134,6 @@ func (s *ReportService) DeleteAuthorReport(r *http.Request) (any, error) {
 
 	if err := s.manager.DeleteAuthorReport(userId, id); err != nil {
 		return nil, CodedError(err, reportErrorStatus(err))
-	}
-
-	return nil, nil
-}
-
-func (s *ReportService) UseLicense(r *http.Request) (any, error) {
-	userId, err := auth.GetUserId(r)
-	if err != nil {
-		return nil, CodedError(err, http.StatusInternalServerError)
-	}
-
-	params, err := ParseRequestBody[api.ActivateLicenseRequest](r)
-	if err != nil {
-		return nil, CodedError(err, http.StatusBadRequest)
-	}
-
-	if err := s.db.Transaction(func(txn *gorm.DB) error {
-		return licensing.AddLicenseUser(txn, params.License, userId)
-	}); err != nil {
-		return nil, CodedError(err, licensingErrorStatus(err))
 	}
 
 	return nil, nil
@@ -329,13 +307,12 @@ func (s *ReportService) CreateUniversityReport(r *http.Request) (any, error) {
 		return nil, CodedError(errors.New("UniversityName must be specified"), http.StatusUnprocessableEntity)
 	}
 
-	licenseId, err := licensing.VerifyLicenseForReport(s.db, userId)
-	if err != nil {
+	if err := s.licensing.VerifyLicense(); err != nil {
 		slog.Error("cannot create new report, unable to verify license", "error", err)
 		return nil, CodedError(err, licensingErrorStatus(err))
 	}
 
-	id, err := s.manager.CreateUniversityReport(licenseId, userId, params.UniversityId, params.UniversityName)
+	id, err := s.manager.CreateUniversityReport(userId, params.UniversityId, params.UniversityName)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}

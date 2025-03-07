@@ -1,18 +1,20 @@
 // src/SearchComponent.js
 import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import TodoListComponent from '../TodoListComponent';
-import { AuthorInstiutionSearchBar } from '../common/searchBar/SearchBar';
-import Logo from '../../assets/images/prism-logo.png';
-import '../common/searchBar/SearchBar.css';
-import '../common/tools/button/button1.css';
-import UserService from '../../services/userService';
-import { searchService } from '../../api/search';
-import { SearchContext } from '../../store/searchContext';
+import TodoListComponent from './TodoListComponent';
+import { AuthorInstiutionSearchBar } from '../../common/searchBar/SearchBar';
+import Logo from '../../../assets/images/prism-logo.png';
+import '../../common/searchBar/SearchBar.css';
+import '../../common/tools/button/button1.css';
+import UserService from '../../../services/userService';
+import { searchService } from '../../../api/search';
+import { SearchContext } from '../../../store/searchContext';
 
 const SearchComponent = () => {
   const { searchState, setSearchState } = useContext(SearchContext);
   const { author, institution, openAlexResults, hasSearched, canLoadMore } = searchState;
+
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const search = async (author, institution) => {
     setSearchState((prev) => ({
@@ -88,27 +90,34 @@ const SearchComponent = () => {
           </div>
         </div>
       </div>
-      {hasSearched && (
-        <TodoListComponent
-          results={openAlexResults}
-          setResults={(newResults) =>
-            setSearchState((prev) => ({ ...prev, openAlexResults: newResults }))
-          }
-          canLoadMore={canLoadMore}
-          loadMore={async () => {
-            if (!canLoadMore) {
-              return [];
-            }
-            const result = await searchService.searchGoogleScholarAuthors(
-              author.Name,
-              institution.Name,
-              null
-            );
-            setSearchState((prev) => ({ ...prev, canLoadMore: false }));
-            return result.Authors;
-          }}
-        />
-      )}
+      <div className="d-flex justify-content-center align-items-center pt-5">
+        <div style={{ width: '80%', animation: 'fade-in 1.25s' }}>
+          {hasSearched && (
+            <TodoListComponent
+              results={openAlexResults}
+              setResults={(newResults) =>
+                setSearchState((prev) => ({ ...prev, openAlexResults: newResults }))
+              }
+              canLoadMore={canLoadMore}
+              isLoadingMore={isLoadingMore}
+              loadMore={async () => {
+                if (!canLoadMore) {
+                  return [];
+                }
+                setIsLoadingMore(true);
+                const result = await searchService.searchGoogleScholarAuthors(
+                  author.Name,
+                  institution.Name,
+                  null
+                );
+                setIsLoadingMore(false);
+                setSearchState((prev) => ({ ...prev, canLoadMore: false }));
+                return result.Authors;
+              }}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import useGoBack from '../../hooks/useGoBack.js';
 import {
   TALENT_CONTRACTS,
   ASSOCIATIONS_WITH_DENIED_ENTITIES,
@@ -68,10 +69,12 @@ const UniversityReport = () => {
   const [instituteName, setInstituteName] = useState('');
   const [toatlResearchers, setTotalResearchers] = useState(0);
   const [researchersAssessed, setResearchersAssessed] = useState(0);
+  const [selectedFlag, setSelectedFlag] = useState(null);
   const [selectedFlagData, setSelectedFlagData] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
   const handleReview = (flag) => {
+    setSelectedFlag(flag);
     setSelectedFlagData(reportContent?.Flags[flag] || []);
     setShowModal(true);
   };
@@ -105,63 +108,66 @@ const UniversityReport = () => {
   }, []);
 
   const [loading, setLoading] = useState(true);
+  const goBack = useGoBack('/university');
 
   return (
     <div className="basic-setup" style={{ minHeight: '100vh', paddingBottom: '50px' }}>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-row">
-          <div
-            className="detail-header"
-            style={{
-              display: 'flex',
-              position: 'absolute',
-              justifyContent: 'center',
-              width: '100%',
-            }}
+      {/* <div className="grid grid-cols-2 gap-4"> */}
+      {/* <div className="flex flex-row"> */}
+      <div
+        className="detail-header"
+        style={{
+          // display: 'flex',
+          width: '100%',
+        }}
+      >
+        <button
+          onClick={() => goBack()}
+          className="btn text-dark mb-3"
+          style={{
+            minWidth: '80px',
+            left: '10px',
+          }}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ marginRight: '8px' }}
           >
-            <button
-              onClick={() => navigate(-1)}
-              className="btn text-dark mb-3"
-              style={{
-                minWidth: '80px',
-                display: 'flex',
-                alignItems: 'center',
-                position: 'absolute',
-                left: '10px',
-              }}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                style={{ marginRight: '8px' }}
-              >
-                <path
-                  d="M10 19L3 12L10 5"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M3 12H21"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Back
-            </button>
-            <h5 style={{ margin: '0 auto' }}>{instituteName}</h5>
-          </div>
-        </div>
+            <path
+              d="M10 19L3 12L10 5"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M3 12H21"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          Back
+        </button>
+        <h5 style={{ margin: '0 auto' }}>{instituteName}</h5>
       </div>
 
       <>
-        {!loading && (
+        <div className="d-flex w-100 flex-column align-items-center">
+          <div className="d-flex w-100 px-5 align-items-center my-2 mt-3 justify-content-between">
+            <div style={{ width: '20px' }}>
+              {loading && (
+                <div className="spinner-border text-primary spinner-border-sm" role="status"></div>
+              )}
+            </div>
+          </div>
+        </div>
+        {
           <div
             className="d-flex w-100 flex-column align-items-center"
             style={{ color: 'rgb(78, 78, 78)', marginTop: '20px' }}
@@ -171,45 +177,47 @@ const UniversityReport = () => {
             <div style={{ fontSize: 'medium', fontWeight: 'bold' }}>Researchers Assessed</div>
             <div style={{ fontSize: '50px', fontWeight: 'bold' }}>{researchersAssessed}</div>
           </div>
-        )}
+        }
 
-        {loading ? (
-          <div style={{ marginTop: '15%', display: 'flex', justifyContent: 'center' }}>
-            <Loader size={100} />
-          </div>
-        ) : (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-around',
-              flexWrap: 'wrap',
-              marginTop: '20px',
-            }}
-          >
-            {reportContent?.Flags &&
-              FLAG_ORDER.map((flag, index) => {
-                let value = 0;
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-around',
+            flexWrap: 'wrap',
+            marginTop: '20px',
+          }}
+        >
+          {reportContent?.Flags
+            ? FLAG_ORDER.map((flag, index) => {
                 const flagData = reportContent.Flags[flag] || [];
-
-                if (flagData.length > 0) {
-                  for (let authorIndex = 0; authorIndex < flagData.length; authorIndex++) {
-                    const author = flagData[authorIndex];
-                    value += author.FlagCount;
-                  }
-                }
 
                 return (
                   <ConcernVisualizer
                     title={TitlesAndDescriptions[flag].title}
                     hoverText={TitlesAndDescriptions[flag].desc}
-                    value={value || 0}
+                    value={flagData.length || 0}
+                    speedometerHoverText={`${flagData.length} Authors`}
                     onReview={() => handleReview(flag)}
+                    selected={flag === selectedFlag}
+                    key={index}
+                  />
+                );
+              })
+            : FLAG_ORDER.map((flag, index) => {
+                return (
+                  <ConcernVisualizer
+                    title={TitlesAndDescriptions[flag].title}
+                    hoverText={TitlesAndDescriptions[flag].desc}
+                    value={0}
+                    speedometerHoverText={`0 Authors`}
+                    onReview={() => handleReview(flag)}
+                    selected={flag === selectedFlag}
                     key={index}
                   />
                 );
               })}
-          </div>
-        )}
+        </div>
+
         {showModal && (
           <div
             style={{
