@@ -34,7 +34,7 @@ type GrobidAcknowledgementsExtractor struct {
 func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downloadDir string) *GrobidAcknowledgementsExtractor {
 	return &GrobidAcknowledgementsExtractor{
 		cache:      cache,
-		maxWorkers: 4,
+		maxWorkers: 10,
 		grobid: resty.New().
 			SetBaseURL(grobidEndpoint).
 			SetRetryCount(2).
@@ -42,8 +42,11 @@ func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downl
 				if err != nil {
 					return true // The err can be non nil for some network errors.
 				}
-				// There's no reason to retry other 400 requests since the outcome should not change
-				return response != nil && (response.StatusCode() > 499 || response.StatusCode() == http.StatusTooManyRequests)
+				// Grobid returns 503 if there are too many requests:
+				// https://grobid.readthedocs.io/en/latest/Grobid-service/
+				// TODO: Should we retry on error code 500? grobid will return 500 for invalid pdfs,
+				// so it's not clear if this is a retryable error.
+				return response != nil && (response.StatusCode() == http.StatusServiceUnavailable)
 			}).
 			SetRetryWaitTime(2 * time.Second).
 			SetRetryMaxWaitTime(10 * time.Second),

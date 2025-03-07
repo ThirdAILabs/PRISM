@@ -48,7 +48,7 @@ jobs:
 
       - name: start grobid docker container
         run: |
-          docker run --rm --init -d --ulimit core=0 -p 8070:8070 grobid/grobid:0.8.0
+          docker run --rm --init -d --ulimit core=0 -p 8070:8070 -v ${{ github.workspace }}/local_setup/grobid_config/grobid.yaml:/opt/grobid/grobid-home/config/grobid.yaml:ro  grobid/grobid:0.8.0
 
       - name: start keycloak docker container
         run: |
