@@ -1,54 +1,17 @@
-// src/SearchComponent.js
-import React, { useState, useContext } from 'react';
-import { Link } from 'react-router-dom';
-import TodoListComponent from './TodoListComponent';
-import { AuthorInstiutionSearchBar } from '../../common/searchBar/SearchBar';
+import React, { useState } from 'react';
+import AuthorInstitutionSearchComponent from './AuthorInstitutionSearch';
+import OrcidSearchComponent from './OrcidSearch';
+import { SearchContext } from '../../../store/searchContext';
+import PaperTitleSearchComponent from './PaperTitleSearch';
 import Logo from '../../../assets/images/prism-logo.png';
 import '../../common/searchBar/SearchBar.css';
 import '../../common/tools/button/button1.css';
-import UserService from '../../../services/userService';
-import { searchService } from '../../../api/search';
-import { SearchContext } from '../../../store/searchContext';
 
 const SearchComponent = () => {
-  const { searchState, setSearchState } = useContext(SearchContext);
-  const { author, institution, openAlexResults, hasSearched, canLoadMore } = searchState;
+  const [selectedSearchType, setSelectedSearchType] = useState('author');
 
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-
-  const search = async (author, institution) => {
-    setSearchState((prev) => ({
-      ...prev,
-      author: author,
-      institution: institution,
-      openAlexResults: [],
-      hasSearched: false,
-      loadMoreCount: 0,
-      canLoadMore: true,
-    }));
-    searchOpenAlex(author, institution);
-    // setIsLoadingScopus(true);
-  };
-
-  const searchOpenAlex = async (author, institution) => {
-    setSearchState((prev) => ({
-      ...prev,
-      isOALoading: true,
-    }));
-
-    const result = await searchService.searchOpenalexAuthors(
-      author.Name,
-      institution.Id,
-      institution.Name
-    );
-    console.log('result in openAlex', result);
-    setSearchState((prev) => ({
-      ...prev,
-      openAlexResults: result,
-      isOALoading: false,
-      loadMoreCount: 0,
-      hasSearched: true,
-    }));
+  const handleSearchTypeChange = (e) => {
+    setSelectedSearchType(e.target.value);
   };
 
   return (
@@ -56,6 +19,7 @@ const SearchComponent = () => {
       <div style={{ textAlign: 'center', marginTop: '3%', animation: 'fade-in 0.75s' }}>
         <img
           src={Logo}
+          alt="Prism Logo"
           style={{
             width: '320px',
             marginTop: '1%',
@@ -80,42 +44,24 @@ const SearchComponent = () => {
             </div>
           </div>
         </div>
-        <div className="d-flex justify-content-center align-items-center pt-5">
-          <div style={{ width: '80%', animation: 'fade-in 1.25s' }}>
-            <AuthorInstiutionSearchBar
-              onSearch={search}
-              defaultAuthor={author}
-              defaultInstitution={institution}
-            />
-          </div>
+        <div className="search-type-container">
+          <label className="search-type-label">Search Type</label>
+          <select
+            className="search-select-smaller"
+            value={selectedSearchType}
+            onChange={handleSearchTypeChange}
+          >
+            <option value="author">Author &amp; Institution</option>
+            <option value="orcid">ORCID ID</option>
+            <option value="paper">Paper Title</option>
+          </select>
         </div>
       </div>
       <div className="d-flex justify-content-center align-items-center pt-5">
         <div style={{ width: '80%', animation: 'fade-in 1.25s' }}>
-          {hasSearched && (
-            <TodoListComponent
-              results={openAlexResults}
-              setResults={(newResults) =>
-                setSearchState((prev) => ({ ...prev, openAlexResults: newResults }))
-              }
-              canLoadMore={canLoadMore}
-              isLoadingMore={isLoadingMore}
-              loadMore={async () => {
-                if (!canLoadMore) {
-                  return [];
-                }
-                setIsLoadingMore(true);
-                const result = await searchService.searchGoogleScholarAuthors(
-                  author.Name,
-                  institution.Name,
-                  null
-                );
-                setIsLoadingMore(false);
-                setSearchState((prev) => ({ ...prev, canLoadMore: false }));
-                return result.Authors;
-              }}
-            />
-          )}
+          {selectedSearchType === 'author' && <AuthorInstitutionSearchComponent />}
+          {selectedSearchType === 'orcid' && <OrcidSearchComponent />}
+          {selectedSearchType === 'paper' && <PaperTitleSearchComponent />}
         </div>
       </div>
     </div>

@@ -87,3 +87,47 @@ export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInst
     </div>
   );
 }
+
+export function SingleSearchBar({
+  title = '',
+  onSearch,
+  placeholder = 'Enter Value',
+  initialValue = '',
+}) {
+  const [value, setValue] = useState(initialValue);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (value.trim()) {
+      onSearch(value);
+    }
+  };
+
+  return (
+    <div className="single-search-container">
+      {/* Same large title style as Author/Institution */}
+      {title && <label className="single-search-bar-label">{title}</label>}
+
+      {/* Row containing input and button side-by-side */}
+      <div className="single-search-row">
+        <div className="single-search-bar-container">
+          <form onSubmit={handleSubmit}>
+            <input
+              type="text"
+              className="search-bar"
+              placeholder={placeholder}
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+            />
+          </form>
+        </div>
+
+        <div className="single-search-button-container">
+          <button className="button" onClick={handleSubmit}>
+            Search
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
