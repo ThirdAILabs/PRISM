@@ -103,6 +103,7 @@ jobs:
           KEYCLOAK_PRIVATE_HOSTNAME: http://localhost
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GROBID_ENDPOINT: http://localhost:8070
+          RESOURCE_FOLDER: ${{ github.workspace }}/prism/services/resources
         run: |
           go build ./prism/cmd/backend/main.go
           go build ./prism/cmd/worker/main.go
