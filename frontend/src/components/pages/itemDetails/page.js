@@ -1048,7 +1048,7 @@ const ItemDetails = () => {
                   onReview={() => setReview(flag)}
                   key={index}
                   selected={isSelected}
-                    valueFontSize={valueFontSize}
+                  valueFontSize={valueFontSize}
                 />
               );
             })}
