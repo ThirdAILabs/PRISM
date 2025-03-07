@@ -49,29 +49,17 @@ export function Ticks({ scale }) {
 }
 
 export function Value({ value, speedometerHoverText }) {
-  const getFontSize = (value) => {
-    // Base font size for single digit (largest size)
-    const baseFontSize = 48;
-
-    const digits = String(value).length;
-    // Each additional digit reduces size by 4px
-    const newSize = baseFontSize - (digits - 1) * 4;
-
-    return `${Math.max(newSize, 28)}px`;
-  };
-  const { cx, cy } = useGaugeState();
+  const { innerRadius, cx, cy } = useGaugeState();
   return (
     <g>
       <text
         x={cx}
         y={cy * 1.1}
-        style={{
-          fill: 'grey',
-          fontSize: getFontSize(value),
-          fontWeight: 'bold',
-          textAnchor: 'middle',
-          dominantBaseline: 'middle',
-        }}
+        style={{ fill: 'grey' }}
+        fontSize={innerRadius * 0.8}
+        fontWeight="bold"
+        textAnchor="middle"
+        dominantBaseline="middle"
       >
         <title>{speedometerHoverText ? speedometerHoverText : null}</title>
         {value}
