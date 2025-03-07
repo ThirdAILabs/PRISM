@@ -91,7 +91,7 @@ function UniversityAssessment() {
           </div>
           <div className="d-flex justify-content-center align-items-center">
             <div style={{ marginTop: 10, marginBottom: '2%', color: '#888888' }}>
-              Who would you like to conduct an assessment on?
+              Which university would you like to conduct an assessment on?
             </div>
           </div>
         </div>
