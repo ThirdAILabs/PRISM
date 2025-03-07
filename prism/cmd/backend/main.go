@@ -124,6 +124,14 @@ func verifyResourceFolder(resourceFolder string) {
 		log.Fatalf("logo is empty")
 	}
 
+	headerLogoPath := filepath.Join(resourceFolder, "prism-header-logo.png")
+	headerLogo, err := os.ReadFile(headerLogoPath)
+	if err != nil {
+		log.Fatalf("error reading header logo: %v", err)
+	}
+	if len(headerLogo) == 0 {
+		log.Fatalf("header logo is empty")
+	}
 }
 
 func main() {
