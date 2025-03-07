@@ -172,7 +172,7 @@ const ItemDetails = () => {
 
       const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
       const newFontSize = `${getFontSize(maxLength)}px`;
-      console.log('New font size:', newFontSize);
+
       setValueFontSize(newFontSize);
     } catch (error) {
       setNotification({
@@ -204,7 +204,7 @@ const ItemDetails = () => {
 
         const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
         const newFontSize = `${getFontSize(maxLength)}px`;
-        console.log('New font size:', newFontSize);
+
         setValueFontSize(newFontSize);
 
         inProgress = report.Status === 'queued' || report.Status === 'in-progress';
@@ -249,7 +249,7 @@ const ItemDetails = () => {
 
       const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
       const newFontSize = `${getFontSize(maxLength)}px`;
-      console.log('New font size:', newFontSize);
+
       setValueFontSize(newFontSize);
       return;
     }
@@ -312,7 +312,7 @@ const ItemDetails = () => {
 
     const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
     const newFontSize = `${getFontSize(maxLength)}px`;
-    console.log('New font size:', newFontSize);
+
     setValueFontSize(newFontSize);
   };
   const [review, setReview] = useState();
