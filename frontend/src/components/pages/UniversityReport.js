@@ -67,7 +67,7 @@ const UniversityReport = () => {
 
   const [reportContent, setReportContent] = useState({});
   const [instituteName, setInstituteName] = useState('');
-  const [totalResearchers, setTotalResearchers] = useState(0);
+  const [toatlResearchers, setTotalResearchers] = useState(0);
   const [researchersAssessed, setResearchersAssessed] = useState(0);
   const [selectedFlag, setSelectedFlag] = useState(null);
   const [selectedFlagData, setSelectedFlagData] = useState(null);
@@ -84,28 +84,20 @@ const UniversityReport = () => {
     let isMounted = true;
     const poll = async () => {
       const report = await universityReportService.getReport(report_id);
-      setLoading(true);
 
-      // The report.Status is designed more for the backend than the frontend.
-      // The status is set as complete as soon as the work that the backend needs to do
-      // for the university reports is done; the backend does not wait for all the
-      // individual author reports to be completed before setting the reports status to complete.
-
-      if (report.Status === 'in-progress' || report.Status === 'complete') {
+      if (report.Status === 'complete' && isMounted) {
+        console.log('Report', report);
         setInstituteName(report.UniversityName);
         setReportContent(report.Content);
         setTotalResearchers(report.Content.TotalAuthors);
         setResearchersAssessed(report.Content.AuthorsReviewed);
-        if (report.Status === 'in-progress') {
-          setTimeout(poll, 10000);
-        }
-      }
-
-      if (report.Content.TotalAuthors === report.Content.AuthorsReviewed) {
         setLoading(false);
+      } else if (report.Status === 'in-progress') {
+        setInstituteName(report.UniversityName);
+        setTotalResearchers(report.Content.TotalAuthors);
+        setResearchersAssessed(report.Content.AuthorsReviewed);
       } else if (isMounted) {
-        setLoading(true);
-        setTimeout(poll, 1000);
+        setTimeout(poll, 10000);
       }
     };
 
@@ -184,7 +176,7 @@ const UniversityReport = () => {
             style={{ color: 'rgb(78, 78, 78)', marginTop: '20px' }}
           >
             <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Researchers</div>
-            <div style={{ fontSize: '60px', fontWeight: 'bold' }}>{totalResearchers}</div>
+            <div style={{ fontSize: '60px', fontWeight: 'bold' }}>{toatlResearchers}</div>
             <div style={{ fontSize: 'medium', fontWeight: 'bold' }}>Researchers Assessed</div>
             <div style={{ fontSize: '50px', fontWeight: 'bold' }}>{researchersAssessed}</div>
           </div>
