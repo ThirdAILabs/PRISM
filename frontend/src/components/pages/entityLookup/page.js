@@ -6,7 +6,7 @@ import Logo from '../../../assets/images/prism-logo.png';
 import { searchService } from '../../../api/search';
 
 const makeLinksClickable = (text) => {
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const urlRegex = /((?:http|https):\/\/[^\s]+)/g;
   if (!text) return text;
 
   const parts = text.split(urlRegex);
@@ -76,7 +76,7 @@ function EntityLookup() {
               >
                 Entity Lookup
               </h1>
-              <p>We help you comply with research security requirements.</p>
+              We help you comply with research security requirements.
             </div>
           </div>
           <div className="d-flex justify-content-center align-items-center">
@@ -165,7 +165,7 @@ function EntityLookup() {
             hasSearched && (
               <div className="no-results">
                 <div className="no-results-icon">🔍</div>
-                <h3>No Results Found</h3>
+                <h3>We couldn't find any results</h3>
                 <p>Try adjusting your search to find what you're looking for.</p>
               </div>
             )}

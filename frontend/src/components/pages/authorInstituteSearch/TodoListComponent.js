@@ -1,5 +1,5 @@
 // src/TodoListComponent.js
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { reportService } from '../../../api/reports';
 import './TodoListComponent.css';
@@ -33,7 +33,7 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadi
       {results.length === 0 ? (
         <div className="no-results">
           <div className="no-results-icon">🔍</div>
-          <h3>No Results Found</h3>
+          <h3>We couldn't find any results</h3>
           <p>Try adjusting your search to find what you're looking for.</p>
         </div>
       ) : (
