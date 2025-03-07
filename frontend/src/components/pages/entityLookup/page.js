@@ -121,52 +121,54 @@ function EntityLookup() {
         ></div>
       )}
 
-      <div className="entity-lookup-results">
-        {results.length > 0
-          ? results.map((entity, index) => (
-              <div key={index} className="detail-item">
-                <b>Names</b>
-                <ul className="bulleted-list">
-                  {entity.Names.split('\n').map((name, index2) => (
-                    <li key={`${index}-${index2}`}>{name}</li>
-                  ))}
-                </ul>
+      {results.length > 0 ? (
+        <div className="entity-lookup-results">
+          {results.map((entity, index) => (
+            <div key={index} className="detail-item">
+              <b>Names</b>
+              <ul className="bulleted-list">
+                {entity.Names.split('\n').map((name, index2) => (
+                  <li key={`${index}-${index2}`}>{name}</li>
+                ))}
+              </ul>
 
-                {entity.Address && (
-                  <>
-                    <b>Address</b>
-                    <p>{entity.Address}</p>
-                  </>
-                )}
-                {entity.Country && (
-                  <>
-                    <b>Country</b>
-                    <p>{entity.Country}</p>
-                  </>
-                )}
-                {entity.Type && (
-                  <>
-                    <b>Type</b>
-                    <p>{entity.Type}</p>
-                  </>
-                )}
-                {entity.Resource && (
-                  <>
-                    <b>Resource</b>
-                    <p>{makeLinksClickable(entity.Resource)}</p>
-                  </>
-                )}
-              </div>
-            ))
-          : !isLoading &&
-            hasSearched && (
-              <div className="no-results">
-                <div className="no-results-icon">🔍</div>
-                <h3>We couldn't find any results</h3>
-                <p>Try adjusting your search to find what you're looking for.</p>
-              </div>
-            )}
-      </div>
+              {entity.Address && (
+                <>
+                  <b>Address</b>
+                  <p>{entity.Address}</p>
+                </>
+              )}
+              {entity.Country && (
+                <>
+                  <b>Country</b>
+                  <p>{entity.Country}</p>
+                </>
+              )}
+              {entity.Type && (
+                <>
+                  <b>Type</b>
+                  <p>{entity.Type}</p>
+                </>
+              )}
+              {entity.Resource && (
+                <>
+                  <b>Resource</b>
+                  <p>{makeLinksClickable(entity.Resource)}</p>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        !isLoading &&
+        hasSearched && (
+          <div className="no-results">
+            <div className="no-results-icon">🔍</div>
+            <h3>We couldn't find any results</h3>
+            <p>Try adjusting your search to find what you're looking for.</p>
+          </div>
+        )
+      )}
     </div>
   );
 }
