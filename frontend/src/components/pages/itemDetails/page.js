@@ -169,6 +169,11 @@ const ItemDetails = () => {
         severity: 'success',
         message: 'Disclosure check succeeded!',
       });
+
+      const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
+      const newFontSize = `${getFontSize(maxLength)}px`;
+      console.log('New font size:', newFontSize);
+      setValueFontSize(newFontSize);
     } catch (error) {
       setNotification({
         open: true,
@@ -197,9 +202,10 @@ const ItemDetails = () => {
         setInitialReportContent(report.Content);
         setLoading(false);
 
-        const newFontSize = `${getFontSize(
-          Math.max(...FLAG_ORDER.map((flag) => report.Content.Flags[flag]?.length || 0))
-        )}px`;
+        const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
+        const newFontSize = `${getFontSize(maxLength)}px`;
+        console.log('New font size:', newFontSize);
+        setValueFontSize(newFontSize);
 
         inProgress = report.Status === 'queued' || report.Status === 'in-progress';
       }
@@ -240,6 +246,11 @@ const ItemDetails = () => {
       setReportContent(initialReprtContent);
       setFilterMessage('');
       handleDropdownChange(1);
+
+      const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
+      const newFontSize = `${getFontSize(maxLength)}px`;
+      console.log('New font size:', newFontSize);
+      setValueFontSize(newFontSize);
       return;
     }
 
@@ -299,10 +310,9 @@ const ItemDetails = () => {
     setReportContent(filteredContent);
     handleDropdownChange(1);
 
-    // font size change maybe needed
-    const newFontSize = `${getFontSize(
-      Math.max(...FLAG_ORDER.map((flag) => filteredContent[flag]?.length || 0))
-    )}px`;
+    const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
+    const newFontSize = `${getFontSize(maxLength)}px`;
+    console.log('New font size:', newFontSize);
     setValueFontSize(newFontSize);
   };
   const [review, setReview] = useState();
