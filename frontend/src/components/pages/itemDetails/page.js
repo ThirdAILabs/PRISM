@@ -300,7 +300,7 @@ const ItemDetails = () => {
     setReportContent(filteredContent);
     handleDropdownChange(1);
 
-    // Change font size if needed
+    // font size change maybe needed
     const newFontSize = `${getFontSize(
       Math.max(...FLAG_ORDER.map((flag) => filteredContent[flag]?.length || 0))
     )}px`;
