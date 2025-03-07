@@ -10,7 +10,7 @@ import {
   MISC_HIGH_RISK_AFFILIATIONS,
   COAUTHOR_AFFILIATIONS,
 } from '../../../constants/constants.js';
-import ConcernVisualizer from '../../ConcernVisualization.js';
+import ConcernVisualizer, { BaseFontSize, getFontSize } from '../../ConcernVisualization.js';
 import Graph from '../../common/graph/graph.js';
 import Tabs from '../../common/tools/Tabs.js';
 import DownloadButton from '../../common/tools/button/downloadButton.js';
@@ -96,12 +96,15 @@ const get_paper_url = (flag) => {
 const ItemDetails = () => {
   const navigate = useNavigate();
   const { report_id } = useParams();
-  const [dropdownOpen, setDropdownOpen] = useState(0);
+
+  const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
+  const [downloadDropdownOpen, setDownloadDropdownOpen] = useState(false);
   const [reportContent, setReportContent] = useState({});
   const [authorName, setAuthorName] = useState('');
   const [institutions, setInstitutions] = useState([]);
   const [initialReprtContent, setInitialReportContent] = useState({});
   const [isDisclosureChecked, setDisclosureChecked] = useState(false);
+  const [valueFontSize, setValueFontSize] = useState(`${BaseFontSize}px`);
 
   // box shadow for disclosed/undisclosed buttons
   const greenBoxShadow = '0 0px 10px rgb(0, 183, 46)';
@@ -109,12 +112,6 @@ const ItemDetails = () => {
 
   const toggleSortOrder = () => {
     setSortOrder((prevOrder) => (prevOrder === 'asc' ? 'desc' : 'asc'));
-  };
-
-  // Add handlers
-  const handleDropdownChange = (index) => {
-    if (index === dropdownOpen) setDropdownOpen(0);
-    else setDropdownOpen(index);
   };
 
   const [notification, setNotification] = useState({
@@ -129,7 +126,6 @@ const ItemDetails = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
-    handleDropdownChange(0);
   };
 
   const handleFileSelect = async (event) => {
@@ -168,6 +164,11 @@ const ItemDetails = () => {
         severity: 'success',
         message: 'Disclosure check succeeded!',
       });
+
+      const maxLength = Math.max(...FLAG_ORDER.map((flag) => result.Content[flag]?.length || 0));
+      const newFontSize = `${getFontSize(maxLength)}px`;
+
+      setValueFontSize(newFontSize);
     } catch (error) {
       setNotification({
         open: true,
@@ -195,6 +196,12 @@ const ItemDetails = () => {
         setReportContent(report.Content);
         setInitialReportContent(report.Content);
         setLoading(false);
+
+        const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
+        const newFontSize = `${getFontSize(maxLength)}px`;
+
+        setValueFontSize(newFontSize);
+
         inProgress = report.Status === 'queued' || report.Status === 'in-progress';
       }
 
@@ -230,10 +237,10 @@ const ItemDetails = () => {
   }
 
   const handleDateFilter = () => {
+    setYearDropdownOpen(false);
     if (!startDate && !endDate) {
       setReportContent(initialReprtContent);
       setFilterMessage('');
-      handleDropdownChange(1);
       return;
     }
 
@@ -291,8 +298,13 @@ const ItemDetails = () => {
     setEndDate('');
 
     setReportContent(filteredContent);
-    handleDropdownChange(1);
+
+    const maxLength = Math.max(...FLAG_ORDER.map((flag) => reportContent[flag]?.length || 0));
+    const newFontSize = `${getFontSize(maxLength)}px`;
+
+    setValueFontSize(newFontSize);
   };
+
   const [review, setReview] = useState();
 
   function withPublicationDate(header, flag) {
@@ -897,15 +909,6 @@ const ItemDetails = () => {
 
   const [showPopover, setShowPopover] = useState(false);
 
-  const handleResetFilter = () => {
-    setStartDate('');
-    setEndDate('');
-    setReportContent(initialReprtContent);
-  };
-
-  const togglePopover = () => {
-    setShowPopover(!showPopover);
-  };
   function wrapLinks(origtext) {
     const linkStart = Math.max(origtext.indexOf('https://'), origtext.indexOf('http://'));
     if (linkStart === -1) {
@@ -927,10 +930,14 @@ const ItemDetails = () => {
   );
   const goBack = useGoBack('/');
 
-  const dropdownRef = useOutsideClick(() => {
-    handleDropdownChange(0);
+  const dropdownFilterRef = useOutsideClick(() => {
+    setYearDropdownOpen(false);
   });
-  console.log('The value of dropDownChange is ', dropdownOpen);
+
+  const dropdownDownloadRef = useOutsideClick(() => {
+    setDownloadDropdownOpen(false);
+  });
+
   return (
     <div className="basic-setup">
       <div className="grid grid-cols-2 gap-4">
@@ -982,7 +989,7 @@ const ItemDetails = () => {
               </b>
             </div>
             <div>
-              <div className="dropdown">
+              <div className="dropdown" ref={dropdownFilterRef}>
                 <style>
                   {`
                     .form-control::placeholder {
@@ -993,7 +1000,7 @@ const ItemDetails = () => {
                 <button
                   className="btn dropdown-toggle"
                   type="button"
-                  onClick={() => handleDropdownChange(1)}
+                  onClick={() => setYearDropdownOpen(!yearDropdownOpen)}
                   style={{
                     backgroundColor: 'rgb(160, 160, 160)',
                     border: 'none',
@@ -1005,7 +1012,7 @@ const ItemDetails = () => {
                 >
                   Filter by Timeline
                 </button>
-                {dropdownOpen === 1 && (
+                {yearDropdownOpen && (
                   <div
                     className="dropdown-menu show p-2"
                     style={{
@@ -1022,7 +1029,6 @@ const ItemDetails = () => {
                       display: 'flex',
                       flexDirection: 'column',
                     }}
-                    ref={dropdownRef}
                   >
                     <div className="form-group" style={{ marginBottom: '10px', width: '100%' }}>
                       <label>Start Date</label>
@@ -1115,12 +1121,13 @@ const ItemDetails = () => {
                 {notification.message}
               </Alert>
             </Snackbar>
-            <DownloadButton
-              reportId={report_id}
-              isOpen={dropdownOpen === 2}
-              setIsOpen={() => handleDropdownChange(2)}
-              dropdownRef={dropdownRef}
-            />
+            <div ref={dropdownDownloadRef}>
+              <DownloadButton
+                reportId={report_id}
+                isOpen={downloadDropdownOpen}
+                setIsOpen={() => setDownloadDropdownOpen(!downloadDropdownOpen)}
+              />
+            </div>
           </div>
         )}
       </div>
@@ -1164,6 +1171,7 @@ const ItemDetails = () => {
                     onReview={() => setReview(flag)}
                     key={index}
                     selected={isSelected}
+                    valueFontSize={valueFontSize}
                   />
                 );
               })}

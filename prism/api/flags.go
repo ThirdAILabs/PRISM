@@ -13,13 +13,19 @@ type KeyValue struct {
 	Value string
 }
 
+type KeyValueURL struct {
+	Key   string
+	Value string
+	Url   string
+}
+
 type Flag interface {
 	Type() string
 
 	// This is used to deduplicate flags. Primarily for author flags, it is
 	// possible to have the same flag created for multiple works, for instance by
-	// finding the author is faculty at an EOC. For work flags, the key is just the 
-	// hash of the flagger type and work id since we can only have 1 flag for a 
+	// finding the author is faculty at an EOC. For work flags, the key is just the
+	// hash of the flagger type and work id since we can only have 1 flag for a
 	// given work.
 	Hash() [sha256.Size]byte
 
@@ -33,6 +39,8 @@ type Flag interface {
 
 	// The second arg indicates if the flag can be filtered by date.
 	Date() (time.Time, bool)
+
+	GetDetailsFieldsForReport() []KeyValueURL
 }
 
 const (
@@ -152,6 +160,14 @@ func (flag *TalentContractFlag) Date() (time.Time, bool) {
 	return flag.Work.PublicationDate, true
 }
 
+func (flag *TalentContractFlag) GetDetailsFieldsForReport() []KeyValueURL {
+	return []KeyValueURL{
+		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
+		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
+		{Key: "Acknowledgements", Value: strings.Join(flag.RawAcknowledements, ", ")},
+	}
+}
+
 type AssociationWithDeniedEntityFlag struct {
 	DisclosableFlag
 	Message               string
@@ -185,15 +201,23 @@ func (flag *AssociationWithDeniedEntityFlag) GetHeading() string {
 func (flag *AssociationWithDeniedEntityFlag) GetDetailFields() []KeyValue {
 	return []KeyValue{
 		{Key: "Disclosed", Value: fmt.Sprintf("%v", flag.Disclosed)},
-		{Key: "Paper Title", Value: flag.Work.DisplayName},
+		{Key: "Title", Value: flag.Work.DisplayName},
 		{Key: "URL", Value: flag.Work.WorkUrl},
-		{Key: "Publication Date", Value: flag.Work.PublicationDate.String()},
+		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
 		{Key: "Acknowledgements", Value: strings.Join(flag.RawAcknowledements, ", ")},
 	}
 }
 
 func (flag *AssociationWithDeniedEntityFlag) Date() (time.Time, bool) {
 	return flag.Work.PublicationDate, true
+}
+
+func (flag *AssociationWithDeniedEntityFlag) GetDetailsFieldsForReport() []KeyValueURL {
+	return []KeyValueURL{
+		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
+		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
+		{Key: "Acknowledgements", Value: strings.Join(flag.RawAcknowledements, ", ")},
+	}
 }
 
 type HighRiskFunderFlag struct {
@@ -236,6 +260,14 @@ func (flag *HighRiskFunderFlag) Date() (time.Time, bool) {
 	return flag.Work.PublicationDate, true
 }
 
+func (flag *HighRiskFunderFlag) GetDetailsFieldsForReport() []KeyValueURL {
+	return []KeyValueURL{
+		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
+		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
+		{Key: "Funders", Value: strings.Join(flag.Funders, ", ")},
+	}
+}
+
 type AuthorAffiliationFlag struct {
 	DisclosableFlag
 	Message      string
@@ -274,6 +306,14 @@ func (flag *AuthorAffiliationFlag) Date() (time.Time, bool) {
 	return flag.Work.PublicationDate, true
 }
 
+func (flag *AuthorAffiliationFlag) GetDetailsFieldsForReport() []KeyValueURL {
+	return []KeyValueURL{
+		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
+		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
+		{Key: "Affiliations", Value: strings.Join(flag.Affiliations, ", ")},
+	}
+}
+
 type PotentialAuthorAffiliationFlag struct {
 	DisclosableFlag
 	Message       string
@@ -308,6 +348,12 @@ func (flag *PotentialAuthorAffiliationFlag) GetDetailFields() []KeyValue {
 func (flag *PotentialAuthorAffiliationFlag) Date() (time.Time, bool) {
 	// TODO: add date information to this flag and return it here
 	return time.Time{}, false
+}
+
+func (flag *PotentialAuthorAffiliationFlag) GetDetailsFieldsForReport() []KeyValueURL {
+	return []KeyValueURL{
+		{Key: "University", Value: flag.University, Url: flag.UniversityUrl},
+	}
 }
 
 type Connection struct {
@@ -378,6 +424,22 @@ func (flag *MiscHighRiskAssociationFlag) Date() (time.Time, bool) {
 	return time.Time{}, false
 }
 
+func (flag *MiscHighRiskAssociationFlag) GetDetailsFieldsForReport() []KeyValueURL {
+	fields := []KeyValueURL{
+		{Key: "Title", Value: flag.DocTitle, Url: flag.DocUrl},
+		{Key: "Entities", Value: strings.Join(flag.DocEntities, ", ")},
+		{Key: "Entity Mentioned", Value: flag.EntityMentioned},
+	}
+	if flag.FrequentCoauthor != nil {
+		fields = append(fields, KeyValueURL{Key: "Frequent Coauthor", Value: *flag.FrequentCoauthor})
+	}
+	for i, conn := range flag.Connections {
+		titleKey := fmt.Sprintf("Connection %d", i+1)
+		fields = append(fields, KeyValueURL{Key: titleKey, Value: conn.DocTitle, Url: conn.DocUrl})
+	}
+	return fields
+}
+
 type CoauthorAffiliationFlag struct {
 	DisclosableFlag
 	Message      string
@@ -416,6 +478,15 @@ func (flag *CoauthorAffiliationFlag) GetDetailFields() []KeyValue {
 
 func (flag *CoauthorAffiliationFlag) Date() (time.Time, bool) {
 	return flag.Work.PublicationDate, true
+}
+
+func (flag *CoauthorAffiliationFlag) GetDetailsFieldsForReport() []KeyValueURL {
+	return []KeyValueURL{
+		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
+		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
+		{Key: "Co-authors", Value: strings.Join(flag.Coauthors, ", ")},
+		{Key: "Affiliations", Value: strings.Join(flag.Affiliations, ", ")},
+	}
 }
 
 type ReportContent map[string][]Flag
@@ -461,6 +532,14 @@ func (flag *MultipleAffiliationFlag) Date() (time.Time, bool) {
 	return flag.Work.PublicationDate, true
 }
 
+func (flag *MultipleAffiliationFlag) GetDetailsFieldsForReport() []KeyValueURL {
+	return []KeyValueURL{
+		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
+		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
+		{Key: "Affiliations", Value: strings.Join(flag.Affiliations, ", ")},
+	}
+}
+
 type HighRiskPublisherFlag struct {
 	DisclosableFlag
 	Message    string
@@ -499,6 +578,14 @@ func (flag *HighRiskPublisherFlag) Date() (time.Time, bool) {
 	return flag.Work.PublicationDate, true
 }
 
+func (flag *HighRiskPublisherFlag) GetDetailsFieldsForReport() []KeyValueURL {
+	return []KeyValueURL{
+		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
+		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
+		{Key: "Publishers", Value: strings.Join(flag.Publishers, ", ")},
+	}
+}
+
 type HighRiskCoauthorFlag struct {
 	DisclosableFlag
 	Message   string
@@ -535,4 +622,12 @@ func (flag *HighRiskCoauthorFlag) GetDetailFields() []KeyValue {
 
 func (flag *HighRiskCoauthorFlag) Date() (time.Time, bool) {
 	return flag.Work.PublicationDate, true
+}
+
+func (flag *HighRiskCoauthorFlag) GetDetailsFieldsForReport() []KeyValueURL {
+	return []KeyValueURL{
+		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
+		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
+		{Key: "Co-authors", Value: strings.Join(flag.Coauthors, ", ")},
+	}
 }

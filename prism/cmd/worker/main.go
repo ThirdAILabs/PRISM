@@ -103,7 +103,7 @@ func main() {
 		WorkDir:        config.WorkDir,
 	}
 
-	db := cmd.InitDb(config.PostgresUri)
+	db := cmd.OpenDB(config.PostgresUri)
 
 	reportManager := reports.NewManager(db, reports.StaleReportThreshold)
 

@@ -5,14 +5,39 @@ import './entityLookup.css';
 import Logo from '../../../assets/images/prism-logo.png';
 import { searchService } from '../../../api/search';
 
+const makeLinksClickable = (text) => {
+  const urlRegex = /((?:http|https):\/\/[^\s]+)/g;
+  if (!text) return text;
+
+  const parts = text.split(urlRegex);
+  return parts.map((part, i) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={i}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: '#2c5282', textDecoration: 'underline' }}
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+};
+
 function EntityLookup() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setHasSearched(true);
     try {
       const entities = await searchService.matchEntities(query);
       console.log(entities);
@@ -29,6 +54,7 @@ function EntityLookup() {
       <div style={{ textAlign: 'center', marginTop: '5.5%', animation: 'fade-in 0.75s' }}>
         <img
           src={Logo}
+          alt="Logo"
           style={{
             width: '320px',
             marginTop: '5%',
@@ -74,7 +100,11 @@ function EntityLookup() {
                   />
                 </div>
                 <div className="author-institution-search-button-container">
-                  <button type="submit" disabled={isLoading} className="button">
+                  <button
+                    type="submit"
+                    disabled={isLoading || query.length === 0}
+                    className="button"
+                  >
                     {isLoading ? 'Searching...' : 'Search'}
                   </button>
                 </div>
@@ -90,43 +120,55 @@ function EntityLookup() {
           role="status"
         ></div>
       )}
-      <div className="entity-lookup-results">
-        {results.map((entity, index) => (
-          <div key={index} className="entity-lookup-items">
-            <b>Names:</b>
-            <ul className="bulleted-list">
-              {entity.Names.split('\n').map((name, index2) => {
-                return <li key={`${index}-${index2}`}>{name}</li>;
-              })}
-            </ul>
 
-            {entity.Address && entity.Address.length > 0 && (
-              <>
-                <b>Address:</b>
-                <p>{entity.Address}</p>
-              </>
-            )}
-            {entity.Country && entity.Country.length > 0 && (
-              <>
-                <b>Country:</b>
-                <p>{entity.Country}</p>
-              </>
-            )}
-            {entity.Type && entity.Type.length > 0 && (
-              <>
-                <b>Type:</b>
-                <p>{entity.Type}</p>
-              </>
-            )}
-            {entity.Resource && entity.Resource.length > 0 && (
-              <>
-                <b>Resource:</b>
-                <p>{entity.Resource}</p>
-              </>
-            )}
+      {results.length > 0 ? (
+        <div className="entity-lookup-results">
+          {results.map((entity, index) => (
+            <div key={index} className="entity-lookup-items">
+              <b>Names:</b>
+              <ul className="bulleted-list">
+                {entity.Names.split('\n').map((name, index2) => (
+                  <li key={`${index}-${index2}`}>{name}</li>
+                ))}
+              </ul>
+
+              {entity.Address && (
+                <>
+                  <b>Address:</b>
+                  <p>{entity.Address}</p>
+                </>
+              )}
+              {entity.Country && (
+                <>
+                  <b>Country:</b>
+                  <p>{entity.Country}</p>
+                </>
+              )}
+              {entity.Type && (
+                <>
+                  <b>Type:</b>
+                  <p>{entity.Type}</p>
+                </>
+              )}
+              {entity.Resource && (
+                <>
+                  <b>Resource:</b>
+                  <p>{makeLinksClickable(entity.Resource)}</p>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        !isLoading &&
+        hasSearched && (
+          <div className="no-results">
+            <div className="no-results-icon">🔍</div>
+            <h3>We couldn't find any results</h3>
+            <p>Try adjusting your search to find what you're looking for.</p>
           </div>
-        ))}
-      </div>
+        )
+      )}
     </div>
   );
 }

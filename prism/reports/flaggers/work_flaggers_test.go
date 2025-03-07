@@ -184,7 +184,7 @@ func (m *mockAcknowledgmentExtractor) GetAcknowledgements(logger *slog.Logger, w
 			Acknowledgements: []Acknowledgement{{
 				RawText: "special thanks to bad entity xyz",
 				SearchableEntities: []Entity{
-					{"bad entity xyz", "", 0},
+					{EntityText: "bad entity xyz", EntityType: "", StartPosition: 0},
 				},
 			}},
 		},
