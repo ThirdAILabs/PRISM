@@ -38,7 +38,7 @@ func TestReportGeneration(t *testing.T) {
 		{
 			api.TalentContractType:               3,
 			api.AssociationsWithDeniedEntityType: 0,
-			api.HighRiskFunderType:               4,
+			api.HighRiskFunderType:               3,
 			api.AuthorAffiliationType:            4,
 			api.PotentialAuthorAffiliationType:   0,
 			api.MiscHighRiskAssociationType:      5,
