@@ -16,6 +16,7 @@ import { GetShowMenuIcon } from './utils/helper.js';
 import SearchProviderWrapper from './services/SearchProviderWrapper';
 import UniversityProviderWrapper from './services/UniversityProviderWrapper';
 import { Tooltip } from '@mui/material';
+import useOutsideClick from './hooks/useOutsideClick.js';
 
 //CSS
 import 'bootstrap/dist/css/bootstrap.css';
@@ -44,7 +45,9 @@ function AppContent() {
   }, []);
 
   const showMenuIcon = GetShowMenuIcon();
-
+  const sidepanelRef = useOutsideClick(() => {
+    setIsSidePanelOpen(false);
+  });
   return (
     <div className="App">
       {showMenuIcon && (
@@ -85,10 +88,12 @@ function AppContent() {
           </div>
         </Tooltip>
       )}
-      <SidePanel
-        isOpen={isSidePanelOpen && showMenuIcon}
-        onClose={() => setIsSidePanelOpen(false)}
-      />
+      <div ref={sidepanelRef}>
+        <SidePanel
+          isOpen={isSidePanelOpen && showMenuIcon}
+          onClose={() => setIsSidePanelOpen(false)}
+        />
+      </div>
       <Routes>
         <Route element={<SearchProviderWrapper />}>
           <Route path="/" element={<SearchComponent />} />
