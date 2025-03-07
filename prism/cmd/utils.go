@@ -55,7 +55,7 @@ func InitTriangulationDb(uri string) *gorm.DB {
 		&triangulation.FundCode{},
 	)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("error migrating fundcode triangulation db schema: %v", err)
 	}
 
 	return db

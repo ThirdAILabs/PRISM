@@ -11,10 +11,6 @@ type TriangulationDB struct {
 	db *gorm.DB
 }
 
-func (t *TriangulationDB) GetTriangulationDB() *gorm.DB {
-	return t.db
-}
-
 func (t *TriangulationDB) GetAuthorFundCodeResult(authorName, fundCode string) (*AuthorFundCodeResult, error) {
 	var result AuthorFundCodeResult
 

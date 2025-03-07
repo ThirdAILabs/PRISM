@@ -376,12 +376,6 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
 	logger *slog.Logger, acknowledgements []Acknowledgement, allAuthorNames []string,
 ) (map[string]map[string]bool, error) {
-	for _, ack := range acknowledgements {
-		for _, entity := range ack.SearchableEntities {
-			logger.Info("Found entity", "entity", entity)
-		}
-	}
-
 	var funders []Entity
 	triangulationResults := make(map[string]map[string]bool)
 
