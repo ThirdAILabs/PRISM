@@ -10,7 +10,7 @@ import {
   MISC_HIGH_RISK_AFFILIATIONS,
   COAUTHOR_AFFILIATIONS,
 } from '../../constants/constants.js';
-import ConcernVisualizer from '../ConcernVisualization.js';
+import ConcernVisualizer, { BaseFontSize, getFontSize } from '../ConcernVisualization.js';
 
 import { universityReportService } from '../../api/universityReports.js';
 import AuthorCard from '../common/cards/AuthorCard.js';
@@ -72,6 +72,7 @@ const UniversityReport = () => {
   const [selectedFlag, setSelectedFlag] = useState(null);
   const [selectedFlagData, setSelectedFlagData] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [valueFontSize, setValueFontSize] = useState(`${BaseFontSize}px`);
 
   const handleReview = (flag) => {
     setSelectedFlag(flag);
@@ -91,10 +92,22 @@ const UniversityReport = () => {
         setTotalResearchers(report.Content.TotalAuthors);
         setResearchersAssessed(report.Content.AuthorsReviewed);
         setLoading(false);
+
+        // Set font size based on the maximum number of flag count
+        const newFontSize = `${getFontSize(
+          Math.max(...FLAG_ORDER.map((flag) => report.Content.Flags[flag]?.length || 0))
+        )}px`;
+
+        setValueFontSize(newFontSize);
       } else if (report.Status === 'in-progress') {
         setInstituteName(report.UniversityName);
         setTotalResearchers(report.Content.TotalAuthors);
         setResearchersAssessed(report.Content.AuthorsReviewed);
+
+        // Set font size based on the maximum number of flag count
+        setValueFontSize(
+          getFontSize(Math.max(...FLAG_ORDER.map((flag) => reportContent.Flags[flag]?.length || 0)))
+        );
       } else if (isMounted) {
         setTimeout(poll, 10000);
       }
@@ -200,6 +213,7 @@ const UniversityReport = () => {
                     onReview={() => handleReview(flag)}
                     selected={flag === selectedFlag}
                     key={index}
+                    valueFontSize={valueFontSize}
                   />
                 );
               })
@@ -213,6 +227,7 @@ const UniversityReport = () => {
                     onReview={() => handleReview(flag)}
                     selected={flag === selectedFlag}
                     key={index}
+                    valueFontSize={valueFontSize}
                   />
                 );
               })}
