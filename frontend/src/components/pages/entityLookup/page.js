@@ -97,9 +97,6 @@ function EntityLookup() {
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="E.g. PQR Company"
                     className="search-bar"
-                    style={{
-                      marginBottom: '20px',
-                    }}
                   />
                 </div>
                 <div className="author-institution-search-button-container">
@@ -124,7 +121,7 @@ function EntityLookup() {
         ></div>
       )}
 
-      <div className="results-section">
+      <div className="entity-lookup-results">
         {results.length > 0
           ? results.map((entity, index) => (
               <div key={index} className="detail-item">
