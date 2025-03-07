@@ -39,6 +39,42 @@ type ReportRequest struct {
 	ContainsReportContent bool                       `json:"ContainsReportContent"`
 }
 
+func (request *ReportRequest) Validate() error {
+
+	if !request.ContainsReportContent {
+		return nil
+	}
+
+	if request.Id == "" {
+		return fmt.Errorf("report id is required")
+	}
+
+	if request.LastAccessedAt == "" {
+		return fmt.Errorf("last accessed at is required")
+	}
+
+	if request.AuthorId == "" {
+		return fmt.Errorf("author id is required")
+	}
+
+	if request.AuthorName == "" {
+		return fmt.Errorf("author name is required")
+	}
+
+	if request.Source == "" {
+		return fmt.Errorf("source is required")
+	}
+
+	if request.Status == "" {
+		return fmt.Errorf("status is required")
+	}
+
+	if request.Content == nil {
+		return fmt.Errorf("content is required")
+	}
+	return nil
+}
+
 func convertReportRequestToReport(request *ReportRequest) (api.Report, error) {
 
 	id, err := uuid.Parse(request.Id)
@@ -276,6 +312,11 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 	var requestBody ReportRequest
 	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
 		http.Error(w, "Invalid request format", http.StatusBadRequest)
+		return
+	}
+
+	if err := requestBody.Validate(); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
