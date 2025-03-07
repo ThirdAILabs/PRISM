@@ -39,7 +39,7 @@ type ReportRequest struct {
 	ContainsReportContent bool                       `json:"ContainsReportContent"`
 }
 
-func downloadReportRequestToReportContent(request *ReportRequest) (api.Report, error) {
+func convertReportRequestToReport(request *ReportRequest) (api.Report, error) {
 
 	id, err := uuid.Parse(request.Id)
 	if err != nil {
@@ -283,7 +283,7 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 
 	var report api.Report
 	if containsReportContent {
-		report, err = downloadReportRequestToReportContent(&requestBody)
+		report, err = convertReportRequestToReport(&requestBody)
 	} else {
 		report, err = s.manager.GetAuthorReport(userId, reportId)
 	}
