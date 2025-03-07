@@ -23,7 +23,7 @@ type Config struct {
 	PostgresUri              string `env:"DB_URI,notEmpty,required"`
 	FundcodeTriangulationUri string `env:"FUNDCODE_TRIANGULATION_DB_URI,notEmpty,required"`
 	Logfile                  string `env:"LOGFILE,notEmpty" envDefault:"prism_worker.log"`
-	NdbLicense               string `env:"NDB_LICENSE,notEmpty,required"`
+	PrismLicense             string `env:"PRISM_LICENSE,notEmpty,required"`
 
 	WorkDir string `env:"WORK_DIR,notEmpty" envDefault:"./work"`
 
