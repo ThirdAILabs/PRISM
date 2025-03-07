@@ -63,21 +63,17 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 0 auto;
-  margin-top: 1rem;
 }
 
 .search-type-label {
   font-weight: bold;
-  font-size: 1rem;
-  margin-bottom: 4px;
   color: black;
   text-align: center;
 }
 
 .search-select-smaller {
   width: 100%;
-  max-width: 220px;
+  max-width: 180px;
   padding: 10px;
   font-size: 1rem;
   border: none;
