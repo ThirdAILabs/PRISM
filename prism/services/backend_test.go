@@ -93,7 +93,7 @@ func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 	}
 
 	backend := services.NewBackend(
-		db, openalex.NewRemoteKnowledgeBase(), entitySearch, &MockTokenVerifier{prefix: userPrefix}, licensing,
+		db, openalex.NewRemoteKnowledgeBase(), entitySearch, &MockTokenVerifier{prefix: userPrefix}, licensing, "./resources",
 	)
 
 	return backend.Routes(), db

@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/cmd"
 	"prism/prism/licensing"
@@ -48,6 +49,8 @@ type Config struct {
 	// This variable is directly loaded by the openai client library, it is just
 	// listed here so that and error is raised if it's missing.
 	OpenaiKey string `env:"OPENAI_API_KEY,notEmpty,required"`
+
+	ResourceFolder string `env:"RESOURCE_FOLDER,notEmpty,required"`
 }
 
 func (c *Config) logfile() string {
@@ -101,6 +104,36 @@ func buildEntityNdb(entityPath string) services.EntitySearch {
 	return es
 }
 
+func verifyResourceFolder(resourceFolder string) {
+	info, err := os.Stat(resourceFolder)
+	if os.IsNotExist(err) {
+		log.Fatalf("resource folder '%s' does not exist", resourceFolder)
+	}
+
+	if !info.IsDir() {
+		log.Fatalf("resource folder '%s' is not a directory", resourceFolder)
+	}
+
+	logoPath := filepath.Join(resourceFolder, "prism-logo.png")
+	logo, err := os.ReadFile(logoPath)
+	if err != nil {
+		log.Fatalf("error reading logo: %v", err)
+	}
+
+	if len(logo) == 0 {
+		log.Fatalf("logo is empty")
+	}
+
+	headerLogoPath := filepath.Join(resourceFolder, "prism-header-logo.png")
+	headerLogo, err := os.ReadFile(headerLogoPath)
+	if err != nil {
+		log.Fatalf("error reading header logo: %v", err)
+	}
+	if len(headerLogo) == 0 {
+		log.Fatalf("header logo is empty")
+	}
+}
+
 func main() {
 	cmd.LoadEnvFile()
 
@@ -148,7 +181,9 @@ func main() {
 		log.Fatalf("error initializing keycloak user auth: %v", err)
 	}
 
-	backend := services.NewBackend(db, openalex, entitySearch, userAuth, licensing)
+	verifyResourceFolder(config.ResourceFolder)
+
+	backend := services.NewBackend(db, openalex, entitySearch, userAuth, licensing, config.ResourceFolder)
 
 	r := chi.NewRouter()
 
