@@ -127,6 +127,7 @@ func (auth *KeycloakAuth) createRealm(adminToken string) error {
 		AccessTokenLifespan:             gocloak.IntP(1500),
 		SsoSessionMaxLifespan:           gocloak.IntP(259200),
 		SsoSessionIdleTimeoutRememberMe: gocloak.IntP(259200),
+		SsoSessionMaxLifespanRememberMe: gocloak.IntP(259200),
 		RememberMe:                      gocloak.BoolP(true),
 		PasswordPolicy:                  gocloak.StringP("length(8) and digits(1) and lowerCase(1) and upperCase(1) and specialChars(1)"),
 		BruteForceProtected:             gocloak.BoolP(true),
