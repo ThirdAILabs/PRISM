@@ -198,9 +198,8 @@ const ItemDetails = () => {
         setLoading(false);
 
         const newFontSize = `${getFontSize(
-          Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0))
+          Math.max(...FLAG_ORDER.map((flag) => report.Content.Flags[flag]?.length || 0))
         )}px`;
-        setValueFontSize(newFontSize);
 
         inProgress = report.Status === 'queued' || report.Status === 'in-progress';
       }

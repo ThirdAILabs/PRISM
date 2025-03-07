@@ -97,7 +97,6 @@ const UniversityReport = () => {
         const newFontSize = `${getFontSize(
           Math.max(...FLAG_ORDER.map((flag) => report.Content.Flags[flag]?.length || 0))
         )}px`;
-
         setValueFontSize(newFontSize);
       } else if (report.Status === 'in-progress') {
         setInstituteName(report.UniversityName);
@@ -105,9 +104,10 @@ const UniversityReport = () => {
         setResearchersAssessed(report.Content.AuthorsReviewed);
 
         // Set font size based on the maximum number of flag count
-        setValueFontSize(
-          getFontSize(Math.max(...FLAG_ORDER.map((flag) => reportContent.Flags[flag]?.length || 0)))
-        );
+        const newFontSize = `${getFontSize(
+          Math.max(...FLAG_ORDER.map((flag) => report.Content.Flags[flag]?.length || 0))
+        )}px`;
+        setValueFontSize(newFontSize);
       } else if (isMounted) {
         setTimeout(poll, 10000);
       }
