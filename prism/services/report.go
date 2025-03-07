@@ -13,7 +13,6 @@ import (
 	"prism/prism/schema"
 	"prism/prism/services/auth"
 	"strings"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -199,8 +198,6 @@ func (s *ReportService) CheckDisclosure(r *http.Request) (any, error) {
 			updateFlagDisclosure(flag, allFileTexts)
 		}
 	}
-
-	s.manager.UpdateAuthorReport(report.Id, schema.ReportCompleted, time.Now(), report.Content)
 	return report, nil
 }
 
