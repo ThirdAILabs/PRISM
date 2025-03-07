@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -26,6 +27,80 @@ type ReportService struct {
 	resourceFolder string
 }
 
+func downloadReportRequestToReportContent(data map[string]interface{}) (api.Report, error) {
+	id, err := GetUUIDFromMap(data, "Id")
+	if err != nil {
+		return api.Report{}, fmt.Errorf("error parsing report id: %w", err)
+	}
+
+	lastAccessedAt, err := GetTimeFromMap(data, "LastAccessedAt")
+	if err != nil {
+		return api.Report{}, fmt.Errorf("error parsing report last accessed at: %w", err)
+	}
+
+	authorId, err := GetStringFromMap(data, "AuthorId")
+	if err != nil {
+		return api.Report{}, fmt.Errorf("error parsing report author id: %w", err)
+	}
+
+	authorName, err := GetStringFromMap(data, "AuthorName")
+	if err != nil {
+		return api.Report{}, fmt.Errorf("error parsing report author name: %w", err)
+	}
+
+	source, err := GetStringFromMap(data, "Source")
+	if err != nil {
+		return api.Report{}, fmt.Errorf("error parsing report source: %w", err)
+	}
+
+	status, err := GetStringFromMap(data, "Status")
+	if err != nil {
+		return api.Report{}, fmt.Errorf("error parsing report status: %w", err)
+	}
+
+	report := api.Report{
+		Id:             id,
+		LastAccessedAt: lastAccessedAt,
+		AuthorId:       authorId,
+		AuthorName:     authorName,
+		Source:         source,
+		Status:         status,
+		Content:        make(map[string][]api.Flag),
+	}
+
+	contentData, ok := data["Content"].(map[string]interface{})
+	if !ok {
+		return api.Report{}, fmt.Errorf("error parsing report content: %w", errors.New("content is not a map"))
+	}
+
+	for flagType, flagsData := range contentData {
+		flagsArray, ok := flagsData.([]interface{})
+		if !ok {
+			return api.Report{}, fmt.Errorf("error parsing flags for flag type %s: %w", flagType, errors.New("flags are not an array"))
+		}
+
+		flags := make([]api.Flag, 0, len(flagsArray))
+		for _, flagData := range flagsArray {
+			flagBytes, err := json.Marshal(flagData)
+			if err != nil {
+				return api.Report{}, fmt.Errorf("error serializing flag: %w", err)
+			}
+
+			flag, err := api.EmptyFlag(flagType)
+			if err != nil {
+				return api.Report{}, fmt.Errorf("error creating empty flag of the type %s: %w", flagType, err)
+			}
+			if err := json.Unmarshal(flagBytes, flag); err != nil {
+				return api.Report{}, fmt.Errorf("error deserializing flag of the type %s: %w", flagType, err)
+			}
+			flags = append(flags, flag)
+		}
+		report.Content[flagType] = flags
+	}
+
+	return report, nil
+}
+
 func (s *ReportService) Routes() chi.Router {
 	r := chi.NewRouter()
 
@@ -35,7 +110,7 @@ func (s *ReportService) Routes() chi.Router {
 		r.Get("/{report_id}", WrapRestHandler(s.GetReport))
 		r.Delete("/{report_id}", WrapRestHandler(s.DeleteAuthorReport))
 		r.Post("/{report_id}/check-disclosure", WrapRestHandler(s.CheckDisclosure))
-		r.Get("/{report_id}/download", s.DownloadReport)
+		r.Post("/{report_id}/download", s.DownloadReport)
 	})
 
 	r.Route("/university", func(r chi.Router) {
@@ -214,7 +289,30 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	report, err := s.manager.GetAuthorReport(userId, reportId)
+	requestBody, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var requestBodyMap map[string]interface{}
+	if err := json.Unmarshal(requestBody, &requestBodyMap); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	containsReportContent, err := GetBoolFromMap(requestBodyMap, "contains_report_content")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var report api.Report
+	if containsReportContent {
+		report, err = downloadReportRequestToReportContent(requestBodyMap)
+	} else {
+		report, err = s.manager.GetAuthorReport(userId, reportId)
+	}
 	if err != nil {
 		http.Error(w, err.Error(), reportErrorStatus(err))
 		return

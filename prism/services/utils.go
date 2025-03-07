@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"prism/prism/licensing"
 	"prism/prism/reports"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -20,6 +21,58 @@ func ParseRequestBody[T any](r *http.Request) (T, error) {
 		return data, fmt.Errorf("error parsing request body")
 	}
 	return data, nil
+}
+
+func GetStringFromMap(data map[string]interface{}, key string) (string, error) {
+	result, ok := data[key]
+	if !ok {
+		return "", fmt.Errorf("key %s not found in map", key)
+	}
+
+	resultString, ok := result.(string)
+	if !ok {
+		return "", fmt.Errorf("key %s is not a string", key)
+	}
+	return resultString, nil
+}
+
+func GetUUIDFromMap(data map[string]interface{}, key string) (uuid.UUID, error) {
+	result, ok := data[key]
+	if !ok {
+		return uuid.Nil, fmt.Errorf("key %s not found in map", key)
+	}
+
+	resultUUID, ok := result.(uuid.UUID)
+	if !ok {
+		return uuid.Nil, fmt.Errorf("key %s is not a uuid", key)
+	}
+	return resultUUID, nil
+}
+
+func GetTimeFromMap(data map[string]interface{}, key string) (time.Time, error) {
+	result, ok := data[key]
+	if !ok {
+		return time.Time{}, fmt.Errorf("key %s not found in map", key)
+	}
+
+	resultTime, ok := result.(time.Time)
+	if !ok {
+		return time.Time{}, fmt.Errorf("key %s is not a time", key)
+	}
+	return resultTime, nil
+}
+
+func GetBoolFromMap(data map[string]interface{}, key string) (bool, error) {
+	result, ok := data[key]
+	if !ok {
+		return false, fmt.Errorf("key %s not found in map", key)
+	}
+
+	resultBool, ok := result.(bool)
+	if !ok {
+		return false, fmt.Errorf("key %s is not a bool", key)
+	}
+	return resultBool, nil
 }
 
 type codedError struct {
