@@ -87,13 +87,12 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  margin: 30px;
-  margin-top: 0;
+  margin-left: 150px;
   align-items: center;
 }
 
 .single-search-row {
-  width: 40%;
+  width: 100%;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -101,7 +100,7 @@
 }
 
 .single-search-bar-container {
-  width: 85%;
+  width: 87%;
 }
 
 .single-search-button-container {
@@ -109,7 +108,7 @@
 }
 
 .single-search-bar-label {
-  width: 40%;
+  width: 100%;
   text-align: left;
   font-size: 24px;
   font-weight: bold;
