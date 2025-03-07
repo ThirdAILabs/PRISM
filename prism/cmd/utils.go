@@ -8,7 +8,6 @@ import (
 	"log/slog"
 	"net/url"
 	"os"
-	"prism/prism/triangulation"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -35,18 +34,10 @@ func OpenDB(uri string) *gorm.DB {
 	return db
 }
 
-func InitTriangulationDb(uri string) *gorm.DB {
+func OpenTriangulationDB(uri string) *gorm.DB {
 	db, err := gorm.Open(postgres.Open(uriToDsn(uri)), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("error opening triangulation database connection: %v", err)
-	}
-
-	err = db.AutoMigrate(
-		&triangulation.Author{},
-		&triangulation.FundCode{},
-	)
-	if err != nil {
-		log.Fatalf("error migrating fundcode triangulation db schema: %v", err)
 	}
 
 	return db

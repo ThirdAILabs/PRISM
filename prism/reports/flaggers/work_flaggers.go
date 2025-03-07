@@ -380,32 +380,25 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
 
 	for _, ack := range acknowledgements {
 		for _, entity := range ack.SearchableEntities {
-
 			if len(entity.FundCodes) > 0 {
 				for _, sussyBaka := range flagger.sussyBakas {
 					if strings.Contains(" "+strings.ToLower(entity.EntityText)+" ", fmt.Sprintf(" %s ", sussyBaka)) {
-						logger.Info("Found a concerning funder", "funder", entity.EntityText, "grants", entity.FundCodes)
+						if _, ok := triangulationResults[entity.EntityText]; !ok {
+							triangulationResults[entity.EntityText] = make(map[string]bool)
+						}
 
 						for _, grantNumber := range entity.FundCodes {
 							for _, authorName := range allAuthorNames {
-								result, err := flagger.triangulationDB.GetAuthorFundCodeResult(authorName, grantNumber)
+								result, err := flagger.triangulationDB.IsAuthorGrantRecipient(authorName, grantNumber)
 								if err != nil {
-									logger.Error("error executing triangulation query", "error", err)
 									continue
 								}
-								if result != nil {
-									if _, ok := triangulationResults[entity.EntityText]; !ok {
-										triangulationResults[entity.EntityText] = make(map[string]bool)
-									}
-									if float64(result.NumPapersByAuthor)/float64(result.NumPapers) >= 0.4 {
-										triangulationResults[entity.EntityText][grantNumber] = true
-									} else {
-										triangulationResults[entity.EntityText][grantNumber] = false
-									}
-								}
+
+								logger.Info("triangulation result", "author", authorName, "grant", grantNumber, "result", result)
+								triangulationResults[entity.EntityText][grantNumber] = result
+								break
 							}
 						}
-
 					}
 				}
 			}

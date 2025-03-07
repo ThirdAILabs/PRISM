@@ -11,6 +11,10 @@ type TriangulationDB struct {
 	db *gorm.DB
 }
 
+func CreateTriangulationDB(db *gorm.DB) *TriangulationDB {
+	return &TriangulationDB{db: db}
+}
+
 func (t *TriangulationDB) GetAuthorFundCodeResult(authorName, fundCode string) (*AuthorFundCodeResult, error) {
 	var result AuthorFundCodeResult
 
@@ -23,17 +27,28 @@ func (t *TriangulationDB) GetAuthorFundCodeResult(authorName, fundCode string) (
 
 	if err != nil {
 		slog.Error("error executing fundcode triangulation query", "error", err)
-		return nil, fmt.Errorf("error executing query: %w", err)
+		return nil, fmt.Errorf("error executing fund codd triangulation query: %w", err)
 	}
 
 	if result.NumPapersByAuthor == 0 && result.NumPapers == 0 {
-		slog.Info("not found author and number of papers with triangulation query", "author_name", authorName, "fund_code", fundCode)
 		return nil, nil
 	}
 
 	return &result, nil
 }
 
-func CreateTriangulationDB(db *gorm.DB) *TriangulationDB {
-	return &TriangulationDB{db: db}
+func (t *TriangulationDB) IsAuthorGrantRecipient(authorName string, grantNumber string) (bool, error) {
+	result, err := t.GetAuthorFundCodeResult(authorName, grantNumber)
+
+	if err != nil {
+		return false, err
+	}
+
+	if result != nil {
+		if float64(result.NumPapersByAuthor)/float64(result.NumPapers) >= 0.4 {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
