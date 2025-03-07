@@ -79,7 +79,7 @@ function AppContent() {
             onClick={() => setIsSidePanelOpen(!isSidePanelOpen)}
             className="sidebar-toggle"
           >
-            {isSidePanelOpen ? <GoSidebarCollapse size={30} /> : <GoSidebarExpand size={30} />}
+            {isSidePanelOpen ? <GoSidebarExpand size={30} /> : <GoSidebarCollapse size={30} />}
           </div>
         </Tooltip>
       )}
