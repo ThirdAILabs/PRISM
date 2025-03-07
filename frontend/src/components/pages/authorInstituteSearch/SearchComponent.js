@@ -1,18 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import AuthorInstitutionSearchComponent from './AuthorInstitutionSearch';
 import OrcidSearchComponent from './OrcidSearch';
 import { SearchContext } from '../../../store/searchContext';
 import PaperTitleSearchComponent from './PaperTitleSearch';
 import Logo from '../../../assets/images/prism-logo.png';
-import '../../common/searchBar/SearchBar.css';
-import '../../common/tools/button/button1.css';
 
 const SearchComponent = () => {
-  const [selectedSearchType, setSelectedSearchType] = useState('author');
+  const { searchState, setSearchState } = useContext(SearchContext);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const params = new URLSearchParams(location.search);
+  const defaultType = params.get('type') || 'author';
+
+  const [selectedSearchType, setSelectedSearchType] = useState(defaultType);
 
   const handleSearchTypeChange = (e) => {
-    setSelectedSearchType(e.target.value);
+    const newType = e.target.value;
+    setSelectedSearchType(newType);
+
+    setSearchState((prev) => ({
+      ...prev,
+      // author/institution data
+      author: null,
+      institution: null,
+      openAlexResults: [],
+      hasSearched: false,
+      loadMoreCount: 0,
+      canLoadMore: true,
+      isOALoading: false,
+
+      // orcid data
+      orcidResults: [],
+      isOrcidLoading: false,
+      hasSearchedOrcid: false,
+
+      // paper data
+      paperResults: [],
+      isPaperLoading: false,
+      hasSearchedPaper: false,
+    }));
+
+    navigate(`?type=${newType}`);
   };
+
+  useEffect(() => {
+    const newType = params.get('type') || 'author';
+    setSelectedSearchType(newType);
+  }, [location.search, params]);
 
   return (
     <div className="basic-setup" style={{ color: 'black' }}>
