@@ -518,6 +518,15 @@ func (flag *CoauthorAffiliationFlag) Date() (time.Time, bool) {
 	return flag.Work.PublicationDate, true
 }
 
+func (flag *CoauthorAffiliationFlag) GetDetailsFieldsForReport() []KeyValueURL {
+	return []KeyValueURL{
+		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
+		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
+		{Key: "Co-authors", Value: strings.Join(flag.Coauthors, ", ")},
+		{Key: "Affiliations", Value: strings.Join(flag.Affiliations, ", ")},
+	}
+}
+
 //The following flags are unused by the frontend, but they are kept in case we
 // want to have them in the future.
 
