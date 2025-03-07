@@ -8,9 +8,13 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# Serve the static files with Nginx
 FROM nginx:stable-alpine
 COPY --from=builder /app/build /usr/share/nginx/html
 
+COPY public/config.template.js /usr/share/nginx/html/
+
+COPY entrypoint.sh /docker-entrypoint.d/entrypoint.sh
+RUN chmod +x /docker-entrypoint.d/entrypoint.sh
+
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["/docker-entrypoint.d/entrypoint.sh", "nginx", "-g", "daemon off;"]
