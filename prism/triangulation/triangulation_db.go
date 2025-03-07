@@ -21,7 +21,7 @@ func (t *TriangulationDB) GetAuthorFundCodeResult(authorName, fundCode string) (
 	err := t.db.Table("authors a").
 		Select("a.numpapersbyauthor, f.numpapers").
 		Joins("JOIN fundcodes f ON a.fundcode_id = f.id").
-		Where("a.authorname = ? AND f.fundcodes = ?", authorName, fundCode).
+		Where("a.authorname = ? AND f.fundcode = ?", authorName, fundCode).
 		Limit(1).
 		Scan(&result).Error
 
