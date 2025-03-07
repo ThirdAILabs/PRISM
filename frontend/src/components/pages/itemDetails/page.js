@@ -883,9 +883,10 @@ const ItemDetails = () => {
                     backgroundColor: 'rgb(160, 160, 160)',
                     border: 'none',
                     color: 'white',
-                    width: '200px',
+                    width: '180px',
                     fontWeight: 'bold',
                     fontSize: '14px',
+                    marginRight: '10px',
                   }}
                 >
                   Filter by Timeline
@@ -894,11 +895,12 @@ const ItemDetails = () => {
                   <div
                     className="dropdown-menu show p-2"
                     style={{
-                      width: '200px',
+                      width: '180px',
                       backgroundColor: 'rgb(160, 160, 160)',
                       border: 'none',
                       right: 0,
                       marginTop: '5px',
+                      marginRight: '10px',
                       color: 'white',
                       fontWeight: 'bold',
                       fontSize: '14px',
