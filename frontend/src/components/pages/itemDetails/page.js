@@ -165,7 +165,7 @@ const ItemDetails = () => {
         message: 'Disclosure check succeeded!',
       });
 
-      const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
+      const maxLength = Math.max(...FLAG_ORDER.map((flag) => result.Content[flag]?.length || 0));
       const newFontSize = `${getFontSize(maxLength)}px`;
 
       setValueFontSize(newFontSize);
@@ -279,17 +279,17 @@ const ItemDetails = () => {
 
     const displayStart = startDate
       ? parseLocalDate(startDate).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
       : 'earliest';
     const displayEnd = endDate
       ? parseLocalDate(endDate).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
       : 'today';
 
     setFilterMessage(`${displayStart} to ${displayEnd}`);
@@ -299,7 +299,7 @@ const ItemDetails = () => {
 
     setReportContent(filteredContent);
 
-    const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
+    const maxLength = Math.max(...FLAG_ORDER.map((flag) => reportContent[flag]?.length || 0));
     const newFontSize = `${getFontSize(maxLength)}px`;
 
     setValueFontSize(newFontSize);
@@ -570,7 +570,7 @@ const ItemDetails = () => {
           {flag.RawAcknowledements.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
-          <p>{ }</p>
+          <p>{}</p>
         </p>
       </div>
     );
