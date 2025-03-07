@@ -10,7 +10,7 @@ import {
   MISC_HIGH_RISK_AFFILIATIONS,
   COAUTHOR_AFFILIATIONS,
 } from '../../../constants/constants.js';
-import ConcernVisualizer from '../../ConcernVisualization.js';
+import ConcernVisualizer, { BaseFontSize, getFontSize } from '../../ConcernVisualization.js';
 import Graph from '../../common/graph/graph.js';
 import Tabs from '../../common/tools/Tabs.js';
 import DownloadButton from '../../common/tools/button/downloadButton.js';
@@ -102,6 +102,7 @@ const ItemDetails = () => {
   const [institutions, setInstitutions] = useState([]);
   const [initialReprtContent, setInitialReportContent] = useState({});
   const [isDisclosureChecked, setDisclosureChecked] = useState(false);
+  const [valueFontSize, setValueFontSize] = useState(`${BaseFontSize}px`);
 
   // box shadow for disclosed/undisclosed buttons
   const greenBoxShadow = '0 0px 10px rgb(0, 183, 46)';
@@ -195,6 +196,12 @@ const ItemDetails = () => {
         setReportContent(report.Content);
         setInitialReportContent(report.Content);
         setLoading(false);
+
+        const newFontSize = `${getFontSize(
+          Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0))
+        )}px`;
+        setValueFontSize(newFontSize);
+
         inProgress = report.Status === 'queued' || report.Status === 'in-progress';
       }
 
@@ -292,6 +299,12 @@ const ItemDetails = () => {
 
     setReportContent(filteredContent);
     handleDropdownChange(1);
+
+    // Change font size if needed
+    const newFontSize = `${getFontSize(
+      Math.max(...FLAG_ORDER.map((flag) => filteredContent[flag]?.length || 0))
+    )}px`;
+    setValueFontSize(newFontSize);
   };
   const [review, setReview] = useState();
 
@@ -1042,6 +1055,7 @@ const ItemDetails = () => {
                     onReview={() => setReview(flag)}
                     key={index}
                     selected={isSelected}
+                    valueFontSize={valueFontSize}
                   />
                 );
               })}
