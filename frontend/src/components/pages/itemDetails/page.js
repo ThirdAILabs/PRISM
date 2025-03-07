@@ -188,23 +188,25 @@ const ItemDetails = () => {
   useEffect(() => {
     let isMounted = true;
     const poll = async () => {
-      let inProgress = true;
       const report = await reportService.getReport(report_id);
-      if (report.Content && Object.keys(report.Content).length > 0 && isMounted) {
-        console.log('Report', report);
+
+      if (!isMounted) return;
+
+      let inProgress = report.Status === 'queued' || report.Status === 'in-progress';
+      setLoading(inProgress);
+
+      if (report.Content && Object.keys(report.Content).length > 0) {
         setAuthorName(report.AuthorName);
         setReportContent(report.Content);
         setInitialReportContent(report.Content);
-        setLoading(false);
 
         const newFontSize = `${getFontSize(
           Math.max(...FLAG_ORDER.map((flag) => report.Content.Flags[flag]?.length || 0))
         )}px`;
-
-        inProgress = report.Status === 'queued' || report.Status === 'in-progress';
+        setValueFontSize(newFontSize);
       }
 
-      if (inProgress) {
+      if (inProgress && isMounted) {
         setTimeout(poll, 2000);
       }
     };

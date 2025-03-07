@@ -174,7 +174,7 @@ const UniversityReport = () => {
         <div className="d-flex w-100 flex-column align-items-center">
           <div className="d-flex w-100 px-5 align-items-center my-2 mt-3 justify-content-between">
             <div style={{ width: '20px' }}>
-              {loading && (
+              {(loading || toatlResearchers != researchersAssessed) && (
                 <div className="spinner-border text-primary spinner-border-sm" role="status"></div>
               )}
             </div>
