@@ -13,7 +13,7 @@ const PaperTitleSearchComponent = () => {
   const [paperTitle, setPaperTitle] = useState(paperTitleQuery || '');
   const [isSelected, setIsSelected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const debouncedSearch = useCallOnPause(300);
 
   const autocompletePaperTitle = useCallback(
@@ -36,9 +36,9 @@ const PaperTitleSearchComponent = () => {
 
   const search = async (title) => {
     if (!isSelected) {
-        alert('Please select a valid paper title from the suggestions');
-        return;
-      }
+      alert('Please select a valid paper title from the suggestions');
+      return;
+    }
     setSearchState((prev) => ({
       ...prev,
       paperTitleQuery: title,
@@ -64,7 +64,7 @@ const PaperTitleSearchComponent = () => {
   return (
     <div style={{ textAlign: 'center', marginTop: '3%' }}>
       <div style={{ marginTop: '1rem' }}>
-        <div className="author-institution-search-bar">
+        <div className="paper-search-bar">
           <div className="autocomplete-search-bar">
             <AutocompleteSearchBar
               title="Paper Title"
@@ -87,12 +87,8 @@ const PaperTitleSearchComponent = () => {
         </div>
       </div>
       {isLoading && <div>Loading...</div>}
-      {hasSearchedPaper && !isLoading && paperResults.length === 0 && (
-        <div>No results found.</div>
-      )}
-      {hasSearchedPaper && paperResults.length > 0 && (
-        <TodoListComponent results={paperResults} />
-      )}
+      {hasSearchedPaper && !isLoading && paperResults.length === 0 && <div>No results found.</div>}
+      {hasSearchedPaper && paperResults.length > 0 && <TodoListComponent results={paperResults} />}
     </div>
   );
 };

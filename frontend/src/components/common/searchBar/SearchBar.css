@@ -49,6 +49,15 @@
   margin-top: 60px;
 }
 
+.paper-search-bar {
+  width: 95.5%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-left: 7.5%;
+  margin-top: 60px;
+}
+
 .author-institution-search-bar-container {
   width: 40%;
 }
