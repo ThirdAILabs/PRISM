@@ -8,30 +8,38 @@ RUN apt-get update && apt-get install -y \
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
-# Install Firefox with Playwright and its dependencies
-RUN go run github.com/playwright-community/playwright-go/cmd/playwright install --with-deps firefox
+# Install Playwright CLI globally for later use
+RUN PWGO_VER=$(grep -oE "playwright-go v\S+" ./go.mod | sed 's/playwright-go //g') \
+    && go install github.com/playwright-community/playwright-go/cmd/playwright@${PWGO_VER}
 
 COPY prism prism
-RUN echo ls -la
 RUN mkdir -p bin
 RUN CGO_ENABLED=1 GOOS=linux go build -o bin/backend -v ./prism/cmd/backend/main.go
 RUN CGO_ENABLED=1 GOOS=linux go build -o bin/worker -v ./prism/cmd/worker/main.go
 
-FROM gcr.io/distroless/base-debian11 AS build-release-stage
+# Change to Ubuntu for the final stage instead of distroless
+FROM debian:11-slim AS build-release-stage
 WORKDIR /app
 
+# Copy binaries
 COPY --from=build-stage /app/bin/* ./
+COPY --from=build-stage /go/bin/playwright /usr/local/bin/
 
-# Copy SSL libraries from their actual location
-COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libssl.so* /lib/x86_64-linux-gnu/
-COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libcrypto.so* /lib/x86_64-linux-gnu/
-
-# Copy other libraries
-COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libstdc++.so* /lib/x86_64-linux-gnu/
-COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libgomp.so* /lib/x86_64-linux-gnu/
-COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libgcc_s.so* /lib/x86_64-linux-gnu/
-COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libc.so* /lib/x86_64-linux-gnu/
-COPY --from=build-stage /usr/lib64/ld-linux-x86-64.so* /lib64/
+# Install Playwright dependencies
+RUN apt-get update && apt-get install -y ca-certificates tzdata \
+    && /usr/local/bin/playwright install --with-deps firefox \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy application data
 COPY data data
+
+# Copy SSL libraries from their actual location
+COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libssl.so* /usr/lib/x86_64-linux-gnu/
+COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libcrypto.so* /usr/lib/x86_64-linux-gnu/
+
+# Copy other libraries
+COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libstdc++.so* /usr/lib/x86_64-linux-gnu/
+COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libgomp.so* /usr/lib/x86_64-linux-gnu/
+COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libgcc_s.so* /usr/lib/x86_64-linux-gnu/
+COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libc.so* /usr/lib/x86_64-linux-gnu/
+COPY --from=build-stage /usr/lib64/ld-linux-x86-64.so* /lib64/
