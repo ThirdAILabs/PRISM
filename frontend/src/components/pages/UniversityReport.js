@@ -33,31 +33,31 @@ const todayStr = new Date().toISOString().split('T')[0];
 const TitlesAndDescriptions = {
   [TALENT_CONTRACTS]: {
     title: 'Talent Contracts',
-    desc: 'Authors in these papers are recruited by talent programs that have close ties to high-risk foreign governments.',
+    desc: 'Researchers in this list appear in papers funded by Talent Contracts.',
   },
   [ASSOCIATIONS_WITH_DENIED_ENTITIES]: {
     title: 'Funding from Denied Entities',
-    desc: 'Some of the parties involved in these works are in the denied entity lists of U.S. government agencies.',
+    desc: 'Researchers in this list appear in papers funded by Denied Entities.',
   },
   [HIGH_RISK_FUNDERS]: {
     title: 'High Risk Funding Sources',
-    desc: 'These papers are funded by funding sources that have close ties to high-risk foreign governments.',
+    desc: 'Researchers in this list appear in papers funded by High Risk Funding Sources.',
   },
   [AUTHOR_AFFILIATIONS]: {
     title: 'Affiliations with High Risk Foreign Institutes',
-    desc: 'Papers that list the queried author as being affiliated with a high-risk foreign institution or web pages that showcase official appointments at high-risk foreign institutions.',
+    desc: 'Researchers in this list have affiliations with High Risk Foreign Institutes.',
   },
   [POTENTIAL_AUTHOR_AFFILIATIONS]: {
     title: 'Appointments at High Risk Foreign Institutes*',
-    desc: 'The author may have an appointment at a high-risk foreign institutions.\n\n*Collated information from the web, might contain false positives.',
+    desc: 'Researchers in this list have appointments with High Risk Foreign Institutes.\n\n*Collated information from the web, might contain false positives.',
   },
   [MISC_HIGH_RISK_AFFILIATIONS]: {
     title: 'Miscellaneous High Risk Connections*',
-    desc: 'The author or an associate may be mentioned in a press release.\n\n*Collated information from the web, might contain false positives.',
+    desc: 'Researchers in this list or their associates appear in press releases.\n\n*Collated information from the web, might contain false positives.',
   },
   [COAUTHOR_AFFILIATIONS]: {
     title: "Co-authors' affiliations with High Risk Foreign Institutes",
-    desc: 'Coauthors in these papers are affiliated with high-risk foreign institutions.',
+    desc: 'Researchers in this list have co-authors who are affiliated with High Risk Foreign Institutes.',
   },
 };
 
@@ -72,6 +72,7 @@ const UniversityReport = () => {
   const [selectedFlag, setSelectedFlag] = useState(null);
   const [selectedFlagData, setSelectedFlagData] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [valueFontSize, setValueFontSize] = useState(`${BaseFontSize}px`);
 
   const handleReview = (flag) => {
@@ -120,7 +121,6 @@ const UniversityReport = () => {
     };
   }, []);
 
-  const [loading, setLoading] = useState(true);
   const goBack = useGoBack('/university');
 
   return (
@@ -171,15 +171,18 @@ const UniversityReport = () => {
       </div>
 
       <>
-        <div className="d-flex w-100 flex-column align-items-center">
+        {/* <div className="d-flex w-100 flex-column align-items-center">
           <div className="d-flex w-100 px-5 align-items-center my-2 mt-3 justify-content-between">
             <div style={{ width: '20px' }}>
-              {(loading || toatlResearchers != researchersAssessed) && (
-                <div className="spinner-border text-primary spinner-border-sm" role="status"></div>
-              )}
+              {loading && <div class="spinner-border text-secondary" role="status" />}
             </div>
           </div>
-        </div>
+        </div> */}
+        {loading && (
+          <div class="d-flex justify-content-start">
+            <div class="spinner-border text-secondary ms-5 mt-3 mb-3" role="status" />
+          </div>
+        )}
         {
           <div
             className="d-flex w-100 flex-column align-items-center"
