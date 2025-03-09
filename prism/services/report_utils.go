@@ -239,7 +239,7 @@ func printWatermark(pdf *gofpdf.Fpdf, text string) {
 	pdf.SetTextColor(currR, currG, currB)
 }
 
-func setupPDFHeader(pdf *gofpdf.Fpdf, resourceFolder string) {
+func setupPDFHeader(pdf *gofpdf.Fpdf, resourceFolder string, authorName string) {
 	pdf.SetHeaderFunc(func() {
 		currentR, currentG, currentB := pdf.GetTextColor()
 		pageWidth, _ := pdf.GetPageSize()
@@ -249,9 +249,9 @@ func setupPDFHeader(pdf *gofpdf.Fpdf, resourceFolder string) {
 		pdf.Image(filepath.Join(resourceFolder, "prism-header-logo.png"), 20, 10, logoWidth, 0, false, "", 0, "")
 
 		// prism report text
-		pdf.SetFont("Arial", "B", 14)
+		pdf.SetFont("Arial", "B", 12)
 		pdf.SetTextColor(0, 0, 200)
-		pdf.Text(pageWidth/2-pdf.GetStringWidth("PRISM REPORT")/2, 17, "PRISM REPORT")
+		pdf.Text(pageWidth-pdf.GetStringWidth(fmt.Sprintf("%s Report", authorName))-20, 17, fmt.Sprintf("%s Report", authorName))
 
 		// divider line
 		pdf.SetDrawColor(200, 200, 200)
@@ -283,7 +283,7 @@ func setupPDFCoverPage(pdf *gofpdf.Fpdf, report api.Report, resourceFolder strin
 
 	// add prism logo to the front page
 	logoPath := filepath.Join(resourceFolder, "prism-logo.png")
-	logoWidth := 150.0 // Width in mm, adjust as needed
+	logoWidth := 100.0 // Width in mm, adjust as needed
 
 	// Get page width to center the logo
 	pageWidth, _ := pdf.GetPageSize()
@@ -295,12 +295,12 @@ func setupPDFCoverPage(pdf *gofpdf.Fpdf, report api.Report, resourceFolder strin
 
 	// Add the logo at position (xPos, 20) with width logoWidth
 	pdf.Image(logoPath, xPos, 50, logoWidth, 0, false, "", 0, "")
-	pdf.Ln(60)
+	pdf.Ln(40)
 
 	pdf.SetY(200)
 	pdf.SetFont("Arial", "B", 14)
 	pdf.SetFillColor(200, 200, 255)
-	pdf.CellFormat(0, 10, "PRISM REPORT", "0", 1, "C", true, 0, "")
+	pdf.CellFormat(0, 10, "Individual Report", "0", 1, "C", true, 0, "")
 	pdf.Ln(2)
 
 	details := [][]string{
@@ -405,7 +405,7 @@ func generatePDF(report api.Report, resourceFolder string) ([]byte, error) {
 
 	// Reserve page for TOC (page 2)
 	// we set the header after the cover page so that header logo starts from page 2
-	setupPDFHeader(pdf, resourceFolder)
+	setupPDFHeader(pdf, resourceFolder, report.AuthorName)
 	pdf.AddPage()
 	tocPage := pdf.PageNo()
 

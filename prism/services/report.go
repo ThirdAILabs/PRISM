@@ -353,7 +353,7 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		contentType = "text/csv"
-		filename = "report.csv"
+		filename = fmt.Sprintf("%s Report.csv", report.AuthorName)
 	case "pdf":
 		fileBytes, err = generatePDF(report, s.resourceFolder)
 		if err != nil {
@@ -361,7 +361,7 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		contentType = "application/pdf"
-		filename = "report.pdf"
+		filename = fmt.Sprintf("%s Report.pdf", report.AuthorName)
 	case "excel", "xlsx":
 		fileBytes, err = generateExcel(report)
 		if err != nil {
@@ -369,7 +369,7 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-		filename = "report.xlsx"
+		filename = fmt.Sprintf("%s Report.xlsx", report.AuthorName)
 	default:
 		http.Error(w, "unsupported format", http.StatusBadRequest)
 		return
