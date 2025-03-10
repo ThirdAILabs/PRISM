@@ -37,15 +37,19 @@ func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downl
 		maxWorkers: 10,
 		grobid: resty.New().
 			SetBaseURL(grobidEndpoint).
+			SetRetryCount(2).
 			AddRetryCondition(func(response *resty.Response, err error) bool {
 				if err != nil {
 					return true // The err can be non nil for some network errors.
 				}
-				// There's no reason to retry other 400 requests since the outcome should not change
-				return response != nil && (response.StatusCode() > 499 || response.StatusCode() == http.StatusTooManyRequests)
+				// Grobid returns 503 if there are too many requests:
+				// https://grobid.readthedocs.io/en/latest/Grobid-service/
+				// TODO: Should we retry on error code 500? grobid will return 500 for invalid pdfs,
+				// so it's not clear if this is a retryable error.
+				return response != nil && (response.StatusCode() == http.StatusServiceUnavailable)
 			}).
-			SetRetryWaitTime(500 * time.Millisecond).
-			SetRetryMaxWaitTime(5 * time.Second),
+			SetRetryWaitTime(2 * time.Second).
+			SetRetryMaxWaitTime(10 * time.Second),
 		downloadDir: downloadDir,
 	}
 }
@@ -94,7 +98,7 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 
 		acks, err := extractor.extractAcknowledgments(workId, next)
 		if err != nil {
-			return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments for work %s: %w", next.WorkId, err)
+			return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments for work %s (%s): %w", next.WorkId, next.DownloadUrl, err)
 		}
 
 		extractor.cache.Update(workId, acks)
@@ -115,7 +119,10 @@ func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId 
 	if err != nil {
 		return Acknowledgements{}, err
 	}
-	defer pdf.Close()
+
+	if closer, ok := pdf.(io.Closer); ok {
+		defer closer.Close()
+	}
 
 	defer func() {
 		if err := os.Remove(destPath); err != nil && !errors.Is(err, os.ErrNotExist) {
@@ -153,6 +160,10 @@ func downloadWithPlaywright(url, destPath string) (io.ReadCloser, error) {
 		return nil, fmt.Errorf("error creating browser context: %w", err)
 	}
 	defer context.Close()
+
+	// When pdfs fail to download it is often just because they reach the timeout,
+	// which slows down processing. Decreasing the timeout will hopefully speed this up.
+	context.SetDefaultTimeout(15000)
 
 	page, err := context.NewPage()
 	if err != nil {
@@ -193,7 +204,7 @@ var headers = map[string]string{
 	"sec-ch-ua-platform":        `"Windows"`,
 }
 
-func downloadWithHttp(url string) (io.ReadCloser, error) {
+func downloadWithHttp(url string) (io.Reader, error) {
 	req, err := http.NewRequest("GET", strings.Replace(url, " ", "%20", -1), nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating http request: %w", err)
@@ -207,17 +218,31 @@ func downloadWithHttp(url string) (io.ReadCloser, error) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("error downloading pdf: %w", err)
+		return nil, fmt.Errorf("error downloading pdf from %s: %w", url, err)
 	}
+	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("error downloading pdf: recieved status_code=%d", res.StatusCode)
+		return nil, fmt.Errorf("error downloading pdf from %s: recieved status_code=%d", url, res.StatusCode)
 	}
 
-	return res.Body, nil
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response: %w", err)
+	}
+
+	// Sometimes the above download can succeed, but instead of returning a pdf, it
+	// will return the html for the page containing the pdf. This leads to an error
+	// when we make a call to grobid. This is a simple trick to check if it is a valid pdf.
+	// https://stackoverflow.com/questions/6186980/determine-if-a-byte-is-a-pdf-file
+	if !bytes.HasPrefix(data, []byte("%PDF")) {
+		return nil, fmt.Errorf("download did not return valid pdf")
+	}
+
+	return bytes.NewReader(data), nil
 }
 
-func downloadPdf(url, destPath string) (io.ReadCloser, error) {
+func downloadPdf(url, destPath string) (io.Reader, error) {
 	attempt1, err1 := downloadWithHttp(url)
 	if err1 != nil {
 	} else {
