@@ -280,7 +280,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) getAuthorNames(authorIds []string) 
 }
 
 func (flagger *OpenAlexAcknowledgementIsEOC) containsSussyBakas(text string) bool {
-	text = fmt.Sprintf(" %s ", strings.ToLower(text))
+	text = fmt.Sprintf(" %s ", strings.ToLower(strings.TrimSpace(text)))
 
 	for _, sussyBaka := range flagger.sussyBakas {
 		if strings.Contains(text, fmt.Sprintf(" %s ", sussyBaka)) {
@@ -315,7 +315,6 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForSussyBaka(ack Acknowledgeme
 	}
 	newText += ack.RawText[prevEndPos:]
 
-	newText = strings.TrimSpace(newText)
 	newText = punctCleaningRe.ReplaceAllString(newText, " ")
 
 	return flagger.containsSussyBakas(newText)
@@ -398,7 +397,6 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
 								continue
 							}
 
-							logger.Info("triangulation result", "author", authorName, "grant", grantNumber, "result", result)
 							triangulationResults[entity.EntityText][grantNumber] = result
 							break
 						}
@@ -512,8 +510,6 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 			workLogger.Error("error checking acknowledgements: skipping work", "error", err)
 			continue
 		}
-
-		workLogger.Info("found flagged entities in acknowledgements", "n_entities", len(flaggedEntities))
 
 		var triangulationResults map[string]map[string]bool
 
