@@ -133,6 +133,7 @@ func (auth *KeycloakAuth) createRealm(adminToken string) error {
 		QuickLoginCheckMilliSeconds:  gocloak.Int64P(int64(1000)),
 		MaxDeltaTimeSeconds:          gocloak.IntP(43200),
 		FailureFactor:                gocloak.IntP(30),
+		VerifyEmail:                  gocloak.BoolP(true),
 		SMTPServer: &map[string]string{
 			"host":     "smtp.sendgrid.net",
 			"port":     "465",
@@ -245,6 +246,11 @@ func (auth *KeycloakAuth) VerifyToken(token string) (uuid.UUID, error) {
 	if userInfo.Sub == nil {
 		auth.logger.Error("missing user identifier in keycloak response")
 		return uuid.Nil, fmt.Errorf("missing user identifier in keycloak response")
+	}
+
+	if userInfo.EmailVerified == nil || !*userInfo.EmailVerified {
+		auth.logger.Error("user email is not verified", "user", *userInfo.Sub)
+		return uuid.Nil, fmt.Errorf("email not verified")
 	}
 
 	userId, err := uuid.Parse(*userInfo.Sub)
