@@ -25,10 +25,10 @@ const initKeycloak = (onAuthenticatedCallback) => {
       checkLoginIframe: false,
       // Token timeouts in seconds
       timeSkew: 0,
-      tokenMinValidity: 30, // Start refreshing 30 seconds before expiry
+      tokenMinValidity: 150, // Start refreshing 30 seconds before expiry
       refreshToken: true,
       // Token lifetimes
-      sessionTimeOutInSeconds: 1800, // 30 minutes
+      sessionTimeOutInSeconds: 1500, // 25 minutes
       refreshTokenTimeoutInSeconds: 259200, // 3 days
       // Silent refresh
       silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
@@ -43,7 +43,7 @@ const initKeycloak = (onAuthenticatedCallback) => {
         console.log('User is authenticated');
         // Set up token refresh
         setInterval(() => {
-          _kc.updateToken(70).catch(() => {
+          _kc.updateToken(150).catch(() => {
             console.log('Failed to refresh token');
           });
         }, 60000); // Check every minute
