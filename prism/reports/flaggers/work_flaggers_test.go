@@ -254,9 +254,8 @@ func TestFundCodeTriangulation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer authorCache.Close()
-
 	authorCache.Update("1", openalex.Author{AuthorId: "1", DisplayName: "Jane Smith"})
+	defer authorCache.Close()
 
 	aliasToSource := map[string]string{
 		"bad entity xyz": "source_a",
