@@ -248,11 +248,6 @@ func (auth *KeycloakAuth) VerifyToken(token string) (uuid.UUID, error) {
 		return uuid.Nil, fmt.Errorf("missing user identifier in keycloak response")
 	}
 
-	if userInfo.EmailVerified == nil || !*userInfo.EmailVerified {
-		auth.logger.Error("user email is not verified", "user", *userInfo.Sub)
-		return uuid.Nil, fmt.Errorf("email not verified")
-	}
-
 	userId, err := uuid.Parse(*userInfo.Sub)
 	if err != nil {
 		auth.logger.Error("unable to parse user id from keycloak", "id", *userInfo.Sub, "error", err)
