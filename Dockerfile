@@ -32,6 +32,7 @@ RUN apt-get update && apt-get install -y ca-certificates tzdata \
 
 # Copy application data
 COPY data data
+COPY prism/services/resources resources
 
 # Copy SSL libraries from their actual location
 COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libssl.so* /usr/lib/x86_64-linux-gnu/
@@ -43,7 +44,3 @@ COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libgomp.so* /usr/lib/x86_64-li
 COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libgcc_s.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libc.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=build-stage /usr/lib64/ld-linux-x86-64.so* /lib64/
-
-# Copy application data
-COPY data data
-COPY prism/services/resources resources
