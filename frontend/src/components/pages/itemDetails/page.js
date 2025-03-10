@@ -105,6 +105,7 @@ const ItemDetails = () => {
   const [initialReprtContent, setInitialReportContent] = useState({});
   const [isDisclosureChecked, setDisclosureChecked] = useState(false);
   const [valueFontSize, setValueFontSize] = useState(`${BaseFontSize}px`);
+  const [reportMetadata, setReportMetadata] = useState({});
 
   // box shadow for disclosed/undisclosed buttons
   const greenBoxShadow = '0 0px 10px rgb(0, 183, 46)';
@@ -153,9 +154,17 @@ const ItemDetails = () => {
 
     try {
       const result = await reportService.checkDisclosure(report_id, files);
-      setReportContent(result.Content);
-      setInitialReportContent(result.Content);
+      const { Content, ...metadata } = result;
+      setReportContent(Content);
+      setInitialReportContent(Content);
       setDisclosureChecked(true);
+
+      setReportMetadata({
+        ...metadata,
+        ContainsDisclosure: true,
+        ContainsReportContent: true,
+      });
+
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -190,11 +199,16 @@ const ItemDetails = () => {
     const poll = async () => {
       let inProgress = true;
       const report = await reportService.getReport(report_id);
-      if (report.Content && Object.keys(report.Content).length > 0 && isMounted) {
+      const { Content, ...metadata } = report;
+      if (Content && Object.keys(Content).length > 0 && isMounted) {
         console.log('Report', report);
         setAuthorName(report.AuthorName);
-        setReportContent(report.Content);
-        setInitialReportContent(report.Content);
+        setReportContent(Content);
+        setInitialReportContent(Content);
+        setReportMetadata({
+          ...metadata,
+          ContainsReportContent: true,
+        });
         setLoading(false);
 
         const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
@@ -279,17 +293,17 @@ const ItemDetails = () => {
 
     const displayStart = startDate
       ? parseLocalDate(startDate).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
       : 'earliest';
     const displayEnd = endDate
       ? parseLocalDate(endDate).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
       : 'today';
 
     setFilterMessage(`${displayStart} to ${displayEnd}`);
@@ -298,6 +312,10 @@ const ItemDetails = () => {
     setEndDate('');
 
     setReportContent(filteredContent);
+    setReportMetadata({
+      ...reportMetadata,
+      TimeRange: `${displayStart} to ${displayEnd}`,
+    });
 
     const maxLength = Math.max(...FLAG_ORDER.map((flag) => reportContent[flag]?.length || 0));
     const newFontSize = `${getFontSize(maxLength)}px`;
@@ -570,7 +588,7 @@ const ItemDetails = () => {
           {flag.RawAcknowledements.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
-          <p>{}</p>
+          <p>{ }</p>
         </p>
       </div>
     );
@@ -1002,6 +1020,8 @@ const ItemDetails = () => {
             <div ref={dropdownDownloadRef}>
               <DownloadButton
                 reportId={report_id}
+                metadata={reportMetadata}
+                content={reportContent}
                 isOpen={downloadDropdownOpen}
                 setIsOpen={() => setDownloadDropdownOpen(!downloadDropdownOpen)}
               />

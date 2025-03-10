@@ -37,6 +37,8 @@ type ReportRequest struct {
 	Status                string                     `json:"Status"`
 	Content               map[string]json.RawMessage `json:"Content"`
 	ContainsReportContent bool                       `json:"ContainsReportContent"`
+	ContainsDisclosure    bool                       `json:"ContainsDisclosure"`
+	TimeRange             string                     `json:"TimeRange"`
 }
 
 func (request *ReportRequest) Validate() error {
@@ -75,16 +77,16 @@ func (request *ReportRequest) Validate() error {
 	return nil
 }
 
-func convertReportRequestToReport(request *ReportRequest) (api.Report, error) {
+func convertReportRequestToReport(request *ReportRequest) (api.Report, string, error) {
 
 	id, err := uuid.Parse(request.Id)
 	if err != nil {
-		return api.Report{}, fmt.Errorf("error parsing report id: %w", err)
+		return api.Report{}, "", fmt.Errorf("error parsing report id: %w", err)
 	}
 
 	lastAccessedAt, err := time.Parse(time.RFC3339, request.LastAccessedAt)
 	if err != nil {
-		return api.Report{}, fmt.Errorf("error parsing report last accessed at: %w", err)
+		return api.Report{}, "", fmt.Errorf("error parsing report last accessed at: %w", err)
 	}
 
 	report := api.Report{
@@ -100,25 +102,25 @@ func convertReportRequestToReport(request *ReportRequest) (api.Report, error) {
 	for flagType, flagsData := range request.Content {
 		var flagsArray []json.RawMessage
 		if err := json.Unmarshal(flagsData, &flagsArray); err != nil {
-			return api.Report{}, fmt.Errorf("error deserializing flags: %w", err)
+			return api.Report{}, "", fmt.Errorf("error deserializing flags: %w", err)
 		}
 
 		flags := make([]api.Flag, 0, len(flagsArray))
 		for _, rawFlag := range flagsArray {
 			flag, err := api.EmptyFlag(flagType)
 			if err != nil {
-				return api.Report{}, fmt.Errorf("error creating empty flag of the type %s: %w", flagType, err)
+				return api.Report{}, "", fmt.Errorf("error creating empty flag of the type %s: %w", flagType, err)
 			}
 
 			if err := json.Unmarshal(rawFlag, flag); err != nil {
-				return api.Report{}, fmt.Errorf("error deserializing flag of the type %s: %w", flagType, err)
+				return api.Report{}, "", fmt.Errorf("error deserializing flag of the type %s: %w", flagType, err)
 			}
 			flags = append(flags, flag)
 		}
 		report.Content[flagType] = flags
 	}
 
-	return report, nil
+	return report, request.TimeRange, nil
 }
 
 func (s *ReportService) Routes() chi.Router {
@@ -323,8 +325,9 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 	containsReportContent := requestBody.ContainsReportContent
 
 	var report api.Report
+	var timeRange string
 	if containsReportContent {
-		report, err = convertReportRequestToReport(&requestBody)
+		report, timeRange, err = convertReportRequestToReport(&requestBody)
 	} else {
 		report, err = s.manager.GetAuthorReport(userId, reportId)
 	}
@@ -355,7 +358,7 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 		contentType = "text/csv"
 		filename = fmt.Sprintf("%s Report.csv", report.AuthorName)
 	case "pdf":
-		fileBytes, err = generatePDF(report, s.resourceFolder)
+		fileBytes, err = generatePDF(report, s.resourceFolder, requestBody.ContainsDisclosure, timeRange)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
