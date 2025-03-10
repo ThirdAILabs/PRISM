@@ -122,7 +122,7 @@ func (auth *KeycloakAuth) createRealm(adminToken string) error {
 		Enabled:                         gocloak.BoolP(true),
 		IdentityProviders:               &[]interface{}{},
 		DefaultRoles:                    &[]string{"user"},
-		RegistrationAllowed:             gocloak.BoolP(false),
+		RegistrationAllowed:             gocloak.BoolP(true),
 		ResetPasswordAllowed:            gocloak.BoolP(true),
 		AccessTokenLifespan:             gocloak.IntP(1500),
 		SsoSessionMaxLifespan:           gocloak.IntP(259200),
