@@ -38,11 +38,16 @@ export const reportService = {
     );
     return response.data;
   },
-  downloadReport: async (reportId, format) => {
+  downloadReport: async (reportId, format, metadata, content) => {
     try {
-      const response = await axiosInstance.get(
-        `${API_ROUTES.REPORTS.DOWNLOAD(reportId)}?format=${format}`,
+      const response = await axiosInstance.post(
+        `${API_ROUTES.REPORTS.DOWNLOAD(reportId)}`,
         {
+          ...metadata,
+          Content: content,
+        },
+        {
+          params: { format },
           responseType: 'blob',
         }
       );

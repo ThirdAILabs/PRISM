@@ -321,17 +321,13 @@ func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTi
 	})
 }
 
-func flagsToReportContent(flags []schema.AuthorFlag) (api.ReportContent, error) {
-	content := make(api.ReportContent)
+func flagsToReportContent(flags []schema.AuthorFlag) (map[string][]api.Flag, error) {
+	content := make(map[string][]api.Flag)
 
 	for _, flag := range flags {
-		output, err := api.EmptyFlag(flag.FlagType)
+		output, err := api.ParseFlag(flag.FlagType, flag.Data)
 		if err != nil {
-			slog.Error("error creating empty flag", "error", err)
 			return nil, err
-		}
-		if err := json.Unmarshal(flag.Data, output); err != nil {
-			return nil, fmt.Errorf("error deserializing flag: %w", err)
 		}
 		content[output.Type()] = append(content[output.Type()], output)
 	}
@@ -359,14 +355,23 @@ func convertReport(report schema.UserAuthorReport) (api.Report, error) {
 func (r *ReportManager) ListUniversityReports(userId uuid.UUID) ([]api.UniversityReport, error) {
 	var reports []schema.UserUniversityReport
 
-	if err := r.db.Preload("Report").Order("last_accessed_at DESC").Find(&reports, "user_id = ?", userId).Error; err != nil {
+	if err := r.db.Preload("Report").Preload("Report.Authors").Order("last_accessed_at DESC").Find(&reports, "user_id = ?", userId).Error; err != nil {
 		slog.Error("error finding list of reports ")
 		return nil, ErrReportAccessFailed
 	}
 
 	results := make([]api.UniversityReport, 0, len(reports))
 	for _, report := range reports {
-		results = append(results, convertUniversityReport(report, api.UniversityReportContent{}))
+		content := api.UniversityReportContent{}
+		for _, author := range report.Report.Authors {
+			switch author.Status {
+			case schema.ReportCompleted, schema.ReportFailed:
+				content.AuthorsReviewed++
+			}
+			content.TotalAuthors++
+		}
+
+		results = append(results, convertUniversityReport(report, content))
 	}
 
 	return results, nil

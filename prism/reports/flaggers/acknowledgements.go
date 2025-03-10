@@ -37,15 +37,19 @@ func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downl
 		maxWorkers: 10,
 		grobid: resty.New().
 			SetBaseURL(grobidEndpoint).
+			SetRetryCount(2).
 			AddRetryCondition(func(response *resty.Response, err error) bool {
 				if err != nil {
 					return true // The err can be non nil for some network errors.
 				}
-				// There's no reason to retry other 400 requests since the outcome should not change
-				return response != nil && (response.StatusCode() > 499 || response.StatusCode() == http.StatusTooManyRequests)
+				// Grobid returns 503 if there are too many requests:
+				// https://grobid.readthedocs.io/en/latest/Grobid-service/
+				// TODO: Should we retry on error code 500? grobid will return 500 for invalid pdfs,
+				// so it's not clear if this is a retryable error.
+				return response != nil && (response.StatusCode() == http.StatusServiceUnavailable)
 			}).
-			SetRetryWaitTime(500 * time.Millisecond).
-			SetRetryMaxWaitTime(5 * time.Second),
+			SetRetryWaitTime(2 * time.Second).
+			SetRetryMaxWaitTime(10 * time.Second),
 		downloadDir: downloadDir,
 	}
 }
@@ -54,6 +58,8 @@ type Entity struct {
 	EntityText    string
 	EntityType    string
 	StartPosition int
+
+	FundCodes []string
 }
 
 type Acknowledgement struct {
@@ -92,7 +98,7 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 
 		acks, err := extractor.extractAcknowledgments(workId, next)
 		if err != nil {
-			return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments for work %s: %w", next.WorkId, err)
+			return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments for work %s (%s): %w", next.WorkId, next.DownloadUrl, err)
 		}
 
 		extractor.cache.Update(workId, acks)
@@ -113,7 +119,10 @@ func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId 
 	if err != nil {
 		return Acknowledgements{}, err
 	}
-	defer pdf.Close()
+
+	if closer, ok := pdf.(io.Closer); ok {
+		defer closer.Close()
+	}
 
 	defer func() {
 		if err := os.Remove(destPath); err != nil && !errors.Is(err, os.ErrNotExist) {
@@ -151,6 +160,10 @@ func downloadWithPlaywright(url, destPath string) (io.ReadCloser, error) {
 		return nil, fmt.Errorf("error creating browser context: %w", err)
 	}
 	defer context.Close()
+
+	// When pdfs fail to download it is often just because they reach the timeout,
+	// which slows down processing. Decreasing the timeout will hopefully speed this up.
+	context.SetDefaultTimeout(15000)
 
 	page, err := context.NewPage()
 	if err != nil {
@@ -191,7 +204,7 @@ var headers = map[string]string{
 	"sec-ch-ua-platform":        `"Windows"`,
 }
 
-func downloadWithHttp(url string) (io.ReadCloser, error) {
+func downloadWithHttp(url string) (io.Reader, error) {
 	req, err := http.NewRequest("GET", strings.Replace(url, " ", "%20", -1), nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating http request: %w", err)
@@ -205,17 +218,31 @@ func downloadWithHttp(url string) (io.ReadCloser, error) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("error downloading pdf: %w", err)
+		return nil, fmt.Errorf("error downloading pdf from %s: %w", url, err)
 	}
+	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("error downloading pdf: recieved status_code=%d", res.StatusCode)
+		return nil, fmt.Errorf("error downloading pdf from %s: recieved status_code=%d", url, res.StatusCode)
 	}
 
-	return res.Body, nil
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response: %w", err)
+	}
+
+	// Sometimes the above download can succeed, but instead of returning a pdf, it
+	// will return the html for the page containing the pdf. This leads to an error
+	// when we make a call to grobid. This is a simple trick to check if it is a valid pdf.
+	// https://stackoverflow.com/questions/6186980/determine-if-a-byte-is-a-pdf-file
+	if !bytes.HasPrefix(data, []byte("%PDF")) {
+		return nil, fmt.Errorf("download did not return valid pdf")
+	}
+
+	return bytes.NewReader(data), nil
 }
 
-func downloadPdf(url, destPath string) (io.ReadCloser, error) {
+func downloadPdf(url, destPath string) (io.Reader, error) {
 	attempt1, err1 := downloadWithHttp(url)
 	if err1 != nil {
 	} else {
@@ -231,14 +258,51 @@ func downloadPdf(url, destPath string) (io.ReadCloser, error) {
 	return nil, fmt.Errorf("unable to download pdf, http error: %w, playwright error: %w", err1, err2)
 }
 
-var searchAbleEntityTypes = map[string]bool{
-	"affiliation": true,
-	"funderName":  true,
-	"grantName":   true,
-	"institution": true,
-	"programName": true,
-	"projectName": true,
-	"funder":      true,
+const (
+	funderType      = "funder"
+	funderNameType  = "funderName"
+	grantNameType   = "grantName"
+	grantNumberType = "grantNumber"
+)
+
+var searchableEntityTypes = map[string]bool{
+	funderType:     true,
+	funderNameType: true,
+	grantNameType:  true,
+	"affiliation":  true,
+	"institution":  true,
+	"programName":  true,
+	"projectName":  true,
+}
+
+func mergeFundersAndFundCodes(entities []Entity) []Entity {
+	merged := make([]Entity, 0)
+
+	for _, entity := range entities {
+		entityMerged := false
+
+		if entity.EntityType == grantNameType && len(merged) > 0 {
+			last := merged[len(merged)-1]
+
+			if last.EntityType == funderType || last.EntityType == funderNameType {
+				last.EntityText += " " + entity.EntityText
+				entityMerged = true
+			}
+		} else if entity.EntityType == grantNumberType && len(merged) > 0 {
+			last := merged[len(merged)-1]
+
+			if last.EntityType == funderType || last.EntityType == funderNameType || last.EntityType == grantNameType {
+				merged[len(merged)-1].FundCodes = append(merged[len(merged)-1].FundCodes, entity.EntityText)
+				entityMerged = true
+			}
+		}
+
+		if !entityMerged {
+			merged = append(merged, entity)
+		}
+	}
+
+	return merged
 }
 
 // Grobid extracts header from acknowledgements (e.g. "Acknowledgments" or "Funding")
@@ -259,13 +323,11 @@ func parseGrobidReponse(data io.Reader) ([]Acknowledgement, error) {
 	acks := make([]Acknowledgement, 0)
 
 	processor := func(i int, s *goquery.Selection) {
-		text := strings.TrimSpace(s.Text())
-		text = cleanAckHeader(text)
-
-		searchable := make([]Entity, 0)
-		misc := make([]Entity, 0)
+		text := cleanAckHeader(strings.TrimSpace(s.Text()))
 
 		last := 0
+
+		allEntities := make([]Entity, 0)
 
 		s.Find("rs").Each(func(i int, s *goquery.Selection) {
 			entityText := s.Text()
@@ -273,12 +335,19 @@ func parseGrobidReponse(data io.Reader) ([]Acknowledgement, error) {
 			start := strings.Index(text[last:], entityText) + last
 			last = start + len(entityText)
 
-			if searchAbleEntityTypes[entityType] {
-				searchable = append(searchable, Entity{EntityText: entityText, EntityType: entityType, StartPosition: start})
-			} else {
-				misc = append(misc, Entity{EntityText: entityText, EntityType: entityType, StartPosition: start})
-			}
+			allEntities = append(allEntities, Entity{EntityText: entityText, EntityType: entityType, StartPosition: start})
 		})
+
+		searchable := make([]Entity, 0)
+		misc := make([]Entity, 0)
+
+		for _, entity := range mergeFundersAndFundCodes(allEntities) {
+			if searchableEntityTypes[entity.EntityType] {
+				searchable = append(searchable, entity)
+			} else {
+				misc = append(misc, entity)
+			}
+		}
 
 		acks = append(acks, Acknowledgement{RawText: text, SearchableEntities: searchable, MiscEntities: misc})
 	}

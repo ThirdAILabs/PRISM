@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/csv"
 	"fmt"
+	"path/filepath"
 	"prism/prism/api"
 	"slices"
 	"strings"
@@ -223,41 +224,97 @@ func printWatermark(pdf *gofpdf.Fpdf, text string) {
 	pdf.SetFont("Arial", "B", 50)
 	pdf.SetAlpha(0.2, "Normal")
 	x, y := pdf.GetPageSize()
+
+	// Get text width to calculate center position
+	textWidth := pdf.GetStringWidth(text)
+
 	pdf.TransformBegin()
 	pdf.TransformRotate(45, x/2, y/2)
 	pdf.SetTextColor(200, 200, 200)
-	pdf.Text(x/4, y/2, text)
+	// Position text centered on page
+	pdf.Text(x/2-textWidth/2, y/2, text)
 	pdf.TransformEnd()
 
 	pdf.SetAlpha(1, "Normal")
 	pdf.SetTextColor(currR, currG, currB)
 }
 
-func generatePDF(report api.Report) ([]byte, error) {
-	pdf := gofpdf.New("P", "mm", "A4", "")
-	pdf.SetMargins(20, 20, 20)
-	pdf.SetAutoPageBreak(true, 20)
+func setupPDFHeader(pdf *gofpdf.Fpdf, resourceFolder string, authorName string) {
+	pdf.SetHeaderFunc(func() {
+		currentR, currentG, currentB := pdf.GetTextColor()
+		pageWidth, _ := pdf.GetPageSize()
 
-	pdf.SetFooterFunc(func() {
-		pdf.SetY(-15)
-		pdf.SetFont("Arial", "I", 8)
-		pdf.CellFormat(0, 10, fmt.Sprintf("Page %d of {nb}", pdf.PageNo()), "", 0, "C", false, 0, "")
+		// add smaller logo to header
+		logoWidth := 10.0
+		pdf.Image(filepath.Join(resourceFolder, "prism-header-logo.png"), 20, 10, logoWidth, 0, false, "", 0, "")
+
+		// prism report text
+		pdf.SetFont("Arial", "B", 10)
+		// dark grey color for author name
+		pdf.SetTextColor(100, 100, 100)
+		pdf.Text(pageWidth-pdf.GetStringWidth(authorName)-20, 17, authorName)
+
+		// divider line
+		pdf.SetDrawColor(200, 200, 200)
+		pdf.Line(20, 25, pageWidth-20, 25)
+
+		// watermark
+		printWatermark(pdf, "PRISM")
+
+		// restore original settings
+		// assume we're using Arial 14 font
+		pdf.SetFont("Arial", "", 14)
+		pdf.SetTextColor(currentR, currentG, currentB)
 	})
+}
 
-	pdf.AliasNbPages("{nb}")
+func setupPDFFooter(pdf *gofpdf.Fpdf) {
+	pdf.SetFooterFunc(func() {
+		currentR, currentG, currentB := pdf.GetTextColor()
+		pdf.SetTextColor(0, 0, 0)
+		pdf.SetFont("Arial", "I", 8)
+		pdf.SetY(-15)
+		pdf.CellFormat(0, 10, fmt.Sprintf("Page %d of {nb}", pdf.PageNo()), "", 0, "C", false, 0, "")
+		pdf.SetTextColor(currentR, currentG, currentB)
+	})
+}
 
+func setupPDFCoverPage(pdf *gofpdf.Fpdf, report api.Report, resourceFolder string, timeRange string) {
 	pdf.AddPage()
-	printWatermark(pdf, "PRISM")
+
+	// add prism logo to the front page
+	logoPath := filepath.Join(resourceFolder, "prism-logo.png")
+	logoWidth := 100.0 // Width in mm, adjust as needed
+
+	// Get page width to center the logo
+	pageWidth, _ := pdf.GetPageSize()
+	left, _, right, _ := pdf.GetMargins()
+	usableWidth := pageWidth - left - right
+
+	// Calculate x position to center the logo
+	xPos := (usableWidth-logoWidth)/2 + left
+
+	// Add the logo at position (xPos, 20) with width logoWidth
+	pdf.Image(logoPath, xPos, 50, logoWidth, 0, false, "", 0, "")
+	pdf.Ln(20)
+
+	pdf.SetY(175)
 	pdf.SetFont("Arial", "B", 14)
 	pdf.SetFillColor(200, 200, 255)
-	pdf.CellFormat(0, 10, "PRISM REPORT", "0", 1, "C", true, 0, "")
+	pdf.CellFormat(0, 10, "Individual Report", "0", 1, "C", true, 0, "")
 	pdf.Ln(2)
 
 	details := [][]string{
-		{"Report ID", report.Id.String()},
-		{"Downloaded At", time.Now().Format(time.RFC3339)},
 		{"Author Name", report.AuthorName},
+		{"Downloaded At", time.Now().Format("Jan 2, 2006")},
+		{"Report ID", report.Id.String()},
 	}
+	// insert timeline after the author name
+	if timeRange != "" {
+		timelineRow := []string{"Timeline", timeRange}
+		details = append(details[:1], append([][]string{timelineRow}, details[1:]...)...)
+	}
+
 	pdf.SetFont("Arial", "", 12)
 
 	for _, row := range details {
@@ -267,7 +324,79 @@ func generatePDF(report api.Report) ([]byte, error) {
 		pdf.CellFormat(0, 8, row[1], "1", 1, "L", false, 0, "")
 	}
 	pdf.Ln(5)
+}
 
+func setupPDFFlagGroup(pdf *gofpdf.Fpdf, flags []api.Flag, useDisclosure bool) error {
+	if len(flags) == 0 {
+		return nil
+	}
+	pdf.AddPage()
+	pdf.SetFont("Arial", "B", 14)
+	pdf.SetFillColor(200, 200, 255)
+
+	pageWidth, _ := pdf.GetPageSize()
+	left, _, right, _ := pdf.GetMargins()
+	headerWidth := pageWidth - left - right
+
+	pdf.SetX(left)
+	pdf.CellFormat(headerWidth, 10, flags[0].GetHeading(), "0", 1, "C", true, 0, "")
+	pdf.Ln(3)
+
+	if useDisclosure {
+		slices.SortFunc(flags, func(a, b api.Flag) int {
+			return map[bool]int{false: 0, true: 1}[b.IsDisclosed()] - map[bool]int{false: 0, true: 1}[a.IsDisclosed()]
+		})
+	}
+
+	for flagIndex, flag := range flags {
+		pdf.SetFont("Arial", "B", 13)
+		pdf.SetFillColor(230, 230, 230)
+		pdf.CellFormat(0, 10, fmt.Sprintf("Issue %d", flagIndex+1), "", 1, "L", true, 0, "")
+		pdf.Ln(3)
+
+		for _, kv := range flag.GetDetailsFieldsForReport(useDisclosure) {
+			keyWidth := 50.0
+			pageWidth, _ := pdf.GetPageSize()
+			left, _, right, _ := pdf.GetMargins()
+			valueWidth := pageWidth - left - right - keyWidth
+
+			pdf.SetFont("Arial", "B", 11)
+			pdf.SetTextColor(80, 80, 80)
+			pdf.CellFormat(keyWidth, 8, kv.Key, "", 0, "L", false, 0, "")
+
+			pdf.SetFont("Arial", "", 11)
+			pdf.SetTextColor(0, 0, 0)
+
+			if kv.Url != "" {
+				pdf.SetTextColor(0, 0, 200)
+				startX := pdf.GetX()
+				startY := pdf.GetY()
+				pdf.MultiCell(valueWidth, 8, kv.Value, "", "L", false)
+				pdf.LinkString(startX, startY, valueWidth, pdf.GetY()-startY, kv.Url)
+				pdf.SetTextColor(0, 0, 0)
+			} else {
+				pdf.MultiCell(valueWidth, 8, kv.Value, "", "L", false)
+			}
+			pdf.Ln(2)
+		}
+		pdf.Ln(5)
+	}
+	return nil
+}
+
+func generatePDF(report api.Report, resourceFolder string, containsDisclosure bool, timeRange string) ([]byte, error) {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetMargins(20, 30, 20)
+	pdf.SetAutoPageBreak(true, 20)
+
+	setupPDFCoverPage(pdf, report, resourceFolder, timeRange)
+
+	// we set the footer here so that cover also has a page number
+	setupPDFFooter(pdf)
+
+	pdf.AliasNbPages("{nb}")
+
+	// Prepare heading and flags data
 	type headingAndFlag struct {
 		heading string
 		flags   []api.Flag
@@ -281,86 +410,67 @@ func generatePDF(report api.Report) ([]byte, error) {
 				flags:   flags,
 			})
 		}
-
 	}
 
 	slices.SortFunc(headingsAndFlags, func(a, b headingAndFlag) int {
 		return strings.Compare(a.heading, b.heading)
 	})
 
-	currentPage := 3
-	var tocLines []string
-	var tocPages []struct {
-		Start int
-		End   int
-	}
+	// Reserve page for TOC (page 2)
+	// we set the header after the cover page so that header logo starts from page 2
+	setupPDFHeader(pdf, resourceFolder, report.AuthorName)
+	pdf.AddPage()
+	tocPage := pdf.PageNo()
 
+	// Track section start pages
+	type sectionInfo struct {
+		heading   string
+		startPage int
+	}
+	var sectionPages []sectionInfo
+
+	// Generate all content pages
 	for _, group := range headingsAndFlags {
 		if len(group.flags) > 0 {
-			start := currentPage
-			end := currentPage + len(group.flags) - 1
-			tocLines = append(tocLines, fmt.Sprintf("%s: %d - %d", group.heading, start, end))
-			tocPages = append(tocPages, struct{ Start, End int }{start, end})
-			currentPage += len(group.flags)
-		}
-	}
+			startPage := pdf.PageNo()
+			sectionPages = append(sectionPages, sectionInfo{
+				heading:   group.flags[0].GetHeading(),
+				startPage: startPage,
+			})
 
-	pdf.AddPage()
-	printWatermark(pdf, "PRISM")
-	pdf.SetFont("Arial", "B", 16)
-	pdf.CellFormat(0, 10, "Table of Contents", "0", 1, "C", false, 0, "")
-	pdf.Ln(5)
-	pdf.SetFont("Arial", "B", 12)
-	pdf.CellFormat(120, 8, "Type", "", 0, "L", false, 0, "")
-	pdf.CellFormat(0, 8, "Pages", "", 1, "R", false, 0, "")
-	pdf.SetFont("Arial", "", 12)
-	for i, line := range tocLines {
-		parts := strings.SplitN(line, ":", 2)
-		if len(parts) < 2 {
-			continue
-		}
-		category := strings.TrimSpace(parts[0])
-		pageRange := strings.TrimSpace(parts[1])
-		link := pdf.AddLink()
-		pdf.SetLink(link, 0, tocPages[i].Start)
-		pdf.SetTextColor(0, 0, 255)
-		pdf.CellFormat(120, 8, category, "", 0, "L", false, link, "")
-		pdf.CellFormat(0, 8, pageRange, "", 1, "R", false, link, "")
-		pdf.SetTextColor(0, 0, 0)
-	}
-
-	addFlagPage := func(flag api.Flag) error {
-		pdf.AddPage()
-		printWatermark(pdf, "PRISM")
-		pdf.SetFont("Arial", "B", 14)
-		pdf.CellFormat(0, 10, flag.GetHeading(), "0", 1, "C", true, 0, "")
-		pdf.Ln(3)
-		for _, kv := range flag.GetDetailFields() {
-			pdf.SetFont("Arial", "B", 12)
-			pdf.CellFormat(41, 8, kv.Key, "", 0, "L", false, 0, "")
-			pageWidth, _ := pdf.GetPageSize()
-			left, _, right, _ := pdf.GetMargins() // returns left, top, right, bottom
-			valueWidth := pageWidth - left - right - 41
-			pdf.SetFont("Arial", "", 12)
-			if strings.EqualFold(kv.Key, "URL") || strings.HasSuffix(strings.ToLower(kv.Key), "url") {
-				pdf.SetTextColor(0, 0, 255)
-				pdf.CellFormat(0, 8, "link", "", 1, "L", false, 0, kv.Value)
-				pdf.SetTextColor(0, 0, 0)
-			} else {
-				pdf.MultiCell(valueWidth, 8, kv.Value, "", "L", false)
-			}
-		}
-		pdf.Ln(5)
-		return nil
-	}
-
-	for _, group := range headingsAndFlags {
-		for _, flag := range group.flags {
-			if err := addFlagPage(flag); err != nil {
+			if err := setupPDFFlagGroup(pdf, group.flags, containsDisclosure); err != nil {
 				return nil, err
 			}
 		}
 	}
+
+	// Now create TOC with correct page references
+	// Important: We need to save the last page number before going back to TOC
+	lastPageBeforeTOC := pdf.PageNo()
+
+	// Go back to TOC page and fill it in
+	pdf.SetPage(tocPage)
+	pdf.SetY(30)
+	pdf.SetFont("Arial", "B", 16)
+	pdf.CellFormat(0, 10, "Table of Contents", "0", 1, "C", false, 0, "")
+	pdf.Ln(5)
+	pdf.SetFont("Arial", "B", 12)
+	pdf.CellFormat(120, 8, "Category", "", 0, "L", false, 0, "")
+	pdf.CellFormat(0, 8, "Page", "", 1, "R", false, 0, "")
+	pdf.SetFont("Arial", "", 12)
+
+	for _, section := range sectionPages {
+		link := pdf.AddLink()
+		pdf.SetLink(link, 0, section.startPage+1)
+		pdf.SetTextColor(0, 0, 255)
+		pdf.CellFormat(120, 8, section.heading, "", 0, "L", false, link, "")
+		pdf.CellFormat(0, 8, fmt.Sprintf("%d", section.startPage+1), "", 1, "R", false, link, "")
+		pdf.SetTextColor(0, 0, 0)
+	}
+
+	// Critical fix: Return to the last content page to ensure all pages are included
+	// without this, content pages might be lost
+	pdf.SetPage(lastPageBeforeTOC)
 
 	var buf bytes.Buffer
 	if err := pdf.Output(&buf); err != nil {
