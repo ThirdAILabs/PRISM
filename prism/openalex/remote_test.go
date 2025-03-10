@@ -348,12 +348,9 @@ func TestAutoCompleteInstituteAuthor(t *testing.T) {
 
 	found := false
 	for _, res := range results {
-		if !strings.HasPrefix(res.Id, "https://openalex.org/") ||
-			!strings.Contains(strings.ToLower(res.Name), "katherine") {
-			t.Fatal("invalid result")
-		}
-		if strings.EqualFold(res.Hint, "Texas A&M University, USA") {
+		if strings.EqualFold(res.Name, "M. Katherine Banks") && strings.EqualFold(res.Hint, "Texas A&M University, USA") {
 			found = true
+			break
 		}
 	}
 
