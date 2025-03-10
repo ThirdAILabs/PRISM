@@ -172,10 +172,11 @@ type AcknowledgementEntity struct {
 
 type TalentContractFlag struct {
 	DisclosableFlag
-	Message            string
-	Work               WorkSummary
-	Entities           []AcknowledgementEntity
-	RawAcknowledements []string
+	Message               string
+	Work                  WorkSummary
+	Entities              []AcknowledgementEntity
+	RawAcknowledements    []string
+	FundCodeTriangulation map[string]map[string]bool
 }
 
 func (flag *TalentContractFlag) Type() string {
@@ -286,10 +287,11 @@ func (flag *AssociationWithDeniedEntityFlag) GetDetailsFieldsForReport(useDisclo
 
 type HighRiskFunderFlag struct {
 	DisclosableFlag
-	Message            string
-	Work               WorkSummary
-	Funders            []string
-	RawAcknowledements []string
+	Message               string
+	Work                  WorkSummary
+	Funders               []string
+	RawAcknowledements    []string
+	FundCodeTriangulation map[string]map[string]bool
 }
 
 func (flag *HighRiskFunderFlag) Type() string {
