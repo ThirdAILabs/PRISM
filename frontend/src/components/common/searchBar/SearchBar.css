@@ -96,7 +96,8 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  margin-left: 150px;
+  margin-top: 60px;
+  margin-left: 7.5%;
   align-items: center;
 }
 
