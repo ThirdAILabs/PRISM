@@ -2,80 +2,53 @@ package tests
 
 import (
 	"testing"
-	"time"
 
 	"prism/prism/api"
 	"prism/prism/services/auth"
+
+	"github.com/caarlos0/env/v11"
 )
 
-const (
-	backendUrl = "http://localhost"
-
-	keycloakUrl           = "http://localhost/keycloak"
-	keycloakAdminUsername = "kc-admin"
-	keycloakAdminPassword = "KC-admin-pwd@1"
-
-	regularUserUsername = "regular-user"
-	regularUserPassword = "Regular-user-pwd@1"
-
-	adminUserUsername = "admin-user"
-	adminUserPassword = "Admin-user-pwd@1"
-)
-
-func setupKeycloakUsers(t *testing.T) {
-	users := []struct {
-		realm    string
-		username string
-		password string
-	}{
-		{"prism-user", regularUserUsername, regularUserPassword},
-		{"prism-admin", adminUserUsername, adminUserPassword},
-	}
-
-	for _, user := range users {
-		auth, err := auth.NewKeycloakAuth(user.realm, auth.KeycloakArgs{
-			KeycloakServerUrl:     keycloakUrl,
-			KeycloakAdminUsername: keycloakAdminUsername,
-			KeycloakAdminPassword: keycloakAdminPassword,
-			PublicHostname:        "",
-			PrivateHostname:       "",
-		})
-		if err != nil {
-			t.Fatalf("error connecting to keycloak: %v", err)
-		}
-
-		adminToken, err := auth.AdminLogin(keycloakAdminUsername, keycloakAdminPassword)
-		if err != nil {
-			t.Fatalf("keycloak admin login failed: %v", err)
-		}
-
-		if err := auth.CreateUser(adminToken, user.username, user.username+"@mail.com", user.password); err != nil {
-			t.Fatalf("error creating user: %v", err)
-		}
-	}
+type testEnv struct {
+	BackendUrl            string `env:"BACKEND_URL" envDefault:"http://localhost"`
+	KeycloakUrl           string `env:"KEYCLOAK_URL" envDefault:"http://localhost/keycloak"`
+	KeycloakAdminUsername string `env:"KEYCLOAK_ADMIN_USERNAME" envDefault:"kc-admin"`
+	KeycloakAdminPassword string `env:"KEYCLOAK_ADMIN_PASSWORD" envDefault:"KC-admin-pwd@1"`
 }
 
-func setupTestEnv(t *testing.T) (*api.UserClient, *api.AdminClient) {
-	setupKeycloakUsers(t)
+func setupTestEnv(t *testing.T) *api.PrismClient {
+	const (
+		username = "regular-user"
+		password = "Regular-user-pwd@1"
+	)
 
-	user := api.NewUserClient(backendUrl, keycloakUrl)
-	if err := user.Login(regularUserUsername, regularUserPassword); err != nil {
-		t.Fatal(err)
+	var vars testEnv
+	if err := env.Parse(&vars); err != nil {
+		t.Fatalf("error parsing env: %v", err)
 	}
 
-	admin := api.NewAdminClient(backendUrl, keycloakUrl)
-	if err := admin.Login(adminUserUsername, adminUserPassword); err != nil {
-		t.Fatal(err)
-	}
-
-	license, err := admin.CreateLicense("test license", time.Now().UTC().Add(time.Hour))
+	auth, err := auth.NewKeycloakAuth("prism-user", auth.KeycloakArgs{
+		KeycloakServerUrl:     vars.KeycloakUrl,
+		KeycloakAdminUsername: vars.KeycloakAdminUsername,
+		KeycloakAdminPassword: vars.KeycloakAdminPassword,
+	})
 	if err != nil {
+		t.Fatalf("error connecting to keycloak: %v", err)
+	}
+
+	adminToken, err := auth.AdminLogin(vars.KeycloakAdminUsername, vars.KeycloakAdminPassword)
+	if err != nil {
+		t.Fatalf("keycloak admin login failed: %v", err)
+	}
+
+	if err := auth.CreateUser(adminToken, username, username+"@mail.com", password); err != nil {
+		t.Fatalf("error creating user: %v", err)
+	}
+
+	user := api.NewUserClient(vars.BackendUrl, vars.KeycloakUrl)
+	if err := user.Login(username, password); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := user.ActivateLicense(license); err != nil {
-		t.Fatal(err)
-	}
-
-	return user, admin
+	return user
 }
