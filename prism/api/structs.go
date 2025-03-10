@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,7 +18,41 @@ type Report struct {
 
 	Status string
 
-	Content ReportContent
+	Content map[string][]Flag
+}
+
+// We have to define a custom Unmarshal method because Flag is an interface so we
+// cannot directly deserialize into it.
+func (r *Report) UnmarshalJSON(data []byte) error {
+	// Define an alias for the Report type to avoid infinite recursion
+	type Alias Report
+
+	// Define an anonymous struct with a Content field and an embedded Alias field
+	aux := &struct {
+		Content map[string][]json.RawMessage
+		*Alias
+	}{
+		Alias: (*Alias)(r), // Embed the Alias type as a pointer
+	}
+
+	// Unmarshal the JSON data into the anonymous struct
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	// Process the Content field separately
+	r.Content = make(map[string][]Flag)
+	for flagType, rawFlags := range aux.Content {
+		for _, rawFlag := range rawFlags {
+			flag, err := ParseFlag(flagType, rawFlag)
+			if err != nil {
+				return err
+			}
+			r.Content[flagType] = append(r.Content[flagType], flag)
+		}
+	}
+
+	return nil
 }
 
 type CreateAuthorReportRequest struct {
