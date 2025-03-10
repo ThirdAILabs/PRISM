@@ -69,7 +69,7 @@ type InstitutionAuthor struct {
 }
 
 type KnowledgeBase interface {
-	AutocompleteAuthor(query, institutionId string) ([]api.Autocompletion, error)
+	AutocompleteAuthor(authorNameQuery, institutionId string) ([]api.Autocompletion, error)
 
 	AutocompleteInstitution(query string) ([]api.Autocompletion, error)
 

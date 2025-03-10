@@ -66,9 +66,7 @@ func (oa *RemoteKnowledgeBase) autocompleteHelper(component, query, filter strin
 		return nil, fmt.Errorf("unable to get autocomplete suggestions")
 	}
 
-	// fmt.Println(component, query, res.String())
 	results := res.Result().(*oaResults[oaAutocompletion])
-	// fmt.Println(results.Results)
 
 	autocompletions := make([]api.Autocompletion, 0, len(results.Results))
 	for _, result := range results.Results {
@@ -82,12 +80,12 @@ func (oa *RemoteKnowledgeBase) autocompleteHelper(component, query, filter strin
 	return autocompletions, nil
 }
 
-func (oa *RemoteKnowledgeBase) AutocompleteAuthor(query string, institutionId string) ([]api.Autocompletion, error) {
+func (oa *RemoteKnowledgeBase) AutocompleteAuthor(authorNameQuery string, institutionId string) ([]api.Autocompletion, error) {
 	var filterParam = ""
 	if institutionId != "" {
 		filterParam = fmt.Sprintf("affiliations.institution.id:%s", institutionId)
 	}
-	return oa.autocompleteHelper("authors", query, filterParam)
+	return oa.autocompleteHelper("authors", authorNameQuery, filterParam)
 }
 
 func (oa *RemoteKnowledgeBase) AutocompleteInstitution(query string) ([]api.Autocompletion, error) {
