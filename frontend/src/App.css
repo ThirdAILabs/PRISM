@@ -99,6 +99,23 @@
   padding: 0;
   /* Removes padding */
 }
+.non-bulleted-list {
+  list-style-type: none;
+  padding-left: 20px;
+  background-color: inherit;
+  /* Ensures background is not styled like a button/card */
+}
+
+.non-bulleted-list li {
+  margin-bottom: 10px;
+  /* Adds space between items */
+  background-color: inherit;
+  /* Ensures background is not styled like a button/card */
+  border: none;
+  /* Removes any borders */
+  padding: 0;
+  /* Removes padding */
+}
 
 input {
   margin: 5px;
