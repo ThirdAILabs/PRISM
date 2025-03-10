@@ -1,5 +1,13 @@
 azure:
   branches:
+    kartik-ux:
+      pull_credentials:
+        password: RGaZZLuybLXtKgIJv0LBq9q+NKSQa6FpmicreUuZ12+ACRBrUaO9
+        username: prism-pull-kartik-ux
+      push_credentials:
+        password: n8rjvLE4oGe7tauu0EAW1XeUV+kaQvslu9OATcSjJS+ACRBRCDEv
+        username: prism-push-kartik-ux
+      version: 0.0.1
     test-docker:
       pull_credentials:
         password: y3ATmxOBiPrHeQYqRLS4obJ2rn2RkNavlqAsKclu0H+ACRCPe12P
