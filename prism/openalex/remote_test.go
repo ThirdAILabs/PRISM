@@ -11,7 +11,7 @@ import (
 func TestAutocompleteAuthor(t *testing.T) {
 	oa := openalex.NewRemoteKnowledgeBase()
 
-	results, err := oa.AutocompleteAuthor("anshumali shriva")
+	results, err := oa.AutocompleteAuthor("anshumali shriva", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -331,5 +331,33 @@ func TestGetInstitutionAuthors(t *testing.T) {
 		if author.AuthorId == "" || author.AuthorName == "" {
 			t.Fatal("author info cannot be empty")
 		}
+	}
+}
+
+func TestAutoCompleteInstituteAuthor(t *testing.T) {
+	oa := openalex.NewRemoteKnowledgeBase()
+
+	results, err := oa.AutocompleteAuthor("M kather", "https://openalex.org/I91045830")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(results) == 0 {
+		t.Fatal("should have some results")
+	}
+
+	found := false
+	for _, res := range results {
+		if !strings.HasPrefix(res.Id, "https://openalex.org/") ||
+			!strings.EqualFold(res.Name, "M Katherine Banks") {
+			t.Fatal("invalid result")
+		}
+		if strings.EqualFold(res.Hint, "Texas A&M University, USA") {
+			found = true
+		}
+	}
+
+	if !found {
+		t.Fatal("didn't find correct result")
 	}
 }
