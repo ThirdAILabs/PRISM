@@ -66,9 +66,9 @@ const StyledWrapper = styled.div`
   }
 `;
 
-const Button = ({ reportId, isOpen, setIsOpen }) => {
+const Button = ({ reportId, metadata, content, isOpen, setIsOpen }) => {
   const handleDownload = (format) => {
-    reportService.downloadReport(reportId, format);
+    reportService.downloadReport(reportId, format, metadata, content);
     setIsOpen(false);
   };
   return (
