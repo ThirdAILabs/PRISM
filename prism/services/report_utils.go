@@ -342,6 +342,12 @@ func setupPDFFlagGroup(pdf *gofpdf.Fpdf, flags []api.Flag, useDisclosure bool) e
 	pdf.CellFormat(headerWidth, 10, flags[0].GetHeading(), "0", 1, "C", true, 0, "")
 	pdf.Ln(3)
 
+	if useDisclosure {
+		slices.SortFunc(flags, func(a, b api.Flag) int {
+			return map[bool]int{false: 0, true: 1}[b.IsDisclosed()] - map[bool]int{false: 0, true: 1}[a.IsDisclosed()]
+		})
+	}
+
 	for flagIndex, flag := range flags {
 		pdf.SetFont("Arial", "B", 13)
 		pdf.SetFillColor(230, 230, 230)

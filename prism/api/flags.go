@@ -48,6 +48,8 @@ type Flag interface {
 	Date() (time.Time, bool)
 
 	GetDetailsFieldsForReport(useDisclosure bool) []KeyValueURL
+
+	IsDisclosed() bool
 }
 
 const (
@@ -107,6 +109,10 @@ type DisclosableFlag struct {
 
 func (flag *DisclosableFlag) MarkDisclosed() {
 	flag.Disclosed = true
+}
+
+func (flag *DisclosableFlag) IsDisclosed() bool {
+	return flag.Disclosed
 }
 
 type WorkSummary struct {
