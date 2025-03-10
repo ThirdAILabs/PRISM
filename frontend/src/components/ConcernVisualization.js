@@ -36,6 +36,15 @@ const Hover = ({ text }) => {
   );
 };
 
+export const BaseFontSize = 48;
+export function getFontSize(value) {
+  const digits = String(value).length;
+
+  // Each additional digit reduces size by 4px
+  const newSize = BaseFontSize - (digits - 1) * 4;
+  return Math.max(newSize, 28);
+}
+
 export default function ConcernVisualizer({
   title,
   hoverText,
@@ -44,6 +53,7 @@ export default function ConcernVisualizer({
   onReview,
   selected,
   speedometerHoverText,
+  valueFontSize,
 }) {
   return (
     <div style={{ width: '200px', height: '300px', position: 'relative' }}>
@@ -51,6 +61,7 @@ export default function ConcernVisualizer({
         scale={scale || [0, 1, 2, 3, 5, 10, 20]}
         value={value}
         speedometerHoverText={speedometerHoverText}
+        valueFontSize={valueFontSize}
       />
 
       <div className="mt-3 mb-4 text-dark" style={{ height: '50px' }}>

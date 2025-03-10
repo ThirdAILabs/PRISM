@@ -6,7 +6,6 @@ import EntityLookup from './components/pages/entityLookup/page';
 import UserService from './services/userService';
 import { useUser } from './store/userContext';
 import { FaBars } from 'react-icons/fa';
-import { TbLayoutSidebarLeftExpand, TbLayoutSidebarRightExpand } from 'react-icons/tb';
 import SidePanel from './components/sidebar/SidePanel';
 import UniversityAssessment from './components/pages/UniversityAssessment';
 import UniversityReport from './components/pages/UniversityReport';
@@ -16,6 +15,10 @@ import { GetShowMenuIcon } from './utils/helper.js';
 import SearchProviderWrapper from './services/SearchProviderWrapper';
 import UniversityProviderWrapper from './services/UniversityProviderWrapper';
 import { Tooltip } from '@mui/material';
+import useOutsideClick from './hooks/useOutsideClick.js';
+
+import { GoSidebarCollapse } from 'react-icons/go';
+import { GoSidebarExpand } from 'react-icons/go';
 
 //CSS
 import 'bootstrap/dist/css/bootstrap.css';
@@ -44,7 +47,9 @@ function AppContent() {
   }, []);
 
   const showMenuIcon = GetShowMenuIcon();
-
+  const sidepanelRef = useOutsideClick(() => {
+    setIsSidePanelOpen(false);
+  });
   return (
     <div className="App">
       {showMenuIcon && (
@@ -70,25 +75,23 @@ function AppContent() {
               cursor: 'pointer',
               position: 'fixed',
               left: isSidePanelOpen ? '240px' : '20px',
-              top: '15px',
+              top: '10px',
               zIndex: 1000,
               transition: 'left 0.3s ease',
             }}
             onClick={() => setIsSidePanelOpen(!isSidePanelOpen)}
-            className="menu-icon"
+            className="sidebar-toggle"
           >
-            {isSidePanelOpen ? (
-              <TbLayoutSidebarRightExpand size={40} />
-            ) : (
-              <TbLayoutSidebarLeftExpand size={40} />
-            )}
+            {isSidePanelOpen ? <GoSidebarExpand size={30} /> : <GoSidebarCollapse size={30} />}
           </div>
         </Tooltip>
       )}
-      <SidePanel
-        isOpen={isSidePanelOpen && showMenuIcon}
-        onClose={() => setIsSidePanelOpen(false)}
-      />
+      <div ref={sidepanelRef}>
+        <SidePanel
+          isOpen={isSidePanelOpen && showMenuIcon}
+          onClose={() => setIsSidePanelOpen(false)}
+        />
+      </div>
       <Routes>
         <Route element={<SearchProviderWrapper />}>
           <Route path="/" element={<SearchComponent />} />

@@ -25,6 +25,7 @@ export const API_ROUTES = {
   AUTOCOMPLETE: {
     AUTHOR: '/api/v1/autocomplete/author',
     INSTITUTION: '/api/v1/autocomplete/institution',
+    PAPER_TITLE: '/api/v1/autocomplete/paper',
   },
   SEARCH: {
     AUTHOR: '/api/v1/search/authors',

@@ -26,4 +26,18 @@ export const searchService = {
     });
     return response.data;
   },
+
+  searchByOrcid: async (orcidId) => {
+    const response = await axiosInstance.get(API_ROUTES.SEARCH.AUTHOR, {
+      params: { orcid: orcidId },
+    });
+    return response.data;
+  },
+
+  searchByPaperTitle: async (title) => {
+    const response = await axiosInstance.get(API_ROUTES.SEARCH.AUTHOR, {
+      params: { paper_title: title },
+    });
+    return response.data;
+  },
 };

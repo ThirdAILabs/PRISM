@@ -10,7 +10,7 @@ import {
   MISC_HIGH_RISK_AFFILIATIONS,
   COAUTHOR_AFFILIATIONS,
 } from '../../constants/constants.js';
-import ConcernVisualizer from '../ConcernVisualization.js';
+import ConcernVisualizer, { BaseFontSize, getFontSize } from '../ConcernVisualization.js';
 
 import { universityReportService } from '../../api/universityReports.js';
 import AuthorCard from '../common/cards/AuthorCard.js';
@@ -72,6 +72,8 @@ const UniversityReport = () => {
   const [selectedFlag, setSelectedFlag] = useState(null);
   const [selectedFlagData, setSelectedFlagData] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [valueFontSize, setValueFontSize] = useState(`${BaseFontSize}px`);
 
   const handleReview = (flag) => {
     setSelectedFlag(flag);
@@ -91,10 +93,22 @@ const UniversityReport = () => {
         setTotalResearchers(report.Content.TotalAuthors);
         setResearchersAssessed(report.Content.AuthorsReviewed);
         setLoading(false);
+
+        // Set font size based on the maximum number of flag count
+        const newFontSize = `${getFontSize(
+          Math.max(...FLAG_ORDER.map((flag) => report.Content.Flags[flag]?.length || 0))
+        )}px`;
+        setValueFontSize(newFontSize);
       } else if (report.Status === 'in-progress') {
         setInstituteName(report.UniversityName);
         setTotalResearchers(report.Content.TotalAuthors);
         setResearchersAssessed(report.Content.AuthorsReviewed);
+
+        // Set font size based on the maximum number of flag count
+        const newFontSize = `${getFontSize(
+          Math.max(...FLAG_ORDER.map((flag) => report.Content.Flags[flag]?.length || 0))
+        )}px`;
+        setValueFontSize(newFontSize);
       } else if (isMounted) {
         setTimeout(poll, 10000);
       }
@@ -107,7 +121,6 @@ const UniversityReport = () => {
     };
   }, []);
 
-  const [loading, setLoading] = useState(true);
   const goBack = useGoBack('/university');
 
   return (
@@ -158,15 +171,18 @@ const UniversityReport = () => {
       </div>
 
       <>
-        <div className="d-flex w-100 flex-column align-items-center">
+        {/* <div className="d-flex w-100 flex-column align-items-center">
           <div className="d-flex w-100 px-5 align-items-center my-2 mt-3 justify-content-between">
             <div style={{ width: '20px' }}>
-              {loading && (
-                <div className="spinner-border text-primary spinner-border-sm" role="status"></div>
-              )}
+              {loading && <div class="spinner-border text-secondary" role="status" />}
             </div>
           </div>
-        </div>
+        </div> */}
+        {loading && (
+          <div class="d-flex justify-content-start">
+            <div class="spinner-border text-secondary ms-5 mt-3 mb-3" role="status" />
+          </div>
+        )}
         {
           <div
             className="d-flex w-100 flex-column align-items-center"
@@ -200,6 +216,7 @@ const UniversityReport = () => {
                     onReview={() => handleReview(flag)}
                     selected={flag === selectedFlag}
                     key={index}
+                    valueFontSize={valueFontSize}
                   />
                 );
               })
@@ -213,6 +230,7 @@ const UniversityReport = () => {
                     onReview={() => handleReview(flag)}
                     selected={flag === selectedFlag}
                     key={index}
+                    valueFontSize={valueFontSize}
                   />
                 );
               })}

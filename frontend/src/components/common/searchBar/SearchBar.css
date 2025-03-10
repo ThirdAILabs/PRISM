@@ -46,6 +46,16 @@
   flex-direction: row;
   justify-content: space-between;
   margin-left: 7.5%;
+  margin-top: 60px;
+}
+
+.paper-search-bar {
+  width: 95.5%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-left: 7.5%;
+  margin-top: 60px;
 }
 
 .author-institution-search-bar-container {
@@ -55,4 +65,62 @@
 .author-institution-search-button-container {
   width: 10%;
   margin-top: 40px;
+}
+
+.search-type-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-type-label {
+  font-weight: bold;
+  color: black;
+  text-align: center;
+}
+
+.search-select-smaller {
+  width: 100%;
+  max-width: 180px;
+  padding: 10px;
+  font-size: 1rem;
+  border: none;
+  background-color: rgb(245, 240, 240);
+  color: black;
+  outline: none;
+  text-align: center;
+}
+
+.single-search-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-left: 150px;
+  align-items: center;
+}
+
+.single-search-row {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.single-search-bar-container {
+  width: 87%;
+}
+
+.single-search-button-container {
+  width: 10%;
+}
+
+.single-search-bar-label {
+  width: 100%;
+  text-align: left;
+  font-size: 24px;
+  font-weight: bold;
+  color: black;
+  padding-bottom: 5px;
 }
