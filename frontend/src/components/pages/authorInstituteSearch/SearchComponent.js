@@ -82,7 +82,7 @@ const SearchComponent = () => {
             </div>
           </div>
         </div>
-        <div className="search-type-container">
+        <div className="search-type-container mt-4">
           <label className="search-type-label">Search Type</label>
           <select
             className="search-select-smaller"
