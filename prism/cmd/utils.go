@@ -34,15 +34,6 @@ func OpenDB(uri string) *gorm.DB {
 	return db
 }
 
-func OpenTriangulationDB(uri string) *gorm.DB {
-	db, err := gorm.Open(postgres.Open(uriToDsn(uri)), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("error opening triangulation database connection: %v", err)
-	}
-
-	return db
-}
-
 func InitLogging(logFile *os.File) {
 	log.SetFlags(log.Lshortfile | log.Ltime | log.Ldate)
 	log.SetOutput(io.MultiWriter(logFile, os.Stderr))

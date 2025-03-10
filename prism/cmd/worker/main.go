@@ -75,7 +75,7 @@ func main() {
 		log.Fatalf("error deleting existing ndb dir '%s': %v", ndbDir, err)
 	}
 
-	if err := os.MkdirAll(ndbDir, 0o777); err != nil {
+	if err := os.MkdirAll(ndbDir, 0777); err != nil {
 		log.Fatalf("error creating work dir: %v", err)
 	}
 
@@ -89,7 +89,7 @@ func main() {
 		UniversityNDB:   flaggers.BuildUniversityNDB(config.UniversityData, filepath.Join(ndbDir, "university.ndb")),
 		DocNDB:          flaggers.BuildDocNDB(config.DocData, filepath.Join(ndbDir, "doc.ndb")),
 		AuxNDB:          flaggers.BuildAuxNDB(config.AuxData, filepath.Join(ndbDir, "aux.ndb")),
-		TriangulationDB: triangulation.CreateTriangulationDB(cmd.OpenTriangulationDB(config.FundcodeTriangulationUri)),
+		TriangulationDB: triangulation.CreateTriangulationDB(cmd.OpenDB(config.FundcodeTriangulationUri)),
 
 		EntityLookup: entityStore,
 

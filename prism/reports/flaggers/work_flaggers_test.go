@@ -291,10 +291,8 @@ func TestFundCodeTriangulation(t *testing.T) {
 		},
 	}
 
-	for _, fundCode := range fundCodes {
-		if err := db.Create(&fundCode).Error; err != nil {
-			t.Fatal(err)
-		}
+	if err := db.Create(&fundCodes).Error; err != nil {
+		t.Fatal(err)
 	}
 
 	authors := []triangulation.Author{
@@ -312,10 +310,8 @@ func TestFundCodeTriangulation(t *testing.T) {
 		},
 	}
 
-	for _, author := range authors {
-		if err := db.Create(&author).Error; err != nil {
-			t.Fatal(err)
-		}
+	if err := db.Create(&authors).Error; err != nil {
+		t.Fatal(err)
 	}
 
 	triangulationDB := triangulation.CreateTriangulationDB(db)

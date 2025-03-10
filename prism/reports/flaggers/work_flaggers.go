@@ -279,6 +279,17 @@ func (flagger *OpenAlexAcknowledgementIsEOC) getAuthorNames(authorIds []string) 
 	return authorNames, nil
 }
 
+func (flagger *OpenAlexAcknowledgementIsEOC) containsSussyBakas(text string) bool {
+	text = fmt.Sprintf(" %s ", strings.ToLower(text))
+
+	for _, sussyBaka := range flagger.sussyBakas {
+		if strings.Contains(text, fmt.Sprintf(" %s ", sussyBaka)) {
+			return true
+		}
+	}
+	return false
+}
+
 var punctCleaningRe = regexp.MustCompile(`[.,()!?:"']`)
 
 func (flagger *OpenAlexAcknowledgementIsEOC) checkForSussyBaka(ack Acknowledgement) bool {
@@ -304,16 +315,10 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForSussyBaka(ack Acknowledgeme
 	}
 	newText += ack.RawText[prevEndPos:]
 
-	newText = strings.ToLower(strings.TrimSpace(newText))
+	newText = strings.TrimSpace(newText)
 	newText = punctCleaningRe.ReplaceAllString(newText, " ")
-	newText = fmt.Sprintf(" %s ", newText)
 
-	for _, sussyBaka := range flagger.sussyBakas {
-		if strings.Contains(newText, fmt.Sprintf(" %s ", sussyBaka)) {
-			return true
-		}
-	}
-	return false
+	return flagger.containsSussyBakas(newText)
 }
 
 func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
@@ -381,23 +386,21 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
 	for _, ack := range acknowledgements {
 		for _, entity := range ack.SearchableEntities {
 			if len(entity.FundCodes) > 0 {
-				for _, sussyBaka := range flagger.sussyBakas {
-					if strings.Contains(" "+strings.ToLower(entity.EntityText)+" ", fmt.Sprintf(" %s ", sussyBaka)) {
-						if _, ok := triangulationResults[entity.EntityText]; !ok {
-							triangulationResults[entity.EntityText] = make(map[string]bool)
-						}
+				if flagger.containsSussyBakas(entity.EntityText) {
+					if _, ok := triangulationResults[entity.EntityText]; !ok {
+						triangulationResults[entity.EntityText] = make(map[string]bool)
+					}
 
-						for _, grantNumber := range entity.FundCodes {
-							for _, authorName := range allAuthorNames {
-								result, err := flagger.triangulationDB.IsAuthorGrantRecipient(authorName, grantNumber)
-								if err != nil {
-									continue
-								}
-
-								logger.Info("triangulation result", "author", authorName, "grant", grantNumber, "result", result)
-								triangulationResults[entity.EntityText][grantNumber] = result
-								break
+					for _, grantNumber := range entity.FundCodes {
+						for _, authorName := range allAuthorNames {
+							result, err := flagger.triangulationDB.IsAuthorGrantRecipient(authorName, grantNumber)
+							if err != nil {
+								continue
 							}
+
+							logger.Info("triangulation result", "author", authorName, "grant", grantNumber, "result", result)
+							triangulationResults[entity.EntityText][grantNumber] = result
+							break
 						}
 					}
 				}
