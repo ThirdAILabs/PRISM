@@ -337,7 +337,7 @@ func TestGetInstitutionAuthors(t *testing.T) {
 func TestAutoCompleteInstituteAuthor(t *testing.T) {
 	oa := openalex.NewRemoteKnowledgeBase()
 
-	results, err := oa.AutocompleteAuthor("M kather", "https://openalex.org/I91045830")
+	results, err := oa.AutocompleteAuthor("M katherine B", "https://openalex.org/I91045830")
 	if err != nil {
 		t.Fatal(err)
 	}
