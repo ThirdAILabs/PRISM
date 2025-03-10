@@ -211,11 +211,10 @@ func (flag *TalentContractFlag) GetDetailsFieldsForReport() []KeyValueURL {
 
 type AssociationWithDeniedEntityFlag struct {
 	DisclosableFlag
-	Message               string
-	Work                  WorkSummary
-	Entities              []AcknowledgementEntity
-	RawAcknowledements    []string
-	FundCodeTriangulation map[string]map[string]bool
+	Message            string
+	Work               WorkSummary
+	Entities           []AcknowledgementEntity
+	RawAcknowledements []string
 }
 
 func (flag *AssociationWithDeniedEntityFlag) Type() string {

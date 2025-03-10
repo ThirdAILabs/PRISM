@@ -442,11 +442,10 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 		}
 	} else if containsSource(entities, deniedEntities) {
 		return &api.AssociationWithDeniedEntityFlag{
-			Message:               message,
-			Work:                  getWorkSummary(work),
-			Entities:              entities,
-			RawAcknowledements:    rawAcks,
-			FundCodeTriangulation: triangulationResults,
+			Message:            message,
+			Work:               getWorkSummary(work),
+			Entities:           entities,
+			RawAcknowledements: rawAcks,
 		}
 	} else {
 		entityNames := make([]string, 0, len(entities))
