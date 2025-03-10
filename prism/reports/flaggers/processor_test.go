@@ -54,7 +54,7 @@ func yearEnd(year int) time.Time {
 	return time.Date(year, 12, 31, 0, 0, 0, 0, time.UTC)
 }
 
-func getReportContent(t *testing.T, report reports.ReportUpdateTask, processor *ReportProcessor, manager *reports.ReportManager) api.ReportContent {
+func getReportContent(t *testing.T, report reports.ReportUpdateTask, processor *ReportProcessor, manager *reports.ReportManager) map[string][]api.Flag {
 	user := uuid.New()
 	reportId, err := manager.CreateAuthorReport(user, report.AuthorId, report.AuthorName, report.Source)
 	if err != nil {

@@ -2,6 +2,7 @@ package api
 
 import (
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"slices"
 	"strings"
@@ -57,37 +58,77 @@ const (
 	HighRiskCoauthorType    = "HighRiskCoauthors"
 )
 
-func EmptyFlag(ftype string) (Flag, error) {
+func ParseFlag(ftype string, data []byte) (Flag, error) {
 	switch ftype {
 	case TalentContractType:
-		return &TalentContractFlag{}, nil
+		var flag TalentContractFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	case AssociationsWithDeniedEntityType:
-		return &AssociationWithDeniedEntityFlag{}, nil
+		var flag AssociationWithDeniedEntityFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	case HighRiskFunderType:
-		return &HighRiskFunderFlag{}, nil
+		var flag HighRiskFunderFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	case AuthorAffiliationType:
-		return &AuthorAffiliationFlag{}, nil
+		var flag AuthorAffiliationFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	case PotentialAuthorAffiliationType:
-		return &PotentialAuthorAffiliationFlag{}, nil
+		var flag PotentialAuthorAffiliationFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	case MiscHighRiskAssociationType:
-		return &MiscHighRiskAssociationFlag{}, nil
+		var flag MiscHighRiskAssociationFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	case CoauthorAffiliationType:
-		return &CoauthorAffiliationFlag{}, nil
+		var flag CoauthorAffiliationFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	case MultipleAffiliationType:
-		return &MultipleAffiliationFlag{}, nil
+		var flag MultipleAffiliationFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	case HighRiskPublisherType:
-		return &HighRiskPublisherFlag{}, nil
+		var flag HighRiskPublisherFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	case HighRiskCoauthorType:
-		return &HighRiskCoauthorFlag{}, nil
+		var flag HighRiskCoauthorFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	default:
 		return nil, fmt.Errorf("invalid flag type '%s'", ftype)
@@ -488,8 +529,6 @@ func (flag *CoauthorAffiliationFlag) GetDetailsFieldsForReport() []KeyValueURL {
 		{Key: "Affiliations", Value: strings.Join(flag.Affiliations, ", ")},
 	}
 }
-
-type ReportContent map[string][]Flag
 
 //The following flags are unused by the frontend, but they are kept in case we
 // want to have them in the future.

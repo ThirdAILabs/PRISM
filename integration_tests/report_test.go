@@ -1,41 +1,78 @@
 package tests
 
 import (
-	"encoding/json"
-	"fmt"
 	"prism/prism/api"
 	"testing"
 	"time"
+
+	"github.com/google/uuid"
 )
 
-func createReport(t *testing.T, user *api.UserClient, authorId, authorName string) any {
-	reportId, err := user.CreateReport(api.CreateAuthorReportRequest{
-		AuthorId:   authorId,
-		AuthorName: authorName,
-		Source:     api.OpenAlexSource,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	report, err := user.WaitForReport(reportId, 10*time.Second)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if report.Status != "complete" {
-		t.Fatal("report failed")
-	}
-
-	return report.Content
-}
-
 func TestReportGeneration(t *testing.T) {
-	user, _ := setupTestEnv(t)
+	user := setupTestEnv(t)
 
-	report := createReport(t, user, "https://openalex.org/A5084836278", "Charles M. Lieber")
+	reportRequests := []api.CreateAuthorReportRequest{
+		{
+			AuthorId:   "https://openalex.org/A5084836278",
+			AuthorName: "Charles M. Lieber",
+			Source:     api.OpenAlexSource,
+		},
+		{
+			AuthorId:   "https://openalex.org/A5016320004",
+			AuthorName: "David Zhang",
+			Source:     api.OpenAlexSource,
+		},
+	}
 
-	data, _ := json.MarshalIndent(report, "", "    ")
+	reportIds := make([]uuid.UUID, 0, len(reportRequests))
 
-	fmt.Println(string(data))
+	for _, report := range reportRequests {
+		reportId, err := user.CreateReport(report)
+		if err != nil {
+			t.Fatal(err)
+		}
+		reportIds = append(reportIds, reportId)
+	}
+
+	expectedFlagCounts := []map[string]int{
+		{
+			api.TalentContractType:               3,
+			api.AssociationsWithDeniedEntityType: 0,
+			api.HighRiskFunderType:               3,
+			api.AuthorAffiliationType:            4,
+			api.PotentialAuthorAffiliationType:   0,
+			api.MiscHighRiskAssociationType:      5,
+			api.CoauthorAffiliationType:          10,
+		}, {
+			api.TalentContractType:               0,
+			api.AssociationsWithDeniedEntityType: 0,
+			api.HighRiskFunderType:               12,
+			api.AuthorAffiliationType:            2,
+			api.PotentialAuthorAffiliationType:   0,
+			api.MiscHighRiskAssociationType:      6,
+			api.CoauthorAffiliationType:          31,
+		},
+	}
+
+	for i, reportId := range reportIds {
+		report, err := user.WaitForReport(reportId, 300*time.Second)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if report.Status != "complete" ||
+			report.AuthorId != reportRequests[i].AuthorId ||
+			report.AuthorName != reportRequests[i].AuthorName ||
+			report.Source != reportRequests[i].Source {
+			t.Fatal("incorrect report returned")
+		}
+
+		expectedFlags := expectedFlagCounts[i]
+
+		for flagType, expectedCount := range expectedFlags {
+			if len(report.Content[flagType]) < expectedCount {
+				t.Fatalf("Report %s (%s): expected %d flags of type %s, got %d", reportRequests[i].AuthorName, reportRequests[i].AuthorId, expectedCount, flagType, len(report.Content[flagType]))
+			}
+		}
+	}
 }
