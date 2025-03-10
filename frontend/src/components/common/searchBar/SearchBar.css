@@ -2,6 +2,10 @@
   width: 100%;
 }
 
+.paper-title-search-bar {
+  width: 95%;
+}
+
 .autocomplete-search-bar-title {
   width: 100%;
   text-align: left;
@@ -50,7 +54,7 @@
 }
 
 .paper-search-bar {
-  width: 95.5%;
+  width: 100%;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -110,7 +114,7 @@
 }
 
 .single-search-bar-container {
-  width: 87%;
+  width: 85%;
 }
 
 .single-search-button-container {

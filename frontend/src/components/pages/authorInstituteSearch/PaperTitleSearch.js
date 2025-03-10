@@ -65,7 +65,7 @@ const PaperTitleSearchComponent = () => {
     <div style={{ textAlign: 'center', marginTop: '3%' }}>
       <div style={{ marginTop: '1rem' }}>
         <div className="paper-search-bar">
-          <div className="autocomplete-search-bar">
+          <div className="paper-title-search-bar">
             <AutocompleteSearchBar
               title="Paper Title"
               autocomplete={autocompletePaperTitle}

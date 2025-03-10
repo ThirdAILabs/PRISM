@@ -95,7 +95,7 @@ const SearchComponent = () => {
           </select>
         </div>
       </div>
-      <div className="d-flex justify-content-center align-items-center pt-5">
+      <div className="d-flex justify-content-center align-items-center">
         <div style={{ width: '80%', animation: 'fade-in 1.25s' }}>
           {selectedSearchType === 'author' && <AuthorInstitutionSearchComponent />}
           {selectedSearchType === 'orcid' && <OrcidSearchComponent />}
