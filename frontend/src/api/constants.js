@@ -1,7 +1,7 @@
 const runtimeConfig = window._env_ || {};
 
-export const prismBaseUrl = runtimeConfig.REACT_APP_BACKEND_ORIGIN || process.env.REACT_APP_BACKEND_ORIGIN;
-
+export const prismBaseUrl =
+  runtimeConfig.REACT_APP_BACKEND_ORIGIN || process.env.REACT_APP_BACKEND_ORIGIN;
 
 export const API_ROUTES = {
   REPORTS: {

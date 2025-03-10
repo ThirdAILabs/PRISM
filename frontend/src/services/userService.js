@@ -6,8 +6,8 @@ const runtimeConfig = window._env_ || {};
 // Create a new Keycloak instance with the configuration object.
 const _kc = new Keycloak({
   url: runtimeConfig.REACT_APP_KEYCLOAK_URL || process.env.REACT_APP_KEYCLOAK_URL,
-  realm: "prism-user",
-  clientId: "prism-user-login-client",
+  realm: 'prism-user',
+  clientId: 'prism-user-login-client',
   redirectUri: window.location.origin,
 });
 
