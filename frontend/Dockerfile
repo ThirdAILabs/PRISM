@@ -1,11 +1,20 @@
-FROM node:20-slim
+# Build the react app
+FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 COPY . .
+RUN npm run build
 
-EXPOSE 3000
+FROM nginx:stable-alpine
+COPY --from=builder /app/build /usr/share/nginx/html
 
-CMD ["npm", "start"]
+COPY public/config.template.js /usr/share/nginx/html/
+
+COPY entrypoint.sh /docker-entrypoint.d/entrypoint.sh
+RUN chmod +x /docker-entrypoint.d/entrypoint.sh
+
+EXPOSE 80
+CMD ["/docker-entrypoint.d/entrypoint.sh", "nginx", "-g", "daemon off;"]
