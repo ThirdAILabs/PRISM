@@ -64,16 +64,20 @@
   padding: 8px 0;
   cursor: pointer;
   background: white;
+  color: rgb(100, 100, 100);
+  border-radius: 1rem;
+  border: none;
 }
 
 .nav-item:hover {
-  background: #04b9f0;
-  color: white;
+  background: rgb(245, 240, 240);
+  color: rgb(60, 60, 60);
 }
 
 .nav-item.active {
-  background: #04b9f0;
-  color: white;
+  /* background: #8fb8f6; */
+  background: rgb(245, 240, 240);
+  color: rgb(60, 60, 60);
 }
 
 .nav-icon {
@@ -87,6 +91,7 @@
 .reports {
   margin-top: 20px;
   margin-left: 1%;
+  color: rgb(100, 100, 100);
 }
 
 .report-header {
@@ -105,11 +110,12 @@
   border-radius: 1rem;
   font-size: smaller;
   padding-block: 5px;
+  color: rgb(100, 100, 100);
 }
 
 .report-item:hover {
-  background: #04b9f0;
-  color: white;
+  background: rgb(245, 240, 240);
+  color: rgb(60, 60, 60);
   padding: 4px 10;
 }
 
@@ -141,9 +147,10 @@
 
 .collapsible-icon {
   cursor: pointer;
+  padding: 0px;
 }
 
 .collapsible-icon:hover {
-  background-color: #04b9f0;
+  background-color: rgb(245, 240, 240);
   border-radius: 0.5rem;
 }

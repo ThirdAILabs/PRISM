@@ -8,7 +8,6 @@ import (
 	"log/slog"
 	"net/url"
 	"os"
-	"prism/prism/schema"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -26,18 +25,10 @@ func uriToDsn(uri string) string {
 	return fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v", parts.Hostname(), parts.User.Username(), pwd, dbname, parts.Port())
 }
 
-func InitDb(uri string) *gorm.DB {
+func OpenDB(uri string) *gorm.DB {
 	db, err := gorm.Open(postgres.Open(uriToDsn(uri)), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("error opening database connection: %v", err)
-	}
-
-	err = db.AutoMigrate(
-		&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{},
-		&schema.UniversityReport{}, &schema.UserUniversityReport{},
-	)
-	if err != nil {
-		log.Fatalf("error migrating db schema: %v", err)
 	}
 
 	return db
