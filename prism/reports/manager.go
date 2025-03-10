@@ -321,17 +321,13 @@ func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTi
 	})
 }
 
-func flagsToReportContent(flags []schema.AuthorFlag) (api.ReportContent, error) {
-	content := make(api.ReportContent)
+func flagsToReportContent(flags []schema.AuthorFlag) (map[string][]api.Flag, error) {
+	content := make(map[string][]api.Flag)
 
 	for _, flag := range flags {
-		output, err := api.EmptyFlag(flag.FlagType)
+		output, err := api.ParseFlag(flag.FlagType, flag.Data)
 		if err != nil {
-			slog.Error("error creating empty flag", "error", err)
 			return nil, err
-		}
-		if err := json.Unmarshal(flag.Data, output); err != nil {
-			return nil, fmt.Errorf("error deserializing flag: %w", err)
 		}
 		content[output.Type()] = append(content[output.Type()], output)
 	}
