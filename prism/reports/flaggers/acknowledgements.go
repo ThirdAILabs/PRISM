@@ -115,7 +115,10 @@ func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId 
 	if err != nil {
 		return Acknowledgements{}, err
 	}
-	defer pdf.Close()
+
+	if closer, ok := pdf.(io.Closer); ok {
+		defer closer.Close()
+	}
 
 	defer func() {
 		if err := os.Remove(destPath); err != nil && !errors.Is(err, os.ErrNotExist) {
@@ -153,6 +156,10 @@ func downloadWithPlaywright(url, destPath string) (io.ReadCloser, error) {
 		return nil, fmt.Errorf("error creating browser context: %w", err)
 	}
 	defer context.Close()
+
+	// When pdfs fail to download it is often just because they reach the timeout,
+	// which slows down processing. Decreasing the timeout will hopefully speed this up.
+	context.SetDefaultTimeout(15000)
 
 	page, err := context.NewPage()
 	if err != nil {
@@ -193,7 +200,7 @@ var headers = map[string]string{
 	"sec-ch-ua-platform":        `"Windows"`,
 }
 
-func downloadWithHttp(url string) (io.ReadCloser, error) {
+func downloadWithHttp(url string) (io.Reader, error) {
 	req, err := http.NewRequest("GET", strings.Replace(url, " ", "%20", -1), nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating http request: %w", err)
@@ -209,15 +216,29 @@ func downloadWithHttp(url string) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error downloading pdf: %w", err)
 	}
+	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("error downloading pdf: recieved status_code=%d", res.StatusCode)
 	}
 
-	return res.Body, nil
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response: %w", err)
+	}
+
+	// Sometimes the above download can succeed, but instead of returning a pdf, it
+	// will return the html for the page containing the pdf. This leads to an error
+	// when we make a call to grobid. This is a simple trick to check if it is a valid pdf.
+	// https://stackoverflow.com/questions/6186980/determine-if-a-byte-is-a-pdf-file
+	if !bytes.HasPrefix(data, []byte("%PDF")) {
+		return nil, fmt.Errorf("download did not return valid pdf")
+	}
+
+	return bytes.NewReader(data), nil
 }
 
-func downloadPdf(url, destPath string) (io.ReadCloser, error) {
+func downloadPdf(url, destPath string) (io.Reader, error) {
 	attempt1, err1 := downloadWithHttp(url)
 	if err1 != nil {
 	} else {
