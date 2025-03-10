@@ -208,8 +208,8 @@ DB_URI="postgresql://<username>:<password>@<host | localhost>:<port | 5432>/pris
 # Uri for fund code triangulation postgres db
 FUNDCODE_TRIANGULATION_DB_URI="postgresql://<username>:<password>@<host | localhost>:<port | 5432>/prism_triangulation"
 
-# License for NDB
-NDB_LICENSE="bolt license key"
+# License for PRISM, this should be a keygen license with the Full Access and Prism entitlements.
+PRISM_LICENSE="prism license key"
 
 # Work dir for worker, will store ndbs and caches etc.
 WORK_DIR="any empty directory"
