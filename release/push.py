@@ -20,7 +20,7 @@ def get_args() -> argparse.Namespace:
         "-b",
         "--branch",
         required=True,
-        help="The branch to push docker images to. E.g. 'prod', 'test', etc.",
+        help="The branch to push docker images to. E.g. 'prod', 'test', etc. 'prod' is our production branch",
     )
     parser.add_argument(
         "--config",
