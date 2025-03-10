@@ -107,7 +107,7 @@ func convertReportRequestToReport(request *ReportRequest) (api.Report, string, e
 
 		flags := make([]api.Flag, 0, len(flagsArray))
 		for _, rawFlag := range flagsArray {
-			flag, err := api.EmptyFlag(flagType)
+			flag, err := api.ParseFlag(flagType, rawFlag)
 			if err != nil {
 				return api.Report{}, "", fmt.Errorf("error creating empty flag of the type %s: %w", flagType, err)
 			}
