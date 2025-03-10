@@ -18,7 +18,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build -o bin/backend -v ./prism/cmd/backend/main
 RUN CGO_ENABLED=1 GOOS=linux go build -o bin/worker -v ./prism/cmd/worker/main.go
 
 # Change to Ubuntu for the final stage instead of distroless
-FROM debian:11-slim AS build-release-stage
+FROM debian:bookworm-slim AS build-release-stage
 WORKDIR /app
 
 # Copy binaries
