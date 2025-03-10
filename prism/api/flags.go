@@ -2,11 +2,19 @@ package api
 
 import (
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"slices"
 	"strings"
 	"time"
 )
+
+func capitalizeFirstLetter(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
+}
 
 type KeyValue struct {
 	Key   string
@@ -40,7 +48,9 @@ type Flag interface {
 	// The second arg indicates if the flag can be filtered by date.
 	Date() (time.Time, bool)
 
-	GetDetailsFieldsForReport() []KeyValueURL
+	GetDetailsFieldsForReport(useDisclosure bool) []KeyValueURL
+
+	IsDisclosed() bool
 }
 
 const (
@@ -57,37 +67,77 @@ const (
 	HighRiskCoauthorType    = "HighRiskCoauthors"
 )
 
-func EmptyFlag(ftype string) (Flag, error) {
+func ParseFlag(ftype string, data []byte) (Flag, error) {
 	switch ftype {
 	case TalentContractType:
-		return &TalentContractFlag{}, nil
+		var flag TalentContractFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	case AssociationsWithDeniedEntityType:
-		return &AssociationWithDeniedEntityFlag{}, nil
+		var flag AssociationWithDeniedEntityFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	case HighRiskFunderType:
-		return &HighRiskFunderFlag{}, nil
+		var flag HighRiskFunderFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	case AuthorAffiliationType:
-		return &AuthorAffiliationFlag{}, nil
+		var flag AuthorAffiliationFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	case PotentialAuthorAffiliationType:
-		return &PotentialAuthorAffiliationFlag{}, nil
+		var flag PotentialAuthorAffiliationFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	case MiscHighRiskAssociationType:
-		return &MiscHighRiskAssociationFlag{}, nil
+		var flag MiscHighRiskAssociationFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	case CoauthorAffiliationType:
-		return &CoauthorAffiliationFlag{}, nil
+		var flag CoauthorAffiliationFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	case MultipleAffiliationType:
-		return &MultipleAffiliationFlag{}, nil
+		var flag MultipleAffiliationFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	case HighRiskPublisherType:
-		return &HighRiskPublisherFlag{}, nil
+		var flag HighRiskPublisherFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	case HighRiskCoauthorType:
-		return &HighRiskCoauthorFlag{}, nil
+		var flag HighRiskCoauthorFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
 
 	default:
 		return nil, fmt.Errorf("invalid flag type '%s'", ftype)
@@ -100,6 +150,10 @@ type DisclosableFlag struct {
 
 func (flag *DisclosableFlag) MarkDisclosed() {
 	flag.Disclosed = true
+}
+
+func (flag *DisclosableFlag) IsDisclosed() bool {
+	return flag.Disclosed
 }
 
 type WorkSummary struct {
@@ -159,12 +213,18 @@ func (flag *TalentContractFlag) Date() (time.Time, bool) {
 	return flag.Work.PublicationDate, true
 }
 
-func (flag *TalentContractFlag) GetDetailsFieldsForReport() []KeyValueURL {
-	return []KeyValueURL{
+func (flag *TalentContractFlag) GetDetailsFieldsForReport(useDisclosure bool) []KeyValueURL {
+	fields := []KeyValueURL{
 		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
 		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
 		{Key: "Acknowledgements", Value: strings.Join(flag.RawAcknowledements, ", ")},
 	}
+	if useDisclosure {
+		fields = append([]KeyValueURL{
+			{Key: "Disclosed", Value: capitalizeFirstLetter(fmt.Sprintf("%v", flag.Disclosed))},
+		}, fields...)
+	}
+	return fields
 }
 
 type AssociationWithDeniedEntityFlag struct {
@@ -210,12 +270,18 @@ func (flag *AssociationWithDeniedEntityFlag) Date() (time.Time, bool) {
 	return flag.Work.PublicationDate, true
 }
 
-func (flag *AssociationWithDeniedEntityFlag) GetDetailsFieldsForReport() []KeyValueURL {
-	return []KeyValueURL{
+func (flag *AssociationWithDeniedEntityFlag) GetDetailsFieldsForReport(useDisclosure bool) []KeyValueURL {
+	fields := []KeyValueURL{
 		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
 		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
 		{Key: "Acknowledgements", Value: strings.Join(flag.RawAcknowledements, ", ")},
 	}
+	if useDisclosure {
+		fields = append([]KeyValueURL{
+			{Key: "Disclosed", Value: capitalizeFirstLetter(fmt.Sprintf("%v", flag.Disclosed))},
+		}, fields...)
+	}
+	return fields
 }
 
 type HighRiskFunderFlag struct {
@@ -257,12 +323,18 @@ func (flag *HighRiskFunderFlag) Date() (time.Time, bool) {
 	return flag.Work.PublicationDate, true
 }
 
-func (flag *HighRiskFunderFlag) GetDetailsFieldsForReport() []KeyValueURL {
-	return []KeyValueURL{
+func (flag *HighRiskFunderFlag) GetDetailsFieldsForReport(useDisclosure bool) []KeyValueURL {
+	fields := []KeyValueURL{
 		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
 		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
 		{Key: "Funders", Value: strings.Join(flag.Funders, ", ")},
 	}
+	if useDisclosure {
+		fields = append([]KeyValueURL{
+			{Key: "Disclosed", Value: capitalizeFirstLetter(fmt.Sprintf("%v", flag.Disclosed))},
+		}, fields...)
+	}
+	return fields
 }
 
 type AuthorAffiliationFlag struct {
@@ -303,12 +375,18 @@ func (flag *AuthorAffiliationFlag) Date() (time.Time, bool) {
 	return flag.Work.PublicationDate, true
 }
 
-func (flag *AuthorAffiliationFlag) GetDetailsFieldsForReport() []KeyValueURL {
-	return []KeyValueURL{
+func (flag *AuthorAffiliationFlag) GetDetailsFieldsForReport(useDisclosure bool) []KeyValueURL {
+	fields := []KeyValueURL{
 		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
 		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
 		{Key: "Affiliations", Value: strings.Join(flag.Affiliations, ", ")},
 	}
+	if useDisclosure {
+		fields = append([]KeyValueURL{
+			{Key: "Disclosed", Value: capitalizeFirstLetter(fmt.Sprintf("%v", flag.Disclosed))},
+		}, fields...)
+	}
+	return fields
 }
 
 type PotentialAuthorAffiliationFlag struct {
@@ -347,10 +425,16 @@ func (flag *PotentialAuthorAffiliationFlag) Date() (time.Time, bool) {
 	return time.Time{}, false
 }
 
-func (flag *PotentialAuthorAffiliationFlag) GetDetailsFieldsForReport() []KeyValueURL {
-	return []KeyValueURL{
+func (flag *PotentialAuthorAffiliationFlag) GetDetailsFieldsForReport(useDisclosure bool) []KeyValueURL {
+	fields := []KeyValueURL{
 		{Key: "University", Value: flag.University, Url: flag.UniversityUrl},
 	}
+	if useDisclosure {
+		fields = append([]KeyValueURL{
+			{Key: "Disclosed", Value: capitalizeFirstLetter(fmt.Sprintf("%v", flag.Disclosed))},
+		}, fields...)
+	}
+	return fields
 }
 
 type Connection struct {
@@ -421,7 +505,7 @@ func (flag *MiscHighRiskAssociationFlag) Date() (time.Time, bool) {
 	return time.Time{}, false
 }
 
-func (flag *MiscHighRiskAssociationFlag) GetDetailsFieldsForReport() []KeyValueURL {
+func (flag *MiscHighRiskAssociationFlag) GetDetailsFieldsForReport(useDisclosure bool) []KeyValueURL {
 	fields := []KeyValueURL{
 		{Key: "Title", Value: flag.DocTitle, Url: flag.DocUrl},
 		{Key: "Entities", Value: strings.Join(flag.DocEntities, ", ")},
@@ -433,6 +517,11 @@ func (flag *MiscHighRiskAssociationFlag) GetDetailsFieldsForReport() []KeyValueU
 	for i, conn := range flag.Connections {
 		titleKey := fmt.Sprintf("Connection %d", i+1)
 		fields = append(fields, KeyValueURL{Key: titleKey, Value: conn.DocTitle, Url: conn.DocUrl})
+	}
+	if useDisclosure {
+		fields = append([]KeyValueURL{
+			{Key: "Disclosed", Value: capitalizeFirstLetter(fmt.Sprintf("%v", flag.Disclosed))},
+		}, fields...)
 	}
 	return fields
 }
@@ -477,16 +566,20 @@ func (flag *CoauthorAffiliationFlag) Date() (time.Time, bool) {
 	return flag.Work.PublicationDate, true
 }
 
-func (flag *CoauthorAffiliationFlag) GetDetailsFieldsForReport() []KeyValueURL {
-	return []KeyValueURL{
+func (flag *CoauthorAffiliationFlag) GetDetailsFieldsForReport(useDisclosure bool) []KeyValueURL {
+	fields := []KeyValueURL{
 		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
 		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
 		{Key: "Co-authors", Value: strings.Join(flag.Coauthors, ", ")},
 		{Key: "Affiliations", Value: strings.Join(flag.Affiliations, ", ")},
 	}
+	if useDisclosure {
+		fields = append([]KeyValueURL{
+			{Key: "Disclosed", Value: capitalizeFirstLetter(fmt.Sprintf("%v", flag.Disclosed))},
+		}, fields...)
+	}
+	return fields
 }
-
-type ReportContent map[string][]Flag
 
 //The following flags are unused by the frontend, but they are kept in case we
 // want to have them in the future.
@@ -529,12 +622,18 @@ func (flag *MultipleAffiliationFlag) Date() (time.Time, bool) {
 	return flag.Work.PublicationDate, true
 }
 
-func (flag *MultipleAffiliationFlag) GetDetailsFieldsForReport() []KeyValueURL {
-	return []KeyValueURL{
+func (flag *MultipleAffiliationFlag) GetDetailsFieldsForReport(useDisclosure bool) []KeyValueURL {
+	fields := []KeyValueURL{
 		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
 		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
 		{Key: "Affiliations", Value: strings.Join(flag.Affiliations, ", ")},
 	}
+	if useDisclosure {
+		fields = append([]KeyValueURL{
+			{Key: "Disclosed", Value: capitalizeFirstLetter(fmt.Sprintf("%v", flag.Disclosed))},
+		}, fields...)
+	}
+	return fields
 }
 
 type HighRiskPublisherFlag struct {
@@ -575,12 +674,18 @@ func (flag *HighRiskPublisherFlag) Date() (time.Time, bool) {
 	return flag.Work.PublicationDate, true
 }
 
-func (flag *HighRiskPublisherFlag) GetDetailsFieldsForReport() []KeyValueURL {
-	return []KeyValueURL{
+func (flag *HighRiskPublisherFlag) GetDetailsFieldsForReport(useDisclosure bool) []KeyValueURL {
+	fields := []KeyValueURL{
 		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
 		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
 		{Key: "Publishers", Value: strings.Join(flag.Publishers, ", ")},
 	}
+	if useDisclosure {
+		fields = append([]KeyValueURL{
+			{Key: "Disclosed", Value: capitalizeFirstLetter(fmt.Sprintf("%v", flag.Disclosed))},
+		}, fields...)
+	}
+	return fields
 }
 
 type HighRiskCoauthorFlag struct {
@@ -621,10 +726,16 @@ func (flag *HighRiskCoauthorFlag) Date() (time.Time, bool) {
 	return flag.Work.PublicationDate, true
 }
 
-func (flag *HighRiskCoauthorFlag) GetDetailsFieldsForReport() []KeyValueURL {
-	return []KeyValueURL{
+func (flag *HighRiskCoauthorFlag) GetDetailsFieldsForReport(useDisclosure bool) []KeyValueURL {
+	fields := []KeyValueURL{
 		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
 		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
 		{Key: "Co-authors", Value: strings.Join(flag.Coauthors, ", ")},
 	}
+	if useDisclosure {
+		fields = append([]KeyValueURL{
+			{Key: "Disclosed", Value: capitalizeFirstLetter(fmt.Sprintf("%v", flag.Disclosed))},
+		}, fields...)
+	}
+	return fields
 }

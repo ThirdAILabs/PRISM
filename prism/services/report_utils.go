@@ -239,7 +239,7 @@ func printWatermark(pdf *gofpdf.Fpdf, text string) {
 	pdf.SetTextColor(currR, currG, currB)
 }
 
-func setupPDFHeader(pdf *gofpdf.Fpdf, resourceFolder string) {
+func setupPDFHeader(pdf *gofpdf.Fpdf, resourceFolder string, authorName string) {
 	pdf.SetHeaderFunc(func() {
 		currentR, currentG, currentB := pdf.GetTextColor()
 		pageWidth, _ := pdf.GetPageSize()
@@ -249,9 +249,10 @@ func setupPDFHeader(pdf *gofpdf.Fpdf, resourceFolder string) {
 		pdf.Image(filepath.Join(resourceFolder, "prism-header-logo.png"), 20, 10, logoWidth, 0, false, "", 0, "")
 
 		// prism report text
-		pdf.SetFont("Arial", "B", 14)
-		pdf.SetTextColor(0, 0, 200)
-		pdf.Text(pageWidth/2-pdf.GetStringWidth("PRISM REPORT")/2, 17, "PRISM REPORT")
+		pdf.SetFont("Arial", "B", 10)
+		// dark grey color for author name
+		pdf.SetTextColor(100, 100, 100)
+		pdf.Text(pageWidth-pdf.GetStringWidth(authorName)-20, 17, authorName)
 
 		// divider line
 		pdf.SetDrawColor(200, 200, 200)
@@ -278,12 +279,12 @@ func setupPDFFooter(pdf *gofpdf.Fpdf) {
 	})
 }
 
-func setupPDFCoverPage(pdf *gofpdf.Fpdf, report api.Report, resourceFolder string) {
+func setupPDFCoverPage(pdf *gofpdf.Fpdf, report api.Report, resourceFolder string, timeRange string) {
 	pdf.AddPage()
 
 	// add prism logo to the front page
 	logoPath := filepath.Join(resourceFolder, "prism-logo.png")
-	logoWidth := 150.0 // Width in mm, adjust as needed
+	logoWidth := 100.0 // Width in mm, adjust as needed
 
 	// Get page width to center the logo
 	pageWidth, _ := pdf.GetPageSize()
@@ -295,19 +296,25 @@ func setupPDFCoverPage(pdf *gofpdf.Fpdf, report api.Report, resourceFolder strin
 
 	// Add the logo at position (xPos, 20) with width logoWidth
 	pdf.Image(logoPath, xPos, 50, logoWidth, 0, false, "", 0, "")
-	pdf.Ln(60)
+	pdf.Ln(20)
 
-	pdf.SetY(200)
+	pdf.SetY(175)
 	pdf.SetFont("Arial", "B", 14)
 	pdf.SetFillColor(200, 200, 255)
-	pdf.CellFormat(0, 10, "PRISM REPORT", "0", 1, "C", true, 0, "")
+	pdf.CellFormat(0, 10, "Individual Report", "0", 1, "C", true, 0, "")
 	pdf.Ln(2)
 
 	details := [][]string{
-		{"Report ID", report.Id.String()},
-		{"Downloaded At", time.Now().Format(time.DateOnly)},
 		{"Author Name", report.AuthorName},
+		{"Downloaded At", time.Now().Format("Jan 2, 2006")},
+		{"Report ID", report.Id.String()},
 	}
+	// insert timeline after the author name
+	if timeRange != "" {
+		timelineRow := []string{"Timeline", timeRange}
+		details = append(details[:1], append([][]string{timelineRow}, details[1:]...)...)
+	}
+
 	pdf.SetFont("Arial", "", 12)
 
 	for _, row := range details {
@@ -319,7 +326,7 @@ func setupPDFCoverPage(pdf *gofpdf.Fpdf, report api.Report, resourceFolder strin
 	pdf.Ln(5)
 }
 
-func setupPDFFlagGroup(pdf *gofpdf.Fpdf, flags []api.Flag) error {
+func setupPDFFlagGroup(pdf *gofpdf.Fpdf, flags []api.Flag, useDisclosure bool) error {
 	if len(flags) == 0 {
 		return nil
 	}
@@ -335,13 +342,19 @@ func setupPDFFlagGroup(pdf *gofpdf.Fpdf, flags []api.Flag) error {
 	pdf.CellFormat(headerWidth, 10, flags[0].GetHeading(), "0", 1, "C", true, 0, "")
 	pdf.Ln(3)
 
+	if useDisclosure {
+		slices.SortFunc(flags, func(a, b api.Flag) int {
+			return map[bool]int{false: 0, true: 1}[b.IsDisclosed()] - map[bool]int{false: 0, true: 1}[a.IsDisclosed()]
+		})
+	}
+
 	for flagIndex, flag := range flags {
 		pdf.SetFont("Arial", "B", 13)
 		pdf.SetFillColor(230, 230, 230)
 		pdf.CellFormat(0, 10, fmt.Sprintf("Issue %d", flagIndex+1), "", 1, "L", true, 0, "")
 		pdf.Ln(3)
 
-		for _, kv := range flag.GetDetailsFieldsForReport() {
+		for _, kv := range flag.GetDetailsFieldsForReport(useDisclosure) {
 			keyWidth := 50.0
 			pageWidth, _ := pdf.GetPageSize()
 			left, _, right, _ := pdf.GetMargins()
@@ -371,12 +384,12 @@ func setupPDFFlagGroup(pdf *gofpdf.Fpdf, flags []api.Flag) error {
 	return nil
 }
 
-func generatePDF(report api.Report, resourceFolder string) ([]byte, error) {
+func generatePDF(report api.Report, resourceFolder string, containsDisclosure bool, timeRange string) ([]byte, error) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetMargins(20, 30, 20)
 	pdf.SetAutoPageBreak(true, 20)
 
-	setupPDFCoverPage(pdf, report, resourceFolder)
+	setupPDFCoverPage(pdf, report, resourceFolder, timeRange)
 
 	// we set the footer here so that cover also has a page number
 	setupPDFFooter(pdf)
@@ -405,7 +418,7 @@ func generatePDF(report api.Report, resourceFolder string) ([]byte, error) {
 
 	// Reserve page for TOC (page 2)
 	// we set the header after the cover page so that header logo starts from page 2
-	setupPDFHeader(pdf, resourceFolder)
+	setupPDFHeader(pdf, resourceFolder, report.AuthorName)
 	pdf.AddPage()
 	tocPage := pdf.PageNo()
 
@@ -425,7 +438,7 @@ func generatePDF(report api.Report, resourceFolder string) ([]byte, error) {
 				startPage: startPage,
 			})
 
-			if err := setupPDFFlagGroup(pdf, group.flags); err != nil {
+			if err := setupPDFFlagGroup(pdf, group.flags, containsDisclosure); err != nil {
 				return nil, err
 			}
 		}

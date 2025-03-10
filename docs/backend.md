@@ -165,7 +165,7 @@ __Example Response__:
 
 | Method | Path | Auth Required | Permissions |
 | ------ | ---- | ------------- | ----------  |
-| `GET` | `/api/v1/report/author/{report_id}/download` | Yes | Token for Keycloak User Realm |
+| `POST` | `/api/v1/report/author/{report_id}/download` | Yes | Token for Keycloak User Realm |
 
 Downloads a completed report in the requested format. The report status must be complete in order for the report to be downloadable.
 
