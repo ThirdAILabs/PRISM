@@ -350,7 +350,9 @@ func TestAutoCompleteInstituteAuthor(t *testing.T) {
 	for _, res := range results {
 		if strings.EqualFold(res.Name, "M. Katherine Banks") && strings.EqualFold(res.Hint, "Texas A&M University, USA") {
 			found = true
-			break
+		}
+		if strings.EqualFold(res.Name, "M Katherine Bleckley") {
+			t.Fatal("should not have this author")
 		}
 	}
 
