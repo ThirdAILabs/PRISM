@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -13,6 +14,7 @@ import (
 	"prism/prism/schema"
 	"prism/prism/services/auth"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -26,6 +28,101 @@ type ReportService struct {
 	resourceFolder string
 }
 
+type ReportRequest struct {
+	Id                    string                     `json:"Id"`
+	LastAccessedAt        string                     `json:"LastAccessedAt"`
+	AuthorId              string                     `json:"AuthorId"`
+	AuthorName            string                     `json:"AuthorName"`
+	Source                string                     `json:"Source"`
+	Status                string                     `json:"Status"`
+	Content               map[string]json.RawMessage `json:"Content"`
+	ContainsReportContent bool                       `json:"ContainsReportContent"`
+	ContainsDisclosure    bool                       `json:"ContainsDisclosure"`
+	TimeRange             string                     `json:"TimeRange"`
+}
+
+func (request *ReportRequest) Validate() error {
+
+	if !request.ContainsReportContent {
+		return nil
+	}
+
+	if request.Id == "" {
+		return fmt.Errorf("report id is required")
+	}
+
+	if request.LastAccessedAt == "" {
+		return fmt.Errorf("last accessed at is required")
+	}
+
+	if request.AuthorId == "" {
+		return fmt.Errorf("author id is required")
+	}
+
+	if request.AuthorName == "" {
+		return fmt.Errorf("author name is required")
+	}
+
+	if request.Source == "" {
+		return fmt.Errorf("source is required")
+	}
+
+	if request.Status == "" {
+		return fmt.Errorf("status is required")
+	}
+
+	if request.Content == nil {
+		return fmt.Errorf("content is required")
+	}
+	return nil
+}
+
+func convertReportRequestToReport(request *ReportRequest) (api.Report, string, error) {
+
+	id, err := uuid.Parse(request.Id)
+	if err != nil {
+		return api.Report{}, "", fmt.Errorf("error parsing report id: %w", err)
+	}
+
+	lastAccessedAt, err := time.Parse(time.RFC3339, request.LastAccessedAt)
+	if err != nil {
+		return api.Report{}, "", fmt.Errorf("error parsing report last accessed at: %w", err)
+	}
+
+	report := api.Report{
+		Id:             id,
+		LastAccessedAt: lastAccessedAt,
+		AuthorId:       request.AuthorId,
+		AuthorName:     request.AuthorName,
+		Source:         request.Source,
+		Status:         request.Status,
+		Content:        make(map[string][]api.Flag),
+	}
+
+	for flagType, flagsData := range request.Content {
+		var flagsArray []json.RawMessage
+		if err := json.Unmarshal(flagsData, &flagsArray); err != nil {
+			return api.Report{}, "", fmt.Errorf("error deserializing flags: %w", err)
+		}
+
+		flags := make([]api.Flag, 0, len(flagsArray))
+		for _, rawFlag := range flagsArray {
+			flag, err := api.ParseFlag(flagType, rawFlag)
+			if err != nil {
+				return api.Report{}, "", fmt.Errorf("error creating empty flag of the type %s: %w", flagType, err)
+			}
+
+			if err := json.Unmarshal(rawFlag, flag); err != nil {
+				return api.Report{}, "", fmt.Errorf("error deserializing flag of the type %s: %w", flagType, err)
+			}
+			flags = append(flags, flag)
+		}
+		report.Content[flagType] = flags
+	}
+
+	return report, request.TimeRange, nil
+}
+
 func (s *ReportService) Routes() chi.Router {
 	r := chi.NewRouter()
 
@@ -35,7 +132,7 @@ func (s *ReportService) Routes() chi.Router {
 		r.Get("/{report_id}", WrapRestHandler(s.GetReport))
 		r.Delete("/{report_id}", WrapRestHandler(s.DeleteAuthorReport))
 		r.Post("/{report_id}/check-disclosure", WrapRestHandler(s.CheckDisclosure))
-		r.Get("/{report_id}/download", s.DownloadReport)
+		r.Post("/{report_id}/download", s.DownloadReport)
 	})
 
 	r.Route("/university", func(r chi.Router) {
@@ -214,7 +311,26 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	report, err := s.manager.GetAuthorReport(userId, reportId)
+	var requestBody ReportRequest
+	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
+		http.Error(w, "Invalid request format", http.StatusBadRequest)
+		return
+	}
+
+	if err := requestBody.Validate(); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	containsReportContent := requestBody.ContainsReportContent
+
+	var report api.Report
+	var timeRange string
+	if containsReportContent {
+		report, timeRange, err = convertReportRequestToReport(&requestBody)
+	} else {
+		report, err = s.manager.GetAuthorReport(userId, reportId)
+	}
 	if err != nil {
 		http.Error(w, err.Error(), reportErrorStatus(err))
 		return
@@ -240,15 +356,15 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		contentType = "text/csv"
-		filename = "report.csv"
+		filename = fmt.Sprintf("%s Report.csv", report.AuthorName)
 	case "pdf":
-		fileBytes, err = generatePDF(report, s.resourceFolder)
+		fileBytes, err = generatePDF(report, s.resourceFolder, requestBody.ContainsDisclosure, timeRange)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		contentType = "application/pdf"
-		filename = "report.pdf"
+		filename = fmt.Sprintf("%s Report.pdf", report.AuthorName)
 	case "excel", "xlsx":
 		fileBytes, err = generateExcel(report)
 		if err != nil {
@@ -256,7 +372,7 @@ func (s *ReportService) DownloadReport(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-		filename = "report.xlsx"
+		filename = fmt.Sprintf("%s Report.xlsx", report.AuthorName)
 	default:
 		http.Error(w, "unsupported format", http.StatusBadRequest)
 		return
