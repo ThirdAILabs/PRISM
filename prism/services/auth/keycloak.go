@@ -137,6 +137,8 @@ func (auth *KeycloakAuth) createRealm(adminToken string) error {
 		QuickLoginCheckMilliSeconds:     gocloak.Int64P(int64(1000)),
 		MaxDeltaTimeSeconds:             gocloak.IntP(43200),
 		FailureFactor:                   gocloak.IntP(30),
+		AccessCodeLifespan:              gocloak.IntP(1500),
+		VerifyEmail:                     gocloak.BoolP(true),
 		SMTPServer: &map[string]string{
 			"host":     "smtp.sendgrid.net",
 			"port":     "465",
