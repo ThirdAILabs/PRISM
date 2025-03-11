@@ -1,42 +1,62 @@
+html,
+body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 div.kc-logo-text {
-    height: 40px;
-    width: 400px;
+    background-image: url('../img/prism-logo.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    height: 80px;
+    width: 100%;
+    max-width: 800px;
     background-color: white;
-    /* border-radius: 100%; */
-    /* margin-bottom: 10px; */
+    margin-bottom: 0;
+    margin-top: -20%;
 }
 
 #kc-header-wrapper {
-    padding-top: 0px;
-    padding-bottom: 0px;
-    padding-left: 4%;
-    padding-right: 0px;
+    padding: 0;
+    margin: 0 !important;
 }
 
 .login-pf-page {
-    margin-top: 5%;
-    margin-left: 5%;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    /* horizontal centering */
     border-radius: 10px;
     background-color: white;
-
+    box-sizing: border-box;
+    padding: 20px;
+    /* internal spacing */
 }
 
 h1#kc-page-title {
-    margin-top: 0px;
+    margin-top: 0;
     font-weight: bold;
     font-size: 29px;
     padding-right: 125px;
 }
 
 .login-pf-page .login-pf-page-header {
-    margin-bottom: 0px;
-    margin-top: 5%;
+    margin-bottom: 0;
 }
 
 .card-pf {
     margin: 0 auto;
     box-shadow: none;
-    padding: 0 20px;
+    padding: 0 0px;
     max-width: 500px;
     border-top: 0px;
 }
@@ -54,26 +74,26 @@ h1#kc-page-title {
 }
 
 .pf-c-form-control {
-    border-radius: 0.75rem;
-    /* Rounds the corners (adjust value for more/less rounding) */
+    border-radius: 0.5rem;
+
     border: 0.5px solid #007BFF;
-    /* Adjust border width and color */
+
     padding: 1rem 1rem;
-    /* Ensure proper spacing inside the input box */
+
     font-size: 12px;
-    /* Adjust font size */
+
     outline: none;
     box-shadow: none;
-    /* Remove the default outline */
+
     transition: none;
-    /* Smooth transition effects */
+
 }
 
 /* Hover effect */
 .pf-c-form-control:hover {
     border-color: #007BFF;
     box-shadow: none;
-    /* Light blue border on hover */
+
 }
 
 /* Focus effect */
@@ -86,17 +106,20 @@ h1#kc-page-title {
 }
 
 .pf-c-button.pf-m-primary {
-    border-radius: 0.75rem;
+    border-radius: 0.5rem;
 }
 
 #kc-content {
     width: 70%;
+    margin: 0 auto;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Container for password input and toggle */
 .password-input {
     position: relative;
-    width: 300px;
+    width: 100%;
 }
 
 /* Password toggle button */
