@@ -312,6 +312,9 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 			continue
 		}
 
+		matches := primaryMatcher.findMatches(result.Text)
+		slog.Info("matches inside third hop", "matches", matches)
+
 		url, _ := result.Metadata["url"].(string)
 		if seen[url] {
 			continue
@@ -402,11 +405,15 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(logger *slog.Logger, autho
 		return nil, err
 	}
 
+	slog.Info("first/second level flags", "flags", firstSecondLevelFlags)
+
 	secondThirdLevelFlags, err := flagger.findSecondThirdHopEntities(logger, authorName)
 	if err != nil {
 		logger.Error("error checking second/third level flags", "error", err)
 		return nil, err
 	}
+
+	slog.Info("second/third level flags", "flags", secondThirdLevelFlags)
 
 	flags := slices.Concat(firstSecondLevelFlags, secondThirdLevelFlags)
 

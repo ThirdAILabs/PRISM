@@ -4,7 +4,8 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"log/slog"
-	"path/filepath"
+
+	// "path/filepath"
 	"prism/prism/api"
 	"prism/prism/openalex"
 	"prism/prism/reports"
@@ -44,37 +45,37 @@ type ReportProcessorOptions struct {
 
 // TODO(Nicholas): How to do cleanup for this, or just let it get cleaned up at the end of the process?
 func NewReportProcessor(manager *reports.ReportManager, opts ReportProcessorOptions) (*ReportProcessor, error) {
-	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(opts.WorkDir, "authors.cache"))
-	if err != nil {
-		return nil, fmt.Errorf("error loading author cache: %w", err)
-	}
-	ackCache, err := NewCache[Acknowledgements]("acks", filepath.Join(opts.WorkDir, "acks.cache"))
-	if err != nil {
-		return nil, fmt.Errorf("error loading ack cache: %w", err)
-	}
+	// authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(opts.WorkDir, "authors.cache"))
+	// if err != nil {
+	// 	return nil, fmt.Errorf("error loading author cache: %w", err)
+	// }
+	// ackCache, err := NewCache[Acknowledgements]("acks", filepath.Join(opts.WorkDir, "acks.cache"))
+	// if err != nil {
+	// 	return nil, fmt.Errorf("error loading ack cache: %w", err)
+	// }
 
 	return &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
 		workFlaggers: []WorkFlagger{
-			&OpenAlexFunderIsEOC{
-				concerningFunders:  opts.ConcerningFunders,
-				concerningEntities: opts.ConcerningEntities,
-			},
-			&OpenAlexAuthorAffiliationIsEOC{
-				concerningEntities:     opts.ConcerningEntities,
-				concerningInstitutions: opts.ConcerningInstitutions,
-			},
+			// &OpenAlexFunderIsEOC{
+			// 	concerningFunders:  opts.ConcerningFunders,
+			// 	concerningEntities: opts.ConcerningEntities,
+			// },
+			// &OpenAlexAuthorAffiliationIsEOC{
+			// 	concerningEntities:     opts.ConcerningEntities,
+			// 	concerningInstitutions: opts.ConcerningInstitutions,
+			// },
 			&OpenAlexCoauthorAffiliationIsEOC{
 				concerningEntities:     opts.ConcerningEntities,
 				concerningInstitutions: opts.ConcerningInstitutions,
 			},
-			&OpenAlexAcknowledgementIsEOC{
-				openalex:     openalex.NewRemoteKnowledgeBase(),
-				entityLookup: opts.EntityLookup,
-				authorCache:  authorCache,
-				extractor:    NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.WorkDir),
-				sussyBakas:   opts.SussyBakas,
-			},
+			// &OpenAlexAcknowledgementIsEOC{
+			// 	openalex:     openalex.NewRemoteKnowledgeBase(),
+			// 	entityLookup: opts.EntityLookup,
+			// 	authorCache:  authorCache,
+			// 	extractor:    NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.WorkDir),
+			// 	sussyBakas:   opts.SussyBakas,
+			// },
 		},
 		authorFacultyAtEOC: &AuthorIsFacultyAtEOCFlagger{
 			universityNDB: opts.UniversityNDB,
