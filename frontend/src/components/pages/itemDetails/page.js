@@ -925,53 +925,61 @@ const ItemDetails = () => {
               alignItems: 'center',
               justifyContent: 'space-between',
               margin: '0 auto',
-              padding: '10px 0', // reduce padding
+              padding: '10px 0',
+              height: '75px',
             }}
           >
-            <button
-              onClick={() => goBack()}
-              className="btn text-dark mb-3"
-              style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                style={{ marginRight: '8px' }}
+            {/* Left section - Back button */}
+            <div style={{ flex: '1', display: 'flex', justifyContent: 'flex-start' }}>
+              <button
+                onClick={() => goBack()}
+                className="btn text-dark mb-3"
+                style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}
               >
-                <path
-                  d="M10 19L3 12L10 5"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M3 12H21"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Back
-            </button>
-            <div style={{ textAlign: 'center' }}>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{ marginRight: '8px' }}
+                >
+                  <path
+                    d="M10 19L3 12L10 5"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M3 12H21"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                Back
+              </button>
+            </div>
+
+            {/* Center section - Author information */}
+            <div style={{ flex: '1', textAlign: 'center' }}>
               <h5 className="m-0">{authorName}</h5>
               <b className="m-0 p-0" style={{ fontSize: 'small' }}>
                 {institutions.join(', ')}
               </b>
             </div>
-            <div>
+
+            {/* Right section - Filter dropdown */}
+            <div style={{ flex: '1', display: 'flex', justifyContent: 'flex-end' }}>
               <div className="dropdown" ref={dropdownFilterRef}>
                 <style>
                   {`
-                    .form-control::placeholder {
-                      color: #888;
-                    }
-                  `}
+          .form-control::placeholder {
+            color: #888;
+          }
+        `}
                 </style>
                 <button
                   className="btn dropdown-toggle"
@@ -980,11 +988,11 @@ const ItemDetails = () => {
                   style={{
                     backgroundColor: 'rgb(160, 160, 160)',
                     border: 'none',
+                    marginRight: '10px',
                     color: 'white',
                     width: '180px',
                     fontWeight: 'bold',
                     fontSize: '14px',
-                    marginRight: '10px',
                   }}
                 >
                   Filter by Timeline
