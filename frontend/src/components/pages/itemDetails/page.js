@@ -26,6 +26,8 @@ import { Snackbar } from '@mui/material';
 import useGoBack from '../../../hooks/useGoBack.js';
 import useOutsideClick from '../../../hooks/useOutsideClick.js';
 
+import Collapsible from '../../common/tools/CollapsibleComponent.js';
+
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
   ASSOCIATIONS_WITH_DENIED_ENTITIES,
@@ -331,6 +333,73 @@ const ItemDetails = () => {
 
   const [review, setReview] = useState();
 
+  function fundCodeTriangulation(flag, index) {
+    return (
+      <>
+        {flag.FundCodeTriangulation &&
+          typeof flag.FundCodeTriangulation === 'object' &&
+          Object.keys(flag.FundCodeTriangulation).length > 0 && (
+            <>
+              <Collapsible title="High-Risk Grants" initiallyExpanded={false}>
+                {/* <strong>High-Risk Grants</strong> */}
+                <ul className="bulleted-list">
+                  {Object.entries(flag.FundCodeTriangulation).map(
+                    ([outerKey, innerMap], index1) => (
+                      <li key={`fund-${index}-${index1}`} className="mb-3">
+                        {outerKey}
+                        <ul className="non-bulleted-list ms-3">
+                          {Object.entries(innerMap).map(([innerKey, value], index2) => (
+                            <li key={`fund-${index}-${index1}-${index2}`} className="mb-2">
+                              {typeof value === 'boolean' ? (
+                                <button
+                                  type="button"
+                                  className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
+                                  style={{ minWidth: '180px', textAlign: 'center' }}
+                                  title={`${innerKey}: ${
+                                    value
+                                      ? 'The author likely IS a primary recipient of this grant.'
+                                      : 'The author likely IS NOT a primary recipient of this grant.'
+                                  }`}
+                                >
+                                  {innerKey}
+                                  {/* : {value ? 'Yes' : 'No'} */}
+                                </button>
+                              ) : (
+                                <>
+                                  <strong>{innerKey}:</strong> {JSON.stringify(value)}
+                                </>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </li>
+                    )
+                  )}
+                </ul>
+                {/* Legend Section */}
+                <div className="mt-4 d-flex flex-column small">
+                  <span className="me-3">
+                    <span
+                      className="rounded-circle d-inline-block me-2"
+                      style={{ width: '8px', height: '8px', backgroundColor: 'green' }}
+                    ></span>
+                    The author likely <b>is not</b> a primary recipient of these grants.
+                  </span>
+                  <span>
+                    <span
+                      className="rounded-circle d-inline-block me-2"
+                      style={{ width: '8px', height: '8px', backgroundColor: 'red' }}
+                    ></span>
+                    The author likely <b>is</b> a primary recipient of these grants.
+                  </span>
+                </div>
+              </Collapsible>
+            </>
+          )}
+      </>
+    );
+  }
+
   function withPublicationDate(header, flag) {
     const publicationDateStr = flag.Work && flag.Work.PublicationDate;
     let formattedDate = 'N/A';
@@ -418,66 +487,8 @@ const ItemDetails = () => {
             </>
           )}
         </p>
-        <div>
-          {flag.FundCodeTriangulation &&
-            typeof flag.FundCodeTriangulation === 'object' &&
-            Object.keys(flag.FundCodeTriangulation).length > 0 && (
-              <>
-                <strong>High-Risk Grants</strong>
-                <ul className="bulleted-list">
-                  {Object.entries(flag.FundCodeTriangulation).map(
-                    ([outerKey, innerMap], index1) => (
-                      <li key={`fund-${index}-${index1}`} className="mb-3">
-                        {outerKey}
-                        <ul className="non-bulleted-list ms-3">
-                          {Object.entries(innerMap).map(([innerKey, value], index2) => (
-                            <li key={`fund-${index}-${index1}-${index2}`} className="mb-2">
-                              {typeof value === 'boolean' ? (
-                                <button
-                                  type="button"
-                                  className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
-                                  style={{ minWidth: '180px', textAlign: 'center' }}
-                                  title={`${innerKey}: ${
-                                    value
-                                      ? 'The author likely IS a primary recipient of this grant.'
-                                      : 'The author likely IS NOT a primary recipient of this grant.'
-                                  }`}
-                                >
-                                  {innerKey}
-                                  {/* : {value ? 'Yes' : 'No'} */}
-                                </button>
-                              ) : (
-                                <>
-                                  <strong>{innerKey}:</strong> {JSON.stringify(value)}
-                                </>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      </li>
-                    )
-                  )}
-                </ul>
-                {/* Legend Section */}
-                <div className="mt-4 d-flex flex-column small">
-                  <span className="me-3">
-                    <span
-                      className="rounded-circle d-inline-block me-2"
-                      style={{ width: '8px', height: '8px', backgroundColor: 'green' }}
-                    ></span>
-                    The author likely <b>is not</b> a primary recipient of these grants.
-                  </span>
-                  <span>
-                    <span
-                      className="rounded-circle d-inline-block me-2"
-                      style={{ width: '8px', height: '8px', backgroundColor: 'red' }}
-                    ></span>
-                    The author likely <b>is</b> a primary recipient of these grants.
-                  </span>
-                </div>
-              </>
-            )}
-        </div>
+
+        <div>{fundCodeTriangulation(flag, index)}</div>
       </div>
     );
   }
@@ -658,66 +669,7 @@ const ItemDetails = () => {
         </p>
         {}
 
-        <div>
-          {flag.FundCodeTriangulation &&
-            typeof flag.FundCodeTriangulation === 'object' &&
-            Object.keys(flag.FundCodeTriangulation).length > 0 && (
-              <>
-                <strong>High-Risk Grants</strong>
-                <ul className="bulleted-list">
-                  {Object.entries(flag.FundCodeTriangulation).map(
-                    ([outerKey, innerMap], index1) => (
-                      <li key={`fund-${index}-${index1}`} className="mb-3">
-                        {outerKey}
-                        <ul className="non-bulleted-list ms-3">
-                          {Object.entries(innerMap).map(([innerKey, value], index2) => (
-                            <li key={`fund-${index}-${index1}-${index2}`} className="mb-2">
-                              {typeof value === 'boolean' ? (
-                                <button
-                                  type="button"
-                                  className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
-                                  style={{ minWidth: '180px', textAlign: 'center' }}
-                                  title={`${innerKey}: ${
-                                    value
-                                      ? 'The author likely IS a primary recipient of this grant.'
-                                      : 'The author likely IS NOT a primary recipient of this grant.'
-                                  }`}
-                                >
-                                  {innerKey}
-                                  {/* : {value ? 'Yes' : 'No'} */}
-                                </button>
-                              ) : (
-                                <>
-                                  <strong>{innerKey}:</strong> {JSON.stringify(value)}
-                                </>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      </li>
-                    )
-                  )}
-                </ul>
-                {/* Legend Section */}
-                <div className="mt-4 d-flex flex-column small">
-                  <span className="me-3">
-                    <span
-                      className="rounded-circle d-inline-block me-2"
-                      style={{ width: '8px', height: '8px', backgroundColor: 'green' }}
-                    ></span>
-                    The author likely <b>is not</b> a primary recipient of these grants.
-                  </span>
-                  <span>
-                    <span
-                      className="rounded-circle d-inline-block me-2"
-                      style={{ width: '8px', height: '8px', backgroundColor: 'red' }}
-                    ></span>
-                    The author likely <b>is</b> a primary recipient of these grants.
-                  </span>
-                </div>
-              </>
-            )}
-        </div>
+        <div>{fundCodeTriangulation(flag, index)}</div>
       </div>
     );
   }
@@ -973,53 +925,61 @@ const ItemDetails = () => {
               alignItems: 'center',
               justifyContent: 'space-between',
               margin: '0 auto',
-              padding: '10px 0', // reduce padding
+              padding: '10px 0',
+              height: '75px',
             }}
           >
-            <button
-              onClick={() => goBack()}
-              className="btn text-dark mb-3"
-              style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                style={{ marginRight: '8px' }}
+            {/* Left section - Back button */}
+            <div style={{ flex: '1', display: 'flex', justifyContent: 'flex-start' }}>
+              <button
+                onClick={() => goBack()}
+                className="btn text-dark mb-3"
+                style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}
               >
-                <path
-                  d="M10 19L3 12L10 5"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M3 12H21"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Back
-            </button>
-            <div style={{ textAlign: 'center' }}>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{ marginRight: '8px' }}
+                >
+                  <path
+                    d="M10 19L3 12L10 5"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M3 12H21"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                Back
+              </button>
+            </div>
+
+            {/* Center section - Author information */}
+            <div style={{ flex: '1', textAlign: 'center' }}>
               <h5 className="m-0">{authorName}</h5>
               <b className="m-0 p-0" style={{ fontSize: 'small' }}>
                 {institutions.join(', ')}
               </b>
             </div>
-            <div>
+
+            {/* Right section - Filter dropdown */}
+            <div style={{ flex: '1', display: 'flex', justifyContent: 'flex-end' }}>
               <div className="dropdown" ref={dropdownFilterRef}>
                 <style>
                   {`
-                    .form-control::placeholder {
-                      color: #888;
-                    }
-                  `}
+          .form-control::placeholder {
+            color: #888;
+          }
+        `}
                 </style>
                 <button
                   className="btn dropdown-toggle"
@@ -1028,11 +988,11 @@ const ItemDetails = () => {
                   style={{
                     backgroundColor: 'rgb(160, 160, 160)',
                     border: 'none',
+                    marginRight: '10px',
                     color: 'white',
                     width: '180px',
                     fontWeight: 'bold',
                     fontSize: '14px',
-                    marginRight: '10px',
                   }}
                 >
                   Filter by Timeline

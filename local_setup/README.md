@@ -51,7 +51,7 @@
   6. To view the admin dashboard go to `localhost:8180` in your browser and login with the credentials `temp_admin` and `password`.
 
   7. Integrate Custom Theme in Login UI
-    1. Copy the custom-theme folder from keycloak-assets.
+    1. Copy the custom-theme folder from the keycloak directory in this repo.
     2. Navigate to the themes folder inside your keycloak-26.0.0 directory.
     3. Paste the directory (named custom-theme) into the themes folder.
 
