@@ -197,12 +197,15 @@ const ItemDetails = () => {
 
   useEffect(() => {
     let isMounted = true;
+    let timeoutId = null;
+
     const poll = async () => {
-      let inProgress = true;
-      const report = await reportService.getReport(report_id);
-      const { Content, ...metadata } = report;
-      if (isMounted) {
-        console.log('Report', report);
+      try {
+        const report = await reportService.getReport(report_id);
+        const { Content, ...metadata } = report;
+
+        if (!isMounted) return;
+
         setAuthorName(report.AuthorName);
         setReportContent(report.Content);
         setInitialReportContent(report.Content);
@@ -213,15 +216,17 @@ const ItemDetails = () => {
 
         const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
         const newFontSize = `${getFontSize(maxLength)}px`;
-
         setValueFontSize(newFontSize);
 
-        inProgress = report.Status === 'queued' || report.Status === 'in-progress';
-      }
+        const inProgress = report.Status === 'queued' || report.Status === 'in-progress';
 
-      if (inProgress) {
-        setTimeout(poll, 2000);
-      } else {
+        if (inProgress) {
+          timeoutId = setTimeout(poll, 2000);
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
         setLoading(false);
       }
     };
@@ -230,6 +235,7 @@ const ItemDetails = () => {
 
     return () => {
       isMounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, []);
 
