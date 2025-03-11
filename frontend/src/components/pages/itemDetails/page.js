@@ -203,7 +203,7 @@ const ItemDetails = () => {
       try {
         const report = await reportService.getReport(report_id);
         const { Content, ...metadata } = report;
-        
+
         if (!isMounted) return;
 
         setAuthorName(report.AuthorName);
