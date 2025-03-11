@@ -193,7 +193,7 @@ go run cmd/backend/main.go --env "./cmd/backend/.env"
   <summary><h2 style="display: inline;">Start the worker</h2></summary>
   <br>
 
-  The worker needs the fund code triangulation database. The database can be created with the command ```psql -U postgres``` followed by ```create database prism_triangulation;```. To populate the database, the following command should be run in the terminal ```pg_restore -U postgres -d prism_triangulation -F c prism_triangulation.dump```. The dump can be found [here](https://thirdai-corp-public.s3.us-east-2.amazonaws.com/Prism/prism_triangulation.dump).
+  The worker needs the fund code triangulation database. The database can be created with the command ```psql -U postgres``` followed by ```create database prism_triangulation;```. To populate the database, the following command should be run in the terminal ```pg_restore --no-owner -U postgres -d prism_triangulation -F c prism_triangulation.dump```. The dump can be found [here](https://thirdai-corp-public.s3.us-east-2.amazonaws.com/Prism/prism_triangulation.dump).
 
   1. Make a copy of `cmd/worker/.env.example` and fill in the fields.
   ```bash
