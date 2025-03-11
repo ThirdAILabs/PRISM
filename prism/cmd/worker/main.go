@@ -36,6 +36,9 @@ type Config struct {
 	// This variable is directly loaded by the openai client library, it is just
 	// listed here so that and error is raised if it's missing.
 	OpenaiKey string `env:"OPENAI_API_KEY,notEmpty,required"`
+
+	MaxDownloadThreads int `env:"MAX_DOWNLOAD_THREADS" envDefault:"40"`
+	MaxGrobidThreads   int `env:"MAX_GROBID_THREADS" envDefault:"10"`
 }
 
 func (c *Config) logfile() string {
@@ -101,6 +104,9 @@ func main() {
 
 		GrobidEndpoint: config.GrobidEndpoint,
 		WorkDir:        config.WorkDir,
+
+		MaxDownloadThreads: config.MaxDownloadThreads,
+		MaxGrobidThreads:   config.MaxGrobidThreads,
 	}
 
 	db := cmd.OpenDB(config.PostgresUri)

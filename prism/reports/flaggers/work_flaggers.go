@@ -24,7 +24,7 @@ func getWorkSummary(w openalex.Work) api.WorkSummary {
 		WorkId:          w.WorkId,
 		DisplayName:     w.DisplayName,
 		WorkUrl:         w.WorkUrl,
-		OaUrl:           w.OaUrl,
+		OaUrl:           w.DownloadUrl,
 		PublicationDate: w.PublicationDate,
 	}
 }
@@ -378,7 +378,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 }
 
 func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
-	logger *slog.Logger, acknowledgements []Acknowledgement, allAuthorNames []string,
+	acknowledgements []Acknowledgement, allAuthorNames []string,
 ) (map[string]map[string]bool, error) {
 	triangulationResults := make(map[string]map[string]bool)
 
@@ -516,7 +516,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 		if flagged {
 			var err error
 			triangulationResults, err = flagger.checkForGrantRecipient(
-				workLogger, acks.Result.Acknowledgements, allAuthorNames,
+				acks.Result.Acknowledgements, allAuthorNames,
 			)
 			if err != nil {
 				workLogger.Error("error checking for grant recipient", "error", err)
