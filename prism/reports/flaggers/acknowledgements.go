@@ -35,11 +35,11 @@ type GrobidAcknowledgementsExtractor struct {
 	downloadDir    string
 }
 
-func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downloadDir string) *GrobidAcknowledgementsExtractor {
+func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downloadDir string, maxDownloadThreads, maxGrobidThreads int) *GrobidAcknowledgementsExtractor {
 	return &GrobidAcknowledgementsExtractor{
 		cache:      cache,
-		maxThreads: 40,
-		grobidSem:  semaphore.NewWeighted(10),
+		maxThreads: max(maxDownloadThreads, maxGrobidThreads),
+		grobidSem:  semaphore.NewWeighted(int64(maxGrobidThreads)),
 		grobidClient: resty.New().
 			SetBaseURL(grobidEndpoint).
 			SetRetryCount(2).
@@ -222,7 +222,7 @@ var headers = map[string]string{
 	"sec-ch-ua-platform":        `"Windows"`,
 }
 
-func (extractor *GrobidAcknowledgementsExtractor) DownloadWithHttp(url string) (io.Reader, error) {
+func (extractor *GrobidAcknowledgementsExtractor) downloadWithHttp(url string) (io.Reader, error) {
 	res, err := extractor.downloadClient.R().SetHeaders(headers).Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("download error: %w", err)
@@ -246,7 +246,7 @@ func (extractor *GrobidAcknowledgementsExtractor) DownloadWithHttp(url string) (
 }
 
 func (extractor *GrobidAcknowledgementsExtractor) downloadPdf(url, destPath string) (io.Reader, error) {
-	attempt1, err1 := extractor.DownloadWithHttp(url)
+	attempt1, err1 := extractor.downloadWithHttp(url)
 	if err1 != nil {
 	} else {
 		return attempt1, nil
