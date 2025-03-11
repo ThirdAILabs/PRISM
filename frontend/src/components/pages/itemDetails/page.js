@@ -198,10 +198,10 @@ const ItemDetails = () => {
   useEffect(() => {
     let isMounted = true;
     const poll = async () => {
+      let inProgress = true;
       const report = await reportService.getReport(report_id);
       const { Content, ...metadata } = report;
       if (isMounted) {
-        console.log('Report', report);
         setAuthorName(report.AuthorName);
         setReportContent(report.Content);
         setInitialReportContent(report.Content);
@@ -214,9 +214,11 @@ const ItemDetails = () => {
         const newFontSize = `${getFontSize(maxLength)}px`;
 
         setValueFontSize(newFontSize);
+
+        inProgress = report.Status === 'queued' || report.Status === 'in-progress';
       }
 
-      if (inProgress && isMounted) {
+      if (inProgress) {
         setTimeout(poll, 2000);
       } else {
         setLoading(false);
