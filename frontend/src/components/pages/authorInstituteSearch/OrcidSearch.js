@@ -48,7 +48,13 @@ const OrcidSearchComponent = () => {
           initialValue={orcidQuery}
         />
       </div>
-      {isLoading && <div>Loading...</div>}
+      {isLoading && (
+        <div
+          className="spinner-border text-primary"
+          style={{ width: '3rem', height: '3rem', marginTop: '20px' }}
+          role="status"
+        ></div>
+      )}
       {hasSearchedOrcid && !isLoading && orcidResults.length === 0 && (
         <div className="no-results">
           <div className="no-results-icon">🔍</div>
