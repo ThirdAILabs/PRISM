@@ -46,6 +46,23 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Create prism triangulation database
+        run: |
+          PGPASSWORD=password psql -h localhost -U postgres -c "CREATE DATABASE prism_triangulation;"
+        
+      - name: Download prism triangulation dump
+        run: |
+          wget https://thirdai-corp-public.s3.us-east-2.amazonaws.com/Prism/prism_triangulation.dump -C ${{ github.workspace }}/prism_triangulation.dump
+      
+      - name: Restore prism triangulation dump
+        run: |
+          PGPASSWORD=password pg_restore --no-owner -h localhost -U postgres -d prism_triangulation -F c ${{ github.workspace }}/prism_triangulation.dump
+          
       - name: start grobid docker container
         run: |
           docker run --rm --init -d --ulimit core=0 -p 8070:8070 -v ${{ github.workspace }}/local_setup/grobid_config/grobid.yaml:/opt/grobid/grobid-home/config/grobid.yaml:ro  grobid/grobid:0.8.0
@@ -93,6 +110,7 @@ jobs:
       - name: start backend
         env:
           DB_URI: postgres://postgres:password@localhost:5432/prism
+          FUNDCODE_TRIANGULATION_DB_URI: postgres://postgres:password@localhost:5432/prism_triangulation
           PRISM_LICENSE: ${{ secrets.PRISM_CI_LICENSE }}
           SEARCHABLE_ENTITIES_DATA: ${{ github.workspace }}/data/searchable_entities.json
           UNIVERSITY_DATA: ${{ github.workspace }}/data/university_webpages.json
