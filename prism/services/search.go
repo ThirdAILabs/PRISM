@@ -104,7 +104,7 @@ func (s *SearchService) SearchOpenAlex(r *http.Request) (any, error) {
 		author, err := s.openalex.FindAuthorByOrcidId(query.Get("orcid"))
 		if err != nil {
 			if errors.Is(err, openalex.ErrAuthorNotFound) {
-				return nil, CodedError(err, http.StatusNotFound)
+				return []api.Author{}, nil
 			}
 			return nil, CodedError(err, http.StatusInternalServerError)
 		}

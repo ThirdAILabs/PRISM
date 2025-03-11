@@ -51,7 +51,7 @@
   6. To view the admin dashboard go to `localhost:8180` in your browser and login with the credentials `temp_admin` and `password`.
 
   7. Integrate Custom Theme in Login UI
-    1. Copy the custom-theme folder from keycloak-assets.
+    1. Copy the custom-theme folder from the keycloak directory in this repo.
     2. Navigate to the themes folder inside your keycloak-26.0.0 directory.
     3. Paste the directory (named custom-theme) into the themes folder.
 
@@ -193,7 +193,7 @@ go run cmd/backend/main.go --env "./cmd/backend/.env"
   <summary><h2 style="display: inline;">Start the worker</h2></summary>
   <br>
 
-  The worker needs the fund code triangulation database. The database can be created with the command ```psql -U postgres``` followed by ```create database prism_triangulation;```. To populate the database, the following command should be run in the terminal ```pg_restore -U postgres -d prism_triangulation -F c prism_triangulation.dump```. The dump can be found [here](https://thirdai-corp-public.s3.us-east-2.amazonaws.com/Prism/prism_triangulation.dump).
+  The worker needs the fund code triangulation database. The database can be created with the command ```psql -U postgres``` followed by ```create database prism_triangulation;```. To populate the database, the following command should be run in the terminal ```pg_restore --no-owner -U postgres -d prism_triangulation -F c prism_triangulation.dump```. The dump can be found [here](https://thirdai-corp-public.s3.us-east-2.amazonaws.com/Prism/prism_triangulation.dump).
 
   1. Make a copy of `cmd/worker/.env.example` and fill in the fields.
   ```bash
@@ -208,8 +208,8 @@ DB_URI="postgresql://<username>:<password>@<host | localhost>:<port | 5432>/pris
 # Uri for fund code triangulation postgres db
 FUNDCODE_TRIANGULATION_DB_URI="postgresql://<username>:<password>@<host | localhost>:<port | 5432>/prism_triangulation"
 
-# License for NDB
-NDB_LICENSE="bolt license key"
+# License for PRISM, this should be a keygen license with the Full Access and Prism entitlements.
+PRISM_LICENSE="prism license key"
 
 # Work dir for worker, will store ndbs and caches etc.
 WORK_DIR="any empty directory"

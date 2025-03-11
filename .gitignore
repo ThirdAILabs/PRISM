@@ -173,12 +173,9 @@ cython_debug/
 .test_license
 .data
 
-config.yaml
 model/
 
 **/*.csv
-*.txt
-*.py
 *.pdf
 *.xlsx
 *.cache

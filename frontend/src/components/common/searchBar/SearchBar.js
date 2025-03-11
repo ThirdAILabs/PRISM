@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
+import { SearchContext } from '../../../store/searchContext';
 import { autocompleteService } from '../../../api/autocomplete';
 import './SearchBar.css';
 import '../tools/button/button1.css';
@@ -8,6 +9,7 @@ import AutocompleteSearchBar from '../../../utils/autocomplete';
 export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInstitution }) {
   const [author, setAuthor] = useState(defaultAuthor || null);
   const [institution, setInstitution] = useState(defaultInstitution || null);
+  const { searchState, setSearchState } = useContext(SearchContext);
   const [results, setResults] = useState([]);
   const debouncedSearch = useCallOnPause(300); // 300ms delay
 
@@ -34,7 +36,10 @@ export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInst
       return new Promise((resolve) => {
         debouncedSearch(async () => {
           try {
-            const res = await autocompleteService.autocompleteAuthors(query);
+            const res = await autocompleteService.autocompleteAuthors(
+              query,
+              institution == null ? '' : institution.Id
+            );
             resolve(res);
             return res;
           } catch (error) {
@@ -62,6 +67,7 @@ export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInst
           title="Author"
           autocomplete={autocompleteAuthor}
           onSelect={setAuthor}
+          setSearchState={setSearchState}
           showHint={false}
           placeholder={'E.g. John Doe'}
           initialValue={defaultAuthor ? defaultAuthor.Name : ''}
@@ -73,6 +79,7 @@ export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInst
           title="Institution"
           autocomplete={autocompleteInstitution}
           onSelect={setInstitution}
+          setSearchState={setSearchState}
           showHint={true}
           placeholder={'E.g. University of XYZ'}
           initialValue={defaultInstitution ? defaultInstitution.Name : ''}
