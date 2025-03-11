@@ -324,9 +324,7 @@ func TestCheckDisclosure(t *testing.T) {
 		t.Fatalf("expected status 200; got %d, response: %s", res.StatusCode, w.Body.String())
 	}
 
-	var updatedReport struct {
-		Content map[string][]map[string]any
-	}
+	var updatedReport api.Report
 	if err := json.NewDecoder(res.Body).Decode(&updatedReport); err != nil {
 		t.Fatal(err)
 	}
@@ -334,14 +332,14 @@ func TestCheckDisclosure(t *testing.T) {
 	if len(updatedReport.Content["TalentContracts"]) != 1 {
 		t.Fatalf("expected 1 TalentContract flag; got %d", len(updatedReport.Content["TalentContracts"]))
 	}
-	if !(updatedReport.Content["TalentContracts"][0]["Disclosed"].(bool)) {
+	if !updatedReport.Content["TalentContracts"][0].(*api.TalentContractFlag).Disclosed {
 		t.Fatal("expected TalentContract flag to be marked as disclosed")
 	}
 
 	if len(updatedReport.Content["AssociationsWithDeniedEntities"]) != 1 {
 		t.Fatalf("expected 1 AssociationWithDeniedEntity flag; got %d", len(updatedReport.Content["AssociationsWithDeniedEntities"]))
 	}
-	if updatedReport.Content["AssociationsWithDeniedEntities"][0]["Disclosed"].(bool) {
+	if updatedReport.Content["AssociationsWithDeniedEntities"][0].(*api.AssociationWithDeniedEntityFlag).Disclosed {
 		t.Fatal("expected AssociationWithDeniedEntity flag to remain undisclosed")
 	}
 }
@@ -388,7 +386,7 @@ func TestDownloadReportAllFormats(t *testing.T) {
 	formats := []string{"csv", "pdf", "excel"}
 	for _, format := range formats {
 		endpoint := fmt.Sprintf("/report/author/%s/download?format=%s", reportResp.Id.String(), format)
-		req := httptest.NewRequest("GET", endpoint, nil)
+		req := httptest.NewRequest("POST", endpoint, io.Reader(bytes.NewBuffer([]byte("{}"))))
 		req.Header.Add("Authorization", "Bearer "+user)
 		w := httptest.NewRecorder()
 		backend.ServeHTTP(w, req)
@@ -404,13 +402,13 @@ func TestDownloadReportAllFormats(t *testing.T) {
 		switch format {
 		case "csv":
 			expectedContentType = "text/csv"
-			expectedFilename = "report.csv"
+			expectedFilename = "download-report-name Report.csv"
 		case "pdf":
 			expectedContentType = "application/pdf"
-			expectedFilename = "report.pdf"
+			expectedFilename = "download-report-name Report.pdf"
 		case "excel":
 			expectedContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-			expectedFilename = "report.xlsx"
+			expectedFilename = "download-report-name Report.xlsx"
 		}
 
 		if ct := res.Header.Get("Content-Type"); ct != expectedContentType {

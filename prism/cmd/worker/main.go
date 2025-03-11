@@ -6,21 +6,24 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+
 	"prism/prism/cmd"
 	"prism/prism/licensing"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers"
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/search"
+	"prism/prism/triangulation"
 	"time"
 
 	"github.com/caarlos0/env/v11"
 )
 
 type Config struct {
-	PostgresUri  string `env:"DB_URI,notEmpty,required"`
-	Logfile      string `env:"LOGFILE,notEmpty" envDefault:"prism_worker.log"`
-	PrismLicense string `env:"PRISM_LICENSE,notEmpty,required"`
+	PostgresUri              string `env:"DB_URI,notEmpty,required"`
+	FundcodeTriangulationUri string `env:"FUNDCODE_TRIANGULATION_DB_URI,notEmpty,required"`
+	Logfile                  string `env:"LOGFILE,notEmpty" envDefault:"prism_worker.log"`
+	PrismLicense             string `env:"PRISM_LICENSE,notEmpty,required"`
 
 	WorkDir string `env:"WORK_DIR,notEmpty" envDefault:"./work"`
 
@@ -50,7 +53,7 @@ func main() {
 		log.Fatalf("error parsing config: %v", err)
 	}
 
-	logFile, err := os.OpenFile(config.logfile(), os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+	logFile, err := os.OpenFile(config.logfile(), os.O_CREATE|os.O_APPEND|os.O_RDWR, 0o666)
 	if err != nil {
 		log.Fatalf("error opening log file: %v", err)
 	}
@@ -83,9 +86,10 @@ func main() {
 	defer entityStore.Free()
 
 	opts := flaggers.ReportProcessorOptions{
-		UniversityNDB: flaggers.BuildUniversityNDB(config.UniversityData, filepath.Join(ndbDir, "university.ndb")),
-		DocNDB:        flaggers.BuildDocNDB(config.DocData, filepath.Join(ndbDir, "doc.ndb")),
-		AuxNDB:        flaggers.BuildAuxNDB(config.AuxData, filepath.Join(ndbDir, "aux.ndb")),
+		UniversityNDB:   flaggers.BuildUniversityNDB(config.UniversityData, filepath.Join(ndbDir, "university.ndb")),
+		DocNDB:          flaggers.BuildDocNDB(config.DocData, filepath.Join(ndbDir, "doc.ndb")),
+		AuxNDB:          flaggers.BuildAuxNDB(config.AuxData, filepath.Join(ndbDir, "aux.ndb")),
+		TriangulationDB: triangulation.CreateTriangulationDB(cmd.OpenDB(config.FundcodeTriangulationUri)),
 
 		EntityLookup: entityStore,
 

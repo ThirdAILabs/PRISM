@@ -3,9 +3,14 @@ package flaggers
 import (
 	"log/slog"
 	"path/filepath"
+	"prism/prism/api"
 	"prism/prism/openalex"
 	"prism/prism/reports/flaggers/eoc"
+	"prism/prism/triangulation"
 	"testing"
+
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 func TestMultipleAssociations(t *testing.T) {
@@ -178,9 +183,9 @@ func (m *mockAcknowledgmentExtractor) GetAcknowledgements(logger *slog.Logger, w
 		Result: Acknowledgements{
 			WorkId: works[0].WorkId,
 			Acknowledgements: []Acknowledgement{{
-				RawText: "special thanks to bad entity xyz",
+				RawText: "special thanks to bad entity xyz for grants ABC-123456 and XYZ-9876",
 				SearchableEntities: []Entity{
-					{EntityText: "bad entity xyz", EntityType: "", StartPosition: 0},
+					{EntityText: "bad entity xyz", EntityType: "", StartPosition: 0, FundCodes: []string{"ABC-123456", "XYZ-9876"}},
 				},
 			}},
 		},
@@ -210,12 +215,26 @@ func TestAcknowledgementEOC(t *testing.T) {
 	}
 	defer entityStore.Free()
 
+	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := db.AutoMigrate(
+		&triangulation.Author{},
+		&triangulation.FundCode{},
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	triangulationDB := triangulation.CreateTriangulationDB(db)
+
 	flagger := OpenAlexAcknowledgementIsEOC{
-		openalex:     openalex.NewRemoteKnowledgeBase(),
-		entityLookup: entityStore,
-		authorCache:  authorCache,
-		extractor:    &mockAcknowledgmentExtractor{},
-		sussyBakas:   []string{"bad entity xyz"},
+		openalex:        openalex.NewRemoteKnowledgeBase(),
+		entityLookup:    entityStore,
+		authorCache:     authorCache,
+		extractor:       &mockAcknowledgmentExtractor{},
+		sussyBakas:      []string{"bad entity xyz"},
+		triangulationDB: triangulationDB,
 	}
 
 	flags, err := flagger.Flag(slog.Default(), []openalex.Work{{WorkId: "a/b", DownloadUrl: "n/a"}}, []string{})
@@ -225,5 +244,107 @@ func TestAcknowledgementEOC(t *testing.T) {
 
 	if len(flags) != 1 {
 		t.Fatal("expected 1 flag")
+	}
+}
+
+func TestFundCodeTriangulation(t *testing.T) {
+	testDir := t.TempDir()
+
+	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(testDir, "author.cache"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	authorCache.Update("1", openalex.Author{AuthorId: "1", DisplayName: "Jane Smith"})
+	defer authorCache.Close()
+
+	aliasToSource := map[string]string{
+		"bad entity xyz": "source_a",
+	}
+
+	entityStore, err := NewEntityStore(t.TempDir(), aliasToSource)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer entityStore.Free()
+
+	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := db.AutoMigrate(
+		&triangulation.Author{},
+		&triangulation.FundCode{},
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	fundCodes := []triangulation.FundCode{
+		{
+			ID:        1,
+			FundCode:  "ABC-123456",
+			NumPapers: 100,
+		},
+		{
+			ID:        2,
+			FundCode:  "XYZ-9876",
+			NumPapers: 100,
+		},
+	}
+
+	if err := db.Create(&fundCodes).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	authors := []triangulation.Author{
+		{
+			ID:                1,
+			FundCodeID:        &fundCodes[0].ID,
+			AuthorName:        "Jane Smith",
+			NumPapersByAuthor: 52,
+		},
+		{
+			ID:                2,
+			FundCodeID:        &fundCodes[1].ID,
+			AuthorName:        "Jane Smith",
+			NumPapersByAuthor: 5,
+		},
+	}
+
+	if err := db.Create(&authors).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	triangulationDB := triangulation.CreateTriangulationDB(db)
+
+	flagger := OpenAlexAcknowledgementIsEOC{
+		openalex:        openalex.NewRemoteKnowledgeBase(),
+		entityLookup:    entityStore,
+		authorCache:     authorCache,
+		extractor:       &mockAcknowledgmentExtractor{},
+		sussyBakas:      []string{"bad entity xyz"},
+		triangulationDB: triangulationDB,
+	}
+
+	works := []openalex.Work{
+		{WorkId: "a/b", DownloadUrl: "n/a", Authors: []openalex.Author{
+			{AuthorId: "1", Institutions: []openalex.Institution{{}, {}}, DisplayName: "Jane Smith"},
+		}},
+	}
+
+	flags, err := flagger.Flag(slog.Default(), works, []string{"1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(flags) != 1 {
+		t.Fatal("expected 1 flag")
+	}
+
+	if flag, ok := flags[0].(*api.HighRiskFunderFlag); ok {
+		if flag.FundCodeTriangulation["bad entity xyz"][fundCodes[0].FundCode] != true || flag.FundCodeTriangulation["bad entity xyz"][fundCodes[1].FundCode] != false {
+			t.Fatal("incorrect fund code triangulation")
+		}
+	} else {
+		t.Fatal("expected HighRiskFunderFlag")
 	}
 }
