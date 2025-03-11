@@ -1,9 +1,11 @@
 package flaggers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"prism/prism/api"
+	"prism/prism/llms"
 	"prism/prism/openalex"
 	"prism/prism/search"
 	"regexp"
@@ -40,6 +42,10 @@ func newNameMatcher(name string) (nameMatcher, bool) {
 
 func (n *nameMatcher) matches(candidate string) bool {
 	return n.re.MatchString(strings.ToLower(candidate))
+}
+
+func (n *nameMatcher) findMatches(candidate string) []string {
+	return n.re.FindAllString(strings.ToLower(candidate), -1)
 }
 
 func (flagger *AuthorIsFacultyAtEOCFlagger) Name() string {
@@ -122,6 +128,77 @@ func topCoauthors(works []openalex.Work) []authorCnt {
 	return topAuthors[:min(len(topAuthors), 4)]
 }
 
+const llmMatchValidationPromptTemplate = `Return a python list of True or False indicating whether the entity matches against any of the entities in the list.
+
+Syntax:
+Inputs:
+- Name (String)
+- Possible aliases (List of List of Strings)
+
+Output : [True, False, ...]
+
+Example :
+Input : 
+Name : Marie C. Smith
+Possible aliases : [["Marie Smith", "Marie C. Smith"], ["Smith, Marge", "M. Phillipe Smith", "Marie Smiths"], ["Smith, Marie", "M.W. Smith"]]
+Output : [True, False, True]
+
+Explanation :
+- Marie C. Smith matches against ["Marie Smith", "Marie C. Smith"]
+- Marie C. Smith does not match against ["Smith, Marge", "M. Phillipe Smith", "Marie Smiths"]
+- Marie C. Smith matches against ["Smith, Marie"] but not against ["M.W. Smith"] 
+
+Use general knowledge to determine if the entity matches against any of the entities in the list. Answer with a python list of True or False, and nothing else. Do not provide any explanation or extra words/characters. Ensure that the python syntax is absolutely correct and runnable. Ensure that the length of the output list is the same as the length of the possible aliases list.
+
+Input : 
+- Name: %s
+- Possible aliases: ["%s"]
+
+Output:
+`
+
+func runLLMVerification(name string, possibleAliases [][]string) ([]bool, error) {
+	llm := llms.New()
+
+	// Convert the nested slice into a properly formatted string representation
+	aliasesJSON, err := json.Marshal(possibleAliases)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling aliases: %w", err)
+	}
+
+	prompt := fmt.Sprintf(llmMatchValidationPromptTemplate, name, string(aliasesJSON))
+	slog.Info("prompt", "prompt", prompt)
+	res, err := llm.Generate(prompt, &llms.Options{
+		Model:        llms.GPT4oMini,
+		ZeroTemp:     true,
+		SystemPrompt: "You are a helpful python assistant who responds in python lists only.",
+	})
+	if err != nil {
+		slog.Error("error running llm", "error", err)
+		return nil, fmt.Errorf("error running llm: %w", err)
+	}
+
+	// Clean the response to handle potential formatting issues
+	res = strings.TrimSpace(res)
+	res = strings.Trim(res, "[]")
+	res = strings.ReplaceAll(res, " ", "")
+	flags := strings.Split(res, ",")
+
+	if len(flags) != len(possibleAliases) {
+		slog.Error("llm returned incorrect number of flags", "expected", len(possibleAliases), "got", len(flags))
+		slog.Error("llm response", "response", res)
+		slog.Error("possible aliases", "aliases", possibleAliases)
+		return nil, fmt.Errorf("llm returned incorrect number of flags: %d", len(flags))
+	}
+
+	results := make([]bool, len(flags))
+	for i, flag := range flags {
+		results[i] = strings.TrimSpace(flag) == "True"
+	}
+
+	return results, nil
+}
+
 func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(authorName string, works []openalex.Work) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
@@ -148,10 +225,15 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 			return nil, fmt.Errorf("error querying ndb: %w", err)
 		}
 
+		temporaryFlags := make([]api.Flag, 0)
+		matches := make([][]string, 0)
+
 		for _, result := range results {
 			if !matcher.matches(result.Text) {
 				continue
 			}
+
+			matches = append(matches, matcher.findMatches(result.Text))
 
 			url, _ := result.Metadata["url"].(string)
 			if seen[url] {
@@ -164,7 +246,8 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 			entities := result.Metadata["entities"].(string)
 
 			if primaryMatcher.matches(author.author) {
-				flags = append(flags, &api.MiscHighRiskAssociationFlag{
+				slog.Info("primary match", "author", author.author, "title", title, "url", url, "entities", entities)
+				temporaryFlags = append(temporaryFlags, &api.MiscHighRiskAssociationFlag{
 					Message:         "The author or a frequent associate may be mentioned in a press release.",
 					DocTitle:        title,
 					DocUrl:          url,
@@ -172,7 +255,8 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 					EntityMentioned: author.author,
 				})
 			} else {
-				flags = append(flags, &api.MiscHighRiskAssociationFlag{
+				slog.Info("secondary match", "author", author.author, "title", title, "url", url, "entities", entities)
+				temporaryFlags = append(temporaryFlags, &api.MiscHighRiskAssociationFlag{
 					Message:          "The author or a frequent associate may be mentioned in a press release.",
 					DocTitle:         title,
 					DocUrl:           url,
@@ -183,6 +267,24 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 				})
 			}
 		}
+		// if there are no matches, we don't need to run the LLM
+		// if len(matches) == 0 {
+		// 	continue
+		// }
+		// llmResults, err := runLLMVerification(author.author, matches)
+		// if err != nil {
+		// 	return nil, fmt.Errorf("error running llm: %w", err)
+		// }
+
+		// for index, llmResult := range llmResults {
+		// 	if llmResult {
+		// 		flags = append(flags, temporaryFlags[index])
+		// 		slog.Info("flag", "author", author.author, "matches", matches[index], "llmResult", llmResult)
+		// 	}
+		// }
+
+		flags = append(flags, temporaryFlags...)
+
 	}
 
 	return flags, nil
@@ -278,6 +380,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 			url, _ := result.Metadata["url"].(string)
 			entities, _ := result.Metadata["entities"].(string)
 
+			slog.Info("third level match", "query", query, "title", title, "url", url, "entities", entities)
 			flags = append(flags, &api.MiscHighRiskAssociationFlag{
 				Message:         "The author may be associated be an entity who/which may be mentioned in a press release.\n",
 				DocTitle:        title,
