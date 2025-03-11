@@ -215,44 +215,6 @@ var headers = map[string]string{
 	"sec-ch-ua-platform":        `"Windows"`,
 }
 
-func downloadWithHttpV1(url string) (io.Reader, error) {
-	req, err := http.NewRequest("GET", strings.Replace(url, " ", "%20", -1), nil)
-	if err != nil {
-		return nil, fmt.Errorf("error creating http request: %w", err)
-	}
-
-	for k, v := range headers {
-		req.Header.Add(k, v)
-	}
-
-	client := &http.Client{Timeout: 10 * time.Second}
-
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("error downloading pdf from %s: %w", url, err)
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("error downloading pdf from %s: recieved status_code=%d", url, res.StatusCode)
-	}
-
-	data, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, fmt.Errorf("error reading response: %w", err)
-	}
-
-	// Sometimes the above download can succeed, but instead of returning a pdf, it
-	// will return the html for the page containing the pdf. This leads to an error
-	// when we make a call to grobid. This is a simple trick to check if it is a valid pdf.
-	// https://stackoverflow.com/questions/6186980/determine-if-a-byte-is-a-pdf-file
-	if !bytes.HasPrefix(data, []byte("%PDF")) {
-		return nil, fmt.Errorf("download did not return valid pdf")
-	}
-
-	return bytes.NewReader(data), nil
-}
-
 var downloadClient = resty.New().SetRetryCount(1).SetTimeout(20 * time.Second).SetRetryWaitTime(5 * time.Second).SetRetryMaxWaitTime(30 * time.Second)
 
 func DownloadWithHttp(url string) (io.Reader, error) {
