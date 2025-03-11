@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -413,4 +414,58 @@ func (iter *AuthorPaperIterator) Next() ([]string, error) {
 	iter.start += batchSize
 
 	return titles, nil
+}
+
+type googleNewsArticle struct {
+	Title string `json:"title"`
+	Link  string `json:"link"`
+	Date  string `json:"date"`
+}
+
+type googleNewsResults struct {
+	NewsResults []googleNewsArticle `json:"news_results"`
+}
+
+type NewsArticle struct {
+	Title string
+	Link  string
+	Date  time.Time
+}
+
+func GetNewsArticles(authorName, universityName string) ([]NewsArticle, error) {
+	query := fmt.Sprintf("%s %s", authorName, universityName)
+	res, err := client.R().
+		SetResult(&googleNewsResults{}).
+		SetQueryParam("engine", "google_news").
+		SetQueryParam("q", query).
+		Get("/search")
+
+	if err != nil {
+		slog.Error("google news search failed", "query", query, "error", err)
+		return nil, fmt.Errorf("google news error: %w", err)
+	}
+
+	if !res.IsSuccess() {
+		slog.Error("google news search returned error", "status_code", res.StatusCode(), "body", res.String())
+		return nil, fmt.Errorf("google news error: %w", err)
+	}
+
+	results := res.Result().(*googleNewsResults)
+
+	articles := make([]NewsArticle, 0, len(results.NewsResults))
+
+	for _, result := range results.NewsResults {
+		date, err := time.Parse("01/02/2006, 03:04 PM, -0700 MST", result.Date)
+		if err != nil {
+			slog.Error("failed to parse date", "date", result.Date, "error", err)
+			continue
+		}
+		articles = append(articles, NewsArticle{
+			Title: result.Title,
+			Link:  result.Link,
+			Date:  date,
+		})
+	}
+
+	return articles, nil
 }

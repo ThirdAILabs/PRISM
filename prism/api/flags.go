@@ -61,6 +61,7 @@ const (
 	PotentialAuthorAffiliationType   = "PotentialAuthorAffiliations"
 	MiscHighRiskAssociationType      = "MiscHighRiskAssociations"
 	CoauthorAffiliationType          = "CoauthorAffiliations"
+	NewsArticleType                  = "NewsArticles"
 	// Unused flags
 	MultipleAffiliationType = "MultipleAffiliations"
 	HighRiskPublisherType   = "HighRiskPublishers"
@@ -582,6 +583,54 @@ func (flag *CoauthorAffiliationFlag) GetDetailsFieldsForReport(useDisclosure boo
 	}
 	return fields
 }
+
+type NewsArticleFlag struct {
+	Message string
+
+	Title       string
+	Link        string
+	ArticleDate time.Time
+}
+
+func (flag *NewsArticleFlag) Type() string {
+	return NewsArticleType
+}
+
+func (flag *NewsArticleFlag) Hash() [sha256.Size]byte {
+	return sha256.Sum256([]byte(flag.Type() + flag.Title))
+}
+
+func (flag *NewsArticleFlag) GetEntities() []string {
+	return nil
+}
+
+func (flag *NewsArticleFlag) GetHeading() string {
+	return "Concerning News Articles"
+}
+
+func (flag *NewsArticleFlag) GetDetailFields() []KeyValue {
+	return []KeyValue{
+		{Key: "Article Title", Value: flag.Title},
+		{Key: "URL", Value: flag.Link},
+		{Key: "Publication Date", Value: flag.ArticleDate.String()},
+	}
+}
+
+func (flag *NewsArticleFlag) Date() (time.Time, bool) {
+	return flag.ArticleDate, true
+}
+
+func (flag *NewsArticleFlag) GetDetailsFieldsForReport(useDisclosure bool) []KeyValueURL {
+	return []KeyValueURL{
+		{Key: "Article Title", Value: flag.Title, Url: flag.Link},
+		{Key: "URL", Value: flag.Link},
+		{Key: "Publication Date", Value: flag.ArticleDate.String()},
+	}
+}
+
+func (flag *NewsArticleFlag) IsDisclosed() bool { return false }
+
+func (flag *NewsArticleFlag) MarkDisclosed() {}
 
 //The following flags are unused by the frontend, but they are kept in case we
 // want to have them in the future.

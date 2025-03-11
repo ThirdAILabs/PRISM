@@ -1,8 +1,11 @@
 package flaggers
 
 import (
+	"encoding/json"
+	"fmt"
 	"log/slog"
 	"prism/prism/api"
+	"prism/prism/llms"
 	"prism/prism/openalex"
 	"prism/prism/search"
 	"slices"
@@ -212,4 +215,19 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			t.Fatalf("incorrect flag: %v", *flag)
 		}
 	})
+}
+
+func TestAuthorNewsArticleFlagger(t *testing.T) {
+	flagger := AuthorNewsArticlesFlagger{
+		llm: llms.New(),
+	}
+
+	flags, err := flagger.Flag(slog.Default(), "charles lieber")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	data, _ := json.MarshalIndent(flags, "", "  ")
+
+	fmt.Println(string(data))
 }

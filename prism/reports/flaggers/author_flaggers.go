@@ -2,13 +2,18 @@ package flaggers
 
 import (
 	"fmt"
+	"io"
 	"log/slog"
+	"net/http"
 	"prism/prism/api"
+	"prism/prism/gscholar"
+	"prism/prism/llms"
 	"prism/prism/openalex"
 	"prism/prism/search"
 	"regexp"
 	"slices"
 	"strings"
+	"time"
 )
 
 type AuthorIsFacultyAtEOCFlagger struct {
@@ -306,6 +311,107 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(logger *slog.Logger, autho
 	}
 
 	flags := slices.Concat(firstSecondLevelFlags, secondThirdLevelFlags)
+
+	return flags, nil
+}
+
+type AuthorNewsArticlesFlagger struct {
+	llm llms.LLM
+}
+
+func (flagger *AuthorNewsArticlesFlagger) Name() string {
+	return "NewsArticles"
+}
+
+func fetchArticleWebpage(link string) (string, error) {
+	req, err := http.NewRequest("GET", link, nil)
+	if err != nil {
+		return "", err
+	}
+
+	headers := map[string]string{
+		"User-Agent":                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+		"Accept-Language":           "en-US,en;q=0.9",
+		"Connection":                "keep-alive",
+		"Accept":                    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+		"Referer":                   "https://www.google.com/",
+		"Upgrade-Insecure-Requests": "1",
+	}
+
+	for k, v := range headers {
+		req.Header.Add(k, v)
+	}
+
+	client := http.Client{Timeout: 10 * time.Second}
+	res, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("request returned status: %d", res.StatusCode)
+	}
+
+	const maxBytes = 300000
+
+	text := make([]byte, maxBytes) // TODO(question): this seems like a lot?
+	n, err := io.ReadFull(res.Body, text)
+	if err != nil && err != io.ErrUnexpectedEOF { // UnexpectedEOF is returned if < N bytes are read
+		return "", err
+	}
+
+	return string(text[:n]), nil
+}
+
+const articleCheckTemplate = `I will give you an author name, the title of a news article, and part of the html webpage for the article. 
+If the article is about the author, and indicates misconduct of some kind you must reply with just the word "flag".
+If the article is not about the author, or does not indicate misconduct, you must reply with just the word "none".
+
+Author Name: %s
+Title: %s
+Html Content: %s
+`
+
+func (flagger *AuthorNewsArticlesFlagger) checkArticle(authorName string, article gscholar.NewsArticle) (bool, error) {
+	html, err := fetchArticleWebpage(article.Link)
+	if err != nil {
+		return false, err
+	}
+
+	response, err := flagger.llm.Generate(fmt.Sprintf(articleCheckTemplate, authorName, article.Title, html), nil)
+	if err != nil {
+		return false, err
+	}
+
+	return strings.Contains(strings.ToLower(response), "flag"), nil
+}
+
+func (flagger *AuthorNewsArticlesFlagger) Flag(logger *slog.Logger, authorName string) ([]api.Flag, error) {
+	articles, err := gscholar.GetNewsArticles(authorName, "")
+	if err != nil {
+		logger.Error("error getting news articles for author", "author_name", authorName, "error", err)
+		return nil, err
+	}
+
+	flags := make([]api.Flag, 0)
+	for _, article := range articles[:10] {
+		flag, err := flagger.checkArticle(authorName, article)
+		if err != nil {
+			logger.Error("error checking article", "error", err)
+			continue
+		}
+		if flag {
+			flags = append(flags, &api.NewsArticleFlag{
+				Message:     "The author may be mentioned in a news article that indicates misconduct.",
+				Title:       article.Title,
+				Link:        article.Link,
+				ArticleDate: article.Date,
+			})
+		} else {
+			fmt.Println("no flag: ", article.Title)
+		}
+	}
 
 	return flags, nil
 }
