@@ -404,6 +404,65 @@ func (r *ReportManager) CreateUniversityReport(userId uuid.UUID, universityId, u
 		}
 
 		if result.RowsAffected == 0 {
+			return ErrReportNotFound
+		}
+
+		if err := r.queueUniversityReportUpdateIfNeeded(txn, &report); err != nil {
+			return err
+		}
+
+		result = txn.Where("user_id = ? AND report_id = ?", userId, report.Id).
+			Limit(1).Find(&userReport)
+		if result.Error != nil {
+			slog.Error("error finding existing user university report", "error", result.Error)
+			return ErrReportCreationFailed
+		}
+
+		if result.RowsAffected == 0 {
+			userReportId = uuid.New()
+			userReport = schema.UserUniversityReport{
+				Id:             userReportId,
+				UserId:         userId,
+				ReportId:       report.Id,
+				LastAccessedAt: now,
+			}
+			if err := txn.Create(&userReport).Error; err != nil {
+				slog.Error("error creating new user university report", "error", err)
+				return ErrReportCreationFailed
+			}
+		} else {
+			if err := txn.Model(&userReport).Update("last_accessed_at", now).Error; err != nil {
+				slog.Error("error updating user university report last_accessed_at", "error", err)
+				return ErrReportCreationFailed
+			}
+
+			userReportId = userReport.Id
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return userReportId, nil
+}
+
+func (r *ReportManager) CreateBackendUniversityReport(userId uuid.UUID, universityId, universityName string) (uuid.UUID, error) {
+	var userReport schema.UserUniversityReport
+	var userReportId uuid.UUID
+	now := time.Now().UTC()
+
+	err := r.db.Transaction(func(txn *gorm.DB) error {
+		var report schema.UniversityReport
+		result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Limit(1).Find(&report, "university_id = ?", universityId)
+		if result.Error != nil {
+			slog.Error("error checking for existing university report", "error", result.Error)
+			return ErrReportCreationFailed
+		}
+
+		if result.RowsAffected == 0 {
 			reportId := uuid.New()
 			report = schema.UniversityReport{
 				Id:             reportId,

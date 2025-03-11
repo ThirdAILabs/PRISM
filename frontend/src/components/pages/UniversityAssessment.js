@@ -51,11 +51,16 @@ function UniversityAssessment() {
     };
     const reportId = await universityReportService.createReport(reportData);
     console.log('University report id: ', reportId);
-    navigate(`report/${reportId.Id}`, {
-      state: {
-        canGoBack: true,
-      },
-    });
+
+    if (!reportId || reportId === undefined) {
+      alert(`"${institution.Name}" report unavailable. Please try again later.`);
+    } else {
+      navigate(`report/${reportId.Id}`, {
+        state: {
+          canGoBack: true,
+        },
+      });
+    }
   };
 
   return (

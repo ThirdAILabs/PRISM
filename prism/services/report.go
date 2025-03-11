@@ -138,6 +138,7 @@ func (s *ReportService) Routes() chi.Router {
 	r.Route("/university", func(r chi.Router) {
 		r.Get("/list", WrapRestHandler(s.ListUniversityReports))
 		r.Post("/create", WrapRestHandler(s.CreateUniversityReport))
+		r.Post("/backend-create", WrapRestHandler(s.CreateBackendUniversityReport))
 		r.Get("/{report_id}", WrapRestHandler(s.GetUniversityReport))
 		r.Delete("/{report_id}", WrapRestHandler(s.DeleteUniversityReport))
 	})
@@ -426,6 +427,38 @@ func (s *ReportService) CreateUniversityReport(r *http.Request) (any, error) {
 	}
 
 	id, err := s.manager.CreateUniversityReport(userId, params.UniversityId, params.UniversityName)
+	if err != nil {
+		return nil, CodedError(err, http.StatusNoContent)
+	}
+
+	return api.CreateReportResponse{Id: id}, nil
+}
+
+func (s *ReportService) CreateBackendUniversityReport(r *http.Request) (any, error) {
+	userId, err := auth.GetUserId(r)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	params, err := ParseRequestBody[api.CreateUniversityReportRequest](r)
+	if err != nil {
+		return nil, CodedError(err, http.StatusBadRequest)
+	}
+
+	if params.UniversityId == "" {
+		return nil, CodedError(errors.New("UniversityId must be specified"), http.StatusUnprocessableEntity)
+	}
+
+	if params.UniversityName == "" {
+		return nil, CodedError(errors.New("UniversityName must be specified"), http.StatusUnprocessableEntity)
+	}
+
+	if err := s.licensing.VerifyLicense(); err != nil {
+		slog.Error("cannot create new report, unable to verify license", "error", err)
+		return nil, CodedError(err, licensingErrorStatus(err))
+	}
+
+	id, err := s.manager.CreateBackendUniversityReport(userId, params.UniversityId, params.UniversityName)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
