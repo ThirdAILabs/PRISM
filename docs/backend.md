@@ -230,11 +230,35 @@ Note: that the field `Status` will be one of `queued`, `in-progress`, `failed`, 
 
 ## Create a University Report
 
+### Endpoint for the backend/developers
+
+| Method | Path | Auth Required | Permissions |
+| ------ | ---- | ------------- | ----------  |
+| `POST` | `/api/v1/report/university/backend-create` | Yes | Token for Keycloak User Realm |
+
+Create a new university report. The user id is determined from the provided access token. This endpoint is only for the backend. 
+
+__Example Request__: 
+```json
+{
+    "UniversityId": "university name",
+    "UniversityName": "university id",
+}
+```
+__Example Response__:
+```json
+{
+    "Id": "f9589b57-4b73-409a-98b8-a97b0ca5d936"
+}
+```
+
+### Endpoint for the frontend
+
 | Method | Path | Auth Required | Permissions |
 | ------ | ---- | ------------- | ----------  |
 | `POST` | `/api/v1/report/university/create` | Yes | Token for Keycloak User Realm |
 
-Create a new university report. The user id is determined from the provided access token.
+Return the university report if it is available in the cache otherwise return a status code 204 No Content. The user id is determined from the provided access token.
 
 __Example Request__: 
 ```json
