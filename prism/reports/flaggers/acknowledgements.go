@@ -2,6 +2,7 @@ package flaggers
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -18,6 +19,7 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/google/uuid"
 	"github.com/playwright-community/playwright-go"
+	"golang.org/x/sync/semaphore"
 )
 
 type AcknowledgementsExtractor interface {
@@ -26,7 +28,8 @@ type AcknowledgementsExtractor interface {
 
 type GrobidAcknowledgementsExtractor struct {
 	cache       DataCache[Acknowledgements]
-	maxWorkers  int
+	maxThreads  int
+	grobidSem   *semaphore.Weighted
 	grobid      *resty.Client
 	downloadDir string
 }
@@ -34,7 +37,8 @@ type GrobidAcknowledgementsExtractor struct {
 func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downloadDir string) *GrobidAcknowledgementsExtractor {
 	return &GrobidAcknowledgementsExtractor{
 		cache:      cache,
-		maxWorkers: 10,
+		maxThreads: 40,
+		grobidSem:  semaphore.NewWeighted(int64(10)),
 		grobid: resty.New().
 			SetBaseURL(grobidEndpoint).
 			SetRetryCount(2).
@@ -106,7 +110,7 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 		return acks, nil
 	}
 
-	nWorkers := min(len(queue), extractor.maxWorkers)
+	nWorkers := min(len(queue), extractor.maxThreads)
 
 	RunInPool(worker, queue, outputCh, nWorkers)
 
@@ -129,6 +133,13 @@ func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId 
 			slog.Error("error removing temp download file", "error", err)
 		}
 	}()
+
+	if err := extractor.grobidSem.Acquire(context.Background(), 1); err != nil {
+		slog.Error("error aquiring semaphore for grobid access", "error", err)
+		return Acknowledgements{}, fmt.Errorf("error acquiring semaphore for grobid access: %w", err)
+	}
+
+	defer extractor.grobidSem.Release(1)
 
 	acks, err := extractor.processPdfWithGrobid(pdf)
 	if err != nil {
@@ -242,10 +253,10 @@ func downloadWithHttpV1(url string) (io.Reader, error) {
 	return bytes.NewReader(data), nil
 }
 
-var downloadClient = resty.New().SetRetryCount(1).SetTimeout(20 * time.Second).SetRetryWaitTime(10 * time.Second).SetRetryMaxWaitTime(30 * time.Second)
+var downloadClient = resty.New().SetRetryCount(1).SetTimeout(20 * time.Second).SetRetryWaitTime(5 * time.Second).SetRetryMaxWaitTime(30 * time.Second)
 
 func DownloadWithHttp(url string) (io.Reader, error) {
-	res, err := downloadClient.R().Get(url)
+	res, err := downloadClient.R().SetHeaders(headers).Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("error downloading pdf from %s: %w", url, err)
 	}
