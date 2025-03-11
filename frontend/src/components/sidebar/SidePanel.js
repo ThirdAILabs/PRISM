@@ -222,11 +222,7 @@ const SidePanel = ({ isOpen, onClose }) => {
                         <span className="text-start">{universityReport.UniversityName}</span>
                         {/* <span><MdDelete style={15} /></span> */}
                         <span className={`status ${universityReport.Status}`}>
-                          {universityReport.Status === 'complete' &&
-                          universityReport.Content.TotalAuthors !=
-                            universityReport.Content.AuthorsReviewed
-                            ? status['in-progress']
-                            : status[universityReport.Status]}
+                          {status[universityReport.Status]}
                         </span>
                       </div>
                     )
