@@ -13,6 +13,8 @@ COPY --from=builder /app/build /usr/share/nginx/html
 
 COPY public/config.template.js /usr/share/nginx/html/
 
+COPY default.conf /etc/nginx/conf.d/default.conf
+
 COPY entrypoint.sh /docker-entrypoint.d/entrypoint.sh
 RUN chmod +x /docker-entrypoint.d/entrypoint.sh
 
