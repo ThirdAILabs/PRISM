@@ -57,7 +57,7 @@ jobs:
         
       - name: Download prism triangulation dump
         run: |
-          wget https://thirdai-corp-public.s3.us-east-2.amazonaws.com/Prism/prism_triangulation.dump -C ${{ github.workspace }}/prism_triangulation.dump
+          wget https://thirdai-corp-public.s3.us-east-2.amazonaws.com/Prism/prism_triangulation.dump -O ${{ github.workspace }}/prism_triangulation.dump
       
       - name: Restore prism triangulation dump
         run: |
