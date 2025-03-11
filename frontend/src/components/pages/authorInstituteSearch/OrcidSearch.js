@@ -48,8 +48,20 @@ const OrcidSearchComponent = () => {
           initialValue={orcidQuery}
         />
       </div>
-      {isLoading && <div>Loading...</div>}
-      {hasSearchedOrcid && !isLoading && orcidResults.length === 0 && <div>No results found.</div>}
+      {isLoading && (
+        <div
+          className="spinner-border text-primary"
+          style={{ width: '3rem', height: '3rem', marginTop: '20px' }}
+          role="status"
+        ></div>
+      )}
+      {hasSearchedOrcid && !isLoading && orcidResults.length === 0 && (
+        <div className="no-results">
+          <div className="no-results-icon">🔍</div>
+          <h3>Author Not Found</h3>
+          <p>We couldn't find an author associated with this ORCID ID.</p>
+        </div>
+      )}
       {hasSearchedOrcid && orcidResults.length > 0 && <TodoListComponent results={orcidResults} />}
     </div>
   );
