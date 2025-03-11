@@ -596,7 +596,7 @@ func TestAutocompleteAuthor(t *testing.T) {
 	user := newUser()
 
 	var results []api.Autocompletion
-	err := mockRequest(backend, "GET", "/autocomplete/author?authorNameQuery="+url.QueryEscape("anshumali shriva"), user, nil, &results)
+	err := mockRequest(backend, "GET", "/autocomplete/author?query="+url.QueryEscape("anshumali shriva"), user, nil, &results)
 	if err != nil {
 		t.Fatal(err)
 	}
