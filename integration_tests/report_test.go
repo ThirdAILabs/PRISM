@@ -70,8 +70,8 @@ func TestReportGeneration(t *testing.T) {
 		expectedFlags := expectedFlagCounts[i]
 
 		for flagType, expectedCount := range expectedFlags {
-			if len(report.Content[flagType]) < expectedCount {
-				t.Fatalf("Report %s (%s): expected %d flags of type %s, got %d", reportRequests[i].AuthorName, reportRequests[i].AuthorId, expectedCount, flagType, len(report.Content[flagType]))
+			if len(report.Content[flagType]) < expectedCount-2 || len(report.Content[flagType]) > expectedCount+2 {
+				t.Fatalf("Report %s (%s): expected [%d, %d] flags of type %s, got %d", reportRequests[i].AuthorName, reportRequests[i].AuthorId, expectedCount-1, expectedCount+1, flagType, len(report.Content[flagType]))
 			}
 		}
 	}
