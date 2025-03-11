@@ -8,6 +8,7 @@ import (
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/schema"
+	"prism/prism/triangulation"
 	"slices"
 	"strings"
 	"testing"
@@ -53,7 +54,7 @@ func yearEnd(year int) time.Time {
 	return time.Date(year, 12, 31, 0, 0, 0, 0, time.UTC)
 }
 
-func getReportContent(t *testing.T, report reports.ReportUpdateTask, processor *ReportProcessor, manager *reports.ReportManager) api.ReportContent {
+func getReportContent(t *testing.T, report reports.ReportUpdateTask, processor *ReportProcessor, manager *reports.ReportManager) map[string][]api.Flag {
 	user := uuid.New()
 	reportId, err := manager.CreateAuthorReport(user, report.AuthorId, report.AuthorName, report.Source)
 	if err != nil {
@@ -467,16 +468,30 @@ func TestProcessorAcknowledgements(t *testing.T) {
 	}
 	defer entityStore.Free()
 
+	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := db.AutoMigrate(
+		&triangulation.Author{},
+		&triangulation.FundCode{},
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	triangulationDB := triangulation.CreateTriangulationDB(db)
+
 	manager := setupReportManager(t)
 	processor := &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
 		workFlaggers: []WorkFlagger{
 			&OpenAlexAcknowledgementIsEOC{
-				openalex:     openalex.NewRemoteKnowledgeBase(),
-				entityLookup: entityStore,
-				authorCache:  authorCache,
-				extractor:    NewGrobidExtractor(ackCache, grobidEndpoint, testDir),
-				sussyBakas:   eoc.LoadSussyBakas(),
+				openalex:        openalex.NewRemoteKnowledgeBase(),
+				entityLookup:    entityStore,
+				authorCache:     authorCache,
+				extractor:       NewGrobidExtractor(ackCache, grobidEndpoint, testDir),
+				sussyBakas:      eoc.LoadSussyBakas(),
+				triangulationDB: triangulationDB,
 			},
 		},
 		manager: manager,

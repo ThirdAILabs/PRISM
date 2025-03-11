@@ -11,6 +11,7 @@ import (
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/schema"
 	"prism/prism/search"
+	"prism/prism/triangulation"
 	"sync"
 	"time"
 )
@@ -24,9 +25,10 @@ type ReportProcessor struct {
 }
 
 type ReportProcessorOptions struct {
-	UniversityNDB search.NeuralDB
-	DocNDB        search.NeuralDB
-	AuxNDB        search.NeuralDB
+	UniversityNDB   search.NeuralDB
+	DocNDB          search.NeuralDB
+	AuxNDB          search.NeuralDB
+	TriangulationDB *triangulation.TriangulationDB
 
 	EntityLookup *EntityStore
 
@@ -69,11 +71,12 @@ func NewReportProcessor(manager *reports.ReportManager, opts ReportProcessorOpti
 				concerningInstitutions: opts.ConcerningInstitutions,
 			},
 			&OpenAlexAcknowledgementIsEOC{
-				openalex:     openalex.NewRemoteKnowledgeBase(),
-				entityLookup: opts.EntityLookup,
-				authorCache:  authorCache,
-				extractor:    NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.WorkDir),
-				sussyBakas:   opts.SussyBakas,
+				openalex:        openalex.NewRemoteKnowledgeBase(),
+				entityLookup:    opts.EntityLookup,
+				authorCache:     authorCache,
+				extractor:       NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.WorkDir),
+				sussyBakas:      opts.SussyBakas,
+				triangulationDB: opts.TriangulationDB,
 			},
 		},
 		authorFacultyAtEOC: &AuthorIsFacultyAtEOCFlagger{

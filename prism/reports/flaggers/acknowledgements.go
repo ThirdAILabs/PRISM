@@ -37,15 +37,19 @@ func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downl
 		maxWorkers: 10,
 		grobid: resty.New().
 			SetBaseURL(grobidEndpoint).
+			SetRetryCount(2).
 			AddRetryCondition(func(response *resty.Response, err error) bool {
 				if err != nil {
 					return true // The err can be non nil for some network errors.
 				}
-				// There's no reason to retry other 400 requests since the outcome should not change
-				return response != nil && (response.StatusCode() > 499 || response.StatusCode() == http.StatusTooManyRequests)
+				// Grobid returns 503 if there are too many requests:
+				// https://grobid.readthedocs.io/en/latest/Grobid-service/
+				// TODO: Should we retry on error code 500? grobid will return 500 for invalid pdfs,
+				// so it's not clear if this is a retryable error.
+				return response != nil && (response.StatusCode() == http.StatusServiceUnavailable)
 			}).
-			SetRetryWaitTime(500 * time.Millisecond).
-			SetRetryMaxWaitTime(5 * time.Second),
+			SetRetryWaitTime(2 * time.Second).
+			SetRetryMaxWaitTime(10 * time.Second),
 		downloadDir: downloadDir,
 	}
 }
@@ -94,7 +98,7 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 
 		acks, err := extractor.extractAcknowledgments(workId, next)
 		if err != nil {
-			return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments for work %s: %w", next.WorkId, err)
+			return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments for work %s (%s): %w", next.WorkId, next.DownloadUrl, err)
 		}
 
 		extractor.cache.Update(workId, acks)
@@ -214,12 +218,12 @@ func downloadWithHttp(url string) (io.Reader, error) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("error downloading pdf: %w", err)
+		return nil, fmt.Errorf("error downloading pdf from %s: %w", url, err)
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("error downloading pdf: recieved status_code=%d", res.StatusCode)
+		return nil, fmt.Errorf("error downloading pdf from %s: recieved status_code=%d", url, res.StatusCode)
 	}
 
 	data, err := io.ReadAll(res.Body)

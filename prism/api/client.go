@@ -8,13 +8,21 @@ import (
 	"github.com/google/uuid"
 )
 
-type baseClient struct {
+const realm = "prism-user"
+
+type PrismClient struct {
 	backend  *resty.Client
 	keycloak *resty.Client
-	realm    string
 }
 
-func (client *baseClient) Login(username, password string) error {
+func NewUserClient(backendUrl, keycloakUrl string) *PrismClient {
+	return &PrismClient{
+		backend:  resty.New().SetBaseURL(backendUrl).SetAuthScheme("Bearer"),
+		keycloak: resty.New().SetBaseURL(keycloakUrl),
+	}
+}
+
+func (client *PrismClient) Login(username, password string) error {
 	type loginRes struct {
 		AccessToken string `json:"access_token"`
 	}
@@ -24,12 +32,12 @@ func (client *baseClient) Login(username, password string) error {
 			"grant_type":    "password",
 			"username":      username,
 			"password":      password,
-			"client_id":     fmt.Sprintf("%s-login-client", client.realm),
+			"client_id":     fmt.Sprintf("%s-login-client", realm),
 			"lcient_secret": "",
 			"scope":         "email profile openid",
 		}).
 		SetResult(&loginRes{}).
-		Post(fmt.Sprintf("/realms/%s/protocol/openid-connect/token", client.realm))
+		Post(fmt.Sprintf("/realms/%s/protocol/openid-connect/token", realm))
 
 	if err != nil {
 		return fmt.Errorf("login request failed: %w", err)
@@ -44,54 +52,7 @@ func (client *baseClient) Login(username, password string) error {
 	return nil
 }
 
-type AdminClient struct {
-	baseClient
-}
-
-func NewAdminClient(backendUrl, keycloakUrl string) *AdminClient {
-	return &AdminClient{
-		baseClient{
-			backend:  resty.New().SetBaseURL(backendUrl).SetAuthScheme("Bearer"),
-			keycloak: resty.New().SetBaseURL(keycloakUrl),
-			realm:    "prism-admin",
-		},
-	}
-}
-
-func (client *AdminClient) CreateLicense(name string, expiration time.Time) (string, error) {
-	res, err := client.backend.R().
-		SetBody(CreateLicenseRequest{
-			Name:       name,
-			Expiration: expiration,
-		}).
-		SetResult(&CreateLicenseResponse{}).
-		Post("/api/v1/license/create")
-	if err != nil {
-		return "", fmt.Errorf("create license request failed: %w", err)
-	}
-
-	if !res.IsSuccess() {
-		return "", fmt.Errorf("create license returned status=%d, error=%v", res.StatusCode(), res.String())
-	}
-
-	return res.Result().(*CreateLicenseResponse).License, nil
-}
-
-type UserClient struct {
-	baseClient
-}
-
-func NewUserClient(backendUrl, keycloakUrl string) *UserClient {
-	return &UserClient{
-		baseClient{
-			backend:  resty.New().SetBaseURL(backendUrl).SetAuthScheme("Bearer"),
-			keycloak: resty.New().SetBaseURL(keycloakUrl),
-			realm:    "prism-user",
-		},
-	}
-}
-
-func (client *UserClient) CreateReport(report CreateAuthorReportRequest) (uuid.UUID, error) {
+func (client *PrismClient) CreateReport(report CreateAuthorReportRequest) (uuid.UUID, error) {
 	res, err := client.backend.R().
 		SetBody(report).
 		SetResult(&CreateReportResponse{}).
@@ -107,7 +68,7 @@ func (client *UserClient) CreateReport(report CreateAuthorReportRequest) (uuid.U
 	return res.Result().(*CreateReportResponse).Id, nil
 }
 
-func (client *UserClient) GetReport(reportId uuid.UUID) (*Report, error) {
+func (client *PrismClient) GetReport(reportId uuid.UUID) (*Report, error) {
 	res, err := client.backend.R().
 		SetResult(&Report{}).
 		SetPathParam("report_id", reportId.String()).
@@ -123,7 +84,7 @@ func (client *UserClient) GetReport(reportId uuid.UUID) (*Report, error) {
 	return res.Result().(*Report), nil
 }
 
-func (client *UserClient) WaitForReport(reportId uuid.UUID, timeout time.Duration) (*Report, error) {
+func (client *PrismClient) WaitForReport(reportId uuid.UUID, timeout time.Duration) (*Report, error) {
 	interval := time.Tick(time.Second)
 	stop := time.After(timeout)
 	for {
@@ -142,7 +103,7 @@ func (client *UserClient) WaitForReport(reportId uuid.UUID, timeout time.Duratio
 	}
 }
 
-func (client *UserClient) ActivateLicense(license string) error {
+func (client *PrismClient) ActivateLicense(license string) error {
 	res, err := client.backend.R().
 		SetBody(ActivateLicenseRequest{
 			License: license,
