@@ -135,6 +135,9 @@
   color: #004085;
 }
 
+.refresh-icon {
+  cursor: pointer;
+}
 .collapsible-header {
   background-color: #ffffff;
   padding: 10px;

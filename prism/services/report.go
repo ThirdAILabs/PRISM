@@ -129,6 +129,7 @@ func (s *ReportService) Routes() chi.Router {
 	r.Route("/author", func(r chi.Router) {
 		r.Get("/list", WrapRestHandler(s.List))
 		r.Post("/create", WrapRestHandler(s.CreateReport))
+		r.Post("/{report_id}/recreate", WrapRestHandler(s.RecreateReport))
 		r.Get("/{report_id}", WrapRestHandler(s.GetReport))
 		r.Delete("/{report_id}", WrapRestHandler(s.DeleteAuthorReport))
 		r.Post("/{report_id}/check-disclosure", WrapRestHandler(s.CheckDisclosure))
@@ -196,6 +197,24 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 	}
 
 	return api.CreateReportResponse{Id: id}, nil
+}
+
+func (s *ReportService) RecreateReport(r *http.Request) (any, error) {
+	userId, err := auth.GetUserId(r)
+	if err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	id, err := URLParamUUID(r, "report_id")
+	if err != nil {
+		return nil, CodedError(err, http.StatusBadRequest)
+	}
+
+	if err := s.manager.RecreateAuthorReport(userId, id); err != nil {
+		return nil, CodedError(err, reportErrorStatus(err))
+	}
+
+	return nil, nil
 }
 
 func (s *ReportService) GetReport(r *http.Request) (any, error) {
