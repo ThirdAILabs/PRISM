@@ -19,7 +19,7 @@ on:
 
 jobs:
   unit-tests:
-    runs-on: ubuntu-22.04-8-cores
+    runs-on: ubuntu-22.04-16-cores
     steps:
       - uses: actions/checkout@v2
 
