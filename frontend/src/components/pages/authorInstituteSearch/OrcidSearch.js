@@ -49,7 +49,13 @@ const OrcidSearchComponent = () => {
         />
       </div>
       {isLoading && <div>Loading...</div>}
-      {hasSearchedOrcid && !isLoading && orcidResults.length === 0 && <div>No results found.</div>}
+      {hasSearchedOrcid && !isLoading && orcidResults.length === 0 && (
+        <div className="no-results">
+          <div className="no-results-icon">🔍</div>
+          <h3>We couldn't find any results</h3>
+          <p>Try adjusting your search to find what you're looking for.</p>
+        </div>
+      )}
       {hasSearchedOrcid && orcidResults.length > 0 && <TodoListComponent results={orcidResults} />}
     </div>
   );
