@@ -107,7 +107,7 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 
 		acks, err := extractor.extractAcknowledgments(workId, next)
 		if err != nil {
-			return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments for work %s (%s): %w", next.WorkId, next.DownloadUrl, err)
+			return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments for work %s: %w", next.WorkId, err)
 		}
 
 		extractor.cache.Update(workId, acks)
@@ -229,7 +229,7 @@ func (extractor *GrobidAcknowledgementsExtractor) DownloadWithHttp(url string) (
 	}
 
 	if !res.IsSuccess() {
-		return nil, fmt.Errorf("download returned erroor, recieved status_code=%d", res.StatusCode())
+		return nil, fmt.Errorf("download returned error, recieved status_code=%d", res.StatusCode())
 	}
 
 	data := res.Body()
