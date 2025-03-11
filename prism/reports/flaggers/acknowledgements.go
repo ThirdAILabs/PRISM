@@ -27,19 +27,20 @@ type AcknowledgementsExtractor interface {
 }
 
 type GrobidAcknowledgementsExtractor struct {
-	cache       DataCache[Acknowledgements]
-	maxThreads  int
-	grobidSem   *semaphore.Weighted
-	grobid      *resty.Client
-	downloadDir string
+	cache          DataCache[Acknowledgements]
+	maxThreads     int
+	grobidSem      *semaphore.Weighted
+	grobidClient   *resty.Client
+	downloadClient *resty.Client
+	downloadDir    string
 }
 
 func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downloadDir string) *GrobidAcknowledgementsExtractor {
 	return &GrobidAcknowledgementsExtractor{
 		cache:      cache,
 		maxThreads: 40,
-		grobidSem:  semaphore.NewWeighted(int64(10)),
-		grobid: resty.New().
+		grobidSem:  semaphore.NewWeighted(10),
+		grobidClient: resty.New().
 			SetBaseURL(grobidEndpoint).
 			SetRetryCount(2).
 			AddRetryCondition(func(response *resty.Response, err error) bool {
@@ -54,6 +55,10 @@ func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downl
 			}).
 			SetRetryWaitTime(2 * time.Second).
 			SetRetryMaxWaitTime(10 * time.Second),
+		downloadClient: resty.New().
+			SetRetryCount(1).SetTimeout(20 * time.Second).
+			SetRetryWaitTime(5 * time.Second).
+			SetRetryMaxWaitTime(30 * time.Second),
 		downloadDir: downloadDir,
 	}
 }
@@ -119,7 +124,7 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 
 func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId string, work openalex.Work) (Acknowledgements, error) {
 	destPath := filepath.Join(extractor.downloadDir, uuid.NewString()+".pdf")
-	pdf, err := downloadPdf(work.DownloadUrl, destPath)
+	pdf, err := extractor.downloadPdf(work.DownloadUrl, destPath)
 	if err != nil {
 		return Acknowledgements{}, err
 	}
@@ -135,6 +140,8 @@ func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId 
 	}()
 
 	if err := extractor.grobidSem.Acquire(context.Background(), 1); err != nil {
+		// I don't think this can fail if we use context.Background, so this error check
+		// is just in case.
 		slog.Error("error aquiring semaphore for grobid access", "error", err)
 		return Acknowledgements{}, fmt.Errorf("error acquiring semaphore for grobid access: %w", err)
 	}
@@ -189,7 +196,7 @@ func downloadWithPlaywright(url, destPath string) (io.ReadCloser, error) {
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error downloading pdf '%s': %w", url, err)
+		return nil, fmt.Errorf("download error: %w", err)
 	}
 
 	if err := download.SaveAs(destPath); err != nil {
@@ -215,16 +222,14 @@ var headers = map[string]string{
 	"sec-ch-ua-platform":        `"Windows"`,
 }
 
-var downloadClient = resty.New().SetRetryCount(1).SetTimeout(20 * time.Second).SetRetryWaitTime(5 * time.Second).SetRetryMaxWaitTime(30 * time.Second)
-
-func DownloadWithHttp(url string) (io.Reader, error) {
-	res, err := downloadClient.R().SetHeaders(headers).Get(url)
+func (extractor *GrobidAcknowledgementsExtractor) DownloadWithHttp(url string) (io.Reader, error) {
+	res, err := extractor.downloadClient.R().SetHeaders(headers).Get(url)
 	if err != nil {
-		return nil, fmt.Errorf("error downloading pdf from %s: %w", url, err)
+		return nil, fmt.Errorf("download error: %w", err)
 	}
 
 	if !res.IsSuccess() {
-		return nil, fmt.Errorf("error downloading pdf from %s: recieved status_code=%d, body=%s", url, res.StatusCode(), res.String())
+		return nil, fmt.Errorf("download returned erroor, recieved status_code=%d", res.StatusCode())
 	}
 
 	data := res.Body()
@@ -240,8 +245,8 @@ func DownloadWithHttp(url string) (io.Reader, error) {
 	return bytes.NewReader(data), nil
 }
 
-func downloadPdf(url, destPath string) (io.Reader, error) {
-	attempt1, err1 := DownloadWithHttp(url)
+func (extractor *GrobidAcknowledgementsExtractor) downloadPdf(url, destPath string) (io.Reader, error) {
+	attempt1, err1 := extractor.DownloadWithHttp(url)
 	if err1 != nil {
 	} else {
 		return attempt1, nil
@@ -253,7 +258,7 @@ func downloadPdf(url, destPath string) (io.Reader, error) {
 		return attempt2, nil
 	}
 
-	return nil, fmt.Errorf("unable to download pdf, http error: %w, playwright error: %w", err1, err2)
+	return nil, fmt.Errorf("unable to download pdf from %s, http error: %w, playwright error: %w", url, err1, err2)
 }
 
 const (
@@ -357,7 +362,7 @@ func parseGrobidReponse(data io.Reader) ([]Acknowledgement, error) {
 }
 
 func (extractor *GrobidAcknowledgementsExtractor) processPdfWithGrobid(pdf io.Reader) ([]Acknowledgement, error) {
-	res, err := extractor.grobid.R().
+	res, err := extractor.grobidClient.R().
 		SetMultipartField("input", "filename.pdf", "application/pdf", pdf).
 		Post("/api/processHeaderFundingDocument")
 	if err != nil {
@@ -365,7 +370,7 @@ func (extractor *GrobidAcknowledgementsExtractor) processPdfWithGrobid(pdf io.Re
 	}
 
 	if !res.IsSuccess() {
-		return nil, fmt.Errorf("grobid '%s' returned status=%d, error=%v", res.Request.URL, res.StatusCode(), res.String())
+		return nil, fmt.Errorf("grobid returned status=%d, error=%v", res.StatusCode(), res.String())
 	}
 
 	body := res.Body()
