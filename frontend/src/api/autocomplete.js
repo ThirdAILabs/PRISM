@@ -15,4 +15,11 @@ export const autocompleteService = {
     });
     return response.data;
   },
+
+  autocompletePaperTitles: async (query) => {
+    const response = await axiosInstance.get(API_ROUTES.AUTOCOMPLETE.PAPER_TITLE, {
+      params: { query },
+    });
+    return response.data;
+  },
 };

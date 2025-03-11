@@ -106,6 +106,7 @@ const ItemDetails = () => {
   const [isDisclosureChecked, setDisclosureChecked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [valueFontSize, setValueFontSize] = useState(`${BaseFontSize}px`);
+  const [reportMetadata, setReportMetadata] = useState({});
 
   // box shadow for disclosed/undisclosed buttons
   const greenBoxShadow = '0 0px 10px rgb(0, 183, 46)';
@@ -154,9 +155,17 @@ const ItemDetails = () => {
 
     try {
       const result = await reportService.checkDisclosure(report_id, files);
-      setReportContent(result.Content);
-      setInitialReportContent(result.Content);
+      const { Content, ...metadata } = result;
+      setReportContent(Content);
+      setInitialReportContent(Content);
       setDisclosureChecked(true);
+
+      setReportMetadata({
+        ...metadata,
+        ContainsDisclosure: true,
+        ContainsReportContent: true,
+      });
+
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -191,11 +200,16 @@ const ItemDetails = () => {
     const poll = async () => {
       let inProgress = true;
       const report = await reportService.getReport(report_id);
+      const { Content, ...metadata } = report;
       if (isMounted) {
         console.log('Report', report);
         setAuthorName(report.AuthorName);
         setReportContent(report.Content);
         setInitialReportContent(report.Content);
+        setReportMetadata({
+          ...metadata,
+          ContainsReportContent: true,
+        });
 
         const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
         const newFontSize = `${getFontSize(maxLength)}px`;
@@ -298,6 +312,10 @@ const ItemDetails = () => {
     setEndDate('');
 
     setReportContent(filteredContent);
+    setReportMetadata({
+      ...reportMetadata,
+      TimeRange: `${displayStart} to ${displayEnd}`,
+    });
 
     const maxLength = Math.max(...FLAG_ORDER.map((flag) => reportContent[flag]?.length || 0));
     const newFontSize = `${getFontSize(maxLength)}px`;
@@ -394,6 +412,66 @@ const ItemDetails = () => {
             </>
           )}
         </p>
+        <div>
+          {flag.FundCodeTriangulation &&
+            typeof flag.FundCodeTriangulation === 'object' &&
+            Object.keys(flag.FundCodeTriangulation).length > 0 && (
+              <>
+                <strong>High-Risk Grants</strong>
+                <ul className="bulleted-list">
+                  {Object.entries(flag.FundCodeTriangulation).map(
+                    ([outerKey, innerMap], index1) => (
+                      <li key={`fund-${index}-${index1}`} className="mb-3">
+                        {outerKey}
+                        <ul className="non-bulleted-list ms-3">
+                          {Object.entries(innerMap).map(([innerKey, value], index2) => (
+                            <li key={`fund-${index}-${index1}-${index2}`} className="mb-2">
+                              {typeof value === 'boolean' ? (
+                                <button
+                                  type="button"
+                                  className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
+                                  style={{ minWidth: '180px', textAlign: 'center' }}
+                                  title={`${innerKey}: ${
+                                    value
+                                      ? 'The author likely IS a primary recipient of this grant.'
+                                      : 'The author likely IS NOT a primary recipient of this grant.'
+                                  }`}
+                                >
+                                  {innerKey}
+                                  {/* : {value ? 'Yes' : 'No'} */}
+                                </button>
+                              ) : (
+                                <>
+                                  <strong>{innerKey}:</strong> {JSON.stringify(value)}
+                                </>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </li>
+                    )
+                  )}
+                </ul>
+                {/* Legend Section */}
+                <div className="mt-4 d-flex flex-column small">
+                  <span className="me-3">
+                    <span
+                      className="rounded-circle d-inline-block me-2"
+                      style={{ width: '8px', height: '8px', backgroundColor: 'green' }}
+                    ></span>
+                    The author likely <b>is not</b> a primary recipient of these grants.
+                  </span>
+                  <span>
+                    <span
+                      className="rounded-circle d-inline-block me-2"
+                      style={{ width: '8px', height: '8px', backgroundColor: 'red' }}
+                    ></span>
+                    The author likely <b>is</b> a primary recipient of these grants.
+                  </span>
+                </div>
+              </>
+            )}
+        </div>
       </div>
     );
   }
@@ -572,6 +650,68 @@ const ItemDetails = () => {
           })}
           <p>{}</p>
         </p>
+        {}
+
+        <div>
+          {flag.FundCodeTriangulation &&
+            typeof flag.FundCodeTriangulation === 'object' &&
+            Object.keys(flag.FundCodeTriangulation).length > 0 && (
+              <>
+                <strong>High-Risk Grants</strong>
+                <ul className="bulleted-list">
+                  {Object.entries(flag.FundCodeTriangulation).map(
+                    ([outerKey, innerMap], index1) => (
+                      <li key={`fund-${index}-${index1}`} className="mb-3">
+                        {outerKey}
+                        <ul className="non-bulleted-list ms-3">
+                          {Object.entries(innerMap).map(([innerKey, value], index2) => (
+                            <li key={`fund-${index}-${index1}-${index2}`} className="mb-2">
+                              {typeof value === 'boolean' ? (
+                                <button
+                                  type="button"
+                                  className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
+                                  style={{ minWidth: '180px', textAlign: 'center' }}
+                                  title={`${innerKey}: ${
+                                    value
+                                      ? 'The author likely IS a primary recipient of this grant.'
+                                      : 'The author likely IS NOT a primary recipient of this grant.'
+                                  }`}
+                                >
+                                  {innerKey}
+                                  {/* : {value ? 'Yes' : 'No'} */}
+                                </button>
+                              ) : (
+                                <>
+                                  <strong>{innerKey}:</strong> {JSON.stringify(value)}
+                                </>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </li>
+                    )
+                  )}
+                </ul>
+                {/* Legend Section */}
+                <div className="mt-4 d-flex flex-column small">
+                  <span className="me-3">
+                    <span
+                      className="rounded-circle d-inline-block me-2"
+                      style={{ width: '8px', height: '8px', backgroundColor: 'green' }}
+                    ></span>
+                    The author likely <b>is not</b> a primary recipient of these grants.
+                  </span>
+                  <span>
+                    <span
+                      className="rounded-circle d-inline-block me-2"
+                      style={{ width: '8px', height: '8px', backgroundColor: 'red' }}
+                    ></span>
+                    The author likely <b>is</b> a primary recipient of these grants.
+                  </span>
+                </div>
+              </>
+            )}
+        </div>
       </div>
     );
   }
@@ -883,9 +1023,10 @@ const ItemDetails = () => {
                     backgroundColor: 'rgb(160, 160, 160)',
                     border: 'none',
                     color: 'white',
-                    width: '200px',
+                    width: '180px',
                     fontWeight: 'bold',
                     fontSize: '14px',
+                    marginRight: '10px',
                   }}
                 >
                   Filter by Timeline
@@ -894,11 +1035,12 @@ const ItemDetails = () => {
                   <div
                     className="dropdown-menu show p-2"
                     style={{
-                      width: '200px',
+                      width: '180px',
                       backgroundColor: 'rgb(160, 160, 160)',
                       border: 'none',
                       right: 0,
                       marginTop: '5px',
+                      marginRight: '10px',
                       color: 'white',
                       fontWeight: 'bold',
                       fontSize: '14px',
@@ -1002,6 +1144,8 @@ const ItemDetails = () => {
             <div ref={dropdownDownloadRef}>
               <DownloadButton
                 reportId={report_id}
+                metadata={reportMetadata}
+                content={reportContent}
                 isOpen={downloadDropdownOpen}
                 setIsOpen={() => setDownloadDropdownOpen(!downloadDropdownOpen)}
               />

@@ -386,7 +386,7 @@ func TestDownloadReportAllFormats(t *testing.T) {
 	formats := []string{"csv", "pdf", "excel"}
 	for _, format := range formats {
 		endpoint := fmt.Sprintf("/report/author/%s/download?format=%s", reportResp.Id.String(), format)
-		req := httptest.NewRequest("GET", endpoint, nil)
+		req := httptest.NewRequest("POST", endpoint, io.Reader(bytes.NewBuffer([]byte("{}"))))
 		req.Header.Add("Authorization", "Bearer "+user)
 		w := httptest.NewRecorder()
 		backend.ServeHTTP(w, req)
@@ -402,13 +402,13 @@ func TestDownloadReportAllFormats(t *testing.T) {
 		switch format {
 		case "csv":
 			expectedContentType = "text/csv"
-			expectedFilename = "report.csv"
+			expectedFilename = "download-report-name Report.csv"
 		case "pdf":
 			expectedContentType = "application/pdf"
-			expectedFilename = "report.pdf"
+			expectedFilename = "download-report-name Report.pdf"
 		case "excel":
 			expectedContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-			expectedFilename = "report.xlsx"
+			expectedFilename = "download-report-name Report.xlsx"
 		}
 
 		if ct := res.Header.Get("Content-Type"); ct != expectedContentType {
