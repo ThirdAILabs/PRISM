@@ -333,6 +333,73 @@ const ItemDetails = () => {
 
   const [review, setReview] = useState();
 
+  function fundCodeTriangulation(flag, index) {
+    return (
+      <>
+        {flag.FundCodeTriangulation &&
+          typeof flag.FundCodeTriangulation === 'object' &&
+          Object.keys(flag.FundCodeTriangulation).length > 0 && (
+            <>
+              <Collapsible title="High-Risk Grants" initiallyExpanded={false}>
+                {/* <strong>High-Risk Grants</strong> */}
+                <ul className="bulleted-list">
+                  {Object.entries(flag.FundCodeTriangulation).map(
+                    ([outerKey, innerMap], index1) => (
+                      <li key={`fund-${index}-${index1}`} className="mb-3">
+                        {outerKey}
+                        <ul className="non-bulleted-list ms-3">
+                          {Object.entries(innerMap).map(([innerKey, value], index2) => (
+                            <li key={`fund-${index}-${index1}-${index2}`} className="mb-2">
+                              {typeof value === 'boolean' ? (
+                                <button
+                                  type="button"
+                                  className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
+                                  style={{ minWidth: '180px', textAlign: 'center' }}
+                                  title={`${innerKey}: ${
+                                    value
+                                      ? 'The author likely IS a primary recipient of this grant.'
+                                      : 'The author likely IS NOT a primary recipient of this grant.'
+                                  }`}
+                                >
+                                  {innerKey}
+                                  {/* : {value ? 'Yes' : 'No'} */}
+                                </button>
+                              ) : (
+                                <>
+                                  <strong>{innerKey}:</strong> {JSON.stringify(value)}
+                                </>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </li>
+                    )
+                  )}
+                </ul>
+                {/* Legend Section */}
+                <div className="mt-4 d-flex flex-column small">
+                  <span className="me-3">
+                    <span
+                      className="rounded-circle d-inline-block me-2"
+                      style={{ width: '8px', height: '8px', backgroundColor: 'green' }}
+                    ></span>
+                    The author likely <b>is not</b> a primary recipient of these grants.
+                  </span>
+                  <span>
+                    <span
+                      className="rounded-circle d-inline-block me-2"
+                      style={{ width: '8px', height: '8px', backgroundColor: 'red' }}
+                    ></span>
+                    The author likely <b>is</b> a primary recipient of these grants.
+                  </span>
+                </div>
+              </Collapsible>
+            </>
+          )}
+      </>
+    );
+  }
+
   function withPublicationDate(header, flag) {
     const publicationDateStr = flag.Work && flag.Work.PublicationDate;
     let formattedDate = 'N/A';
@@ -421,68 +488,7 @@ const ItemDetails = () => {
           )}
         </p>
 
-        <div>
-          {flag.FundCodeTriangulation &&
-            typeof flag.FundCodeTriangulation === 'object' &&
-            Object.keys(flag.FundCodeTriangulation).length > 0 && (
-              <>
-                <Collapsible title="High-Risk Grants" initiallyExpanded={false}>
-                  {/* <strong>High-Risk Grants</strong> */}
-                  <ul className="bulleted-list">
-                    {Object.entries(flag.FundCodeTriangulation).map(
-                      ([outerKey, innerMap], index1) => (
-                        <li key={`fund-${index}-${index1}`} className="mb-3">
-                          {outerKey}
-                          <ul className="non-bulleted-list ms-3">
-                            {Object.entries(innerMap).map(([innerKey, value], index2) => (
-                              <li key={`fund-${index}-${index1}-${index2}`} className="mb-2">
-                                {typeof value === 'boolean' ? (
-                                  <button
-                                    type="button"
-                                    className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
-                                    style={{ minWidth: '180px', textAlign: 'center' }}
-                                    title={`${innerKey}: ${
-                                      value
-                                        ? 'The author likely IS a primary recipient of this grant.'
-                                        : 'The author likely IS NOT a primary recipient of this grant.'
-                                    }`}
-                                  >
-                                    {innerKey}
-                                    {/* : {value ? 'Yes' : 'No'} */}
-                                  </button>
-                                ) : (
-                                  <>
-                                    <strong>{innerKey}:</strong> {JSON.stringify(value)}
-                                  </>
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        </li>
-                      )
-                    )}
-                  </ul>
-                  {/* Legend Section */}
-                  <div className="mt-4 d-flex flex-column small">
-                    <span className="me-3">
-                      <span
-                        className="rounded-circle d-inline-block me-2"
-                        style={{ width: '8px', height: '8px', backgroundColor: 'green' }}
-                      ></span>
-                      The author likely <b>is not</b> a primary recipient of these grants.
-                    </span>
-                    <span>
-                      <span
-                        className="rounded-circle d-inline-block me-2"
-                        style={{ width: '8px', height: '8px', backgroundColor: 'red' }}
-                      ></span>
-                      The author likely <b>is</b> a primary recipient of these grants.
-                    </span>
-                  </div>
-                </Collapsible>
-              </>
-            )}
-        </div>
+        <div>{fundCodeTriangulation(flag, index)}</div>
       </div>
     );
   }
@@ -663,68 +669,7 @@ const ItemDetails = () => {
         </p>
         {}
 
-        <div>
-          {flag.FundCodeTriangulation &&
-            typeof flag.FundCodeTriangulation === 'object' &&
-            Object.keys(flag.FundCodeTriangulation).length > 0 && (
-              <>
-                <Collapsible title="High-Risk Grants" initiallyExpanded={false}>
-                  {/* <strong>High-Risk Grants</strong> */}
-                  <ul className="bulleted-list">
-                    {Object.entries(flag.FundCodeTriangulation).map(
-                      ([outerKey, innerMap], index1) => (
-                        <li key={`fund-${index}-${index1}`} className="mb-3">
-                          {outerKey}
-                          <ul className="non-bulleted-list ms-3">
-                            {Object.entries(innerMap).map(([innerKey, value], index2) => (
-                              <li key={`fund-${index}-${index1}-${index2}`} className="mb-2">
-                                {typeof value === 'boolean' ? (
-                                  <button
-                                    type="button"
-                                    className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
-                                    style={{ minWidth: '180px', textAlign: 'center' }}
-                                    title={`${innerKey}: ${
-                                      value
-                                        ? 'The author likely IS a primary recipient of this grant.'
-                                        : 'The author likely IS NOT a primary recipient of this grant.'
-                                    }`}
-                                  >
-                                    {innerKey}
-                                    {/* : {value ? 'Yes' : 'No'} */}
-                                  </button>
-                                ) : (
-                                  <>
-                                    <strong>{innerKey}:</strong> {JSON.stringify(value)}
-                                  </>
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        </li>
-                      )
-                    )}
-                  </ul>
-                  {/* Legend Section */}
-                  <div className="mt-4 d-flex flex-column small">
-                    <span className="me-3">
-                      <span
-                        className="rounded-circle d-inline-block me-2"
-                        style={{ width: '8px', height: '8px', backgroundColor: 'green' }}
-                      ></span>
-                      The author likely <b>is not</b> a primary recipient of these grants.
-                    </span>
-                    <span>
-                      <span
-                        className="rounded-circle d-inline-block me-2"
-                        style={{ width: '8px', height: '8px', backgroundColor: 'red' }}
-                      ></span>
-                      The author likely <b>is</b> a primary recipient of these grants.
-                    </span>
-                  </div>
-                </Collapsible>
-              </>
-            )}
-        </div>
+        <div>{fundCodeTriangulation(flag, index)}</div>
       </div>
     );
   }
