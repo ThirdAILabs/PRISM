@@ -1,11 +1,13 @@
 // Import the Keycloak library to handle authentication.
 import Keycloak from 'keycloak-js';
 
+const runtimeConfig = window._env_ || {};
+
 // Create a new Keycloak instance with the configuration object.
 const _kc = new Keycloak({
-  url: process.env.REACT_APP_KEYCLOAK_URL,
-  realm: process.env.REACT_APP_KEYCLOAK_REALM,
-  clientId: process.env.REACT_APP_KEYCLOAK_CLIENT_ID,
+  url: runtimeConfig.REACT_APP_KEYCLOAK_URL || process.env.REACT_APP_KEYCLOAK_URL,
+  realm: 'prism-user',
+  clientId: 'prism-user-login-client',
   redirectUri: window.location.origin,
 });
 

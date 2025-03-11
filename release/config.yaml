@@ -1,0 +1,12 @@
+azure:
+  branches:
+    prod:
+      pull_credentials:
+        password: YA5Rm8350UhKrEQaaqNjbGk2TfjN+ri7Cy0Di9UReB+ACRBRSYKs
+        username: prism-pull
+      push_credentials:
+        password: QfKXji872oiQaHrp+ZgjfSs1ertCeInK+D0PBDXe4c+ACRCB3faT
+        username: prism-push
+      version: 0.0.3
+  registry: prismresearchsecurity.azurecr.io
+provider: azure
