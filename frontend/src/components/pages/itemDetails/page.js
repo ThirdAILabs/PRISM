@@ -974,6 +974,7 @@ const ItemDetails = () => {
               justifyContent: 'space-between',
               margin: '0 auto',
               padding: '10px 0', // reduce padding
+              height: '75px',
             }}
           >
             <button
