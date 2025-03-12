@@ -252,7 +252,7 @@ func TestCheckDisclosure(t *testing.T) {
 
 	user := newUser()
 
-	manager := reports.NewManager(db, reports.StaleReportThreshold)
+	manager := reports.NewManager(db, reports.StaleReportThreshold, reports.RetryReportThreshold)
 
 	reportResp, err := createAuthorReport(backend, user, "disclosure-report")
 	if err != nil {
@@ -354,7 +354,7 @@ func TestDownloadReportAllFormats(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	manager := reports.NewManager(db, reports.StaleReportThreshold)
+	manager := reports.NewManager(db, reports.StaleReportThreshold, reports.RetryReportThreshold)
 
 	content := []api.Flag{
 		&api.TalentContractFlag{
@@ -529,7 +529,7 @@ func TestAuthorReportEndpoints(t *testing.T) {
 
 func TestUniversityReportEndpoints(t *testing.T) {
 	backend, db := createBackend(t)
-	manager := reports.NewManager(db, reports.StaleReportThreshold)
+	manager := reports.NewManager(db, reports.StaleReportThreshold, reports.RetryReportThreshold)
 
 	user1, user2 := newUser(), newUser()
 

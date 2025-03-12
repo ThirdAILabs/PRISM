@@ -24,7 +24,7 @@ func setup(t *testing.T) *reports.ReportManager {
 		t.Fatal(err)
 	}
 
-	return reports.NewManager(db, time.Second)
+	return reports.NewManager(db, time.Second, reports.RetryReportThreshold)
 }
 
 func checkNextAuthorReport(t *testing.T, next *reports.ReportUpdateTask, authorId, authorName, source string, startDate, endDate time.Time) {
