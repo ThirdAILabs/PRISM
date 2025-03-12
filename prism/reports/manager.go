@@ -7,15 +7,45 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"os"
 	"prism/prism/api"
 	"prism/prism/schema"
 	"sort"
 	"time"
 
+	"sync"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
+
+var timingLogMutex sync.Mutex
+
+func LogTiming(functionName string) func() {
+	start := time.Now()
+
+	timingLogMutex.Lock()
+	f, err := os.OpenFile("timing.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		slog.Error("failed to open timing log file", "error", err)
+		slog.Info("Entering function", "function", functionName)
+		timingLogMutex.Unlock()
+		return func() {}
+	}
+	logger := slog.New(slog.NewTextHandler(f, nil))
+	logger.Info("Entering function", "function", functionName)
+	timingLogMutex.Unlock()
+
+	return func() {
+		duration := time.Since(start)
+		s := duration.Seconds()
+		timingLogMutex.Lock()
+		logger.Info("Exiting function", "function", functionName, "duration_s", s)
+		f.Close()
+		timingLogMutex.Unlock()
+	}
+}
 
 const (
 	StaleReportThreshold time.Duration = time.Hour * 24 * 14
@@ -38,14 +68,17 @@ type ReportManager struct {
 }
 
 func NewManager(db *gorm.DB, staleReportThreshold time.Duration) *ReportManager {
+	defer LogTiming("NewManager")()
 	return &ReportManager{db: db, staleReportThreshold: staleReportThreshold}
 }
 
 func (r *ReportManager) ListAuthorReports(userId uuid.UUID) ([]api.Report, error) {
+	defer LogTiming("ListAuthorReports")()
+
 	var reports []schema.UserAuthorReport
 
 	if err := r.db.Preload("Report").Order("last_accessed_at DESC").Find(&reports, "user_id = ?", userId).Error; err != nil {
-		slog.Error("error finding list of reports ")
+		slog.Error("error finding list of reports")
 		return nil, ErrReportAccessFailed
 	}
 
@@ -61,10 +94,8 @@ func (r *ReportManager) ListAuthorReports(userId uuid.UUID) ([]api.Report, error
 	return results, nil
 }
 
-// This function is only called from GetAuthorReport or CreateAuthorReport. The university reports
-// use a different methods that can check all the author reports associated with the university report
-// at once.
 func (r *ReportManager) queueAuthorReportUpdateIfNeeded(txn *gorm.DB, report *schema.AuthorReport) error {
+	defer LogTiming("queueAuthorReportUpdateIfNeeded")()
 	if time.Now().UTC().Sub(report.LastUpdatedAt) > r.staleReportThreshold &&
 		report.Status != schema.ReportInProgress && report.Status != schema.ReportQueued {
 		updates := map[string]any{"status": schema.ReportQueued, "queued_at": time.Now().UTC(), "queued_by_user": true}
@@ -78,6 +109,7 @@ func (r *ReportManager) queueAuthorReportUpdateIfNeeded(txn *gorm.DB, report *sc
 }
 
 func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string, fromUserReq bool) (schema.AuthorReport, error) {
+	defer LogTiming("createOrGetAuthorReport")()
 	var report schema.AuthorReport
 	result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Limit(1).Find(&report, "author_id = ? AND source = ?", authorId, source)
 	if result.Error != nil {
@@ -107,11 +139,13 @@ func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string, 
 }
 
 func (r *ReportManager) CreateAuthorReport(userId uuid.UUID, authorId, authorName, source string) (uuid.UUID, error) {
+	defer LogTiming("CreateAuthorReport")()
 	var userReport schema.UserAuthorReport
 	var userReportId uuid.UUID
 	now := time.Now().UTC()
 
 	err := r.db.Transaction(func(txn *gorm.DB) error {
+		defer LogTiming("CreateAuthorReport Transaction")()
 		report, err := createOrGetAuthorReport(txn, authorId, authorName, source, true /*fromUserReq*/)
 		if err != nil {
 			return err
@@ -159,9 +193,11 @@ func (r *ReportManager) CreateAuthorReport(userId uuid.UUID, authorId, authorNam
 }
 
 func (r *ReportManager) GetAuthorReport(userId, reportId uuid.UUID) (api.Report, error) {
+	defer LogTiming("GetAuthorReport")()
 	var report schema.UserAuthorReport
 
 	if err := r.db.Transaction(func(txn *gorm.DB) error {
+		defer LogTiming("GetAuthorReport Transaction")()
 		if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
 			Preload("Report").Preload("Report.Flags").
 			First(&report, "id = ?", reportId).Error; err != nil {
@@ -194,6 +230,7 @@ func (r *ReportManager) GetAuthorReport(userId, reportId uuid.UUID) (api.Report,
 }
 
 func (r *ReportManager) DeleteAuthorReport(userId, reportId uuid.UUID) error {
+	defer LogTiming("DeleteAuthorReport")()
 	result := r.db.Delete(&schema.UserAuthorReport{}, "id = ? AND user_id = ?", reportId, userId)
 	if result.Error != nil {
 		slog.Error("error deleting author report", "author_report_id", reportId, "error", result.Error)
@@ -215,6 +252,7 @@ type ReportUpdateTask struct {
 }
 
 func findNextAuthorReport(txn *gorm.DB) (*schema.AuthorReport, error) {
+	defer LogTiming("findNextAuthorReport")()
 	var report schema.AuthorReport
 	for _, queuedByUser := range [2]bool{true, false} {
 		result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
@@ -233,9 +271,11 @@ func findNextAuthorReport(txn *gorm.DB) (*schema.AuthorReport, error) {
 }
 
 func (r *ReportManager) GetNextAuthorReport() (*ReportUpdateTask, error) {
+	defer LogTiming("GetNextAuthorReport")()
 	var report *schema.AuthorReport
 
 	err := r.db.Transaction(func(txn *gorm.DB) error {
+		defer LogTiming("GetNextAuthorReport Transaction")()
 		var err error
 		report, err = findNextAuthorReport(txn)
 		if err != nil {
@@ -271,7 +311,9 @@ func (r *ReportManager) GetNextAuthorReport() (*ReportUpdateTask, error) {
 }
 
 func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTime time.Time, updateFlags []api.Flag) error {
+	defer LogTiming("UpdateAuthorReport")()
 	return r.db.Transaction(func(txn *gorm.DB) error {
+		defer LogTiming("UpdateAuthorReport Transaction")()
 		updates := map[string]any{"status": status}
 		if status == schema.ReportCompleted {
 			updates["last_updated_at"] = updateTime
@@ -322,6 +364,7 @@ func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTi
 }
 
 func flagsToReportContent(flags []schema.AuthorFlag) (map[string][]api.Flag, error) {
+	defer LogTiming("flagsToReportContent")()
 	content := make(map[string][]api.Flag)
 
 	for _, flag := range flags {
@@ -336,6 +379,7 @@ func flagsToReportContent(flags []schema.AuthorFlag) (map[string][]api.Flag, err
 }
 
 func convertReport(report schema.UserAuthorReport) (api.Report, error) {
+	defer LogTiming("convertReport")()
 	content, err := flagsToReportContent(report.Report.Flags)
 	if err != nil {
 		return api.Report{}, err
@@ -353,10 +397,11 @@ func convertReport(report schema.UserAuthorReport) (api.Report, error) {
 }
 
 func (r *ReportManager) ListUniversityReports(userId uuid.UUID) ([]api.UniversityReport, error) {
+	defer LogTiming("ListUniversityReports")()
 	var reports []schema.UserUniversityReport
 
 	if err := r.db.Preload("Report").Preload("Report.Authors").Order("last_accessed_at DESC").Find(&reports, "user_id = ?", userId).Error; err != nil {
-		slog.Error("error finding list of reports ")
+		slog.Error("error finding list of reports")
 		return nil, ErrReportAccessFailed
 	}
 
@@ -378,6 +423,7 @@ func (r *ReportManager) ListUniversityReports(userId uuid.UUID) ([]api.Universit
 }
 
 func (r *ReportManager) queueUniversityReportUpdateIfNeeded(txn *gorm.DB, report *schema.UniversityReport) error {
+	defer LogTiming("queueUniversityReportUpdateIfNeeded")()
 	if time.Now().UTC().Sub(report.LastUpdatedAt) > r.staleReportThreshold &&
 		report.Status != schema.ReportInProgress && report.Status != schema.ReportQueued {
 		updates := map[string]any{"status": schema.ReportQueued, "queued_at": time.Now().UTC()}
@@ -391,11 +437,13 @@ func (r *ReportManager) queueUniversityReportUpdateIfNeeded(txn *gorm.DB, report
 }
 
 func (r *ReportManager) CreateUniversityReport(userId uuid.UUID, universityId, universityName string) (uuid.UUID, error) {
+	defer LogTiming("CreateUniversityReport")()
 	var userReport schema.UserUniversityReport
 	var userReportId uuid.UUID
 	now := time.Now().UTC()
 
 	err := r.db.Transaction(func(txn *gorm.DB) error {
+		defer LogTiming("CreateUniversityReport Transaction")()
 		var report schema.UniversityReport
 		result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Limit(1).Find(&report, "university_id = ?", universityId)
 		if result.Error != nil {
@@ -462,11 +510,11 @@ func (r *ReportManager) CreateUniversityReport(userId uuid.UUID, universityId, u
 }
 
 const (
-	// The last N years of flags that will be added to the university report.
 	yearsInUniversityReport = 5
 )
 
 func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.UniversityReport, error) {
+	defer LogTiming("GetUniversityReport")()
 	type universityAuthorFlags struct {
 		AuthorName string
 		AuthorId   string
@@ -486,6 +534,7 @@ func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.Uni
 	var flags []universityAuthorFlags
 
 	if err := r.db.Transaction(func(txn *gorm.DB) error {
+		defer LogTiming("GetUniversityReport Transaction")()
 		if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
 			Preload("Report").
 			First(&report, "id = ?", reportId).Error; err != nil {
@@ -519,9 +568,6 @@ func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.Uni
 			return ErrReportAccessFailed
 		}
 
-		// Note: it is ok to select author_reports.author_name/author_id/source even though
-		// they are not not part of the group by clause or have an aggregator becuase
-		// we are grouping by the primary key of the table they come from, so only a single value is possible.
 		if err := txn.Model(&schema.AuthorFlag{}).
 			Select("author_reports.author_name, author_reports.author_id, author_reports.source, author_flags.flag_type, count(*) as count").
 			Joins("JOIN author_reports ON author_flags.report_id = author_reports.id").
@@ -572,6 +618,7 @@ func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.Uni
 }
 
 func (r *ReportManager) DeleteUniversityReport(userId, reportId uuid.UUID) error {
+	defer LogTiming("DeleteUniversityReport")()
 	result := r.db.Delete(&schema.UserUniversityReport{}, "id = ? AND user_id = ?", reportId, userId)
 	if result.Error != nil {
 		slog.Error("error deleting university report", "university_report_id", reportId, "error", result.Error)
@@ -591,10 +638,12 @@ type UniversityReportUpdateTask struct {
 }
 
 func (r *ReportManager) GetNextUniversityReport() (*UniversityReportUpdateTask, error) {
+	defer LogTiming("GetNextUniversityReport")()
 	found := false
 	var report schema.UniversityReport
 
 	err := r.db.Transaction(func(txn *gorm.DB) error {
+		defer LogTiming("GetNextUniversityReport Transaction")()
 		result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
 			Limit(1).Order("queued_at ASC").
 			Find(&report, "status = ?", schema.ReportQueued)
@@ -633,6 +682,7 @@ func (r *ReportManager) GetNextUniversityReport() (*UniversityReportUpdateTask, 
 }
 
 func (r *ReportManager) queueAuthorReportUpdatesForUniversityReport(txn *gorm.DB, universityReportId uuid.UUID) error {
+	defer LogTiming("queueAuthorReportUpdatesForUniversityReport")()
 	staleCutoff := time.Now().UTC().Add(-r.staleReportThreshold)
 
 	result := txn.Model(&schema.AuthorReport{}).
@@ -657,7 +707,9 @@ type UniversityAuthorReport struct {
 }
 
 func (r *ReportManager) UpdateUniversityReport(id uuid.UUID, status string, updateTime time.Time, authors []UniversityAuthorReport) error {
+	defer LogTiming("UpdateUniversityReport")()
 	return r.db.Transaction(func(txn *gorm.DB) error {
+		defer LogTiming("UpdateUniversityReport Transaction")()
 		var report schema.UniversityReport
 
 		if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).First(&report, "id = ?", id).Error; err != nil {
@@ -703,10 +755,10 @@ func (r *ReportManager) UpdateUniversityReport(id uuid.UUID, status string, upda
 
 		return nil
 	})
-
 }
 
 func convertUniversityReport(report schema.UserUniversityReport, content api.UniversityReportContent) api.UniversityReport {
+	defer LogTiming("convertUniversityReport")()
 	return api.UniversityReport{
 		Id:             report.Id,
 		LastAccessedAt: report.LastAccessedAt,

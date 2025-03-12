@@ -6,16 +6,19 @@ import (
 	"prism/prism/gscholar"
 	"prism/prism/llms"
 	"prism/prism/openalex"
+	"prism/prism/reports"
 	"regexp"
 	"strings"
 	"time"
 )
 
 func streamOpenAlexWorks(openalex openalex.KnowledgeBase, authorId string, startDate, endDate time.Time) chan openalex.WorkBatch {
+	defer reports.LogTiming("streamOpenAlexWorks")()
 	return openalex.StreamWorks(authorId, startDate, endDate)
 }
 
 func findOAAuthorId(work openalex.Work, targetAuthorName string) string {
+	defer reports.LogTiming("findOAAuthorId")()
 	authorId := ""
 	maxSim := 0.0
 
@@ -35,6 +38,7 @@ func findOAAuthorId(work openalex.Work, targetAuthorName string) string {
 }
 
 func findTargetAuthorIds(works []openalex.Work, targetAuthorName string) []string {
+	defer reports.LogTiming("findTargetAuthorIds")()
 	targetAuthorIds := make([]string, 0)
 	for _, work := range works {
 		if oaId := findOAAuthorId(work, targetAuthorName); len(oaId) > 0 {
@@ -45,9 +49,11 @@ func findTargetAuthorIds(works []openalex.Work, targetAuthorName string) []strin
 }
 
 func streamGScholarWorks(oa openalex.KnowledgeBase, authorName, gScholarAuthorId string, startDate, endDate time.Time) chan openalex.WorkBatch {
+	defer reports.LogTiming("streamGScholarWorks")()
 	outputCh := make(chan openalex.WorkBatch, 10)
 
 	go func() {
+		defer reports.LogTiming("streamGScholarWorks goroutine")()
 		defer close(outputCh)
 
 		workTitleIterator := gscholar.NewAuthorPaperIterator(gScholarAuthorId)
@@ -88,9 +94,11 @@ And so on. Here comes the snippet:
 
 //lint:ignore U1000 streamUnstructuredWorks
 func streamUnstructuredWorks(oa openalex.KnowledgeBase, authorName, text string, startDate, endDate time.Time) chan openalex.WorkBatch {
+	defer reports.LogTiming("streamUnstructuredWorks")()
 	outputCh := make(chan openalex.WorkBatch, 10)
 
 	go func() {
+		defer reports.LogTiming("streamUnstructuredWorks goroutine")()
 		defer close(outputCh)
 
 		llm := llms.New()
@@ -131,9 +139,11 @@ func streamUnstructuredWorks(oa openalex.KnowledgeBase, authorName, text string,
 
 //lint:ignore U1000 streamScopusWorks
 func streamScopusWorks(oa openalex.KnowledgeBase, authorName string, titles []string, startDate, endDate time.Time) chan openalex.WorkBatch {
+	defer reports.LogTiming("streamScopusWorks")()
 	outputCh := make(chan openalex.WorkBatch, 10)
 
 	go func() {
+		defer reports.LogTiming("streamScopusWorks goroutine")()
 		defer close(outputCh)
 
 		const batchSize = 20

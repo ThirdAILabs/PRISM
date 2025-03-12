@@ -9,6 +9,7 @@ import (
 
 	"prism/prism/api"
 	"prism/prism/openalex"
+	"prism/prism/reports"
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/triangulation"
 )
@@ -36,6 +37,7 @@ func (flagger *OpenAlexMultipleAffiliationsFlagger) Name() string {
 }
 
 func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+	defer reports.LogTiming("OpenAlexMultipleAffiliationsFlagger.Flag")()
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -65,6 +67,8 @@ func (flagger *OpenAlexFunderIsEOC) Name() string {
 }
 
 func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+	defer reports.LogTiming("OpenAlexFunderIsEOC.Flag")()
+
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -96,6 +100,7 @@ func (flagger *OpenAlexPublisherIsEOC) Name() string {
 }
 
 func (flagger *OpenAlexPublisherIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+	defer reports.LogTiming("OpenAlexPublisherIsEOC.Flag")()
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -127,6 +132,7 @@ func (flagger *OpenAlexCoauthorIsEOC) Name() string {
 }
 
 func (flagger *OpenAlexCoauthorIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+	defer reports.LogTiming("OpenAlexCoauthorIsEOC.Flag")()
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -167,6 +173,7 @@ func (flagger *OpenAlexAuthorAffiliationIsEOC) Name() string {
 }
 
 func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+	defer reports.LogTiming("OpenAlexAuthorAffiliationIsEOC.Flag")()
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -206,6 +213,7 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Name() string {
 }
 
 func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+	defer reports.LogTiming("OpenAlexCoauthorAffiliationIsEOC.Flag")()
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -253,6 +261,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Name() string {
 }
 
 func (flagger *OpenAlexAcknowledgementIsEOC) getAuthorNames(authorIds []string) ([]string, error) {
+	defer reports.LogTiming("getAuthorNames")()
 	authorNames := make([]string, 0, len(authorIds))
 
 	for _, authorId := range authorIds {
@@ -280,6 +289,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) getAuthorNames(authorIds []string) 
 }
 
 func (flagger *OpenAlexAcknowledgementIsEOC) containsSussyBakas(text string) bool {
+	defer reports.LogTiming("containsSussyBakas")()
 	text = fmt.Sprintf(" %s ", strings.ToLower(strings.TrimSpace(text)))
 
 	for _, sussyBaka := range flagger.sussyBakas {
@@ -293,6 +303,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) containsSussyBakas(text string) boo
 var punctCleaningRe = regexp.MustCompile(`[.,()!?:"']`)
 
 func (flagger *OpenAlexAcknowledgementIsEOC) checkForSussyBaka(ack Acknowledgement) bool {
+	defer reports.LogTiming("checkForSussyBaka")()
 	slices.SortFunc(ack.MiscEntities, func(a, b Entity) int {
 		if a.StartPosition < b.StartPosition {
 			return -1
@@ -323,6 +334,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForSussyBaka(ack Acknowledgeme
 func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 	logger *slog.Logger, acknowledgements []Acknowledgement, allAuthorNames []string,
 ) (bool, map[string]SourceToAliases, string, error) {
+	defer reports.LogTiming("checkAcknowledgementEntities")()
 	message := ""
 	flagged := false
 
@@ -380,6 +392,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
 	acknowledgements []Acknowledgement, allAuthorNames []string,
 ) (map[string]map[string]bool, error) {
+	defer reports.LogTiming("checkForGrantRecipient")()
 	triangulationResults := make(map[string]map[string]bool)
 
 	for _, ack := range acknowledgements {
@@ -419,6 +432,7 @@ var deniedEntities = []string{
 }
 
 func containsSource(entities []api.AcknowledgementEntity, sourcesOfInterest []string) bool {
+	defer reports.LogTiming("containsSource")()
 	for _, entity := range entities {
 		for _, source := range entity.Sources {
 			if slices.Contains(sourcesOfInterest, source) {
@@ -430,6 +444,7 @@ func containsSource(entities []api.AcknowledgementEntity, sourcesOfInterest []st
 }
 
 func createAcknowledgementFlag(work openalex.Work, message string, entities []api.AcknowledgementEntity, rawAcks []string, triangulationResults map[string]map[string]bool) api.Flag {
+	defer reports.LogTiming("createAcknowledgementFlag")()
 	if strings.Contains(message, "talent") || strings.Contains(message, "Talent") || containsSource(entities, talentPrograms) {
 		return &api.TalentContractFlag{
 			Message:               message,
@@ -461,10 +476,12 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 }
 
 func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+	// Log overall function timing.
+	defer reports.LogTiming("OpenAlexAcknowledgementIsEOC.Flag")()
+
+	initTimer := reports.LogTiming("Initialization")
 	flags := make([]api.Flag, 0)
-
 	remaining := make([]openalex.Work, 0)
-
 	workIdToWork := make(map[string]openalex.Work)
 
 	for _, work := range works {
@@ -473,28 +490,31 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 			logger.Warn("unable to parse work id", "work_name", work.DisplayName, "work_id", work.WorkId)
 			continue
 		}
-
 		workIdToWork[workId] = work
 
 		if work.DownloadUrl == "" {
-			// This is fairly common so we just ignore it and continue
 			continue
 		}
-
 		remaining = append(remaining, work)
 	}
+	initTimer()
 
+	authorNamesTimer := reports.LogTiming("Get Author Names")
 	allAuthorNames, err := flagger.getAuthorNames(targetAuthorIds)
+	authorNamesTimer()
 	if err != nil {
 		logger.Error("error getting author names", "target_authors", targetAuthorIds, "error", err)
 		return nil, fmt.Errorf("error getting author infos: %w", err)
 	}
 
+	ackExtractTimer := reports.LogTiming("Extract Acknowledgements")
 	acknowledgementsStream := flagger.extractor.GetAcknowledgements(logger, remaining)
+	ackExtractTimer()
 
+	acknowledgementsStreamTimer := reports.LogTiming("acknowledgementsStream")
 	for acks := range acknowledgementsStream {
 		if acks.Error != nil {
-			logger.Warn("error retreiving acknowledgments for work", "error", acks.Error)
+			logger.Warn("error retrieving acknowledgments for work", "error", acks.Error)
 			continue
 		}
 
@@ -503,21 +523,23 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 			continue
 		}
 
+		checkAckTimer := reports.LogTiming("Check Acknowledgements")
 		flagged, flaggedEntities, message, err := flagger.checkAcknowledgementEntities(
 			workLogger, acks.Result.Acknowledgements, allAuthorNames,
 		)
+		checkAckTimer()
 		if err != nil {
 			workLogger.Error("error checking acknowledgements: skipping work", "error", err)
 			continue
 		}
 
 		var triangulationResults map[string]map[string]bool
-
 		if flagged {
-			var err error
+			triangulationTimer := reports.LogTiming("Check Grant Recipient")
 			triangulationResults, err = flagger.checkForGrantRecipient(
 				acks.Result.Acknowledgements, allAuthorNames,
 			)
+			triangulationTimer()
 			if err != nil {
 				workLogger.Error("error checking for grant recipient", "error", err)
 				continue
@@ -525,11 +547,11 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 		}
 
 		if flagged {
+			flagProcessingTimer := reports.LogTiming("Process Flagged Acknowledgements")
 			ackTexts := make([]string, 0, len(acks.Result.Acknowledgements))
 			for _, ack := range acks.Result.Acknowledgements {
 				ackTexts = append(ackTexts, ack.RawText)
 			}
-
 			entities := make([]api.AcknowledgementEntity, 0, len(flaggedEntities))
 			for entity, sourceToAliases := range flaggedEntities {
 				sources, allAliases := getAllSourcesAndAliases(sourceToAliases)
@@ -539,16 +561,17 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 					Aliases: allAliases,
 				})
 			}
-
 			flags = append(flags, createAcknowledgementFlag(
 				workIdToWork[acks.Result.WorkId],
 				fmt.Sprintf("%s\n%s", message, strings.Join(ackTexts, "\n")),
 				entities,
 				ackTexts,
-				triangulationResults))
+				triangulationResults,
+			))
+			flagProcessingTimer()
 		}
 	}
-
+	acknowledgementsStreamTimer()
 	return flags, nil
 }
 

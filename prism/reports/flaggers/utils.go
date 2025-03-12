@@ -2,6 +2,7 @@ package flaggers
 
 import (
 	"prism/prism/openalex"
+	"prism/prism/reports"
 	"strings"
 	"sync"
 )
@@ -45,6 +46,8 @@ func RunInPool[In any, Out any](worker func(In) (Out, error), queue chan In, com
 }
 
 func parseOpenAlexId(work openalex.Work) string {
+	defer reports.LogTiming("parseOpenAlexId")()
+
 	idx := strings.LastIndex(work.WorkId, "/")
 	if idx < 0 {
 		return ""

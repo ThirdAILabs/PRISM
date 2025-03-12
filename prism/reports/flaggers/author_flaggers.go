@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"prism/prism/api"
 	"prism/prism/openalex"
+	"prism/prism/reports"
 	"prism/prism/search"
 	"regexp"
 	"slices"
@@ -47,6 +48,7 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Name() string {
 }
 
 func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName string) ([]api.Flag, error) {
+	defer reports.LogTiming("AuthorIsFacultyAtEOCFlagger.Flag")()
 	results, err := flagger.universityNDB.Query(authorName, 5, nil)
 	if err != nil {
 		logger.Error("error querying ndb", "error", err)
@@ -97,6 +99,7 @@ type authorCnt struct {
 }
 
 func topCoauthors(works []openalex.Work) []authorCnt {
+	defer reports.LogTiming("topCoauthors")()
 	authors := make(map[string]int)
 	for _, work := range works {
 		for _, author := range work.Authors {
@@ -123,6 +126,7 @@ func topCoauthors(works []openalex.Work) []authorCnt {
 }
 
 func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(authorName string, works []openalex.Work) ([]api.Flag, error) {
+	defer reports.LogTiming("findFirstSecondHopEntities")()
 	flags := make([]api.Flag, 0)
 
 	seen := make(map[string]bool)
@@ -189,6 +193,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 }
 
 func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logger *slog.Logger, authorName string) ([]api.Flag, error) {
+	defer reports.LogTiming("findSecondThirdHopEntities")()
 	seen := make(map[string]bool)
 
 	primaryMatcher, validName := newNameMatcher(authorName)
@@ -293,6 +298,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 }
 
 func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(logger *slog.Logger, authorName string, works []openalex.Work) ([]api.Flag, error) {
+	defer reports.LogTiming("AuthorIsAssociatedWithEOCFlagger.Flag")()
 	firstSecondLevelFlags, err := flagger.findFirstSecondHopEntities(authorName, works)
 	if err != nil {
 		logger.Error("error checking first/second level flags", "error", err)

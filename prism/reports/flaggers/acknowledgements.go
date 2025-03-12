@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"prism/prism/openalex"
+	"prism/prism/reports"
 	"regexp"
 	"strings"
 	"time"
@@ -83,13 +84,16 @@ type Acknowledgements struct {
 }
 
 func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan CompletedTask[Acknowledgements] {
-	outputCh := make(chan CompletedTask[Acknowledgements], len(works))
+	defer reports.LogTiming("GetAcknowledgements")()
 
+	outputCh := make(chan CompletedTask[Acknowledgements], len(works))
 	queue := make(chan openalex.Work, len(works))
 
 	for _, work := range works {
+		workTimer := reports.LogTiming("ProcessWork")
 		workId := parseOpenAlexId(work)
 		if workId == "" {
+			workTimer() // end timer for this work processing
 			continue
 		}
 
@@ -98,33 +102,45 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 		} else {
 			queue <- work
 		}
-
+		workTimer() // end timer for processing this work
 	}
 	close(queue)
 
 	worker := func(next openalex.Work) (Acknowledgements, error) {
 		workId := parseOpenAlexId(next)
 
+		extractTimer := reports.LogTiming("ExtractAcks")
 		acks, err := extractor.extractAcknowledgments(workId, next)
+		extractTimer()
 		if err != nil {
 			return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments for work %s: %w", next.WorkId, err)
 		}
 
+		// Time the cache update.
+		cacheTimer := reports.LogTiming("CacheUpdate")
 		extractor.cache.Update(workId, acks)
+		cacheTimer()
 
 		return acks, nil
 	}
 
+	// Determine number of worker routines.
+	runInPoolTimer := reports.LogTiming("RunInPool")
 	nWorkers := min(len(queue), extractor.maxThreads)
-
 	RunInPool(worker, queue, outputCh, nWorkers)
+	runInPoolTimer()
 
 	return outputCh
 }
 
 func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId string, work openalex.Work) (Acknowledgements, error) {
+	defer reports.LogTiming("GrobidAcknowledgementsExtractor.extractAcknowledgments")()
+
 	destPath := filepath.Join(extractor.downloadDir, uuid.NewString()+".pdf")
+
+	downloadTimer := reports.LogTiming("Download PDF")
 	pdf, err := extractor.downloadPdf(work.DownloadUrl, destPath)
+	downloadTimer()
 	if err != nil {
 		return Acknowledgements{}, err
 	}
@@ -139,16 +155,18 @@ func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId 
 		}
 	}()
 
+	acquireTimer := reports.LogTiming("Acquire Semaphore")
 	if err := extractor.grobidSem.Acquire(context.Background(), 1); err != nil {
-		// I don't think this can fail if we use context.Background, so this error check
-		// is just in case.
-		slog.Error("error aquiring semaphore for grobid access", "error", err)
+		acquireTimer()
+		slog.Error("error acquiring semaphore for grobid access", "error", err)
 		return Acknowledgements{}, fmt.Errorf("error acquiring semaphore for grobid access: %w", err)
 	}
-
+	acquireTimer()
 	defer extractor.grobidSem.Release(1)
 
+	processTimer := reports.LogTiming("Process PDF with Grobid")
 	acks, err := extractor.processPdfWithGrobid(pdf)
+	processTimer()
 	if err != nil {
 		return Acknowledgements{}, err
 	}
@@ -157,53 +175,75 @@ func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId 
 }
 
 func downloadWithPlaywright(url, destPath string) (io.ReadCloser, error) {
+	defer reports.LogTiming("downloadWithPlaywright")()
+
+	startPlaywright := reports.LogTiming("Start Playwright")
 	pw, err := playwright.Run(&playwright.RunOptions{Browsers: []string{"firefox"}})
+	startPlaywright()
 	if err != nil {
 		return nil, fmt.Errorf("error starting playwright: %w", err)
 	}
-	// Skipping error check since there's nothing we can do if this fails
+	// Skipping error check on Stop.
 	defer pw.Stop() //nolint:errcheck
 
+	// Launch the browser.
+	launchBrowser := reports.LogTiming("Launch Browser")
 	browser, err := pw.Firefox.Launch(playwright.BrowserTypeLaunchOptions{Headless: playwright.Bool(true)})
+	launchBrowser()
 	if err != nil {
 		return nil, fmt.Errorf("error launching browser: %w", err)
 	}
 	defer browser.Close()
 
+	// Create a new browser context.
+	createContext := reports.LogTiming("Create Browser Context")
 	context, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		AcceptDownloads:   playwright.Bool(true),
 		IgnoreHttpsErrors: playwright.Bool(true),
 	})
+	createContext()
 	if err != nil {
 		return nil, fmt.Errorf("error creating browser context: %w", err)
 	}
 	defer context.Close()
 
-	// When pdfs fail to download it is often just because they reach the timeout,
-	// which slows down processing. Decreasing the timeout will hopefully speed this up.
+	// Set the default timeout.
+	timeoutTimer := reports.LogTiming("Set Default Timeout")
 	context.SetDefaultTimeout(15000)
+	timeoutTimer()
 
+	// Open a new page.
+	newPage := reports.LogTiming("New Page")
 	page, err := context.NewPage()
+	newPage()
 	if err != nil {
 		return nil, fmt.Errorf("error opening browser page: %w", err)
 	}
-	// context.Close() closes pages in the context
 
+	// Expect the download.
+	expectDownload := reports.LogTiming("Expect Download")
 	download, err := page.ExpectDownload(func() error {
-		// Page.Goto returns an error saying that the download is starting, so we ignore the error
+		// The call to Goto starts the download; ignore its error.
 		page.Goto(url, playwright.PageGotoOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}) //nolint:errcheck
-
 		return nil
 	})
+	expectDownload()
 	if err != nil {
 		return nil, fmt.Errorf("download error: %w", err)
 	}
 
+	// Save the downloaded file.
+	saveDownload := reports.LogTiming("Save Download")
 	if err := download.SaveAs(destPath); err != nil {
+		saveDownload()
 		return nil, fmt.Errorf("error saving downloaded paper: %w", err)
 	}
+	saveDownload()
 
+	// Open the file.
+	openFile := reports.LogTiming("Open Downloaded File")
 	file, err := os.Open(destPath)
+	openFile()
 	if err != nil {
 		return nil, fmt.Errorf("error opening downloaded paper: %w", err)
 	}
@@ -223,38 +263,63 @@ var headers = map[string]string{
 }
 
 func (extractor *GrobidAcknowledgementsExtractor) downloadWithHttp(url string) (io.Reader, error) {
+	// Overall timing for the function.
+	defer reports.LogTiming("downloadWithHttp")()
+
+	// Send HTTP request.
+	httpRequest := reports.LogTiming("HTTP Request")
 	res, err := extractor.downloadClient.R().SetHeaders(headers).Get(url)
+	httpRequest()
 	if err != nil {
 		return nil, fmt.Errorf("download error: %w", err)
 	}
 
+	// Check the HTTP status.
+	statusCheck := reports.LogTiming("HTTP Status Check")
 	if !res.IsSuccess() {
-		return nil, fmt.Errorf("download returned error, recieved status_code=%d", res.StatusCode())
+		statusCheck()
+		return nil, fmt.Errorf("download returned error, received status_code=%d", res.StatusCode())
 	}
+	statusCheck()
 
+	// Read the response body.
+	readBody := reports.LogTiming("Read Response Body")
 	data := res.Body()
+	readBody()
 
-	// Sometimes the above download can succeed, but instead of returning a pdf, it
-	// will return the html for the page containing the pdf. This leads to an error
-	// when we make a call to grobid. This is a simple trick to check if it is a valid pdf.
-	// https://stackoverflow.com/questions/6186980/determine-if-a-byte-is-a-pdf-file
+	// Validate that the data is a PDF.
+	validatePDF := reports.LogTiming("Validate PDF")
 	if !bytes.HasPrefix(data, []byte("%PDF")) {
+		validatePDF()
 		return nil, fmt.Errorf("download did not return valid pdf")
 	}
+	validatePDF()
 
-	return bytes.NewReader(data), nil
+	// Create a reader from the data.
+	createReader := reports.LogTiming("Create Reader")
+	reader := bytes.NewReader(data)
+	createReader()
+
+	return reader, nil
 }
 
 func (extractor *GrobidAcknowledgementsExtractor) downloadPdf(url, destPath string) (io.Reader, error) {
+	// Overall timing for the function.
+	defer reports.LogTiming("downloadPdf")()
+
+	// First attempt: HTTP download.
+	httpAttempt := reports.LogTiming("HTTP Download Attempt")
 	attempt1, err1 := extractor.downloadWithHttp(url)
-	if err1 != nil {
-	} else {
+	httpAttempt()
+	if err1 == nil {
 		return attempt1, nil
 	}
 
+	// Second attempt: Playwright download.
+	playwrightAttempt := reports.LogTiming("Playwright Download Attempt")
 	attempt2, err2 := downloadWithPlaywright(url, destPath)
-	if err2 != nil {
-	} else {
+	playwrightAttempt()
+	if err2 == nil {
 		return attempt2, nil
 	}
 

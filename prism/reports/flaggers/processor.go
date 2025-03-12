@@ -47,8 +47,8 @@ type ReportProcessorOptions struct {
 	MaxGrobidThreads   int
 }
 
-// TODO(Nicholas): How to do cleanup for this, or just let it get cleaned up at the end of the process?
 func NewReportProcessor(manager *reports.ReportManager, opts ReportProcessorOptions) (*ReportProcessor, error) {
+	defer reports.LogTiming("NewReportProcessor")()
 	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(opts.WorkDir, "authors.cache"))
 	if err != nil {
 		return nil, fmt.Errorf("error loading author cache: %w", err)
@@ -94,6 +94,7 @@ func NewReportProcessor(manager *reports.ReportManager, opts ReportProcessorOpti
 }
 
 func (processor *ReportProcessor) getWorkStream(report reports.ReportUpdateTask) (chan openalex.WorkBatch, error) {
+	defer reports.LogTiming("ReportProcessor.getWorkStream")()
 	switch report.Source {
 	case api.OpenAlexSource:
 		return streamOpenAlexWorks(processor.openalex, report.AuthorId, report.StartDate, report.EndDate), nil
@@ -109,6 +110,7 @@ func (processor *ReportProcessor) getWorkStream(report reports.ReportUpdateTask)
 }
 
 func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName string, workStream chan openalex.WorkBatch, flagsCh chan []api.Flag) {
+	defer reports.LogTiming("ReportProcessor.processWorks")()
 	wg := sync.WaitGroup{}
 
 	batch := -1
@@ -123,6 +125,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 			wg.Add(1)
 
 			go func(flagger WorkFlagger, works []openalex.Work, authorIds []string) {
+				defer reports.LogTiming("processWorks goroutine 1")()
 				defer wg.Done()
 
 				logger := logger.With("flagger", flagger.Name(), "batch", batch)
@@ -138,6 +141,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 
 		wg.Add(1)
 		go func(batch int, works []openalex.Work) {
+			defer reports.LogTiming("processWorks goroutine 2")()
 			defer wg.Done()
 
 			flagger := processor.authorAssociatedWithEOC
@@ -159,6 +163,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 
 	wg.Add(1)
 	go func() {
+		defer reports.LogTiming("processWorks goroutine 3")()
 		defer wg.Done()
 
 		flagger := processor.authorFacultyAtEOC
@@ -181,6 +186,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 }
 
 func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdateTask) {
+	defer reports.LogTiming("ProcessAuthorReport")()
 	logger := slog.With("report_id", report.Id)
 
 	logger.Info("starting report processing", "author_id", report.AuthorId, "author_name", report.AuthorName, "source", report.Source)
@@ -230,6 +236,7 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 }
 
 func (processor *ReportProcessor) ProcessNextAuthorReport() bool {
+	defer reports.LogTiming("ReportProcessor")()
 	report, err := processor.manager.GetNextAuthorReport()
 	if err != nil {
 		slog.Error("error checking for next report", "error", err)
@@ -245,6 +252,7 @@ func (processor *ReportProcessor) ProcessNextAuthorReport() bool {
 }
 
 func (processor *ReportProcessor) getUniversityAuthors(report reports.UniversityReportUpdateTask) ([]reports.UniversityAuthorReport, error) {
+	defer reports.LogTiming("getUniversityAuthors")()
 	authors, err := processor.openalex.GetInstitutionAuthors(report.UniversityId, time.Now().AddDate(-4, 0, 0), time.Now())
 	if err != nil {
 		return nil, err
@@ -263,6 +271,7 @@ func (processor *ReportProcessor) getUniversityAuthors(report reports.University
 }
 
 func (processor *ReportProcessor) ProcessNextUniversityReport() bool {
+	defer reports.LogTiming("ProcessNextUniversityReport")()
 	nextReport, err := processor.manager.GetNextUniversityReport()
 	if err != nil {
 		slog.Error("error checking for next report", "error", err)

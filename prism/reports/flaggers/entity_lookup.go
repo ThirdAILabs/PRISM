@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"prism/prism/llms"
+	"prism/prism/reports"
 	"prism/prism/search"
 	"slices"
 	"strings"
@@ -126,6 +127,7 @@ func (store *EntityStore) allAliases() ([]string, error) {
 type SourceToAliases = map[string][]string
 
 func (store *EntityStore) exactLookup(queries []string) (SourceToAliases, error) {
+	defer reports.LogTiming("exactLookup")()
 	sourceToAliases := make(map[string][]string)
 	for _, query := range queries {
 		source, ok := store.aliasToSource[query]
@@ -138,6 +140,7 @@ func (store *EntityStore) exactLookup(queries []string) (SourceToAliases, error)
 }
 
 func (store *EntityStore) ndbLookup(query string) ([]string, error) {
+	defer reports.LogTiming("ndbLookup")()
 	results, err := store.ndb.Query(query, 5, nil)
 	if err != nil {
 		return nil, fmt.Errorf("ndb entity lookup failed: %w", err)
@@ -184,6 +187,7 @@ Answer:
 `
 
 func filterMatchesWithLLM(query string, matches []string) ([]string, error) {
+	defer reports.LogTiming("filterMatchesWithLLM")()
 	llm := llms.New()
 
 	res, err := llm.Generate(fmt.Sprintf(llmValidationPromptTemplate, query, strings.Join(matches, `", "`)), &llms.Options{
@@ -225,6 +229,7 @@ func filterMatchesWorker(task verificationTask) (verificationTask, error) {
 }
 
 func (store *EntityStore) SearchEntities(logger *slog.Logger, queries []string) (map[string]SourceToAliases, error) {
+	defer reports.LogTiming("SearchEntities")()
 	queue := make(chan verificationTask, len(queries))
 	for _, query := range queries {
 		ndbMatches, err := store.ndbLookup(query)
