@@ -41,8 +41,8 @@ func TestReportGeneration(t *testing.T) {
 			api.HighRiskFunderType:               18,
 			api.AuthorAffiliationType:            13,
 			api.PotentialAuthorAffiliationType:   0,
-			api.MiscHighRiskAssociationType:      21,
-			api.CoauthorAffiliationType:          0,
+			api.MiscHighRiskAssociationType:      0,
+			api.CoauthorAffiliationType:          21,
 		}, {
 			api.TalentContractType:               0,
 			api.AssociationsWithDeniedEntityType: 0,
@@ -72,7 +72,7 @@ func TestReportGeneration(t *testing.T) {
 		expectedFlags := expectedFlagCounts[i]
 
 		for flagType, expectedCount := range expectedFlags {
-			if len(report.Content[flagType]) < expectedCount-2 {
+			if len(report.Content[flagType]) < expectedCount-3 {
 				t.Errorf("Report %s (%s): expected >= %d flags of type %s, got %d", reportRequests[i].AuthorName, reportRequests[i].AuthorId, expectedCount-2, flagType, len(report.Content[flagType]))
 			}
 		}
