@@ -16,6 +16,7 @@ import { MdDelete } from 'react-icons/md';
 import { useLocation } from 'react-router-dom';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import { Tooltip } from '@mui/material';
 
 const SidePanel = ({ isOpen, onClose }) => {
   const { userInfo } = useUser();
@@ -90,7 +91,13 @@ const SidePanel = ({ isOpen, onClose }) => {
       },
     });
   };
-  console.log('reports', reports);
+  const maximumAllowedStringLength = 25;
+  const truncateString = (str) => {
+    if (str.length > maximumAllowedStringLength)
+      return str.substring(0, maximumAllowedStringLength) + '...';
+    return str;
+  };
+
   return (
     <>
       <div className={`side-panel ${isOpen ? 'open' : ''}`}>
@@ -183,7 +190,27 @@ const SidePanel = ({ isOpen, onClose }) => {
                         className="report-item"
                         onClick={handleReportClick.bind(null, report)}
                       >
-                        <span className="text-start">{report.AuthorName}</span>
+                        {report?.AuthorName?.length > maximumAllowedStringLength ? <Tooltip
+                          title={report.AuthorName}
+                          placement="right"
+                          arrow
+                          componentsProps={{
+                            tooltip: {
+                              sx: {
+                                bgcolor: 'rgba(60,60,60, 0.87)',
+                                '& .MuiTooltip-arrow': {
+                                  color: 'rgba(60, 60, 60, 0.87)',
+                                },
+                                padding: '8px 12px',
+                                fontSize: '14px',
+                              },
+                            },
+                          }}
+                        >
+                          <span className="text-start">{truncateString(report.AuthorName)}</span>
+                        </Tooltip> :
+                          <span className="text-start">{truncateString(report.AuthorName)}</span>}
+
                         {/* <span><MdDelete style={15} /></span> */}
                         <span className={`status ${report.Status}`}>{status[report.Status]}</span>
                       </div>
@@ -193,7 +220,7 @@ const SidePanel = ({ isOpen, onClose }) => {
             )}
             <div
               className="collapsible-header"
-              // style={{ marginTop: '10px' }}
+            // style={{ marginTop: '10px' }}
             >
               {universityReports?.length ? (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -219,11 +246,32 @@ const SidePanel = ({ isOpen, onClose }) => {
                         className="report-item"
                         onClick={handleUniversityReportClick.bind(null, universityReport)}
                       >
-                        <span className="text-start">{universityReport.UniversityName}</span>
+                        {universityReport?.UniversityName?.length > maximumAllowedStringLength ?
+                          <Tooltip
+                            title={universityReport.UniversityName}
+                            placement="right"
+                            arrow
+                            componentsProps={{
+                              tooltip: {
+                                sx: {
+                                  bgcolor: 'rgba(60,60,60, 0.87)',
+                                  '& .MuiTooltip-arrow': {
+                                    color: 'rgba(60, 60, 60, 0.87)',
+                                  },
+                                  padding: '8px 12px',
+                                  fontSize: '14px',
+                                },
+                              },
+                            }}
+                          >
+                            <span className="text-start">{truncateString(universityReport.UniversityName)}</span>
+                          </Tooltip>
+                          :
+                          <span className="text-start">{truncateString(universityReport.UniversityName)}</span>}
                         {/* <span><MdDelete style={15} /></span> */}
                         <span className={`status ${universityReport.Status}`}>
                           {universityReport.Status === 'complete' &&
-                          universityReport.Content.TotalAuthors !=
+                            universityReport.Content.TotalAuthors !=
                             universityReport.Content.AuthorsReviewed
                             ? status['in-progress']
                             : status[universityReport.Status]}
