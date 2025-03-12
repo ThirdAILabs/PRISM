@@ -46,4 +46,9 @@ COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libgcc_s.so* /usr/lib/x86_64-l
 COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libc.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=build-stage /usr/lib64/ld-linux-x86-64.so* /lib64/
 
-RUN UNIVERSITY_DATA=/app/data/university_webpages.json DOC_DATA=/app/data/docs_and_press_releases.json AUX_DATA=/app/data/auxiliary_webpages.json ./train_worker_ndbs
+RUN WORK_DIR=/app/.worker_work_dir \
+    UNIVERSITY_DATA=/app/data/university_webpages.json \
+    DOC_DATA=/app/data/docs_and_press_releases.json \
+    AUX_DATA=/app/data/auxiliary_webpages.json \
+    PRISM_LICENSE=413E68-DC19F1-C0FFDB-1A7273-4F66CE-V3 \
+    ./train_worker_ndbs

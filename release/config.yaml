@@ -1,5 +1,13 @@
 azure:
   branches:
+    build-ndbs:
+      pull_credentials:
+        password: QuitAb9N3xsQk2YACopenhhGAcXrRdgW8RbI3/CVF7+ACRB5h8qK
+        username: prism-pull-build-ndbs
+      push_credentials:
+        password: FFscb9V3SA95aMgAJTEj0pQJoE7X8NLjrrPf5lsNe3+ACRA1tDaF
+        username: prism-push-build-ndbs
+      version: 0.0.2
     prod:
       pull_credentials:
         password: YA5Rm8350UhKrEQaaqNjbGk2TfjN+ri7Cy0Di9UReB+ACRBRSYKs
