@@ -140,6 +140,13 @@ func ParseFlag(ftype string, data []byte) (Flag, error) {
 		}
 		return &flag, nil
 
+	case NewsArticleType:
+		var flag NewsArticleFlag
+		if err := json.Unmarshal(data, &flag); err != nil {
+			return nil, fmt.Errorf("error parsing flag of type '%s': %w", ftype, err)
+		}
+		return &flag, nil
+
 	default:
 		return nil, fmt.Errorf("invalid flag type '%s'", ftype)
 	}

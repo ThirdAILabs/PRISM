@@ -5,6 +5,7 @@ export const AUTHOR_AFFILIATIONS = 'AuthorAffiliations';
 export const POTENTIAL_AUTHOR_AFFILIATIONS = 'PotentialAuthorAffiliations';
 export const MISC_HIGH_RISK_AFFILIATIONS = 'MiscHighRiskAssociations';
 export const COAUTHOR_AFFILIATIONS = 'CoauthorAffiliations';
+export const NEWS_ARTICLES = 'NewsArticles';
 
 // Deprecated
 export const MULTI_AFFIL = 'oa_multi_affil';
