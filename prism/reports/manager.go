@@ -39,8 +39,18 @@ type ReportManager struct {
 	reportRetryThreshold time.Duration
 }
 
-func NewManager(db *gorm.DB, staleReportThreshold, retryReportThreshold time.Duration) *ReportManager {
-	return &ReportManager{db: db, staleReportThreshold: staleReportThreshold, reportRetryThreshold: retryReportThreshold}
+func NewManager(db *gorm.DB) *ReportManager {
+	return &ReportManager{db: db, staleReportThreshold: StaleReportThreshold, reportRetryThreshold: RetryReportThreshold}
+}
+
+func (r *ReportManager) SetStaleReportThreshold(threshold time.Duration) *ReportManager {
+	r.staleReportThreshold = threshold
+	return r
+}
+
+func (r *ReportManager) SetRetryReportThreshold(threshold time.Duration) *ReportManager {
+	r.reportRetryThreshold = threshold
+	return r
 }
 
 func (r *ReportManager) ListAuthorReports(userId uuid.UUID) ([]api.Report, error) {

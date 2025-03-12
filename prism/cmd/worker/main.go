@@ -111,7 +111,7 @@ func main() {
 
 	db := cmd.OpenDB(config.PostgresUri)
 
-	reportManager := reports.NewManager(db, reports.StaleReportThreshold, reports.RetryReportThreshold)
+	reportManager := reports.NewManager(db)
 
 	processor, err := flaggers.NewReportProcessor(reportManager, opts)
 	if err != nil {
