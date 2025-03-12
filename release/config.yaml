@@ -7,7 +7,7 @@ azure:
       push_credentials:
         password: 6QdVgwrYixrSdd5IGB2YnSp6WIj1jXHpHVRajVTG6n+ACRAPgg9w
         username: prism-push-demo-aux-db
-      version: 0.0.2
+      version: 0.0.3
     prod:
       pull_credentials:
         password: YA5Rm8350UhKrEQaaqNjbGk2TfjN+ri7Cy0Di9UReB+ACRBRSYKs
