@@ -39,6 +39,8 @@ type Config struct {
 
 	MaxDownloadThreads int `env:"MAX_DOWNLOAD_THREADS" envDefault:"40"`
 	MaxGrobidThreads   int `env:"MAX_GROBID_THREADS" envDefault:"10"`
+
+	RetrainNDBs bool `env:"RETRAIN_NDBS" envDefault:"true"`
 }
 
 func (c *Config) logfile() string {
@@ -74,12 +76,19 @@ func main() {
 	}
 
 	ndbDir := filepath.Join(config.WorkDir, "ndbs")
-	if err := os.RemoveAll(ndbDir); err != nil && !errors.Is(err, os.ErrNotExist) {
-		log.Fatalf("error deleting existing ndb dir '%s': %v", ndbDir, err)
-	}
 
-	if err := os.MkdirAll(ndbDir, 0777); err != nil {
-		log.Fatalf("error creating work dir: %v", err)
+	var universityNDB search.NeuralDB
+	var docNDB search.NeuralDB
+	var auxNDB search.NeuralDB
+
+	if config.RetrainNDBs {
+		if err := os.RemoveAll(ndbDir); err != nil && !errors.Is(err, os.ErrNotExist) {
+			log.Fatalf("error deleting existing ndb dir '%s': %v", ndbDir, err)
+		}
+
+		if err := os.MkdirAll(ndbDir, 0777); err != nil {
+			log.Fatalf("error creating work dir: %v", err)
+		}
 	}
 
 	entityStore, err := flaggers.NewEntityStore(filepath.Join(ndbDir, "entity_lookup.ndb"), eoc.LoadSourceToAlias())
