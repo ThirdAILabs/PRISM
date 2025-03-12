@@ -466,7 +466,8 @@ const ItemDetails = () => {
         <p>
           {get_paper_url(flag)} is funded by the following entities of concern:
           <ul className="bulleted-list">
-            {Array.isArray(flag.Funders) && flag.Funders.length > 0 ? (
+            {Array.isArray(flag.Funders) &&
+              flag.Funders.length > 0 &&
               flag.Funders.map((item, index2) => {
                 const key = `${index} ${index2}`;
                 return (
@@ -474,10 +475,7 @@ const ItemDetails = () => {
                     <a>{item}</a>
                   </li>
                 );
-              })
-            ) : (
-              <li>No funders found</li>
-            )}
+              })}
           </ul>
           {Array.isArray(flag.RawAcknowledements) && flag.RawAcknowledements.length > 0 && (
             <>
