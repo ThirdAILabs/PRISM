@@ -35,7 +35,8 @@ func newNameMatcher(name string) (nameMatcher, bool) {
 
 	maxChars := max(len(name)-(len(firstname)+len(lastname)), 10)
 
-	re := regexp.MustCompile(fmt.Sprintf(`(\b%s[\w\s\.\-\,]{0,%d}%s\b)|(\b%s[\w\s\.\-\,]{0,%d}%s\b)`, firstname, maxChars, lastname, lastname, maxChars, firstname))
+	namepattern := strings.Join(fields, `\s+`)
+	re := regexp.MustCompile(fmt.Sprintf(`(\b%s[\w\s\.\-\,]{0,%d}%s\b)|(\b%s[\w\s\.\-\,]{0,%d}%s\b)|\b%s\b`, firstname, maxChars, lastname, lastname, maxChars, firstname, namepattern))
 
 	return nameMatcher{re: re}, true
 }
@@ -44,8 +45,198 @@ func (n *nameMatcher) matches(candidate string) bool {
 	return n.re.MatchString(strings.ToLower(candidate))
 }
 
-func (n *nameMatcher) findMatches(candidate string) []string {
-	return n.re.FindAllString(strings.ToLower(candidate), -1)
+type MatchResult struct {
+	Match   string
+	Context string
+}
+
+func (n *nameMatcher) findMatches(candidate string) []MatchResult {
+	lowercaseCandidate := strings.ToLower(candidate)
+	matchIndices := n.re.FindAllStringIndex(lowercaseCandidate, -1)
+
+	results := make([]MatchResult, 0, len(matchIndices))
+
+	// Get positions of all words
+	wordBounds := regexp.MustCompile(`\S+`).FindAllStringIndex(candidate, -1)
+
+	for _, indices := range matchIndices {
+		start, end := indices[0], indices[1]
+		match := candidate[start:end]
+
+		matchStartWord, matchEndWord := -1, -1
+
+		for i, bounds := range wordBounds {
+			wordStart, wordEnd := bounds[0], bounds[1]
+
+			if matchStartWord == -1 && start >= wordStart && start < wordEnd {
+				matchStartWord = i
+			}
+
+			if end > wordStart && end <= wordEnd {
+				matchEndWord = i
+				break
+			}
+
+			// Match ends exactly at a space or punctuation after a word
+			if end == wordEnd {
+				matchEndWord = i
+				break
+			}
+		}
+
+		if matchStartWord == -1 {
+			matchStartWord = 0
+		}
+		if matchEndWord == -1 {
+			matchEndWord = len(wordBounds) - 1
+		}
+
+		contextStartWord := max(0, matchStartWord-2)
+		contextEndWord := min(len(wordBounds)-1, matchEndWord+2)
+
+		// Reconstruct context safely
+		context := candidate[wordBounds[contextStartWord][0]:wordBounds[contextEndWord][1]]
+
+		results = append(results, MatchResult{
+			Match:   match,
+			Context: context,
+		})
+	}
+
+	return results
+}
+
+const llmMatchValidationPromptTemplate = `Return a python list of True or False indicating whether the entity matches against any of the entities in each group.
+
+Syntax:
+Inputs:
+- Name (String)
+- Possible matches grouped by page (List of List of Dict with 'match' and 'context' keys)
+
+Output : [True, False, ...]
+
+Example :
+Input : 
+Name : Marie C. Smith
+Possible matches : [
+  [
+    {"match": "Marie Smith", "context": "Professor Marie Smith from Harvard"},
+    {"match": "Marie C Smith", "context": "Professor Marie C Smith teaches biology"}
+  ],
+  [
+    {"match": "Smith, Marge", "context": "Dr. Smith, Marge at Stanford"},
+    {"match": "Smith, M", "context": "Smith, M is the lead author"}
+  ]
+]
+Output : [True, False]
+
+Explanation :
+- The first group contains "Marie Smith" and "Marie C Smith" which are valid matches for "Marie C. Smith"
+- The second group contains "Smith, Marge" and "Smith, M" which are not valid matches for "Marie C. Smith"
+
+Example : 
+Input : 
+Name : J. Phillip
+Possible matches : [
+  [
+    {"match": "J Phillip", "context": "Professor Donovan J Phillip"}
+  ],
+  [
+    {"match": "J. Phillip", "context": "J. Phillip Smith"},
+    {"match": "J Phillip", "context": "research by J Phillip in 2020"}
+  ]
+]
+Output : [False, True]
+
+Explanation :
+- First group: "J Phillip" in "Professor Donovan J Phillip" is not a match because Donovan is part of the name
+- Second group: Contains "J. Phillip Smith" which is a valid match for "J. Phillip"
+
+Return True for a group if ANY match in that group correctly refers to the input name. Use the context to determine if a match is legitimate. Answer with a python list of True or False, and nothing else.
+
+Input : 
+- Name: %s
+- Possible matches: %s
+
+Output:
+`
+
+func runLLMVerification(name string, texts []string) ([]bool, error) {
+	// returns a list of boolean values indicating whether page i contains a match for the name
+
+	matcher, validName := newNameMatcher(name)
+	if !validName {
+		return nil, fmt.Errorf("author name is empty")
+	}
+
+	possibleAliases := make([][]MatchResult, len(texts))
+	for i, text := range texts {
+		possibleAliases[i] = matcher.findMatches(text)
+	}
+
+	llm := llms.New()
+
+	// Convert the nested slice into a properly formatted string representation
+	aliasesJSON, err := json.Marshal(possibleAliases)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling aliases: %w", err)
+	}
+
+	prompt := fmt.Sprintf(llmMatchValidationPromptTemplate, name, string(aliasesJSON))
+	slog.Info("prompt", "prompt", prompt)
+	res, err := llm.Generate(prompt, &llms.Options{
+		Model:        llms.GPT4o,
+		ZeroTemp:     true,
+		SystemPrompt: "You are a helpful python assistant who responds in python lists only.",
+	})
+	if err != nil {
+		slog.Error("error running llm", "error", err)
+		return nil, fmt.Errorf("error running llm: %w", err)
+	}
+
+	// Clean the response to handle potential formatting issues
+	res = strings.TrimSpace(res)
+	res = strings.Trim(res, "[]")
+	res = strings.ReplaceAll(res, " ", "")
+	flags := strings.Split(res, ",")
+
+	if len(flags) != len(possibleAliases) {
+		slog.Error("llm returned incorrect number of flags", "expected", len(possibleAliases), "got", len(flags))
+		slog.Error("llm response", "response", res)
+		return nil, fmt.Errorf("llm returned incorrect number of flags: %d", len(flags))
+	}
+
+	results := make([]bool, len(flags))
+	for i, flag := range flags {
+		results[i] = strings.TrimSpace(flag) == "True"
+		slog.Info("llm result", "name", name, "alias", possibleAliases[i], "result", results[i])
+	}
+
+	return results, nil
+}
+
+func filterFlagsWithLLM(flags []api.Flag, texts []string, name string) ([]api.Flag, error) {
+	if len(texts) == 0 {
+		return flags, nil
+	}
+
+	if len(flags) != len(texts) {
+		return nil, fmt.Errorf("flags and texts have different lengths")
+	}
+
+	llmResults, err := runLLMVerification(name, texts)
+	if err != nil {
+		return nil, fmt.Errorf("error running llm: %w", err)
+	}
+
+	filteredFlags := make([]api.Flag, 0)
+	for i, flag := range flags {
+		if llmResults[i] {
+			filteredFlags = append(filteredFlags, flag)
+		}
+	}
+
+	return filteredFlags, nil
 }
 
 func (flagger *AuthorIsFacultyAtEOCFlagger) Name() string {
@@ -65,7 +256,8 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 		return nil, nil
 	}
 
-	flags := make([]api.Flag, 0)
+	temporaryFlags := make([]api.Flag, 0)
+	texts := make([]string, 0)
 
 	for _, result := range results {
 		if matcher.matches(result.Text) {
@@ -76,8 +268,9 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 			}
 
 			url, _ := result.Metadata["url"].(string)
+			texts = append(texts, result.Text)
 
-			flags = append(flags, &api.PotentialAuthorAffiliationFlag{
+			temporaryFlags = append(temporaryFlags, &api.PotentialAuthorAffiliationFlag{
 				Message:       fmt.Sprintf("The author %s may be associated with this concerning entity: %s\n", authorName, university),
 				University:    university,
 				UniversityUrl: url,
@@ -85,7 +278,16 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 		}
 	}
 
-	return flags, nil
+	if len(temporaryFlags) == 0 {
+		return nil, nil
+	}
+
+	// filteredFlags, err := filterFlagsWithLLM(temporaryFlags, texts, authorName)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("error filtering flags: %w", err)
+	// }
+
+	return temporaryFlags, nil
 }
 
 type AuthorIsAssociatedWithEOCFlagger struct {
@@ -128,77 +330,6 @@ func topCoauthors(works []openalex.Work) []authorCnt {
 	return topAuthors[:min(len(topAuthors), 4)]
 }
 
-const llmMatchValidationPromptTemplate = `Return a python list of True or False indicating whether the entity matches against any of the entities in the list.
-
-Syntax:
-Inputs:
-- Name (String)
-- Possible aliases (List of List of Strings)
-
-Output : [True, False, ...]
-
-Example :
-Input : 
-Name : Marie C. Smith
-Possible aliases : [["Marie Smith", "Marie C. Smith"], ["Smith, Marge", "M. Phillipe Smith", "Marie Smiths"], ["Smith, Marie", "M.W. Smith"]]
-Output : [True, False, True]
-
-Explanation :
-- Marie C. Smith matches against ["Marie Smith", "Marie C. Smith"]
-- Marie C. Smith does not match against ["Smith, Marge", "M. Phillipe Smith", "Marie Smiths"]
-- Marie C. Smith matches against ["Smith, Marie"] but not against ["M.W. Smith"] 
-
-Use general knowledge to determine if the entity matches against any of the entities in the list. Answer with a python list of True or False, and nothing else. Do not provide any explanation or extra words/characters. Ensure that the python syntax is absolutely correct and runnable. Ensure that the length of the output list is the same as the length of the possible aliases list.
-
-Input : 
-- Name: %s
-- Possible aliases: ["%s"]
-
-Output:
-`
-
-func runLLMVerification(name string, possibleAliases [][]string) ([]bool, error) {
-	llm := llms.New()
-
-	// Convert the nested slice into a properly formatted string representation
-	aliasesJSON, err := json.Marshal(possibleAliases)
-	if err != nil {
-		return nil, fmt.Errorf("error marshalling aliases: %w", err)
-	}
-
-	prompt := fmt.Sprintf(llmMatchValidationPromptTemplate, name, string(aliasesJSON))
-	slog.Info("prompt", "prompt", prompt)
-	res, err := llm.Generate(prompt, &llms.Options{
-		Model:        llms.GPT4oMini,
-		ZeroTemp:     true,
-		SystemPrompt: "You are a helpful python assistant who responds in python lists only.",
-	})
-	if err != nil {
-		slog.Error("error running llm", "error", err)
-		return nil, fmt.Errorf("error running llm: %w", err)
-	}
-
-	// Clean the response to handle potential formatting issues
-	res = strings.TrimSpace(res)
-	res = strings.Trim(res, "[]")
-	res = strings.ReplaceAll(res, " ", "")
-	flags := strings.Split(res, ",")
-
-	if len(flags) != len(possibleAliases) {
-		slog.Error("llm returned incorrect number of flags", "expected", len(possibleAliases), "got", len(flags))
-		slog.Error("llm response", "response", res)
-		slog.Error("possible aliases", "aliases", possibleAliases)
-		return nil, fmt.Errorf("llm returned incorrect number of flags: %d", len(flags))
-	}
-
-	results := make([]bool, len(flags))
-	for i, flag := range flags {
-		results[i] = strings.TrimSpace(flag) == "True"
-	}
-
-	return results, nil
-}
-
 func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(authorName string, works []openalex.Work) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
@@ -226,14 +357,13 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 		}
 
 		temporaryFlags := make([]api.Flag, 0)
-		matches := make([][]string, 0)
-
+		texts := make([]string, 0)
 		for _, result := range results {
 			if !matcher.matches(result.Text) {
 				continue
 			}
 
-			matches = append(matches, matcher.findMatches(result.Text))
+			texts = append(texts, result.Text)
 
 			url, _ := result.Metadata["url"].(string)
 			if seen[url] {
@@ -267,24 +397,13 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 				})
 			}
 		}
-		// if there are no matches, we don't need to run the LLM
-		// if len(matches) == 0 {
-		// 	continue
-		// }
-		// llmResults, err := runLLMVerification(author.author, matches)
-		// if err != nil {
-		// 	return nil, fmt.Errorf("error running llm: %w", err)
-		// }
 
-		// for index, llmResult := range llmResults {
-		// 	if llmResult {
-		// 		flags = append(flags, temporaryFlags[index])
-		// 		slog.Info("flag", "author", author.author, "matches", matches[index], "llmResult", llmResult)
-		// 	}
-		// }
+		filteredFlags, err := filterFlagsWithLLM(temporaryFlags, texts, author.author)
+		if err != nil {
+			return nil, fmt.Errorf("error filtering flags: %w", err)
+		}
 
-		flags = append(flags, temporaryFlags...)
-
+		flags = append(flags, filteredFlags...)
 	}
 
 	return flags, nil
@@ -301,7 +420,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 
 	queryToConn := make(map[string][]api.Connection)
 
-	results, err := flagger.auxNDB.Query(authorName, 5, nil)
+	results, err := flagger.auxNDB.Query(authorName, 10, nil)
 	if err != nil {
 		logger.Error("error querying aux ndb", "error", err)
 		return nil, fmt.Errorf("error querying ndb: %w", err)
@@ -311,9 +430,6 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 		if !primaryMatcher.matches(result.Text) {
 			continue
 		}
-
-		matches := primaryMatcher.findMatches(result.Text)
-		slog.Info("matches inside third hop", "matches", matches)
 
 		url, _ := result.Metadata["url"].(string)
 		if seen[url] {
@@ -340,8 +456,18 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 			return nil, fmt.Errorf("error querying ndb: %w", err)
 		}
 
+		secondaryMatcher, validName := newNameMatcher(query)
+		if !validName {
+			continue
+		}
+
 		for _, result := range results {
 			if !strings.Contains(result.Text, query) {
+				continue
+			}
+
+			// this is the second level to remove false positives
+			if !secondaryMatcher.matches(result.Text) {
 				continue
 			}
 
@@ -374,17 +500,37 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 			return nil, fmt.Errorf("error querying ndb: %w", err)
 		}
 
+		finalMatcher, validName := newNameMatcher(query)
+		if !validName {
+			continue
+		}
+
+		texts := make([]string, 0)
+		temporaryFlags := make([]api.Flag, 0)
+
 		for _, result := range results {
+			// searching for exact match
+			// this increases the false negatives for the names
 			if !strings.Contains(result.Text, query) {
 				continue
 			}
+
+			// if match is found, assert that it matches the query
+			// this might increase the false positives for the company names
+			// but assuming that company name occurs exactly in the text, its effect on
+			// false positives is minimal
+			if !finalMatcher.matches(result.Text) {
+				continue
+			}
+
+			texts = append(texts, result.Text)
 
 			title, _ := result.Metadata["title"].(string)
 			url, _ := result.Metadata["url"].(string)
 			entities, _ := result.Metadata["entities"].(string)
 
 			slog.Info("third level match", "query", query, "title", title, "url", url, "entities", entities)
-			flags = append(flags, &api.MiscHighRiskAssociationFlag{
+			temporaryFlags = append(temporaryFlags, &api.MiscHighRiskAssociationFlag{
 				Message:         "The author may be associated be an entity who/which may be mentioned in a press release.\n",
 				DocTitle:        title,
 				DocUrl:          url,
@@ -393,6 +539,17 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 				Connections:     conns,
 			})
 		}
+
+		filteredFlags, err := filterFlagsWithLLM(temporaryFlags, texts, query)
+		if err != nil {
+			return nil, fmt.Errorf("error filtering flags: %w", err)
+		}
+
+		if len(filteredFlags) != len(temporaryFlags) {
+			slog.Info("filtered flags have different lengths", "temp", temporaryFlags, "filtered", filteredFlags)
+		}
+
+		flags = append(flags, filteredFlags...)
 	}
 
 	return flags, nil
