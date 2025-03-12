@@ -4,7 +4,7 @@ import (
 	"log"
 	"path/filepath"
 	"prism/prism/cmd"
-	"prism/prism/train_ndb"
+	"prism/prism/reports/flaggers"
 
 	"github.com/caarlos0/env/v11"
 )
@@ -26,6 +26,6 @@ func main() {
 	}
 
 	ndbDir := filepath.Join(config.WorkDir, "ndbs")
-	train_ndb.RetrainWorkerNDBs(ndbDir, config.UniversityData, config.DocData, config.AuxData)
+	flaggers.RetrainWorkerNDBs(ndbDir, config.UniversityData, config.DocData, config.AuxData)
 
 }

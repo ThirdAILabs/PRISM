@@ -12,7 +12,6 @@ import (
 	"prism/prism/reports/flaggers"
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/search"
-	"prism/prism/train_ndb"
 	"prism/prism/triangulation"
 	"time"
 
@@ -82,7 +81,7 @@ func main() {
 	var auxNDB search.NeuralDB
 
 	if config.RetrainNDBs {
-		universityNDB, docNDB, auxNDB = train_ndb.RetrainWorkerNDBs(ndbDir, config.UniversityData, config.DocData, config.AuxData)
+		universityNDB, docNDB, auxNDB = flaggers.RetrainWorkerNDBs(ndbDir, config.UniversityData, config.DocData, config.AuxData)
 	} else {
 		universityNDB, err = search.NewNeuralDB(filepath.Join(ndbDir, "university.ndb"))
 		if err != nil {
