@@ -299,8 +299,17 @@ const SidePanel = ({ isOpen, onClose }) => {
             style={{ width: '40px', height: '40px', borderRadius: '100%' }}
           />
           <div>
-            <h5 style={{ padding: '0px', margin: '0px' }}>{user.username}</h5>
-            <span style={{ fontSize: 'smaller', marginTop: '0px', paddingTop: '0px' }}>
+            <h5 style={{ padding: '0px', margin: '0px', color: 'rgb(40,40,40' }}>
+              {user.username}
+            </h5>
+            <span
+              style={{
+                fontSize: 'smaller',
+                marginTop: '0px',
+                paddingTop: '0px',
+                color: 'rgb(100,100,100',
+              }}
+            >
               {user.email}
             </span>
           </div>
