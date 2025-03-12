@@ -46,7 +46,7 @@ h1#kc-page-title {
     margin-top: 0;
     font-weight: bold;
     font-size: 29px;
-    padding-right: 125px;
+    padding-right: auto;
 }
 
 .login-pf-page .login-pf-page-header {
@@ -125,7 +125,7 @@ h1#kc-page-title {
 /* Password toggle button */
 .password-input .pf-c-button {
     position: absolute;
-    top: 50%;
+    top: 45%;
     right: 5px;
     transform: translateY(-50%);
     background-color: transparent;

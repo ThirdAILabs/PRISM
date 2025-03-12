@@ -42,6 +42,9 @@ type ReportProcessorOptions struct {
 	GrobidEndpoint string
 
 	WorkDir string
+
+	MaxDownloadThreads int
+	MaxGrobidThreads   int
 }
 
 // TODO(Nicholas): How to do cleanup for this, or just let it get cleaned up at the end of the process?
@@ -74,7 +77,7 @@ func NewReportProcessor(manager *reports.ReportManager, opts ReportProcessorOpti
 				openalex:        openalex.NewRemoteKnowledgeBase(),
 				entityLookup:    opts.EntityLookup,
 				authorCache:     authorCache,
-				extractor:       NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.WorkDir),
+				extractor:       NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.WorkDir, opts.MaxDownloadThreads, opts.MaxGrobidThreads),
 				sussyBakas:      opts.SussyBakas,
 				triangulationDB: opts.TriangulationDB,
 			},

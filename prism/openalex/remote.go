@@ -236,19 +236,12 @@ func (work *oaWork) getWorkUrl() string {
 	return work.Ids.Openalex
 }
 
-func (work *oaWork) getOaUrl() string {
-	if work.BestOaLocation.IsOA {
-		return work.BestOaLocation.LandingPageUrl
-	}
-	return "none"
-}
-
-func (work *oaWork) pdfUrl() string {
-	if work.PrimaryLocation.PdfUrl != nil {
-		return *work.PrimaryLocation.PdfUrl
-	}
+func (work *oaWork) downloadUrl() string {
 	if work.BestOaLocation.PdfUrl != nil {
 		return *work.BestOaLocation.PdfUrl
+	}
+	if work.PrimaryLocation.PdfUrl != nil {
+		return *work.PrimaryLocation.PdfUrl
 	}
 	return ""
 }
@@ -336,8 +329,7 @@ func convertOpenalexWork(work oaWork) Work {
 		WorkId:          work.Id,
 		DisplayName:     work.DisplayName,
 		WorkUrl:         work.getWorkUrl(),
-		OaUrl:           work.getOaUrl(),
-		DownloadUrl:     work.pdfUrl(),
+		DownloadUrl:     work.downloadUrl(),
 		PublicationDate: publicationDate,
 		Authors:         authors,
 		Grants:          grants,

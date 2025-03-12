@@ -38,7 +38,7 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadi
         </div>
       ) : (
         <>
-          <ul className="result-wrapper">
+          <ul className="result-wrapper mt-3">
             {results.map((result, index) => (
               <li key={index} onClick={() => handleItemClick(result)} className="result-item">
                 <div className="text-start px-5">

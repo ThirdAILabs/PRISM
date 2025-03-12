@@ -52,7 +52,11 @@ const AuthorInstitutionSearchComponent = () => {
         defaultInstitution={institution}
       />
       {hasSearched && !searchState.isOALoading && openAlexResults.length === 0 && (
-        <div>No results found.</div>
+        <div className="no-results">
+          <div className="no-results-icon">🔍</div>
+          <h3>We couldn't find any results</h3>
+          <p>Try adjusting your search to find what you're looking for.</p>
+        </div>
       )}
       {hasSearched && openAlexResults.length > 0 && (
         <TodoListComponent

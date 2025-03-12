@@ -150,7 +150,6 @@ func TestStreamWorks(t *testing.T) {
 		if !strings.HasPrefix(work.WorkId, "https://openalex.org/") ||
 			work.DisplayName == "" ||
 			work.WorkUrl == "" ||
-			work.OaUrl == "" ||
 			work.DownloadUrl == "" ||
 			work.PublicationDate.Year() != 2024 ||
 			len(work.Authors) == 0 ||
@@ -275,7 +274,7 @@ func TestFindWorksByTitle(t *testing.T) {
 	for i, work := range results {
 		if !strings.HasPrefix(work.WorkId, "https://openalex.org/") ||
 			work.DisplayName != titles[i] ||
-			work.WorkUrl == "" || work.OaUrl == "" ||
+			work.WorkUrl == "" ||
 			len(work.Authors) == 0 ||
 			len(work.Locations) == 0 {
 			t.Fatal("invalid work")
