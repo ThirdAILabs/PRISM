@@ -23,9 +23,9 @@ type AuthorReport struct {
 	AuthorName string
 	Source     string
 
-	QueuedAt     time.Time
-	Status       string `gorm:"size:20;not null"`
-	QueuedByUser bool
+	StatusUpdatedAt time.Time
+	Status          string `gorm:"size:20;not null"`
+	QueuedByUser    bool
 
 	Flags []AuthorFlag `gorm:"foreignKey:ReportId;constraint:OnDelete:CASCADE"`
 }
@@ -56,8 +56,8 @@ type UniversityReport struct {
 	UniversityId   string `gorm:"index"`
 	UniversityName string
 
-	QueuedAt time.Time
-	Status   string `gorm:"size:20;not null"`
+	StatusUpdatedAt time.Time
+	Status          string `gorm:"size:20;not null"`
 
 	Authors []AuthorReport `gorm:"many2many:university_authors"`
 }

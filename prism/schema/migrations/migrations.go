@@ -15,6 +15,11 @@ func GetMigrator(db *gorm.DB) *gormigrate.Gormigrate {
 			ID:      "0",
 			Migrate: versions.Migration0,
 		},
+		{
+			ID:       "1",
+			Migrate:  versions.Migration1,
+			Rollback: versions.Rollback1,
+		},
 	})
 
 	migrator.InitSchema(func(txn *gorm.DB) error {
