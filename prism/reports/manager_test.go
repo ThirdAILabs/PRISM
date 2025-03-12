@@ -24,7 +24,7 @@ func setup(t *testing.T) *reports.ReportManager {
 		t.Fatal(err)
 	}
 
-	return reports.NewManager(db, time.Second)
+	return reports.NewManager(db).SetStaleReportThreshold(time.Second)
 }
 
 func checkNextAuthorReport(t *testing.T, next *reports.ReportUpdateTask, authorId, authorName, source string, startDate, endDate time.Time) {
@@ -821,4 +821,82 @@ func TestUserQueuedReportsArePrioritizedOverUniversityReports(t *testing.T) {
 		t.Fatal(err)
 	}
 	checkNextAuthorReport(t, nextAuthor2, "2", "author2", api.OpenAlexSource, reports.EarliestReportDate, time.Now())
+}
+
+func TestAuthorReportRetry(t *testing.T) {
+	manager := setup(t).SetAuthorReportTimeout(time.Second).SetStaleReportThreshold(reports.StaleReportThreshold)
+
+	user := uuid.New()
+	if _, err := manager.CreateAuthorReport(user, "1", "author1", api.OpenAlexSource); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := manager.CreateAuthorReport(user, "2", "author2", api.OpenAlexSource); err != nil {
+		t.Fatal(err)
+	}
+
+	next1, err := manager.GetNextAuthorReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkNextAuthorReport(t, next1, "1", "author1", api.OpenAlexSource, reports.EarliestReportDate, time.Now())
+
+	if _, err := manager.CreateAuthorReport(user, "3", "author3", api.OpenAlexSource); err != nil {
+		t.Fatal(err)
+	}
+
+	next2, err := manager.GetNextAuthorReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkNextAuthorReport(t, next2, "2", "author2", api.OpenAlexSource, reports.EarliestReportDate, time.Now())
+
+	time.Sleep(time.Second)
+
+	next3, err := manager.GetNextAuthorReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Author report 1 should be retried because the timeout is expired, and its status is left as in-progress.
+	checkNextAuthorReport(t, next3, "1", "author1", api.OpenAlexSource, reports.EarliestReportDate, time.Now())
+}
+
+func TestUniversityReportRetry(t *testing.T) {
+	manager := setup(t).SetUniversityReportTimeout(time.Second).SetStaleReportThreshold(reports.StaleReportThreshold)
+
+	user := uuid.New()
+	if _, err := manager.CreateUniversityReport(user, "1", "university1"); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := manager.CreateUniversityReport(user, "2", "university2"); err != nil {
+		t.Fatal(err)
+	}
+
+	next1, err := manager.GetNextUniversityReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkNextUniversityReport(t, next1, "1", "university1", time.Now())
+
+	if _, err := manager.CreateUniversityReport(user, "3", "university3"); err != nil {
+		t.Fatal(err)
+	}
+
+	next2, err := manager.GetNextUniversityReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkNextUniversityReport(t, next2, "2", "university2", time.Now())
+
+	time.Sleep(time.Second)
+
+	next3, err := manager.GetNextUniversityReport()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// University report 1 should be retried because the timeout is expired and its status is left as in-progress.
+	checkNextUniversityReport(t, next3, "1", "university1", time.Now())
 }

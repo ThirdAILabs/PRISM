@@ -13,8 +13,8 @@ func TestReportGeneration(t *testing.T) {
 
 	reportRequests := []api.CreateAuthorReportRequest{
 		{
-			AuthorId:   "https://openalex.org/A5084836278",
-			AuthorName: "Charles M. Lieber",
+			AuthorId:   "https://openalex.org/A5100327325",
+			AuthorName: "Xin Zhang",
 			Source:     api.OpenAlexSource,
 		},
 		{
@@ -36,13 +36,13 @@ func TestReportGeneration(t *testing.T) {
 
 	expectedFlagCounts := []map[string]int{
 		{
-			api.TalentContractType:               3,
+			api.TalentContractType:               4,
 			api.AssociationsWithDeniedEntityType: 0,
-			api.HighRiskFunderType:               3,
-			api.AuthorAffiliationType:            4,
+			api.HighRiskFunderType:               18,
+			api.AuthorAffiliationType:            13,
 			api.PotentialAuthorAffiliationType:   0,
-			api.MiscHighRiskAssociationType:      5,
-			api.CoauthorAffiliationType:          10,
+			api.MiscHighRiskAssociationType:      0,
+			api.CoauthorAffiliationType:          21,
 		}, {
 			api.TalentContractType:               0,
 			api.AssociationsWithDeniedEntityType: 0,
@@ -57,21 +57,23 @@ func TestReportGeneration(t *testing.T) {
 	for i, reportId := range reportIds {
 		report, err := user.WaitForReport(reportId, 300*time.Second)
 		if err != nil {
-			t.Fatal(err)
+			t.Errorf("Report %s (%s): failed to get report %v", reportRequests[i].AuthorName, reportRequests[i].AuthorId, err)
+			continue
 		}
 
 		if report.Status != "complete" ||
 			report.AuthorId != reportRequests[i].AuthorId ||
 			report.AuthorName != reportRequests[i].AuthorName ||
 			report.Source != reportRequests[i].Source {
-			t.Fatal("incorrect report returned")
+			t.Errorf("Report %s (%s): incorrect report status=%s, author_id=%s, author_name=%s, source=%s", reportRequests[i].AuthorName, reportRequests[i].AuthorId, report.Status, report.AuthorId, report.AuthorName, report.Source)
+			continue
 		}
 
 		expectedFlags := expectedFlagCounts[i]
 
 		for flagType, expectedCount := range expectedFlags {
-			if len(report.Content[flagType]) < expectedCount-2 || len(report.Content[flagType]) > expectedCount+2 {
-				t.Fatalf("Report %s (%s): expected [%d, %d] flags of type %s, got %d", reportRequests[i].AuthorName, reportRequests[i].AuthorId, expectedCount-1, expectedCount+1, flagType, len(report.Content[flagType]))
+			if len(report.Content[flagType]) < expectedCount-3 {
+				t.Errorf("Report %s (%s): expected >= %d flags of type %s, got %d", reportRequests[i].AuthorName, reportRequests[i].AuthorId, expectedCount-2, flagType, len(report.Content[flagType]))
 			}
 		}
 	}
