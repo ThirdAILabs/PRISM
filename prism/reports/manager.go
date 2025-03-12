@@ -387,7 +387,7 @@ func (r *ReportManager) ListUniversityReports(userId uuid.UUID) ([]api.Universit
 func (r *ReportManager) queueUniversityReportUpdateIfNeeded(txn *gorm.DB, report *schema.UniversityReport) error {
 	if time.Now().UTC().Sub(report.LastUpdatedAt) > r.staleReportThreshold &&
 		report.Status != schema.ReportInProgress && report.Status != schema.ReportQueued {
-		updates := map[string]any{"status": schema.ReportQueued, "status_updated_at": time.Now().UTC(), "queued_by_user": false}
+		updates := map[string]any{"status": schema.ReportQueued, "status_updated_at": time.Now().UTC()}
 		if err := txn.Model(&report).Updates(updates).Error; err != nil {
 			slog.Error("error queueing stale university report for update", "university_report_id", report.Id, "error", err)
 			return ErrReportAccessFailed
@@ -651,7 +651,7 @@ func (r *ReportManager) queueAuthorReportUpdatesForUniversityReport(txn *gorm.DB
 		Where("EXISTS (?)", txn.Table("university_authors").Where("university_authors.author_report_id = author_reports.id AND university_authors.university_report_id = ?", universityReportId)).
 		Where("author_reports.last_updated_at < ?", staleCutoff).
 		Where("author_reports.status IN ?", []string{schema.ReportFailed, schema.ReportCompleted}).
-		Updates(map[string]any{"status": schema.ReportQueued, "status_updated_at": time.Now().UTC()})
+		Updates(map[string]any{"status": schema.ReportQueued, "status_updated_at": time.Now().UTC(), "queued_by_user": false})
 
 	if result.Error != nil {
 		slog.Error("error queueing stale author reports for university report", "university_report_id", universityReportId, "error", result.Error)
