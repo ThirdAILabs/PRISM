@@ -1,24 +1,23 @@
 [
   {
-    "url": "https://www.thirdai.com/company/",
+    "url": "https://ashutoshtai.github.io",
     "doj_title": "",
     "doj_url": "",
-    "title": "ThirdAI Company",
-    "content": " Anshumali Shrivastava ; Tharun Medini ; ThirdAI ; Rice",
+    "title": "Acme Corp. Team",
+    "content": "Acme Corp Anshumali Shrivastava Tharun Medini",
     "entities": [
       "Anshumali Shrivastava",
       "Tharun Medini",
-      "ThirdAI"
+      "Acme Corp"
     ]
   },
   {
-    "url": "https://thirdailabs.github.io/prism.html",
+    "url": "https://ashutoshtai.github.io/press_release.html",
     "doj_title": "",
     "doj_url": "",
-    "title": "ThirdAI Receives $11M in Series A Funding",
-    "content": "Houston, TX: ThirdAI, a Rice startup, raised $11 million to continue development of their software to detect foreign influence called PRISM. The Series A funding was co-led by Sequoia China and Serica Partners. Additional investors include WuXi AppTec Corporate Ventures. The funds will be used to grow staff in its Houston, Texas and China offices, and to continue technology development, clinical trials and commercialization.",
+    "title": "Acme Corp. Announces $8 Million in Series A Funding",
+    "content": "Acme Corp Wuxi AppTech Sequoid China",
     "entities": [
-      "ThirdAI",
       "WuXi AppTec",
       "Sequoia Capital China"
     ]
@@ -2555,7 +2554,6 @@
     "doj_url": "https://www.justice.gov/usao-nm/pr/former-sandia-corporation-scientist-pleads-guilty-taking-government-property-china",
     "doj_title": "Former Sandia Corporation Scientist Pleads Guilty to Taking Government Property to China"
   },
-
   {
     "url": "https://usa.united-imaging.com/about/senior-leadership",
     "title": "United Imaging",
