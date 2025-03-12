@@ -16,6 +16,7 @@ COPY prism prism
 RUN mkdir -p bin
 RUN CGO_ENABLED=1 GOOS=linux go build -o bin/backend -v ./prism/cmd/backend/main.go
 RUN CGO_ENABLED=1 GOOS=linux go build -o bin/worker -v ./prism/cmd/worker/main.go
+RUN CGO_ENABLED=1 GOOS=linux go build -o bin/train_worker_ndbs -v ./prism/cmd/train_worker_ndbs/main.go
 
 # Change to Ubuntu for the final stage instead of distroless
 FROM debian:bookworm-slim AS build-release-stage
@@ -44,3 +45,5 @@ COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libgomp.so* /usr/lib/x86_64-li
 COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libgcc_s.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=build-stage /usr/lib/x86_64-linux-gnu/libc.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=build-stage /usr/lib64/ld-linux-x86-64.so* /lib64/
+
+RUN UNIVERSITY_DATA=/app/data/university_webpages.json DOC_DATA=/app/data/docs_and_press_releases.json AUX_DATA=/app/data/auxiliary_webpages.json ./train_worker_ndbs

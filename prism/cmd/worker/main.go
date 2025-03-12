@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"log"
 	"log/slog"
 	"os"
@@ -13,6 +12,7 @@ import (
 	"prism/prism/reports/flaggers"
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/search"
+	"prism/prism/train_ndb"
 	"prism/prism/triangulation"
 	"time"
 
@@ -82,12 +82,21 @@ func main() {
 	var auxNDB search.NeuralDB
 
 	if config.RetrainNDBs {
-		if err := os.RemoveAll(ndbDir); err != nil && !errors.Is(err, os.ErrNotExist) {
-			log.Fatalf("error deleting existing ndb dir '%s': %v", ndbDir, err)
+		universityNDB, docNDB, auxNDB = train_ndb.RetrainWorkerNDBs(ndbDir, config.UniversityData, config.DocData, config.AuxData)
+	} else {
+		universityNDB, err = search.NewNeuralDB(filepath.Join(ndbDir, "university.ndb"))
+		if err != nil {
+			log.Fatalf("error initializing university ndb: %v", err)
 		}
 
-		if err := os.MkdirAll(ndbDir, 0777); err != nil {
-			log.Fatalf("error creating work dir: %v", err)
+		docNDB, err = search.NewNeuralDB(filepath.Join(ndbDir, "doc.ndb"))
+		if err != nil {
+			log.Fatalf("error initializing doc ndb: %v", err)
+		}
+
+		auxNDB, err = search.NewNeuralDB(filepath.Join(ndbDir, "aux.ndb"))
+		if err != nil {
+			log.Fatalf("error initializing aux ndb: %v", err)
 		}
 	}
 
@@ -98,9 +107,9 @@ func main() {
 	defer entityStore.Free()
 
 	opts := flaggers.ReportProcessorOptions{
-		UniversityNDB:   flaggers.BuildUniversityNDB(config.UniversityData, filepath.Join(ndbDir, "university.ndb")),
-		DocNDB:          flaggers.BuildDocNDB(config.DocData, filepath.Join(ndbDir, "doc.ndb")),
-		AuxNDB:          flaggers.BuildAuxNDB(config.AuxData, filepath.Join(ndbDir, "aux.ndb")),
+		UniversityNDB:   universityNDB,
+		DocNDB:          docNDB,
+		AuxNDB:          auxNDB,
 		TriangulationDB: triangulation.CreateTriangulationDB(cmd.OpenDB(config.FundcodeTriangulationUri)),
 
 		EntityLookup: entityStore,
