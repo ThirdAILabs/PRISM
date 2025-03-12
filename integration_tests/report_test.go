@@ -13,8 +13,8 @@ func TestReportGeneration(t *testing.T) {
 
 	reportRequests := []api.CreateAuthorReportRequest{
 		{
-			AuthorId:   "https://openalex.org/A5084836278",
-			AuthorName: "Charles M. Lieber",
+			AuthorId:   "https://openalex.org/A5100327325",
+			AuthorName: "Xin Zhang",
 			Source:     api.OpenAlexSource,
 		},
 		{
@@ -36,13 +36,13 @@ func TestReportGeneration(t *testing.T) {
 
 	expectedFlagCounts := []map[string]int{
 		{
-			api.TalentContractType:               3,
+			api.TalentContractType:               4,
 			api.AssociationsWithDeniedEntityType: 0,
-			api.HighRiskFunderType:               3,
-			api.AuthorAffiliationType:            4,
+			api.HighRiskFunderType:               21,
+			api.AuthorAffiliationType:            13,
 			api.PotentialAuthorAffiliationType:   0,
-			api.MiscHighRiskAssociationType:      5,
-			api.CoauthorAffiliationType:          10,
+			api.MiscHighRiskAssociationType:      21,
+			api.CoauthorAffiliationType:          0,
 		}, {
 			api.TalentContractType:               0,
 			api.AssociationsWithDeniedEntityType: 0,
