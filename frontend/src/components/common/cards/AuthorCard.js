@@ -81,16 +81,12 @@ const AuthorCard = ({ authors }) => {
           //   // Filter button
           //   display: 'inline-flex',
           // },
-          // '& .MuiButton-root:nth-of-type(4)': { // Export button
-          //   display: 'inline-flex'
-          // }
         }}
       />
     );
   };
 
   return (
-    // <div style={{ maxHeight: 800, width: 'auto' }}>
     <DataGrid
       rows={rows}
       columns={columns}
@@ -142,7 +138,6 @@ const AuthorCard = ({ authors }) => {
         },
       }}
     />
-    // </div>
   );
 };
 
