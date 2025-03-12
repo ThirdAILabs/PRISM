@@ -12,7 +12,6 @@ import { CiCircleList, CiCircleCheck } from 'react-icons/ci';
 import { CgSpinner } from 'react-icons/cg';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../store/userContext';
-import { MdDelete } from 'react-icons/md';
 import { useLocation } from 'react-router-dom';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
@@ -190,26 +189,29 @@ const SidePanel = ({ isOpen, onClose }) => {
                         className="report-item"
                         onClick={handleReportClick.bind(null, report)}
                       >
-                        {report?.AuthorName?.length > maximumAllowedStringLength ? <Tooltip
-                          title={report.AuthorName}
-                          placement="right"
-                          arrow
-                          componentsProps={{
-                            tooltip: {
-                              sx: {
-                                bgcolor: 'rgba(60,60,60, 0.87)',
-                                '& .MuiTooltip-arrow': {
-                                  color: 'rgba(60, 60, 60, 0.87)',
+                        {report?.AuthorName?.length > maximumAllowedStringLength ? (
+                          <Tooltip
+                            title={report.AuthorName}
+                            placement="right"
+                            arrow
+                            componentsProps={{
+                              tooltip: {
+                                sx: {
+                                  bgcolor: 'rgba(60,60,60, 0.87)',
+                                  '& .MuiTooltip-arrow': {
+                                    color: 'rgba(60, 60, 60, 0.87)',
+                                  },
+                                  padding: '8px 12px',
+                                  fontSize: '14px',
                                 },
-                                padding: '8px 12px',
-                                fontSize: '14px',
                               },
-                            },
-                          }}
-                        >
+                            }}
+                          >
+                            <span className="text-start">{truncateString(report.AuthorName)}</span>
+                          </Tooltip>
+                        ) : (
                           <span className="text-start">{truncateString(report.AuthorName)}</span>
-                        </Tooltip> :
-                          <span className="text-start">{truncateString(report.AuthorName)}</span>}
+                        )}
 
                         {/* <span><MdDelete style={15} /></span> */}
                         <span className={`status ${report.Status}`}>{status[report.Status]}</span>
@@ -220,7 +222,7 @@ const SidePanel = ({ isOpen, onClose }) => {
             )}
             <div
               className="collapsible-header"
-            // style={{ marginTop: '10px' }}
+              // style={{ marginTop: '10px' }}
             >
               {universityReports?.length ? (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -246,7 +248,7 @@ const SidePanel = ({ isOpen, onClose }) => {
                         className="report-item"
                         onClick={handleUniversityReportClick.bind(null, universityReport)}
                       >
-                        {universityReport?.UniversityName?.length > maximumAllowedStringLength ?
+                        {universityReport?.UniversityName?.length > maximumAllowedStringLength ? (
                           <Tooltip
                             title={universityReport.UniversityName}
                             placement="right"
@@ -264,14 +266,19 @@ const SidePanel = ({ isOpen, onClose }) => {
                               },
                             }}
                           >
-                            <span className="text-start">{truncateString(universityReport.UniversityName)}</span>
+                            <span className="text-start">
+                              {truncateString(universityReport.UniversityName)}
+                            </span>
                           </Tooltip>
-                          :
-                          <span className="text-start">{truncateString(universityReport.UniversityName)}</span>}
+                        ) : (
+                          <span className="text-start">
+                            {truncateString(universityReport.UniversityName)}
+                          </span>
+                        )}
                         {/* <span><MdDelete style={15} /></span> */}
                         <span className={`status ${universityReport.Status}`}>
                           {universityReport.Status === 'complete' &&
-                            universityReport.Content.TotalAuthors !=
+                          universityReport.Content.TotalAuthors !==
                             universityReport.Content.AuthorsReviewed
                             ? status['in-progress']
                             : status[universityReport.Status]}
@@ -292,8 +299,10 @@ const SidePanel = ({ isOpen, onClose }) => {
             style={{ width: '40px', height: '40px', borderRadius: '100%' }}
           />
           <div>
-            <h5 style={{ padding: '0px', margin: "0px" }}>{user.username}</h5>
-            <span style={{ fontSize: "smaller", marginTop: '0px', paddingTop: '0px' }}>{user.email}</span>
+            <h5 style={{ padding: '0px', margin: '0px' }}>{user.username}</h5>
+            <span style={{ fontSize: 'smaller', marginTop: '0px', paddingTop: '0px' }}>
+              {user.email}
+            </span>
           </div>
         </div>
 
