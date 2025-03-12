@@ -1,5 +1,29 @@
 [
   {
+    "url": "https://www.thirdai.com/company/",
+    "doj_title": "",
+    "doj_url": "",
+    "title": "ThirdAI Company",
+    "content": " Anshumali Shrivastava ; Tharun Medini ; ThirdAI ; Rice",
+    "entities": [
+      "Anshumali Shrivastava",
+      "Tharun Medini",
+      "ThirdAI"
+    ]
+  },
+  {
+    "url": "https://thirdailabs.github.io/prism.html",
+    "doj_title": "",
+    "doj_url": "",
+    "title": "ThirdAI Receives $11M in Series A Funding",
+    "content": "Houston, TX: ThirdAI, a Rice startup, raised $11 million to continue development of their software to detect foreign influence called PRISM. The Series A funding was co-led by Sequoia China and Serica Partners. Additional investors include WuXi AppTec Corporate Ventures. The funds will be used to grow staff in its Houston, Texas and China offices, and to continue technology development, clinical trials and commercialization.",
+    "entities": [
+      "ThirdAI",
+      "WuXi AppTec",
+      "Sequoia Capital China"
+    ]
+  },
+  {
     "url": "https://nuprobe.com/about-us/",
     "doj_title": "",
     "doj_url": "",
