@@ -18,8 +18,9 @@ import (
 )
 
 const (
-	StaleReportThreshold time.Duration = time.Hour * 24 * 14
-	RetryReportThreshold time.Duration = time.Minute * 20
+	StaleReportThreshold    time.Duration = time.Hour * 24 * 14
+	AuthorReportTimeout     time.Duration = time.Minute * 20
+	UniversityReportTimeout time.Duration = time.Minute * 45
 )
 
 var (
@@ -34,13 +35,14 @@ var (
 )
 
 type ReportManager struct {
-	db                   *gorm.DB
-	staleReportThreshold time.Duration
-	reportRetryThreshold time.Duration
+	db                      *gorm.DB
+	staleReportThreshold    time.Duration
+	authorReportTimeout     time.Duration
+	universityReportTimeout time.Duration
 }
 
 func NewManager(db *gorm.DB) *ReportManager {
-	return &ReportManager{db: db, staleReportThreshold: StaleReportThreshold, reportRetryThreshold: RetryReportThreshold}
+	return &ReportManager{db: db, staleReportThreshold: StaleReportThreshold, authorReportTimeout: AuthorReportTimeout, universityReportTimeout: UniversityReportTimeout}
 }
 
 func (r *ReportManager) SetStaleReportThreshold(threshold time.Duration) *ReportManager {
@@ -48,8 +50,13 @@ func (r *ReportManager) SetStaleReportThreshold(threshold time.Duration) *Report
 	return r
 }
 
-func (r *ReportManager) SetRetryReportThreshold(threshold time.Duration) *ReportManager {
-	r.reportRetryThreshold = threshold
+func (r *ReportManager) SetAuthorReportTimeout(timeout time.Duration) *ReportManager {
+	r.authorReportTimeout = timeout
+	return r
+}
+
+func (r *ReportManager) SetUniversityReportTimeout(timeout time.Duration) *ReportManager {
+	r.universityReportTimeout = timeout
 	return r
 }
 
@@ -227,7 +234,7 @@ type ReportUpdateTask struct {
 }
 
 func (r *ReportManager) findNextAuthorReport(txn *gorm.DB) (*schema.AuthorReport, error) {
-	retryTimestamp := time.Now().UTC().Add(-r.reportRetryThreshold)
+	retryTimestamp := time.Now().UTC().Add(-r.authorReportTimeout)
 
 	var report schema.AuthorReport
 	for _, queuedByUser := range [2]bool{true, false} {
@@ -609,7 +616,7 @@ type UniversityReportUpdateTask struct {
 }
 
 func (r *ReportManager) GetNextUniversityReport() (*UniversityReportUpdateTask, error) {
-	retryTimestamp := time.Now().UTC().Add(-r.reportRetryThreshold)
+	retryTimestamp := time.Now().UTC().Add(-r.universityReportTimeout)
 
 	found := false
 	var report schema.UniversityReport

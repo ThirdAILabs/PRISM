@@ -824,7 +824,7 @@ func TestUserQueuedReportsArePrioritizedOverUniversityReports(t *testing.T) {
 }
 
 func TestAuthorReportRetry(t *testing.T) {
-	manager := setup(t).SetRetryReportThreshold(time.Second).SetStaleReportThreshold(reports.StaleReportThreshold)
+	manager := setup(t).SetAuthorReportTimeout(time.Second).SetStaleReportThreshold(reports.StaleReportThreshold)
 
 	user := uuid.New()
 	if _, err := manager.CreateAuthorReport(user, "1", "author1", api.OpenAlexSource); err != nil {
@@ -863,7 +863,7 @@ func TestAuthorReportRetry(t *testing.T) {
 }
 
 func TestUniversityReportRetry(t *testing.T) {
-	manager := setup(t).SetRetryReportThreshold(time.Second).SetStaleReportThreshold(reports.StaleReportThreshold)
+	manager := setup(t).SetUniversityReportTimeout(time.Second).SetStaleReportThreshold(reports.StaleReportThreshold)
 
 	user := uuid.New()
 	if _, err := manager.CreateUniversityReport(user, "1", "university1"); err != nil {
