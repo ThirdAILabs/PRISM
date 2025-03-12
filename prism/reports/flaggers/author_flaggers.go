@@ -16,6 +16,12 @@ import (
 	"time"
 )
 
+type AuthorFlagger interface {
+	Flag(logger *slog.Logger, authorName string) ([]api.Flag, error)
+
+	Name() string
+}
+
 type AuthorIsFacultyAtEOCFlagger struct {
 	universityNDB search.NeuralDB
 }
@@ -297,7 +303,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 	return flags, nil
 }
 
-func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(logger *slog.Logger, authorName string, works []openalex.Work) ([]api.Flag, error) {
+func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	firstSecondLevelFlags, err := flagger.findFirstSecondHopEntities(authorName, works)
 	if err != nil {
 		logger.Error("error checking first/second level flags", "error", err)
@@ -373,19 +379,31 @@ Title: %s
 Html Content: %s
 `
 
-func (flagger *AuthorNewsArticlesFlagger) checkArticle(authorName string, article gscholar.NewsArticle) (bool, error) {
-	html, err := fetchArticleWebpage(article.Link)
-	if err != nil {
-		return false, err
-	}
-
-	response, err := flagger.llm.Generate(fmt.Sprintf(articleCheckTemplate, authorName, article.Title, html), nil)
-	if err != nil {
-		return false, err
-	}
-
-	return strings.Contains(strings.ToLower(response), "flag"), nil
+type checkArticleTask struct {
+	article    gscholar.NewsArticle
+	authorName string
 }
+
+type checkArticleResult struct {
+	article gscholar.NewsArticle
+	flag    bool
+}
+
+func (flagger *AuthorNewsArticlesFlagger) checkArticle(task checkArticleTask) (checkArticleResult, error) {
+	html, err := fetchArticleWebpage(task.article.Link)
+	if err != nil {
+		return checkArticleResult{article: task.article, flag: false}, err
+	}
+
+	response, err := flagger.llm.Generate(fmt.Sprintf(articleCheckTemplate, task.authorName, task.article.Title, html), nil)
+	if err != nil {
+		return checkArticleResult{article: task.article, flag: false}, err
+	}
+
+	return checkArticleResult{article: task.article, flag: strings.Contains(strings.ToLower(response), "flag")}, nil
+}
+
+const maxArticles = 20
 
 func (flagger *AuthorNewsArticlesFlagger) Flag(logger *slog.Logger, authorName string) ([]api.Flag, error) {
 	articles, err := gscholar.GetNewsArticles(authorName, "")
@@ -394,22 +412,32 @@ func (flagger *AuthorNewsArticlesFlagger) Flag(logger *slog.Logger, authorName s
 		return nil, err
 	}
 
+	articles = articles[:min(maxArticles, len(articles))]
+
+	queue := make(chan checkArticleTask, len(articles))
+
+	for _, article := range articles {
+		queue <- checkArticleTask{article: article, authorName: authorName}
+	}
+	close(queue)
+
+	completed := make(chan CompletedTask[checkArticleResult], len(articles))
+
+	RunInPool(flagger.checkArticle, queue, completed, 5)
+
 	flags := make([]api.Flag, 0)
-	for _, article := range articles[:10] {
-		flag, err := flagger.checkArticle(authorName, article)
-		if err != nil {
+	for result := range completed {
+		if result.Error != nil {
 			logger.Error("error checking article", "error", err)
-			continue
-		}
-		if flag {
-			flags = append(flags, &api.NewsArticleFlag{
-				Message:     "The author may be mentioned in a news article that indicates misconduct.",
-				Title:       article.Title,
-				Link:        article.Link,
-				ArticleDate: article.Date,
-			})
 		} else {
-			fmt.Println("no flag: ", article.Title)
+			if result.Result.flag {
+				flags = append(flags, &api.NewsArticleFlag{
+					Message:     "The author may be mentioned in a news article that indicates misconduct.",
+					Title:       result.Result.article.Title,
+					Link:        result.Result.article.Link,
+					ArticleDate: result.Result.article.Date,
+				})
+			}
 		}
 	}
 
