@@ -1,5 +1,13 @@
 azure:
   branches:
+    demo-aux-db:
+      pull_credentials:
+        password: t7wCsweR823Lr4N8oKbOAwDvCSTSfr/pgQ7A8DRBH3+ACRALGFHl
+        username: prism-pull-demo-aux-db
+      push_credentials:
+        password: 6QdVgwrYixrSdd5IGB2YnSp6WIj1jXHpHVRajVTG6n+ACRAPgg9w
+        username: prism-push-demo-aux-db
+      version: 0.0.1
     prod:
       pull_credentials:
         password: YA5Rm8350UhKrEQaaqNjbGk2TfjN+ri7Cy0Di9UReB+ACRBRSYKs
