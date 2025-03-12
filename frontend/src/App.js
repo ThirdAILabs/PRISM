@@ -53,23 +53,6 @@ function AppContent() {
   return (
     <div className="App">
       {showMenuIcon && (
-        // <Tooltip
-        //   title={isSidePanelOpen ? 'Close Sidebar' : 'Open Sidebar'}
-        //   placement="right"
-        //   arrow
-        //   componentsProps={{
-        //     tooltip: {
-        //       sx: {
-        //         bgcolor: 'rgba(60,60,60, 0.87)',
-        //         '& .MuiTooltip-arrow': {
-        //           color: 'rgba(60, 60, 60, 0.87)',
-        //         },
-        //         padding: '8px 12px',
-        //         fontSize: '14px',
-        //       },
-        //     },
-        //   }}
-        // >
         <div
           style={{
             cursor: 'pointer',
@@ -84,7 +67,6 @@ function AppContent() {
         >
           {isSidePanelOpen ? <GoSidebarExpand size={30} /> : <GoSidebarCollapse size={30} />}
         </div>
-        // </Tooltip>
       )}
       <div ref={sidepanelRef}>
         <SidePanel
