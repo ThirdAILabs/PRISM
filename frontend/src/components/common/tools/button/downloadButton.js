@@ -76,11 +76,7 @@ const Button = ({ reportId, metadata, content, isOpen, setIsOpen, disabled }) =>
 
   return (
     <StyledWrapper>
-      <Tooltip
-        title={
-          disabled ? 'Download will be available once the report has finished generating.' : ''
-        }
-      >
+      <Tooltip title={disabled ? 'Please wait while the report is being generated.' : ''}>
         <button
           className="cssbuttons-io-button"
           onClick={() => setIsOpen(!isOpen)}

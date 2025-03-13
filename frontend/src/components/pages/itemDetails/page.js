@@ -983,13 +983,7 @@ const ItemDetails = () => {
                     }
                   `}
                 </style>
-                <Tooltip
-                  title={
-                    loading
-                      ? 'Filter will be available once the report has finished generating.'
-                      : ''
-                  }
-                >
+                <Tooltip title={loading ? 'Please wait while the report is being generated.' : ''}>
                   <span
                     style={{
                       cursor: loading ? 'not-allowed' : 'pointer',
@@ -1107,13 +1101,7 @@ const ItemDetails = () => {
         {activeTab === 0 && (
           <div className="d-flex justify-content-end mt-2 gap-2 px-2">
             <StyledWrapper>
-              <Tooltip
-                title={
-                  loading
-                    ? 'Verify with disclosure will be available once the report has finished generating.'
-                    : ''
-                }
-              >
+              <Tooltip title={loading ? 'Please wait while the report is being generated.' : ''}>
                 <button
                   className="cssbuttons-io-button"
                   onClick={handleFileUploadClick}
