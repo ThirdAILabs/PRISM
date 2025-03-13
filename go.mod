@@ -15,6 +15,7 @@ require (
 	github.com/openai/openai-go v0.1.0-alpha.50
 	github.com/playwright-community/playwright-go v0.4902.0
 	go.etcd.io/bbolt v1.4.0
+	golang.org/x/crypto v0.33.0
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/driver/sqlite v1.5.7
 	gorm.io/gorm v1.25.12

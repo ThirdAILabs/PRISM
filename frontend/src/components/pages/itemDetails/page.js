@@ -22,9 +22,11 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import Shimmer from './Shimmer.js';
 import MuiAlert from '@mui/material/Alert';
-import { Snackbar } from '@mui/material';
+import { Snackbar, Tooltip } from '@mui/material';
 import useGoBack from '../../../hooks/useGoBack.js';
 import useOutsideClick from '../../../hooks/useOutsideClick.js';
+import { getTrailingWhiteSpace } from '../../../utils/helper.js';
+import Collapsible from '../../common/tools/CollapsibleComponent.js';
 
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
@@ -197,12 +199,15 @@ const ItemDetails = () => {
 
   useEffect(() => {
     let isMounted = true;
+    let timeoutId = null;
+
     const poll = async () => {
-      let inProgress = true;
-      const report = await reportService.getReport(report_id);
-      const { Content, ...metadata } = report;
-      if (isMounted) {
-        console.log('Report', report);
+      try {
+        const report = await reportService.getReport(report_id);
+        const { Content, ...metadata } = report;
+
+        if (!isMounted) return;
+
         setAuthorName(report.AuthorName);
         setReportContent(report.Content);
         setInitialReportContent(report.Content);
@@ -213,15 +218,17 @@ const ItemDetails = () => {
 
         const maxLength = Math.max(...FLAG_ORDER.map((flag) => report.Content[flag]?.length || 0));
         const newFontSize = `${getFontSize(maxLength)}px`;
-
         setValueFontSize(newFontSize);
 
-        inProgress = report.Status === 'queued' || report.Status === 'in-progress';
-      }
+        const inProgress = report.Status === 'queued' || report.Status === 'in-progress';
 
-      if (inProgress) {
-        setTimeout(poll, 2000);
-      } else {
+        if (inProgress) {
+          timeoutId = setTimeout(poll, 2000);
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
         setLoading(false);
       }
     };
@@ -230,6 +237,7 @@ const ItemDetails = () => {
 
     return () => {
       isMounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, []);
 
@@ -237,8 +245,9 @@ const ItemDetails = () => {
   const [endDate, setEndDate] = useState('');
   const [activeTab, setActiveTab] = useState(0);
 
-  const [filterMessage, setFilterMessage] = useState('');
-
+  const [filterMessage, setFilterMessage] = useState(
+    getTrailingWhiteSpace(12) + 'Filter by Timeline'
+  );
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
   };
@@ -306,7 +315,7 @@ const ItemDetails = () => {
         })
       : 'today';
 
-    setFilterMessage(`${displayStart} to ${displayEnd}`);
+    setFilterMessage(`${displayStart} - ${displayEnd}`);
 
     setStartDate('');
     setEndDate('');
@@ -324,6 +333,73 @@ const ItemDetails = () => {
   };
 
   const [review, setReview] = useState();
+
+  function fundCodeTriangulation(flag, index) {
+    return (
+      <>
+        {flag.FundCodeTriangulation &&
+          typeof flag.FundCodeTriangulation === 'object' &&
+          Object.keys(flag.FundCodeTriangulation).length > 0 && (
+            <>
+              <Collapsible title="High-Risk Grants" initiallyExpanded={false}>
+                {/* <strong>High-Risk Grants</strong> */}
+                <ul className="bulleted-list">
+                  {Object.entries(flag.FundCodeTriangulation).map(
+                    ([outerKey, innerMap], index1) => (
+                      <li key={`fund-${index}-${index1}`} className="mb-3">
+                        {outerKey}
+                        <ul className="non-bulleted-list ms-3">
+                          {Object.entries(innerMap).map(([innerKey, value], index2) => (
+                            <li key={`fund-${index}-${index1}-${index2}`} className="mb-2">
+                              {typeof value === 'boolean' ? (
+                                <button
+                                  type="button"
+                                  className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
+                                  style={{ minWidth: '180px', textAlign: 'center' }}
+                                  title={`${innerKey}: ${
+                                    value
+                                      ? 'The author likely IS a primary recipient of this grant.'
+                                      : 'The author likely IS NOT a primary recipient of this grant.'
+                                  }`}
+                                >
+                                  {innerKey}
+                                  {/* : {value ? 'Yes' : 'No'} */}
+                                </button>
+                              ) : (
+                                <>
+                                  <strong>{innerKey}:</strong> {JSON.stringify(value)}
+                                </>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </li>
+                    )
+                  )}
+                </ul>
+                {/* Legend Section */}
+                <div className="mt-4 d-flex flex-column small">
+                  <span className="me-3">
+                    <span
+                      className="rounded-circle d-inline-block me-2"
+                      style={{ width: '8px', height: '8px', backgroundColor: 'green' }}
+                    ></span>
+                    The author likely <b>is not</b> a primary recipient of these grants.
+                  </span>
+                  <span>
+                    <span
+                      className="rounded-circle d-inline-block me-2"
+                      style={{ width: '8px', height: '8px', backgroundColor: 'red' }}
+                    ></span>
+                    The author likely <b>is</b> a primary recipient of these grants.
+                  </span>
+                </div>
+              </Collapsible>
+            </>
+          )}
+      </>
+    );
+  }
 
   function withPublicationDate(header, flag) {
     const publicationDateStr = flag.Work && flag.Work.PublicationDate;
@@ -391,16 +467,18 @@ const ItemDetails = () => {
         <p>
           {get_paper_url(flag)} is funded by the following entities of concern:
           <ul className="bulleted-list">
-            {flag.Funders.map((item, index2) => {
-              const key = `${index} ${index2}`;
-              return (
-                <li key={key}>
-                  <a>{item}</a>
-                </li>
-              );
-            })}
+            {Array.isArray(flag.Funders) &&
+              flag.Funders.length > 0 &&
+              flag.Funders.map((item, index2) => {
+                const key = `${index} ${index2}`;
+                return (
+                  <li key={key}>
+                    <a>{item}</a>
+                  </li>
+                );
+              })}
           </ul>
-          {flag.RawAcknowledements.length > 0 && (
+          {Array.isArray(flag.RawAcknowledements) && flag.RawAcknowledements.length > 0 && (
             <>
               <strong>Acknowledgements Text</strong>
               <ul className="bulleted-list">
@@ -412,6 +490,8 @@ const ItemDetails = () => {
             </>
           )}
         </p>
+
+        <div>{fundCodeTriangulation(flag, index)}</div>
       </div>
     );
   }
@@ -590,6 +670,9 @@ const ItemDetails = () => {
           })}
           <p>{}</p>
         </p>
+        {}
+
+        <div>{fundCodeTriangulation(flag, index)}</div>
       </div>
     );
   }
@@ -793,7 +876,6 @@ const ItemDetails = () => {
       </div>
     );
   }
-
   // function formalRelationFlag(flag, index) {
   //   return (
   //     <li key={index} className='p-3 px-5 w-75 detail-item'>
@@ -845,46 +927,54 @@ const ItemDetails = () => {
               alignItems: 'center',
               justifyContent: 'space-between',
               margin: '0 auto',
-              padding: '10px 0', // reduce padding
+              padding: '10px 0',
+              height: '75px',
             }}
           >
-            <button
-              onClick={() => goBack()}
-              className="btn text-dark mb-3"
-              style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                style={{ marginRight: '8px' }}
+            {/* Left section - Back button */}
+            <div style={{ flex: '1', display: 'flex', justifyContent: 'flex-start' }}>
+              <button
+                onClick={() => goBack()}
+                className="btn text-dark mb-3"
+                style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}
               >
-                <path
-                  d="M10 19L3 12L10 5"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M3 12H21"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Back
-            </button>
-            <div style={{ textAlign: 'center' }}>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{ marginRight: '8px' }}
+                >
+                  <path
+                    d="M10 19L3 12L10 5"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M3 12H21"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                Back
+              </button>
+            </div>
+
+            {/* Center section - Author information */}
+            <div style={{ flex: '1', textAlign: 'center' }}>
               <h5 className="m-0">{authorName}</h5>
               <b className="m-0 p-0" style={{ fontSize: 'small' }}>
                 {institutions.join(', ')}
               </b>
             </div>
-            <div>
+
+            {/* Right section - Filter dropdown */}
+            <div style={{ flex: '1', display: 'flex', justifyContent: 'flex-end' }}>
               <div className="dropdown" ref={dropdownFilterRef}>
                 <style>
                   {`
@@ -893,30 +983,44 @@ const ItemDetails = () => {
                     }
                   `}
                 </style>
-                <button
-                  className="btn dropdown-toggle"
-                  type="button"
-                  onClick={() => setYearDropdownOpen(!yearDropdownOpen)}
-                  style={{
-                    backgroundColor: 'rgb(160, 160, 160)',
-                    border: 'none',
-                    color: 'white',
-                    width: '200px',
-                    fontWeight: 'bold',
-                    fontSize: '14px',
-                  }}
-                >
-                  Filter by Timeline
-                </button>
+                <Tooltip title={loading ? 'Please wait while the report is being generated.' : ''}>
+                  <span
+                    style={{
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    <button
+                      className="btn dropdown-toggle"
+                      onClick={() => setYearDropdownOpen(!yearDropdownOpen)}
+                      style={{
+                        backgroundColor: 'rgb(160, 160, 160)',
+                        border: 'none',
+                        marginRight: '10px',
+                        color: 'white',
+                        width: '225px',
+                        fontWeight: 'bold',
+                        fontSize: '14px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                      }}
+                      disabled={loading}
+                    >
+                      {filterMessage}
+                    </button>
+                  </span>
+                </Tooltip>
                 {yearDropdownOpen && (
                   <div
                     className="dropdown-menu show p-2"
                     style={{
-                      width: '200px',
+                      width: '225px',
                       backgroundColor: 'rgb(160, 160, 160)',
                       border: 'none',
-                      right: 0,
+                      // right: 0,
                       marginTop: '5px',
+                      marginRight: '10px',
                       color: 'white',
                       fontWeight: 'bold',
                       fontSize: '14px',
@@ -926,7 +1030,10 @@ const ItemDetails = () => {
                       flexDirection: 'column',
                     }}
                   >
-                    <div className="form-group" style={{ marginBottom: '10px', width: '100%' }}>
+                    <div
+                      className="form-group"
+                      style={{ marginBottom: '10px', width: '100%', padding: '7px' }}
+                    >
                       <label>Start Date</label>
                       <input
                         type="date"
@@ -944,7 +1051,10 @@ const ItemDetails = () => {
                         }}
                       />
                     </div>
-                    <div className="form-group" style={{ marginBottom: '10px', width: '100%' }}>
+                    <div
+                      className="form-group"
+                      style={{ marginBottom: '10px', width: '100%', padding: '0 7px' }}
+                    >
                       <label>End Date</label>
                       <input
                         type="date"
@@ -968,14 +1078,15 @@ const ItemDetails = () => {
                       onClick={handleDateFilter}
                       disabled={!(startDate || endDate)}
                       style={{
-                        backgroundColor: 'black',
+                        backgroundColor: 'rgb(200, 200, 200)',
                         border: 'none',
                         color: 'white',
                         width: '100px',
                         fontWeight: 'bold',
                         fontSize: '14px',
-                        cursor: startDate || endDate ? 'pointer' : 'default',
+                        cursor: startDate || endDate ? 'pointer' : 'not-allowed',
                         transition: 'background-color 0.3s',
+                        marginTop: '10px',
                       }}
                     >
                       Submit
@@ -985,19 +1096,23 @@ const ItemDetails = () => {
               </div>
             </div>
           </div>
-          {/* Render the Tabs with the filterMessage */}
-          <Tabs
-            activeTab={activeTab}
-            handleTabChange={handleTabChange}
-            filterMessage={filterMessage}
-          />
+          <Tabs activeTab={activeTab} handleTabChange={handleTabChange} disabled={loading} />
         </div>
         {activeTab === 0 && (
           <div className="d-flex justify-content-end mt-2 gap-2 px-2">
             <StyledWrapper>
-              <button className="cssbuttons-io-button" onClick={handleFileUploadClick}>
-                Verify with Disclosures
-              </button>
+              <Tooltip title={loading ? 'Please wait while the report is being generated.' : ''}>
+                <button
+                  className="cssbuttons-io-button"
+                  onClick={handleFileUploadClick}
+                  disabled={loading}
+                  style={{
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  Verify with Disclosures
+                </button>
+              </Tooltip>
             </StyledWrapper>
             <input
               type="file"
@@ -1024,6 +1139,7 @@ const ItemDetails = () => {
                 content={reportContent}
                 isOpen={downloadDropdownOpen}
                 setIsOpen={() => setDownloadDropdownOpen(!downloadDropdownOpen)}
+                disabled={loading}
               />
             </div>
           </div>
@@ -1130,7 +1246,6 @@ const ItemDetails = () => {
                           borderRadius: '20px',
                           border: '2px solid green',
                           padding: '10px 10px',
-                          cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',

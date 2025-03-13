@@ -42,7 +42,6 @@ type Work struct {
 	WorkId          string
 	DisplayName     string
 	WorkUrl         string
-	OaUrl           string
 	DownloadUrl     string
 	PublicationDate time.Time
 	Authors         []Author
@@ -69,7 +68,7 @@ type InstitutionAuthor struct {
 }
 
 type KnowledgeBase interface {
-	AutocompleteAuthor(query string) ([]api.Autocompletion, error)
+	AutocompleteAuthor(authorNameQuery, institutionId string) ([]api.Autocompletion, error)
 
 	AutocompleteInstitution(query string) ([]api.Autocompletion, error)
 

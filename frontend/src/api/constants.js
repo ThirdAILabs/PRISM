@@ -1,4 +1,7 @@
-export const prismBaseUrl = process.env.REACT_APP_BACKEND_ORIGIN;
+const runtimeConfig = window._env_ || {};
+
+export const prismBaseUrl =
+  runtimeConfig.REACT_APP_BACKEND_ORIGIN || process.env.REACT_APP_BACKEND_ORIGIN;
 
 export const API_ROUTES = {
   REPORTS: {
@@ -22,6 +25,7 @@ export const API_ROUTES = {
   AUTOCOMPLETE: {
     AUTHOR: '/api/v1/autocomplete/author',
     INSTITUTION: '/api/v1/autocomplete/institution',
+    PAPER_TITLE: '/api/v1/autocomplete/paper',
   },
   SEARCH: {
     AUTHOR: '/api/v1/search/authors',

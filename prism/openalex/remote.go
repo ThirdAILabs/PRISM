@@ -49,10 +49,11 @@ type oaAutocompletion struct {
 	Hint        string `json:"hint"`
 }
 
-func (oa *RemoteKnowledgeBase) autocompleteHelper(component, query string) ([]api.Autocompletion, error) {
+func (oa *RemoteKnowledgeBase) autocompleteHelper(component, query, filter string) ([]api.Autocompletion, error) {
 	res, err := oa.client.R().
 		SetResult(&oaResults[oaAutocompletion]{}).
 		SetQueryParam("q", query).
+		SetQueryParam("filter", filter).
 		Get(fmt.Sprintf("/autocomplete/%s", component))
 
 	if err != nil {
@@ -79,16 +80,20 @@ func (oa *RemoteKnowledgeBase) autocompleteHelper(component, query string) ([]ap
 	return autocompletions, nil
 }
 
-func (oa *RemoteKnowledgeBase) AutocompleteAuthor(query string) ([]api.Autocompletion, error) {
-	return oa.autocompleteHelper("authors", query)
+func (oa *RemoteKnowledgeBase) AutocompleteAuthor(authorNameQuery string, institutionId string) ([]api.Autocompletion, error) {
+	var filterParam = ""
+	if institutionId != "" {
+		filterParam = fmt.Sprintf("affiliations.institution.id:%s", institutionId)
+	}
+	return oa.autocompleteHelper("authors", authorNameQuery, filterParam)
 }
 
 func (oa *RemoteKnowledgeBase) AutocompleteInstitution(query string) ([]api.Autocompletion, error) {
-	return oa.autocompleteHelper("institutions", query)
+	return oa.autocompleteHelper("institutions", query, "")
 }
 
 func (oa *RemoteKnowledgeBase) AutocompletePaper(query string) ([]api.Autocompletion, error) {
-	return oa.autocompleteHelper("works", query)
+	return oa.autocompleteHelper("works", query, "")
 }
 
 // Response Format: https://docs.openalex.org/api-entities/authors/get-lists-of-authors
@@ -231,19 +236,12 @@ func (work *oaWork) getWorkUrl() string {
 	return work.Ids.Openalex
 }
 
-func (work *oaWork) getOaUrl() string {
-	if work.BestOaLocation.IsOA {
-		return work.BestOaLocation.LandingPageUrl
-	}
-	return "none"
-}
-
-func (work *oaWork) pdfUrl() string {
-	if work.PrimaryLocation.PdfUrl != nil {
-		return *work.PrimaryLocation.PdfUrl
-	}
+func (work *oaWork) downloadUrl() string {
 	if work.BestOaLocation.PdfUrl != nil {
 		return *work.BestOaLocation.PdfUrl
+	}
+	if work.PrimaryLocation.PdfUrl != nil {
+		return *work.PrimaryLocation.PdfUrl
 	}
 	return ""
 }
@@ -331,8 +329,7 @@ func convertOpenalexWork(work oaWork) Work {
 		WorkId:          work.Id,
 		DisplayName:     work.DisplayName,
 		WorkUrl:         work.getWorkUrl(),
-		OaUrl:           work.getOaUrl(),
-		DownloadUrl:     work.pdfUrl(),
+		DownloadUrl:     work.downloadUrl(),
 		PublicationDate: publicationDate,
 		Authors:         authors,
 		Grants:          grants,

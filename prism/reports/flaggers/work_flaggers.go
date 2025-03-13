@@ -3,12 +3,14 @@ package flaggers
 import (
 	"fmt"
 	"log/slog"
-	"prism/prism/api"
-	"prism/prism/openalex"
-	"prism/prism/reports/flaggers/eoc"
 	"regexp"
 	"slices"
 	"strings"
+
+	"prism/prism/api"
+	"prism/prism/openalex"
+	"prism/prism/reports/flaggers/eoc"
+	"prism/prism/triangulation"
 )
 
 type WorkFlagger interface {
@@ -22,7 +24,7 @@ func getWorkSummary(w openalex.Work) api.WorkSummary {
 		WorkId:          w.WorkId,
 		DisplayName:     w.DisplayName,
 		WorkUrl:         w.WorkUrl,
-		OaUrl:           w.OaUrl,
+		OaUrl:           w.DownloadUrl,
 		PublicationDate: w.PublicationDate,
 	}
 }
@@ -238,11 +240,12 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works
 }
 
 type OpenAlexAcknowledgementIsEOC struct {
-	openalex     openalex.KnowledgeBase
-	entityLookup *EntityStore
-	authorCache  DataCache[openalex.Author]
-	extractor    AcknowledgementsExtractor
-	sussyBakas   []string
+	openalex        openalex.KnowledgeBase
+	entityLookup    *EntityStore
+	authorCache     DataCache[openalex.Author]
+	extractor       AcknowledgementsExtractor
+	sussyBakas      []string
+	triangulationDB *triangulation.TriangulationDB
 }
 
 func (flagger *OpenAlexAcknowledgementIsEOC) Name() string {
@@ -276,6 +279,17 @@ func (flagger *OpenAlexAcknowledgementIsEOC) getAuthorNames(authorIds []string) 
 	return authorNames, nil
 }
 
+func (flagger *OpenAlexAcknowledgementIsEOC) containsSussyBakas(text string) bool {
+	text = fmt.Sprintf(" %s ", strings.ToLower(strings.TrimSpace(text)))
+
+	for _, sussyBaka := range flagger.sussyBakas {
+		if strings.Contains(text, fmt.Sprintf(" %s ", sussyBaka)) {
+			return true
+		}
+	}
+	return false
+}
+
 var punctCleaningRe = regexp.MustCompile(`[.,()!?:"']`)
 
 func (flagger *OpenAlexAcknowledgementIsEOC) checkForSussyBaka(ack Acknowledgement) bool {
@@ -301,16 +315,9 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForSussyBaka(ack Acknowledgeme
 	}
 	newText += ack.RawText[prevEndPos:]
 
-	newText = strings.ToLower(strings.TrimSpace(newText))
 	newText = punctCleaningRe.ReplaceAllString(newText, " ")
-	newText = fmt.Sprintf(" %s ", newText)
 
-	for _, sussyBaka := range flagger.sussyBakas {
-		if strings.Contains(newText, fmt.Sprintf(" %s ", sussyBaka)) {
-			return true
-		}
-	}
-	return false
+	return flagger.containsSussyBakas(newText)
 }
 
 func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
@@ -370,6 +377,38 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 	return flagged, flaggedEntities, message, nil
 }
 
+func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
+	acknowledgements []Acknowledgement, allAuthorNames []string,
+) (map[string]map[string]bool, error) {
+	triangulationResults := make(map[string]map[string]bool)
+
+	for _, ack := range acknowledgements {
+		for _, entity := range ack.SearchableEntities {
+			if len(entity.FundCodes) > 0 {
+				if flagger.containsSussyBakas(entity.EntityText) {
+					if _, ok := triangulationResults[entity.EntityText]; !ok {
+						triangulationResults[entity.EntityText] = make(map[string]bool)
+					}
+
+					for _, grantNumber := range entity.FundCodes {
+						for _, authorName := range allAuthorNames {
+							result, err := flagger.triangulationDB.IsAuthorGrantRecipient(authorName, grantNumber)
+							if err != nil {
+								continue
+							}
+
+							triangulationResults[entity.EntityText][grantNumber] = result
+							break
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return triangulationResults, nil
+}
+
 var talentPrograms = []string{
 	"Department of Defense - Foreign Talent Programs that Pose a Threat to National Security Interests of the United States",
 	"Foreign Talent Recruitment Programs",
@@ -390,13 +429,14 @@ func containsSource(entities []api.AcknowledgementEntity, sourcesOfInterest []st
 	return false
 }
 
-func createAcknowledgementFlag(work openalex.Work, message string, entities []api.AcknowledgementEntity, rawAcks []string) api.Flag {
+func createAcknowledgementFlag(work openalex.Work, message string, entities []api.AcknowledgementEntity, rawAcks []string, triangulationResults map[string]map[string]bool) api.Flag {
 	if strings.Contains(message, "talent") || strings.Contains(message, "Talent") || containsSource(entities, talentPrograms) {
 		return &api.TalentContractFlag{
-			Message:            message,
-			Work:               getWorkSummary(work),
-			Entities:           entities,
-			RawAcknowledements: rawAcks,
+			Message:               message,
+			Work:                  getWorkSummary(work),
+			Entities:              entities,
+			RawAcknowledements:    rawAcks,
+			FundCodeTriangulation: triangulationResults,
 		}
 	} else if containsSource(entities, deniedEntities) {
 		return &api.AssociationWithDeniedEntityFlag{
@@ -411,10 +451,11 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			entityNames = append(entityNames, entity.Entity)
 		}
 		return &api.HighRiskFunderFlag{
-			Message:            message,
-			Work:               getWorkSummary(work),
-			Funders:            entityNames,
-			RawAcknowledements: rawAcks,
+			Message:               message,
+			Work:                  getWorkSummary(work),
+			Funders:               entityNames,
+			RawAcknowledements:    rawAcks,
+			FundCodeTriangulation: triangulationResults,
 		}
 	}
 }
@@ -470,6 +511,19 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 			continue
 		}
 
+		var triangulationResults map[string]map[string]bool
+
+		if flagged {
+			var err error
+			triangulationResults, err = flagger.checkForGrantRecipient(
+				acks.Result.Acknowledgements, allAuthorNames,
+			)
+			if err != nil {
+				workLogger.Error("error checking for grant recipient", "error", err)
+				continue
+			}
+		}
+
 		if flagged {
 			ackTexts := make([]string, 0, len(acks.Result.Acknowledgements))
 			for _, ack := range acks.Result.Acknowledgements {
@@ -491,7 +545,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 				fmt.Sprintf("%s\n%s", message, strings.Join(ackTexts, "\n")),
 				entities,
 				ackTexts,
-			))
+				triangulationResults))
 		}
 	}
 

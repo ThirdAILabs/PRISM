@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import '../components/common/searchBar/SearchBar.css';
 import '../components/common/tools/button/button1.css';
 
@@ -8,6 +8,7 @@ function AutocompleteSearchBar({
   onSelect,
   placeholder,
   showHint,
+  setSearchState,
   initialValue = '',
 }) {
   const [suggestions, setSuggestions] = useState([]);
@@ -23,6 +24,21 @@ function AutocompleteSearchBar({
     return () => {
       setSuggestions([]);
       setQuery(suggestion.Name);
+      if (setSearchState) {
+        setSearchState((prev) => ({
+          ...prev,
+          openAlexResults: [],
+          orcidResults: [],
+          paperResults: [],
+          hasSearched: false,
+          hasSearchedOrcid: false,
+          hasSearchedPaper: false,
+          isOALoading: false,
+          isOrcidLoading: false,
+          isPaperLoading: false,
+        }));
+      }
+
       onSelect(suggestion);
     };
   }
