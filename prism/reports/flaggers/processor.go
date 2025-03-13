@@ -4,8 +4,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"log/slog"
-
-	// "path/filepath"
+	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/openalex"
 	"prism/prism/reports"
@@ -45,37 +44,37 @@ type ReportProcessorOptions struct {
 
 // TODO(Nicholas): How to do cleanup for this, or just let it get cleaned up at the end of the process?
 func NewReportProcessor(manager *reports.ReportManager, opts ReportProcessorOptions) (*ReportProcessor, error) {
-	// authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(opts.WorkDir, "authors.cache"))
-	// if err != nil {
-	// 	return nil, fmt.Errorf("error loading author cache: %w", err)
-	// }
-	// ackCache, err := NewCache[Acknowledgements]("acks", filepath.Join(opts.WorkDir, "acks.cache"))
-	// if err != nil {
-	// 	return nil, fmt.Errorf("error loading ack cache: %w", err)
-	// }
+	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(opts.WorkDir, "authors.cache"))
+	if err != nil {
+		return nil, fmt.Errorf("error loading author cache: %w", err)
+	}
+	ackCache, err := NewCache[Acknowledgements]("acks", filepath.Join(opts.WorkDir, "acks.cache"))
+	if err != nil {
+		return nil, fmt.Errorf("error loading ack cache: %w", err)
+	}
 
 	return &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
 		workFlaggers: []WorkFlagger{
-			// &OpenAlexFunderIsEOC{
-			// 	concerningFunders:  opts.ConcerningFunders,
-			// 	concerningEntities: opts.ConcerningEntities,
-			// },
-			// &OpenAlexAuthorAffiliationIsEOC{
-			// 	concerningEntities:     opts.ConcerningEntities,
-			// 	concerningInstitutions: opts.ConcerningInstitutions,
-			// },
+			&OpenAlexFunderIsEOC{
+				concerningFunders:  opts.ConcerningFunders,
+				concerningEntities: opts.ConcerningEntities,
+			},
+			&OpenAlexAuthorAffiliationIsEOC{
+				concerningEntities:     opts.ConcerningEntities,
+				concerningInstitutions: opts.ConcerningInstitutions,
+			},
 			&OpenAlexCoauthorAffiliationIsEOC{
 				concerningEntities:     opts.ConcerningEntities,
 				concerningInstitutions: opts.ConcerningInstitutions,
 			},
-			// &OpenAlexAcknowledgementIsEOC{
-			// 	openalex:     openalex.NewRemoteKnowledgeBase(),
-			// 	entityLookup: opts.EntityLookup,
-			// 	authorCache:  authorCache,
-			// 	extractor:    NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.WorkDir),
-			// 	sussyBakas:   opts.SussyBakas,
-			// },
+			&OpenAlexAcknowledgementIsEOC{
+				openalex:     openalex.NewRemoteKnowledgeBase(),
+				entityLookup: opts.EntityLookup,
+				authorCache:  authorCache,
+				extractor:    NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.WorkDir),
+				sussyBakas:   opts.SussyBakas,
+			},
 		},
 		authorFacultyAtEOC: &AuthorIsFacultyAtEOCFlagger{
 			universityNDB: opts.UniversityNDB,
@@ -129,9 +128,6 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 					flagsCh <- flags
 				}
 			}(flagger, works.Works, works.TargetAuthorIds)
-		}
-		if len(works.Works) == 0 {
-			continue
 		}
 
 		wg.Add(1)
@@ -197,17 +193,12 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 
 	seen := make(map[[sha256.Size]byte]struct{})
 	flagCounts := make(map[string]int)
-	flagMap := make(map[[sha256.Size]byte]api.Flag)
 	for flags := range flagsCh {
 		for _, flag := range flags {
 			hash := flag.Hash()
 			if _, ok := seen[hash]; !ok {
 				seen[hash] = struct{}{}
-				flagMap[hash] = flag
 				flagCounts[flag.Type()]++
-			} else {
-				// slog.Info("duplicate flag", "flag", flag)
-				// slog.Info("present flags", "flag", flagMap[hash])
 			}
 		}
 

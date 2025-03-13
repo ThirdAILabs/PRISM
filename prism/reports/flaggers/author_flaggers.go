@@ -1,6 +1,7 @@
 package flaggers
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -18,14 +19,15 @@ type AuthorIsFacultyAtEOCFlagger struct {
 }
 
 type nameMatcher struct {
-	re *regexp.Regexp
+	text_regex   *regexp.Regexp
+	entity_regex *regexp.Regexp
 }
 
 const (
 	numUniversityDocumentsToRetrieve = 5
 	numAuxillaryDocumentsToRetrieve  = 5
 	numDOJDocumentsToRetrieve        = 5
-	useLLMVerification               = false
+	useLLMVerification               = true
 )
 
 func newNameMatcher(name string) (nameMatcher, bool) {
@@ -35,23 +37,40 @@ func newNameMatcher(name string) (nameMatcher, bool) {
 	}
 
 	if len(fields) == 1 {
-		return nameMatcher{regexp.MustCompile(fields[0])}, true
+		return nameMatcher{text_regex: regexp.MustCompile(fields[0]), entity_regex: regexp.MustCompile(fields[0])}, true
 	}
 
 	firstname, lastname := fields[0], fields[len(fields)-1]
 
 	maxChars := max(len(name)-(len(firstname)+len(lastname)), 10)
 
-	// namepattern := strings.Join(fields, `\s+`)
-	// re := regexp.MustCompile(fmt.Sprintf(`(\b%s[\w\s\.\-\,]{0,%d}%s\b)|(\b%s[\w\s\.\-\,]{0,%d}%s\b)|\b%s\b`, firstname, maxChars, lastname, lastname, maxChars, firstname, namepattern))
+	namepattern := strings.Join(fields, `\s+`)
+	test_regex := regexp.MustCompile(fmt.Sprintf(`(\b%s[\w\s\.\-\,]{0,%d}%s\b)|(\b%s[\w\s\.\-\,]{0,%d}%s\b)|(\b%s\b)`, firstname, maxChars, lastname, lastname, maxChars, firstname, namepattern))
 
-	re := regexp.MustCompile(fmt.Sprintf(`(\b%s[\w\s\.\-\,]{0,%d}%s\b)|(\b%s[\w\s\.\-\,]{0,%d}%s\b)`, firstname, maxChars, lastname, lastname, maxChars, firstname))
+	// anchored regex to the start and end of the string
+	entity_regex := regexp.MustCompile(fmt.Sprintf(`^((%s[\w\s\.\-\,]{0,%d}%s)|(%s[\w\s\.\-\,]{0,%d}%s)|(%s))$`,
+		firstname, maxChars, lastname,
+		lastname, maxChars, firstname,
+		namepattern))
 
-	return nameMatcher{re: re}, true
+	return nameMatcher{text_regex: test_regex, entity_regex: entity_regex}, true
 }
 
-func (n *nameMatcher) matches(candidate string) bool {
-	return n.re.MatchString(strings.ToLower(candidate))
+func (n *nameMatcher) matchesText(candidate string) bool {
+	return n.text_regex.MatchString(strings.ToLower(candidate))
+}
+
+func (n *nameMatcher) matchesEntity(candidate string) bool {
+	return n.entity_regex.MatchString(strings.ToLower(candidate))
+}
+
+func (n *nameMatcher) matchesAnyEntity(candidates []string) bool {
+	for _, candidate := range candidates {
+		if n.matchesEntity(strings.TrimSpace(candidate)) {
+			return true
+		}
+	}
+	return false
 }
 
 type MatchResult struct {
@@ -59,9 +78,9 @@ type MatchResult struct {
 	Context string
 }
 
-func (n *nameMatcher) findMatches(candidate string) []MatchResult {
+func (n *nameMatcher) findMatchesInText(candidate string) []MatchResult {
 	lowercaseCandidate := strings.ToLower(candidate)
-	matchIndices := n.re.FindAllStringIndex(lowercaseCandidate, -1)
+	matchIndices := n.text_regex.FindAllStringIndex(lowercaseCandidate, -1)
 
 	results := make([]MatchResult, 0, len(matchIndices))
 
@@ -180,7 +199,7 @@ func runLLMVerification(name string, texts []string) ([]bool, error) {
 
 	possibleAliases := make([][]MatchResult, len(texts))
 	for i, text := range texts {
-		possibleAliases[i] = matcher.findMatches(text)
+		possibleAliases[i] = matcher.findMatchesInText(text)
 	}
 
 	llm := llms.New()
@@ -268,7 +287,7 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 	flags := make([]api.Flag, 0)
 
 	for _, result := range results {
-		if matcher.matches(result.Text) {
+		if matcher.matchesText(result.Text) {
 			university, _ := result.Metadata["university"].(string)
 			if university == "" {
 				logger.Error("missing university metadata", "result", result)
@@ -325,10 +344,9 @@ func topCoauthors(works []openalex.Work) []authorCnt {
 		return 0
 	})
 
-	if len(topAuthors) <= 4 {
-		return topAuthors
-	}
-
+	// if len(topAuthors) <= 4 {
+	// 	return topAuthors
+	// }
 	// Find the count of the 4th top author
 	// thresholdCount := topAuthors[3].cnt
 
@@ -341,7 +359,7 @@ func topCoauthors(works []openalex.Work) []authorCnt {
 	// 		break
 	// 	}
 	// }
-	return topAuthors[:4]
+	return topAuthors[:min(len(topAuthors), 4)]
 
 	// return result
 }
@@ -375,7 +393,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 		temporaryFlags := make([]api.Flag, 0)
 		texts := make([]string, 0)
 		for _, result := range results {
-			if !matcher.matches(result.Text) {
+			if !matcher.matchesText(result.Text) {
 				continue
 			}
 
@@ -391,7 +409,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 			title, _ := result.Metadata["title"].(string)
 			entities := result.Metadata["entities"].(string)
 
-			if primaryMatcher.matches(author.author) {
+			if primaryMatcher.matchesEntity(author.author) {
 				temporaryFlags = append(temporaryFlags, &api.MiscHighRiskAssociationFlag{
 					Message:         "The author or a frequent associate may be mentioned in a press release.",
 					DocTitle:        title,
@@ -444,17 +462,22 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 	}
 
 	for _, result := range results {
-		if !primaryMatcher.matches(result.Text) {
-			continue
-		}
-
+		// skip if already seen the URL
 		url, _ := result.Metadata["url"].(string)
 		if seen[url] {
 			continue
 		}
 		seen[url] = true
 
+		// iterate over entities and check if any of them match the primary matcher
+		// skip if no entity matches the primary matcher
+		// this is not always accurate as Thomas J. Smith will match with J. Smith
 		entities, _ := result.Metadata["entities"].(string)
+		if !primaryMatcher.matchesAnyEntity(strings.Split(entities, ";")) {
+			continue
+		}
+
+		// add neighbouring entities to the queryToConn map
 		for _, entity := range strings.Split(entities, ";") {
 			if _, ok := queryToConn[entity]; !ok {
 				title, _ := result.Metadata["title"].(string)
@@ -473,6 +496,12 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 			return nil, fmt.Errorf("error querying ndb: %w", err)
 		}
 
+		secondaryMatcher, validName := newNameMatcher(query)
+		if !validName {
+			slog.Error("query name is empty")
+			continue
+		}
+
 		for _, result := range results {
 			if !strings.Contains(result.Text, query) {
 				continue
@@ -484,7 +513,12 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 			}
 			seen[url] = true
 
+			// skip if no entity matches the secondary matcher
 			entities, _ := result.Metadata["entities"].(string)
+			if !secondaryMatcher.matchesAnyEntity(strings.Split(entities, ";")) {
+				continue
+			}
+
 			for _, entity := range strings.Split(entities, ";") {
 				if _, ok := level2Entities[entity]; !ok {
 					title, _ := result.Metadata["title"].(string)
@@ -499,8 +533,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 	}
 
 	flags := make([]api.Flag, 0)
-
-	// seenFlags := make(map[string]*api.MiscHighRiskAssociationFlag)
+	seenFlags := make(map[[sha256.Size]byte]bool)
 	for query, conns := range queryToConn {
 		results, err := flagger.docNDB.Query(query, numDOJDocumentsToRetrieve, nil)
 		if err != nil {
@@ -508,6 +541,10 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 			return nil, fmt.Errorf("error querying ndb: %w", err)
 		}
 
+		tempFlags := make([]api.Flag, 0)
+
+		// rather than using direct string comparison, we use llm to verify matches here
+		texts := make([]string, 0)
 		for _, result := range results {
 			// searching for exact match
 			// this increases the false negatives for the names
@@ -518,57 +555,56 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 			title, _ := result.Metadata["title"].(string)
 			url, _ := result.Metadata["url"].(string)
 
-			// if _, ok := seenFlags[url]; ok {
-			// 	seenFlags[url].Connections = append(seenFlags[url].Connections, conns...)
-			// 	continue
-			// }
-
 			entities, _ := result.Metadata["entities"].(string)
-			flags = append(flags, &api.MiscHighRiskAssociationFlag{
+			flag := &api.MiscHighRiskAssociationFlag{
 				Message:         "The author may be associated be an entity who/which may be mentioned in a press release.\n",
 				DocTitle:        title,
 				DocUrl:          url,
 				DocEntities:     strings.Split(entities, ";"),
 				EntityMentioned: query,
 				Connections:     conns,
-			})
-			// seenFlags[url] = temporaryFlags[len(temporaryFlags)-1].(*api.MiscHighRiskAssociationFlag)
+			}
+
+			hash := flag.Hash()
+
+			if _, ok := seenFlags[hash]; ok {
+				continue
+			}
+
+			seenFlags[hash] = true
+			tempFlags = append(tempFlags, flag)
+			texts = append(texts, result.Text)
 		}
 
-		// if useLLMVerification {
-		// 	filteredFlags, err := filterFlagsWithLLM(temporaryFlags, texts, query)
-		// 	if err != nil {
-		// 		return nil, fmt.Errorf("error filtering flags: %w", err)
-		// 	}
-		// 	flags = append(flags, filteredFlags...)
-		// 	for _, flag := range filteredFlags {
-		// 		castFlag := flag.(*api.MiscHighRiskAssociationFlag)
-		// 		slog.Info("flag", "url", castFlag.DocUrl, "title", castFlag.DocTitle)
-		// 	}
-		// } else {
-		// 	flags = append(flags, temporaryFlags...)
-		// }
+		if useLLMVerification {
+			filteredFlags, err := filterFlagsWithLLM(tempFlags, texts, query)
+			if err != nil {
+				return nil, fmt.Errorf("error filtering flags: %w", err)
+			}
+			flags = append(flags, filteredFlags...)
+			for _, flag := range filteredFlags {
+				castFlag := flag.(*api.MiscHighRiskAssociationFlag)
+				slog.Info("flag", "url", castFlag.DocUrl, "title", castFlag.DocTitle)
+			}
+		} else {
+			flags = append(flags, tempFlags...)
+		}
 	}
 	return flags, nil
 }
 
 func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(logger *slog.Logger, authorName string, works []openalex.Work) ([]api.Flag, error) {
-	slog.Info("finding first/second level flags", "author", authorName, "num works", len(works))
 	firstSecondLevelFlags, err := flagger.findFirstSecondHopEntities(authorName, works)
 	if err != nil {
 		logger.Error("error checking first/second level flags", "error", err)
 		return nil, err
 	}
 
-	slog.Info("first/second level flags", "flags", firstSecondLevelFlags)
-
 	secondThirdLevelFlags, err := flagger.findSecondThirdHopEntities(logger, authorName)
 	if err != nil {
 		logger.Error("error checking second/third level flags", "error", err)
 		return nil, err
 	}
-
-	slog.Info("second/third level flags", "flags", secondThirdLevelFlags)
 
 	flags := slices.Concat(firstSecondLevelFlags, secondThirdLevelFlags)
 
