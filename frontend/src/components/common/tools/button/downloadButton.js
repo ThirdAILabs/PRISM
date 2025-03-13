@@ -76,13 +76,17 @@ const Button = ({ reportId, metadata, content, isOpen, setIsOpen, disabled }) =>
 
   return (
     <StyledWrapper>
-      <Tooltip title={disabled ? "Download will be available once the report has finished generating." : ""}>
+      <Tooltip
+        title={
+          disabled ? 'Download will be available once the report has finished generating.' : ''
+        }
+      >
         <button
           className="cssbuttons-io-button"
           onClick={() => setIsOpen(!isOpen)}
           disabled={disabled}
           style={{
-            cursor: disabled ? 'not-allowed' : 'pointer'
+            cursor: disabled ? 'not-allowed' : 'pointer',
           }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24}>

@@ -53,10 +53,7 @@ const CustomTabs = ({ activeTab, handleTabChange, disabled }) => {
             minHeight: '48px',
           }}
         >
-          <span
-            onClick={(e) => !disabled && handleTabChange(e, 0)}
-            className={classes.tab}
-          >
+          <span onClick={(e) => !disabled && handleTabChange(e, 0)} className={classes.tab}>
             <Tab
               label="Dashboard"
               className={classes.tab}
@@ -68,7 +65,11 @@ const CustomTabs = ({ activeTab, handleTabChange, disabled }) => {
             />
           </span>
           <Tooltip
-            title={disabled ? 'Graph Visualization will be available once the report has finished generating.' : ""}
+            title={
+              disabled
+                ? 'Graph Visualization will be available once the report has finished generating.'
+                : ''
+            }
             arrow
             componentsProps={{
               tooltip: {
@@ -103,7 +104,6 @@ const CustomTabs = ({ activeTab, handleTabChange, disabled }) => {
               />
             </span>
           </Tooltip>
-
         </Tabs>
       </Box>
       {/* Added black divider below tabs */}

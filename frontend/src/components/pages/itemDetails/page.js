@@ -245,7 +245,9 @@ const ItemDetails = () => {
   const [endDate, setEndDate] = useState('');
   const [activeTab, setActiveTab] = useState(0);
 
-  const [filterMessage, setFilterMessage] = useState((getTrailingWhiteSpace(12)) + 'Filter by Timeline');
+  const [filterMessage, setFilterMessage] = useState(
+    getTrailingWhiteSpace(12) + 'Filter by Timeline'
+  );
   const handleTabChange = (event, newValue) => {
     // if (newValue === 1) {
     //   console.log("new value and loading", newValue, loading);
@@ -253,7 +255,7 @@ const ItemDetails = () => {
     //     setActiveTab(newValue);
     //   return;
     // }
-    console.log("value", newValue);
+    console.log('value', newValue);
     setActiveTab(newValue);
   };
   const handleStartDateChange = (e) => setStartDate(e.target.value);
@@ -307,17 +309,17 @@ const ItemDetails = () => {
 
     const displayStart = startDate
       ? parseLocalDate(startDate).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
       : 'earliest';
     const displayEnd = endDate
       ? parseLocalDate(endDate).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
       : 'today';
 
     setFilterMessage(`${displayStart} - ${displayEnd}`);
@@ -361,10 +363,11 @@ const ItemDetails = () => {
                                   type="button"
                                   className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
                                   style={{ minWidth: '180px', textAlign: 'center' }}
-                                  title={`${innerKey}: ${value
-                                    ? 'The author likely IS a primary recipient of this grant.'
-                                    : 'The author likely IS NOT a primary recipient of this grant.'
-                                    }`}
+                                  title={`${innerKey}: ${
+                                    value
+                                      ? 'The author likely IS a primary recipient of this grant.'
+                                      : 'The author likely IS NOT a primary recipient of this grant.'
+                                  }`}
                                 >
                                   {innerKey}
                                   {/* : {value ? 'Yes' : 'No'} */}
@@ -672,9 +675,9 @@ const ItemDetails = () => {
           {flag.RawAcknowledements.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
-          <p>{ }</p>
+          <p>{}</p>
         </p>
-        { }
+        {}
 
         <div>{fundCodeTriangulation(flag, index)}</div>
       </div>
@@ -987,10 +990,18 @@ const ItemDetails = () => {
                     }
                   `}
                 </style>
-                <Tooltip title={loading ? "Filter will be available once the report has finished generating." : ""}>
-                  <span style={{
-                    cursor: loading ? 'not-allowed' : 'pointer'
-                  }}>
+                <Tooltip
+                  title={
+                    loading
+                      ? 'Filter will be available once the report has finished generating.'
+                      : ''
+                  }
+                >
+                  <span
+                    style={{
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                    }}
+                  >
                     <button
                       className="btn dropdown-toggle"
                       onClick={() => setYearDropdownOpen(!yearDropdownOpen)}
@@ -1005,7 +1016,7 @@ const ItemDetails = () => {
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        cursor: loading ? 'not-allowed' : 'pointer'
+                        cursor: loading ? 'not-allowed' : 'pointer',
                       }}
                       disabled={loading}
                     >
@@ -1032,7 +1043,10 @@ const ItemDetails = () => {
                       flexDirection: 'column',
                     }}
                   >
-                    <div className="form-group" style={{ marginBottom: '10px', width: '100%', padding: '7px' }}>
+                    <div
+                      className="form-group"
+                      style={{ marginBottom: '10px', width: '100%', padding: '7px' }}
+                    >
                       <label>Start Date</label>
                       <input
                         type="date"
@@ -1050,7 +1064,10 @@ const ItemDetails = () => {
                         }}
                       />
                     </div>
-                    <div className="form-group" style={{ marginBottom: '10px', width: '100%', padding: '0 7px' }}>
+                    <div
+                      className="form-group"
+                      style={{ marginBottom: '10px', width: '100%', padding: '0 7px' }}
+                    >
                       <label>End Date</label>
                       <input
                         type="date"
@@ -1092,22 +1109,24 @@ const ItemDetails = () => {
               </div>
             </div>
           </div>
-          <Tabs
-            activeTab={activeTab}
-            handleTabChange={handleTabChange}
-            disabled={loading}
-          />
+          <Tabs activeTab={activeTab} handleTabChange={handleTabChange} disabled={loading} />
         </div>
         {activeTab === 0 && (
           <div className="d-flex justify-content-end mt-2 gap-2 px-2">
             <StyledWrapper>
-              <Tooltip title={loading ?
-                "Verify with disclosure will be available once the report has finished generating." : ""}>
-                <button className="cssbuttons-io-button"
+              <Tooltip
+                title={
+                  loading
+                    ? 'Verify with disclosure will be available once the report has finished generating.'
+                    : ''
+                }
+              >
+                <button
+                  className="cssbuttons-io-button"
                   onClick={handleFileUploadClick}
                   disabled={loading}
                   style={{
-                    cursor: loading ? 'not-allowed' : 'pointer'
+                    cursor: loading ? 'not-allowed' : 'pointer',
                   }}
                 >
                   Verify with Disclosures

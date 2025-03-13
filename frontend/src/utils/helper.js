@@ -15,4 +15,4 @@ export function GetShowMenuIcon() {
 export function getTrailingWhiteSpace(count) {
   const stringTrailingWhiteSpace = '\u00A0';
   return Array(count).fill(stringTrailingWhiteSpace).join('');
-};
+}
