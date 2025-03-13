@@ -130,6 +130,9 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 				}
 			}(flagger, works.Works, works.TargetAuthorIds)
 		}
+		if len(works.Works) == 0 {
+			continue
+		}
 
 		wg.Add(1)
 		go func(batch int, works []openalex.Work) {
