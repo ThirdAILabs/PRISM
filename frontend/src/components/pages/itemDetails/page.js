@@ -249,13 +249,6 @@ const ItemDetails = () => {
     getTrailingWhiteSpace(12) + 'Filter by Timeline'
   );
   const handleTabChange = (event, newValue) => {
-    // if (newValue === 1) {
-    //   console.log("new value and loading", newValue, loading);
-    //   if (!loading)
-    //     setActiveTab(newValue);
-    //   return;
-    // }
-    console.log('value', newValue);
     setActiveTab(newValue);
   };
   const handleStartDateChange = (e) => setStartDate(e.target.value);
