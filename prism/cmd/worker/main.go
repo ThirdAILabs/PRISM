@@ -4,6 +4,7 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"path/filepath"
 
 	"prism/prism/cmd"
 	"prism/prism/licensing"
@@ -73,35 +74,36 @@ func main() {
 		log.Fatalf("error activating license key: %v", err)
 	}
 
+	ndbDir := filepath.Join(config.WorkDir, "ndbs")
+
 	var universityNDB search.NeuralDB
 	var docNDB search.NeuralDB
 	var auxNDB search.NeuralDB
-	var entityStore *flaggers.EntityStore
 
-	// if config.RetrainNDBs {
-	// 	universityNDB, docNDB, auxNDB = flaggers.RetrainWorkerNDBs(ndbDir, config.UniversityData, config.DocData, config.AuxData)
-	// } else {
-	// 	universityNDB, err = search.NewNeuralDB(filepath.Join(ndbDir, "university.ndb"))
-	// 	if err != nil {
-	// 		log.Fatalf("error initializing university ndb: %v", err)
-	// 	}
+	if config.RetrainNDBs {
+		universityNDB, docNDB, auxNDB = flaggers.RetrainWorkerNDBs(ndbDir, config.UniversityData, config.DocData, config.AuxData)
+	} else {
+		universityNDB, err = search.NewNeuralDB(filepath.Join(ndbDir, "university.ndb"))
+		if err != nil {
+			log.Fatalf("error initializing university ndb: %v", err)
+		}
 
-	// 	docNDB, err = search.NewNeuralDB(filepath.Join(ndbDir, "doc.ndb"))
-	// 	if err != nil {
-	// 		log.Fatalf("error initializing doc ndb: %v", err)
-	// 	}
+		docNDB, err = search.NewNeuralDB(filepath.Join(ndbDir, "doc.ndb"))
+		if err != nil {
+			log.Fatalf("error initializing doc ndb: %v", err)
+		}
 
-	// 	auxNDB, err = search.NewNeuralDB(filepath.Join(ndbDir, "aux.ndb"))
-	// 	if err != nil {
-	// 		log.Fatalf("error initializing aux ndb: %v", err)
-	// 	}
-	// }
+		auxNDB, err = search.NewNeuralDB(filepath.Join(ndbDir, "aux.ndb"))
+		if err != nil {
+			log.Fatalf("error initializing aux ndb: %v", err)
+		}
+	}
 
-	// entityStore, err := flaggers.NewEntityStore(filepath.Join(ndbDir, "entity_lookup.ndb"), eoc.LoadSourceToAlias())
-	// if err != nil {
-	// 	log.Fatalf("error creating entity store: %v", err)
-	// }
-	// defer entityStore.Free()
+	entityStore, err := flaggers.NewEntityStore(filepath.Join(ndbDir, "entity_lookup.ndb"), eoc.LoadSourceToAlias())
+	if err != nil {
+		log.Fatalf("error creating entity store: %v", err)
+	}
+	defer entityStore.Free()
 
 	opts := flaggers.ReportProcessorOptions{
 		UniversityNDB:   universityNDB,
