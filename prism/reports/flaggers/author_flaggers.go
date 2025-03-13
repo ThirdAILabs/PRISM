@@ -578,10 +578,6 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 				return nil, fmt.Errorf("error filtering flags: %w", err)
 			}
 			flags = append(flags, filteredFlags...)
-			for _, flag := range filteredFlags {
-				castFlag := flag.(*api.MiscHighRiskAssociationFlag)
-				slog.Info("flag", "url", castFlag.DocUrl, "title", castFlag.DocTitle)
-			}
 		} else {
 			flags = append(flags, tempFlags...)
 		}
