@@ -1,0 +1,6444 @@
+[
+  {
+    "Entity": "Fourth Military Medical University",
+    "Queries": [
+      "Fourth Military Medical University",
+      "FMMU",
+      "4th Military Medical University"
+    ]
+  },
+  {
+    "Entity": "BUCT",
+    "Queries": [
+      "Beijing University of Chemical Technology",
+      "Beijing UCT",
+      "B. UCT"
+    ]
+  },
+  {
+    "Entity": "China Aerospace Science and Industry Corporation",
+    "Queries": [
+      "CASIC",
+      "China Aerospace Science \u0026 Industry Corp",
+      "China Aerospace Science and Industry Corp."
+    ]
+  },
+  {
+    "Entity": "火箭军士官学校",
+    "Queries": [
+      "火箭军士官学院",
+      "火箭军士官学",
+      "火箭军学院"
+    ]
+  },
+  {
+    "Entity": "空军后勤学院",
+    "Queries": [
+      "空军后勤学院",
+      "空军后勤学",
+      "空军后勤院"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军陆军边海学院",
+    "Queries": [
+      "中国陆军边海学院",
+      "人民解放军陆军边海学院",
+      "陆军边海学院"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军海军勤务学院",
+    "Queries": [
+      "中国海军勤务学院",
+      "人民海军勤务学院",
+      "解放军海军勤务学院"
+    ]
+  },
+  {
+    "Entity": "AVIC Jonhon Optronic Technology Co., Ltd.",
+    "Queries": [
+      "AVIC Jonhon Optronic Technology",
+      "AVIC Jonhon Optronic Technology Company",
+      "AVIC Jonhon Optronic Technology Co."
+    ]
+  },
+  {
+    "Entity": "International Academic Masters Campus Travel Plan",
+    "Queries": [
+      "International Academic Masters Campus Travel Plan",
+      "Int'l Academic Masters Campus Travel Plan",
+      "I.A.M.C. Travel Plan"
+    ]
+  },
+  {
+    "Entity": "Space Engineering University",
+    "Queries": [
+      "Space Engineering Univ.",
+      "Space Eng. University",
+      "SE University"
+    ]
+  },
+  {
+    "Entity": "Youth Thousand Talents Program",
+    "Queries": [
+      "Youth 1000 Talents Program",
+      "YTTP",
+      "Youth Thousand Talents Programme"
+    ]
+  },
+  {
+    "Entity": "中国人民武装警察部队警官学院",
+    "Queries": [
+      "中国武警警官学院",
+      "武装警察部队警官学院",
+      "武警警官学院"
+    ]
+  },
+  {
+    "Entity": "Army Research Institute",
+    "Queries": [
+      "Army Research Institute",
+      "U.S. Army Research Institute",
+      "ARI"
+    ]
+  },
+  {
+    "Entity": "Zhengzhou Institute of Surveying and Mapping",
+    "Queries": [
+      "Zhengzhou Surveying and Mapping Institute",
+      "Institute of Surveying and Mapping Zhengzhou",
+      "Zhengzhou Institute of Mapping"
+    ]
+  },
+  {
+    "Entity": "China National Offshore Oil Corporation",
+    "Queries": [
+      "CNOOC",
+      "China National Offshore Oil Co.",
+      "China Nat. Offshore Oil Corp."
+    ]
+  },
+  {
+    "Entity": "Southwest Institute of Explosive and Chemical Engineering",
+    "Queries": [
+      "Southwest Institute of Explosive \u0026 Chemical Engineering",
+      "Southwest Institute of Chemical and Explosive Engineering",
+      "S. I. of Explosive and Chemical Engineering"
+    ]
+  },
+  {
+    "Entity": "公安海警学院",
+    "Queries": [
+      "公安海警学院",
+      "公安海警學院",
+      "GPA Police Academy"
+    ]
+  },
+  {
+    "Entity": "Special Police of China",
+    "Queries": [
+      "Special Police Dept of China",
+      "China Special Police",
+      "Chinese Special Police"
+    ]
+  },
+  {
+    "Entity": "Naval Equipment Academy",
+    "Queries": [
+      "Naval Equipment Acad",
+      "N.E. Academy",
+      "NE Academy"
+    ]
+  },
+  {
+    "Entity": "中国核工业集团有限公司",
+    "Queries": [
+      "CNNC",
+      "中国核工业集团",
+      "中国核工业集团公司"
+    ]
+  },
+  {
+    "Entity": "YSU",
+    "Queries": [
+      "Youngstown State University",
+      "Y.S.U.",
+      "YSU University"
+    ]
+  },
+  {
+    "Entity": "Changjiang Scholars program",
+    "Queries": [
+      "Changjiang Scholars Program",
+      "Yangtze River Scholars Program",
+      "Changjiang Scholars."
+    ]
+  },
+  {
+    "Entity": "Army Academy of Artillery and Air Defense",
+    "Queries": [
+      "Army Academy of Artillery \u0026 Air Defense",
+      "Army Academy of Artillery and Air Defence",
+      "Army Academy of Artillery \u0026 Air Defence"
+    ]
+  },
+  {
+    "Entity": "NJUST",
+    "Queries": [
+      "NJUST",
+      "Nanjing University of Science and Technology",
+      "Nanjing UST"
+    ]
+  },
+  {
+    "Entity": "PLA Navy Submarine Academy",
+    "Queries": [
+      "PLA Navy Submarine Academy",
+      "People's Liberation Army Navy Submarine Academy",
+      "People's Liberation Army Navy Submarine Acad."
+    ]
+  },
+  {
+    "Entity": "Semiconductor Manufacturing International (Beijing) Corporation",
+    "Queries": [
+      "SMIC Beijing",
+      "Semiconductor Manufacturing Int. (Beijing) Corp.",
+      "Semiconductor Manufacturing Int'l (Beijing) Corp."
+    ]
+  },
+  {
+    "Entity": "Special Police Academy",
+    "Queries": [
+      "Special Police Acad.",
+      "Special Police Acad",
+      "SPA"
+    ]
+  },
+  {
+    "Entity": "Central South CAD Center",
+    "Queries": [
+      "Central South Computer-Aided Design Center",
+      "Central South CAD Centre",
+      "CS CAD Center"
+    ]
+  },
+  {
+    "Entity": "Southwest Institute of General Designing and Assembly",
+    "Queries": [
+      "SW Institute of General Designing and Assembly",
+      "Southwest Institute of General Designing \u0026 Assembly",
+      "Southwest Institute of General Design and Assembly"
+    ]
+  },
+  {
+    "Entity": "Federal State Budgetary Institution of Science P.I.K.A Valiev RAS of the Ministry of Science and Higher Education of Russia",
+    "Queries": [
+      "Federal State Budgetary Institution of Science P.I.K.A. Valiev RAS",
+      "P.I.K.A. Valiev RAS",
+      "Valiev RAS"
+    ]
+  },
+  {
+    "Entity": "Gold Card",
+    "Queries": [
+      "Gold C.",
+      "G. Card",
+      "G. C."
+    ]
+  },
+  {
+    "Entity": "Air Force Harbin Flight Academy",
+    "Queries": [
+      "Air Force Harbin Flight Academy",
+      "Harbin Flight Academy",
+      "AF Harbin Flight Academy"
+    ]
+  },
+  {
+    "Entity": "SYLU",
+    "Queries": null
+  },
+  {
+    "Entity": "China Aerodynamics Research and Development Center",
+    "Queries": [
+      "CARDC",
+      "China Aerodynamics R\u0026D Center",
+      "China Aerodynamics Research \u0026 Development Centre"
+    ]
+  },
+  {
+    "Entity": "北京科技大学",
+    "Queries": [
+      "北科大",
+      "Beijing University of Science and Technology",
+      "USTB"
+    ]
+  },
+  {
+    "Entity": "AVIC Heavy Machinery Company Limited",
+    "Queries": [
+      "AVIC Heavy Machinery Co. Ltd.",
+      "AVIC Heavy Machinery Co.",
+      "AVIC Heavy Machinery Ltd."
+    ]
+  },
+  {
+    "Entity": "西安电子科技大学",
+    "Queries": [
+      "Xidian University",
+      "Xidian U.",
+      "XD University"
+    ]
+  },
+  {
+    "Entity": "西南科技大学",
+    "Queries": [
+      "西南科大",
+      "西南科工大",
+      "SWUST"
+    ]
+  },
+  {
+    "Entity": "XJTU",
+    "Queries": [
+      "Xi'an Jiaotong University",
+      "X. Jiaotong University",
+      "Jiaotong University Xi'an"
+    ]
+  },
+  {
+    "Entity": "Institute of Microbial Epidemiology",
+    "Queries": [
+      "Institute of Microbial Epidemiology",
+      "Institute for Microbial Epidemiology",
+      "Institute of Microbial Epidemiological Studies"
+    ]
+  },
+  {
+    "Entity": "ITMO University Fellowship \u0026 Professorship Program --- three short-term tracks, lasting two weeks to one month",
+    "Queries": [
+      "ITMO University Fellowship \u0026 Professorship Program",
+      "ITMO University Fellowship Program",
+      "ITMO University Professorship Program"
+    ]
+  },
+  {
+    "Entity": "CNNC",
+    "Queries": [
+      "CNNC",
+      "C.N.N.C."
+    ]
+  },
+  {
+    "Entity": "Northwest Nuclear Technology Institute",
+    "Queries": [
+      "Northwest Nuclear Tech Institute",
+      "Northwest Nuclear Technology Inst.",
+      "NNTI"
+    ]
+  },
+  {
+    "Entity": "AVIC Xi'an Aircraft Industry Group Company Ltd.",
+    "Queries": [
+      "AVIC Xi'an Aircraft Industry Group Co. Ltd.",
+      "AVIC Xi'an Aircraft Industry Group Co.",
+      "AVIC Xi'an Aircraft Industry Group."
+    ]
+  },
+  {
+    "Entity": "Joint Stock Company “State Research Institute of Mechanical Engineering” named after “V.V. Bakhirev”",
+    "Queries": [
+      "JSC \"SRIME\" named after \"V.V. Bakhirev\"",
+      "State Research Institute of Mechanical Engineering \"V.V. Bakhirev\"",
+      "\"V.V. Bakhirev\" State Research Institute of Mechanical Engineering"
+    ]
+  },
+  {
+    "Entity": "Training Plan of the Intellect Recruitment Program for Higher Education Curricula Innovation",
+    "Queries": [
+      "Training Plan of the Intellect Recruitment Program",
+      "Training Plan for Higher Education Curricula Innovation",
+      "Intellect Recruitment Program for Higher Education Curricula Innovation"
+    ]
+  },
+  {
+    "Entity": "Homeland-Serving Action Plan for Patriotic Overseas Chinese",
+    "Queries": [
+      "Homeland-Serving Action Plan",
+      "Patriotic Overseas Chinese Action Plan",
+      "Homeland-Serving Plan for Chinese Patriots"
+    ]
+  },
+  {
+    "Entity": "Academy of Military Medical Sciences, Institute of Disease Control and Prevention",
+    "Queries": [
+      "Academy of Military Medical Sciences",
+      "Institute of Disease Control \u0026 Prevention",
+      "Academy of Military Medical Sciences",
+      "Disease Control and Prevention Institute",
+      "AMMS Institute of Disease Control and Prevention"
+    ]
+  },
+  {
+    "Entity": "CSCC",
+    "Queries": null
+  },
+  {
+    "Entity": "Rzhanov Insitute of Semiconductor Physics, Siberian Branch of Russian Academy of Sciences",
+    "Queries": [
+      "ISP SB RAS",
+      "RISP SB RAS",
+      "Rzhanov Institute SB RAS"
+    ]
+  },
+  {
+    "Entity": "901 Institute",
+    "Queries": [
+      "901 Inst.",
+      "901 Inst",
+      "Nine Zero One Institute"
+    ]
+  },
+  {
+    "Entity": "Army Aviation College",
+    "Queries": [
+      "Army Aviation College",
+      "A. A. College",
+      "AAC"
+    ]
+  },
+  {
+    "Entity": "空军军医大学",
+    "Queries": [
+      "Air Force Medical University",
+      "AFMU",
+      "Fourth Military Medical University"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军海军蚌埠士官学校",
+    "Queries": [
+      "中国人民解放军海军蚌埠士官学院",
+      "中国人民解放军蚌埠海军士官学校",
+      "中国人民解放军海军蚌埠士官学堂"
+    ]
+  },
+  {
+    "Entity": "SKB DNIKhTI",
+    "Queries": [
+      "SKB D.N. Ikhti",
+      "SKB D. N. Ikhti",
+      "SKB DN Ikhti"
+    ]
+  },
+  {
+    "Entity": "Plan for the Recruitment of Overseas Young Talents in the Cultural and Educational Sectors",
+    "Queries": [
+      "Plan for the Recruitment of Overseas Young Talents",
+      "Recruitment of Overseas Young Talents Program",
+      "Cultural and Educational Overseas Talents Program"
+    ]
+  },
+  {
+    "Entity": "西安工业大学",
+    "Queries": [
+      "XATU",
+      "Xi'an Technological University",
+      "Xi’an University of Technology"
+    ]
+  },
+  {
+    "Entity": "Dahna",
+    "Queries": [
+      "D."
+    ]
+  },
+  {
+    "Entity": "State Key Laboratory of Mathematical Engineering and Advanced Computing",
+    "Queries": [
+      "State Key Lab of Mathematical Engineering and Advanced Computing",
+      "SKL of Mathematical Engineering and Advanced Computing",
+      "SKL of MEAC"
+    ]
+  },
+  {
+    "Entity": "Beijing Zhidao Chuangyu Information Technology Co., Ltd.",
+    "Queries": [
+      "Beijing Zhidao Chuangyu Information Technology Company",
+      "Beijing Zhidao Chuangyu Information Technology Co.",
+      "Beijing Zhidao Chuangyu."
+    ]
+  },
+  {
+    "Entity": "Railway Police College",
+    "Queries": [
+      "Railway Police College",
+      "RPC",
+      "Railway Police Coll."
+    ]
+  },
+  {
+    "Entity": "Changjiang Scholar Distinguished Professorship",
+    "Queries": null
+  },
+  {
+    "Entity": "Third Military Medical University",
+    "Queries": [
+      "Third Military Medical University",
+      "TMMU",
+      "3rd Military Medical University"
+    ]
+  },
+  {
+    "Entity": "南京信息技术研究院",
+    "Queries": [
+      "Nanjing Institute of Information Technology",
+      "南京信息技術研究院",
+      "Nanjing Information Technology Research Institute"
+    ]
+  },
+  {
+    "Entity": "大连民大",
+    "Queries": [
+      "大连民族大学",
+      "民族大学",
+      "辽宁民族学院"
+    ]
+  },
+  {
+    "Entity": "360 Security Technology Inc.",
+    "Queries": [
+      "360 Security Technology",
+      "Three Sixty Security Technology",
+      "360 Sec. Tech. Inc."
+    ]
+  },
+  {
+    "Entity": "Hundred Talents Plan",
+    "Queries": [
+      "Hundred Talents Program",
+      "100 Talents Plan",
+      "100 Talents Program"
+    ]
+  },
+  {
+    "Entity": "Beijing Institute of Space Automatic Control",
+    "Queries": [
+      "Beijing Institute of Space Automation Control",
+      "BISAC",
+      "Beijing Institute of Space AC"
+    ]
+  },
+  {
+    "Entity": "MPS China People's Police University",
+    "Queries": [
+      "China People's Police University",
+      "MPS China People's Police Univ.",
+      "CP Police University"
+    ]
+  },
+  {
+    "Entity": "Zhonghang Electronic Measuring Instruments Company Limited",
+    "Queries": [
+      "Zhonghang Electronic Measuring Instruments Co.",
+      "Ltd.",
+      "ZEMIC",
+      "ZEMI Co.",
+      "Ltd."
+    ]
+  },
+  {
+    "Entity": "Hefei National Laboratory for Physical Sciences and the Microscale",
+    "Queries": [
+      "Hefei National Laboratory",
+      "Hefei Physical Sciences Laboratory",
+      "Hefei Microscale Laboratory"
+    ]
+  },
+  {
+    "Entity": "Army Infantry Academy",
+    "Queries": [
+      "Army Infantry Acad.",
+      "Infantry Academy",
+      "A. Infantry Academy"
+    ]
+  },
+  {
+    "Entity": "Beijing Power Generating Machinery Institute",
+    "Queries": [
+      "Beijing Power Generating Machinery Inst.",
+      "BPGMI",
+      "Beijing Power Generating Machinery Inst."
+    ]
+  },
+  {
+    "Entity": "FTIAN IM K.A. Valiev RAS",
+    "Queries": [
+      "F. I. Valiev",
+      "FTIAN I. K. A. Valiev",
+      "FTIAN K. A. Valiev"
+    ]
+  },
+  {
+    "Entity": "Dalian Nationalities University",
+    "Queries": [
+      "Dalian Nationalities University",
+      "Dalian Minzu University",
+      "DNU"
+    ]
+  },
+  {
+    "Entity": "ISSP",
+    "Queries": [
+      "ISSP",
+      "I.S.S.P.",
+      "International Social Survey Programme"
+    ]
+  },
+  {
+    "Entity": "China Ordnance Group Corporation",
+    "Queries": [
+      "China Ordnance Group Corp.",
+      "China Ordnance Group",
+      "China Ordnance Corp."
+    ]
+  },
+  {
+    "Entity": "中国北方工业集团公司",
+    "Queries": [
+      "Norinco",
+      "China North Industries Group Corporation",
+      "China North Industries Group."
+    ]
+  },
+  {
+    "Entity": "Skyeye Laser Technology Limited",
+    "Queries": [
+      "Skyeye Laser Tech Ltd.",
+      "Skyeye Laser Technology Ltd.",
+      "Skyeye Laser Technology Co."
+    ]
+  },
+  {
+    "Entity": "China Mobile Communications Group Co., Ltd.",
+    "Queries": [
+      "China Mobile",
+      "China Mobile Communications",
+      "China Mobile Communications Group"
+    ]
+  },
+  {
+    "Entity": "China Ordnance Industries Group Corporation Limited",
+    "Queries": [
+      "China Ordnance Industries Group Corp. Ltd.",
+      "China Ordnance Industries Group Co. Ltd.",
+      "Norinco"
+    ]
+  },
+  {
+    "Entity": "数学工程与先进计算国家重点实验室",
+    "Queries": [
+      "数值计算实验室",
+      "国家重点实验室",
+      "高级计算实验室"
+    ]
+  },
+  {
+    "Entity": "Academy of Military Medical Sciences, Field Blood Transfusion Institute",
+    "Queries": [
+      "Academy of Military Medical Sciences",
+      "Blood Transfusion Institute"
+    ]
+  },
+  {
+    "Entity": "海军工程大学",
+    "Queries": [
+      "Naval University of Engineering",
+      "PLA Naval University of Engineering",
+      "Naval Engineering University"
+    ]
+  },
+  {
+    "Entity": "East China University of Technology",
+    "Queries": [
+      "ECUT",
+      "East China Univ. of Tech.",
+      "East China University of Tech."
+    ]
+  },
+  {
+    "Entity": "Beijing Computing Science Research Center",
+    "Queries": [
+      "Beijing Computing Science R.C.",
+      "Beijing Computing Science Research Ctr",
+      "Beijing CSRC"
+    ]
+  },
+  {
+    "Entity": "Sichuan Dingcheng Material Trade Co., Ltd.",
+    "Queries": [
+      "Sichuan Dingcheng Material Trade",
+      "Dingcheng Material Trade Co.",
+      "Ltd.",
+      "S. Dingcheng Material Trade Co."
+    ]
+  },
+  {
+    "Entity": "南京841研究所",
+    "Queries": [
+      "南京841研究所",
+      "南841研究所",
+      "841研究所"
+    ]
+  },
+  {
+    "Entity": "CPPU",
+    "Queries": [
+      "CPPU",
+      "C.P.P.U.",
+      "CPPU Inc."
+    ]
+  },
+  {
+    "Entity": "University of Electronic Science and Technology",
+    "Queries": [
+      "University of Electronic Science \u0026 Technology",
+      "UEST",
+      "UESTC"
+    ]
+  },
+  {
+    "Entity": "Institute of International Politics",
+    "Queries": [
+      "Institute of Int'l Politics",
+      "Intl. Politics Institute",
+      "IIP"
+    ]
+  },
+  {
+    "Entity": "海军航大",
+    "Queries": null
+  },
+  {
+    "Entity": "Academy of Military Science",
+    "Queries": [
+      "Academy of Military Sciences",
+      "A. Military Science",
+      "AMS"
+    ]
+  },
+  {
+    "Entity": "China State Shipbuilding Corporation Limited",
+    "Queries": [
+      "China State Shipbuilding Corp. Ltd.",
+      "CSSC Ltd.",
+      "CSSC"
+    ]
+  },
+  {
+    "Entity": "火箭军装备研究院",
+    "Queries": [
+      "火箭军装备研究院",
+      "火箭军装备研究所",
+      "装备研究院"
+    ]
+  },
+  {
+    "Entity": "Air Force Xi’an Flight Academy",
+    "Queries": [
+      "Air Force Xian Flight Academy",
+      "AFXFA",
+      "Xi'an Flight Academy"
+    ]
+  },
+  {
+    "Entity": "南京理工大学",
+    "Queries": [
+      "南京理工大",
+      "南理工",
+      "NUST"
+    ]
+  },
+  {
+    "Entity": "Southwest Institute of Structural Mechanics",
+    "Queries": [
+      "Southwest Institute of Structural Mechanics",
+      "SW Institute of Structural Mechanics",
+      "Southwest Inst. of Structural Mechanics"
+    ]
+  },
+  {
+    "Entity": "湘潭大学",
+    "Queries": [
+      "Xiangtan University",
+      "Xiangtan Univ.",
+      "湘潭大學"
+    ]
+  },
+  {
+    "Entity": "Army Armored Forces Academy",
+    "Queries": [
+      "Army Armored Forces Acad.",
+      "Army Armored Forces Acad",
+      "A.A.F. Academy"
+    ]
+  },
+  {
+    "Entity": "Dll",
+    "Queries": null
+  },
+  {
+    "Entity": "并行与分布处理国家重点实验室",
+    "Queries": [
+      "并行实验室",
+      "分布实验室",
+      "国家重点实验室"
+    ]
+  },
+  {
+    "Entity": "China National Chemical Corporation Ltd.",
+    "Queries": [
+      "China National Chemical Corp.",
+      "ChemChina",
+      "China National Chemical Corporation"
+    ]
+  },
+  {
+    "Entity": "National Digital Switching System Engineering and Technology Research Center",
+    "Queries": [
+      "NDSS Research Center",
+      "NDSSS Research Center",
+      "National Digital Switching System Engineering \u0026 Technology Research Center"
+    ]
+  },
+  {
+    "Entity": "State Research Institute of Mechanical Engineering",
+    "Queries": [
+      "State Research Institute of Mechanical Engineering",
+      "SRI of Mechanical Engineering",
+      "State Research Institute ME"
+    ]
+  },
+  {
+    "Entity": "四医大",
+    "Queries": [
+      "第四军医大学",
+      "四军大",
+      "Xi'an Medical University"
+    ]
+  },
+  {
+    "Entity": "Dalian Communications NCO Academy",
+    "Queries": [
+      "Dalian Comms NCO Academy",
+      "Dalian Communications Non-Commissioned Officer Academy",
+      "Dalian Communications NCO Acad."
+    ]
+  },
+  {
+    "Entity": "陆军军医大学",
+    "Queries": [
+      "陆军医科大学",
+      "解放军第三军医大学",
+      "第三军医大"
+    ]
+  },
+  {
+    "Entity": "ITMO University Fellowship \u0026 Professorship Program",
+    "Queries": [
+      "ITMO University Fellowship and Professorship Program",
+      "ITMO University Fellowship \u0026 Professorship Programme",
+      "ITMO University Fellowship and Professorship Programme"
+    ]
+  },
+  {
+    "Entity": "Hangzhou Hikvision Digital Technology Co., Ltd.",
+    "Queries": [
+      "H. Hikvision Digital Technology Co.",
+      "Ltd.",
+      "Hikvision Digital Technology",
+      "Hangzhou Hikvision."
+    ]
+  },
+  {
+    "Entity": "中国人民解放军国防大学",
+    "Queries": [
+      "PLA National Defense University",
+      "National Defense University of the People's Liberation Army",
+      "NDU of the PLA"
+    ]
+  },
+  {
+    "Entity": "铁道警院",
+    "Queries": [
+      "铁道警察学院",
+      "铁道警院",
+      "铁警院"
+    ]
+  },
+  {
+    "Entity": "Jinshan Scholars Program",
+    "Queries": [
+      "Jinshan Scholars",
+      "Jinshan Scholars Initiative",
+      "Jinshan Scholars Project"
+    ]
+  },
+  {
+    "Entity": "BRI Educational, Culture, and Health Intellect Recruitment Program",
+    "Queries": [
+      "BRI Educational",
+      "BRI Educational Program",
+      "BRI Educational Recruitment Program"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军信息工程大学",
+    "Queries": [
+      "解放军信息工程大学",
+      "PLA Information Engineering University",
+      "People's Liberation Army Information Engineering University"
+    ]
+  },
+  {
+    "Entity": "CSSC",
+    "Queries": [
+      "CSSC Co.",
+      "CSSC Corporation",
+      "CSSC Ltd."
+    ]
+  },
+  {
+    "Entity": "Rocket Force University of Engineering",
+    "Queries": [
+      "Rocket Force Univ. of Engineering",
+      "R.F. University of Engineering",
+      "Rocket Force University of Eng."
+    ]
+  },
+  {
+    "Entity": "国防大学",
+    "Queries": [
+      "National Defense University",
+      "NDU",
+      "国防大"
+    ]
+  },
+  {
+    "Entity": "Mabna Institute",
+    "Queries": [
+      "Mabna Inst.",
+      "Mabna Inst. Co.",
+      "Mabna Institute Co."
+    ]
+  },
+  {
+    "Entity": "PPORosprofprom V “GOSNIMASH”",
+    "Queries": [
+      "PPORosprofprom V GOSNIMASH",
+      "PPORosprofprom V \"GOSNIMASH\"",
+      "PPORosprofprom V. GOSNIMASH"
+    ]
+  },
+  {
+    "Entity": "Navy Logistics Academy",
+    "Queries": [
+      "NLA",
+      "Navy Log. Academy",
+      "Naval Logistics Academy"
+    ]
+  },
+  {
+    "Entity": "Beijing Hangxing Machine Building Corporation",
+    "Queries": [
+      "BHMBC",
+      "Beijing Hangxing",
+      "Hangxing Machine Building Corp."
+    ]
+  },
+  {
+    "Entity": "SMIC Hong Kong International Company Limited",
+    "Queries": [
+      "SMIC HK International Company Ltd",
+      "SMIC Hong Kong Int'l Co. Ltd",
+      "SMIC Hong Kong Intl. Co. Ltd"
+    ]
+  },
+  {
+    "Entity": "中山大学",
+    "Queries": [
+      "Sun Yat-sen University",
+      "SYSU",
+      "Zhongshan University"
+    ]
+  },
+  {
+    "Entity": "哈尔滨工程大学",
+    "Queries": [
+      "哈工程",
+      "哈尔滨工大",
+      "哈工程大学"
+    ]
+  },
+  {
+    "Entity": "吉林大学",
+    "Queries": [
+      "吉林大学",
+      "Jilin University",
+      "JLU"
+    ]
+  },
+  {
+    "Entity": "Innovative Talent Promotion Program",
+    "Queries": [
+      "ITPP",
+      "Innovative Talent Program",
+      "Talent Promotion Program"
+    ]
+  },
+  {
+    "Entity": "COMAC",
+    "Queries": [
+      "Comac",
+      "C.O.M.A.C.",
+      "COMAC Corporation"
+    ]
+  },
+  {
+    "Entity": "Moscow Order of the Red Banner of Labor Research Radio Engineering Institute JSC",
+    "Queries": [
+      "Moscow Research Radio Engineering Institute JSC",
+      "Moscow Order of the Red Banner of Labor Research Radio Engineering Institute",
+      "Research Radio Engineering Institute JSC"
+    ]
+  },
+  {
+    "Entity": "Key Economic and Technical Foreign Experts Plan",
+    "Queries": [
+      "Key Economic and Technical Foreign Experts Program",
+      "KETFEP",
+      "Key Economic and Technical Foreign Experts Initiative"
+    ]
+  },
+  {
+    "Entity": "SMIC Semiconductor Manufacturing (Shanghai) Co., Ltd",
+    "Queries": [
+      "SMIC",
+      "SMIC Semiconductor Manufacturing",
+      "SMIC Co."
+    ]
+  },
+  {
+    "Entity": "China Railway Construction Corporation Limited",
+    "Queries": [
+      "CRCC",
+      "China Railway Construction Corp.",
+      "China Railway Construction Co. Ltd."
+    ]
+  },
+  {
+    "Entity": "中国航空工业集团有限公司",
+    "Queries": [
+      "中航工业",
+      "中国航工",
+      "AVIC"
+    ]
+  },
+  {
+    "Entity": "Aero Engine Corporation of China",
+    "Queries": [
+      "AECC",
+      "Aero Engine Corp. of China",
+      "Aero Engine Corporation China"
+    ]
+  },
+  {
+    "Entity": "Hunan University",
+    "Queries": [
+      "Hunan Univ.",
+      "Hunan U.",
+      "HU"
+    ]
+  },
+  {
+    "Entity": "Harbin Engineering University",
+    "Queries": [
+      "Harbin Eng. University",
+      "Harbin Engineering Univ.",
+      "HEU"
+    ]
+  },
+  {
+    "Entity": "National Food Safety Risk Assessment Center \"532\" Talent Program",
+    "Queries": [
+      "National Food Safety Risk Assessment Center Talent Program 532",
+      "National Food Safety Risk Assessment Center \"532\" Talent",
+      "National Food Safety Risk Assessment Center: \"532\" Talent Program"
+    ]
+  },
+  {
+    "Entity": "武警海警学院",
+    "Queries": [
+      "武警海警學院",
+      "China Coast Guard Academy",
+      "People's Armed Police Force Coast Guard Academy"
+    ]
+  },
+  {
+    "Entity": "PLA Dalian Naval Academy",
+    "Queries": [
+      "PLA Dalian Naval Academy",
+      "People's Liberation Army Dalian Naval Academy",
+      "Dalian Naval Academy"
+    ]
+  },
+  {
+    "Entity": "USC",
+    "Queries": [
+      "University of Southern California",
+      "U.S.C.",
+      "Southern Cal"
+    ]
+  },
+  {
+    "Entity": "High-End Foreign Expert Recruitment Program",
+    "Queries": [
+      "High-End Foreign Expert Recruitment Program",
+      "High-End Foreign Expert Recruitment Prog.",
+      "High-End Foreign Expert Recruitment Prgm."
+    ]
+  },
+  {
+    "Entity": "PAP Officers’ College",
+    "Queries": [
+      "PAP Officers' College",
+      "PAP Officers College",
+      "P.A.P. Officers’ College"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军海军装备论证研究中心",
+    "Queries": [
+      "中国人民解放军海军装备论证研究所",
+      "中国人民解放军海军论证中心",
+      "中国人民解放军海军装备研究中心"
+    ]
+  },
+  {
+    "Entity": "Federal Research Center Boreskov Institute of Catalysis",
+    "Queries": [
+      "Federal Research Center BIC",
+      "FRC Boreskov Institute",
+      "BIC Institute"
+    ]
+  },
+  {
+    "Entity": "Plan for Experts' Return and Settlement in China",
+    "Queries": [
+      "Experts' Return Plan",
+      "Return and Settlement for Experts in China",
+      "Experts’ Settlement Plan"
+    ]
+  },
+  {
+    "Entity": "Army Engineering University of the PLA",
+    "Queries": [
+      "Army Engineering University",
+      "PLA Engineering University",
+      "AEUPLA"
+    ]
+  },
+  {
+    "Entity": "CCCG",
+    "Queries": [
+      "CCCG",
+      "C.C.C.G.",
+      "C.C.C. Group"
+    ]
+  },
+  {
+    "Entity": "中国刑事警察学院",
+    "Queries": [
+      "中国刑警学院",
+      "中國刑事警察學院",
+      "中國刑警學院"
+    ]
+  },
+  {
+    "Entity": "Southwest Institute of Applied Electronics",
+    "Queries": [
+      "Southwest Institute of Applied Electronics",
+      "SW Institute of Applied Electronics",
+      "Southwest Institute of Applied Electronics Inc."
+    ]
+  },
+  {
+    "Entity": "国家安全部行政学院",
+    "Queries": null
+  },
+  {
+    "Entity": "University of Electronic Science and Technology of China",
+    "Queries": [
+      "UESTC",
+      "University of Electronic Science \u0026 Technology of China",
+      "Univ. of Electronic Science and Technology of China"
+    ]
+  },
+  {
+    "Entity": "军陆军研究院",
+    "Queries": [
+      "軍陸軍研究院",
+      "Jun Lu-Jun Yan Jiu Yuan",
+      "Jūn Lù-jūn Yánjiūyuàn"
+    ]
+  },
+  {
+    "Entity": "International Cooperative Program for Innovative Talents",
+    "Queries": [
+      "International Co-op Program for Innovative Talents",
+      "Int'l Cooperative Program for Innovative Talents",
+      "International Cooperative Program for Innovative Talent"
+    ]
+  },
+  {
+    "Entity": "13th Institute China Aerospace Times Electronics Corporation (CATEC)",
+    "Queries": [
+      "13th Institute CATEC",
+      "13th Institute of China Aerospace Times Electronics Corporation",
+      "CATEC 13th Institute"
+    ]
+  },
+  {
+    "Entity": "北京邮电大学",
+    "Queries": [
+      "北邮",
+      "BUPT",
+      "北京邮电"
+    ]
+  },
+  {
+    "Entity": "中国武装警察部队特种警察学院",
+    "Queries": [
+      "武警特警学院",
+      "中国武警特警学院",
+      "武警学院"
+    ]
+  },
+  {
+    "Entity": "东华理工大学",
+    "Queries": [
+      "东华理工学院",
+      "东华理工",
+      "ECUT"
+    ]
+  },
+  {
+    "Entity": "中国航天",
+    "Queries": [
+      "CNSA",
+      "Chinese National Space Administration",
+      "China National Space Administration"
+    ]
+  },
+  {
+    "Entity": "CSGC",
+    "Queries": [
+      "CSGC Inc.",
+      "CSGC Ltd.",
+      "CSGC Co."
+    ]
+  },
+  {
+    "Entity": "Thousand Talents Program — Overseas High-Level Experts",
+    "Queries": [
+      "Thousand Talents Program",
+      "Overseas High-Level Experts",
+      "Thousand Talents Plan"
+    ]
+  },
+  {
+    "Entity": "KAUST Gifted Student Program (KGSP) United Arab Emirates",
+    "Queries": [
+      "KGSP UAE",
+      "KAUST GSP UAE",
+      "KAUST Gifted Student Program UAE"
+    ]
+  },
+  {
+    "Entity": "Army Special Operations College",
+    "Queries": [
+      "Army Special Operations College",
+      "Army Spec Ops College",
+      "ASOC"
+    ]
+  },
+  {
+    "Entity": "Beijing University of Chemical Technology",
+    "Queries": [
+      "Beijing University of Chemical Technology",
+      "BUCT",
+      "Beijing Chem Tech"
+    ]
+  },
+  {
+    "Entity": "PLA Air Force Aviation University",
+    "Queries": [
+      "PLA Air Force Aviation University",
+      "People’s Liberation Army Air Force Aviation University",
+      "PLAAF Aviation University"
+    ]
+  },
+  {
+    "Entity": "Beijing Kownsec",
+    "Queries": [
+      "Beijing Kownsec",
+      "B. Kownsec",
+      "Beijing K."
+    ]
+  },
+  {
+    "Entity": "空军通信士官学校",
+    "Queries": [
+      "空军通信士官学院",
+      "PLAAF Telecommunications NCO Academy",
+      "Kongjun Communication University"
+    ]
+  },
+  {
+    "Entity": "PLA Navy Command College",
+    "Queries": [
+      "PLA Navy Command College",
+      "People's Liberation Army Navy Command College",
+      "People's Liberation Army Navy Command School"
+    ]
+  },
+  {
+    "Entity": "Harbin Institute of Technology",
+    "Queries": [
+      "Harbin Institute of Tech",
+      "HIT",
+      "Harbin Tech"
+    ]
+  },
+  {
+    "Entity": "National Defense Science and Technology Scholarship",
+    "Queries": [
+      "NDSTS",
+      "National Defense S\u0026T Scholarship",
+      "National Defense Science \u0026 Technology Scholarship"
+    ]
+  },
+  {
+    "Entity": "火箭军工程大学",
+    "Queries": [
+      "火箭军工大",
+      "工程大学火箭军",
+      "火箭軍工程大學"
+    ]
+  },
+  {
+    "Entity": "People's Armed Police NCO College",
+    "Queries": [
+      "People's Armed Police Non-Commissioned Officer College",
+      "PAP NCO College",
+      "PAP Non-Commissioned Officer College"
+    ]
+  },
+  {
+    "Entity": "Rocket Force Equipment Academy",
+    "Queries": [
+      "Rocket Force Equipment Acad",
+      "RF Equipment Academy",
+      "Rocket F. Equip. Academy"
+    ]
+  },
+  {
+    "Entity": "Peking University",
+    "Queries": [
+      "Peking Univ.",
+      "PKU",
+      "Beijing University"
+    ]
+  },
+  {
+    "Entity": "海军航空大学",
+    "Queries": [
+      "海军航空院校",
+      "海航大学",
+      "海军航空学院"
+    ]
+  },
+  {
+    "Entity": "AVIC",
+    "Queries": [
+      "A.V.I.C.",
+      "Avic",
+      "A.V.I.C"
+    ]
+  },
+  {
+    "Entity": "陆军航空兵学院",
+    "Queries": [
+      "陆军航空兵学",
+      "陆航空兵学院",
+      "陆航兵学院"
+    ]
+  },
+  {
+    "Entity": "Shijiazhuang Flying College of the PLA Air Force",
+    "Queries": [
+      "Shijiazhuang Flying College",
+      "Flying College of the PLA Air Force",
+      "S. Flying College of the PLA Air Force"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军陆军特种作战学院",
+    "Queries": [
+      "中国人民解放军陆军特战学院",
+      "中国人民解放军特种作战学院",
+      "陆军特种作战学院"
+    ]
+  },
+  {
+    "Entity": "南昌陆院",
+    "Queries": [
+      "南昌陆军学院",
+      "南昌陆院学院",
+      "南昌陆院院校"
+    ]
+  },
+  {
+    "Entity": "Hundred Talents Program",
+    "Queries": [
+      "Hundred Talents Programme",
+      "100 Talents Program",
+      "100 Talents Programme"
+    ]
+  },
+  {
+    "Entity": "Rocket Force Sergeancy School",
+    "Queries": [
+      "Rocket Force Sergeancy Sch.",
+      "RFSS",
+      "R.F. Sergeancy School"
+    ]
+  },
+  {
+    "Entity": "哈尔滨工业大学",
+    "Queries": [
+      "哈工大",
+      "Harbin Institute of Technology",
+      "HIT"
+    ]
+  },
+  {
+    "Entity": "Foreign Youth Talent Recruitment Plan",
+    "Queries": [
+      "Foreign Youth Talent Recruitment Plan",
+      "FYTRP",
+      "Foreign Youth Talent Program"
+    ]
+  },
+  {
+    "Entity": "NDU",
+    "Queries": [
+      "N.D.U.",
+      "Nigerian Defence University",
+      "National Defence University"
+    ]
+  },
+  {
+    "Entity": "People's Armed Police China Coast Guard Academy",
+    "Queries": [
+      "China Coast Guard Academy",
+      "PAP CCG Academy",
+      "People's Armed Police CCG Academy"
+    ]
+  },
+  {
+    "Entity": "Thousand Talents Plan",
+    "Queries": [
+      "Thousand Talents Programme",
+      "Thousand Talents Initiative",
+      "1000 Talents Plan"
+    ]
+  },
+  {
+    "Entity": "HNUST",
+    "Queries": [
+      "HNU St",
+      "H. N. U. S. T.",
+      "H. NUST"
+    ]
+  },
+  {
+    "Entity": "Institute of Solid-State Physics of the Russian Academy of Sciences",
+    "Queries": [
+      "Institute of Solid State Physics RAS",
+      "ISSP RAS",
+      "Solid-State Physics Institute RAS"
+    ]
+  },
+  {
+    "Entity": "HNU",
+    "Queries": [
+      "H. N. U.",
+      "HNU University",
+      "Hunan Normal University"
+    ]
+  },
+  {
+    "Entity": "Semiconductor Manufacturing International (Shenzhen) Corporation",
+    "Queries": [
+      "Semiconductor Manufacturing International (Shenzhen) Corp.",
+      "SMIC Shenzhen",
+      "SMIC (Shenzhen) Corporation"
+    ]
+  },
+  {
+    "Entity": "Pervichnaya Profsoyuznaya Organizatsiya Rossiskogo Profsoyuza Rabotnkov Promyshlennosti V",
+    "Queries": [
+      "PPO RPRRP",
+      "Pervichnaya Profsoyuznaya Organizatsiya RPRRP",
+      "Profsoyuznaya Organizatsiya Rossiskogo Profsoyuza RPRRP"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军陆军步兵学院",
+    "Queries": [
+      "解放军陆军步兵学院",
+      "中国步兵学院",
+      "中国陆军步兵学院"
+    ]
+  },
+  {
+    "Entity": "China Unicom (Hong Kong) Limited",
+    "Queries": [
+      "China Unicom Hong Kong",
+      "China Unicom (HK) Ltd",
+      "China Unicom (HK)."
+    ]
+  },
+  {
+    "Entity": "沈阳航空航天大学",
+    "Queries": [
+      "沈航",
+      "沈阳航大",
+      "SYATU"
+    ]
+  },
+  {
+    "Entity": "武警士官学校",
+    "Queries": [
+      "武警士官学院",
+      "武警士校",
+      "武警士官官校"
+    ]
+  },
+  {
+    "Entity": "Academy of Military Transportation",
+    "Queries": [
+      "Military Transportation Academy",
+      "Academy of Military Transport",
+      "AMT"
+    ]
+  },
+  {
+    "Entity": "Jilin University",
+    "Queries": [
+      "JLU",
+      "Ji Lin University",
+      "Jilin Univ."
+    ]
+  },
+  {
+    "Entity": "SPA",
+    "Queries": [
+      "SPA",
+      "S.P.A.",
+      "S. P. A."
+    ]
+  },
+  {
+    "Entity": "Changsha Institute of Technology",
+    "Queries": [
+      "Changsha Tech",
+      "CIT",
+      "Changsha Inst. of Tech."
+    ]
+  },
+  {
+    "Entity": "National Nuclear Power Foreign High-Level Talent Recruitment Program",
+    "Queries": [
+      "National Nuclear Talent Program",
+      "Nuclear Power High-Level Recruitment",
+      "National Nuclear High-Level Talent Program"
+    ]
+  },
+  {
+    "Entity": "SMIC",
+    "Queries": [
+      "SMIC",
+      "Semiconductor Manufacturing International Corporation",
+      "S.M.I.C."
+    ]
+  },
+  {
+    "Entity": "The Institute of Applied Physics and Computational Mathematics, Beijing",
+    "Queries": [
+      "The Institute of Applied Physics and Computational Mathematics",
+      "IAPCM",
+      "Institute of Applied Physics and Computational Mathematics"
+    ]
+  },
+  {
+    "Entity": "第四军医大学",
+    "Queries": [
+      "第四军医大学",
+      "第四軍醫大學",
+      "Fourth Military Medical University"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军空军后勤学院",
+    "Queries": [
+      "PLA Air Force Logistics Academy",
+      "People's Liberation Army Air Force Logistics Academy",
+      "Chinese People's Liberation Army Air Force Logistics Academy"
+    ]
+  },
+  {
+    "Entity": "ITMO University Fellowship \u0026 Professorship Program --- Micro Fellowship (a short-term research appointment)",
+    "Queries": [
+      "ITMO University Fellowship \u0026 Professorship Program – Micro Fellowship",
+      "ITMO University Fellowship \u0026 Professorship Program - Micro Fellowship",
+      "ITMO University Fellowship \u0026 Professorship Program: Micro Fellowship"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军海军士官学校",
+    "Queries": [
+      "中国海军士官学校",
+      "人民海军士官学校",
+      "海军士官学校"
+    ]
+  },
+  {
+    "Entity": "Nanhang University",
+    "Queries": [
+      "Nanhang Univ.",
+      "Nanhang Univ",
+      "Nanhang University (without punctuation)"
+    ]
+  },
+  {
+    "Entity": "PLA Equipment Academy",
+    "Queries": [
+      "PLA Equipment Academy",
+      "People's Liberation Army Equipment Academy",
+      "PLA Equipment Acad."
+    ]
+  },
+  {
+    "Entity": "第29试验训练基地",
+    "Queries": [
+      "基地29",
+      "29试验基地",
+      "第29试训基地"
+    ]
+  },
+  {
+    "Entity": "空军西安飞行学院",
+    "Queries": [
+      "空军西安飞行学院",
+      "空军西安飞机学院",
+      "西安飞行学院"
+    ]
+  },
+  {
+    "Entity": "Naval Command College",
+    "Queries": [
+      "NCC",
+      "Naval Com. College",
+      "N. Command College"
+    ]
+  },
+  {
+    "Entity": "四川大学",
+    "Queries": [
+      "Sichuan University",
+      "SCU",
+      "川大"
+    ]
+  },
+  {
+    "Entity": "北华航天工业学院",
+    "Queries": [
+      "Beihua University of Aeronautics and Astronautics",
+      "Beihua College of Astronautics",
+      "North China Institute of Aerospace Engineering"
+    ]
+  },
+  {
+    "Entity": "No. 31 Research Institute, Third Academy of CASIC",
+    "Queries": [
+      "31st Research Institute",
+      "Third Academy of CASIC",
+      "No. 31 Research Institute",
+      "3rd Academy of CASIC"
+    ]
+  },
+  {
+    "Entity": "Chinese Academy of Sciences – Shenyang Institute of Automation",
+    "Queries": [
+      "CAS – Shenyang Institute of Automation",
+      "Chinese Academy of Sciences – SIA",
+      "Shenyang Institute of Automation – CAS"
+    ]
+  },
+  {
+    "Entity": "Institute of Cadre Management",
+    "Queries": [
+      "Institute of Cadre Mgmt",
+      "ICM",
+      "Cadre Management Institute"
+    ]
+  },
+  {
+    "Entity": "Thousand Talents Program — Innovative Talents Plan (Short-Term)",
+    "Queries": [
+      "Thousand Talents Program",
+      "Innovative Talents Plan",
+      "Short-Term Innovative Talents Plan"
+    ]
+  },
+  {
+    "Entity": "Academy of Military Medical Sciences, Institute of Microbiology and Epidemiology",
+    "Queries": [
+      "Academy of Military Medical Sciences",
+      "Institute of Microbiology \u0026 Epidemiology",
+      "Academy of Military Medical Sciences",
+      "Institute of Microbiology and Epidemiology (AMMS IME)",
+      "AMMS",
+      "Institute of Microbiology and Epidemiology"
+    ]
+  },
+  {
+    "Entity": "Rocket Force Sergeant School of the PLA",
+    "Queries": [
+      "Rocket Force Sgt. School of the PLA",
+      "Rocket Force Sergeant Sch. of the PLA",
+      "PLA Rocket Force Sergeant School"
+    ]
+  },
+  {
+    "Entity": "ECUT",
+    "Queries": null
+  },
+  {
+    "Entity": "CCCC",
+    "Queries": null
+  },
+  {
+    "Entity": "Jiangnan Social University",
+    "Queries": [
+      "J. Social University",
+      "Jiangnan S. University",
+      "Jiangnan Social U."
+    ]
+  },
+  {
+    "Entity": "SWUST",
+    "Queries": [
+      "SWUST",
+      "Southwest University of Science and Technology",
+      "S.W.U.S.T."
+    ]
+  },
+  {
+    "Entity": "中国人民解放军火箭军研究院",
+    "Queries": [
+      "火箭军研究院",
+      "中国火箭军研究院",
+      "人民解放军火箭军研究院"
+    ]
+  },
+  {
+    "Entity": "Harbin Flight College of Air Force",
+    "Queries": [
+      "Harbin Flight College",
+      "Flight College of Harbin",
+      "H. F. College of Air Force"
+    ]
+  },
+  {
+    "Entity": "SDU",
+    "Queries": [
+      "SDU",
+      "S.D.U.",
+      "South Denmark University"
+    ]
+  },
+  {
+    "Entity": "IEU",
+    "Queries": null
+  },
+  {
+    "Entity": "Academy of Military Medical Sciences, Military Veterinary Research Institute",
+    "Queries": [
+      "AMMS",
+      "Military Veterinary Research Institute",
+      "AMMS",
+      "Veterinary Research Institute"
+    ]
+  },
+  {
+    "Entity": "Beijing Institute of Technology",
+    "Queries": [
+      "Beijing Inst. of Technology",
+      "BIT",
+      "Beijing Tech"
+    ]
+  },
+  {
+    "Entity": "中国兵器装备集团有限公司",
+    "Queries": [
+      "中国兵装集团",
+      "CSGC",
+      "中国兵器装备集团"
+    ]
+  },
+  {
+    "Entity": "SJTU",
+    "Queries": [
+      "Shanghai Jiao Tong University",
+      "Shanghai J.T. University",
+      "S.J. University"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军外国语学院",
+    "Queries": [
+      "中国人民解放军外国语学院",
+      "PLA Foreign Language University",
+      "People's Liberation Army Foreign Language Institute"
+    ]
+  },
+  {
+    "Entity": "PLA Nanjing Army Command College",
+    "Queries": [
+      "PLA Nanjing Army Command College",
+      "Nanjing Army Command College",
+      "People's Liberation Army Nanjing Army Command College"
+    ]
+  },
+  {
+    "Entity": "Hikvision",
+    "Queries": [
+      "Hikvision Technologies Co.",
+      "Ltd.",
+      "Hangzhou Hikvision Digital Technology Co.",
+      "Ltd.",
+      "海康威视 (Hai Kang Wei Shi)"
+    ]
+  },
+  {
+    "Entity": "Institute of Radiation and Radiation Medicine or Institute of Electromagnetic and Particle Radiation Medicine",
+    "Queries": [
+      "Institute of Radiation and Radiation Medicine",
+      "Institute of Electromagnetic and Particle Radiation Medicine",
+      "Institute of Radiation Medicine"
+    ]
+  },
+  {
+    "Entity": "Institute of Northwest Nuclear Technology",
+    "Queries": [
+      "INNT",
+      "Institute of NW Nuclear Technology",
+      "Institute of Northwest Nuclear Tech"
+    ]
+  },
+  {
+    "Entity": "CSU",
+    "Queries": [
+      "Colorado State University",
+      "CSU",
+      "C.S.U."
+    ]
+  },
+  {
+    "Entity": "AMS",
+    "Queries": [
+      "American Mathematical Society",
+      "A. M. S.",
+      "A.M.S."
+    ]
+  },
+  {
+    "Entity": "Sun Yat-Sen University",
+    "Queries": [
+      "SYSU",
+      "Sun Yat-sen U",
+      "Zhongshan University"
+    ]
+  },
+  {
+    "Entity": "Naval Aviation University",
+    "Queries": [
+      "Naval Aviation Univ.",
+      "N.A.U."
+    ]
+  },
+  {
+    "Entity": "Double Hundreds Program of the China Meteorological Administration",
+    "Queries": [
+      "Double Hundreds Program",
+      "Double Hundreds Initiative",
+      "CMA Double Hundreds Program"
+    ]
+  },
+  {
+    "Entity": "第二炮兵工程大学",
+    "Queries": [
+      "第二炮兵工程大学",
+      "Second Artillery Engineering University",
+      "PLA Rocket Force University of Engineering"
+    ]
+  },
+  {
+    "Entity": "Wuhan Radar Institute",
+    "Queries": [
+      "W. Radar Institute",
+      "Wuhan R. Institute",
+      "Wuhan Radar Inst."
+    ]
+  },
+  {
+    "Entity": "ZJU",
+    "Queries": [
+      "ZJU",
+      "Zhejiang University"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军空军航空大学",
+    "Queries": [
+      "中国空军航空大学",
+      "空军航空大学",
+      "解放军航空大学"
+    ]
+  },
+  {
+    "Entity": "Air Force Command College",
+    "Queries": [
+      "AF Command College",
+      "AFCC",
+      "Air Force CC"
+    ]
+  },
+  {
+    "Entity": "PLA Army Service Academy",
+    "Queries": [
+      "PLA Army Service Academy",
+      "People's Liberation Army Army Service Academy",
+      "Army Service Academy of the PLA"
+    ]
+  },
+  {
+    "Entity": "RFUE",
+    "Queries": null
+  },
+  {
+    "Entity": "陆军炮兵防空兵学院",
+    "Queries": [
+      "陆军炮兵防空兵院",
+      "陆军炮兵学院",
+      "陆军防空兵学院"
+    ]
+  },
+  {
+    "Entity": "Overseas Famous Teachers Plan",
+    "Queries": null
+  },
+  {
+    "Entity": "Beijing Aeronautical Manufacturing Technology Research Institute",
+    "Queries": [
+      "Beijing Aeronautical Manufacturing Tech. Research Institute",
+      "BAMTRI",
+      "Beijing Aeronautical Manufacturing Technology R.I."
+    ]
+  },
+  {
+    "Entity": "中国电科",
+    "Queries": [
+      "CETC",
+      "中国电子科技集团",
+      "CEC."
+    ]
+  },
+  {
+    "Entity": "Research Institute “Gidpropridor”",
+    "Queries": [
+      "Research Institute \"Gidpropridor\"",
+      "Gidpropridor Research Institute",
+      "\"Gidpropridor\" Research Institute"
+    ]
+  },
+  {
+    "Entity": "空军第二飞行学院",
+    "Queries": [
+      "空军第二飞行学院",
+      "空军第2飞行学院",
+      "空军二飞院"
+    ]
+  },
+  {
+    "Entity": "Nanchang Hangkong University",
+    "Queries": [
+      "Nanchang Hangkong Univ.",
+      "NCHU",
+      "南昌航空大学"
+    ]
+  },
+  {
+    "Entity": "海军装备研究院",
+    "Queries": [
+      "海军装备研究院",
+      "Naval Equipment Research Institute",
+      "Naval Armament Research Institute"
+    ]
+  },
+  {
+    "Entity": "北京化工大学",
+    "Queries": [
+      "北化",
+      "北京化工大",
+      "北京化大"
+    ]
+  },
+  {
+    "Entity": "火箭指挥学院",
+    "Queries": [
+      "火箭指挥学院",
+      "火箭司令部学院",
+      "火箭指挥院校"
+    ]
+  },
+  {
+    "Entity": "Center for High Pressure Science \u0026 Technology Advanced Research",
+    "Queries": [
+      "Center for High Pressure Science and Technology Advanced Research",
+      "CHPS \u0026 TAR",
+      "CHPS-AR"
+    ]
+  },
+  {
+    "Entity": "中国人民武装警察指挥学院",
+    "Queries": [
+      "中国武警指挥学院",
+      "武警指挥学院",
+      "中国武警学院"
+    ]
+  },
+  {
+    "Entity": "中国兵器工业集团公司",
+    "Queries": [
+      "中国兵器工业集团",
+      "中国兵器工业集团有限公司",
+      "中兵工业集团"
+    ]
+  },
+  {
+    "Entity": "Center for High Pressure Science and Technology Advanced Research",
+    "Queries": [
+      "Center for High Pressure Science and Technology Research",
+      "CHPSAR",
+      "HPSTAR"
+    ]
+  },
+  {
+    "Entity": "Kurchatovskiy Institute ITEF",
+    "Queries": [
+      "ITEF",
+      "Kurchatov Institute",
+      "ITEF Kurchatov Institute"
+    ]
+  },
+  {
+    "Entity": "Key Support Plan for the Recruitment of Overseas High-Level Cultural and Educational Experts",
+    "Queries": [
+      "Key Support Plan",
+      "Recruitment of Overseas High-Level Cultural and Educational Experts Plan",
+      "Key Support Recruitment Plan"
+    ]
+  },
+  {
+    "Entity": "陆军边海防学院",
+    "Queries": [
+      "陆军边海防學院",
+      "陆军边海防学院 (simplified)",
+      "陸軍邊海防學院 (traditional)"
+    ]
+  },
+  {
+    "Entity": "Xi’an Jiaotong University",
+    "Queries": [
+      "Xi'an J. University",
+      "XJTU",
+      "Xi’an Jiaotong U."
+    ]
+  },
+  {
+    "Entity": "Beijing Power Machinery Research Laboratory",
+    "Queries": [
+      "Beijing Power Machinery Research Lab",
+      "Beijing Power Machinery Research Institute",
+      "BPMRL"
+    ]
+  },
+  {
+    "Entity": "Nanjing Information Technology Academe",
+    "Queries": [
+      "Nanjing IT Academe",
+      "Nanjing Information Technology Academy",
+      "Nanjing Info Tech Academe"
+    ]
+  },
+  {
+    "Entity": "Fujian Torch Electron Technology Co., Ltd.",
+    "Queries": [
+      "Fujian Torch",
+      "Torch Electron Technology",
+      "Torch Electron"
+    ]
+  },
+  {
+    "Entity": "Criminal Investigation Police University of China",
+    "Queries": [
+      "Criminal Investigation Police Univ. of China",
+      "C.I.P.U. of China",
+      "C.I. Police University of China"
+    ]
+  },
+  {
+    "Entity": "中国商用飞机有限责任公司",
+    "Queries": [
+      "COMAC",
+      "中国商飞",
+      "商飞公司"
+    ]
+  },
+  {
+    "Entity": "China Haiying Electronic Mechanical Technical Research Academy",
+    "Queries": [
+      "China Haiying Tech Research Academy",
+      "Haiying Electronic Mechanical Research Academy",
+      "CHER Academy"
+    ]
+  },
+  {
+    "Entity": "武汉大学",
+    "Queries": [
+      "Wuhan University",
+      "WHU",
+      "Wuda"
+    ]
+  },
+  {
+    "Entity": "People’s Armed Police Command College",
+    "Queries": [
+      "People’s Armed Police Command College",
+      "People’s Armed Police Command Coll.",
+      "PAP Command College"
+    ]
+  },
+  {
+    "Entity": "CGN",
+    "Queries": null
+  },
+  {
+    "Entity": "RFEU",
+    "Queries": [
+      "R. F. E. U.",
+      "RF EU",
+      "RFE U"
+    ]
+  },
+  {
+    "Entity": "DLNU",
+    "Queries": null
+  },
+  {
+    "Entity": "HUST",
+    "Queries": [
+      "H.U.S.T.",
+      "Huazhong University of Science and Technology"
+    ]
+  },
+  {
+    "Entity": "China Mobile Limited",
+    "Queries": [
+      "China Mobile Ltd.",
+      "China Mobile",
+      "CML"
+    ]
+  },
+  {
+    "Entity": "CSIC",
+    "Queries": [
+      "CSIC",
+      "C.S.I.C.",
+      "Consejo Superior de Investigaciones Científicas"
+    ]
+  },
+  {
+    "Entity": "Aviation Industry Corporation of China’s (AVIC) Institute 625",
+    "Queries": [
+      "AVIC Institute 625",
+      "Aviation Industry Corporation of China Institute 625",
+      "AVIC's Institute 625"
+    ]
+  },
+  {
+    "Entity": "Design and Manufacture Center of Navigation and Control Device",
+    "Queries": [
+      "Design \u0026 Manufacture Center of Navigation \u0026 Control Device",
+      "D\u0026M Center of Navigation \u0026 Control Device",
+      "DMCNCD"
+    ]
+  },
+  {
+    "Entity": "BGI Genomics Co., Ltd.",
+    "Queries": [
+      "BGI Genomics",
+      "BGI Genomics Co.",
+      "BGI Genomics Ltd."
+    ]
+  },
+  {
+    "Entity": "Federal State Budgetary Institution of Science Institute of Solid-State Physics N.A. Yu. A. Osipyanof the Russian Academy of Sciences",
+    "Queries": [
+      "Federal State Institution of Science Institute of Solid-State Physics N.A. Yu. A. Osipyan of the Russian Academy of Sciences",
+      "Institute of Solid-State Physics N.A. Yu. A. Osipyan of the Russian Academy of Sciences",
+      "Solid-State Physics Institute N.A. Yu. A. Osipyan of RAS"
+    ]
+  },
+  {
+    "Entity": "BIT",
+    "Queries": [
+      "B.I.T.",
+      "Bit",
+      "bit"
+    ]
+  },
+  {
+    "Entity": "BUAA",
+    "Queries": [
+      "Beihang University",
+      "Beijing University of Aeronautics and Astronautics",
+      "Beihang."
+    ]
+  },
+  {
+    "Entity": "CNOOC Limited",
+    "Queries": [
+      "CNOOC Ltd.",
+      "CNOOC",
+      "China National Offshore Oil Corporation Limited"
+    ]
+  },
+  {
+    "Entity": "“2071 Moonshot\" Apprenticeship Program",
+    "Queries": [
+      "\"2071 Moonshot\" Apprenticeship Program",
+      "2071 Moonshot Apprenticeship Program",
+      "Moonshot 2071 Apprenticeship Program"
+    ]
+  },
+  {
+    "Entity": "NCIAE",
+    "Queries": [
+      "NCIAE",
+      "N.C.I.A.E.",
+      "N.C.I.A.E"
+    ]
+  },
+  {
+    "Entity": "China State Construction Group Co. CloudWalk Technology Co., Ltd.",
+    "Queries": [
+      "China State Construction Group Co.",
+      "Ltd.",
+      "CloudWalk Technology Co."
+    ]
+  },
+  {
+    "Entity": "中国南方工业集团公司",
+    "Queries": [
+      "中国南方工业集团公司",
+      "Norinco",
+      "CNIGC"
+    ]
+  },
+  {
+    "Entity": "THU",
+    "Queries": [
+      "T. H. U.",
+      "THU Inc.",
+      "THU Corp."
+    ]
+  },
+  {
+    "Entity": "Army Special Operations Academy",
+    "Queries": [
+      "Army Spec Ops Academy",
+      "Army SO Academy",
+      "ASOA"
+    ]
+  },
+  {
+    "Entity": "中核集团",
+    "Queries": [
+      "CNNC",
+      "China National Nuclear Corporation",
+      "中核公司"
+    ]
+  },
+  {
+    "Entity": "中国航天科技集团",
+    "Queries": [
+      "中国航天科技集团有限公司",
+      "China Aerospace Science and Technology Corporation",
+      "CASC"
+    ]
+  },
+  {
+    "Entity": "National University of Defense Technology",
+    "Queries": [
+      "NUDT",
+      "National Univ. of Defense Technology",
+      "Nat'l Univ. of Defense Technology"
+    ]
+  },
+  {
+    "Entity": "Aviation University of PLA Air Force",
+    "Queries": [
+      "Aviation University of the People's Liberation Army Air Force",
+      "AU of PLA Air Force",
+      "PLA Air Force Aviation University"
+    ]
+  },
+  {
+    "Entity": "13th Research Institute, 9th Academy of CASC",
+    "Queries": [
+      "13th RI",
+      "13th Research Institute of the 9th Academy",
+      "13th Research Institute of CASC"
+    ]
+  },
+  {
+    "Entity": "Navy Aviation University",
+    "Queries": [
+      "Navy Aviation Univ.",
+      "Naval Aviation University",
+      "NAU"
+    ]
+  },
+  {
+    "Entity": "China Changfeng Mechanics and Electronics Technology Academy",
+    "Queries": [
+      "China Changfeng Mechanics \u0026 Electronics Technology Academy",
+      "China Changfeng Mechanics and Electronics Tech Academy",
+      "China Changfeng Mechanics and Electronics Technology Acad."
+    ]
+  },
+  {
+    "Entity": "Chang Jiang Scholars Award Program (Distinguished Professor)",
+    "Queries": [
+      "Chang Jiang Scholars Program",
+      "Changjiang Scholars Program",
+      "Distinguished Professor Program"
+    ]
+  },
+  {
+    "Entity": "China Aerospace Science \u0026 Industry Corp",
+    "Queries": [
+      "China Aerospace Science and Industry Corporation",
+      "CASIC",
+      "CASI Corporation"
+    ]
+  },
+  {
+    "Entity": "High-profile Qimam Fellowship scheme",
+    "Queries": [
+      "Qimam Fellowship",
+      "High-profile Qimam",
+      "Qimam Fellowship Scheme"
+    ]
+  },
+  {
+    "Entity": "Hunan University of Science and Technology",
+    "Queries": [
+      "Hunan University of Science \u0026 Technology",
+      "Hunan University of Sci. and Tech.",
+      "HNUST"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军海军工程大学",
+    "Queries": [
+      "海军工程大学",
+      "中国人民解放军工程大学",
+      "中国海军工程大学"
+    ]
+  },
+  {
+    "Entity": "北京航空航天大学",
+    "Queries": [
+      "北航",
+      "北京航大",
+      "BUAA"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军第三军医大学",
+    "Queries": [
+      "第三军医大学",
+      "中国第三军医大学",
+      "中国人民解放军医大三院"
+    ]
+  },
+  {
+    "Entity": "Southwest Institute of Electronic Engineering",
+    "Queries": [
+      "Southwest Institute of Electronic Eng.",
+      "SW Institute of Electronic Engineering",
+      "SWIEE"
+    ]
+  },
+  {
+    "Entity": "陆军特种作战学院",
+    "Queries": [
+      "陆军特种作战学校",
+      "陆军特种作战学",
+      "陆军特种学院"
+    ]
+  },
+  {
+    "Entity": "AECC",
+    "Queries": [
+      "AECC Ltd.",
+      "Associação AECC",
+      "AECC Group"
+    ]
+  },
+  {
+    "Entity": "南昌航空大学",
+    "Queries": [
+      "南昌航大",
+      "Nanchang Hangkong Daxue",
+      "NCHU"
+    ]
+  },
+  {
+    "Entity": "The High Power Laser Laboratory, Shanghai",
+    "Queries": [
+      "High Power Laser Lab",
+      "Shanghai",
+      "The High-Power Laser Lab",
+      "Shanghai",
+      "High-Power Laser Laboratory",
+      "Shanghai"
+    ]
+  },
+  {
+    "Entity": "China Aerospace Science and Technology Corporation",
+    "Queries": [
+      "CASC",
+      "China Aerospace Corporation",
+      "China Academy of Launch Vehicle Technology"
+    ]
+  },
+  {
+    "Entity": "AFEU",
+    "Queries": null
+  },
+  {
+    "Entity": "PAP China Coast Guard Academy",
+    "Queries": [
+      "PAP CCG Academy",
+      "China Coast Guard Academy",
+      "PAP CCG School"
+    ]
+  },
+  {
+    "Entity": "中船集团",
+    "Queries": [
+      "CSSC",
+      "China State Shipbuilding Corporation",
+      "中船集团公司"
+    ]
+  },
+  {
+    "Entity": "NUE",
+    "Queries": [
+      "NUE",
+      "N. Utilities Enterprises",
+      "N. U. Enterprises"
+    ]
+  },
+  {
+    "Entity": "Overseas Evaluation Expert Plan",
+    "Queries": [
+      "Overseas Evaluation Expert Program",
+      "Overseas Evaluation Expert Scheme",
+      "Overseas Evaluation Expert Initiative"
+    ]
+  },
+  {
+    "Entity": "China North Industries Group",
+    "Queries": [
+      "China North Industries Group Corporation Limited",
+      "Norinco Group",
+      "CNIGC"
+    ]
+  },
+  {
+    "Entity": "Joint Stock Company Concern Sea Underwater Weapons Gidropribor",
+    "Queries": [
+      "JSC Concern Sea Underwater Weapons Gidropribor",
+      "Concern Gidropribor",
+      "Gidropribor Joint Stock Company"
+    ]
+  },
+  {
+    "Entity": "空军工程大学",
+    "Queries": [
+      "空军工程大学",
+      "空軍工程大學",
+      "PLA Air Force Engineering University"
+    ]
+  },
+  {
+    "Entity": "NCHU",
+    "Queries": [
+      "NCHU",
+      "N. C. H. U."
+    ]
+  },
+  {
+    "Entity": "Academy of Military Medical Sciences, Institute of Medical Equipment",
+    "Queries": [
+      "Academy of Military Medical Sciences",
+      "Institute of Medical Equipment",
+      "AMMS Institute of Medical Equipment",
+      "Academy of Military Medical Sciences - Institute of Medical Equipment"
+    ]
+  },
+  {
+    "Entity": "空军预警学院",
+    "Queries": [
+      "空军预警学院",
+      "Air Force Early Warning Academy",
+      "AFEWA"
+    ]
+  },
+  {
+    "Entity": "NWPU",
+    "Queries": [
+      "NWPU",
+      "N.W.P.U.",
+      "Northwestern Polytechnical University"
+    ]
+  },
+  {
+    "Entity": "陆军防化学院",
+    "Queries": [
+      "陆军防化学院",
+      "PLA NBC Defense College",
+      "Army Chemical Defense College"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军军事科学院空气动力试验基地",
+    "Queries": [
+      "中国人民解放军军事科学院空气动力试验基地",
+      "PLA Military Science Academy Aerodynamic Test Base",
+      "PLA Air Force Research Institute"
+    ]
+  },
+  {
+    "Entity": "Air Force Engineering University",
+    "Queries": [
+      "AFEU",
+      "Air Force Eng. University",
+      "A. F. Engineering University"
+    ]
+  },
+  {
+    "Entity": "CIECC",
+    "Queries": [
+      "C.I.E.C.C.",
+      "CIECC Inc.",
+      "CIECC Co."
+    ]
+  },
+  {
+    "Entity": "GTCOM",
+    "Queries": [
+      "GTCOM",
+      "G.T.COM",
+      "GTCOM Inc."
+    ]
+  },
+  {
+    "Entity": "Xiangtan University",
+    "Queries": [
+      "X. University",
+      "University of Xiangtan",
+      "Xiangtan Univ."
+    ]
+  },
+  {
+    "Entity": "Moscow Institute of Physics and Technology",
+    "Queries": [
+      "MIPT",
+      "Moscow Institute of Physics \u0026 Technology",
+      "Moscow Institute of Physics and Tech."
+    ]
+  },
+  {
+    "Entity": "北京计算科学研究中心",
+    "Queries": [
+      "Beijing Computational Science Research Center",
+      "Beijing CSRC",
+      "CSRC"
+    ]
+  },
+  {
+    "Entity": "Southwest Institute of Machining Technology",
+    "Queries": [
+      "Southwest Inst. of Machining Technology",
+      "SW Institute of Machining Technology",
+      "Southwest Institute of Machining Tech"
+    ]
+  },
+  {
+    "Entity": "Nanchang Aviation University",
+    "Queries": [
+      "Nanchang University of Aeronautics",
+      "Nanchang CAUC",
+      "Nanchang Hangkong University"
+    ]
+  },
+  {
+    "Entity": "Dalian Naval Academy",
+    "Queries": [
+      "Dalian Naval Academy",
+      "Dalian Naval Acad.",
+      "D. Naval Academy"
+    ]
+  },
+  {
+    "Entity": "PLA Air Force Command College",
+    "Queries": [
+      "PLAAF Command College",
+      "People's Liberation Army Air Force Command College",
+      "PLA Air Force Command Academy"
+    ]
+  },
+  {
+    "Entity": "1st General Design Department of the China Aerospace Science and Technology Corporation’s First Academy (CALT)",
+    "Queries": [
+      "1st General Design Department of CALT",
+      "First General Design Department of CALT",
+      "1st General Design Department of the China Aerospace Science and Technology Corporation"
+    ]
+  },
+  {
+    "Entity": "MPS Railway Police College",
+    "Queries": [
+      "MPS Railway Police Coll.",
+      "MPS Railway Police Clg.",
+      "Metropolitan Police Service Railway Police College"
+    ]
+  },
+  {
+    "Entity": "Sun Yat-sen University",
+    "Queries": [
+      "Sun Yat-sen Uni",
+      "SYSU",
+      "Zhongshan University"
+    ]
+  },
+  {
+    "Entity": "Hunan Guofang Keji University",
+    "Queries": [
+      "Hunan Defense Science and Technology University",
+      "Hunan National Defense Science and Technology University",
+      "Hunan University of Defense Science and Technology"
+    ]
+  },
+  {
+    "Entity": "中国人民武装警察部队工程大学",
+    "Queries": [
+      "中国武警工程大学",
+      "中国武警工程院校",
+      "中国人民武警工程大学"
+    ]
+  },
+  {
+    "Entity": "The Institute of Applied Physics and Computation Mathematics, Beijing",
+    "Queries": [
+      "Institute of Applied Physics and Computational Mathematics",
+      "Beijing",
+      "IAPCM",
+      "The Institute of Applied Physics and Computational Mathematics"
+    ]
+  },
+  {
+    "Entity": "BGI",
+    "Queries": null
+  },
+  {
+    "Entity": "火箭军研究院",
+    "Queries": [
+      "Rocket Force Research Institute",
+      "People's Liberation Army Rocket Force Research Institute",
+      "PLARF Research Institute"
+    ]
+  },
+  {
+    "Entity": "National Major S\u0026T Special Talent Recruitment Program",
+    "Queries": [
+      "National Major Science and Technology Special Talent Recruitment Program",
+      "NMSTS Special Talent Recruitment Program",
+      "National Major S\u0026T Special Talent Program"
+    ]
+  },
+  {
+    "Entity": "902 Institute",
+    "Queries": [
+      "902 Institute",
+      "Nine O Two Institute",
+      "902 Inst."
+    ]
+  },
+  {
+    "Entity": "Outstanding Technical Talent Recruitment Plan",
+    "Queries": [
+      "Outstanding Tech Talent Recruitment Plan",
+      "Outstanding Technical Talent Recruitment Program",
+      "O.T.T. Recruitment Plan"
+    ]
+  },
+  {
+    "Entity": "Tactical Missile Corporation, Concern “MPO-Gidropribor”",
+    "Queries": [
+      "Tactical Missile Corporation",
+      "Concern “MPO-Gidropribor”",
+      "Tactical Missiles Corporation",
+      "Concern \"MPO-Gidropribor\"",
+      "Tactical Missile Corp.",
+      "Concern \"MPO-Gidropribor\""
+    ]
+  },
+  {
+    "Entity": "杭州电子科技大学",
+    "Queries": [
+      "杭电",
+      "HDU",
+      "Hangzhou Dianzi University"
+    ]
+  },
+  {
+    "Entity": "中国电子信息产业集团有限公司",
+    "Queries": [
+      "CETC",
+      "中国电子",
+      "中国电子信息产业集团."
+    ]
+  },
+  {
+    "Entity": "Commercial Aircraft Corporation of China",
+    "Queries": [
+      "COMAC",
+      "Commercial Aircraft Corp. of China",
+      "Commercial Aircraft Corporation of China Ltd."
+    ]
+  },
+  {
+    "Entity": "Navy Submarine Academy",
+    "Queries": [
+      "Navy Submarine Acad.",
+      "U.S. Navy Submarine Academy",
+      "Naval Submarine Academy"
+    ]
+  },
+  {
+    "Entity": "Naval Research Academy",
+    "Queries": [
+      "Naval Research Acad.",
+      "NRA",
+      "Naval R. Academy"
+    ]
+  },
+  {
+    "Entity": "航天科工",
+    "Queries": [
+      "航天科技工业",
+      "中国航天科工集团",
+      "中国航天科工股份有限公司"
+    ]
+  },
+  {
+    "Entity": "中国船舶重工集团有限公司",
+    "Queries": [
+      "中船重工",
+      "中国船舶重工",
+      "中国船舶工业集团公司"
+    ]
+  },
+  {
+    "Entity": "Naval Engineering University",
+    "Queries": [
+      "Naval Eng. University",
+      "NEU",
+      "Naval Engineering Univ."
+    ]
+  },
+  {
+    "Entity": "Nanjing Army Command College",
+    "Queries": [
+      "Nanjing Army Cmd College",
+      "Nanjing Army Command Coll",
+      "Nanjing ACC"
+    ]
+  },
+  {
+    "Entity": "Xi’an Technological University",
+    "Queries": [
+      "XTU",
+      "Xi'an Tech University",
+      "Xi’an Technological Univ."
+    ]
+  },
+  {
+    "Entity": "南华大学",
+    "Queries": [
+      "南华大學",
+      "University of South China",
+      "Nanhua University"
+    ]
+  },
+  {
+    "Entity": "PLA Foreign Languages University",
+    "Queries": [
+      "PLA Foreign Languages University",
+      "People's Liberation Army Foreign Languages University",
+      "People's Liberation Army University of Foreign Languages"
+    ]
+  },
+  {
+    "Entity": "Funding Program for Overseas Students in S\u0026T Activities",
+    "Queries": [
+      "Funding Program for Overseas Students in Science and Technology Activities",
+      "Overseas Students S\u0026T Activities Funding Program",
+      "Overseas Students in S\u0026T Activities Funding Program"
+    ]
+  },
+  {
+    "Entity": "Institute of International Relations Suzhou Campus",
+    "Queries": [
+      "IIRS",
+      "Institute of International Relations (Suzhou)",
+      "IIR Suzhou"
+    ]
+  },
+  {
+    "Entity": "PLA Navy Equipment Academy",
+    "Queries": [
+      "PLA Navy Equipment Academy",
+      "People's Liberation Army Navy Equipment Academy",
+      "PLA Naval Equipment Academy"
+    ]
+  },
+  {
+    "Entity": "Naval Academy",
+    "Queries": [
+      "Naval Acad.",
+      "U.S. Naval Academy",
+      "USNA"
+    ]
+  },
+  {
+    "Entity": "AUAF",
+    "Queries": [
+      "American University of Afghanistan",
+      "A.U.A.F.",
+      "AU of Afghanistan"
+    ]
+  },
+  {
+    "Entity": "DLMU",
+    "Queries": null
+  },
+  {
+    "Entity": "HEU",
+    "Queries": null
+  },
+  {
+    "Entity": "Air Force Aviation University",
+    "Queries": [
+      "Air Force Aviation College",
+      "Air Force Aviation Institute",
+      "Air Force Aviation School"
+    ]
+  },
+  {
+    "Entity": "海军勤务学院",
+    "Queries": [
+      "海军勤务院",
+      "Navy Logistics Academy",
+      "Haijun Qinwu Xueyuan"
+    ]
+  },
+  {
+    "Entity": "西安高技术研究所",
+    "Queries": [
+      "西安高技研究所",
+      "Xian High-Tech Research Institute",
+      "Xi'an High-Technology Research Institute"
+    ]
+  },
+  {
+    "Entity": "北京电子科技学院",
+    "Queries": [
+      "北京电子科技学院",
+      "Beijing University of Electronic Science and Technology",
+      "Beijing University of Electronic Science \u0026 Technology"
+    ]
+  },
+  {
+    "Entity": "中国人民武装警察部队杭州士官学校",
+    "Queries": [
+      "武警杭州士官学校",
+      "中国人民武警杭州士官学校",
+      "杭州士官学校"
+    ]
+  },
+  {
+    "Entity": "Semiconductor Manufacturing International Corporation",
+    "Queries": [
+      "SMIC",
+      "S.M.I.C.",
+      "Semiconductor Mfg. Int'l Corp."
+    ]
+  },
+  {
+    "Entity": "Chengdu Fine Optical Engineering Research Center",
+    "Queries": [
+      "Chengdu Fine Optical Engineering Research Centre",
+      "CDOERC",
+      "Fine Optical Engineering Research Center Chengdu"
+    ]
+  },
+  {
+    "Entity": "Army Academy of Armored Forces",
+    "Queries": [
+      "Army Academy of Armored Forces",
+      "Army Academy of Armoured Forces",
+      "AAAF"
+    ]
+  },
+  {
+    "Entity": "Sichuan University",
+    "Queries": [
+      "Sichuan Univ.",
+      "SCU",
+      "Sichuan U."
+    ]
+  },
+  {
+    "Entity": "空军哈尔滨飞行学院",
+    "Queries": [
+      "空军哈尔滨飞行学院",
+      "哈尔滨飞行学院",
+      "空军飞行学院"
+    ]
+  },
+  {
+    "Entity": "BCSRC",
+    "Queries": [
+      "BC SRC"
+    ]
+  },
+  {
+    "Entity": "空军指挥学院",
+    "Queries": [
+      "Air Force Command College",
+      "PLA Air Force Command College",
+      "Chinese Air Force Command College"
+    ]
+  },
+  {
+    "Entity": "JUST",
+    "Queries": null
+  },
+  {
+    "Entity": "Central South University",
+    "Queries": [
+      "CSU",
+      "Central S. University",
+      "C. South University"
+    ]
+  },
+  {
+    "Entity": "PLA Equipment Command and Technology Academy",
+    "Queries": [
+      "PLA Equipment Command \u0026 Technology Academy",
+      "People's Liberation Army Equipment Command and Technology Academy",
+      "Equipment Command and Technology Academy of the PLA"
+    ]
+  },
+  {
+    "Entity": "SPC",
+    "Queries": [
+      "SPC",
+      "S.P.C.",
+      "S P C"
+    ]
+  },
+  {
+    "Entity": "PLA Navy Research Academy",
+    "Queries": [
+      "PLA Navy Research Academy",
+      "People's Liberation Army Navy Research Academy",
+      "PLA Naval Research Academy"
+    ]
+  },
+  {
+    "Entity": "Air Force Logistics University",
+    "Queries": [
+      "Air Force Logistics Univ.",
+      "A.F. Logistics University",
+      "Air Force L. University"
+    ]
+  },
+  {
+    "Entity": "Semiconductor Manufacturing South China Corporation",
+    "Queries": [
+      "Semiconductor Manufacturing South China Corp.",
+      "Semiconductor Manufacturing South China Co.",
+      "SMSC"
+    ]
+  },
+  {
+    "Entity": "武警后勤学院",
+    "Queries": [
+      "武警后勤学院 could be 武警后勤大学",
+      "People's Armed Police Logistics Academy",
+      "武警后勤学校"
+    ]
+  },
+  {
+    "Entity": "UESTC",
+    "Queries": [
+      "UESTC",
+      "U.E.S.T.C.",
+      "UESTC University"
+    ]
+  },
+  {
+    "Entity": "陆军工程大学",
+    "Queries": [
+      "陆军工大",
+      "陆工程大",
+      "陆工大"
+    ]
+  },
+  {
+    "Entity": "Northwest Institute of Nuclear Technology",
+    "Queries": [
+      "Northwest Institute of Nuclear Tech",
+      "NINT",
+      "Northwest Institute of Nuclear Tech."
+    ]
+  },
+  {
+    "Entity": "Chang Jiang Scholars Award Program (Chair Professor)",
+    "Queries": [
+      "Changjiang Scholars Program (Chair Professor)",
+      "CJK Scholars Award Program (Chair Professor)",
+      "Changjiang Professorship (Chair Professor)"
+    ]
+  },
+  {
+    "Entity": "Nanchang Army Academy",
+    "Queries": [
+      "Nanchang Military Academy",
+      "Nanchang Armed Forces Academy",
+      "Nanchang Defense Academy"
+    ]
+  },
+  {
+    "Entity": "HPSTAR",
+    "Queries": [
+      "HPSTAR",
+      "H.P. STAR",
+      "HP STAR"
+    ]
+  },
+  {
+    "Entity": "NINT",
+    "Queries": null
+  },
+  {
+    "Entity": "Beijing Jincheng Huanyu Electronics Co., Ltd.",
+    "Queries": [
+      "Beijing Jincheng Huanyu Electronics",
+      "Jincheng Huanyu Electronics Co.",
+      "Ltd.",
+      "Beijing Jincheng Huanyu Electronics Co."
+    ]
+  },
+  {
+    "Entity": "Beijing University of Posts and Telecommunications",
+    "Queries": [
+      "Beijing U. of Posts and Telecommunications",
+      "BUPT",
+      "Beijing University of P\u0026T"
+    ]
+  },
+  {
+    "Entity": "Naval Petty Officer Academy",
+    "Queries": [
+      "Naval PO Academy",
+      "Naval Petty Officer Acad.",
+      "NPO Academy"
+    ]
+  },
+  {
+    "Entity": "Wuhan University",
+    "Queries": [
+      "WU",
+      "Wuhan Univ.",
+      "Wuhan U."
+    ]
+  },
+  {
+    "Entity": "Luoyang University",
+    "Queries": [
+      "Luoyang Univ.",
+      "Loyang University",
+      "Luoyang Univ"
+    ]
+  },
+  {
+    "Entity": "ChemChina",
+    "Queries": [
+      "Chem China",
+      "China National Chemical Corporation",
+      "C. N. Chemical Corporation"
+    ]
+  },
+  {
+    "Entity": "University of South China",
+    "Queries": [
+      "USC",
+      "South China University",
+      "University of S. China"
+    ]
+  },
+  {
+    "Entity": "PLA Navy Bengbu Petty Officer Academy",
+    "Queries": [
+      "PLA Navy Bengbu PO Academy",
+      "Bengbu Petty Officer Academy",
+      "PLA Navy Bengbu Petty Officer Acad."
+    ]
+  },
+  {
+    "Entity": "空军研究院",
+    "Queries": [
+      "空军研究院",
+      "空军学院",
+      "空军研究机构"
+    ]
+  },
+  {
+    "Entity": "35 Institute of CASIC’s Third Academy",
+    "Queries": [
+      "35 Inst. of CASIC’s 3rd Academy",
+      "35 Institute of the Third Academy of CASIC",
+      "35th Institute of CASIC's Third Academy"
+    ]
+  },
+  {
+    "Entity": "Huawei Inves1ment \u0026 Holding Co., Ltd.",
+    "Queries": [
+      "Huawei Investment and Holding Co.",
+      "Ltd.",
+      "Huawei Investment \u0026 Holding Co. Ltd.",
+      "Huawei Investment \u0026 Holding Company Limited"
+    ]
+  },
+  {
+    "Entity": "Beijing Institute of Space System Engineering",
+    "Queries": [
+      "BISSE",
+      "Beijing ISSE",
+      "Beijing Institute of SSE"
+    ]
+  },
+  {
+    "Entity": "Thousand Talents Program — Entrepreneurs",
+    "Queries": [
+      "Thousand Talents Program - Entrepreneurs",
+      "Thousand Talents Entrepreneurs",
+      "TTP - Entrepreneurs"
+    ]
+  },
+  {
+    "Entity": "Key Laboratory of Complex Aviation System Simulation",
+    "Queries": [
+      "Key Lab of Complex Aviation System Simulation",
+      "Complex Aviation System Simulation Key Laboratory",
+      "Complex Aviation System Simulation Lab"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军第二军医大",
+    "Queries": [
+      "第二军医大",
+      "Chinese People's Liberation Army Second Military Medical University",
+      "PLA Second Military Medical University"
+    ]
+  },
+  {
+    "Entity": "Chunhui Program",
+    "Queries": [
+      "Chunhui Prog.",
+      "Chunhui Pgm.",
+      "C. Program"
+    ]
+  },
+  {
+    "Entity": "UIR",
+    "Queries": null
+  },
+  {
+    "Entity": "",
+    "Queries": [
+      "Please provide the name of the person or organization you would like alternative forms for."
+    ]
+  },
+  {
+    "Entity": "Zhejiang University",
+    "Queries": [
+      "ZJU",
+      "Zhejiang Univ.",
+      "Zhejiang U."
+    ]
+  },
+  {
+    "Entity": "陆军装甲兵学院",
+    "Queries": [
+      "陆军装甲兵学",
+      "陆军装甲兵院",
+      "陆军装甲学院"
+    ]
+  },
+  {
+    "Entity": "Aviation Industry Corporation of China, Ltd.",
+    "Queries": [
+      "AVIC",
+      "Aviation Industry Corporation of China Limited",
+      "Aviation Industry Corp. of China"
+    ]
+  },
+  {
+    "Entity": "Xi'an University of Electronic Science and Technology",
+    "Queries": [
+      "Xi'an UEST",
+      "XUET",
+      "Xi'an Univ. of Electronic Sci. \u0026 Tech."
+    ]
+  },
+  {
+    "Entity": "中国人民解放军国防科技大学",
+    "Queries": [
+      "国防科技大学",
+      "科技大学",
+      "NDSTU"
+    ]
+  },
+  {
+    "Entity": "China Haiying Electromechanical Technology Academy (a.k.a., China Haiying Science \u0026 Technology Corporation)",
+    "Queries": [
+      "China Haiying Electromechanical Technology Academy",
+      "China Haiying Science \u0026 Technology Corporation",
+      "China Haiying Electromechanical Tech Academy"
+    ]
+  },
+  {
+    "Entity": "Huang Jiaqing Youth Talent Program",
+    "Queries": [
+      "H. Jiaqing Youth Talent Program",
+      "Huang J. Youth Talent Program",
+      "Huang Jiaqing Y.T.P."
+    ]
+  },
+  {
+    "Entity": "China Electronics Technology Group Corporation",
+    "Queries": [
+      "CETC",
+      "China Electronics Technology Group",
+      "China Electronics Tech Group Corp"
+    ]
+  },
+  {
+    "Entity": "HIT",
+    "Queries": [
+      "H.I.T.",
+      "H I T",
+      "H-I-T"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军陆军航空兵学院",
+    "Queries": [
+      "中国人民解放军陆军航空兵学院",
+      "人民解放军陆军航空兵学院",
+      "陆军航空兵学院"
+    ]
+  },
+  {
+    "Entity": "Southwest Institute of Environmental Testing",
+    "Queries": [
+      "Southwest Institute of Environmental Testing",
+      "SW Institute of Environmental Testing",
+      "SWIET"
+    ]
+  },
+  {
+    "Entity": "NPU",
+    "Queries": null
+  },
+  {
+    "Entity": "Yanshan University",
+    "Queries": [
+      "Y. University",
+      "Yanshan Univ.",
+      "Yanshan U."
+    ]
+  },
+  {
+    "Entity": "Sichuan Zhonghe Import and Export Trade Co., Ltd.",
+    "Queries": [
+      "Sichuan Zhonghe Import \u0026 Export Trade Co.",
+      "Ltd.",
+      "Sichuan Zhonghe Import and Export Trading Co.",
+      "Ltd.",
+      "Sichuan Zhonghe I\u0026E Trade Co.",
+      "Ltd."
+    ]
+  },
+  {
+    "Entity": "中国人民解放军空军指挥学院",
+    "Queries": [
+      "空军指挥学院",
+      "中国空军指挥学院",
+      "解放军空军指挥学院"
+    ]
+  },
+  {
+    "Entity": "MNIRTI JSC",
+    "Queries": [
+      "MNIRTI Joint Stock Company",
+      "MNIRTI J.S.C.",
+      "MNIRTI JSC"
+    ]
+  },
+  {
+    "Entity": "Recruitment Program for High-Level Overseas Cultural Talents River Talents Plan",
+    "Queries": [
+      "Recruitment Program for High-Level Overseas Cultural Talents",
+      "River Talents Plan",
+      "Recruitment Program for High-Level Overseas Cultural Talents Plan"
+    ]
+  },
+  {
+    "Entity": "Beijing Aeronautical Manufacturing Technology Research Institute (a.k.a. AVIC Institute 625)",
+    "Queries": [
+      "Beijing AMTRI",
+      "AVIC Institute 625",
+      "AMTRI"
+    ]
+  },
+  {
+    "Entity": "JLU",
+    "Queries": [
+      "J.L.U.",
+      "JLU Inc.",
+      "JLU Corp."
+    ]
+  },
+  {
+    "Entity": "Costar Group Co., Ltd.",
+    "Queries": [
+      "Costar Group",
+      "Costar Group Co.",
+      "Costar Group Ltd."
+    ]
+  },
+  {
+    "Entity": "中国商飞",
+    "Queries": [
+      "COMAC",
+      "Commercial Aircraft Corporation of China",
+      "Ltd.",
+      "Zhongguo Shangfei"
+    ]
+  },
+  {
+    "Entity": "空军雷达学院",
+    "Queries": [
+      "空军雷达学院",
+      "空军雷达学",
+      "雷达学院"
+    ]
+  },
+  {
+    "Entity": "Unit 63820",
+    "Queries": [
+      "Unit 63-820",
+      "Unit 63 820",
+      "Unit 638-20"
+    ]
+  },
+  {
+    "Entity": "中南大学",
+    "Queries": [
+      "CSU",
+      "Central South University",
+      "Zhongnan University"
+    ]
+  },
+  {
+    "Entity": "CAEP",
+    "Queries": [
+      "Council for the Accreditation of Educator Preparation",
+      "C.A.E.P.",
+      "CAEP Inc."
+    ]
+  },
+  {
+    "Entity": "Sugon",
+    "Queries": null
+  },
+  {
+    "Entity": "中国兵装",
+    "Queries": [
+      "China South Industries Group",
+      "China Ordnance Industries",
+      "China Northern Industries Group"
+    ]
+  },
+  {
+    "Entity": "People’s Public Security University of China",
+    "Queries": [
+      "People’s Public Security Univ. of China",
+      "PPSUC",
+      "People's Public Security University of China."
+    ]
+  },
+  {
+    "Entity": "湖南大学",
+    "Queries": [
+      "Hunan University",
+      "Hunan Univ.",
+      "湖南大學"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军海军军医大学",
+    "Queries": [
+      "中国人民解放军海军军医大",
+      "解放军海军军医大学",
+      "海军军医大学"
+    ]
+  },
+  {
+    "Entity": "CEC",
+    "Queries": [
+      "CEC",
+      "C.E.C.",
+      "Central European Commission"
+    ]
+  },
+  {
+    "Entity": "China Unicom",
+    "Queries": [
+      "China United Telecommunications Corporation",
+      "CUCL",
+      "China Unicom Limited"
+    ]
+  },
+  {
+    "Entity": "沈阳理工大学",
+    "Queries": [
+      "沈理工",
+      "沈阳理工",
+      "沈阳理工大"
+    ]
+  },
+  {
+    "Entity": "China United Network Communications Group Co., Ltd.",
+    "Queries": [
+      "China Unicom",
+      "China United Network Communications",
+      "China Unicom Group"
+    ]
+  },
+  {
+    "Entity": "China National Chemical Engineering Group Corporation",
+    "Queries": [
+      "China National Chemical Engineering Group Corp",
+      "CNCEC",
+      "China Natl. Chem. Eng. Group Corp."
+    ]
+  },
+  {
+    "Entity": "China Telecom Corporation Limited",
+    "Queries": [
+      "China Telecom Corp. Ltd.",
+      "China Telecom Co. Ltd.",
+      "China Telecom Limited"
+    ]
+  },
+  {
+    "Entity": "HDU",
+    "Queries": [
+      "H.D.U.",
+      "Huazhong University of Science and Technology",
+      "Hangzhou Dianzi University"
+    ]
+  },
+  {
+    "Entity": "海军指挥学院",
+    "Queries": [
+      "Naval Command College",
+      "Haijun Zhihui Xueyuan",
+      "Naval Academy Command"
+    ]
+  },
+  {
+    "Entity": "江苏科技大学",
+    "Queries": [
+      "江科大",
+      "Jiangsu University of Science and Technology",
+      "JUST"
+    ]
+  },
+  {
+    "Entity": "中国航发",
+    "Queries": [
+      "中国航发",
+      "中国航空发动机集团",
+      "中国航发集团"
+    ]
+  },
+  {
+    "Entity": "大连民族大学",
+    "Queries": [
+      "大连民大",
+      "大连民族学院",
+      "大连民族院校"
+    ]
+  },
+  {
+    "Entity": "海军研究院",
+    "Queries": [
+      "海军研院",
+      "海军研",
+      "Navy Research Institute"
+    ]
+  },
+  {
+    "Entity": "上海交通大学",
+    "Queries": [
+      "SJTU",
+      "Shanghai Jiao Tong University",
+      "Shanghai Jiaotong University"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军火箭军工程大学",
+    "Queries": [
+      "火箭军工程大学",
+      "中国人民解放军火箭军大学",
+      "解放军火箭军工程大学"
+    ]
+  },
+  {
+    "Entity": "海军士官学校",
+    "Queries": [
+      "Naval Academy",
+      "Navy Officer School",
+      "Naval Officer Academy"
+    ]
+  },
+  {
+    "Entity": "PLA Rocket Force Academy",
+    "Queries": [
+      "PLA Rocket Force Academy",
+      "People's Liberation Army Rocket Force Academy",
+      "PLA Rocket Force University"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军海军指挥学院",
+    "Queries": [
+      "解放军海军指挥学院",
+      "人民解放军海军指挥学院",
+      "中国海军指挥学院"
+    ]
+  },
+  {
+    "Entity": "China Communications Construction Group (Limited)",
+    "Queries": [
+      "China Communications Construction Group",
+      "China Communications Construction Group Ltd.",
+      "China Communications Construction Group Limited"
+    ]
+  },
+  {
+    "Entity": "Northwestern Polytechnical University",
+    "Queries": [
+      "Northwestern Polytechnical Univ",
+      "NPU",
+      "Northwestern Polytechnical U."
+    ]
+  },
+  {
+    "Entity": "PAP NCO College",
+    "Queries": [
+      "P.A.P NCO College",
+      "PAP Non-Commissioned Officer College",
+      "P.A.P. NCO College"
+    ]
+  },
+  {
+    "Entity": "Institute of NBC Defense",
+    "Queries": [
+      "Institute of NBC Defense",
+      "Institute of Nuclear",
+      "Biological",
+      "and Chemical Defense",
+      "NBC Defense Institute"
+    ]
+  },
+  {
+    "Entity": "武警工程大学",
+    "Queries": [
+      "武警工大",
+      "People's Armed Police Engineering University",
+      "PAP Engineering University"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军海军研究院",
+    "Queries": [
+      "中国人民解放军海军学院",
+      "中国人民解放军海军学术研究院",
+      "海军研究院"
+    ]
+  },
+  {
+    "Entity": "中北大学",
+    "Queries": [
+      "中北大学",
+      "Zhongbei University",
+      "North University of China"
+    ]
+  },
+  {
+    "Entity": "Sichuan Haitian New Technology Group Co. Ltd.",
+    "Queries": [
+      "Sichuan Haitian New Technology Group",
+      "Sichuan Haitian New Technology",
+      "Sichuan Haitian Group"
+    ]
+  },
+  {
+    "Entity": "A/SEU",
+    "Queries": [
+      "ASEU",
+      "A-SEU",
+      "A SEU"
+    ]
+  },
+  {
+    "Entity": "Dialogue with Masters-Nobel Laureate Campus Travel Plan",
+    "Queries": [
+      "Dialogue with Masters-Nobel Laureate Campus Travel Plan",
+      "Dialogue with Masters-Nobel Laureate Campus Travel Program",
+      "Dialogue with Masters Nobel Laureate Campus Travel Plan"
+    ]
+  },
+  {
+    "Entity": "Support Plan for Overseas Chinese Students Who Return to Start Businesses",
+    "Queries": [
+      "Support Plan for Overseas Chinese Students",
+      "Overseas Chinese Students Support Plan",
+      "Support Plan for Returning Overseas Chinese Students"
+    ]
+  },
+  {
+    "Entity": "CETC",
+    "Queries": [
+      "China Electronics Technology Group Corporation",
+      "China Electronics Technology Group",
+      "CETC Group"
+    ]
+  },
+  {
+    "Entity": "Xi’an Research Institute of High-Tech",
+    "Queries": [
+      "Xi’an Research Institute of High-Tech",
+      "Xi'an Research Institute of High-Technology",
+      "Xi’An High-Tech Research Institute"
+    ]
+  },
+  {
+    "Entity": "陆军勤务学院",
+    "Queries": [
+      "陆军勤院",
+      "陆军勤学院",
+      "陆勤院"
+    ]
+  },
+  {
+    "Entity": "63820部队",
+    "Queries": [
+      "63820部队"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军空军军医大学",
+    "Queries": [
+      "空军军医大学",
+      "解放军空军军医大学",
+      "中国空军军医大学"
+    ]
+  },
+  {
+    "Entity": "High-End Foreign Experts Plan",
+    "Queries": [
+      "High-End Foreign Experts Program",
+      "High-End Foreign Experts Scheme",
+      "High End Foreign Experts Plan"
+    ]
+  },
+  {
+    "Entity": "大连通信士官学校",
+    "Queries": [
+      "大连通信训练基地",
+      "大连通信学院",
+      "大连通信士官学院"
+    ]
+  },
+  {
+    "Entity": "Project 5-100",
+    "Queries": [
+      "5-100 Project",
+      "Project Five-One Hundred",
+      "5/100 Initiative"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军空军通信士官学校",
+    "Queries": [
+      "空军通信士官学校",
+      "中国人民解放军通信士官学校",
+      "解放军空军通信士官学校"
+    ]
+  },
+  {
+    "Entity": "中国人民警察大学",
+    "Queries": [
+      "中国人民警察大",
+      "中国警察大学",
+      "人民警察大学"
+    ]
+  },
+  {
+    "Entity": "Southeast University",
+    "Queries": [
+      "Southeast Univ.",
+      "SEU",
+      "SE University"
+    ]
+  },
+  {
+    "Entity": "北京理工大学",
+    "Queries": [
+      "北理工",
+      "BIT",
+      "北方工业大学"
+    ]
+  },
+  {
+    "Entity": "111 plan",
+    "Queries": null
+  },
+  {
+    "Entity": "Fourth Medical University",
+    "Queries": [
+      "Fourth Medical University",
+      "4th Medical University",
+      "Fourth Med. University"
+    ]
+  },
+  {
+    "Entity": "China State Shipbuilding Corporation",
+    "Queries": [
+      "CSSC",
+      "China State Shipbuilding Corp",
+      "China State Shipbuilding Co."
+    ]
+  },
+  {
+    "Entity": "北京应用物理与计算数学研究所",
+    "Queries": [
+      "北应所",
+      "北京应用物理所",
+      "应用物理与计算数学研究所"
+    ]
+  },
+  {
+    "Entity": "Southwest Institute of Materials",
+    "Queries": [
+      "Southwest Inst. of Materials",
+      "SW Institute of Materials",
+      "Southwest Institute Materials"
+    ]
+  },
+  {
+    "Entity": "Tactical Missile Corporation, Joint Stock Company GosNIMash",
+    "Queries": [
+      "Tactical Missile Corporation JSC",
+      "JSC Tactical Missile Corporation",
+      "GosNIMash JSC"
+    ]
+  },
+  {
+    "Entity": "Air Force Military Medical University",
+    "Queries": [
+      "Air Force Medical University",
+      "AFMMU",
+      "Fourth Military Medical University"
+    ]
+  },
+  {
+    "Entity": "China People’s Police University",
+    "Queries": [
+      "China People's Police Uni",
+      "CPPU",
+      "China People’s Police U"
+    ]
+  },
+  {
+    "Entity": "兵装集团",
+    "Queries": null
+  },
+  {
+    "Entity": "China South Industries Group Corporation",
+    "Queries": [
+      "China South Industries Group Corp.",
+      "CSIGC",
+      "China South Industries Group"
+    ]
+  },
+  {
+    "Entity": "成都电子科技大学",
+    "Queries": [
+      "电子科技大学",
+      "成电",
+      "UESTC"
+    ]
+  },
+  {
+    "Entity": "Aerospace Engineering University",
+    "Queries": [
+      "Aerospace Engineering Univ.",
+      "AE University",
+      "Aerospace Eng. University"
+    ]
+  },
+  {
+    "Entity": "Pearl River Talent Program",
+    "Queries": [
+      "Pearl River Talent Programme",
+      "P. R. Talent Program",
+      "Pearl River Talent Prog."
+    ]
+  },
+  {
+    "Entity": "中国人民解放军陆军军事交通学院",
+    "Queries": [
+      "解放军陆军院校",
+      "陆军军事学院",
+      "军事交通学院"
+    ]
+  },
+  {
+    "Entity": "Planning Department No 1 of the China Aerospace Science and Technology Corporation’s First Academy (CALT)",
+    "Queries": [
+      "Planning Department No 1",
+      "China Aerospace Science and Technology Corporation’s First Academy",
+      "CALT's Planning Department No 1"
+    ]
+  },
+  {
+    "Entity": "CNCEC",
+    "Queries": [
+      "China National Chemical Engineering Corporation",
+      "CNCEC Ltd.",
+      "CN Chemical Engineering Co."
+    ]
+  },
+  {
+    "Entity": "China Chang Feng Mechano-Electronic Engineering Academy",
+    "Queries": [
+      "China CF Mechano-Electronic Engineering Academy",
+      "China Chang Feng Mechanical-Electronic Engineering Academy",
+      "China Chang-Feng Mechano-Electronic Engineering Academy"
+    ]
+  },
+  {
+    "Entity": "Army Service Academy",
+    "Queries": [
+      "Army Service Acad.",
+      "Ar. Svc. Acad.",
+      "ASA"
+    ]
+  },
+  {
+    "Entity": "Rocket Force NCO College",
+    "Queries": [
+      "Rocket Force NCO Coll.",
+      "Rocket Force Non-Commissioned Officer College",
+      "RF NCO College"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军陆军装甲兵学院",
+    "Queries": [
+      "PLA Army Armored Force Academy",
+      "People's Liberation Army Army Armored Forces Academy",
+      "Chinese PLA Army Armored Cavalry Institute"
+    ]
+  },
+  {
+    "Entity": "中国人民武装警察部队后勤学院",
+    "Queries": [
+      "武警后勤学院",
+      "中国武警后勤学院",
+      "武装警察部队后勤学院"
+    ]
+  },
+  {
+    "Entity": "PLA Rocket Force NCO College",
+    "Queries": [
+      "PLA Rocket Force NCO College",
+      "People's Liberation Army Rocket Force NCO College",
+      "Rocket Force NCO College"
+    ]
+  },
+  {
+    "Entity": "Academy of Military Medical Sciences, Institute of Radiation and Radiation Medicine",
+    "Queries": [
+      "Academy of Military Medical Sciences",
+      "Institute of Radiation \u0026 Radiation Medicine",
+      "AMMS Institute of Radiation and Radiation Medicine",
+      "AMMS Institute of Radiation \u0026 Radiation Medicine"
+    ]
+  },
+  {
+    "Entity": "FTIAN",
+    "Queries": null
+  },
+  {
+    "Entity": "Inspur Group Co., Ltd.",
+    "Queries": [
+      "Inspur Group",
+      "Inspur Group Limited",
+      "Inspur Group Co."
+    ]
+  },
+  {
+    "Entity": "中国电子科技集团公司",
+    "Queries": [
+      "CETC",
+      "China Electronics Technology Group Corporation",
+      "中国电科"
+    ]
+  },
+  {
+    "Entity": "AFCC",
+    "Queries": [
+      "AFCC Inc.",
+      "AFCC Ltd.",
+      "AFCC Co."
+    ]
+  },
+  {
+    "Entity": "Naval Aeronautics and Astronautics University",
+    "Queries": [
+      "Naval Aeronautics \u0026 Astronautics University",
+      "NAAU",
+      "Naval Aeronautics and Astronautics Univ."
+    ]
+  },
+  {
+    "Entity": "中国人民解放军陆军炮兵防空兵学院",
+    "Queries": [
+      "炮兵防空兵学院",
+      "解放军陆军炮兵防空兵学院",
+      "中国人民解放军炮兵防空兵学院"
+    ]
+  },
+  {
+    "Entity": "China Jiuyuan Trading Corporation",
+    "Queries": [
+      "China Jiuyuan Trading Corp.",
+      "China Jiuyuan Trading Co.",
+      "China Jiuyuan Trading Company"
+    ]
+  },
+  {
+    "Entity": "Beijing University",
+    "Queries": [
+      "Beijing Uni",
+      "Beijing U",
+      "Peking University"
+    ]
+  },
+  {
+    "Entity": "Beijing Aerospace Automatic Control Institute",
+    "Queries": [
+      "Beijing Aerospace Automatic Control Institute",
+      "BAACI",
+      "Beijing Aerospace Institute"
+    ]
+  },
+  {
+    "Entity": "CRRC",
+    "Queries": [
+      "China Railway Rolling Stock Corporation",
+      "China Railway Rolling Stock Co.",
+      "Ltd.",
+      "CRRC Corporation Limited"
+    ]
+  },
+  {
+    "Entity": "Army Aviation School",
+    "Queries": [
+      "Army Aviation School",
+      "The Army Aviation School",
+      "U.S. Army Aviation School"
+    ]
+  },
+  {
+    "Entity": "Norinco Group",
+    "Queries": [
+      "Norinco",
+      "China North Industries Group Corporation",
+      "CNIGC"
+    ]
+  },
+  {
+    "Entity": "National Science Fund for Distinguished Young Scholars",
+    "Queries": [
+      "National Science Fund for Distinguished Young Scholars",
+      "NSF for Distinguished Young Scholars",
+      "Chinese National Science Fund for Distinguished Young Scholars"
+    ]
+  },
+  {
+    "Entity": "Rocket Force Command College",
+    "Queries": [
+      "Rocket Force Cmd College",
+      "RF Command College",
+      "Rocket Force Command Coll"
+    ]
+  },
+  {
+    "Entity": "International Training Program for Artificial Intelligence Talents in Chinese Universities: AI Training Camp",
+    "Queries": [
+      "ITPAITCU: AI Training Camp",
+      "AI Training Camp",
+      "International AI Training Program in Chinese Universities"
+    ]
+  },
+  {
+    "Entity": "AVIC Aviation High-Technology Company Limited",
+    "Queries": [
+      "AVIC Aviation High-Technology Co. Ltd.",
+      "AVIC Aviation High-Technology Co.",
+      "Ltd.",
+      "AVIC Aviation High-Technology Co. Ltd"
+    ]
+  },
+  {
+    "Entity": "The Edge",
+    "Queries": [
+      "The Edge",
+      "Edge",
+      "D. Evans"
+    ]
+  },
+  {
+    "Entity": "CBC",
+    "Queries": [
+      "Canadian Broadcasting Corporation",
+      "C.B.C.",
+      "CBC/Radio-Canada"
+    ]
+  },
+  {
+    "Entity": "Ninth Academy",
+    "Queries": [
+      "9th Academy",
+      "9th Acad.",
+      "Ninth Acad."
+    ]
+  },
+  {
+    "Entity": "山东大学",
+    "Queries": [
+      "山大",
+      "SDU",
+      "Shandong University"
+    ]
+  },
+  {
+    "Entity": "Aviation Industry Corporation of China",
+    "Queries": [
+      "AVIC",
+      "Aviation Industry Corp. of China",
+      "Aviation Industry Corporation of China",
+      "Ltd."
+    ]
+  },
+  {
+    "Entity": "Thousand Talents Program — Innovative Talents Plan (Long-Term)",
+    "Queries": [
+      "Thousand Talents Program",
+      "Innovative Talents Plan",
+      "Innovative Talents Plan (Long-Term)"
+    ]
+  },
+  {
+    "Entity": "Nanjing Information Technology Research Institute",
+    "Queries": [
+      "Nanjing Information Technology Research Inst.",
+      "Nanjing IT Research Institute",
+      "Nanjing Info Tech Research Institute"
+    ]
+  },
+  {
+    "Entity": "Beijing Electronic Science and Technology Institute",
+    "Queries": [
+      "Beijing Electronic Sci. \u0026 Tech. Institute",
+      "Beijing Electronic Science \u0026 Technology Inst.",
+      "B.E.S.T. Institute"
+    ]
+  },
+  {
+    "Entity": "Nanjing Research Institute of Information Technology",
+    "Queries": [
+      "Nanjing Research Institute of IT",
+      "Nanjing Research Institute of Info Tech",
+      "NRIIT"
+    ]
+  },
+  {
+    "Entity": "Huazhong University of Science and Technology",
+    "Queries": [
+      "HUST",
+      "Huazhong University",
+      "Huazhong Univ. of Sci. and Tech."
+    ]
+  },
+  {
+    "Entity": "Logistics University of the People’s Armed Police Force",
+    "Queries": [
+      "Logistics Univ. of the People's Armed Police Force",
+      "Logistics University of People’s APF",
+      "Logistics University of the People's Armed Police."
+    ]
+  },
+  {
+    "Entity": "Qihoo 360",
+    "Queries": [
+      "Qihoo",
+      "360 Technology",
+      "Q360"
+    ]
+  },
+  {
+    "Entity": "Zhejiang Dahna Technology Co., Ltd.",
+    "Queries": [
+      "Zhejiang Dahna Technology",
+      "Zhejiang Dahna Technology Co.",
+      "Zhejiang Dahna Technology Ltd."
+    ]
+  },
+  {
+    "Entity": "SMIC Northern Integrated Circuit Manufacturing (Beijing) Co., Ltd",
+    "Queries": [
+      "SMIC Northern Integrated Circuit Manufacturing Beijing Co.",
+      "Ltd",
+      "SMIC Northern IC Manufacturing (Beijing) Co.",
+      "Ltd",
+      "SMIC Northern Integrated Circuit Manufacturing Co.",
+      "Ltd"
+    ]
+  },
+  {
+    "Entity": "Hangzhou Institute of Electrical Engineering",
+    "Queries": [
+      "Hangzhou Institute of Electrical Engineering",
+      "Hangzhou Electrical Engineering Institute",
+      "HIEE"
+    ]
+  },
+  {
+    "Entity": "西北核技术研究所",
+    "Queries": [
+      "西北核技術研究所",
+      "XiBei He Ji Shu Yan Jiu Suo",
+      "Northwest Institute of Nuclear Technology"
+    ]
+  },
+  {
+    "Entity": "Beijing Automation Control Equipment Institute (BACEI)",
+    "Queries": [
+      "BACEI",
+      "Beijing ACEI",
+      "B.A.C.E.I."
+    ]
+  },
+  {
+    "Entity": "China Coast Guard Academy",
+    "Queries": [
+      "China Coast Guard Acad.",
+      "CCGA",
+      "China Coast Guard Acad."
+    ]
+  },
+  {
+    "Entity": "Inner Mongolia First Machinery Group Co., Ltd.",
+    "Queries": [
+      "Inner Mongolia 1st Machinery Group Co.",
+      "Ltd.",
+      "Inner Mongolia First Machinery Group Company Limited",
+      "Inner Mongolia First Machinery Group Co. Ltd."
+    ]
+  },
+  {
+    "Entity": "XATU",
+    "Queries": null
+  },
+  {
+    "Entity": "Navy Medical University",
+    "Queries": [
+      "Navy Med. Univ.",
+      "NMU",
+      "Navy Medical Univ."
+    ]
+  },
+  {
+    "Entity": "中国人民解放军海军装备研究院",
+    "Queries": [
+      "中装院",
+      "中国海军装备研究院",
+      "海军装备研究院"
+    ]
+  },
+  {
+    "Entity": "中国电子产业集团",
+    "Queries": [
+      "中国电子集团",
+      "中国电子",
+      "中电集团"
+    ]
+  },
+  {
+    "Entity": "Global Tone Communication Technology Co Ltd",
+    "Queries": [
+      "Global Tone Communication Technology",
+      "Global Tone Communication Technology Co. Ltd.",
+      "GTCOM"
+    ]
+  },
+  {
+    "Entity": "WHUT",
+    "Queries": [
+      "WHUT",
+      "W.H.U.T."
+    ]
+  },
+  {
+    "Entity": "PAP Logistics University",
+    "Queries": [
+      "PAP Logistics Univ.",
+      "P.A.P. Logistics University",
+      "PAP Logistics Univ"
+    ]
+  },
+  {
+    "Entity": "Institute of Toxicology and Drugs",
+    "Queries": [
+      "Institute of Toxicology \u0026 Drugs",
+      "Institute of Toxicology and Drugs (ITD)",
+      "ITD"
+    ]
+  },
+  {
+    "Entity": "BESTI",
+    "Queries": null
+  },
+  {
+    "Entity": "Army Academy of Border and Coastal Defense",
+    "Queries": [
+      "Army Academy of Border \u0026 Coastal Defense",
+      "Army Academy of Border and Coastal Def.",
+      "Army Acad. of Border and Coastal Defense"
+    ]
+  },
+  {
+    "Entity": "PLA Air Force Command Academy",
+    "Queries": [
+      "PLA Air Force Command Academy",
+      "People's Liberation Army Air Force Command Academy",
+      "Air Force Command Academy of the PLA"
+    ]
+  },
+  {
+    "Entity": "China Chang Feng Mechanics and Electronics Technology Academy",
+    "Queries": [
+      "China CFME Technology Academy",
+      "China Chang Feng Mechanics \u0026 Electronics Technology Academy",
+      "CFME Technology Academy"
+    ]
+  },
+  {
+    "Entity": "中国航天科工集团有限公司",
+    "Queries": [
+      "CASIC",
+      "China Aerospace Science and Industry Corporation",
+      "中国航天科工集团."
+    ]
+  },
+  {
+    "Entity": "CSRC",
+    "Queries": [
+      "CSRC",
+      "C.S.R.C.",
+      "C-R-S-C"
+    ]
+  },
+  {
+    "Entity": "Chinese People Public Security University",
+    "Queries": [
+      "Chinese People's Public Security University",
+      "CPPSU",
+      "People's Public Security University of China"
+    ]
+  },
+  {
+    "Entity": "Semiconductor Manufacturing International (Tianjin) Corporation",
+    "Queries": [
+      "SMIC Tianjin",
+      "Semiconductor Manufacturing International Tianjin",
+      "SMIC Tianjin Corporation"
+    ]
+  },
+  {
+    "Entity": "IPP SB RAS",
+    "Queries": [
+      "IPP S.B. RAS",
+      "I.P.P. SB RAS",
+      "Institute of Petroleum and Power Engineering SB RAS"
+    ]
+  },
+  {
+    "Entity": "China National Nuclear Corporation",
+    "Queries": [
+      "CNNC",
+      "China National Nuclear Co.",
+      "China National Nuclear Corp."
+    ]
+  },
+  {
+    "Entity": "Air Force Flight Academy Shijiazhuang",
+    "Queries": [
+      "Air Force Flight Academy Shijiazhuang",
+      "Air Force Flight Academy SZ",
+      "AFFA Shijiazhuang"
+    ]
+  },
+  {
+    "Entity": "Nanjing University of Science and Technology",
+    "Queries": [
+      "NJUST",
+      "Nanjing Univ. of Science \u0026 Tech.",
+      "Nanjing Univ. Sci. \u0026 Tech."
+    ]
+  },
+  {
+    "Entity": "12th Research Institute, China Aerospace Science and Technology Corporation (CALT)",
+    "Queries": [
+      "12th Research Institute",
+      "CALT",
+      "China Aerospace Science and Technology Corp."
+    ]
+  },
+  {
+    "Entity": "Rocket Force Engineering University",
+    "Queries": [
+      "Rocket Force Engineering Univ",
+      "RFE University",
+      "RFE Univ."
+    ]
+  },
+  {
+    "Entity": "Air Force Communication NCO Academy",
+    "Queries": [
+      "Air Force Comm NCO Academy",
+      "Air Force Communication Noncommissioned Officer Academy",
+      "Air Force Communication NCOA"
+    ]
+  },
+  {
+    "Entity": "CASIC",
+    "Queries": [
+      "CASIC",
+      "China Aerospace Science \u0026 Industry Corporation",
+      "C.A.S.I.C."
+    ]
+  },
+  {
+    "Entity": "Tianjin University",
+    "Queries": [
+      "Tianjin Univ.",
+      "TJU",
+      "Tianjin Univ. of Technology"
+    ]
+  },
+  {
+    "Entity": "九院",
+    "Queries": null
+  },
+  {
+    "Entity": "海军潜艇学院",
+    "Queries": [
+      "海军潜艇学院",
+      "Naval Submarine Academy",
+      "PLA Navy Submarine Academy"
+    ]
+  },
+  {
+    "Entity": "Academy of Military Medical Sciences, Institute of Bioengineering",
+    "Queries": [
+      "Academy of Military Medical Sciences",
+      "Institute of Bioengineering",
+      "Academy of Military Medical Sciences - Bioengineering Institute",
+      "AMMS Institute of Bioengineering"
+    ]
+  },
+  {
+    "Entity": "Chinese Academy of Engineering Physics",
+    "Queries": [
+      "CAE",
+      "C.A.E.P",
+      "Chinese Academy of Eng. Physics"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军空军预警学院",
+    "Queries": [
+      "中国空军预警学院",
+      "解放军空军预警学院",
+      "空军预警学院"
+    ]
+  },
+  {
+    "Entity": "Huahang Institute of Radio Measurement",
+    "Queries": [
+      "Huahang Institute",
+      "HIRM",
+      "Huahang Radio Measurement Institute"
+    ]
+  },
+  {
+    "Entity": "警察大学",
+    "Queries": [
+      "警察大学",
+      "Police University",
+      "Keisatsu Daigaku"
+    ]
+  },
+  {
+    "Entity": "SYSU",
+    "Queries": [
+      "Sun Yat-sen University",
+      "SYSU University",
+      "Zhongda"
+    ]
+  },
+  {
+    "Entity": "Spring Light",
+    "Queries": [
+      "S. Light",
+      "Spring L."
+    ]
+  },
+  {
+    "Entity": "China Academy of Engineering Physics",
+    "Queries": [
+      "China Academy of Engineering Physics",
+      "CAEP",
+      "C.A.E.P."
+    ]
+  },
+  {
+    "Entity": "NUDT",
+    "Queries": [
+      "National University of Defense Technology",
+      "N.U.D.T.",
+      "NUDT."
+    ]
+  },
+  {
+    "Entity": "PPSUC",
+    "Queries": [
+      "People's Public Security University of China",
+      "PPSU of China",
+      "Public Security University of China"
+    ]
+  },
+  {
+    "Entity": "Luoyang Foreign Language Institute",
+    "Queries": [
+      "Luoyang Foreign Language Inst.",
+      "Luoyang F.L. Institute",
+      "Luoyang Foreign Language Inst."
+    ]
+  },
+  {
+    "Entity": "Beijing Aerospace Control Instruments Institute",
+    "Queries": [
+      "Beijing ACI Institute",
+      "Beijing Aerospace Control Institute",
+      "BACI Institute"
+    ]
+  },
+  {
+    "Entity": "Nanchang Aeronautical University",
+    "Queries": [
+      "Nanchang University of Aeronautics",
+      "Nanchang Aviation University",
+      "NAU"
+    ]
+  },
+  {
+    "Entity": "973 Program",
+    "Queries": [
+      "National High Technology Research and Development Program",
+      "973 Research Program",
+      "China 973 Program"
+    ]
+  },
+  {
+    "Entity": "浙江大学",
+    "Queries": [
+      "Zhejiang University",
+      "ZJU",
+      "Zhejiang Univ."
+    ]
+  },
+  {
+    "Entity": "Academy of Military Medical Sciences, Institute of Basic Medicine",
+    "Queries": [
+      "Academy of Military Medical Sciences",
+      "Basic Medicine Institute",
+      "AMMS Institute of Basic Medicine"
+    ]
+  },
+  {
+    "Entity": "China Haiying Electromechanical Technology Academy",
+    "Queries": [
+      "China Haiying Electromechanical Technology Institute",
+      "China Haiying Electromechanical Technology School",
+      "C. H. Electromechanical Technology Academy"
+    ]
+  },
+  {
+    "Entity": "Rocket Force Research Institute",
+    "Queries": [
+      "Rocket Force Research Institute",
+      "RFRI",
+      "Rocket Force R.I."
+    ]
+  },
+  {
+    "Entity": "People's Armed Police Special Police Academy",
+    "Queries": [
+      "PAP Special Police Academy",
+      "People's Armed Police Special Police Acad.",
+      "People's Armed Police SP Academy"
+    ]
+  },
+  {
+    "Entity": "海军军医大学",
+    "Queries": [
+      "海军军医大",
+      "Navy Medical University",
+      "Naval Medical University"
+    ]
+  },
+  {
+    "Entity": "Hangzhou Dianzi University",
+    "Queries": [
+      "Hangzhou University of Electronic Science and Technology",
+      "HDU",
+      "Hangzhou Dianzi Univ."
+    ]
+  },
+  {
+    "Entity": "Beijing High Voltage Research Center",
+    "Queries": [
+      "Beijing High Voltage Research Centre",
+      "B.H.V. Research Center",
+      "Beijing HV Research Center"
+    ]
+  },
+  {
+    "Entity": "Key Educational Intellect Recruitment Plan",
+    "Queries": [
+      "Key Educational Intellect Recruitment Plan could be represented as KEIRP",
+      "Key Educational Intellect Recruitment",
+      "or Key Educational Recruitment Plan."
+    ]
+  },
+  {
+    "Entity": "国家数字交换系统工程技术研究中心",
+    "Queries": [
+      "国家数字交换系统工程技术研究中心",
+      "National Digital Switching System Engineering \u0026 Technological R\u0026D Center",
+      "NDSC"
+    ]
+  },
+  {
+    "Entity": "中国航空发动机集团有限公司",
+    "Queries": [
+      "中航发",
+      "中国航发",
+      "航空发动机集团"
+    ]
+  },
+  {
+    "Entity": "East China Institute of Technology",
+    "Queries": [
+      "East China University of Technology",
+      "ECIT",
+      "ECUT"
+    ]
+  },
+  {
+    "Entity": "空军石家庄飞行学院",
+    "Queries": [
+      "空军石家庄飞行学院",
+      "空军石家庄飞行院",
+      "石家庄飞行学院"
+    ]
+  },
+  {
+    "Entity": "CloudWalk",
+    "Queries": null
+  },
+  {
+    "Entity": "Ocean University of China",
+    "Queries": [
+      "Ocean University of China",
+      "OUC",
+      "Ocean Univ. of China"
+    ]
+  },
+  {
+    "Entity": "Nanjing University of Aeronautics and Astronautics",
+    "Queries": [
+      "NUAA",
+      "Nanjing University of Aeronautics \u0026 Astronautics",
+      "Nanjing U. of Aeronautics and Astronautics"
+    ]
+  },
+  {
+    "Entity": "CASIC Academy of Defense Technology",
+    "Queries": [
+      "CASIC ADT",
+      "CASIC Academy",
+      "Academy of Defense Technology"
+    ]
+  },
+  {
+    "Entity": "郑州测绘学院",
+    "Queries": [
+      "郑州测绘大学",
+      "测绘学院郑州",
+      "郑测学院"
+    ]
+  },
+  {
+    "Entity": "Aerospace CHUAV Co., Ltd",
+    "Queries": [
+      "Aerospace CHUAV",
+      "CHUAV Co. Ltd.",
+      "Aerospace CHUAV Limited"
+    ]
+  },
+  {
+    "Entity": "Changfeng Electromechanical Technology Design Institute",
+    "Queries": [
+      "Changfeng Electromechanical",
+      "CET Design Institute",
+      "Changfeng Technology Design Institute"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军海军大连舰艇学院",
+    "Queries": [
+      "中国海军大连舰艇学院",
+      "海军大连舰艇学院",
+      "大连舰艇学院"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军海军潜艇学院",
+    "Queries": [
+      "中国人民解放军海军潜艇院",
+      "中国海军潜艇学院",
+      "潜艇学院"
+    ]
+  },
+  {
+    "Entity": "FTI RAS",
+    "Queries": [
+      "FTI of the RAS",
+      "FTI Russian Academy of Sciences",
+      "FTI RAS Institute"
+    ]
+  },
+  {
+    "Entity": "River Talents Plan",
+    "Queries": [
+      "River Talents Plan",
+      "R. Talents Plan",
+      "River T. Plan"
+    ]
+  },
+  {
+    "Entity": "TJU",
+    "Queries": [
+      "Tianjin University",
+      "Tianjin U",
+      "T. J. University"
+    ]
+  },
+  {
+    "Entity": "University of Science and Technology Beijing",
+    "Queries": [
+      "USTB",
+      "U. of Science and Technology Beijing",
+      "University of Science \u0026 Tech. Beijing"
+    ]
+  },
+  {
+    "Entity": "China Academy of Space Technology (CAST)",
+    "Queries": [
+      "China Academy of Space Technology",
+      "CAST",
+      "C.A.S.T."
+    ]
+  },
+  {
+    "Entity": "Aviation University Air Force",
+    "Queries": [
+      "Aviation U. Air Force",
+      "AU Air Force",
+      "Aviation University A.F."
+    ]
+  },
+  {
+    "Entity": "中国人民解放军海军航空大学",
+    "Queries": [
+      "海军航空大学",
+      "解放军海军航空大学",
+      "人民解放军海军航空大学"
+    ]
+  },
+  {
+    "Entity": "29th Testing and Training Base",
+    "Queries": [
+      "29th TTB",
+      "29th Testing \u0026 Training Base",
+      "29th Testing and Training B."
+    ]
+  },
+  {
+    "Entity": "Southwest University of Science and Technology",
+    "Queries": [
+      "Southwest Univ. of Science and Technology",
+      "SWUST",
+      "Southwest University of Sci. \u0026 Tech."
+    ]
+  },
+  {
+    "Entity": "Academy of Military Sciences",
+    "Queries": [
+      "Academy of Military Science",
+      "A.M.S.",
+      "AMS"
+    ]
+  },
+  {
+    "Entity": "PLA Air Force Xi’an Flight Academy",
+    "Queries": [
+      "PLA Air Force Xi'an Flight Academy",
+      "Xi'an Flight Academy of PLA Air Force",
+      "PLA Xi'an Flight Academy"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军空军西安飞行学院",
+    "Queries": [
+      "中国空军西安飞行学院",
+      "空军西安飞行学院",
+      "西安飞行学院"
+    ]
+  },
+  {
+    "Entity": "Nanjing Information Technology Institute",
+    "Queries": [
+      "Nanjing InfoTech Institute",
+      "Nanjing IT Institute",
+      "Nanjing Institute of Information Technology"
+    ]
+  },
+  {
+    "Entity": "西电大学",
+    "Queries": [
+      "西安电子科技大学",
+      "Xidian University",
+      "西安电科大"
+    ]
+  },
+  {
+    "Entity": "Disease Control and Prevention Institute",
+    "Queries": [
+      "Disease Control Institute",
+      "Disease Prevention Institute",
+      "Institute for Disease Control and Prevention"
+    ]
+  },
+  {
+    "Entity": "Jiangsu University of Science and Technology",
+    "Queries": [
+      "Jiangsu University Sci \u0026 Tech",
+      "JSUST",
+      "Jiangsu Univ. of Sci. \u0026 Tech."
+    ]
+  },
+  {
+    "Entity": "NUAA",
+    "Queries": [
+      "NUAA",
+      "N.U.A.A.",
+      "Nanjing University of Aeronautics and Astronautics"
+    ]
+  },
+  {
+    "Entity": "13th Institute, China Aerospace Science and Technology Corporation (CALT)",
+    "Queries": [
+      "13th Institute",
+      "China Aerospace Science and Technology Corp.",
+      "13th Institute of CALT"
+    ]
+  },
+  {
+    "Entity": "PAP Special Police Academy",
+    "Queries": [
+      "P.A.P. Special Police Academy",
+      "PAP Special Police Acad.",
+      "Special Police Academy"
+    ]
+  },
+  {
+    "Entity": "Aviation University of Air Force",
+    "Queries": [
+      "Aviation University of the Air Force",
+      "Air Force Aviation University",
+      "Air Force University of Aviation"
+    ]
+  },
+  {
+    "Entity": "南京航空航天大学",
+    "Queries": [
+      "Nanjing University of Aeronautics and Astronautics",
+      "NUAA",
+      "Nanjing Aeronautics and Astronautics University"
+    ]
+  },
+  {
+    "Entity": "SEU",
+    "Queries": [
+      "Southern Eastern University",
+      "S.E.U.",
+      "Southeast University"
+    ]
+  },
+  {
+    "Entity": "Beijing Institute of Astronautic Systems Engineering",
+    "Queries": [
+      "Beijing Inst. of Astronautic Systems Eng.",
+      "BIASE",
+      "Beijing Inst. of Astronautic Systems Eng."
+    ]
+  },
+  {
+    "Entity": "电子科技大学",
+    "Queries": [
+      "USTC",
+      "University of Electronic Science and Technology",
+      "UESTC"
+    ]
+  },
+  {
+    "Entity": "Norinco",
+    "Queries": null
+  },
+  {
+    "Entity": "中国人民解放军陆军研究院",
+    "Queries": [
+      "中国解放军陆军研究院",
+      "中国人民解放军陆军院",
+      "中国陆军研究院"
+    ]
+  },
+  {
+    "Entity": "Rocket Force Sergeant School",
+    "Queries": [
+      "Rocket Force Sgt. School",
+      "Rocket Force Srgt. School",
+      "R. F. Sergeant School"
+    ]
+  },
+  {
+    "Entity": "Institute of High Energy Physics",
+    "Queries": [
+      "Institute of High Energy Physics",
+      "IHEP",
+      "High Energy Physics Institute"
+    ]
+  },
+  {
+    "Entity": "西安交通大学",
+    "Queries": [
+      "西安交大",
+      "XJTU",
+      "Xi'an Jiaotong University"
+    ]
+  },
+  {
+    "Entity": "Ministry of State Security Administrative Institute",
+    "Queries": [
+      "Ministry of State Security Administrative Inst.",
+      "Ministry of State Security Admin. Institute",
+      "MSS Administrative Institute"
+    ]
+  },
+  {
+    "Entity": "China Electronics",
+    "Queries": [
+      "China Electronics Corp.",
+      "China Electronics Corporation",
+      "CEC"
+    ]
+  },
+  {
+    "Entity": "Special Plans with Universities Directly under the Administration of Ministries and Commissions of the Central Government",
+    "Queries": [
+      "Special Plans with Universities Directly under Administration",
+      "Special Plans with Universities under Central Government Ministries",
+      "Directly Administered Universities Special Plans"
+    ]
+  },
+  {
+    "Entity": "AVIC Shenyang Aircraft Company Limited",
+    "Queries": [
+      "AVIC Shenyang Aircraft Co. Ltd.",
+      "AVIC Shenyang Aircraft Co.",
+      "AVIC Shenyang Aircraft Ltd."
+    ]
+  },
+  {
+    "Entity": "Southwest Institute of Fluid Physics",
+    "Queries": [
+      "Southwest Institute of Fluid Physics",
+      "SW Institute of Fluid Physics",
+      "Southwest Institute of Fluid Phys."
+    ]
+  },
+  {
+    "Entity": "NUC",
+    "Queries": null
+  },
+  {
+    "Entity": "北京大学",
+    "Queries": [
+      "Peking University",
+      "PKU",
+      "Beida"
+    ]
+  },
+  {
+    "Entity": "Academy of Military Medical Sciences, Institute of Health Service and Medical Information",
+    "Queries": [
+      "Academy of Military Medical Sciences",
+      "IHSMI",
+      "Institute of Health Service and Medical Information"
+    ]
+  },
+  {
+    "Entity": "BAMTRI",
+    "Queries": null
+  },
+  {
+    "Entity": "中国人民解放军战略支援部队航天工程大学",
+    "Queries": [
+      "解放军航天工程大学",
+      "中国人民解放军航天工程大学",
+      "战略支援部队航天工程大学"
+    ]
+  },
+  {
+    "Entity": "Institute of Solid-State Physics of the Academy of Scienes SSSR",
+    "Queries": [
+      "Institute of Solid State Physics of the Academy of Sciences of the USSR",
+      "Institute of Solid-State Physics AS USSR",
+      "ISSP of the Academy of Sciences of USSR"
+    ]
+  },
+  {
+    "Entity": "China Telecommunications Corporation",
+    "Queries": [
+      "China Telecom Corp",
+      "China Telecom",
+      "China Telecommunications Corp."
+    ]
+  },
+  {
+    "Entity": "Academy of Military Medical Sciences",
+    "Queries": [
+      "Academy of Military Medical Sciences",
+      "AMMS",
+      "Military Medical Academy"
+    ]
+  },
+  {
+    "Entity": "Beida",
+    "Queries": null
+  },
+  {
+    "Entity": "湖南科技大学",
+    "Queries": [
+      "湖南科大",
+      "湖南科技大",
+      "湖南科學技術大學"
+    ]
+  },
+  {
+    "Entity": "China Electronics Corporation",
+    "Queries": [
+      "CEC",
+      "China Electronics Corp.",
+      "China Electronics Co."
+    ]
+  },
+  {
+    "Entity": "CASC",
+    "Queries": [
+      "C.A.S.C.",
+      "C A S C",
+      "Cascade"
+    ]
+  },
+  {
+    "Entity": "SCU",
+    "Queries": [
+      "SCU",
+      "S.C.U",
+      "Southern California University"
+    ]
+  },
+  {
+    "Entity": "海军装备论证研究中心",
+    "Queries": [
+      "海军装备论证研究所",
+      "海军装备研究中心",
+      "装备论证中心"
+    ]
+  },
+  {
+    "Entity": "北京高压科学研究中心",
+    "Queries": [
+      "北京高压科学中心",
+      "北京高压研究中心",
+      "高压科学研究中心"
+    ]
+  },
+  {
+    "Entity": "IHEP",
+    "Queries": [
+      "IHEP",
+      "I.H.E.P.",
+      "Institute of High Energy Physics"
+    ]
+  },
+  {
+    "Entity": "WHU",
+    "Queries": [
+      "West Ham United",
+      "W.H.U.",
+      "WHU FC"
+    ]
+  },
+  {
+    "Entity": "China International Engineering Consulting Corporation",
+    "Queries": [
+      "CIECC",
+      "China Int'l Engineering Consulting Corp.",
+      "China International Engineering Consulting Co."
+    ]
+  },
+  {
+    "Entity": "中国人民解放军陆军军医大学",
+    "Queries": [
+      "解放军陆军军医大学",
+      "陆军军医大学",
+      "军医大学"
+    ]
+  },
+  {
+    "Entity": "Beijing University of Aeronautics and Astronautics",
+    "Queries": [
+      "Beihang University",
+      "BUAA",
+      "Beijing University of Aeronautics \u0026 Astronautics"
+    ]
+  },
+  {
+    "Entity": "Xi’an Flying College of PLA Air Force",
+    "Queries": [
+      "Xi'an Flying College",
+      "XAC Flying College",
+      "Xi’an Flying College of People's Liberation Army Air Force"
+    ]
+  },
+  {
+    "Entity": "Academy of Military Science Aerodynamics Testing Base",
+    "Queries": [
+      "Academy of Military Science Aerodynamics Testing Base",
+      "AMS Aerodynamics Testing Base",
+      "Military Science Aerodynamics Testing Base"
+    ]
+  },
+  {
+    "Entity": "Southwest Institute of Nuclear Physics and Chemistry",
+    "Queries": [
+      "Southwest Institute of Nuclear Physics \u0026 Chemistry",
+      "SW Institute of Nuclear Physics and Chemistry",
+      "SINPC"
+    ]
+  },
+  {
+    "Entity": "Shandong University",
+    "Queries": [
+      "SDU",
+      "Shandong Univ.",
+      "Shandong U."
+    ]
+  },
+  {
+    "Entity": "Beijing Institute of Automatic Control Equipment",
+    "Queries": [
+      "Beijing Institute of Automatic Control Equip.",
+      "BIACE",
+      "Beijing Inst. of Automatic Control Equipment"
+    ]
+  },
+  {
+    "Entity": "Aerosun Corporation",
+    "Queries": [
+      "Aerosun Corp.",
+      "Aerosun Co.",
+      "Aerosun Inc."
+    ]
+  },
+  {
+    "Entity": "National Key Laboratory for Parallel and Distributed Processing",
+    "Queries": [
+      "National Key Lab for Parallel and Distributed Processing",
+      "NKL for Parallel and Distributed Processing",
+      "National Key Laboratory for P\u0026D Processing"
+    ]
+  },
+  {
+    "Entity": "Jiangnan Institute of Social Studies",
+    "Queries": [
+      "Jiangnan Social Studies Institute",
+      "J. Institute of Social Studies",
+      "J. Social Studies Institute"
+    ]
+  },
+  {
+    "Entity": "The Chinese People’s Armed Police Forces Academy",
+    "Queries": [
+      "The Chinese People's Armed Police Forces Academy",
+      "Chinese People's Armed Police Forces Academy",
+      "Chinese People's Armed Police Academy"
+    ]
+  },
+  {
+    "Entity": "清华大学",
+    "Queries": [
+      "Tsinghua University",
+      "Qinghua University",
+      "THU"
+    ]
+  },
+  {
+    "Entity": "天津大学",
+    "Queries": [
+      "天大",
+      "天津理工大学",
+      "天津科技大学"
+    ]
+  },
+  {
+    "Entity": "陆军步兵学院",
+    "Queries": [
+      "陆军步兵学院",
+      "陆军步兵院校",
+      "陆军步院"
+    ]
+  },
+  {
+    "Entity": "Northwest Polytechnic University",
+    "Queries": [
+      "Northwest Polytechnic University",
+      "Northwest Polytechnical University",
+      "NPU"
+    ]
+  },
+  {
+    "Entity": "Army Medical University",
+    "Queries": [
+      "Army Med. Univ.",
+      "AMU",
+      "Army Med University"
+    ]
+  },
+  {
+    "Entity": "中国船舶工业集团有限公司",
+    "Queries": [
+      "中船集团",
+      "中国船舶",
+      "船舶工业集团"
+    ]
+  },
+  {
+    "Entity": "CRCC",
+    "Queries": [
+      "CRCC",
+      "C.R.C.C."
+    ]
+  },
+  {
+    "Entity": "中国电子",
+    "Queries": [
+      "CETC",
+      "China Electronics",
+      "Chinese Electronics"
+    ]
+  },
+  {
+    "Entity": "Naval University of Engineering",
+    "Queries": [
+      "Naval Univ. of Engineering",
+      "Naval U. of Engineering",
+      "N.U.E."
+    ]
+  },
+  {
+    "Entity": "SMIC Holdings Limited",
+    "Queries": [
+      "SMIC Holdings Ltd",
+      "SMIC Holdings",
+      "SMIC Ltd"
+    ]
+  },
+  {
+    "Entity": "东南大学",
+    "Queries": [
+      "Southeast University",
+      "SEU",
+      "Dongnan University"
+    ]
+  },
+  {
+    "Entity": "PLA Air Force Shijiazhuang Flight Academy",
+    "Queries": [
+      "PLA Air Force Shijiazhuang Flight Acad.",
+      "PLA Air Force Shijiazhuang FAA",
+      "PLA Air Force Shijiazhuang Flt. Academy"
+    ]
+  },
+  {
+    "Entity": "Changchun University of Science and Technology",
+    "Queries": [
+      "Changchun University of Sci. and Tech.",
+      "CUST",
+      "Changchun Univ. of Science \u0026 Tech."
+    ]
+  },
+  {
+    "Entity": "Xi’an Research Institute of High Technology",
+    "Queries": [
+      "Xi’an Research Institute of High Tech",
+      "Xi’an High Technology Research Institute",
+      "Xi’an Institute of High Technology"
+    ]
+  },
+  {
+    "Entity": "国际关系学院",
+    "Queries": [
+      "国关学院",
+      "外交学院",
+      "CIFA"
+    ]
+  },
+  {
+    "Entity": "Academy of Military Medical Sciences, Institute of Hygiene and Environmental Medicine",
+    "Queries": [
+      "Academy of Military Medical Sciences - Institute of Hygiene and Environmental Medicine",
+      "AMMS Institute of Hygiene and Environmental Medicine",
+      "Institute of Hygiene and Environmental Medicine of the Academy of Military Medical Sciences"
+    ]
+  },
+  {
+    "Entity": "Jiangxi Hongdu Aviation Industry Co., Ltd.",
+    "Queries": [
+      "Jiangxi Hongdu Aviation",
+      "Hongdu Aviation Industry",
+      "Hongdu Aviation Co."
+    ]
+  },
+  {
+    "Entity": "Army Infantry Academy of PLA",
+    "Queries": [
+      "Army Infantry Academy of People's Liberation Army",
+      "Army Infantry Academy of the PLA",
+      "PLA Army Infantry Academy"
+    ]
+  },
+  {
+    "Entity": "中国人民武装警察部队士官学校",
+    "Queries": [
+      "中国武警士官学校",
+      "武警部队士官学校",
+      "武警士官学校"
+    ]
+  },
+  {
+    "Entity": "铁道警察学院",
+    "Queries": [
+      "铁警院",
+      "铁道警院",
+      "铁道警察学院院校"
+    ]
+  },
+  {
+    "Entity": "People's Armed Police Officers’ College",
+    "Queries": [
+      "People's Armed Police Officers College",
+      "PAP Officers’ College",
+      "PAPOC"
+    ]
+  },
+  {
+    "Entity": "Recruitment Plan of the Postdoctoral International Exchange Program",
+    "Queries": [
+      "Recruitment Plan of the Postdoctoral Intl. Exchange Program",
+      "Postdoctoral International Exchange Program Recruitment Plan",
+      "Postdoc International Exchange Program Recruitment Plan"
+    ]
+  },
+  {
+    "Entity": "CASIC Second Academy",
+    "Queries": [
+      "CASIC 2nd Academy",
+      "CASIC Academy 2",
+      "Second Academy of CASIC"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军陆军勤务学院",
+    "Queries": [
+      "中共解放军勤务学院",
+      "PLA陆军勤务学院",
+      "解放军陆勤学院"
+    ]
+  },
+  {
+    "Entity": "Nanjing Institute of Information Technology",
+    "Queries": [
+      "Nanjing Institute of Information Tech",
+      "Nanjing Info Tech Institute",
+      "NJ Institute of Info Tech"
+    ]
+  },
+  {
+    "Entity": "33 Institute of CASIC’s Third Academy",
+    "Queries": [
+      "33 Institute of CASIC’s 3rd Academy",
+      "Thirty-Three Institute of CASIC’s Third Academy",
+      "33rd Institute of CASIC’s Third Academy"
+    ]
+  },
+  {
+    "Entity": "Second Research Academy of CASIC",
+    "Queries": [
+      "Second Research Academy of the China Aerospace Science and Industry Corporation",
+      "Second Research Academy of China Aerospace Science and Industry Corporation",
+      "Second Research Academy of CASIC."
+    ]
+  },
+  {
+    "Entity": "No. 33 Research Institute, Third Academy of CASIC",
+    "Queries": [
+      "No. 33 Research Institute of the Third Academy of CASIC",
+      "33rd Research Institute",
+      "Institute No. 33"
+    ]
+  },
+  {
+    "Entity": "PAP Command College",
+    "Queries": [
+      "P.A.P. Command College",
+      "PAPC Command College",
+      "P.A.P.C. Command College"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军陆军工程大学",
+    "Queries": [
+      "解放军陆工大",
+      "陆军工程大学",
+      "陆工大"
+    ]
+  },
+  {
+    "Entity": "航空工业",
+    "Queries": [
+      "中国航空工业集团",
+      "中国航空工业",
+      "AVIC"
+    ]
+  },
+  {
+    "Entity": "China South Industries Group",
+    "Queries": [
+      "China South Industries Group Corporation",
+      "CSIG",
+      "CSIGC"
+    ]
+  },
+  {
+    "Entity": "空军航空大学",
+    "Queries": [
+      "空军航大",
+      "空航大",
+      "空军航空大"
+    ]
+  },
+  {
+    "Entity": "中船重工",
+    "Queries": [
+      "CSIC",
+      "China Shipbuilding Industry Corporation",
+      "Zhongchuan Heavy Industry"
+    ]
+  },
+  {
+    "Entity": "Ministry of Public Security China People's Police University",
+    "Queries": [
+      "Ministry of Public Security C.P.P.U.",
+      "M.P.S. China People's Police University",
+      "M.P.S. C.P.P.U."
+    ]
+  },
+  {
+    "Entity": "二炮兵装备研究院",
+    "Queries": [
+      "二炮兵装备研究院",
+      "装备研究院",
+      "二炮兵院"
+    ]
+  },
+  {
+    "Entity": "Beijing Spaceflight Autocontrol Research Institute",
+    "Queries": [
+      "BSARI",
+      "Beijing Spaceflight Autocontrol Institute",
+      "Beijing Spaceflight Autocontrol Research Inst."
+    ]
+  },
+  {
+    "Entity": "Dalian Minzu University",
+    "Queries": [
+      "Dalian Nationalities University",
+      "DMU",
+      "Dalian Minzu Univ."
+    ]
+  },
+  {
+    "Entity": "海工大",
+    "Queries": null
+  },
+  {
+    "Entity": "CETGC",
+    "Queries": null
+  },
+  {
+    "Entity": "University of International Relations",
+    "Queries": [
+      "UIR",
+      "Univ. of International Relations",
+      "University Intl. Relations"
+    ]
+  },
+  {
+    "Entity": "“GOSHNIIMASH”",
+    "Queries": null
+  },
+  {
+    "Entity": "中国人民解放军空军研究院",
+    "Queries": [
+      "空军研究院",
+      "中国空军研究院",
+      "人民空军研究院"
+    ]
+  },
+  {
+    "Entity": "武警警官学院",
+    "Queries": [
+      "武警学院",
+      "武警指挥学院",
+      "中国武警警官学院"
+    ]
+  },
+  {
+    "Entity": "华中科技大学",
+    "Queries": [
+      "HUST",
+      "Huazhong University of Science and Technology",
+      "Huazhong Keji Daxue"
+    ]
+  },
+  {
+    "Entity": "Dawning Information Industry Co., Ltd",
+    "Queries": [
+      "Dawning Information Industry",
+      "Dawning Information Industry Company",
+      "Dawning Information Industry Limited"
+    ]
+  },
+  {
+    "Entity": "中国人民武装警察部队海警学院",
+    "Queries": [
+      "中国海警学院",
+      "中國人民武裝警察部隊海警學院",
+      "China Coast Guard Academy"
+    ]
+  },
+  {
+    "Entity": "Southwest Computing Center",
+    "Queries": [
+      "Southwest Computing Ctr",
+      "SW Computing Center",
+      "SW Computing Ctr"
+    ]
+  },
+  {
+    "Entity": "PKU",
+    "Queries": [
+      "Peking University",
+      "Beijing University",
+      "BeiDa"
+    ]
+  },
+  {
+    "Entity": "China Maritime Police Academy",
+    "Queries": [
+      "China Maritime Police Acad.",
+      "China Maritime Police Acadmy",
+      "C.M.P.A."
+    ]
+  },
+  {
+    "Entity": "Nanjing 841 Institute",
+    "Queries": [
+      "Nanjing 841 Inst.",
+      "Nanjing Eight Four One Institute",
+      "Nanjing 841 Inst."
+    ]
+  },
+  {
+    "Entity": "Chang Jiang Scholars Award Program (Young Scholars)",
+    "Queries": [
+      "Chang Jiang Scholars Award Program: Young Scholars",
+      "Young Scholars of the Chang Jiang Scholars Award Program",
+      "Chang Jiang Young Scholars Award Program"
+    ]
+  },
+  {
+    "Entity": "Southwest Institute of Research and Applications of Special Materials Factory",
+    "Queries": [
+      "Southwest Institute of Research and Applications of Special Materials Factory",
+      "Southwest Institute of Research and Applications of Special Materials",
+      "Southwest Institute of Research and Applications."
+    ]
+  },
+  {
+    "Entity": "China Chang Feng Mechano-Electronic Engineering Company",
+    "Queries": [
+      "China Chang Feng Mechano-Electronic Engineering Co.",
+      "Chang Feng Mechano-Electronic Engineering Company",
+      "CCF Mechano-Electronic Engineering."
+    ]
+  },
+  {
+    "Entity": "中国人民解放军火箭指挥学院",
+    "Queries": [
+      "中共火箭军指挥学院",
+      "解放军火箭指挥学院",
+      "火箭指挥学院"
+    ]
+  },
+  {
+    "Entity": "Chief Foreign Experts Plan",
+    "Queries": [
+      "CFEP",
+      "Thousand Talents Program",
+      "Foreign Experts Program"
+    ]
+  },
+  {
+    "Entity": "The People’s Armed Police College China",
+    "Queries": [
+      "The People's Armed Police College China",
+      "People's Armed Police College China",
+      "PAP College China"
+    ]
+  },
+  {
+    "Entity": "中国空气动力研究与发展中心",
+    "Queries": [
+      "CADA",
+      "中国空动",
+      "中空动力研究中心"
+    ]
+  },
+  {
+    "Entity": "Air Force Communications NCO Academy",
+    "Queries": [
+      "Air Force Comms NCO Academy",
+      "AF Communications NCO Academy",
+      "AF Comms NCO Academy"
+    ]
+  },
+  {
+    "Entity": "PLAIEU",
+    "Queries": null
+  },
+  {
+    "Entity": "Luoyang Foreign Languages University",
+    "Queries": [
+      "Luoyang FLU",
+      "Luoyang Foreign Languages Univ.",
+      "Luoyang Foreign Language University"
+    ]
+  },
+  {
+    "Entity": "Air Force Medical University",
+    "Queries": [
+      "AF Medical University",
+      "Air Force Med. University",
+      "A.F. Medical University"
+    ]
+  },
+  {
+    "Entity": "Rocket Sergeant School",
+    "Queries": [
+      "Rocket Sgt. School",
+      "Rkt. Sgt. School",
+      "RSS School"
+    ]
+  },
+  {
+    "Entity": "SAU",
+    "Queries": [
+      "SAU",
+      "S.A.U.",
+      "S.A. University"
+    ]
+  },
+  {
+    "Entity": "Air Force Equipment Academy",
+    "Queries": [
+      "Air Force Equip Academy",
+      "AF Equipment Academy",
+      "Air Force Eqpt Academy"
+    ]
+  },
+  {
+    "Entity": "Armored Forces Engineering Academy",
+    "Queries": [
+      "Armored Forces Eng. Academy",
+      "Armored Forces Engineering Acad.",
+      "AFE Academy"
+    ]
+  },
+  {
+    "Entity": "Information Engineering University",
+    "Queries": [
+      "Information Engineering University",
+      "Info Engineering University",
+      "IE University"
+    ]
+  },
+  {
+    "Entity": "Shijiazhuang Flight Academy",
+    "Queries": [
+      "Shijiazhuang Flight Acad.",
+      "Shijiazhuang Flight Ac.",
+      "S. Flight Academy"
+    ]
+  },
+  {
+    "Entity": "Southwest Institute of Chemical Materials",
+    "Queries": [
+      "SW Institute of Chemical Materials",
+      "Southwest Inst. of Chemical Materials",
+      "Southwest Institute of Chem. Materials"
+    ]
+  },
+  {
+    "Entity": "Academy of Military Medical Sciences, Institute of Toxicology and Pharmacology",
+    "Queries": [
+      "AMMS Institute of Toxicology and Pharmacology",
+      "Academy of Military Medical Sciences Institute of Toxicology",
+      "Institute of Toxicology and Pharmacology at AMMS"
+    ]
+  },
+  {
+    "Entity": "中国工程物理研究院",
+    "Queries": [
+      "CAEA",
+      "China Academy of Engineering Physics",
+      "Chinese Academy of Engineering Physics"
+    ]
+  },
+  {
+    "Entity": "China Shipbuilding Industry Corporation",
+    "Queries": [
+      "CSIC",
+      "China Shipbuilding Industry Corp",
+      "China Shipbuilding Ind. Corp"
+    ]
+  },
+  {
+    "Entity": "Tsinghua University",
+    "Queries": [
+      "Tsinghua Univ.",
+      "Tsinghua Univ",
+      "Tsing Hua University"
+    ]
+  },
+  {
+    "Entity": "China Marine Information Electronics Company Limited",
+    "Queries": [
+      "China Marine Information Electronics Co. Ltd.",
+      "CMIE Co. Ltd.",
+      "China Marine Info Electronics Co. Ltd."
+    ]
+  },
+  {
+    "Entity": "Second Artillery Equipment Academy",
+    "Queries": [
+      "Second Artillery Equipment Acad.",
+      "Second Artillery Equip. Academy",
+      "2nd Artillery Equipment Academy"
+    ]
+  },
+  {
+    "Entity": "National Defense University",
+    "Queries": [
+      "NDU",
+      "National Defense U",
+      "N. Defense University"
+    ]
+  },
+  {
+    "Entity": "Beihang University",
+    "Queries": [
+      "Beihang Univ.",
+      "BUAA",
+      "BU"
+    ]
+  },
+  {
+    "Entity": "Shanghai Jiao Tong University",
+    "Queries": [
+      "SJTU",
+      "Shanghai Jiao Tong",
+      "Jiao Tong University"
+    ]
+  },
+  {
+    "Entity": "Xidian University",
+    "Queries": [
+      "Xidian Univ.",
+      "Xidian Univ",
+      "Xidian Univ."
+    ]
+  },
+  {
+    "Entity": "Navy Command College",
+    "Queries": [
+      "NCC",
+      "Navy Command Coll.",
+      "Navy Cmd College"
+    ]
+  },
+  {
+    "Entity": "Zhengzhou Information Science and Technology Institute",
+    "Queries": [
+      "ZISTI",
+      "Zhengzhou ISTI",
+      "Zhengzhou Info. Sci. and Tech. Inst."
+    ]
+  },
+  {
+    "Entity": "江南社会学院",
+    "Queries": [
+      "江南社院",
+      "江南社会学堂",
+      "江南社科学院"
+    ]
+  },
+  {
+    "Entity": "洛阳外语学院",
+    "Queries": [
+      "洛阳外语大学",
+      "洛阳外国语学院",
+      "Luoyang Foreign Languages Institute"
+    ]
+  },
+  {
+    "Entity": "SMF (Strategic Missile Force) Command College",
+    "Queries": [
+      "Strategic Missile Force Command College",
+      "SMF Command College",
+      "SMFCC"
+    ]
+  },
+  {
+    "Entity": "MFTI",
+    "Queries": [
+      "MFTI",
+      "M.F.T.I."
+    ]
+  },
+  {
+    "Entity": "Beijing Power Machinery Institute of CASIC’s 31 Institute",
+    "Queries": [
+      "Beijing Power Machinery Institute",
+      "Beijing Power Machinery Institute of CASIC",
+      "31 Institute of CASIC"
+    ]
+  },
+  {
+    "Entity": "Naval Command Academy",
+    "Queries": [
+      "Naval Command Acad.",
+      "NCA",
+      "Naval Cmd Academy"
+    ]
+  },
+  {
+    "Entity": "China Ordnance Equipment Group Corporation",
+    "Queries": [
+      "China Ordnance Equipment Group Co.",
+      "China Ordnance Equipment Group Corp",
+      "COEGC"
+    ]
+  },
+  {
+    "Entity": "中国人民公安大学",
+    "Queries": [
+      "公安大学",
+      "中国公安大学",
+      "人民公安大学"
+    ]
+  },
+  {
+    "Entity": "Subsidy Program for High-Level Study Abroad Talent Returnees",
+    "Queries": [
+      "Subsidy Program for High-Level Study Abroad Talent Returnees",
+      "High-Level Study Abroad Talent Returnees Subsidy Program",
+      "Talent Returnees Subsidy Program for High-Level Study Abroad"
+    ]
+  },
+  {
+    "Entity": "Shenyang Aerospace University",
+    "Queries": [
+      "Shenyang Aerospace Univ.",
+      "Shenyang Aerospace U.",
+      "SAU"
+    ]
+  },
+  {
+    "Entity": "武警指挥学院",
+    "Queries": [
+      "武警指挥学院",
+      "People's Armed Police Command Academy",
+      "PAP Command Academy"
+    ]
+  },
+  {
+    "Entity": "Army Military Transportation Academy",
+    "Queries": [
+      "Army Military Transportation Acad.",
+      "AMTA",
+      "Army Mil. Transport Acad."
+    ]
+  },
+  {
+    "Entity": "CIPUC",
+    "Queries": [
+      "CIPUC",
+      "C.I.P.U.C.",
+      "C-I-P-U-C"
+    ]
+  },
+  {
+    "Entity": "China General Nuclear Power Corporation",
+    "Queries": [
+      "CGNPC",
+      "China General Nuclear",
+      "CGN"
+    ]
+  },
+  {
+    "Entity": "Huawei Technologies Co., Ltd.",
+    "Queries": [
+      "Huawei",
+      "Huawei Technologies",
+      "Huawei Technologies Company"
+    ]
+  },
+  {
+    "Entity": "Thousand Talents Program — Young Talents",
+    "Queries": [
+      "Thousand Talents Program – Y. Talents",
+      "Thousand Talents Program – Young T.",
+      "Thousand Talents Program – Young T."
+    ]
+  },
+  {
+    "Entity": "Shenyang Ligong University",
+    "Queries": [
+      "Shenyang University of Technology",
+      "Shenyang Ligong Univ.",
+      "SYLU"
+    ]
+  },
+  {
+    "Entity": "PAP Engineering University",
+    "Queries": [
+      "PAP Engineering Univ.",
+      "PAP Eng. University",
+      "PAP Engineering Univ."
+    ]
+  },
+  {
+    "Entity": "Engineering University of the CAPF",
+    "Queries": [
+      "Engineering University of the CAPF",
+      "Engineering University of the Central Armed Police Forces",
+      "CAPF Engineering University"
+    ]
+  },
+  {
+    "Entity": "China Communications Construction Company Limited",
+    "Queries": [
+      "China Communications Construction Co. Ltd.",
+      "CCCC Ltd.",
+      "China Communications Construction Co."
+    ]
+  },
+  {
+    "Entity": "Air Force Research Institute",
+    "Queries": [
+      "AFRI",
+      "Air Force Research Inst.",
+      "A.F. Research Institute"
+    ]
+  },
+  {
+    "Entity": "Army Engineering University",
+    "Queries": [
+      "Army Engineering Univ.",
+      "AEU",
+      "Army Eng. University"
+    ]
+  },
+  {
+    "Entity": "Shijiazhuang Flight College of Air Force",
+    "Queries": [
+      "Shijiazhuang Air Force Flight College",
+      "Shijiazhuang Flight College",
+      "Air Force Flight College at Shijiazhuang"
+    ]
+  },
+  {
+    "Entity": "North China Institute of Aerospace Engineering",
+    "Queries": [
+      "North China Institute of Aerospace Eng.",
+      "N. China Institute of Aerospace Engineering",
+      "North China Inst. of Aerospace Engineering"
+    ]
+  },
+  {
+    "Entity": "Ministry of Public Security Railway Police College",
+    "Queries": [
+      "MPS Railway Police College",
+      "Ministry of Public Security Railway Police School",
+      "Ministry of Public Security Railway Police Academy"
+    ]
+  },
+  {
+    "Entity": "PLA University of Science and Technology",
+    "Queries": [
+      "PLAUST",
+      "PLA University Sci \u0026 Tech",
+      "PLA University S\u0026T"
+    ]
+  },
+  {
+    "Entity": "武汉理工大学",
+    "Queries": [
+      "武理工",
+      "武汉理工",
+      "WHUT"
+    ]
+  },
+  {
+    "Entity": "Young Talents Program of the Chinese Academy of Agricultural Sciences",
+    "Queries": [
+      "Young Talents Program",
+      "YT Program",
+      "CAAS Young Talents Program"
+    ]
+  },
+  {
+    "Entity": "Wuhan University of Technology",
+    "Queries": [
+      "Wuhan University of Tech",
+      "WUT",
+      "Wuhan Tech University"
+    ]
+  },
+  {
+    "Entity": "CARDC",
+    "Queries": [
+      "CARDC",
+      "C.A.R.D.C."
+    ]
+  },
+  {
+    "Entity": "Beijing Huahang Radio Measurements Research Institute",
+    "Queries": [
+      "Beijing Huahang Radio Measurements Research Inst.",
+      "BHRMRI",
+      "Beijing Huahang RMRI"
+    ]
+  },
+  {
+    "Entity": "5th Academy of CASC",
+    "Queries": [
+      "5th Acad. of CASC",
+      "5th Academy of C.A.S.C.",
+      "The 5th Academy of CASC"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军军事科学院",
+    "Queries": [
+      "解放军军事科学院",
+      "PLA Military Science Academy",
+      "Academy of Military Sciences China"
+    ]
+  },
+  {
+    "Entity": "USTB",
+    "Queries": [
+      "University of Science and Technology Beijing",
+      "Beijing University of Science and Technology",
+      "UST Beijing"
+    ]
+  },
+  {
+    "Entity": "Air Force Early Warning Academy",
+    "Queries": [
+      "Air Force E.W. Academy",
+      "AF Early Warning Academy",
+      "Air Force EW Academy."
+    ]
+  },
+  {
+    "Entity": "International Training Program for Artificial Intelligence Talents in Chinese Universities: Expert Forum",
+    "Queries": [
+      "International AI Talent Training Forum",
+      "Expert Forum on AI Talent Training",
+      "AI Talent Training Expert Forum"
+    ]
+  },
+  {
+    "Entity": "装甲兵工程学院",
+    "Queries": [
+      "装甲兵工程学院",
+      "装甲工程学院",
+      "装甲兵工院"
+    ]
+  },
+  {
+    "Entity": "Officers College of the PAP",
+    "Queries": [
+      "Officers College of the People's Armed Police",
+      "OC of the PAP",
+      "Officers College of the PAP"
+    ]
+  },
+  {
+    "Entity": "China SpaceSat Co., Ltd.",
+    "Queries": [
+      "China SpaceSat",
+      "China Space Satellite",
+      "SpaceSat Co."
+    ]
+  },
+  {
+    "Entity": "Institute of Semiconductor Physics IM A.V. Rzhanov",
+    "Queries": [
+      "Institute of Semiconductor Physics",
+      "Institute of Semiconductor Physics IM AV Rzhanov",
+      "Institute of Semiconductor Physics A.V. Rzhanov"
+    ]
+  },
+  {
+    "Entity": "南京陆军指挥学院",
+    "Queries": [
+      "南陆军指挥学院",
+      "南京陆军指挥学",
+      "陆军指挥学院南京"
+    ]
+  },
+  {
+    "Entity": "北大",
+    "Queries": [
+      "Peking University",
+      "PKU",
+      "Beijing University"
+    ]
+  },
+  {
+    "Entity": "Hunan Guofang Kei University",
+    "Queries": [
+      "Guofang Kei University",
+      "Hunan G. Kei University",
+      "H. Guofang Kei University"
+    ]
+  },
+  {
+    "Entity": "长春理工大学",
+    "Queries": [
+      "长春理工学院",
+      "长春光机学院",
+      "长理工"
+    ]
+  },
+  {
+    "Entity": "North University of China",
+    "Queries": [
+      "NUC",
+      "North University",
+      "NUC China"
+    ]
+  },
+  {
+    "Entity": "空指",
+    "Queries": [
+      "Kōshi",
+      "K. Shi",
+      "K. Zhi"
+    ]
+  },
+  {
+    "Entity": "西北工业大学",
+    "Queries": [
+      "西北工大",
+      "NWPU",
+      "Northwestern Polytechnical University"
+    ]
+  },
+  {
+    "Entity": "Southwest Institute of Explosives and Chemical Engineering",
+    "Queries": [
+      "Southwest Institute of Explosives \u0026 Chemical Engineering",
+      "Southwest Institute of ECE",
+      "SW Institute of Explosives and Chemical Engineering"
+    ]
+  },
+  {
+    "Entity": "BUPT",
+    "Queries": [
+      "BUPT",
+      "Beijing University of Posts and Telecommunications",
+      "Beijing UPT"
+    ]
+  },
+  {
+    "Entity": "AMMS",
+    "Queries": null
+  },
+  {
+    "Entity": "MIPT",
+    "Queries": [
+      "Moscow Institute of Physics and Technology",
+      "MIPT University",
+      "PhysTech"
+    ]
+  },
+  {
+    "Entity": "Northwest Polytechnical University",
+    "Queries": [
+      "Northwest Polytechnic University",
+      "NWPU",
+      "Northwest Polytechnical U."
+    ]
+  },
+  {
+    "Entity": "中国人民解放军空军第二飞行学院",
+    "Queries": [
+      "中国人民解放军空军第二飞行学院",
+      "空军第二飞行学院",
+      "解放军空军第二飞行学院"
+    ]
+  },
+  {
+    "Entity": "CRRC Corporation Limited",
+    "Queries": [
+      "CRRC Corp. Ltd.",
+      "CRRC Corp.",
+      "CRRC Limited"
+    ]
+  },
+  {
+    "Entity": "Shenzhen Dn Innovation Technology Co., Ltd.",
+    "Queries": [
+      "Shenzhen Dn Innovation Technology",
+      "Shenzhen Dn Technology Co.",
+      "Ltd.",
+      "Dn Innovation Technology Co."
+    ]
+  },
+  {
+    "Entity": "中国人民解放军火箭军士官学校",
+    "Queries": [
+      "火箭军士官学校",
+      "火箭军学校",
+      "解放军火箭军学校"
+    ]
+  },
+  {
+    "Entity": "CNGC",
+    "Queries": null
+  },
+  {
+    "Entity": "Qinghua University",
+    "Queries": [
+      "Qinghua Univ.",
+      "Tsinghua University",
+      "Tsinghua Univ."
+    ]
+  },
+  {
+    "Entity": "中国人民解放军空军工程大学",
+    "Queries": [
+      "空军工程大学",
+      "中国空军工程大学",
+      "PLAAF Engineering University"
+    ]
+  },
+  {
+    "Entity": "Peac Institute of Multiscale Science",
+    "Queries": [
+      "Peac Institute",
+      "P.I.M.S.",
+      "PIMS"
+    ]
+  },
+  {
+    "Entity": "CUST",
+    "Queries": [
+      "CUST",
+      "C.U.S.T."
+    ]
+  },
+  {
+    "Entity": "陆军军事交通学院",
+    "Queries": [
+      "陆军军交院",
+      "陆军军事交通大学",
+      "军事交通学院"
+    ]
+  },
+  {
+    "Entity": "China North Industries Group Corporation Limited",
+    "Queries": [
+      "Norinco",
+      "China North Industries Corp",
+      "Norinco Group"
+    ]
+  },
+  {
+    "Entity": "Beijing Computational Science Research Center",
+    "Queries": [
+      "Beijing Computational Science Rsch Ctr",
+      "Beijing Comp Science Research Center",
+      "BCSRC"
+    ]
+  },
+  {
+    "Entity": "PLA Army Infantry Academy",
+    "Queries": [
+      "PLA Army Infantry Academy",
+      "People's Liberation Army Army Infantry Academy",
+      "People's Liberation Army Infantry Academy"
+    ]
+  },
+  {
+    "Entity": "中国人民解放军陆军防化学院",
+    "Queries": [
+      "解放军防化学院",
+      "解放军陆防化学院",
+      "中国人民解放军陆防学院"
+    ]
+  },
+  {
+    "Entity": "Shuguang Program",
+    "Queries": [
+      "S. Program",
+      "Shuguang P."
+    ]
+  },
+  {
+    "Entity": "Northwestern Polytechnic University",
+    "Queries": [
+      "Northwestern Polytechnic Univ.",
+      "Northwestern Polytechnical University",
+      "Northwestern Polytech University"
+    ]
+  },
+  {
+    "Entity": "Second Military Medical University",
+    "Queries": [
+      "Second Military Medical University",
+      "SMMU",
+      "Changhai Hospital"
+    ]
+  },
+  {
+    "Entity": "In-Kingdom Retention Initiatives",
+    "Queries": [
+      "IKRI",
+      "In-Kingdom R. Initiatives",
+      "In-Kingdom Retention I."
+    ]
+  },
+  {
+    "Entity": "CNOOC",
+    "Queries": [
+      "CNOOC Ltd.",
+      "China National Offshore Oil Corporation",
+      "CNOOC Limited"
+    ]
+  },
+  {
+    "Entity": "China Aerospace Science and Industry Corporation Limited",
+    "Queries": [
+      "China Aerospace Science and Industry Corp",
+      "CASIC",
+      "China Aerospace Science \u0026 Industry Corporation"
+    ]
+  },
+  {
+    "Entity": "燕山大学",
+    "Queries": [
+      "燕山大學",
+      "Yanshan University",
+      "YSU"
+    ]
+  },
+  {
+    "Entity": "Second Academy of CASIC",
+    "Queries": [
+      "Second Academy of China Aerospace Science and Industry Corporation",
+      "Second Academy of China Aerospace",
+      "Second Academy of CASIC."
+    ]
+  },
+  {
+    "Entity": "XTU",
+    "Queries": null
+  }
+]
