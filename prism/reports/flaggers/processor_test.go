@@ -1,6 +1,7 @@
 package flaggers
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"prism/prism/api"
@@ -431,6 +432,7 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 				flag.Connections[0].DocUrl != "https://nuprobe.com/about-us/" ||
 				flag.Connections[1].DocTitle != "NuProbe Announces $11 Million Series A Funding Round" ||
 				flag.Connections[1].DocUrl != "https://nuprobe.com/2018/04/nuprobe-announces-11-million-series-a-funding-round-2/" {
+				fmt.Println(flag.Connections)
 				t.Fatal("incorrect flag")
 			}
 			entitiesMentioned[flag.EntityMentioned] = true

@@ -42,8 +42,10 @@ func newNameMatcher(name string) (nameMatcher, bool) {
 
 	maxChars := max(len(name)-(len(firstname)+len(lastname)), 10)
 
-	namepattern := strings.Join(fields, `\s+`)
-	re := regexp.MustCompile(fmt.Sprintf(`(\b%s[\w\s\.\-\,]{0,%d}%s\b)|(\b%s[\w\s\.\-\,]{0,%d}%s\b)|\b%s\b`, firstname, maxChars, lastname, lastname, maxChars, firstname, namepattern))
+	// namepattern := strings.Join(fields, `\s+`)
+	// re := regexp.MustCompile(fmt.Sprintf(`(\b%s[\w\s\.\-\,]{0,%d}%s\b)|(\b%s[\w\s\.\-\,]{0,%d}%s\b)|\b%s\b`, firstname, maxChars, lastname, lastname, maxChars, firstname, namepattern))
+
+	re := regexp.MustCompile(fmt.Sprintf(`(\b%s[\w\s\.\-\,]{0,%d}%s\b)|(\b%s[\w\s\.\-\,]{0,%d}%s\b)`, firstname, maxChars, lastname, lastname, maxChars, firstname))
 
 	return nameMatcher{re: re}, true
 }
@@ -264,7 +266,6 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 	}
 
 	flags := make([]api.Flag, 0)
-	texts := make([]string, 0)
 
 	for _, result := range results {
 		if matcher.matches(result.Text) {
@@ -275,7 +276,6 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 			}
 
 			url, _ := result.Metadata["url"].(string)
-			texts = append(texts, result.Text)
 
 			flags = append(flags, &api.PotentialAuthorAffiliationFlag{
 				Message:       fmt.Sprintf("The author %s may be associated with this concerning entity: %s\n", authorName, university),
@@ -283,18 +283,6 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 				UniversityUrl: url,
 			})
 		}
-	}
-
-	if len(flags) == 0 {
-		return flags, nil
-	}
-
-	if useLLMVerification {
-		filteredFlags, err := filterFlagsWithLLM(flags, texts, authorName)
-		if err != nil {
-			return nil, fmt.Errorf("error filtering flags: %w", err)
-		}
-		return filteredFlags, nil
 	}
 
 	return flags, nil
@@ -342,19 +330,20 @@ func topCoauthors(works []openalex.Work) []authorCnt {
 	}
 
 	// Find the count of the 4th top author
-	thresholdCount := topAuthors[3].cnt
+	// thresholdCount := topAuthors[3].cnt
 
-	// Return all authors with count >= threshold
-	var result []authorCnt
-	for _, author := range topAuthors {
-		if author.cnt >= thresholdCount {
-			result = append(result, author)
-		} else {
-			break
-		}
-	}
+	// // Return all authors with count >= threshold
+	// var result []authorCnt
+	// for _, author := range topAuthors {
+	// 	if author.cnt >= thresholdCount {
+	// 		result = append(result, author)
+	// 	} else {
+	// 		break
+	// 	}
+	// }
+	return topAuthors[:4]
 
-	return result
+	// return result
 }
 
 func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(authorName string, works []openalex.Work) ([]api.Flag, error) {
@@ -484,20 +473,10 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 			return nil, fmt.Errorf("error querying ndb: %w", err)
 		}
 
-		// secondaryMatcher, validName := newNameMatcher(query)
-		// if !validName {
-		// 	continue
-		// }
-
 		for _, result := range results {
 			if !strings.Contains(result.Text, query) {
 				continue
 			}
-
-			// // this is the second level to remove false positives
-			// if !secondaryMatcher.matches(result.Text) {
-			// 	continue
-			// }
 
 			url, _ := result.Metadata["url"].(string)
 			if seen[url] {
@@ -521,21 +500,13 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 
 	flags := make([]api.Flag, 0)
 
-	seenFlags := make(map[string]*api.MiscHighRiskAssociationFlag)
+	// seenFlags := make(map[string]*api.MiscHighRiskAssociationFlag)
 	for query, conns := range queryToConn {
 		results, err := flagger.docNDB.Query(query, numDOJDocumentsToRetrieve, nil)
 		if err != nil {
 			slog.Error("error querying doc ndb", "error", err)
 			return nil, fmt.Errorf("error querying ndb: %w", err)
 		}
-
-		// finalMatcher, validName := newNameMatcher(query)
-		// if !validName {
-		// 	continue
-		// }
-
-		texts := make([]string, 0)
-		temporaryFlags := make([]api.Flag, 0)
 
 		for _, result := range results {
 			// searching for exact match
@@ -544,25 +515,16 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 				continue
 			}
 
-			// // if match is found, assert that it matches the query
-			// // this might increase the false positives for the company names
-			// // but assuming that company name occurs exactly in the text, its effect on
-			// // false positives is minimal
-			// if !finalMatcher.matches(result.Text) {
-			// 	continue
-			// }
-
 			title, _ := result.Metadata["title"].(string)
 			url, _ := result.Metadata["url"].(string)
 
-			if _, ok := seenFlags[url]; ok {
-				seenFlags[url].Connections = append(seenFlags[url].Connections, conns...)
-				continue
-			}
+			// if _, ok := seenFlags[url]; ok {
+			// 	seenFlags[url].Connections = append(seenFlags[url].Connections, conns...)
+			// 	continue
+			// }
 
-			texts = append(texts, result.Text)
 			entities, _ := result.Metadata["entities"].(string)
-			temporaryFlags = append(temporaryFlags, &api.MiscHighRiskAssociationFlag{
+			flags = append(flags, &api.MiscHighRiskAssociationFlag{
 				Message:         "The author may be associated be an entity who/which may be mentioned in a press release.\n",
 				DocTitle:        title,
 				DocUrl:          url,
@@ -570,22 +532,22 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 				EntityMentioned: query,
 				Connections:     conns,
 			})
-			seenFlags[url] = temporaryFlags[len(temporaryFlags)-1].(*api.MiscHighRiskAssociationFlag)
+			// seenFlags[url] = temporaryFlags[len(temporaryFlags)-1].(*api.MiscHighRiskAssociationFlag)
 		}
 
-		if useLLMVerification {
-			filteredFlags, err := filterFlagsWithLLM(temporaryFlags, texts, query)
-			if err != nil {
-				return nil, fmt.Errorf("error filtering flags: %w", err)
-			}
-			flags = append(flags, filteredFlags...)
-			for _, flag := range filteredFlags {
-				castFlag := flag.(*api.MiscHighRiskAssociationFlag)
-				slog.Info("flag", "url", castFlag.DocUrl, "title", castFlag.DocTitle)
-			}
-		} else {
-			flags = append(flags, temporaryFlags...)
-		}
+		// if useLLMVerification {
+		// 	filteredFlags, err := filterFlagsWithLLM(temporaryFlags, texts, query)
+		// 	if err != nil {
+		// 		return nil, fmt.Errorf("error filtering flags: %w", err)
+		// 	}
+		// 	flags = append(flags, filteredFlags...)
+		// 	for _, flag := range filteredFlags {
+		// 		castFlag := flag.(*api.MiscHighRiskAssociationFlag)
+		// 		slog.Info("flag", "url", castFlag.DocUrl, "title", castFlag.DocTitle)
+		// 	}
+		// } else {
+		// 	flags = append(flags, temporaryFlags...)
+		// }
 	}
 	return flags, nil
 }
