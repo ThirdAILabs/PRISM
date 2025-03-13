@@ -222,7 +222,7 @@ func runLLMVerification(name string, texts []string) ([]bool, error) {
 		return nil, fmt.Errorf("error running llm: %w", err)
 	}
 
-	// Clean the response to handle potential formatting issues
+	// Clean the response
 	res = strings.TrimSpace(res)
 	res = strings.Trim(res, "[]")
 	res = strings.ReplaceAll(res, " ", "")
@@ -230,14 +230,12 @@ func runLLMVerification(name string, texts []string) ([]bool, error) {
 
 	if len(flags) != len(possibleAliases) {
 		slog.Error("llm returned incorrect number of flags", "expected", len(possibleAliases), "got", len(flags))
-		slog.Error("llm response", "response", res)
 		return nil, fmt.Errorf("llm returned incorrect number of flags: %d", len(flags))
 	}
 
 	results := make([]bool, len(flags))
 	for i, flag := range flags {
 		results[i] = strings.TrimSpace(flag) == "True"
-		// slog.Info("llm result", "name", name, "alias", possibleAliases[i], "result", results[i])
 	}
 
 	return results, nil
@@ -344,24 +342,22 @@ func topCoauthors(works []openalex.Work) []authorCnt {
 		return 0
 	})
 
-	// if len(topAuthors) <= 4 {
-	// 	return topAuthors
-	// }
+	if len(topAuthors) <= 4 {
+		return topAuthors
+	}
 	// Find the count of the 4th top author
-	// thresholdCount := topAuthors[3].cnt
+	thresholdCount := topAuthors[3].cnt
 
-	// // Return all authors with count >= threshold
-	// var result []authorCnt
-	// for _, author := range topAuthors {
-	// 	if author.cnt >= thresholdCount {
-	// 		result = append(result, author)
-	// 	} else {
-	// 		break
-	// 	}
-	// }
-	return topAuthors[:min(len(topAuthors), 4)]
-
-	// return result
+	// Return all authors with count >= threshold
+	var result []authorCnt
+	for _, author := range topAuthors {
+		if author.cnt >= thresholdCount {
+			result = append(result, author)
+		} else {
+			break
+		}
+	}
+	return result
 }
 
 func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(authorName string, works []openalex.Work) ([]api.Flag, error) {
