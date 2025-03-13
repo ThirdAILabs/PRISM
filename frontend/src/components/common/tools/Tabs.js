@@ -22,7 +22,7 @@ const useStyles = makeStyles({
   },
 });
 
-const CustomTabs = ({ activeTab, handleTabChange, filterMessage }) => {
+const CustomTabs = ({ activeTab, handleTabChange }) => {
   const classes = useStyles();
 
   return (
@@ -72,20 +72,8 @@ const CustomTabs = ({ activeTab, handleTabChange, filterMessage }) => {
             }}
           />
         </Tabs>
-        {filterMessage && (
-          <Box
-            sx={{
-              position: 'absolute',
-              right: '16px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-            }}
-          >
-            {filterMessage}
-          </Box>
-        )}
       </Box>
-      {/* Added white divider below tabs */}
+      {/* Added black divider below tabs */}
       <Divider
         sx={{
           backgroundColor: 'black',

@@ -25,7 +25,7 @@ import MuiAlert from '@mui/material/Alert';
 import { Snackbar } from '@mui/material';
 import useGoBack from '../../../hooks/useGoBack.js';
 import useOutsideClick from '../../../hooks/useOutsideClick.js';
-
+import { getTrailingWhiteSpace } from '../../../utils/helper.js';
 import Collapsible from '../../common/tools/CollapsibleComponent.js';
 
 const FLAG_ORDER = [
@@ -245,7 +245,7 @@ const ItemDetails = () => {
   const [endDate, setEndDate] = useState('');
   const [activeTab, setActiveTab] = useState(0);
 
-  const [filterMessage, setFilterMessage] = useState('');
+  const [filterMessage, setFilterMessage] = useState((getTrailingWhiteSpace(12)) + 'Filter by Timeline');
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -301,20 +301,20 @@ const ItemDetails = () => {
 
     const displayStart = startDate
       ? parseLocalDate(startDate).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
       : 'earliest';
     const displayEnd = endDate
       ? parseLocalDate(endDate).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
       : 'today';
 
-    setFilterMessage(`${displayStart} to ${displayEnd}`);
+    setFilterMessage(`${displayStart} - ${displayEnd}`);
 
     setStartDate('');
     setEndDate('');
@@ -355,11 +355,10 @@ const ItemDetails = () => {
                                   type="button"
                                   className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
                                   style={{ minWidth: '180px', textAlign: 'center' }}
-                                  title={`${innerKey}: ${
-                                    value
-                                      ? 'The author likely IS a primary recipient of this grant.'
-                                      : 'The author likely IS NOT a primary recipient of this grant.'
-                                  }`}
+                                  title={`${innerKey}: ${value
+                                    ? 'The author likely IS a primary recipient of this grant.'
+                                    : 'The author likely IS NOT a primary recipient of this grant.'
+                                    }`}
                                 >
                                   {innerKey}
                                   {/* : {value ? 'Yes' : 'No'} */}
@@ -667,9 +666,9 @@ const ItemDetails = () => {
           {flag.RawAcknowledements.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
-          <p>{}</p>
+          <p>{ }</p>
         </p>
-        {}
+        { }
 
         <div>{fundCodeTriangulation(flag, index)}</div>
       </div>
@@ -978,10 +977,10 @@ const ItemDetails = () => {
               <div className="dropdown" ref={dropdownFilterRef}>
                 <style>
                   {`
-          .form-control::placeholder {
-            color: #888;
-          }
-        `}
+                    .form-control::placeholder {
+                      color: #888;
+                    }
+                  `}
                 </style>
                 <button
                   className="btn dropdown-toggle"
@@ -992,21 +991,24 @@ const ItemDetails = () => {
                     border: 'none',
                     marginRight: '10px',
                     color: 'white',
-                    width: '180px',
+                    width: '225px',
                     fontWeight: 'bold',
                     fontSize: '14px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
                   }}
                 >
-                  Filter by Timeline
+                  {filterMessage}
                 </button>
                 {yearDropdownOpen && (
                   <div
                     className="dropdown-menu show p-2"
                     style={{
-                      width: '180px',
+                      width: '225px',
                       backgroundColor: 'rgb(160, 160, 160)',
                       border: 'none',
-                      right: 0,
+                      // right: 0,
                       marginTop: '5px',
                       marginRight: '10px',
                       color: 'white',
@@ -1018,7 +1020,7 @@ const ItemDetails = () => {
                       flexDirection: 'column',
                     }}
                   >
-                    <div className="form-group" style={{ marginBottom: '10px', width: '100%' }}>
+                    <div className="form-group" style={{ marginBottom: '10px', width: '100%', padding: '7px' }}>
                       <label>Start Date</label>
                       <input
                         type="date"
@@ -1036,7 +1038,7 @@ const ItemDetails = () => {
                         }}
                       />
                     </div>
-                    <div className="form-group" style={{ marginBottom: '10px', width: '100%' }}>
+                    <div className="form-group" style={{ marginBottom: '10px', width: '100%', padding: '0 7px' }}>
                       <label>End Date</label>
                       <input
                         type="date"
@@ -1060,7 +1062,7 @@ const ItemDetails = () => {
                       onClick={handleDateFilter}
                       disabled={!(startDate || endDate)}
                       style={{
-                        backgroundColor: 'black',
+                        backgroundColor: 'rgb(200, 200, 200)',
                         border: 'none',
                         color: 'white',
                         width: '100px',
@@ -1068,6 +1070,7 @@ const ItemDetails = () => {
                         fontSize: '14px',
                         cursor: startDate || endDate ? 'pointer' : 'default',
                         transition: 'background-color 0.3s',
+                        marginTop: '10px',
                       }}
                     >
                       Submit
@@ -1077,11 +1080,9 @@ const ItemDetails = () => {
               </div>
             </div>
           </div>
-          {/* Render the Tabs with the filterMessage */}
           <Tabs
             activeTab={activeTab}
             handleTabChange={handleTabChange}
-            filterMessage={filterMessage}
           />
         </div>
         {activeTab === 0 && (
