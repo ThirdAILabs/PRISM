@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"prism/prism/api"
+	"prism/prism/llms"
 	"prism/prism/openalex"
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/triangulation"
@@ -377,8 +378,41 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 	return flagged, flaggedEntities, message, nil
 }
 
+func (flagger *OpenAlexAcknowledgementIsEOC) verifyGrantRecipientWithLLM(logger *slog.Logger, authorName string, grantNumber string, acknowledgementText string) (bool, error) {
+	llm := llms.New()
+
+	prompt := `Analyze this paper acknowledgment and determine if author %s might be the primary recipient/investigator of grant code %s.
+
+	Important instructions:
+	1. The author might be referred to by their initials (e.g., "J.S." or "JS" for "John Smith") in the text.
+	2. For grant codes that are listed as supporting general work without specifying who the primary recipient is, assume that the given author could be a primary recipient.
+	3. Only return "false" if there is EXPLICIT evidence that someone else is a primary recipient of the grant.
+	4. If multiple grants are listed together, and it's not clear who is the primary recipient of which grant, return "true".
+
+	Acknowledgment:
+	%s
+	`
+
+	res, err := llm.Generate(fmt.Sprintf(prompt, authorName, grantNumber, acknowledgementText), &llms.Options{
+		Model:        llms.GPT4oMini,
+		ZeroTemp:     true,
+		SystemPrompt: "You are a scientific paper analysis assistant who responds with only 'true' or 'false'.",
+	})
+	if err != nil {
+		return true, fmt.Errorf("llm match verification failed: %w", err)
+	}
+
+	logger.Info("LLM verification result", "result", res, "author_name", authorName, "grant_number", grantNumber, "acknowledgementText", acknowledgementText)
+
+	if res == "true" {
+		return true, nil
+	}
+
+	return false, nil
+}
+
 func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
-	acknowledgements []Acknowledgement, allAuthorNames []string,
+	logger *slog.Logger, acknowledgements []Acknowledgement, allAuthorNames []string,
 ) (map[string]map[string]bool, error) {
 	triangulationResults := make(map[string]map[string]bool)
 
@@ -395,6 +429,13 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
 							result, err := flagger.triangulationDB.IsAuthorGrantRecipient(authorName, grantNumber)
 							if err != nil {
 								continue
+							}
+
+							if result {
+								result, err = flagger.verifyGrantRecipientWithLLM(logger, authorName, grantNumber, ack.RawText)
+								if err != nil {
+									continue
+								}
 							}
 
 							triangulationResults[entity.EntityText][grantNumber] = result
@@ -516,7 +557,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 		if flagged {
 			var err error
 			triangulationResults, err = flagger.checkForGrantRecipient(
-				acks.Result.Acknowledgements, allAuthorNames,
+				logger, acks.Result.Acknowledgements, allAuthorNames,
 			)
 			if err != nil {
 				workLogger.Error("error checking for grant recipient", "error", err)
