@@ -1,6 +1,6 @@
 // Tabs.js
 import React from 'react';
-import { Tabs, Tab, Box, Divider } from '@mui/material';
+import { Tabs, Tab, Box, Divider, Tooltip } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles({
@@ -22,7 +22,7 @@ const useStyles = makeStyles({
   },
 });
 
-const CustomTabs = ({ activeTab, handleTabChange }) => {
+const CustomTabs = ({ activeTab, handleTabChange, disabled }) => {
   const classes = useStyles();
 
   return (
@@ -53,24 +53,57 @@ const CustomTabs = ({ activeTab, handleTabChange }) => {
             minHeight: '48px',
           }}
         >
-          <Tab
-            label="Dashboard"
+          <span
+            onClick={(e) => !disabled && handleTabChange(e, 0)}
             className={classes.tab}
-            sx={{
-              textTransform: 'none',
-              minHeight: '48px',
-              padding: '12px 16px',
+          >
+            <Tab
+              label="Dashboard"
+              className={classes.tab}
+              sx={{
+                textTransform: 'none',
+                minHeight: '48px',
+                padding: '12px 16px',
+              }}
+            />
+          </span>
+          <Tooltip
+            title={disabled ? 'Graph Visualization will be available once the report has finished generating.' : ""}
+            arrow
+            componentsProps={{
+              tooltip: {
+                sx: {
+                  bgcolor: 'rgba(60,60,60, 0.87)',
+                  '& .MuiTooltip-arrow': {
+                    color: 'rgba(60, 60, 60, 0.87)',
+                  },
+                  padding: '8px 12px',
+                  fontSize: '14px',
+                },
+              },
             }}
-          />
-          <Tab
-            label="Graph Visualization"
-            className={classes.tab}
-            sx={{
-              textTransform: 'none',
-              minHeight: '48px',
-              padding: '12px 16px',
-            }}
-          />
+          >
+            <span
+              onClick={(e) => !disabled && handleTabChange(e, 1)}
+              style={{
+                cursor: disabled ? 'not-allowed' : 'pointer',
+              }}
+              className={classes.tab}
+            >
+              <Tab
+                label="Graph Visualization"
+                className={classes.tab}
+                sx={{
+                  textTransform: 'none',
+                  minHeight: '48px',
+                  padding: '12px 16px',
+                  pointerEvents: 'none',
+                }}
+                disabled={disabled}
+              />
+            </span>
+          </Tooltip>
+
         </Tabs>
       </Box>
       {/* Added black divider below tabs */}
