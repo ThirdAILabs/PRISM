@@ -183,7 +183,7 @@ func runLLMVerification(name string, texts []string) ([]bool, error) {
 	}
 
 	prompt := fmt.Sprintf(llmMatchValidationPromptTemplate, name, string(aliasesJSON))
-	slog.Info("prompt", "prompt", prompt)
+	// slog.Info("prompt", "prompt", prompt)
 	res, err := llm.Generate(prompt, &llms.Options{
 		Model:        llms.GPT4o,
 		ZeroTemp:     true,
@@ -209,7 +209,7 @@ func runLLMVerification(name string, texts []string) ([]bool, error) {
 	results := make([]bool, len(flags))
 	for i, flag := range flags {
 		results[i] = strings.TrimSpace(flag) == "True"
-		slog.Info("llm result", "name", name, "alias", possibleAliases[i], "result", results[i])
+		// slog.Info("llm result", "name", name, "alias", possibleAliases[i], "result", results[i])
 	}
 
 	return results, nil
@@ -327,7 +327,24 @@ func topCoauthors(works []openalex.Work) []authorCnt {
 		return 0
 	})
 
-	return topAuthors[:min(len(topAuthors), 4)]
+	if len(topAuthors) <= 4 {
+		return topAuthors
+	}
+
+	// Find the count of the 4th top author
+	thresholdCount := topAuthors[3].cnt
+
+	// Return all authors with count >= threshold
+	var result []authorCnt
+	for _, author := range topAuthors {
+		if author.cnt >= thresholdCount {
+			result = append(result, author)
+		} else {
+			break
+		}
+	}
+
+	return result
 }
 
 func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(authorName string, works []openalex.Work) ([]api.Flag, error) {
@@ -508,6 +525,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 		texts := make([]string, 0)
 		temporaryFlags := make([]api.Flag, 0)
 
+		seenFlags := make(map[string]bool)
 		for _, result := range results {
 			// searching for exact match
 			// this increases the false negatives for the names
@@ -523,13 +541,20 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 				continue
 			}
 
-			texts = append(texts, result.Text)
-
 			title, _ := result.Metadata["title"].(string)
 			url, _ := result.Metadata["url"].(string)
-			entities, _ := result.Metadata["entities"].(string)
 
-			slog.Info("third level match", "query", query, "title", title, "url", url, "entities", entities)
+			if seenFlags[url] {
+				slog.Info("duplicate flag", "query", query, "title", title, "url", url)
+				continue
+			}
+			seenFlags[url] = true
+
+			texts = append(texts, result.Text)
+			entities, _ := result.Metadata["entities"].(string)
+			// slog.Info("third level match", "url", url)
+
+			// slog.Info("third level match", "query", query, "title", title, "url", url, "entities", entities)
 			temporaryFlags = append(temporaryFlags, &api.MiscHighRiskAssociationFlag{
 				Message:         "The author may be associated be an entity who/which may be mentioned in a press release.\n",
 				DocTitle:        title,
@@ -556,6 +581,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 }
 
 func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(logger *slog.Logger, authorName string, works []openalex.Work) ([]api.Flag, error) {
+	slog.Info("finding first/second level flags", "author", authorName, "num works", len(works))
 	firstSecondLevelFlags, err := flagger.findFirstSecondHopEntities(authorName, works)
 	if err != nil {
 		logger.Error("error checking first/second level flags", "error", err)

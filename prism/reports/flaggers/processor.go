@@ -194,12 +194,17 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 
 	seen := make(map[[sha256.Size]byte]struct{})
 	flagCounts := make(map[string]int)
+	flagMap := make(map[[sha256.Size]byte]api.Flag)
 	for flags := range flagsCh {
 		for _, flag := range flags {
 			hash := flag.Hash()
 			if _, ok := seen[hash]; !ok {
 				seen[hash] = struct{}{}
+				flagMap[hash] = flag
 				flagCounts[flag.Type()]++
+			} else {
+				// slog.Info("duplicate flag", "flag", flag)
+				// slog.Info("present flags", "flag", flagMap[hash])
 			}
 		}
 
