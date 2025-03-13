@@ -77,34 +77,67 @@ const AuthorCard = ({ authors }) => {
           '& .MuiButton-root': {
             display: 'none',
           },
-          '& .MuiButton-root:nth-of-type(2)': {
-            // Filter button
-            display: 'inline-flex',
-          },
-          // '& .MuiButton-root:nth-of-type(4)': { // Export button
-          //   display: 'inline-flex'
-          // }
+          // '& .MuiButton-root:nth-of-type(2)': {
+          //   // Filter button
+          //   display: 'inline-flex',
+          // },
         }}
       />
     );
   };
 
   return (
-    <div style={{ maxHeight: 800, width: '1000px' }}>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        slots={{ toolbar: CustomToolbar }}
-        density="comfortable"
-        initialState={{
-          pagination: {
-            paginationModel: { pageSize: 10 },
-          },
-        }}
-        pageSizeOptions={handlePaginationList()}
-        disableRowSelectionOnClick
-      />
-    </div>
+    <DataGrid
+      rows={rows}
+      columns={columns}
+      slots={{ toolbar: CustomToolbar }}
+      density="comfortable"
+      initialState={{
+        pagination: {
+          paginationModel: { pageSize: 10 },
+        },
+      }}
+      pageSizeOptions={handlePaginationList()}
+      disableRowSelectionOnClick
+      sx={{
+        '& .MuiDataGrid-footerContainer': {
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0px',
+          minHeight: '52px',
+        },
+        '& .MuiTablePagination-toolbar': {
+          display: 'flex',
+          alignItems: 'center',
+          padding: 0,
+          minHeight: 'auto',
+          marginTop: 0,
+          marginBottom: 0,
+        },
+        '& .MuiTablePagination-actions': {
+          display: 'flex',
+          alignItems: 'center',
+          margin: 0,
+          padding: 0,
+          height: 'auto',
+          position: 'relative',
+          top: '-0px',
+        },
+        '& .MuiTablePagination-displayedRows': {
+          margin: 0,
+          padding: 0,
+        },
+        '& .MuiTablePagination-selectLabel': {
+          margin: 0,
+          padding: 0,
+        },
+        '& .MuiIconButton-root': {
+          padding: '4px',
+          margin: 0,
+        },
+      }}
+    />
   );
 };
 

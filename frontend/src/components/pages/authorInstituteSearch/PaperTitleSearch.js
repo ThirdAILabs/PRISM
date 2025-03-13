@@ -86,8 +86,20 @@ const PaperTitleSearchComponent = () => {
           </div>
         </div>
       </div>
-      {isLoading && <div>Loading...</div>}
-      {hasSearchedPaper && !isLoading && paperResults.length === 0 && <div>No results found.</div>}
+      {isLoading && (
+        <div
+          className="spinner-border text-primary"
+          style={{ width: '3rem', height: '3rem', marginTop: '20px' }}
+          role="status"
+        ></div>
+      )}
+      {hasSearchedPaper && !isLoading && paperResults.length === 0 && (
+        <div className="no-results">
+          <div className="no-results-icon">🔍</div>
+          <h3>Authors Not Found</h3>
+          <p>We couldn't find any authors associated with this Paper.</p>
+        </div>
+      )}
       {hasSearchedPaper && paperResults.length > 0 && <TodoListComponent results={paperResults} />}
     </div>
   );

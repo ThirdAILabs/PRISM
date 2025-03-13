@@ -71,13 +71,13 @@
 
 .nav-item:hover {
   background: rgb(245, 240, 240);
-  color: rgb(60, 60, 60);
+  color: rgb(40, 40, 40);
 }
 
 .nav-item.active {
   /* background: #8fb8f6; */
   background: rgb(245, 240, 240);
-  color: rgb(60, 60, 60);
+  color: rgb(40, 40, 40);
 }
 
 .nav-icon {
@@ -115,7 +115,7 @@
 
 .report-item:hover {
   background: rgb(245, 240, 240);
-  color: rgb(60, 60, 60);
+  color: rgb(40, 40, 40);
   padding: 4px 10;
 }
 
@@ -123,16 +123,6 @@
   padding: 3px 8px;
   border-radius: 12px;
   font-size: 12px;
-}
-
-.status.queued {
-  background: #fff3cd;
-  color: #856404;
-}
-
-.status.in-progress {
-  background: #cce5ff;
-  color: #004085;
 }
 
 .collapsible-header {
@@ -153,4 +143,5 @@
 .collapsible-icon:hover {
   background-color: rgb(245, 240, 240);
   border-radius: 0.5rem;
+  color: rgb(0, 0, 0);
 }
