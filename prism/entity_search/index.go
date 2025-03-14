@@ -173,6 +173,10 @@ Answer:
 `
 
 func (index *EntityIndex[T]) llmValidate(query string, results []Record[T]) ([]Record[T], error) {
+	if len(results) == 0 {
+		return results, nil
+	}
+
 	matchStrings := make([]string, 0, len(results))
 	for _, result := range results {
 		matchStrings = append(matchStrings, result.Entity)

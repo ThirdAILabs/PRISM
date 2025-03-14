@@ -426,7 +426,7 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 				flag.Connections[0].DocUrl != "https://nuprobe.com/about-us/" ||
 				flag.Connections[1].DocTitle != "NuProbe Announces $11 Million Series A Funding Round" ||
 				flag.Connections[1].DocUrl != "https://nuprobe.com/2018/04/nuprobe-announces-11-million-series-a-funding-round-2/" {
-				t.Fatal("incorrect flag")
+				t.Fatalf("incorrect flag; %+v", flag)
 			}
 			entitiesMentioned[flag.EntityMentioned] = true
 		}

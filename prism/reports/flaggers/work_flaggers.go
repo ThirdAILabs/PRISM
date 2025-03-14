@@ -341,6 +341,8 @@ func (flagger *OpenAlexAcknowledgementIsEOC) searchWatchlistEntities(logger *slo
 	for _, entity := range entities {
 		queue <- entity
 	}
+	close(queue)
+
 	completed := make(chan CompletedTask[searchResult], len(entities))
 
 	worker := func(entity string) (searchResult, error) {

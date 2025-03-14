@@ -236,6 +236,10 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 		}
 
 		for _, result := range results {
+			if !strings.Contains(result.Entity, query) {
+				continue
+			}
+
 			if seen[result.Metadata.Url] {
 				continue
 			}
@@ -263,6 +267,9 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 		}
 
 		for _, result := range results {
+			if !strings.Contains(result.Entity, query) {
+				continue
+			}
 			flags = append(flags, &api.MiscHighRiskAssociationFlag{
 				Message:         "The author may be associated be an entity who/which may be mentioned in a press release.\n",
 				DocTitle:        result.Metadata.Title,
