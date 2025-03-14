@@ -1,7 +1,9 @@
 package entity_search
 
 import (
+	"fmt"
 	"math"
+	"prism/prism/llms"
 	"sort"
 	"strings"
 	"unicode"
@@ -29,6 +31,8 @@ type EntityIndex[T any] struct {
 	ngram int
 	k1    float32
 	b     float32
+
+	llm llms.LLM
 }
 
 func tokenize(str string, ngram int) []string {
@@ -115,6 +119,7 @@ func NewIndex[T any](records []Record[T]) *EntityIndex[T] {
 		ngram:    default_ngram,
 		k1:       default_k1,
 		b:        default_b,
+		llm:      llms.New(),
 	}
 }
 
@@ -153,4 +158,47 @@ func (index *EntityIndex[T]) Query(query string, k int) []Record[T] {
 	}
 
 	return results
+}
+
+func (index *EntityIndex[T]) QueryWithLLMValidation(query string, k int) ([]Record[T], error) {
+	results := index.Query(query, k)
+	return index.llmValidate(query, results)
+}
+
+const llmValidationPromptTemplate = `Return a python list containing True or False based on whether this entity: %s, is an equivalent entity to the following entities.
+Here are the entities: ["%s"]
+DO NOT ENTER 'FALSE' JUST BECAUSE THEY HAVE A DIFFERENT NAME, they can still be the same entity with a different name (e.g. same person, organization, school, etc. with different aliases).
+Answer with a python list of True or False, and nothing else. Do not provide any explanation or extra words/characters. Ensure that the python syntax is absolutely correct and runnable. Also ensure that the resulting list is the same length as the list of entities.
+Answer:
+`
+
+func (index *EntityIndex[T]) llmValidate(query string, results []Record[T]) ([]Record[T], error) {
+	matchStrings := make([]string, 0, len(results))
+	for _, result := range results {
+		matchStrings = append(matchStrings, result.Entity)
+	}
+
+	res, err := index.llm.Generate(fmt.Sprintf(llmValidationPromptTemplate, query, strings.Join(matchStrings, `", "`)), &llms.Options{
+		Model:        llms.GPT4oMini,
+		ZeroTemp:     true,
+		SystemPrompt: "You are a helpful python assistant who responds in python lists only.",
+	})
+	if err != nil {
+		return nil, fmt.Errorf("llm match verification failed: %w", err)
+	}
+
+	flags := strings.Split(res, ",")
+
+	if len(flags) != len(matchStrings) {
+		return nil, fmt.Errorf("llm verification returned incorrect number of flags query=%v, matches=%v, flags=%v", query, matchStrings, flags)
+	}
+
+	filtered := make([]Record[T], 0, len(results))
+	for i, result := range results {
+		if strings.Contains(flags[i], "True") {
+			filtered = append(filtered, result)
+		}
+	}
+
+	return filtered, nil
 }
