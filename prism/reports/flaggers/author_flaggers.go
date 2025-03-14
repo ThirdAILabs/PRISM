@@ -211,7 +211,6 @@ func runLLMVerification(name string, texts []string) ([]bool, error) {
 	}
 
 	prompt := fmt.Sprintf(llmMatchValidationPromptTemplate, name, string(aliasesJSON))
-	// slog.Info("prompt", "prompt", prompt)
 	res, err := llm.Generate(prompt, &llms.Options{
 		Model:        llms.GPT4o,
 		ZeroTemp:     true,
@@ -430,22 +429,12 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 			continue
 		}
 
-		for _, flag := range temporaryFlags {
-			castFlag := flag.(*api.MiscHighRiskAssociationFlag)
-			slog.Info("flag", "url", castFlag.DocUrl, "title", castFlag.DocTitle)
-		}
-
 		if useLLMVerification {
-			slog.Info("filtering flags with llm", "author", author.author, "texts", texts)
 			temporaryFlags, err := filterFlagsWithLLM(temporaryFlags, texts, author.author)
 			if err != nil {
 				return nil, fmt.Errorf("error filtering flags: %w", err)
 			}
 			flags = append(flags, temporaryFlags...)
-			for _, flag := range temporaryFlags {
-				castFlag := flag.(*api.MiscHighRiskAssociationFlag)
-				slog.Info("flag", "url", castFlag.DocUrl, "title", castFlag.DocTitle)
-			}
 		} else {
 			flags = append(flags, temporaryFlags...)
 		}
