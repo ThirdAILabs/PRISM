@@ -180,7 +180,7 @@ Explanation :
 - First group: "J Phillip" in "Professor Donovan J Phillip" is not a match because Donovan is part of the name
 - Second group: Contains "J. Phillip Smith" which is a valid match for "J. Phillip"
 
-Return True for a group if ANY match in that group correctly refers to the input name. Use the context to determine if a match is legitimate. Answer with a python list of True or False, and nothing else.
+Return True for a group if ANY match in that group correctly refers to the input name. Use the context to determine if a match is legitimate. Answer with a python list of True or False, and nothing else. Do not use markdown or any other formatting. Only return ["True", "False", ...].
 
 Input : 
 - Name: %s
@@ -426,12 +426,26 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 			}
 		}
 
+		if len(temporaryFlags) == 0 {
+			continue
+		}
+
+		for _, flag := range temporaryFlags {
+			castFlag := flag.(*api.MiscHighRiskAssociationFlag)
+			slog.Info("flag", "url", castFlag.DocUrl, "title", castFlag.DocTitle)
+		}
+
 		if useLLMVerification {
+			slog.Info("filtering flags with llm", "author", author.author, "texts", texts)
 			temporaryFlags, err := filterFlagsWithLLM(temporaryFlags, texts, author.author)
 			if err != nil {
 				return nil, fmt.Errorf("error filtering flags: %w", err)
 			}
 			flags = append(flags, temporaryFlags...)
+			for _, flag := range temporaryFlags {
+				castFlag := flag.(*api.MiscHighRiskAssociationFlag)
+				slog.Info("flag", "url", castFlag.DocUrl, "title", castFlag.DocTitle)
+			}
 		} else {
 			flags = append(flags, temporaryFlags...)
 		}
