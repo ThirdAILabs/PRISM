@@ -595,11 +595,6 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(logger *slog.Logger, autho
 		logger.Error("error checking second/third level flags", "error", err)
 		return nil, err
 	}
-	slog.Info("found second/third level flags", "flags", len(secondThirdLevelFlags))
-	for _, flag := range secondThirdLevelFlags {
-		castedFlag := flag.(*api.MiscHighRiskAssociationFlag)
-		slog.Info("flag", "url", castedFlag.DocUrl, "title", castedFlag.DocTitle, "entity", castedFlag.EntityMentioned)
-	}
 
 	flags := slices.Concat(firstSecondLevelFlags, secondThirdLevelFlags)
 
