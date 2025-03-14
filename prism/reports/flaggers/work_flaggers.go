@@ -378,7 +378,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 	return flagged, flaggedEntities, message, nil
 }
 
-func (flagger *OpenAlexAcknowledgementIsEOC) verifyGrantRecipientWithLLM(logger *slog.Logger, authorName string, grantNumber string, acknowledgementText string) (bool, error) {
+func (flagger *OpenAlexAcknowledgementIsEOC) verifyGrantRecipientWithLLM(authorName string, grantNumber string, acknowledgementText string) (bool, error) {
 	llm := llms.New()
 
 	prompt := `Analyze this paper acknowledgment and determine if author %s might be the primary recipient/investigator of grant code %s.
@@ -402,9 +402,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) verifyGrantRecipientWithLLM(logger 
 		return true, fmt.Errorf("llm match verification failed: %w", err)
 	}
 
-	logger.Info("LLM verification result", "result", res, "author_name", authorName, "grant_number", grantNumber, "acknowledgementText", acknowledgementText)
-
-	if res == "true" {
+	if strings.ToLower(res) == "true" {
 		return true, nil
 	}
 
@@ -412,7 +410,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) verifyGrantRecipientWithLLM(logger 
 }
 
 func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
-	logger *slog.Logger, acknowledgements []Acknowledgement, allAuthorNames []string,
+	fundCodes map[string]bool, acknowledgements []Acknowledgement, allAuthorNames []string,
 ) (map[string]map[string]bool, error) {
 	triangulationResults := make(map[string]map[string]bool)
 
@@ -425,6 +423,11 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
 					}
 
 					for _, grantNumber := range entity.FundCodes {
+						if res, ok := fundCodes[grantNumber]; ok && !res {
+							triangulationResults[entity.EntityText][grantNumber] = false
+							continue
+						}
+
 						for _, authorName := range allAuthorNames {
 							result, err := flagger.triangulationDB.IsAuthorGrantRecipient(authorName, grantNumber)
 							if err != nil {
@@ -432,12 +435,12 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
 							}
 
 							if result {
-								result, err = flagger.verifyGrantRecipientWithLLM(logger, authorName, grantNumber, ack.RawText)
+								result, err = flagger.verifyGrantRecipientWithLLM(authorName, grantNumber, ack.RawText)
 								if err != nil {
 									continue
 								}
 							}
-
+							fundCodes[grantNumber] = result
 							triangulationResults[entity.EntityText][grantNumber] = result
 							break
 						}
@@ -533,6 +536,8 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 
 	acknowledgementsStream := flagger.extractor.GetAcknowledgements(logger, remaining)
 
+	fundCodes := make(map[string]bool)
+
 	for acks := range acknowledgementsStream {
 		if acks.Error != nil {
 			logger.Warn("error retreiving acknowledgments for work", "error", acks.Error)
@@ -557,7 +562,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 		if flagged {
 			var err error
 			triangulationResults, err = flagger.checkForGrantRecipient(
-				logger, acks.Result.Acknowledgements, allAuthorNames,
+				fundCodes, acks.Result.Acknowledgements, allAuthorNames,
 			)
 			if err != nil {
 				workLogger.Error("error checking for grant recipient", "error", err)
@@ -587,6 +592,27 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 				entities,
 				ackTexts,
 				triangulationResults))
+		}
+	}
+
+	updateFundCodeTriangulation := func(flagFundCodeTriangulation map[string]map[string]bool) {
+		for funder, innerMap := range flagFundCodeTriangulation {
+			for grantNumber := range innerMap {
+				if val, ok := fundCodes[grantNumber]; ok {
+					flagFundCodeTriangulation[funder][grantNumber] = val
+				}
+			}
+		}
+	}
+
+	for _, flag := range flags {
+		switch f := flag.(type) {
+		case *api.TalentContractFlag:
+			updateFundCodeTriangulation(f.FundCodeTriangulation)
+		case *api.HighRiskFunderFlag:
+			updateFundCodeTriangulation(f.FundCodeTriangulation)
+		default:
+			continue
 		}
 	}
 
