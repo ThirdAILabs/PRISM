@@ -462,11 +462,7 @@ func TestProcessorAcknowledgements(t *testing.T) {
 	}
 	defer ackCache.Close()
 
-	entityStore, err := NewEntityStore(filepath.Join(testDir, "entity_lookup.ndb"), eoc.LoadSourceToAlias())
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer entityStore.Free()
+	entityStore := BuildWatchlistEntityIndex(eoc.LoadSourceToAlias())
 
 	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
 	if err != nil {

@@ -82,11 +82,7 @@ func main() {
 		log.Fatalf("error creating work dir: %v", err)
 	}
 
-	entityStore, err := flaggers.NewEntityStore(filepath.Join(ndbDir, "entity_lookup.ndb"), eoc.LoadSourceToAlias())
-	if err != nil {
-		log.Fatalf("error creating entity store: %v", err)
-	}
-	defer entityStore.Free()
+	entityStore := flaggers.BuildWatchlistEntityIndex(eoc.LoadSourceToAlias())
 
 	opts := flaggers.ReportProcessorOptions{
 		UniversityNDB:   flaggers.BuildUniversityNDB(config.UniversityData, filepath.Join(ndbDir, "university.ndb")),

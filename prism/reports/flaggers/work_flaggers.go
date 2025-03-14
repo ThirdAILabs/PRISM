@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"prism/prism/api"
+	"prism/prism/entity_search"
 	"prism/prism/openalex"
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/triangulation"
@@ -239,9 +240,17 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works
 	return flags, nil
 }
 
+func BuildWatchlistEntityIndex(aliasToSource map[string]string) *entity_search.EntityIndex[string] {
+	records := make([]entity_search.Record[string], 0, len(aliasToSource))
+	for alias, source := range aliasToSource {
+		records = append(records, entity_search.Record[string]{Entity: alias, Metadata: source})
+	}
+	return entity_search.NewIndex(records)
+}
+
 type OpenAlexAcknowledgementIsEOC struct {
 	openalex        openalex.KnowledgeBase
-	entityLookup    *EntityStore
+	entityLookup    *entity_search.EntityIndex[string]
 	authorCache     DataCache[openalex.Author]
 	extractor       AcknowledgementsExtractor
 	sussyBakas      []string
@@ -320,6 +329,50 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForSussyBaka(ack Acknowledgeme
 	return flagger.containsSussyBakas(newText)
 }
 
+type SourceToAliases map[string][]string
+
+func (flagger *OpenAlexAcknowledgementIsEOC) searchWatchlistEntities(logger *slog.Logger, entities []string) map[string]SourceToAliases {
+	type searchResult struct {
+		entity  string
+		matches SourceToAliases
+	}
+
+	queue := make(chan string, len(entities))
+	for _, entity := range entities {
+		queue <- entity
+	}
+	completed := make(chan CompletedTask[searchResult], len(entities))
+
+	worker := func(entity string) (searchResult, error) {
+		results, err := flagger.entityLookup.QueryWithLLMValidation(entity, 10)
+		if err != nil {
+			return searchResult{}, err
+		}
+
+		sourceToAliases := make(SourceToAliases)
+		for _, result := range results {
+			sourceToAliases[result.Metadata] = append(sourceToAliases[result.Entity], result.Entity)
+		}
+
+		return searchResult{entity: entity, matches: sourceToAliases}, nil
+
+	}
+
+	RunInPool(worker, queue, completed, 20)
+
+	matches := make(map[string]SourceToAliases)
+
+	for task := range completed {
+		if task.Error != nil {
+			logger.Error("watchlist entity search error", "error", task.Error)
+			continue
+		}
+		matches[task.Result.entity] = task.Result.matches
+	}
+
+	return matches
+}
+
 func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 	logger *slog.Logger, acknowledgements []Acknowledgement, allAuthorNames []string,
 ) (bool, map[string]SourceToAliases, string, error) {
@@ -359,10 +412,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 		}
 
 		if len(entityQueries) > 0 {
-			matches, err := flagger.entityLookup.SearchEntities(logger, entityQueries)
-			if err != nil {
-				return false, nil, "", fmt.Errorf("error looking up entity matches: %w", err)
-			}
+			matches := flagger.searchWatchlistEntities(logger, entityQueries)
 
 			for _, entity := range entityQueries {
 				if sources, ok := matches[entity]; ok {

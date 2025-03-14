@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"path/filepath"
 	"prism/prism/api"
+	"prism/prism/entity_search"
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers/eoc"
@@ -30,7 +31,7 @@ type ReportProcessorOptions struct {
 	AuxNDB          search.NeuralDB
 	TriangulationDB *triangulation.TriangulationDB
 
-	EntityLookup *EntityStore
+	EntityLookup *entity_search.EntityIndex[string]
 
 	ConcerningEntities     eoc.EocSet
 	ConcerningInstitutions eoc.EocSet
