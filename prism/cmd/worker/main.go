@@ -86,8 +86,8 @@ func main() {
 
 	opts := flaggers.ReportProcessorOptions{
 		UniversityNDB:   flaggers.BuildUniversityNDB(config.UniversityData, filepath.Join(ndbDir, "university.ndb")),
-		DocNDB:          flaggers.BuildDocNDB(config.DocData, filepath.Join(ndbDir, "doc.ndb")),
-		AuxNDB:          flaggers.BuildAuxNDB(config.AuxData, filepath.Join(ndbDir, "aux.ndb")),
+		DocIndex:        flaggers.BuildDocIndex(config.DocData),
+		AuxIndex:        flaggers.BuildAuxIndex(config.AuxData),
 		TriangulationDB: triangulation.CreateTriangulationDB(cmd.OpenDB(config.FundcodeTriangulationUri)),
 
 		EntityLookup: entityStore,

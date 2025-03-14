@@ -3,6 +3,7 @@ package flaggers
 import (
 	"log/slog"
 	"prism/prism/api"
+	"prism/prism/entity_search"
 	"prism/prism/openalex"
 	"prism/prism/search"
 	"slices"
@@ -59,55 +60,24 @@ func TestAuthorIsFacultyAtEOC(t *testing.T) {
 }
 
 var (
-	mockPressReleases = []string{
-		"abc and xyz are indicted by the justice department",
-		"some other news about legal stuff",
-		"one last random sentence",
-		"new leaked documents implicate qrs today",
+	mockPressReleases = []entity_search.Record[LinkMetadata]{
+		{Entity: "abc", Metadata: LinkMetadata{Title: "indicted", Url: "indicted.com", Entities: []string{"abc", "xyz"}}},
+		{Entity: "xyz", Metadata: LinkMetadata{Title: "indicted", Url: "indicted.com", Entities: []string{"abc", "xyz"}}},
+		{Entity: "qrs", Metadata: LinkMetadata{Title: "leaked docs", Url: "leakeddocs.com", Entities: []string{"qrs"}}},
 	}
 
-	mockPressReleaseMetadata = []map[string]any{
-		{"title": "indicted", "url": "indicted.com", "entities": "abc;xyz"},
-		{"title": "other news", "url": "othernews.com", "entities": ""},
-		{"title": "random", "url": "random.com", "entities": ""},
-		{"title": "leaked docs", "url": "leakeddocs.com", "entities": "qrs"},
-	}
-
-	mockAuxDocs = []string{
-		"xyz and 123 have started a new company together",
-		"graduate student 456 thanks advisor qrs",
-		"best friends and collaborators 456 and 789 announce new paper",
-	}
-
-	mockAuxDocMetadata = []map[string]any{
-		{"title": "new company", "url": "newcompany.com", "entities": "xyz;123"},
-		{"title": "graduate students", "url": "graduatestudents.com", "entities": "456;qrs"},
-		{"title": "best friends", "url": "bestfriends.com", "entities": "456;789"},
+	mockAuxDocs = []entity_search.Record[LinkMetadata]{
+		{Entity: "xyz", Metadata: LinkMetadata{Title: "new company", Url: "newcompany.com", Entities: []string{"xyz", "123"}}},
+		{Entity: "123", Metadata: LinkMetadata{Title: "new company", Url: "newcompany.com", Entities: []string{"xyz", "123"}}},
+		{Entity: "456", Metadata: LinkMetadata{Title: "graduate students", Url: "graduatestudents.com", Entities: []string{"456", "qrs"}}},
+		{Entity: "qrs", Metadata: LinkMetadata{Title: "graduate students", Url: "graduatestudents.com", Entities: []string{"456", "qrs"}}},
+		{Entity: "456", Metadata: LinkMetadata{Title: "best friends", Url: "bestfriends.com", Entities: []string{"456", "789"}}},
+		{Entity: "789", Metadata: LinkMetadata{Title: "best friends", Url: "bestfriends.com", Entities: []string{"456", "789"}}},
 	}
 )
 
 func TestAuthorAssociationIsEOC(t *testing.T) {
-	docNdb, err := search.NewNeuralDB(t.TempDir())
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer docNdb.Free()
-
-	if err := docNdb.Insert("doc", "id", mockPressReleases, mockPressReleaseMetadata, nil); err != nil {
-		t.Fatal(err)
-	}
-
-	auxNdb, err := search.NewNeuralDB(t.TempDir())
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer auxNdb.Free()
-
-	if err := auxNdb.Insert("doc", "id", mockAuxDocs, mockAuxDocMetadata, nil); err != nil {
-		t.Fatal(err)
-	}
-
-	flagger := AuthorIsAssociatedWithEOCFlagger{docNDB: docNdb, auxNDB: auxNdb}
+	flagger := AuthorIsAssociatedWithEOCFlagger{docIndex: entity_search.NewIndex(mockPressReleases), auxIndex: entity_search.NewIndex(mockAuxDocs)}
 
 	t.Run("test primary connection", func(t *testing.T) {
 		works := []openalex.Work{ // Only the author names are used in this flagger

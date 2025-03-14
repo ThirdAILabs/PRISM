@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"prism/prism/api"
+	"prism/prism/entity_search"
 	"prism/prism/openalex"
 	"prism/prism/search"
 	"regexp"
@@ -82,9 +83,15 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 	return flags, nil
 }
 
+type LinkMetadata struct {
+	Title    string
+	Url      string
+	Entities []string
+}
+
 type AuthorIsAssociatedWithEOCFlagger struct {
-	docNDB search.NeuralDB
-	auxNDB search.NeuralDB
+	docIndex *entity_search.EntityIndex[LinkMetadata]
+	auxIndex *entity_search.EntityIndex[LinkMetadata]
 }
 
 func (flagger *AuthorIsAssociatedWithEOCFlagger) Name() string {
@@ -143,40 +150,36 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 		}
 
 		// TODO(question): do we need to use the name combinations, since the tokenizer will split on whitespace and lowercase?
-		results, err := flagger.docNDB.Query(author.author, 5, nil)
+		results, err := flagger.docIndex.QueryWithLLMValidation(author.author, 5)
 		if err != nil {
-			return nil, fmt.Errorf("error querying ndb: %w", err)
+			return nil, fmt.Errorf("error querying doc index: %w", err)
 		}
 
 		for _, result := range results {
-			if !matcher.matches(result.Text) {
+			if !matcher.matches(result.Entity) {
 				continue
 			}
 
-			url, _ := result.Metadata["url"].(string)
-			if seen[url] {
+			if seen[result.Metadata.Url] {
 				continue
 			}
 
-			seen[url] = true
-
-			title, _ := result.Metadata["title"].(string)
-			entities := result.Metadata["entities"].(string)
+			seen[result.Metadata.Url] = true
 
 			if primaryMatcher.matches(author.author) {
 				flags = append(flags, &api.MiscHighRiskAssociationFlag{
 					Message:         "The author or a frequent associate may be mentioned in a press release.",
-					DocTitle:        title,
-					DocUrl:          url,
-					DocEntities:     strings.Split(entities, ";"),
+					DocTitle:        result.Metadata.Title,
+					DocUrl:          result.Metadata.Url,
+					DocEntities:     result.Metadata.Entities,
 					EntityMentioned: author.author,
 				})
 			} else {
 				flags = append(flags, &api.MiscHighRiskAssociationFlag{
 					Message:          "The author or a frequent associate may be mentioned in a press release.",
-					DocTitle:         title,
-					DocUrl:           url,
-					DocEntities:      strings.Split(entities, ";"),
+					DocTitle:         result.Metadata.Title,
+					DocUrl:           result.Metadata.Url,
+					DocEntities:      result.Metadata.Entities,
 					EntityMentioned:  author.author,
 					Connections:      []api.Connection{{DocTitle: author.author + " (frequent coauthor)", DocUrl: ""}},
 					FrequentCoauthor: &author.author,
@@ -199,28 +202,25 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 
 	queryToConn := make(map[string][]api.Connection)
 
-	results, err := flagger.auxNDB.Query(authorName, 5, nil)
+	results, err := flagger.auxIndex.QueryWithLLMValidation(authorName, 5)
 	if err != nil {
-		logger.Error("error querying aux ndb", "error", err)
-		return nil, fmt.Errorf("error querying ndb: %w", err)
+		logger.Error("error querying aux index", "error", err)
+		return nil, fmt.Errorf("error querying index: %w", err)
 	}
 
 	for _, result := range results {
-		if !primaryMatcher.matches(result.Text) {
+		if !primaryMatcher.matches(result.Entity) {
 			continue
 		}
 
-		url, _ := result.Metadata["url"].(string)
-		if seen[url] {
+		if seen[result.Metadata.Url] {
 			continue
 		}
-		seen[url] = true
+		seen[result.Metadata.Url] = true
 
-		entities, _ := result.Metadata["entities"].(string)
-		for _, entity := range strings.Split(entities, ";") {
+		for _, entity := range result.Metadata.Entities {
 			if _, ok := queryToConn[entity]; !ok {
-				title, _ := result.Metadata["title"].(string)
-				queryToConn[entity] = []api.Connection{{DocTitle: title, DocUrl: url}}
+				queryToConn[entity] = []api.Connection{{DocTitle: result.Metadata.Title, DocUrl: result.Metadata.Url}}
 			}
 		}
 	}
@@ -229,28 +229,21 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 	level2Entities := make(map[string][]api.Connection)
 
 	for query, level1Entity := range queryToConn {
-		results, err := flagger.auxNDB.Query(query, 5, nil)
+		results, err := flagger.auxIndex.QueryWithLLMValidation(query, 5)
 		if err != nil {
-			logger.Error("error querying aux ndb", "error", err)
-			return nil, fmt.Errorf("error querying ndb: %w", err)
+			logger.Error("error querying aux index", "error", err)
+			return nil, fmt.Errorf("error querying index: %w", err)
 		}
 
 		for _, result := range results {
-			if !strings.Contains(result.Text, query) {
+			if seen[result.Metadata.Url] {
 				continue
 			}
+			seen[result.Metadata.Url] = true
 
-			url, _ := result.Metadata["url"].(string)
-			if seen[url] {
-				continue
-			}
-			seen[url] = true
-
-			entities, _ := result.Metadata["entities"].(string)
-			for _, entity := range strings.Split(entities, ";") {
+			for _, entity := range result.Metadata.Entities {
 				if _, ok := level2Entities[entity]; !ok {
-					title, _ := result.Metadata["title"].(string)
-					level2Entities[entity] = append(level1Entity, api.Connection{DocTitle: title, DocUrl: url})
+					level2Entities[entity] = append(level1Entity, api.Connection{DocTitle: result.Metadata.Title, DocUrl: result.Metadata.Url})
 				}
 			}
 		}
@@ -263,26 +256,18 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 	flags := make([]api.Flag, 0)
 
 	for query, conns := range queryToConn {
-		results, err := flagger.docNDB.Query(query, 5, nil)
+		results, err := flagger.docIndex.QueryWithLLMValidation(query, 5)
 		if err != nil {
-			slog.Error("error querying doc ndb", "error", err)
-			return nil, fmt.Errorf("error querying ndb: %w", err)
+			slog.Error("error querying doc index", "error", err)
+			return nil, fmt.Errorf("error querying index: %w", err)
 		}
 
 		for _, result := range results {
-			if !strings.Contains(result.Text, query) {
-				continue
-			}
-
-			title, _ := result.Metadata["title"].(string)
-			url, _ := result.Metadata["url"].(string)
-			entities, _ := result.Metadata["entities"].(string)
-
 			flags = append(flags, &api.MiscHighRiskAssociationFlag{
 				Message:         "The author may be associated be an entity who/which may be mentioned in a press release.\n",
-				DocTitle:        title,
-				DocUrl:          url,
-				DocEntities:     strings.Split(entities, ";"),
+				DocTitle:        result.Metadata.Title,
+				DocUrl:          result.Metadata.Url,
+				DocEntities:     result.Metadata.Entities,
 				EntityMentioned: query,
 				Connections:     conns,
 			})

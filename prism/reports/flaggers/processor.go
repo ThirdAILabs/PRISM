@@ -27,8 +27,8 @@ type ReportProcessor struct {
 
 type ReportProcessorOptions struct {
 	UniversityNDB   search.NeuralDB
-	DocNDB          search.NeuralDB
-	AuxNDB          search.NeuralDB
+	DocIndex        *entity_search.EntityIndex[LinkMetadata]
+	AuxIndex        *entity_search.EntityIndex[LinkMetadata]
 	TriangulationDB *triangulation.TriangulationDB
 
 	EntityLookup *entity_search.EntityIndex[string]
@@ -87,8 +87,8 @@ func NewReportProcessor(manager *reports.ReportManager, opts ReportProcessorOpti
 			universityNDB: opts.UniversityNDB,
 		},
 		authorAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlagger{
-			docNDB: opts.DocNDB,
-			auxNDB: opts.AuxNDB,
+			docIndex: opts.DocIndex,
+			auxIndex: opts.AuxIndex,
 		},
 		manager: manager,
 	}, nil

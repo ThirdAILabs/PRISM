@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"prism/prism/entity_search"
 	"prism/prism/search"
-	"strings"
 	"time"
 )
 
@@ -79,49 +79,42 @@ type dojArticleRecord struct {
 	Entities []string `json:"entities"`
 }
 
-func BuildDocNDB(dataPath string, ndbPath string) search.NeuralDB {
-	log.Printf("creating doc ndb %s from data %s", ndbPath, dataPath)
+func BuildDocIndex(dataPath string) *entity_search.EntityIndex[LinkMetadata] {
+	log.Printf("creating doc index from data %s", dataPath)
 
 	var countryToArticles map[string][]dojArticleRecord
 	parseJsonData(dataPath, &countryToArticles)
 
-	records := make([]dojArticleRecord, 0)
+	data := make([]dojArticleRecord, 0)
 	for _, articles := range countryToArticles {
-		records = append(records, articles...)
+		data = append(data, articles...)
 	}
 
-	log.Printf("loaded %d records", len(records))
+	log.Printf("loaded %d records", len(data))
 
-	ndb, err := search.NewNeuralDB(ndbPath)
-	if err != nil {
-		log.Fatalf("error creating ndb: %v", err)
+	records := make([]entity_search.Record[LinkMetadata], 0, len(data))
+	for _, record := range data {
+		for _, entity := range record.Entities {
+			records = append(records, entity_search.Record[LinkMetadata]{
+				Entity: entity,
+				Metadata: LinkMetadata{
+					Title:    record.Title,
+					Url:      record.Url,
+					Entities: record.Entities,
+				},
+			})
+		}
 	}
 
 	s := time.Now()
 
-	for start := 0; start < len(records); start += insertionBatchSize {
-		end := min(start+insertionBatchSize, len(records))
-		recordsBatch := records[start:end]
-
-		chunks := make([]string, 0, len(recordsBatch))
-		metadata := make([]map[string]any, 0, len(recordsBatch))
-		for _, record := range recordsBatch {
-			chunks = append(chunks, record.Text)
-			metadata = append(metadata, map[string]any{"title": record.Title, "url": record.Url, "entities": strings.Join(record.Entities, ";")})
-		}
-
-		if err := ndb.Insert("press_release_docs", "0", chunks, metadata, nil); err != nil {
-			log.Fatalf("error inserting into ndb: %v", err)
-		}
-
-		log.Printf("processed %d/%d %.2f%% complete", end, len(records), 100*float64(end)/float64(len(records)))
-	}
+	index := entity_search.NewIndex(records)
 
 	e := time.Now()
 
 	log.Printf("ndb created successfully time %.3f s", e.Sub(s).Seconds())
 
-	return ndb
+	return index
 }
 
 type releveantWebpageRecord struct {
@@ -133,48 +126,35 @@ type releveantWebpageRecord struct {
 	Entities []string `json:"entities"`
 }
 
-func BuildAuxNDB(dataPath string, ndbPath string) search.NeuralDB {
-	log.Printf("creating aux ndb %s from data %s", ndbPath, dataPath)
+func BuildAuxIndex(dataPath string) *entity_search.EntityIndex[LinkMetadata] {
+	log.Printf("creating aux index from data %s", dataPath)
 
-	var records []releveantWebpageRecord
-	parseJsonData(dataPath, &records)
+	var data []releveantWebpageRecord
+	parseJsonData(dataPath, &data)
 
-	log.Printf("loaded %d records", len(records))
+	log.Printf("loaded %d records", len(data))
 
-	ndb, err := search.NewNeuralDB(ndbPath)
-	if err != nil {
-		log.Fatalf("error creating ndb: %v", err)
+	records := make([]entity_search.Record[LinkMetadata], 0, len(data))
+	for _, record := range data {
+		for _, entity := range record.Entities {
+			records = append(records, entity_search.Record[LinkMetadata]{
+				Entity: entity,
+				Metadata: LinkMetadata{
+					Title:    record.Title,
+					Url:      record.Url,
+					Entities: record.Entities,
+				},
+			})
+		}
 	}
 
 	s := time.Now()
 
-	for start := 0; start < len(records); start += insertionBatchSize {
-		end := min(start+insertionBatchSize, len(records))
-		recordsBatch := records[start:end]
-
-		chunks := make([]string, 0, len(recordsBatch))
-		metadata := make([]map[string]any, 0, len(recordsBatch))
-		for _, record := range recordsBatch {
-			chunks = append(chunks, record.Content)
-			metadata = append(metadata, map[string]any{
-				"title":     record.Title,
-				"url":       record.Url,
-				"entities":  strings.Join(record.Entities, ";"),
-				"doj_title": record.DojTitle,
-				"doj_url":   record.DojUrl,
-			})
-		}
-
-		if err := ndb.Insert("university_data", "0", chunks, metadata, nil); err != nil {
-			log.Fatalf("error inserting into ndb: %v", err)
-		}
-
-		log.Printf("processed %d/%d %.2f%% complete", end, len(records), 100*float64(end)/float64(len(records)))
-	}
+	index := entity_search.NewIndex(records)
 
 	e := time.Now()
 
 	log.Printf("ndb created successfully time %.3f s", e.Sub(s).Seconds())
 
-	return ndb
+	return index
 }

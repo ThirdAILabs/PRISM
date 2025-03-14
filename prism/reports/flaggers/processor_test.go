@@ -323,18 +323,12 @@ func TestProcessorUniversityFacultySeach(t *testing.T) {
 }
 
 func TestProcessorAuthorAssociations(t *testing.T) {
-	docNDB := BuildDocNDB("../../../data/docs_and_press_releases.json", t.TempDir())
-	defer docNDB.Free()
-
-	auxNDB := BuildAuxNDB("../../../data/auxiliary_webpages.json", t.TempDir())
-	defer auxNDB.Free()
-
 	manager := setupReportManager(t)
 	processor := &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
 		authorAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlagger{
-			docNDB: docNDB,
-			auxNDB: auxNDB,
+			docIndex: BuildDocIndex("../../../data/docs_and_press_releases.json"),
+			auxIndex: BuildAuxIndex("../../../data/auxiliary_webpages.json"),
 		},
 		manager: manager,
 	}
