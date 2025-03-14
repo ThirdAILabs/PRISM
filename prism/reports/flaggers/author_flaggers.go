@@ -25,8 +25,8 @@ type nameMatcher struct {
 
 const (
 	numUniversityDocumentsToRetrieve = 5
-	numAuxillaryDocumentsToRetrieve  = 10
-	numDOJDocumentsToRetrieve        = 10
+	numAuxillaryDocumentsToRetrieve  = 5
+	numDOJDocumentsToRetrieve        = 5
 	useLLMVerification               = true
 )
 
