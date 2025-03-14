@@ -470,7 +470,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 	for _, work := range works {
 		workId := parseOpenAlexId(work)
 		if workId == "" {
-			// logger.Warn("unable to parse work id", "work_name", work.DisplayName, "work_id", work.WorkId)
+			logger.Warn("unable to parse work id", "work_name", work.DisplayName, "work_id", work.WorkId)
 			continue
 		}
 
@@ -486,7 +486,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 
 	allAuthorNames, err := flagger.getAuthorNames(targetAuthorIds)
 	if err != nil {
-		// logger.Error("error getting author names", "target_authors", targetAuthorIds, "error", err)
+		logger.Error("error getting author names", "target_authors", targetAuthorIds, "error", err)
 		return nil, fmt.Errorf("error getting author infos: %w", err)
 	}
 
@@ -494,7 +494,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 
 	for acks := range acknowledgementsStream {
 		if acks.Error != nil {
-			// logger.Warn("error retreiving acknowledgments for work", "error", acks.Error)
+			logger.Warn("error retreiving acknowledgments for work", "error", acks.Error)
 			continue
 		}
 
@@ -507,7 +507,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 			workLogger, acks.Result.Acknowledgements, allAuthorNames,
 		)
 		if err != nil {
-			// workLogger.Error("error checking acknowledgements: skipping work", "error", err)
+			workLogger.Error("error checking acknowledgements: skipping work", "error", err)
 			continue
 		}
 

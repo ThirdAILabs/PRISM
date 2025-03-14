@@ -439,6 +439,7 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 		if !entitiesMentioned["WuXi AppTec"] || !entitiesMentioned["Sequoia Capital China"] {
 			t.Fatal("incorrect entities mentioned")
 		}
+		t.Fatal("stop here")
 	})
 }
 

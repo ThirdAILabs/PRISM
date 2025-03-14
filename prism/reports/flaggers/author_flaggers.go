@@ -25,8 +25,8 @@ type nameMatcher struct {
 
 const (
 	numUniversityDocumentsToRetrieve = 5
-	numAuxillaryDocumentsToRetrieve  = 5
-	numDOJDocumentsToRetrieve        = 5
+	numAuxillaryDocumentsToRetrieve  = 10
+	numDOJDocumentsToRetrieve        = 10
 	useLLMVerification               = true
 )
 
@@ -40,20 +40,26 @@ func newNameMatcher(name string) (nameMatcher, bool) {
 		return nameMatcher{text_regex: regexp.MustCompile(fields[0]), entity_regex: regexp.MustCompile(fields[0])}, true
 	}
 
-	firstname, lastname := fields[0], fields[len(fields)-1]
+	firstname, lastname := regexp.QuoteMeta(fields[0]), regexp.QuoteMeta(fields[len(fields)-1])
 
 	maxChars := max(len(name)-(len(firstname)+len(lastname)), 10)
+	namepattern := regexp.QuoteMeta(strings.Join(fields, `\s+`))
 
-	namepattern := strings.Join(fields, `\s+`)
-	test_regex := regexp.MustCompile(fmt.Sprintf(`(\b%s[\w\s\.\-\,]{0,%d}%s\b)|(\b%s[\w\s\.\-\,]{0,%d}%s\b)|(\b%s\b)`, firstname, maxChars, lastname, lastname, maxChars, firstname, namepattern))
+	text_regex, err := regexp.Compile(fmt.Sprintf(`(\b%s[\w\s\.\-]{0,%d}%s\b)|(\b%s[\w\s\.\-\,]{0,%d}%s\b)|(\b%s\b)`, firstname, maxChars, lastname, lastname, maxChars, firstname, namepattern))
+	if err != nil {
+		return nameMatcher{}, false
+	}
 
 	// anchored regex to the start and end of the string
-	entity_regex := regexp.MustCompile(fmt.Sprintf(`^((%s[\w\s\.\-\,]{0,%d}%s)|(%s[\w\s\.\-\,]{0,%d}%s)|(%s))$`,
+	entity_regex, err := regexp.Compile(fmt.Sprintf(`^((%s[\w\s\.\-]{0,%d}%s)|(%s[\w\s\.\-\,]{0,%d}%s)|(%s))$`,
 		firstname, maxChars, lastname,
 		lastname, maxChars, firstname,
 		namepattern))
+	if err != nil {
+		return nameMatcher{}, false
+	}
 
-	return nameMatcher{text_regex: test_regex, entity_regex: entity_regex}, true
+	return nameMatcher{text_regex: text_regex, entity_regex: entity_regex}, true
 }
 
 func (n *nameMatcher) matchesText(candidate string) bool {
@@ -91,12 +97,13 @@ func (n *nameMatcher) findMatchesInText(candidate string) []MatchResult {
 		start, end := indices[0], indices[1]
 		match := candidate[start:end]
 
-		matchStartWord, matchEndWord := -1, -1
+		matchStartWord, matchEndWord := 0, len(wordBounds)-1
 
+		// find the start and end word indices
 		for i, bounds := range wordBounds {
 			wordStart, wordEnd := bounds[0], bounds[1]
 
-			if matchStartWord == -1 && start >= wordStart && start < wordEnd {
+			if start >= wordStart && start < wordEnd {
 				matchStartWord = i
 			}
 
@@ -104,25 +111,10 @@ func (n *nameMatcher) findMatchesInText(candidate string) []MatchResult {
 				matchEndWord = i
 				break
 			}
-
-			// Match ends exactly at a space or punctuation after a word
-			if end == wordEnd {
-				matchEndWord = i
-				break
-			}
-		}
-
-		if matchStartWord == -1 {
-			matchStartWord = 0
-		}
-		if matchEndWord == -1 {
-			matchEndWord = len(wordBounds) - 1
 		}
 
 		contextStartWord := max(0, matchStartWord-2)
 		contextEndWord := min(len(wordBounds)-1, matchEndWord+2)
-
-		// Reconstruct context safely
 		context := candidate[wordBounds[contextStartWord][0]:wordBounds[contextEndWord][1]]
 
 		results = append(results, MatchResult{
@@ -172,13 +164,16 @@ Possible matches : [
   [
     {"match": "J. Phillip", "context": "J. Phillip Smith"},
     {"match": "J Phillip", "context": "research by J Phillip in 2020"}
-  ]
+  ],
+	[
+	]
 ]
-Output : [False, True]
+Output : [False, True, False]
 
 Explanation :
 - First group: "J Phillip" in "Professor Donovan J Phillip" is not a match because Donovan is part of the name
 - Second group: Contains "J. Phillip Smith" which is a valid match for "J. Phillip"
+- Third group: No matches found
 
 Return True for a group if ANY match in that group correctly refers to the input name. Use the context to determine if a match is legitimate. Answer with a python list of True or False, and nothing else. Do not use markdown or any other formatting. Only return ["True", "False", ...].
 
@@ -599,6 +594,11 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(logger *slog.Logger, autho
 	if err != nil {
 		logger.Error("error checking second/third level flags", "error", err)
 		return nil, err
+	}
+	slog.Info("found second/third level flags", "flags", len(secondThirdLevelFlags))
+	for _, flag := range secondThirdLevelFlags {
+		castedFlag := flag.(*api.MiscHighRiskAssociationFlag)
+		slog.Info("flag", "url", castedFlag.DocUrl, "title", castedFlag.DocTitle, "entity", castedFlag.EntityMentioned)
 	}
 
 	flags := slices.Concat(firstSecondLevelFlags, secondThirdLevelFlags)
