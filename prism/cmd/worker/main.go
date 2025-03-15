@@ -39,6 +39,10 @@ type Config struct {
 
 	MaxDownloadThreads int `env:"MAX_DOWNLOAD_THREADS" envDefault:"40"`
 	MaxGrobidThreads   int `env:"MAX_GROBID_THREADS" envDefault:"10"`
+
+	S3Bucket               string `env:"S3_BUCKET" envDefault:"s3://thirdai-prism/"`
+	DownloadPDFFromS3Cache bool   `env:"DOWNLOAD_PDF_FROM_S3_CACHE" envDefault:"false"`
+	UploadPDFToS3Cache     bool   `env:"UPLOAD_PDF_TO_S3_CACHE" envDefault:"true"`
 }
 
 func (c *Config) logfile() string {
@@ -107,6 +111,10 @@ func main() {
 
 		MaxDownloadThreads: config.MaxDownloadThreads,
 		MaxGrobidThreads:   config.MaxGrobidThreads,
+
+		PDFS3CacheBucket:       config.S3Bucket,
+		DownloadPDFFromS3Cache: config.DownloadPDFFromS3Cache,
+		UploadPDFToS3Cache:     config.UploadPDFToS3Cache,
 	}
 
 	db := cmd.OpenDB(config.PostgresUri)

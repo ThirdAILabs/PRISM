@@ -45,6 +45,10 @@ type ReportProcessorOptions struct {
 
 	MaxDownloadThreads int
 	MaxGrobidThreads   int
+
+	PDFS3CacheBucket       string
+	DownloadPDFFromS3Cache bool
+	UploadPDFToS3Cache     bool
 }
 
 // TODO(Nicholas): How to do cleanup for this, or just let it get cleaned up at the end of the process?
@@ -77,7 +81,7 @@ func NewReportProcessor(manager *reports.ReportManager, opts ReportProcessorOpti
 				openalex:        openalex.NewRemoteKnowledgeBase(),
 				entityLookup:    opts.EntityLookup,
 				authorCache:     authorCache,
-				extractor:       NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.WorkDir, opts.MaxDownloadThreads, opts.MaxGrobidThreads),
+				extractor:       NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.MaxDownloadThreads, opts.MaxGrobidThreads, opts.PDFS3CacheBucket, opts.DownloadPDFFromS3Cache, opts.UploadPDFToS3Cache),
 				sussyBakas:      opts.SussyBakas,
 				triangulationDB: opts.TriangulationDB,
 			},

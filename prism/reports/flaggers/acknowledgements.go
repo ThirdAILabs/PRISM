@@ -3,22 +3,19 @@ package flaggers
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
 	"os"
-	"path/filepath"
 	"prism/prism/openalex"
+	"prism/prism/pdf"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/go-resty/resty/v2"
-	"github.com/google/uuid"
-	"github.com/playwright-community/playwright-go"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -27,15 +24,14 @@ type AcknowledgementsExtractor interface {
 }
 
 type GrobidAcknowledgementsExtractor struct {
-	cache          DataCache[Acknowledgements]
-	maxThreads     int
-	grobidSem      *semaphore.Weighted
-	grobidClient   *resty.Client
-	downloadClient *resty.Client
-	downloadDir    string
+	cache        DataCache[Acknowledgements]
+	maxThreads   int
+	grobidSem    *semaphore.Weighted
+	grobidClient *resty.Client
+	downloader   *pdf.PDFDownloader
 }
 
-func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downloadDir string, maxDownloadThreads, maxGrobidThreads int) *GrobidAcknowledgementsExtractor {
+func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint string, maxDownloadThreads, maxGrobidThreads int, pdfS3CacheBucket string, downloadPDFFromS3Cache, uploadPDFToS3Cache bool) *GrobidAcknowledgementsExtractor {
 	return &GrobidAcknowledgementsExtractor{
 		cache:      cache,
 		maxThreads: max(maxDownloadThreads, maxGrobidThreads),
@@ -55,11 +51,7 @@ func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint, downl
 			}).
 			SetRetryWaitTime(2 * time.Second).
 			SetRetryMaxWaitTime(10 * time.Second),
-		downloadClient: resty.New().
-			SetRetryCount(1).SetTimeout(20 * time.Second).
-			SetRetryWaitTime(5 * time.Second).
-			SetRetryMaxWaitTime(30 * time.Second),
-		downloadDir: downloadDir,
+		downloader: pdf.NewPDFDownloader(pdfS3CacheBucket, downloadPDFFromS3Cache, uploadPDFToS3Cache),
 	}
 }
 
@@ -123,21 +115,10 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 }
 
 func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId string, work openalex.Work) (Acknowledgements, error) {
-	destPath := filepath.Join(extractor.downloadDir, uuid.NewString()+".pdf")
-	pdf, err := extractor.downloadPdf(work.DownloadUrl, destPath)
+	pdfPath, err := extractor.downloader.DownloadWork(work)
 	if err != nil {
 		return Acknowledgements{}, err
 	}
-
-	if closer, ok := pdf.(io.Closer); ok {
-		defer closer.Close()
-	}
-
-	defer func() {
-		if err := os.Remove(destPath); err != nil && !errors.Is(err, os.ErrNotExist) {
-			slog.Error("error removing temp download file", "error", err)
-		}
-	}()
 
 	if err := extractor.grobidSem.Acquire(context.Background(), 1); err != nil {
 		// I don't think this can fail if we use context.Background, so this error check
@@ -148,117 +129,18 @@ func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId 
 
 	defer extractor.grobidSem.Release(1)
 
-	acks, err := extractor.processPdfWithGrobid(pdf)
+	file, err := os.Open(pdfPath)
+	if err != nil {
+		return Acknowledgements{}, fmt.Errorf("failed reading file to send to grobid: %w", err)
+	}
+	defer file.Close()
+
+	acks, err := extractor.processPdfWithGrobid(file)
 	if err != nil {
 		return Acknowledgements{}, err
 	}
 
 	return Acknowledgements{WorkId: workId, Acknowledgements: acks}, nil
-}
-
-func downloadWithPlaywright(url, destPath string) (io.ReadCloser, error) {
-	pw, err := playwright.Run(&playwright.RunOptions{Browsers: []string{"firefox"}})
-	if err != nil {
-		return nil, fmt.Errorf("error starting playwright: %w", err)
-	}
-	// Skipping error check since there's nothing we can do if this fails
-	defer pw.Stop() //nolint:errcheck
-
-	browser, err := pw.Firefox.Launch(playwright.BrowserTypeLaunchOptions{Headless: playwright.Bool(true)})
-	if err != nil {
-		return nil, fmt.Errorf("error launching browser: %w", err)
-	}
-	defer browser.Close()
-
-	context, err := browser.NewContext(playwright.BrowserNewContextOptions{
-		AcceptDownloads:   playwright.Bool(true),
-		IgnoreHttpsErrors: playwright.Bool(true),
-	})
-	if err != nil {
-		return nil, fmt.Errorf("error creating browser context: %w", err)
-	}
-	defer context.Close()
-
-	// When pdfs fail to download it is often just because they reach the timeout,
-	// which slows down processing. Decreasing the timeout will hopefully speed this up.
-	context.SetDefaultTimeout(15000)
-
-	page, err := context.NewPage()
-	if err != nil {
-		return nil, fmt.Errorf("error opening browser page: %w", err)
-	}
-	// context.Close() closes pages in the context
-
-	download, err := page.ExpectDownload(func() error {
-		// Page.Goto returns an error saying that the download is starting, so we ignore the error
-		page.Goto(url, playwright.PageGotoOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}) //nolint:errcheck
-
-		return nil
-	})
-	if err != nil {
-		return nil, fmt.Errorf("download error: %w", err)
-	}
-
-	if err := download.SaveAs(destPath); err != nil {
-		return nil, fmt.Errorf("error saving downloaded paper: %w", err)
-	}
-
-	file, err := os.Open(destPath)
-	if err != nil {
-		return nil, fmt.Errorf("error opening downloaded paper: %w", err)
-	}
-
-	return file, nil
-}
-
-var headers = map[string]string{
-	"accept":                    "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-	"accept-language":           "en-US,en;q=0.9",
-	"cache-control":             "max-age=0",
-	"user-agent":                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
-	"upgrade-insecure-requests": "1",
-	"sec-ch-ua":                 `"Not/A)Brand";v="99", "Google Chrome";v="115", "Chromium";v="115"`,
-	"sec-ch-ua-mobile":          "?0",
-	"sec-ch-ua-platform":        `"Windows"`,
-}
-
-func (extractor *GrobidAcknowledgementsExtractor) downloadWithHttp(url string) (io.Reader, error) {
-	res, err := extractor.downloadClient.R().SetHeaders(headers).Get(url)
-	if err != nil {
-		return nil, fmt.Errorf("download error: %w", err)
-	}
-
-	if !res.IsSuccess() {
-		return nil, fmt.Errorf("download returned error, recieved status_code=%d", res.StatusCode())
-	}
-
-	data := res.Body()
-
-	// Sometimes the above download can succeed, but instead of returning a pdf, it
-	// will return the html for the page containing the pdf. This leads to an error
-	// when we make a call to grobid. This is a simple trick to check if it is a valid pdf.
-	// https://stackoverflow.com/questions/6186980/determine-if-a-byte-is-a-pdf-file
-	if !bytes.HasPrefix(data, []byte("%PDF")) {
-		return nil, fmt.Errorf("download did not return valid pdf")
-	}
-
-	return bytes.NewReader(data), nil
-}
-
-func (extractor *GrobidAcknowledgementsExtractor) downloadPdf(url, destPath string) (io.Reader, error) {
-	attempt1, err1 := extractor.downloadWithHttp(url)
-	if err1 != nil {
-	} else {
-		return attempt1, nil
-	}
-
-	attempt2, err2 := downloadWithPlaywright(url, destPath)
-	if err2 != nil {
-	} else {
-		return attempt2, nil
-	}
-
-	return nil, fmt.Errorf("unable to download pdf from %s, http error: %w, playwright error: %w", url, err1, err2)
 }
 
 const (
