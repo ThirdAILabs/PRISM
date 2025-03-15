@@ -242,13 +242,13 @@ func (downloader *PDFDownloader) DownloadWork(work openalex.Work) (string, error
 	doi := strings.TrimPrefix(work.DOI, "https://doi.org/")
 	var errs []error
 
+	var pdfPath string
+
 	if downloader.downloadFromS3Cache {
-		if cacheReader, err := downloader.downloadFromCache(doi); err == nil {
-			return cacheReader, nil
+		if pdfPath, err := downloader.downloadFromCache(doi); err == nil {
+			return pdfPath, nil
 		}
 	}
-
-	var pdfPath string
 
 	if attempt1, err1 := downloader.downloadWithHttp(oaURL); attempt1 != "" {
 		pdfPath = attempt1
