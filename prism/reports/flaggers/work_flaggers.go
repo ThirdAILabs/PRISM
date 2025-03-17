@@ -402,7 +402,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) verifyGrantRecipientWithLLM(authorN
 		return true, fmt.Errorf("llm match verification failed: %w", err)
 	}
 
-	if strings.ToLower(res) == "true" {
+	if strings.Contains(strings.ToLower(res), "true") {
 		return true, nil
 	}
 
