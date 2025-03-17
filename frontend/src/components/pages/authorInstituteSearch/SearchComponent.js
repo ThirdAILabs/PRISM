@@ -5,6 +5,7 @@ import OrcidSearchComponent from './OrcidSearch';
 import { SearchContext } from '../../../store/searchContext';
 import PaperTitleSearchComponent from './PaperTitleSearch';
 import Logo from '../../../assets/images/prism-logo.png';
+import RowRadioButtonsGroup from '../../common/tools/RadioButton';
 
 const SearchComponent = () => {
   const { searchState, setSearchState } = useContext(SearchContext);
@@ -13,7 +14,7 @@ const SearchComponent = () => {
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
   const defaultType = params.get('type') || 'author';
-
+  const [radioButtonProps, setRadioButtonProps] = useState([]);
   const [selectedSearchType, setSelectedSearchType] = useState(defaultType);
 
   const handleSearchTypeChange = (e) => {
@@ -52,6 +53,14 @@ const SearchComponent = () => {
     setSelectedSearchType(newType);
   }, [location.search, params]);
 
+  useEffect(() => {
+    setRadioButtonProps([
+      { value: 'author', label: 'Author & Institution' },
+      { value: 'paper', label: 'Paper Title' },
+      { value: 'orcid', label: 'ORCID ID' },
+    ])
+  }, []);
+
   return (
     <div className="basic-setup" style={{ color: 'black' }}>
       <div style={{ textAlign: 'center', marginTop: '3%', animation: 'fade-in 0.75s' }}>
@@ -82,17 +91,11 @@ const SearchComponent = () => {
             </div>
           </div>
         </div>
-        <div className="search-type-container mt-4">
-          <label className="search-type-label">Search Type</label>
-          <select
-            className="search-select-smaller"
-            value={selectedSearchType}
-            onChange={handleSearchTypeChange}
-          >
-            <option value="author">Author &amp; Institution</option>
-            <option value="orcid">ORCID ID</option>
-            <option value="paper">Paper Title</option>
-          </select>
+        <div style={{
+          marginTop: '1rem',
+          color: 'rgb(100, 100, 100)',
+        }}>
+          <RowRadioButtonsGroup title={"Search type"} selectedSearchType={selectedSearchType} formControlProps={radioButtonProps} handleSearchTypeChange={handleSearchTypeChange} />
         </div>
       </div>
       <div className="d-flex justify-content-center align-items-center">
