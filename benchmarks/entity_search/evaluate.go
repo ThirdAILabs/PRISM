@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/csv"
+	"flag"
 	"fmt"
+	"log"
 	"os"
 	"prism/benchmarks/entity_search/utils"
 	"prism/prism/entity_search"
@@ -45,7 +47,9 @@ func evaluateEntitySearch(queries []utils.Sample) {
 }
 
 func evaluateNDB(queries []utils.Sample) {
-	search.SetLicenseKey("8A5483-502DCE-DEC601-084409-BCA046-V3")
+	if err := search.SetLicensePath("../../.test_license/thirdai.license"); err != nil {
+		log.Fatalf("error setting license key: %v", err)
+	}
 
 	entities := make([]string, 0, len(queries))
 	for _, query := range queries {
@@ -120,7 +124,9 @@ func createCsv(aliases []string) (string, error) {
 }
 
 func evaluateFlash(queries []utils.Sample) {
-	search.SetLicenseKey("8A5483-502DCE-DEC601-084409-BCA046-V3")
+	if err := search.SetLicensePath("../../.test_license/thirdai.license"); err != nil {
+		log.Fatalf("error setting license key: %v", err)
+	}
 
 	entities := make([]string, 0, len(queries))
 	for _, query := range queries {
@@ -176,16 +182,29 @@ func evaluateFlash(queries []utils.Sample) {
 }
 
 func main() {
-	var samples []utils.Sample
-	// utils.ParseJsonData("./multihop_queries.json", &samples)
-	utils.ParseJsonData("./watchlist_queries.json", &samples)
+	generateData := flag.Bool("generate-data", false, "generate data for evaluation")
+	flag.Parse()
 
-	fmt.Println("new entity lookup")
-	evaluateEntitySearch(samples)
+	if *generateData {
+		utils.GenerateMultiHopData()
+		utils.GenerateWatchlistData()
+		return
+	}
 
-	fmt.Println("NDB")
-	evaluateNDB(samples)
+	for _, dataset := range []string{"./multihop_queries.json", "./watchlist_queries.json"} {
+		fmt.Println("Evaluating on dataset:", dataset)
+		var samples []utils.Sample
+		utils.ParseJsonData(dataset, &samples)
 
-	fmt.Println("Flash")
-	evaluateFlash(samples)
+		fmt.Println("new entity lookup")
+		evaluateEntitySearch(samples)
+
+		fmt.Println("NDB")
+		evaluateNDB(samples)
+
+		fmt.Println("Flash")
+		evaluateFlash(samples)
+
+		fmt.Println("=====================================")
+	}
 }
