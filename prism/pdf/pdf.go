@@ -10,7 +10,6 @@ import (
 	"log"
 	"os"
 	"prism/prism/openalex"
-	"regexp"
 	"strings"
 	"time"
 
@@ -170,27 +169,6 @@ func (downloader *PDFDownloader) downloadWithHttp(url string) (string, error) {
 	return tmpFile.Name(), nil
 }
 
-func (downloader *PDFDownloader) downloadFromSciHub(doi string) (string, error) {
-	sciHubDomain := "sci-hub.ru"
-	sciHubURL := fmt.Sprintf("https://%s/%s", sciHubDomain, doi)
-	res, err := downloader.downloadClient.R().Get(sciHubURL)
-	if err != nil {
-		return "", fmt.Errorf("failed to download Sci-Hub page: %w", err)
-	}
-	if !res.IsSuccess() {
-		return "", fmt.Errorf("Sci-Hub page returned status code %d", res.StatusCode())
-	}
-
-	re := regexp.MustCompile(`(/downloads/[^"'\s]+\.pdf)`)
-	pdfURLBytes := re.Find(res.Body())
-	if pdfURLBytes == nil {
-		return "", fmt.Errorf("failed to extract PDF URL from Sci-Hub page")
-	}
-	pdfURL := fmt.Sprintf("https://%s%s", sciHubDomain, string(pdfURLBytes))
-
-	return downloader.downloadWithHttp(pdfURL)
-}
-
 func (downloader *PDFDownloader) downloadFromCache(doi string) (string, error) {
 	key := fmt.Sprintf("pdfs/%s.pdf", doi)
 	input := &s3.GetObjectInput{
@@ -280,15 +258,6 @@ func (downloader *PDFDownloader) DownloadWork(work openalex.Work) (string, error
 			pdfPath = attempt2
 		} else {
 			errs = append(errs, fmt.Errorf("playwright oa error: %w", err2))
-		}
-	}
-
-	// Sci-Hub seems to not have papers after 2021
-	if pdfPath == "" && work.PublicationDate.Year() <= 2021 {
-		if attempt3, err3 := downloader.downloadFromSciHub(doi); attempt3 != "" {
-			pdfPath = attempt3
-		} else {
-			errs = append(errs, fmt.Errorf("sci-hub error: %w", err3))
 		}
 	}
 
