@@ -19,6 +19,10 @@ const SearchComponent = () => {
 
   const handleSearchTypeChange = (e) => {
     const newType = e.target.value;
+    if (!newType) {
+      return;
+    }
+
     setSelectedSearchType(newType);
 
     setSearchState((prev) => ({
@@ -75,7 +79,7 @@ const SearchComponent = () => {
             animation: 'fade-in 0.5s',
           }}
         />
-        <h1 style={{ fontWeight: 'bold', marginTop: 20, animation: 'fade-in 0.75s' }}>
+        <h1 style={{ fontWeight: 'bold', marginTop: 20, animation: 'fade-in 0.75s', fontFamily: 'serif' }}>
           Individual Assessment
         </h1>
         <div style={{ animation: 'fade-in 1s' }}>
@@ -95,7 +99,11 @@ const SearchComponent = () => {
           marginTop: '1rem',
           color: 'rgb(100, 100, 100)',
         }}>
-          <RowRadioButtonsGroup title={"Search type"} selectedSearchType={selectedSearchType} formControlProps={radioButtonProps} handleSearchTypeChange={handleSearchTypeChange} />
+          <RowRadioButtonsGroup
+            selectedSearchType={selectedSearchType}
+            formControlProps={radioButtonProps}
+            handleSearchTypeChange={handleSearchTypeChange}
+          />
         </div>
       </div>
       <div className="d-flex justify-content-center align-items-center">

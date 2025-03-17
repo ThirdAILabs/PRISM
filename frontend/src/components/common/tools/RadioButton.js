@@ -3,7 +3,6 @@ import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
 import { styled } from '@mui/material/styles';
 
 const StyledFormControlLabel = styled(FormControlLabel)(({ checked }) => ({
@@ -13,7 +12,7 @@ const StyledFormControlLabel = styled(FormControlLabel)(({ checked }) => ({
     marginRight: '2rem !important',
 }));
 
-export default function RowRadioButtonsGroup({ title, selectedSearchType, formControlProps, handleSearchTypeChange }) {
+export default function RowRadioButtonsGroup({ selectedSearchType, formControlProps, handleSearchTypeChange }) {
     return (
         <FormControl>
             <RadioGroup
