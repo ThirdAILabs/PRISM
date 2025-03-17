@@ -51,7 +51,7 @@ func TestDownloadWithoutCache(t *testing.T) {
 }
 
 func TestCacheDownload(t *testing.T) {
-	downloader := pdf.NewPDFDownloader("s3://thirdai-prism/", true, false)
+	downloader := pdf.NewPDFDownloader("thirdai-prism", true, false)
 
 	// Check that we can retrieve a PDF from the cache
 	work := openalex.Work{
@@ -74,8 +74,8 @@ func TestCacheDownload(t *testing.T) {
 }
 
 func TestCacheUpload(t *testing.T) {
-	upload_cache_downloader := pdf.NewPDFDownloader("s3://thirdai-prism/", false, true)
-	download_cache_downloader := pdf.NewPDFDownloader("s3://thirdai-prism/", true, false)
+	upload_cache_downloader := pdf.NewPDFDownloader("thirdai-prism", false, true)
+	download_cache_downloader := pdf.NewPDFDownloader("thirdai-prism", true, false)
 
 	DOI := fmt.Sprintf("test_upload_%s", uuid.New().String())
 
