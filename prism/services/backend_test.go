@@ -563,8 +563,8 @@ func TestUniversityReportEndpoints(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if isUniversityQueued {
-		t.Fatal("isUniversityQueued should be false")
+	if !isUniversityQueued {
+		t.Fatal("isUniversityQueued should be true")
 	}
 
 	if err := manager.UpdateAuthorReport(nextAuthorReport.Id, schema.ReportCompleted, time.Now(), []api.Flag{
