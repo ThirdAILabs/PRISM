@@ -31,7 +31,7 @@ type GrobidAcknowledgementsExtractor struct {
 	downloader   *pdf.PDFDownloader
 }
 
-func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint string, maxDownloadThreads, maxGrobidThreads int, pdfS3CacheBucket string, downloadPDFFromS3Cache, uploadPDFToS3Cache bool) *GrobidAcknowledgementsExtractor {
+func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint string, maxDownloadThreads, maxGrobidThreads int, pdfS3CacheBucket string) *GrobidAcknowledgementsExtractor {
 	return &GrobidAcknowledgementsExtractor{
 		cache:      cache,
 		maxThreads: max(maxDownloadThreads, maxGrobidThreads),
@@ -51,7 +51,7 @@ func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint string
 			}).
 			SetRetryWaitTime(2 * time.Second).
 			SetRetryMaxWaitTime(10 * time.Second),
-		downloader: pdf.NewPDFDownloader(pdfS3CacheBucket, downloadPDFFromS3Cache, uploadPDFToS3Cache),
+		downloader: pdf.NewPDFDownloader(pdfS3CacheBucket),
 	}
 }
 

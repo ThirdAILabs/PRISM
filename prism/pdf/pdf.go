@@ -22,11 +22,9 @@ import (
 )
 
 type PDFDownloader struct {
-	downloadClient      *resty.Client
-	s3CacheBucket       string
-	downloadFromS3Cache bool
-	uploadToS3Cache     bool
-	s3Client            *s3.Client
+	downloadClient *resty.Client
+	s3CacheBucket  string
+	s3Client       *s3.Client
 }
 
 var headers = map[string]string{
@@ -40,28 +38,24 @@ var headers = map[string]string{
 	"sec-ch-ua-platform":        `"Windows"`,
 }
 
-func NewPDFDownloader(s3CacheBucket string, downloadFromS3Cache, uploadToS3Cache bool) *PDFDownloader {
+func NewPDFDownloader(s3CacheBucket string) *PDFDownloader {
 	downloader := &PDFDownloader{
 		downloadClient: resty.New().
 			SetRetryCount(1).SetTimeout(20 * time.Second).
 			SetRetryWaitTime(5 * time.Second).
 			SetRetryMaxWaitTime(30 * time.Second).
 			SetHeaders(headers),
-		downloadFromS3Cache: downloadFromS3Cache,
-		uploadToS3Cache:     uploadToS3Cache,
-		s3CacheBucket:       s3CacheBucket,
+		s3CacheBucket: s3CacheBucket,
 	}
 
-	if downloadFromS3Cache || uploadToS3Cache {
-		if s3CacheBucket == "" {
-			log.Fatalf("failed to provide S3 cache bucket")
-		}
-		cfg, err := config.LoadDefaultConfig(context.Background())
-		if err != nil {
-			log.Fatalf("failed to load AWS config: %v", err)
-		}
-		downloader.s3Client = s3.NewFromConfig(cfg)
+	if s3CacheBucket == "" {
+		log.Fatalf("failed to provide S3 cache bucket")
 	}
+	cfg, err := config.LoadDefaultConfig(context.Background())
+	if err != nil {
+		log.Fatalf("failed to load AWS config: %v", err)
+	}
+	downloader.s3Client = s3.NewFromConfig(cfg)
 
 	return downloader
 }
@@ -255,12 +249,8 @@ func (downloader *PDFDownloader) DownloadWork(work openalex.Work) (string, error
 
 	var pdfPath string
 
-	if downloader.downloadFromS3Cache {
-		if pdfPath, err := downloader.downloadFromCache(doi); err == nil {
-			return pdfPath, nil
-		} else {
-			fmt.Printf("s3 cache download error: %v", err)
-		}
+	if pdfPath, err := downloader.downloadFromCache(doi); err == nil {
+		return pdfPath, nil
 	}
 
 	if attempt1, err1 := downloader.downloadWithHttp(oaURL); attempt1 != "" {
@@ -281,10 +271,8 @@ func (downloader *PDFDownloader) DownloadWork(work openalex.Work) (string, error
 		return "", fmt.Errorf("unable to download pdf from %s: %w", oaURL, errors.Join(errs...))
 	}
 
-	if downloader.uploadToS3Cache {
-		if err := downloader.uploadToCache(doi, pdfPath); err != nil {
-			fmt.Printf("warning: failed to upload pdf to S3 cache: %v\n", err)
-		}
+	if err := downloader.uploadToCache(doi, pdfPath); err != nil {
+		fmt.Printf("warning: failed to upload pdf to S3 cache: %v\n", err)
 	}
 
 	return pdfPath, nil

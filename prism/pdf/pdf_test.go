@@ -23,11 +23,11 @@ func readPdf(pdfPath string) (string, error) {
 }
 
 func TestDownloadWithoutCache(t *testing.T) {
-	downloader := pdf.NewPDFDownloader("", false, false)
+	downloader := pdf.NewPDFDownloader("thirdai-prism")
 
 	work := openalex.Work{
 		DownloadUrl: "https://arxiv.org/pdf/1706.03762",
-		DOI:         "https://doi.org/test",
+		DOI:         "https://doi.org/nonexistent",
 	}
 	pdfPath, err := downloader.DownloadWork(work)
 	if err != nil {
@@ -45,7 +45,7 @@ func TestDownloadWithoutCache(t *testing.T) {
 }
 
 func TestCacheDownload(t *testing.T) {
-	downloader := pdf.NewPDFDownloader("thirdai-prism", true, false)
+	downloader := pdf.NewPDFDownloader("thirdai-prism")
 
 	// Check that we can retrieve a PDF from the cache
 	work := openalex.Work{
@@ -68,12 +68,11 @@ func TestCacheDownload(t *testing.T) {
 }
 
 func TestCacheUpload(t *testing.T) {
-	upload_cache_downloader := pdf.NewPDFDownloader("thirdai-prism", false, true)
-	download_cache_downloader := pdf.NewPDFDownloader("thirdai-prism", true, false)
+	downloader := pdf.NewPDFDownloader("thirdai-prism")
 
 	DOI := fmt.Sprintf("https://doi.org/test_upload_%s", uuid.New().String())
 
-	t.Cleanup(func() { upload_cache_downloader.DeleteFromCache(DOI) })
+	t.Cleanup(func() { downloader.DeleteFromCache(DOI) })
 
 	// Check that a PDF is being uploaded to the cache
 	work := openalex.Work{
@@ -81,12 +80,12 @@ func TestCacheUpload(t *testing.T) {
 		DOI:         DOI,
 	}
 
-	_, err := upload_cache_downloader.DownloadWork(work)
+	_, err := downloader.DownloadWork(work)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	pdfPath, err := download_cache_downloader.DownloadWork(work)
+	pdfPath, err := downloader.DownloadWork(work)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -106,12 +105,12 @@ func TestCacheUpload(t *testing.T) {
 		DOI:         DOI,
 	}
 
-	_, err = upload_cache_downloader.DownloadWork(quantum_work)
+	_, err = downloader.DownloadWork(quantum_work)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	pdfPath, err = download_cache_downloader.DownloadWork(quantum_work)
+	pdfPath, err = downloader.DownloadWork(quantum_work)
 	if err != nil {
 		t.Fatal(err)
 	}
