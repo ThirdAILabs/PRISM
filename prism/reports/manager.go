@@ -98,7 +98,9 @@ func (r *ReportManager) queueAuthorReportUpdateIfNeeded(txn *gorm.DB, report *sc
 
 func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string, fromUserReq bool) (schema.AuthorReport, error) {
 	var report schema.AuthorReport
-	result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Limit(1).Find(&report, "author_id = ? AND source = ?", authorId, source)
+	result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
+		Limit(1).
+		Find(&report, "author_id = ? AND source = ? AND queued_by_user = ?", authorId, source, fromUserReq)
 	if result.Error != nil {
 		slog.Error("error checking for existing author report", "error", result.Error)
 		return schema.AuthorReport{}, ErrReportCreationFailed
@@ -233,10 +235,11 @@ type ReportUpdateTask struct {
 	EndDate    time.Time
 }
 
-func (r *ReportManager) findNextAuthorReport(txn *gorm.DB) (*schema.AuthorReport, error) {
+func (r *ReportManager) findNextAuthorReport(txn *gorm.DB) (*schema.AuthorReport, bool, error) {
 	retryTimestamp := time.Now().UTC().Add(-r.authorReportTimeout)
 
 	var report schema.AuthorReport
+	var isUniversityQueued bool
 	for _, queuedByUser := range [2]bool{true, false} {
 		result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
 			Limit(1).Order("status_updated_at ASC").
@@ -245,22 +248,24 @@ func (r *ReportManager) findNextAuthorReport(txn *gorm.DB) (*schema.AuthorReport
 			Find(&report)
 		if result.Error != nil {
 			slog.Error("error getting next author report from queue", "error", result.Error)
-			return nil, ErrReportAccessFailed
+			return nil, false, ErrReportAccessFailed
 		}
 
 		if result.RowsAffected == 1 {
-			return &report, nil
+			isUniversityQueued = !queuedByUser
+			return &report, isUniversityQueued, nil
 		}
 	}
-	return nil, nil
+	return nil, false, nil
 }
 
-func (r *ReportManager) GetNextAuthorReport() (*ReportUpdateTask, error) {
+func (r *ReportManager) GetNextAuthorReport() (*ReportUpdateTask, bool, error) {
 	var report *schema.AuthorReport
+	var isUniversityQueued bool
 
 	err := r.db.Transaction(func(txn *gorm.DB) error {
 		var err error
-		report, err = r.findNextAuthorReport(txn)
+		report, isUniversityQueued, err = r.findNextAuthorReport(txn)
 		if err != nil {
 			return err
 		}
@@ -277,7 +282,7 @@ func (r *ReportManager) GetNextAuthorReport() (*ReportUpdateTask, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	if report != nil {
@@ -288,10 +293,10 @@ func (r *ReportManager) GetNextAuthorReport() (*ReportUpdateTask, error) {
 			Source:     report.Source,
 			StartDate:  report.LastUpdatedAt,
 			EndDate:    time.Now().UTC(),
-		}, nil
+		}, isUniversityQueued, nil
 	}
 
-	return nil, nil
+	return nil, false, nil
 }
 
 func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTime time.Time, updateFlags []api.Flag) error {

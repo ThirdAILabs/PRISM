@@ -286,9 +286,12 @@ func TestCheckDisclosure(t *testing.T) {
 		},
 	}
 
-	nextReport, err := manager.GetNextAuthorReport()
+	nextReport, isUniversityQueued, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
+	}
+	if isUniversityQueued {
+		t.Fatal("isUniversityQueued should be false")
 	}
 	if nextReport == nil {
 		t.Fatal("next report should not be nil")
@@ -371,9 +374,12 @@ func TestDownloadReportAllFormats(t *testing.T) {
 		},
 	}
 
-	nextReport, err := manager.GetNextAuthorReport()
+	nextReport, isUniversityQueued, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
+	}
+	if isUniversityQueued {
+		t.Fatal("isUniversityQueued should be false")
 	}
 	if nextReport == nil {
 		t.Fatal("next report should not be nil")
@@ -552,9 +558,13 @@ func TestUniversityReportEndpoints(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nextAuthorReport, err := manager.GetNextAuthorReport()
+	nextAuthorReport, isUniversityQueued, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if isUniversityQueued {
+		t.Fatal("isUniversityQueued should be false")
 	}
 
 	if err := manager.UpdateAuthorReport(nextAuthorReport.Id, schema.ReportCompleted, time.Now(), []api.Flag{
