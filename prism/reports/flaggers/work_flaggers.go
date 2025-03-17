@@ -332,44 +332,72 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForSussyBaka(ack Acknowledgeme
 type SourceToAliases map[string][]string
 
 func (flagger *OpenAlexAcknowledgementIsEOC) searchWatchlistEntities(logger *slog.Logger, entities []string) map[string]SourceToAliases {
-	type searchResult struct {
-		entity  string
-		matches SourceToAliases
-	}
+	// type searchResult struct {
+	// 	entity  string
+	// 	matches SourceToAliases
+	// }
 
-	queue := make(chan string, len(entities))
-	for _, entity := range entities {
-		queue <- entity
-	}
-	close(queue)
+	// queue := make(chan string, len(entities))
+	// for _, entity := range entities {
+	// 	queue <- entity
+	// }
+	// close(queue)
 
-	completed := make(chan CompletedTask[searchResult], len(entities))
+	// completed := make(chan CompletedTask[searchResult], len(entities))
 
-	worker := func(entity string) (searchResult, error) {
-		results, err := flagger.entityLookup.QueryWithLLMValidation(entity, 10)
-		if err != nil {
-			return searchResult{}, err
-		}
+	// worker := func(entity string) (searchResult, error) {
+	// 	// results, err := flagger.entityLookup.QueryWithLLMValidation(entity, 10)
+	// 	// if err != nil {
+	// 	// 	return searchResult{}, err
+	// 	// }
+	// 	results := flagger.entityLookup.Query(entity, 10)
 
-		sourceToAliases := make(SourceToAliases)
-		for _, result := range results {
-			sourceToAliases[result.Metadata] = append(sourceToAliases[result.Entity], result.Entity)
-		}
+	// 	fmt.Printf("query=%v, results=%+v\n", entity, results)
 
-		return searchResult{entity: entity, matches: sourceToAliases}, nil
+	// 	filtered := make([]entity_search.Record[string], 0, len(results))
+	// 	for _, result := range results {
+	// 		if sim := IndelSimilarity(entity, result.Entity); sim > 0.9 {
+	// 			fmt.Println("SIMILARITY", entity, result.Entity, sim)
+	// 			filtered = append(filtered, result)
+	// 		}
+	// 	}
 
-	}
+	// 	sourceToAliases := make(SourceToAliases)
+	// 	for _, result := range filtered {
+	// 		sourceToAliases[result.Metadata] = append(sourceToAliases[result.Entity], result.Entity)
+	// 	}
 
-	RunInPool(worker, queue, completed, 20)
+	// 	return searchResult{entity: entity, matches: sourceToAliases}, nil
+
+	// }
+
+	// RunInPool(worker, queue, completed, 20)
+
+	// matches := make(map[string]SourceToAliases)
+
+	// for task := range completed {
+	// 	if task.Error != nil {
+	// 		logger.Error("watchlist entity search error", "error", task.Error)
+	// 		continue
+	// 	}
+	// 	matches[task.Result.entity] = task.Result.matches
+	// }
 
 	matches := make(map[string]SourceToAliases)
 
-	for task := range completed {
-		if task.Error != nil {
-			logger.Error("watchlist entity search error", "error", task.Error)
-			continue
+	for _, entity := range entities {
+		results := flagger.entityLookup.Query(entity, 10)
+
+		sourceToAliases := make(SourceToAliases)
+		for _, result := range results {
+			sim := IndelSimilarity(entity, result.Entity)
+			if sim > 0.9 {
+				sourceToAliases[result.Metadata] = append(sourceToAliases[result.Entity], result.Entity)
+			}
 		}
-		matches[task.Result.entity] = task.Result.matches
+		if len(sourceToAliases) > 0 {
+			matches[entity] = sourceToAliases
+		}
 	}
 
 	return matches
