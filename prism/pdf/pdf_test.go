@@ -53,6 +53,7 @@ func TestDownloadWithoutCache(t *testing.T) {
 func TestCacheDownload(t *testing.T) {
 	downloader := pdf.NewPDFDownloader("s3://thirdai-prism/", true, false)
 
+	// Check that we can retrieve a PDF from the cache
 	work := openalex.Work{
 		DownloadUrl: "https://arxiv.org/pdf/1706.03762",
 		DOI:         "test",
@@ -78,6 +79,7 @@ func TestCacheUpload(t *testing.T) {
 
 	DOI := fmt.Sprintf("test_upload_%s", uuid.New().String())
 
+	// Check that a PDF is being uploaded to the cache
 	work := openalex.Work{
 		DownloadUrl: "https://arxiv.org/pdf/1706.03762",
 		DOI:         DOI,
@@ -102,6 +104,7 @@ func TestCacheUpload(t *testing.T) {
 		t.Fatal("PDF does not contain the expected text: 'attention'")
 	}
 
+	// Check that an existing PDF doesn't get overwritten in the cache
 	quantum_work := openalex.Work{
 		DownloadUrl: "https://arxiv.org/pdf/1801.00862",
 		DOI:         DOI,
