@@ -34,6 +34,7 @@ jobs:
 
       - name: install dependencies
         run: |
+          sudo apt-get install poppler-utils
           go mod download
           go run github.com/playwright-community/playwright-go/cmd/playwright install --with-deps firefox
     
