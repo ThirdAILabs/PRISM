@@ -17,6 +17,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/smithy-go"
 	"github.com/go-resty/resty/v2"
 	"github.com/playwright-community/playwright-go"
 )
@@ -218,6 +219,24 @@ func (downloader *PDFDownloader) downloadFromCache(doi string) (string, error) {
 
 func (downloader *PDFDownloader) uploadToCache(doi string, pdfPath string) error {
 	key := fmt.Sprintf("pdfs/%s.pdf", doi)
+
+	headInput := &s3.HeadObjectInput{
+		Bucket: aws.String(downloader.s3CacheBucket),
+		Key:    aws.String(key),
+	}
+	_, err := downloader.s3Client.HeadObject(context.Background(), headInput)
+	if err == nil {
+		return nil
+	}
+
+	var apiErr smithy.APIError
+	if errors.As(err, &apiErr) {
+		if apiErr.ErrorCode() != "NotFound" {
+			return fmt.Errorf("failed to check if object exists in S3: %w", err)
+		}
+	} else {
+		return fmt.Errorf("failed to check if object exists in S3: %w", err)
+	}
 
 	file, err := os.Open(pdfPath)
 	if err != nil {
