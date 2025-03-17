@@ -73,6 +73,8 @@ func TestCacheUpload(t *testing.T) {
 
 	DOI := fmt.Sprintf("https://doi.org/test_upload_%s", uuid.New().String())
 
+	t.Cleanup(func() { upload_cache_downloader.DeleteFromCache(DOI) })
+
 	// Check that a PDF is being uploaded to the cache
 	work := openalex.Work{
 		DownloadUrl: "https://arxiv.org/pdf/1706.03762",

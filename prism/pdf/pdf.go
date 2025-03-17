@@ -235,6 +235,19 @@ func (downloader *PDFDownloader) uploadToCache(doi string, pdfPath string) error
 	return nil
 }
 
+func (downloader *PDFDownloader) DeleteFromCache(doi string) error {
+	key := fmt.Sprintf("pdfs/%s.pdf", doi)
+	input := &s3.DeleteObjectInput{
+		Bucket: aws.String(downloader.s3CacheBucket),
+		Key:    aws.String(key),
+	}
+	_, err := downloader.s3Client.DeleteObject(context.Background(), input)
+	if err != nil {
+		return fmt.Errorf("error deleting key %s from cache: %v", key, err)
+	}
+	return nil
+}
+
 func (downloader *PDFDownloader) DownloadWork(work openalex.Work) (string, error) {
 	oaURL := work.DownloadUrl
 	doi := strings.TrimPrefix(work.DOI, "https://doi.org/")
