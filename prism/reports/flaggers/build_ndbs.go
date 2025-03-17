@@ -101,6 +101,7 @@ func BuildDocIndex(dataPath string) *entity_search.EntityIndex[LinkMetadata] {
 					Title:    record.Title,
 					Url:      record.Url,
 					Entities: record.Entities,
+					Text:     record.Text,
 				},
 			})
 		}
@@ -143,6 +144,7 @@ func BuildAuxIndex(dataPath string) *entity_search.EntityIndex[LinkMetadata] {
 					Title:    record.Title,
 					Url:      record.Url,
 					Entities: record.Entities,
+					Text:     record.Content,
 				},
 			})
 		}
