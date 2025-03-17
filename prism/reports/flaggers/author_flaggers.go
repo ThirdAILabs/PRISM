@@ -383,10 +383,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 		}
 
 		// TODO(question): do we need to use the name combinations, since the tokenizer will split on whitespace and lowercase?
-		results, err := flagger.docIndex.QueryWithLLMValidation(author.author, 5)
-		if err != nil {
-			return nil, fmt.Errorf("error querying doc index: %w", err)
-		}
+		results := flagger.docIndex.Query(author.author, 5)
 
 		temporaryFlags := make([]api.Flag, 0)
 		texts := make([]string, 0)
@@ -485,11 +482,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 	level2Entities := make(map[string][]api.Connection)
 
 	for query, level1Entity := range queryToConn {
-		results, err := flagger.auxIndex.QueryWithLLMValidation(query, 5)
-		if err != nil {
-			logger.Error("error querying aux index", "error", err)
-			return nil, fmt.Errorf("error querying index: %w", err)
-		}
+		results := flagger.auxIndex.Query(query, 5)
 
 		secondaryMatcher, validName := newNameMatcher(query)
 		if !validName {
@@ -527,11 +520,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 	flags := make([]api.Flag, 0)
 	seenFlags := make(map[[sha256.Size]byte]bool)
 	for query, conns := range queryToConn {
-		results, err := flagger.docIndex.QueryWithLLMValidation(query, 5)
-		if err != nil {
-			slog.Error("error querying doc index", "error", err)
-			return nil, fmt.Errorf("error querying index: %w", err)
-		}
+		results := flagger.docIndex.Query(query, 5)
 
 		tempFlags := make([]api.Flag, 0)
 
