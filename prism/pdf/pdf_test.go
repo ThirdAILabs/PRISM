@@ -3,29 +3,23 @@ package pdf_test
 import (
 	"bytes"
 	"fmt"
+	"os/exec"
 	"prism/prism/openalex"
 	"prism/prism/pdf"
 	"strings"
 	"testing"
 
 	"github.com/google/uuid"
-
-	pdfReader "github.com/ledongthuc/pdf"
 )
 
-func readPdf(path string) (string, error) {
-	f, r, err := pdfReader.Open(path)
-	if err != nil {
+func readPdf(pdfPath string) (string, error) {
+	cmd := exec.Command("pdftotext", pdfPath, "-")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
 		return "", err
 	}
-	defer f.Close()
-	var buf bytes.Buffer
-	b, err := r.GetPlainText()
-	if err != nil {
-		return "", err
-	}
-	buf.ReadFrom(b)
-	return buf.String(), nil
+	return out.String(), nil
 }
 
 func TestDownloadWithoutCache(t *testing.T) {
@@ -33,7 +27,7 @@ func TestDownloadWithoutCache(t *testing.T) {
 
 	work := openalex.Work{
 		DownloadUrl: "https://arxiv.org/pdf/1706.03762",
-		DOI:         "test",
+		DOI:         "https://doi.org/test",
 	}
 	pdfPath, err := downloader.DownloadWork(work)
 	if err != nil {
@@ -56,7 +50,7 @@ func TestCacheDownload(t *testing.T) {
 	// Check that we can retrieve a PDF from the cache
 	work := openalex.Work{
 		DownloadUrl: "https://arxiv.org/pdf/1706.03762",
-		DOI:         "test",
+		DOI:         "https://doi.org/test",
 	}
 	pdfPath, err := downloader.DownloadWork(work)
 	if err != nil {
@@ -68,7 +62,7 @@ func TestCacheDownload(t *testing.T) {
 		t.Fatal("Could not extract text from PDF")
 	}
 
-	if !strings.Contains(strings.ToLower(content), "This is a test pdf") {
+	if !strings.Contains(content, "This is a test pdf") {
 		t.Fatal("PDF does not contain the expected text: 'This is a test pdf'")
 	}
 }
@@ -77,7 +71,7 @@ func TestCacheUpload(t *testing.T) {
 	upload_cache_downloader := pdf.NewPDFDownloader("thirdai-prism", false, true)
 	download_cache_downloader := pdf.NewPDFDownloader("thirdai-prism", true, false)
 
-	DOI := fmt.Sprintf("test_upload_%s", uuid.New().String())
+	DOI := fmt.Sprintf("https://doi.org/test_upload_%s", uuid.New().String())
 
 	// Check that a PDF is being uploaded to the cache
 	work := openalex.Work{
@@ -100,7 +94,7 @@ func TestCacheUpload(t *testing.T) {
 		t.Fatal("Could not extract text from PDF")
 	}
 
-	if !strings.Contains(strings.ToLower(content), "attention") {
+	if !strings.Contains(content, "attention") {
 		t.Fatal("PDF does not contain the expected text: 'attention'")
 	}
 
@@ -125,7 +119,7 @@ func TestCacheUpload(t *testing.T) {
 		t.Fatal("Could not extract text from PDF")
 	}
 
-	if strings.Contains(strings.ToLower(content), "quantum") {
+	if strings.Contains(content, "quantum") {
 		t.Fatal("PDF should not contain the text: 'quantum'")
 	}
 

@@ -49,6 +49,7 @@ func NewPDFDownloader(s3CacheBucket string, downloadFromS3Cache, uploadToS3Cache
 			SetHeaders(headers),
 		downloadFromS3Cache: downloadFromS3Cache,
 		uploadToS3Cache:     uploadToS3Cache,
+		s3CacheBucket:       s3CacheBucket,
 	}
 
 	if downloadFromS3Cache || uploadToS3Cache {
@@ -244,6 +245,8 @@ func (downloader *PDFDownloader) DownloadWork(work openalex.Work) (string, error
 	if downloader.downloadFromS3Cache {
 		if pdfPath, err := downloader.downloadFromCache(doi); err == nil {
 			return pdfPath, nil
+		} else {
+			fmt.Printf("s3 cache download error: %v", err)
 		}
 	}
 
