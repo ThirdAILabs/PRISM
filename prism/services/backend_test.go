@@ -358,7 +358,7 @@ func TestDownloadReportAllFormats(t *testing.T) {
 				OaUrl:           "http://example.com/oa/work-1",
 				PublicationDate: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
-			RawAcknowledements: []string{"flag-content"},
+			RawAcknowledgement: []string{"flag-content"},
 		},
 	}
 

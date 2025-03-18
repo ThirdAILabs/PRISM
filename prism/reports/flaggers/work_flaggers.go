@@ -534,7 +534,7 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			Message:               message,
 			Work:                  getWorkSummary(work),
 			Entities:              entities,
-			RawAcknowledements:    rawAcks,
+			RawAcknowledgement:    rawAcks,
 			FundCodeTriangulation: triangulationResults,
 		}
 	} else if containsSource(entities, deniedEntities) {
@@ -542,7 +542,7 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			Message:            message,
 			Work:               getWorkSummary(work),
 			Entities:           entities,
-			RawAcknowledements: rawAcks,
+			RawAcknowledgement: rawAcks,
 		}
 	} else {
 		entityNames := make([]string, 0, len(entities))
@@ -553,7 +553,7 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			Message:               message,
 			Work:                  getWorkSummary(work),
 			Funders:               entityNames,
-			RawAcknowledements:    rawAcks,
+			RawAcknowledgement:    rawAcks,
 			FundCodeTriangulation: triangulationResults,
 		}
 	}

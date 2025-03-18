@@ -478,11 +478,11 @@ const ItemDetails = () => {
                 );
               })}
           </ul>
-          {Array.isArray(flag.RawAcknowledements) && flag.RawAcknowledements.length > 0 && (
+          {Array.isArray(flag.RawAcknowledgement) && flag.RawAcknowledgement.length > 0 && (
             <>
               <strong>Acknowledgements Text</strong>
               <ul className="bulleted-list">
-                {flag.RawAcknowledements.map((item, index2) => {
+                {flag.RawAcknowledgement.map((item, index2) => {
                   const key = `ack-${index} ${index2}`;
                   return <li key={key}>{item}</li>;
                 })}
@@ -665,7 +665,7 @@ const ItemDetails = () => {
             })}
           </ul>
           <strong>Acknowledgement Text</strong>
-          {flag.RawAcknowledements.map((item, index3) => {
+          {flag.RawAcknowledgement.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
           <p>{}</p>
