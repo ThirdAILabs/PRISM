@@ -23,10 +23,10 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import Shimmer from './Shimmer.js';
 import MuiAlert from '@mui/material/Alert';
-import { Snackbar } from '@mui/material';
+import { Snackbar, Tooltip } from '@mui/material';
 import useGoBack from '../../../hooks/useGoBack.js';
 import useOutsideClick from '../../../hooks/useOutsideClick.js';
-
+import { getTrailingWhiteSpace } from '../../../utils/helper.js';
 import Collapsible from '../../common/tools/CollapsibleComponent.js';
 
 const FLAG_ORDER = [
@@ -251,8 +251,9 @@ const ItemDetails = () => {
   const [endDate, setEndDate] = useState('');
   const [activeTab, setActiveTab] = useState(0);
 
-  const [filterMessage, setFilterMessage] = useState('');
-
+  const [filterMessage, setFilterMessage] = useState(
+    getTrailingWhiteSpace(12) + 'Filter by Timeline'
+  );
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
   };
@@ -320,7 +321,7 @@ const ItemDetails = () => {
         })
       : 'today';
 
-    setFilterMessage(`${displayStart} to ${displayEnd}`);
+    setFilterMessage(`${displayStart} - ${displayEnd}`);
 
     setStartDate('');
     setEndDate('');
@@ -472,16 +473,18 @@ const ItemDetails = () => {
         <p>
           {get_paper_url(flag)} is funded by the following entities of concern:
           <ul className="bulleted-list">
-            {flag.Funders.map((item, index2) => {
-              const key = `${index} ${index2}`;
-              return (
-                <li key={key}>
-                  <a>{item}</a>
-                </li>
-              );
-            })}
+            {Array.isArray(flag.Funders) &&
+              flag.Funders.length > 0 &&
+              flag.Funders.map((item, index2) => {
+                const key = `${index} ${index2}`;
+                return (
+                  <li key={key}>
+                    <a>{item}</a>
+                  </li>
+                );
+              })}
           </ul>
-          {flag.RawAcknowledements.length > 0 && (
+          {Array.isArray(flag.RawAcknowledements) && flag.RawAcknowledements.length > 0 && (
             <>
               <strong>Acknowledgements Text</strong>
               <ul className="bulleted-list">
@@ -907,7 +910,6 @@ const ItemDetails = () => {
       </div>
     );
   }
-
   // function formalRelationFlag(flag, index) {
   //   return (
   //     <li key={index} className='p-3 px-5 w-75 detail-item'>
@@ -1010,35 +1012,47 @@ const ItemDetails = () => {
               <div className="dropdown" ref={dropdownFilterRef}>
                 <style>
                   {`
-          .form-control::placeholder {
-            color: #888;
-          }
-        `}
+                    .form-control::placeholder {
+                      color: #888;
+                    }
+                  `}
                 </style>
-                <button
-                  className="btn dropdown-toggle"
-                  type="button"
-                  onClick={() => setYearDropdownOpen(!yearDropdownOpen)}
-                  style={{
-                    backgroundColor: 'rgb(160, 160, 160)',
-                    border: 'none',
-                    marginRight: '10px',
-                    color: 'white',
-                    width: '180px',
-                    fontWeight: 'bold',
-                    fontSize: '14px',
-                  }}
-                >
-                  Filter by Timeline
-                </button>
+                <Tooltip title={loading ? 'Please wait while the report is being generated.' : ''}>
+                  <span
+                    style={{
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    <button
+                      className="btn dropdown-toggle"
+                      onClick={() => setYearDropdownOpen(!yearDropdownOpen)}
+                      style={{
+                        backgroundColor: 'rgb(160, 160, 160)',
+                        border: 'none',
+                        marginRight: '10px',
+                        color: 'white',
+                        width: '225px',
+                        fontWeight: 'bold',
+                        fontSize: '14px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                      }}
+                      disabled={loading}
+                    >
+                      {filterMessage}
+                    </button>
+                  </span>
+                </Tooltip>
                 {yearDropdownOpen && (
                   <div
                     className="dropdown-menu show p-2"
                     style={{
-                      width: '180px',
+                      width: '225px',
                       backgroundColor: 'rgb(160, 160, 160)',
                       border: 'none',
-                      right: 0,
+                      // right: 0,
                       marginTop: '5px',
                       marginRight: '10px',
                       color: 'white',
@@ -1050,7 +1064,10 @@ const ItemDetails = () => {
                       flexDirection: 'column',
                     }}
                   >
-                    <div className="form-group" style={{ marginBottom: '10px', width: '100%' }}>
+                    <div
+                      className="form-group"
+                      style={{ marginBottom: '10px', width: '100%', padding: '7px' }}
+                    >
                       <label>Start Date</label>
                       <input
                         type="date"
@@ -1068,7 +1085,10 @@ const ItemDetails = () => {
                         }}
                       />
                     </div>
-                    <div className="form-group" style={{ marginBottom: '10px', width: '100%' }}>
+                    <div
+                      className="form-group"
+                      style={{ marginBottom: '10px', width: '100%', padding: '0 7px' }}
+                    >
                       <label>End Date</label>
                       <input
                         type="date"
@@ -1092,14 +1112,15 @@ const ItemDetails = () => {
                       onClick={handleDateFilter}
                       disabled={!(startDate || endDate)}
                       style={{
-                        backgroundColor: 'black',
+                        backgroundColor: 'rgb(200, 200, 200)',
                         border: 'none',
                         color: 'white',
                         width: '100px',
                         fontWeight: 'bold',
                         fontSize: '14px',
-                        cursor: startDate || endDate ? 'pointer' : 'default',
+                        cursor: startDate || endDate ? 'pointer' : 'not-allowed',
                         transition: 'background-color 0.3s',
+                        marginTop: '10px',
                       }}
                     >
                       Submit
@@ -1109,19 +1130,23 @@ const ItemDetails = () => {
               </div>
             </div>
           </div>
-          {/* Render the Tabs with the filterMessage */}
-          <Tabs
-            activeTab={activeTab}
-            handleTabChange={handleTabChange}
-            filterMessage={filterMessage}
-          />
+          <Tabs activeTab={activeTab} handleTabChange={handleTabChange} disabled={loading} />
         </div>
         {activeTab === 0 && (
           <div className="d-flex justify-content-end mt-2 gap-2 px-2">
             <StyledWrapper>
-              <button className="cssbuttons-io-button" onClick={handleFileUploadClick}>
-                Verify with Disclosures
-              </button>
+              <Tooltip title={loading ? 'Please wait while the report is being generated.' : ''}>
+                <button
+                  className="cssbuttons-io-button"
+                  onClick={handleFileUploadClick}
+                  disabled={loading}
+                  style={{
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  Verify with Disclosures
+                </button>
+              </Tooltip>
             </StyledWrapper>
             <input
               type="file"
@@ -1148,6 +1173,7 @@ const ItemDetails = () => {
                 content={reportContent}
                 isOpen={downloadDropdownOpen}
                 setIsOpen={() => setDownloadDropdownOpen(!downloadDropdownOpen)}
+                disabled={loading}
               />
             </div>
           </div>
@@ -1254,7 +1280,6 @@ const ItemDetails = () => {
                           borderRadius: '20px',
                           border: '2px solid green',
                           padding: '10px 10px',
-                          cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',

@@ -7036,21 +7036,14 @@
                 "Faramarz Shahi Savandi  ",
                 "Mohammad Mehdi Shah Mansouri  ",
                 "Hollywood Presbyterian Medical Center  ",
-                "Kansas Heart Hospital  ",
                 "Laboratory Corporation of America Holdings  ",
                 "MedStar Health  ",
                 "Nebraska Orthopedic Hospital  ",
                 "Allscripts Healthcare Solutions  ",
-                "City of Atlanta  ",
-                "City of Newark  ",
                 "Port of San Diego  ",
-                "Colorado Department of Transportation  ",
                 "University of Calgary  "
             ],
-            "relevant_webpages": [
-                "https://www.labcorp.com/about/our-story/leadership",
-                "https://kansasheart.com/administration/"
-            ],
+            "relevant_webpages": [],
             "entities_as_text": " Faramarz Shahi Savandi ;  Mohammad Mehdi Shah Mansouri "
         },
         {
