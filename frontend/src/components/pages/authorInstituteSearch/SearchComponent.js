@@ -94,11 +94,7 @@ const SearchComponent = () => {
       <div className="d-flex justify-content-center align-items-center">
         <div style={{ width: '80%' }}>
           <SwitchTransition mode="out-in">
-            <CSSTransition
-              key={selectedSearchType}
-              timeout={300}
-              classNames="fade"
-            >
+            <CSSTransition key={selectedSearchType} timeout={300} classNames="fade">
               <div>
                 {selectedSearchType === 'author' && <AuthorInstitutionSearchComponent />}
                 {selectedSearchType === 'orcid' && <OrcidSearchComponent />}
