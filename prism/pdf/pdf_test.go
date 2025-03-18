@@ -1,25 +1,36 @@
 package pdf_test
 
 import (
-	"bytes"
 	"fmt"
-	"os/exec"
 	"prism/prism/openalex"
 	"prism/prism/pdf"
 	"strings"
 	"testing"
 
+	"github.com/gen2brain/go-fitz"
 	"github.com/google/uuid"
 )
 
 func readPdf(pdfPath string) (string, error) {
-	cmd := exec.Command("pdftotext", pdfPath, "-")
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	if err := cmd.Run(); err != nil {
-		return "", err
+	doc, err := fitz.New(pdfPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to open PDF: %w", err)
 	}
-	return out.String(), nil
+	defer doc.Close()
+
+	pageCount := doc.NumPage()
+
+	var textBuilder strings.Builder
+
+	for i := 0; i < pageCount; i++ {
+		text, err := doc.Text(i)
+		if err != nil {
+			return "", fmt.Errorf("failed to extract text from page %d: %w", i+1, err)
+		}
+		textBuilder.WriteString(fmt.Sprintf("%s\n", text))
+	}
+
+	return textBuilder.String(), nil
 }
 
 func TestDownloadWithoutCache(t *testing.T) {

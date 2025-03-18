@@ -221,6 +221,7 @@ func (downloader *PDFDownloader) uploadToCache(doi string, pdfPath string) error
 			return fmt.Errorf("failed to check if object exists in S3: %w", err)
 		}
 	} else {
+		slog.Error("failed to check if object exists in S3", "error", err)
 		return fmt.Errorf("failed to check if object exists in S3: %w", err)
 	}
 
@@ -265,19 +266,19 @@ func (downloader *PDFDownloader) downloadPdf(doi, oaURL string) (string, error) 
 	if path, err := downloader.downloadFromCache(doi); err == nil {
 		return path, nil
 	} else {
-		errs = append(errs, err)
+		errs = append(errs, fmt.Errorf("s3 cache download: %w", err))
 	}
 
 	if path, err := downloader.downloadWithHttp(oaURL); err == nil {
 		return path, nil
 	} else {
-		errs = append(errs, err)
+		errs = append(errs, fmt.Errorf("http download: %w", err))
 	}
 
 	if path, err := downloader.downloadWithPlaywright(oaURL); err == nil {
 		return path, nil
 	} else {
-		errs = append(errs, err)
+		errs = append(errs, fmt.Errorf("playwright download: %w", err))
 	}
 
 	return "", errors.Join(errs...)
