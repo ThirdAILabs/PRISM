@@ -178,7 +178,7 @@ func (downloader *PDFDownloader) downloadFromCache(doi string) (string, error) {
 	resp, err := downloader.s3Client.GetObject(ctx, input)
 	if err != nil {
 		var apiErr smithy.APIError
-		if errors.As(err, &apiErr) && apiErr.ErrorCode() == "NotFound" {
+		if errors.As(err, &apiErr) && apiErr.ErrorCode() == "NoSuchKey" {
 			return "", fmt.Errorf("cache file not found: %w", err)
 		}
 		slog.Error("error retrieving file from S3 cache", "error", err)
