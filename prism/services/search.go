@@ -12,7 +12,6 @@ import (
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers"
-	"prism/prism/search"
 	"sort"
 	"strconv"
 	"strings"
@@ -207,10 +206,6 @@ func formatForPrompt(e api.MatchedEntity, id int) string {
 	}
 
 	return base + "[ENTITY END]"
-}
-
-type EntitySearch struct {
-	ndb search.NeuralDB
 }
 
 func NewEntitySearch(entities []api.MatchedEntity) *entity_search.EntityIndex[api.MatchedEntity] {
