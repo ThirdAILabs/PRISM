@@ -71,3 +71,10 @@ type UserUniversityReport struct {
 	ReportId uuid.UUID         `gorm:"type:uuid;not null"`
 	Report   *UniversityReport `gorm:"foreignKey:ReportId"`
 }
+
+type Feedback struct {
+	UserId    uuid.UUID  `gorm:"type:uuid;primaryKey"`
+	Flag      AuthorFlag `gorm:"foreignKey:ReportId;constraint:OnDelete:CASCADE;primaryKey"`
+	Timestamp time.Time
+	data      []byte
+}
