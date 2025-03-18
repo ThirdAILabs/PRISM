@@ -26,8 +26,8 @@ type ReportProcessor struct {
 
 type ReportProcessorOptions struct {
 	UniversityNDB   search.NeuralDB
-	DocIndex        *search.EntityIndex[LinkMetadata]
-	AuxIndex        *search.EntityIndex[LinkMetadata]
+	DocIndex        *search.ManyToOneIndex[LinkMetadata]
+	AuxIndex        *search.ManyToOneIndex[LinkMetadata]
 	TriangulationDB *triangulation.TriangulationDB
 
 	EntityLookup *search.EntityIndex[string]

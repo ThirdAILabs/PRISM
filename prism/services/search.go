@@ -26,7 +26,7 @@ type SearchService struct {
 	openalex openalex.KnowledgeBase
 
 	// entitySearch EntitySearch
-	entitySearch *search.EntityIndex[api.MatchedEntity]
+	entitySearch *search.ManyToOneIndex[api.MatchedEntity]
 }
 
 func hybridInstitutionNamesSort(originalInstitution string, institutionNames []string, similarityThreshold float64) []string {
@@ -208,16 +208,13 @@ func formatForPrompt(e api.MatchedEntity, id int) string {
 	return base + "[ENTITY END]"
 }
 
-func NewEntitySearch(entities []api.MatchedEntity) *search.EntityIndex[api.MatchedEntity] {
-	records := make([]search.Record[api.MatchedEntity], 0, len(entities))
+func NewEntitySearch(entities []api.MatchedEntity) *search.ManyToOneIndex[api.MatchedEntity] {
+	entityNames := make([][]string, 0, len(entities))
 	for _, entity := range entities {
-		names := strings.Split(entity.Names, "\n")
-		for _, name := range names {
-			records = append(records, search.Record[api.MatchedEntity]{Entity: name, Metadata: entity})
-		}
+		entityNames = append(entityNames, strings.Split(entity.Names, "\n"))
 	}
 
-	return search.NewIndex(records)
+	return search.NewManyToOneIndex(entityNames, entities)
 }
 
 const (

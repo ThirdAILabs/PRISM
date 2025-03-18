@@ -78,7 +78,7 @@ type dojArticleRecord struct {
 	Entities []string `json:"entities"`
 }
 
-func BuildDocIndex(dataPath string) *search.EntityIndex[LinkMetadata] {
+func BuildDocIndex(dataPath string) *search.ManyToOneIndex[LinkMetadata] {
 	log.Printf("creating doc index from data %s", dataPath)
 
 	var countryToArticles map[string][]dojArticleRecord
@@ -91,24 +91,21 @@ func BuildDocIndex(dataPath string) *search.EntityIndex[LinkMetadata] {
 
 	log.Printf("loaded %d records", len(data))
 
-	records := make([]search.Record[LinkMetadata], 0, len(data))
+	entities := make([][]string, 0, len(data))
+	metadata := make([]LinkMetadata, 0, len(data))
 	for _, record := range data {
-		for _, entity := range record.Entities {
-			records = append(records, search.Record[LinkMetadata]{
-				Entity: entity,
-				Metadata: LinkMetadata{
-					Title:    record.Title,
-					Url:      record.Url,
-					Entities: record.Entities,
-					Text:     record.Text,
-				},
-			})
-		}
+		entities = append(entities, record.Entities)
+		metadata = append(metadata, LinkMetadata{
+			Title:    record.Title,
+			Url:      record.Url,
+			Entities: record.Entities,
+			Text:     record.Text,
+		})
 	}
 
 	s := time.Now()
 
-	index := search.NewIndex(records)
+	index := search.NewManyToOneIndex(entities, metadata)
 
 	e := time.Now()
 
@@ -126,7 +123,7 @@ type releveantWebpageRecord struct {
 	Entities []string `json:"entities"`
 }
 
-func BuildAuxIndex(dataPath string) *search.EntityIndex[LinkMetadata] {
+func BuildAuxIndex(dataPath string) *search.ManyToOneIndex[LinkMetadata] {
 	log.Printf("creating aux index from data %s", dataPath)
 
 	var data []releveantWebpageRecord
@@ -134,24 +131,21 @@ func BuildAuxIndex(dataPath string) *search.EntityIndex[LinkMetadata] {
 
 	log.Printf("loaded %d records", len(data))
 
-	records := make([]search.Record[LinkMetadata], 0, len(data))
+	entities := make([][]string, 0, len(data))
+	metadata := make([]LinkMetadata, 0, len(data))
 	for _, record := range data {
-		for _, entity := range record.Entities {
-			records = append(records, search.Record[LinkMetadata]{
-				Entity: entity,
-				Metadata: LinkMetadata{
-					Title:    record.Title,
-					Url:      record.Url,
-					Entities: record.Entities,
-					Text:     record.Content,
-				},
-			})
-		}
+		entities = append(entities, record.Entities)
+		metadata = append(metadata, LinkMetadata{
+			Title:    record.Title,
+			Url:      record.Url,
+			Entities: record.Entities,
+			Text:     record.Content,
+		})
 	}
 
 	s := time.Now()
 
-	index := search.NewIndex(records)
+	index := search.NewManyToOneIndex(entities, metadata)
 
 	e := time.Now()
 

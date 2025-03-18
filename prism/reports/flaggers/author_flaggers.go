@@ -307,8 +307,8 @@ type LinkMetadata struct {
 }
 
 type AuthorIsAssociatedWithEOCFlagger struct {
-	docIndex *search.EntityIndex[LinkMetadata]
-	auxIndex *search.EntityIndex[LinkMetadata]
+	docIndex *search.ManyToOneIndex[LinkMetadata]
+	auxIndex *search.ManyToOneIndex[LinkMetadata]
 }
 
 func (flagger *AuthorIsAssociatedWithEOCFlagger) Name() string {
@@ -449,11 +449,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 
 	queryToConn := make(map[string][]api.Connection)
 
-	results, err := flagger.auxIndex.QueryWithLLMValidation(authorName, 5)
-	if err != nil {
-		logger.Error("error querying aux index", "error", err)
-		return nil, fmt.Errorf("error querying index: %w", err)
-	}
+	results := flagger.auxIndex.Query(authorName, 5)
 
 	for _, result := range results {
 		// skip if already seen the URL

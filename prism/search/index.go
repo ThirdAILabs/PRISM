@@ -14,12 +14,12 @@ type Record[T any] struct {
 	Metadata T
 }
 
-type recordCnt struct {
-	recordId uint32
-	cnt      uint32
+type tokenFreq struct {
+	RecordId uint32
+	Freq     uint32
 }
 
-type invertedIndex map[string][]recordCnt
+type invertedIndex map[string][]tokenFreq
 
 type EntityIndex[T any] struct {
 	records []Record[T]
@@ -75,8 +75,8 @@ func buildIndex[T any](records []Record[T], ngram int) (int, []int, invertedInde
 			recordTokens[token]++
 		}
 
-		for token, cnt := range recordTokens {
-			index[token] = append(index[token], recordCnt{uint32(recId), cnt})
+		for token, freq := range recordTokens {
+			index[token] = append(index[token], tokenFreq{RecordId: uint32(recId), Freq: freq})
 		}
 	}
 
@@ -137,8 +137,8 @@ func (index *EntityIndex[T]) Query(query string, k int) []Record[T] {
 		idf := idf(tf, float32(len(index.records)))
 
 		for _, record := range records {
-			score := bm25(idf, float32(record.cnt), float32(index.recLens[record.recordId]), avgLen, index.k1, index.b)
-			candidates[record.recordId] += score
+			score := bm25(idf, float32(record.Freq), float32(index.recLens[record.RecordId]), avgLen, index.k1, index.b)
+			candidates[record.RecordId] += score
 		}
 	}
 
@@ -205,4 +205,34 @@ func (index *EntityIndex[T]) llmValidate(query string, results []Record[T]) ([]R
 	}
 
 	return filtered, nil
+}
+
+type ManyToOneIndex[T any] struct {
+	metadata []T
+	index    EntityIndex[int]
+}
+
+func NewManyToOneIndex[T any](entities [][]string, metadata []T) *ManyToOneIndex[T] {
+	records := make([]Record[int], 0, len(entities))
+	for i, entitySet := range entities {
+		for _, entity := range entitySet {
+			records = append(records, Record[int]{Entity: entity, Metadata: i})
+		}
+	}
+
+	return &ManyToOneIndex[T]{
+		metadata: metadata,
+		index:    *NewIndex(records),
+	}
+}
+
+func (index *ManyToOneIndex[T]) Query(query string, k int) []Record[T] {
+	indexResults := index.index.Query(query, k)
+
+	results := make([]Record[T], 0, len(indexResults))
+	for _, result := range indexResults {
+		results = append(results, Record[T]{Entity: result.Entity, Metadata: index.metadata[result.Metadata]})
+	}
+
+	return results
 }

@@ -67,7 +67,7 @@ func (c *Config) port() int {
 	return c.Port
 }
 
-func buildEntityNdb(entityPath string) *search.EntityIndex[api.MatchedEntity] {
+func buildEntitySearch(entityPath string) *search.ManyToOneIndex[api.MatchedEntity] {
 	const entityNdbPath = "searchable_entities.ndb"
 	if err := os.RemoveAll(entityNdbPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		log.Fatalf("error deleting existing ndb: %v", err)
@@ -155,7 +155,7 @@ func main() {
 		log.Fatalf("error activating license key: %v", err)
 	}
 
-	entitySearch := buildEntityNdb(config.SearchableEntitiesData)
+	entitySearch := buildEntitySearch(config.SearchableEntitiesData)
 
 	db := cmd.OpenDB(config.PostgresUri)
 	migrations.RunMigrations(db)

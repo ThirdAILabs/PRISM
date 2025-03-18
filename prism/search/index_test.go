@@ -50,3 +50,34 @@ func TestEntitySearch(t *testing.T) {
 		t.Errorf("accuracy below 95%%: %.3f", float64(correct)/float64(total))
 	}
 }
+
+func TestManyToOneIndex(t *testing.T) {
+	docA := []string{"abc", "xyz", "qrs"}
+	docB := []string{"123", "456", "78", "90"}
+
+	index := search.NewManyToOneIndex([][]string{docA, docB}, []string{"doc_a", "doc_b"})
+
+	for _, query := range docA {
+		results := index.Query(query, 10)
+
+		if len(results) == 0 {
+			t.Errorf("no results found for query %s", query)
+		}
+
+		if results[0].Metadata != "doc_a" {
+			t.Errorf("incorrect metadata for query %s", query)
+		}
+	}
+
+	for _, query := range docB {
+		results := index.Query(query, 10)
+
+		if len(results) == 0 {
+			t.Errorf("no results found for query %s", query)
+		}
+
+		if results[0].Metadata != "doc_b" {
+			t.Errorf("incorrect metadata for query %s", query)
+		}
+	}
+}

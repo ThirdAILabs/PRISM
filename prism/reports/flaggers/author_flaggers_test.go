@@ -59,24 +59,31 @@ func TestAuthorIsFacultyAtEOC(t *testing.T) {
 }
 
 var (
-	mockPressReleases = []search.Record[LinkMetadata]{
-		{Entity: "abc", Metadata: LinkMetadata{Title: "indicted", Url: "indicted.com", Entities: []string{"abc", "xyz"}, Text: "abc and xyz are indicted"}},
-		{Entity: "xyz", Metadata: LinkMetadata{Title: "indicted", Url: "indicted.com", Entities: []string{"abc", "xyz"}, Text: "abc and xyz are indicted"}},
-		{Entity: "qrs", Metadata: LinkMetadata{Title: "leaked docs", Url: "leakeddocs.com", Entities: []string{"qrs"}, Text: "qrs is implicated by leaked docs"}},
+	mockPressReleaseEntities = [][]string{
+		{"abc", "xyz"},
+		{"qrs"},
 	}
 
-	mockAuxDocs = []search.Record[LinkMetadata]{
-		{Entity: "xyz", Metadata: LinkMetadata{Title: "new company", Url: "newcompany.com", Entities: []string{"xyz", "123"}, Text: "xyz and 123 found company"}},
-		{Entity: "123", Metadata: LinkMetadata{Title: "new company", Url: "newcompany.com", Entities: []string{"xyz", "123"}, Text: "xyz and 123 found company"}},
-		{Entity: "456", Metadata: LinkMetadata{Title: "graduate students", Url: "graduatestudents.com", Entities: []string{"456", "qrs"}, Text: "456 and qrs are graduate students together"}},
-		{Entity: "qrs", Metadata: LinkMetadata{Title: "graduate students", Url: "graduatestudents.com", Entities: []string{"456", "qrs"}, Text: "456 and qrs are graduate students together"}},
-		{Entity: "456", Metadata: LinkMetadata{Title: "best friends", Url: "bestfriends.com", Entities: []string{"456", "789"}, Text: "456 and 789 are best friends"}},
-		{Entity: "789", Metadata: LinkMetadata{Title: "best friends", Url: "bestfriends.com", Entities: []string{"456", "789"}, Text: "456 and 789 are best friends"}},
+	mockPressReleaseMetadata = []LinkMetadata{
+		{Title: "indicted", Url: "indicted.com", Entities: []string{"abc", "xyz"}, Text: "abc and xyz are indicted"},
+		{Title: "leaked docs", Url: "leakeddocs.com", Entities: []string{"qrs"}, Text: "qrs is implicated by leaked docs"},
+	}
+
+	mockAuxDocEntities = [][]string{
+		{"xyz", "123"},
+		{"456", "qrs"},
+		{"456", "789"},
+	}
+
+	mockAuxDocMetadata = []LinkMetadata{
+		{Title: "new company", Url: "newcompany.com", Entities: []string{"xyz", "123"}, Text: "xyz and 123 found company"},
+		{Title: "graduate students", Url: "graduatestudents.com", Entities: []string{"456", "qrs"}, Text: "456 and qrs are graduate students together"},
+		{Title: "best friends", Url: "bestfriends.com", Entities: []string{"456", "789"}, Text: "456 and 789 are best friends"},
 	}
 )
 
 func TestAuthorAssociationIsEOC(t *testing.T) {
-	flagger := AuthorIsAssociatedWithEOCFlagger{docIndex: search.NewIndex(mockPressReleases), auxIndex: search.NewIndex(mockAuxDocs)}
+	flagger := AuthorIsAssociatedWithEOCFlagger{docIndex: search.NewManyToOneIndex(mockPressReleaseEntities, mockPressReleaseMetadata), auxIndex: search.NewManyToOneIndex(mockAuxDocEntities, mockAuxDocMetadata)}
 
 	t.Run("test primary connection", func(t *testing.T) {
 		works := []openalex.Work{ // Only the author names are used in this flagger
