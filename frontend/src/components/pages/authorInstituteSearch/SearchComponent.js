@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useRef } from 'react';
 import AuthorInstitutionSearchComponent from './AuthorInstitutionSearch';
 import OrcidSearchComponent from './OrcidSearch';
 import { SearchContext } from '../../../store/searchContext';
@@ -41,7 +42,7 @@ const SearchComponent = () => {
       { value: 'orcid', label: 'ORCID ID' },
     ]);
   }, []);
-
+  const nodeRef = useRef(null);
   return (
     <div className="basic-setup" style={{ color: 'black' }}>
       <div style={{ textAlign: 'center', marginTop: '3%', animation: 'fade-in 0.75s' }}>
@@ -94,8 +95,8 @@ const SearchComponent = () => {
       <div className="d-flex justify-content-center align-items-center">
         <div style={{ width: '80%' }}>
           <SwitchTransition mode="out-in">
-            <CSSTransition key={selectedSearchType} timeout={300} classNames="fade">
-              <div>
+            <CSSTransition key={selectedSearchType} timeout={300} classNames="fade" nodeRef={nodeRef}>
+              <div ref={nodeRef}>
                 {selectedSearchType === 'author' && <AuthorInstitutionSearchComponent />}
                 {selectedSearchType === 'orcid' && <OrcidSearchComponent />}
                 {selectedSearchType === 'paper' && <PaperTitleSearchComponent />}
