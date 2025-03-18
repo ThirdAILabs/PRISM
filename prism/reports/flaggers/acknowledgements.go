@@ -133,8 +133,8 @@ func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId 
 	if err != nil {
 		return Acknowledgements{}, fmt.Errorf("failed reading file to send to grobid: %w", err)
 	}
-	defer file.Close()
 	defer os.Remove(pdfPath)
+	defer file.Close()
 
 	acks, err := extractor.processPdfWithGrobid(file)
 	if err != nil {
