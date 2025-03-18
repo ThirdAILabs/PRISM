@@ -96,11 +96,11 @@ func (r *ReportManager) queueAuthorReportUpdateIfNeeded(txn *gorm.DB, report *sc
 	return nil
 }
 
-func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string, ForUniversityReport bool) (schema.AuthorReport, error) {
+func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string, forUniversityReport bool) (schema.AuthorReport, error) {
 	var report schema.AuthorReport
 	result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
 		Limit(1).
-		Find(&report, "author_id = ? AND source = ? AND for_university_report = ?", authorId, source, ForUniversityReport)
+		Find(&report, "author_id = ? AND source = ? AND for_university_report = ?", authorId, source, forUniversityReport)
 	if result.Error != nil {
 		slog.Error("error checking for existing author report", "error", result.Error)
 		return schema.AuthorReport{}, ErrReportCreationFailed
@@ -115,7 +115,7 @@ func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string, 
 			Source:              source,
 			Status:              schema.ReportQueued,
 			StatusUpdatedAt:     time.Now().UTC(),
-			ForUniversityReport: ForUniversityReport,
+			ForUniversityReport: forUniversityReport,
 		}
 
 		if err := txn.Create(&report).Error; err != nil {
@@ -133,7 +133,7 @@ func (r *ReportManager) CreateAuthorReport(userId uuid.UUID, authorId, authorNam
 	now := time.Now().UTC()
 
 	err := r.db.Transaction(func(txn *gorm.DB) error {
-		report, err := createOrGetAuthorReport(txn, authorId, authorName, source, false /*ForUniversityReport*/)
+		report, err := createOrGetAuthorReport(txn, authorId, authorName, source, false /*forUniversityReport*/)
 		if err != nil {
 			return err
 		}
@@ -710,7 +710,7 @@ func (r *ReportManager) UpdateUniversityReport(id uuid.UUID, status string, upda
 			var authorReports []schema.AuthorReport
 
 			for _, author := range authors {
-				report, err := createOrGetAuthorReport(txn, author.AuthorId, author.AuthorName, author.Source, true /*ForUniversityReport*/)
+				report, err := createOrGetAuthorReport(txn, author.AuthorId, author.AuthorName, author.Source, true /*forUniversityReport*/)
 				if err != nil {
 					slog.Error("error getting author report to add to university report", "author_id", author.AuthorId, "university_report_id", id, "error", err)
 					return err

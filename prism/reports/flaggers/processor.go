@@ -108,7 +108,7 @@ func (processor *ReportProcessor) getWorkStream(report reports.ReportUpdateTask)
 	}
 }
 
-func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName string, workStream chan openalex.WorkBatch, flagsCh chan []api.Flag, ForUniversityReport bool) {
+func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName string, workStream chan openalex.WorkBatch, flagsCh chan []api.Flag, forUniversityReport bool) {
 	wg := sync.WaitGroup{}
 
 	batch := -1
@@ -121,7 +121,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 		logger.Info("got next batch of works", "batch", batch, "n_works", len(works.Works))
 		for _, flagger := range processor.workFlaggers {
 
-			if ForUniversityReport && flagger.DisableForUniversityReport() {
+			if forUniversityReport && flagger.DisableForUniversityReport() {
 				continue
 			}
 
