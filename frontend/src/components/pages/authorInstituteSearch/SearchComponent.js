@@ -6,6 +6,8 @@ import { SearchContext } from '../../../store/searchContext';
 import PaperTitleSearchComponent from './PaperTitleSearch';
 import Logo from '../../../assets/images/prism-logo.png';
 import RowRadioButtonsGroup from '../../common/tools/RadioButton';
+import { CSSTransition, SwitchTransition } from 'react-transition-group';
+import './SearchComponent.css';
 
 const SearchComponent = () => {
   const { searchState, setSearchState } = useContext(SearchContext);
@@ -90,10 +92,20 @@ const SearchComponent = () => {
         </div>
       </div>
       <div className="d-flex justify-content-center align-items-center">
-        <div style={{ width: '80%', animation: 'fade-in 1.25s' }}>
-          {selectedSearchType === 'author' && <AuthorInstitutionSearchComponent />}
-          {selectedSearchType === 'orcid' && <OrcidSearchComponent />}
-          {selectedSearchType === 'paper' && <PaperTitleSearchComponent />}
+        <div style={{ width: '80%' }}>
+          <SwitchTransition mode="out-in">
+            <CSSTransition
+              key={selectedSearchType}
+              timeout={300}
+              classNames="fade"
+            >
+              <div>
+                {selectedSearchType === 'author' && <AuthorInstitutionSearchComponent />}
+                {selectedSearchType === 'orcid' && <OrcidSearchComponent />}
+                {selectedSearchType === 'paper' && <PaperTitleSearchComponent />}
+              </div>
+            </CSSTransition>
+          </SwitchTransition>
         </div>
       </div>
     </div>
