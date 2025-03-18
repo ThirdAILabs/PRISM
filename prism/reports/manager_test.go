@@ -69,9 +69,6 @@ func checkNoNextAuthorReport(t *testing.T, manager *reports.ReportManager) {
 	if next != nil {
 		t.Fatal("should be no report")
 	}
-	if next.ForUniversityReport {
-		t.Fatal("should be no university report")
-	}
 }
 
 func dummyReportUpdate() []api.Flag {
