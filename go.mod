@@ -15,7 +15,6 @@ require (
 	github.com/openai/openai-go v0.1.0-alpha.50
 	github.com/playwright-community/playwright-go v0.4902.0
 	go.etcd.io/bbolt v1.4.0
-	golang.org/x/crypto v0.33.0
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/driver/sqlite v1.5.7
 	gorm.io/gorm v1.25.12
@@ -55,7 +54,7 @@ require (
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/xuri/excelize/v2 v2.9.0
 	golang.org/x/net v0.33.0 // indirect
-	golang.org/x/sync v0.11.0 // indirect
+	golang.org/x/sync v0.11.0
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
 )
