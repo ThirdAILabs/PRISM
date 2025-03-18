@@ -1,57 +1,46 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useRef } from 'react';
 import AuthorInstitutionSearchComponent from './AuthorInstitutionSearch';
 import OrcidSearchComponent from './OrcidSearch';
-import { SearchContext } from '../../../store/searchContext';
 import PaperTitleSearchComponent from './PaperTitleSearch';
 import Logo from '../../../assets/images/prism-logo.png';
+import RowRadioButtonsGroup from '../../common/tools/RadioButton';
+import { CSSTransition, SwitchTransition } from 'react-transition-group';
+import './SearchComponent.css';
 
 const SearchComponent = () => {
-  const { searchState, setSearchState } = useContext(SearchContext);
-
   const location = useLocation();
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
   const defaultType = params.get('type') || 'author';
-
+  const [radioButtonProps, setRadioButtonProps] = useState([]);
   const [selectedSearchType, setSelectedSearchType] = useState(defaultType);
 
   const handleSearchTypeChange = (e) => {
     const newType = e.target.value;
+    if (!newType) {
+      return;
+    }
+
     setSelectedSearchType(newType);
-
-    setSearchState((prev) => ({
-      ...prev,
-      // author/institution data
-      author: null,
-      institution: null,
-      openAlexResults: [],
-      hasSearched: false,
-      loadMoreCount: 0,
-      canLoadMore: true,
-      isOALoading: false,
-
-      // orcid data
-      orcidResults: [],
-      isOrcidLoading: false,
-      hasSearchedOrcid: false,
-      orcidQuery: '',
-
-      // paper data
-      paperResults: [],
-      isPaperLoading: false,
-      hasSearchedPaper: false,
-      paperTitleQuery: '',
-    }));
-
     navigate(`?type=${newType}`);
   };
 
   useEffect(() => {
     const newType = params.get('type') || 'author';
     setSelectedSearchType(newType);
-  }, [location.search, params]);
+  }, []);
 
+  useEffect(() => {
+    setRadioButtonProps([
+      { value: 'author', label: 'Author & Institution' },
+      { value: 'paper', label: 'Paper Title' },
+      { value: 'orcid', label: 'ORCID ID' },
+    ]);
+  }, []);
+
+  const nodeRef = useRef(null);
   return (
     <div className="basic-setup" style={{ color: 'black' }}>
       <div style={{ textAlign: 'center', marginTop: '3%', animation: 'fade-in 0.75s' }}>
@@ -66,7 +55,14 @@ const SearchComponent = () => {
             animation: 'fade-in 0.5s',
           }}
         />
-        <h1 style={{ fontWeight: 'bold', marginTop: 20, animation: 'fade-in 0.75s' }}>
+        <h1
+          style={{
+            fontWeight: 'bold',
+            marginTop: 20,
+            animation: 'fade-in 0.75s',
+            fontFamily: 'serif',
+          }}
+        >
           Individual Assessment
         </h1>
         <div style={{ animation: 'fade-in 1s' }}>
@@ -82,24 +78,34 @@ const SearchComponent = () => {
             </div>
           </div>
         </div>
-        <div className="search-type-container mt-4">
-          <label className="search-type-label">Search Type</label>
-          <select
-            className="search-select-smaller"
-            value={selectedSearchType}
-            onChange={handleSearchTypeChange}
-          >
-            <option value="author">Author &amp; Institution</option>
-            <option value="orcid">ORCID ID</option>
-            <option value="paper">Paper Title</option>
-          </select>
+        <div
+          style={{
+            marginTop: '1rem',
+          }}
+        >
+          <RowRadioButtonsGroup
+            selectedSearchType={selectedSearchType}
+            formControlProps={radioButtonProps}
+            handleSearchTypeChange={handleSearchTypeChange}
+          />
         </div>
       </div>
       <div className="d-flex justify-content-center align-items-center">
-        <div style={{ width: '80%', animation: 'fade-in 1.25s' }}>
-          {selectedSearchType === 'author' && <AuthorInstitutionSearchComponent />}
-          {selectedSearchType === 'orcid' && <OrcidSearchComponent />}
-          {selectedSearchType === 'paper' && <PaperTitleSearchComponent />}
+        <div style={{ width: '80%' }}>
+          <SwitchTransition mode="out-in">
+            <CSSTransition
+              key={selectedSearchType}
+              timeout={300}
+              classNames="fade"
+              nodeRef={nodeRef}
+            >
+              <div ref={nodeRef}>
+                {selectedSearchType === 'author' && <AuthorInstitutionSearchComponent />}
+                {selectedSearchType === 'orcid' && <OrcidSearchComponent />}
+                {selectedSearchType === 'paper' && <PaperTitleSearchComponent />}
+              </div>
+            </CSSTransition>
+          </SwitchTransition>
         </div>
       </div>
     </div>

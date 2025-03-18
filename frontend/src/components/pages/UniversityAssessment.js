@@ -81,6 +81,7 @@ function UniversityAssessment() {
                   color: 'black',
                   marginTop: 20,
                   animation: 'fade-in 0.75s',
+                  fontFamily: 'serif',
                 }}
               >
                 University Assessment
