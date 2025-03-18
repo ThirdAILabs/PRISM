@@ -24,7 +24,7 @@ func TestFlagParsing(t *testing.T) {
 					Work: api.WorkSummary{
 						WorkId: "work-id-1",
 					},
-					RawAcknowledgement: []string{"Raw acks 1"},
+					RawAcknowledgements: []string{"Raw acks 1"},
 				},
 			},
 			api.AssociationsWithDeniedEntityType: {
@@ -32,7 +32,7 @@ func TestFlagParsing(t *testing.T) {
 					Work: api.WorkSummary{
 						WorkId: "work-id-1",
 					},
-					RawAcknowledgement: []string{"Raw acks 1"},
+					RawAcknowledgements: []string{"Raw acks 1"},
 				},
 			},
 			api.HighRiskFunderType: {
