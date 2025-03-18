@@ -1,8 +1,8 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useRef } from 'react';
 import AuthorInstitutionSearchComponent from './AuthorInstitutionSearch';
 import OrcidSearchComponent from './OrcidSearch';
-import { SearchContext } from '../../../store/searchContext';
 import PaperTitleSearchComponent from './PaperTitleSearch';
 import Logo from '../../../assets/images/prism-logo.png';
 import RowRadioButtonsGroup from '../../common/tools/RadioButton';
@@ -10,8 +10,6 @@ import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import './SearchComponent.css';
 
 const SearchComponent = () => {
-  const { searchState, setSearchState } = useContext(SearchContext);
-
   const location = useLocation();
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
@@ -32,7 +30,7 @@ const SearchComponent = () => {
   useEffect(() => {
     const newType = params.get('type') || 'author';
     setSelectedSearchType(newType);
-  }, [location.search, params]);
+  }, []);
 
   useEffect(() => {
     setRadioButtonProps([
@@ -42,6 +40,7 @@ const SearchComponent = () => {
     ]);
   }, []);
 
+  const nodeRef = useRef(null);
   return (
     <div className="basic-setup" style={{ color: 'black' }}>
       <div style={{ textAlign: 'center', marginTop: '3%', animation: 'fade-in 0.75s' }}>
@@ -94,8 +93,13 @@ const SearchComponent = () => {
       <div className="d-flex justify-content-center align-items-center">
         <div style={{ width: '80%' }}>
           <SwitchTransition mode="out-in">
-            <CSSTransition key={selectedSearchType} timeout={300} classNames="fade">
-              <div>
+            <CSSTransition
+              key={selectedSearchType}
+              timeout={300}
+              classNames="fade"
+              nodeRef={nodeRef}
+            >
+              <div ref={nodeRef}>
                 {selectedSearchType === 'author' && <AuthorInstitutionSearchComponent />}
                 {selectedSearchType === 'orcid' && <OrcidSearchComponent />}
                 {selectedSearchType === 'paper' && <PaperTitleSearchComponent />}
