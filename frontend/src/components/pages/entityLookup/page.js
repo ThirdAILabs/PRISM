@@ -51,13 +51,13 @@ function EntityLookup() {
 
   return (
     <div className="basic-setup" style={{ color: 'white' }}>
-      <div style={{ textAlign: 'center', marginTop: '5.5%', animation: 'fade-in 0.75s' }}>
+      <div style={{ textAlign: 'center', marginTop: '5%', animation: 'fade-in 0.75s' }}>
         <img
           src={Logo}
           alt="Logo"
           style={{
             width: '320px',
-            marginTop: '5%',
+            marginTop: '1%',
             marginBottom: '1%',
             marginRight: '2%',
             animation: 'fade-in 0.5s',
@@ -72,6 +72,7 @@ function EntityLookup() {
                   fontWeight: 'bold',
                   color: 'black',
                   animation: 'fade-in 0.75s',
+                  fontFamily: 'serif',
                 }}
               >
                 Entity Lookup
