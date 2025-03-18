@@ -119,6 +119,7 @@ func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId 
 	if err != nil {
 		return Acknowledgements{}, err
 	}
+	defer os.Remove(pdfPath)
 
 	if err := extractor.grobidSem.Acquire(context.Background(), 1); err != nil {
 		// I don't think this can fail if we use context.Background, so this error check
@@ -133,7 +134,6 @@ func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId 
 	if err != nil {
 		return Acknowledgements{}, fmt.Errorf("failed reading file to send to grobid: %w", err)
 	}
-	defer os.Remove(pdfPath)
 	defer file.Close()
 
 	acks, err := extractor.processPdfWithGrobid(file)

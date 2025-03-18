@@ -8,6 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/smithy-go v1.22.2
 	github.com/caarlos0/env/v11 v11.3.1
+	github.com/gen2brain/go-fitz v1.24.14
 	github.com/go-chi/chi/v5 v5.2.0
 	github.com/go-chi/cors v1.2.1
 	github.com/go-gormigrate/gormigrate/v2 v2.1.3
@@ -37,6 +38,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.25.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.29.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.17 // indirect
+	github.com/ebitengine/purego v0.8.0 // indirect
+	github.com/jupiterrider/ffi v0.2.0 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.4 // indirect
@@ -61,7 +64,6 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jung-kurt/gofpdf v1.16.2
-	github.com/ledongthuc/pdf v0.0.0-20240201131950-da5b75280b06
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
