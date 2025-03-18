@@ -95,12 +95,14 @@
   outline: none;
   text-align: center;
   border-radius: 5px;
-  appearance: none; /* Remove default dropdown styling */
+  appearance: none;
+  /* Remove default dropdown styling */
   -webkit-appearance: none;
   -moz-appearance: none;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 10'><polygon points='0,0 20,0 10,10' style='fill:black'/></svg>");
   background-repeat: no-repeat;
-  background-position: right 12px center; /* Adjust icon position */
+  background-position: right 12px center;
+  /* Adjust icon position */
   background-size: 12px;
 }
 
