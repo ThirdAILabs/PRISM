@@ -8,6 +8,7 @@ import { styled } from '@mui/material/styles';
 const StyledFormControlLabel = styled(FormControlLabel)(({ checked }) => ({
     '& .MuiFormControlLabel-label': {
         fontWeight: 'bold',
+        color: checked ? 'rgb(0, 0, 0)' : '#888888',
     },
     marginRight: '2rem !important',
 }));
