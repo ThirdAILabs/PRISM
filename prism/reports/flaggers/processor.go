@@ -108,7 +108,7 @@ func (processor *ReportProcessor) getWorkStream(report reports.ReportUpdateTask)
 	}
 }
 
-func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName string, workStream chan openalex.WorkBatch, flagsCh chan []api.Flag) {
+func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName string, workStream chan openalex.WorkBatch, flagsCh chan []api.Flag, forUniversityReport bool) {
 	wg := sync.WaitGroup{}
 
 	batch := -1
@@ -120,6 +120,11 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 		}
 		logger.Info("got next batch of works", "batch", batch, "n_works", len(works.Works))
 		for _, flagger := range processor.workFlaggers {
+
+			if forUniversityReport && flagger.DisableForUniversityReport() {
+				continue
+			}
+
 			wg.Add(1)
 
 			go func(flagger WorkFlagger, works []openalex.Work, authorIds []string) {
@@ -183,7 +188,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdateTask) {
 	logger := slog.With("report_id", report.Id)
 
-	logger.Info("starting report processing", "author_id", report.AuthorId, "author_name", report.AuthorName, "source", report.Source)
+	logger.Info("starting report processing", "author_id", report.AuthorId, "author_name", report.AuthorName, "source", report.Source, "is_university_queued", report.ForUniversityReport)
 
 	workStream, err := processor.getWorkStream(report)
 	if err != nil {
@@ -195,7 +200,8 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 	}
 
 	flagsCh := make(chan []api.Flag, 100)
-	go processor.processWorks(logger, report.AuthorName, workStream, flagsCh)
+
+	go processor.processWorks(logger, report.AuthorName, workStream, flagsCh, report.ForUniversityReport)
 
 	seen := make(map[[sha256.Size]byte]struct{})
 	flagCounts := make(map[string]int)

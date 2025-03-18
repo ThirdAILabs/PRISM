@@ -278,6 +278,9 @@ func TestCheckDisclosure(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if nextReport.ForUniversityReport {
+		t.Fatal("next report should not be for university report")
+	}
 	if nextReport == nil {
 		t.Fatal("next report should not be nil")
 	}
@@ -362,6 +365,9 @@ func TestDownloadReportAllFormats(t *testing.T) {
 	nextReport, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
+	}
+	if nextReport.ForUniversityReport {
+		t.Fatal("next report should not be for university report")
 	}
 	if nextReport == nil {
 		t.Fatal("next report should not be nil")
@@ -543,6 +549,10 @@ func TestUniversityReportEndpoints(t *testing.T) {
 	nextAuthorReport, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if !nextAuthorReport.ForUniversityReport {
+		t.Fatal("next author report should be for university report")
 	}
 
 	if err := manager.UpdateAuthorReport(nextAuthorReport.Id, schema.ReportCompleted, time.Now(), []api.Flag{
