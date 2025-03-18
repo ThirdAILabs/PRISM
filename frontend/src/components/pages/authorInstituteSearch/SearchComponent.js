@@ -12,7 +12,6 @@ import './SearchComponent.css';
 const SearchComponent = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  console.log("location", location);
   const params = new URLSearchParams(location.search);
   const defaultType = params.get('type') || 'author';
   const [radioButtonProps, setRadioButtonProps] = useState([]);
