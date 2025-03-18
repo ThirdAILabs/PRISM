@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
 import AuthorInstitutionSearchComponent from './AuthorInstitutionSearch';
@@ -12,6 +12,7 @@ import './SearchComponent.css';
 const SearchComponent = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  console.log("location", location);
   const params = new URLSearchParams(location.search);
   const defaultType = params.get('type') || 'author';
   const [radioButtonProps, setRadioButtonProps] = useState([]);
@@ -30,7 +31,7 @@ const SearchComponent = () => {
   useEffect(() => {
     const newType = params.get('type') || 'author';
     setSelectedSearchType(newType);
-  }, [location.search, params]);
+  }, []);
 
   useEffect(() => {
     setRadioButtonProps([
@@ -39,6 +40,7 @@ const SearchComponent = () => {
       { value: 'orcid', label: 'ORCID ID' },
     ]);
   }, []);
+
   const nodeRef = useRef(null);
   return (
     <div className="basic-setup" style={{ color: 'black' }}>
