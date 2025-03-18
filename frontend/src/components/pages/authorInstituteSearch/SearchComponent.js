@@ -24,31 +24,6 @@ const SearchComponent = () => {
     }
 
     setSelectedSearchType(newType);
-
-    setSearchState((prev) => ({
-      ...prev,
-      // author/institution data
-      author: null,
-      institution: null,
-      openAlexResults: [],
-      hasSearched: false,
-      loadMoreCount: 0,
-      canLoadMore: true,
-      isOALoading: false,
-
-      // orcid data
-      orcidResults: [],
-      isOrcidLoading: false,
-      hasSearchedOrcid: false,
-      orcidQuery: '',
-
-      // paper data
-      paperResults: [],
-      isPaperLoading: false,
-      hasSearchedPaper: false,
-      paperTitleQuery: '',
-    }));
-
     navigate(`?type=${newType}`);
   };
 
