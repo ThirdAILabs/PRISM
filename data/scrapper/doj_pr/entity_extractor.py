@@ -1,9 +1,11 @@
 import time
 from openai import OpenAI
+from config import load_config
 
 
 def ask_gpt(message):
-    client = OpenAI()
+    config = load_config()
+    client = OpenAI(api_key=config["openai_api_key"])
     while True:
         try:
             response = client.chat.completions.create(

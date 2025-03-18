@@ -1,6 +1,6 @@
 import feedparser
 from datetime import datetime
-from scraper import get_article_text
+from scrapper import get_article_text
 
 
 def fetch_articles(config):
