@@ -534,15 +534,15 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			Message:               message,
 			Work:                  getWorkSummary(work),
 			Entities:              entities,
-			RawAcknowledements:    rawAcks,
+			RawAcknowledgements:   rawAcks,
 			FundCodeTriangulation: triangulationResults,
 		}
 	} else if containsSource(entities, deniedEntities) {
 		return &api.AssociationWithDeniedEntityFlag{
-			Message:            message,
-			Work:               getWorkSummary(work),
-			Entities:           entities,
-			RawAcknowledements: rawAcks,
+			Message:             message,
+			Work:                getWorkSummary(work),
+			Entities:            entities,
+			RawAcknowledgements: rawAcks,
 		}
 	} else {
 		entityNames := make([]string, 0, len(entities))
@@ -553,7 +553,7 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			Message:               message,
 			Work:                  getWorkSummary(work),
 			Funders:               entityNames,
-			RawAcknowledements:    rawAcks,
+			RawAcknowledgements:   rawAcks,
 			FundCodeTriangulation: triangulationResults,
 		}
 	}
