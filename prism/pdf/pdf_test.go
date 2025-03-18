@@ -81,14 +81,18 @@ func TestCacheDownload(t *testing.T) {
 func TestCacheUpload(t *testing.T) {
 	downloader := pdf.NewPDFDownloader("thirdai-prism")
 
-	DOI := fmt.Sprintf("https://doi.org/test_upload_%s", uuid.New().String())
+	doi := fmt.Sprintf("https://doi.org/test_upload_%s", uuid.New().String())
 
-	t.Cleanup(func() { downloader.DeleteFromCache(DOI) })
+	t.Cleanup(func() {
+		if err := downloader.DeleteFromCache(doi); err != nil {
+			t.Logf("failed to delete %s from cache: %v", doi, err)
+		}
+	})
 
 	// Check that a PDF is being uploaded to the cache
 	work := openalex.Work{
 		DownloadUrl: "https://arxiv.org/pdf/1706.03762",
-		DOI:         DOI,
+		DOI:         doi,
 	}
 
 	_, err := downloader.DownloadWork(work)
@@ -113,7 +117,7 @@ func TestCacheUpload(t *testing.T) {
 	// Check that an existing PDF doesn't get overwritten in the cache
 	quantum_work := openalex.Work{
 		DownloadUrl: "https://arxiv.org/pdf/1801.00862",
-		DOI:         DOI,
+		DOI:         doi,
 	}
 
 	_, err = downloader.DownloadWork(quantum_work)
