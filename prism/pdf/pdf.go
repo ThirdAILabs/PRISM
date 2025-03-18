@@ -26,6 +26,8 @@ type PDFDownloader struct {
 	downloadClient *resty.Client
 	s3CacheBucket  string
 	s3Client       *s3.Client
+	pw             *playwright.Playwright
+	browser        playwright.Browser
 }
 
 var headers = map[string]string{
@@ -58,24 +60,23 @@ func NewPDFDownloader(s3CacheBucket string) *PDFDownloader {
 	}
 	downloader.s3Client = s3.NewFromConfig(cfg)
 
+	pw, err := playwright.Run(&playwright.RunOptions{Browsers: []string{"firefox"}})
+	if err != nil {
+		log.Fatalf("error starting playwright: %v", err)
+	}
+	downloader.pw = pw
+
+	browser, err := pw.Firefox.Launch(playwright.BrowserTypeLaunchOptions{Headless: playwright.Bool(true)})
+	if err != nil {
+		log.Fatalf("error launching browser: %v", err)
+	}
+	downloader.browser = browser
+
 	return downloader
 }
 
 func (downloader *PDFDownloader) downloadWithPlaywright(url string) (string, error) {
-	pw, err := playwright.Run(&playwright.RunOptions{Browsers: []string{"firefox"}})
-	if err != nil {
-		return "", fmt.Errorf("error starting playwright: %w", err)
-	}
-	// Skipping error check since there's nothing we can do if this fails
-	defer pw.Stop() //nolint:errcheck
-
-	browser, err := pw.Firefox.Launch(playwright.BrowserTypeLaunchOptions{Headless: playwright.Bool(true)})
-	if err != nil {
-		return "", fmt.Errorf("error launching browser: %w", err)
-	}
-	defer browser.Close()
-
-	context, err := browser.NewContext(playwright.BrowserNewContextOptions{
+	context, err := downloader.browser.NewContext(playwright.BrowserNewContextOptions{
 		AcceptDownloads:   playwright.Bool(true),
 		IgnoreHttpsErrors: playwright.Bool(true),
 	})
@@ -92,7 +93,6 @@ func (downloader *PDFDownloader) downloadWithPlaywright(url string) (string, err
 	if err != nil {
 		return "", fmt.Errorf("error opening browser page: %w", err)
 	}
-	// context.Close() closes pages in the context
 
 	download, err := page.ExpectDownload(func() error {
 		// Page.Goto returns an error saying that the download is starting, so we ignore the error
