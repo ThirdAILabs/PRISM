@@ -73,8 +73,9 @@ type UserUniversityReport struct {
 }
 
 type Feedback struct {
-	UserId    uuid.UUID  `gorm:"type:uuid;primaryKey"`
-	Flag      AuthorFlag `gorm:"foreignKey:ReportId;constraint:OnDelete:CASCADE;primaryKey"`
+	Id        uuid.UUID  `gorm:"type:uuid;primaryKey"`
+	UserId    uuid.UUID  `gorm:"type:uuid;not null;index"`
+	Flag      AuthorFlag `gorm:"foreignKey:ReportId;constraint:OnDelete:CASCADE"`
 	Timestamp time.Time
-	data      []byte
+	Data      []byte
 }
