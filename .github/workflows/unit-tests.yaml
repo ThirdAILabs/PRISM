@@ -34,7 +34,7 @@ jobs:
 
       - name: install dependencies
         run: |
-          sudo apt-get install poppler-utils
+          sudo apt-get install poppler-utils  # for the pdftotext commandline tool
           go mod download
           go run github.com/playwright-community/playwright-go/cmd/playwright install --with-deps firefox
     

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"os"
 	"prism/prism/openalex"
 	"strings"
@@ -170,14 +171,22 @@ func (downloader *PDFDownloader) downloadFromCache(doi string) (string, error) {
 		Bucket: aws.String(downloader.s3CacheBucket),
 		Key:    aws.String(key),
 	}
-	resp, err := downloader.s3Client.GetObject(context.Background(), input)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	resp, err := downloader.s3Client.GetObject(ctx, input)
 	if err != nil {
-		return "", fmt.Errorf("cache miss or error retrieving cached file: %w", err)
+		var apiErr smithy.APIError
+		if errors.As(err, &apiErr) && apiErr.ErrorCode() == "NotFound" {
+			return "", fmt.Errorf("cache file not found: %w", err)
+		}
+		slog.Error("error retrieving file from S3 cache", "error", err)
+		return "", fmt.Errorf("error retrieving file from S3 cache: %w", err)
 	}
 	defer resp.Body.Close()
 
 	tmpFile, err := os.CreateTemp("", "tmp-download-*.pdf")
-
 	if err != nil {
 		return "", fmt.Errorf("failed to create file: %w", err)
 	}
@@ -197,7 +206,11 @@ func (downloader *PDFDownloader) uploadToCache(doi string, pdfPath string) error
 		Bucket: aws.String(downloader.s3CacheBucket),
 		Key:    aws.String(key),
 	}
-	_, err := downloader.s3Client.HeadObject(context.Background(), headInput)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	defer cancel()
+
+	_, err := downloader.s3Client.HeadObject(ctx, headInput)
 	if err == nil {
 		return nil
 	}
@@ -222,7 +235,7 @@ func (downloader *PDFDownloader) uploadToCache(doi string, pdfPath string) error
 		Key:    aws.String(key),
 		Body:   file,
 	}
-	_, err = downloader.s3Client.PutObject(context.Background(), input)
+	_, err = downloader.s3Client.PutObject(ctx, input)
 	if err != nil {
 		return fmt.Errorf("failed to upload to S3 cache: %w", err)
 	}
@@ -235,44 +248,52 @@ func (downloader *PDFDownloader) DeleteFromCache(doi string) error {
 		Bucket: aws.String(downloader.s3CacheBucket),
 		Key:    aws.String(key),
 	}
-	_, err := downloader.s3Client.DeleteObject(context.Background(), input)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	_, err := downloader.s3Client.DeleteObject(ctx, input)
 	if err != nil {
 		return fmt.Errorf("error deleting key %s from cache: %v", key, err)
 	}
 	return nil
 }
 
+func (downloader *PDFDownloader) downloadPdf(doi, oaURL string) (string, error) {
+	var errs []error
+
+	if path, err := downloader.downloadFromCache(doi); err == nil {
+		return path, nil
+	} else {
+		errs = append(errs, err)
+	}
+
+	if path, err := downloader.downloadWithHttp(oaURL); err == nil {
+		return path, nil
+	} else {
+		errs = append(errs, err)
+	}
+
+	if path, err := downloader.downloadWithPlaywright(oaURL); err == nil {
+		return path, nil
+	} else {
+		errs = append(errs, err)
+	}
+
+	return "", errors.Join(errs...)
+}
+
 func (downloader *PDFDownloader) DownloadWork(work openalex.Work) (string, error) {
 	oaURL := work.DownloadUrl
 	doi := strings.TrimPrefix(work.DOI, "https://doi.org/")
-	var errs []error
 
-	var pdfPath string
-
-	if pdfPath, err := downloader.downloadFromCache(doi); err == nil {
-		return pdfPath, nil
-	}
-
-	if attempt1, err1 := downloader.downloadWithHttp(oaURL); attempt1 != "" {
-		pdfPath = attempt1
-	} else {
-		errs = append(errs, fmt.Errorf("http oa error: %w", err1))
-	}
-
-	if pdfPath == "" {
-		if attempt2, err2 := downloader.downloadWithPlaywright(oaURL); attempt2 != "" {
-			pdfPath = attempt2
-		} else {
-			errs = append(errs, fmt.Errorf("playwright oa error: %w", err2))
-		}
-	}
-
-	if pdfPath == "" {
-		return "", fmt.Errorf("unable to download pdf from %s: %w", oaURL, errors.Join(errs...))
+	pdfPath, err := downloader.downloadPdf(doi, oaURL)
+	if err != nil {
+		return "", fmt.Errorf("unable to download pdf from %s / %s: %w", oaURL, doi, err)
 	}
 
 	if err := downloader.uploadToCache(doi, pdfPath); err != nil {
-		fmt.Printf("warning: failed to upload pdf to S3 cache: %v\n", err)
+		slog.Error("failed to upload pdf to S3 cache", "error", err)
 	}
 
 	return pdfPath, nil
