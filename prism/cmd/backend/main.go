@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/cmd"
+	"prism/prism/entity_search"
 	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/schema/migrations"
@@ -67,7 +68,7 @@ func (c *Config) port() int {
 	return c.Port
 }
 
-func buildEntityNdb(entityPath string) services.EntitySearch {
+func buildEntityNdb(entityPath string) *entity_search.EntityIndex[api.MatchedEntity] {
 	const entityNdbPath = "searchable_entities.ndb"
 	if err := os.RemoveAll(entityNdbPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		log.Fatalf("error deleting existing ndb: %v", err)
@@ -88,20 +89,14 @@ func buildEntityNdb(entityPath string) services.EntitySearch {
 	log.Printf("loaded %d searchable entities", len(entities))
 
 	s := time.Now()
-	es, err := services.NewEntitySearch(entityNdbPath)
-	if err != nil {
-		log.Fatalf("error openning ndb: %v", err)
-	}
 
-	if err := es.Insert(entities); err != nil {
-		log.Fatalf("error inserting into ndb: %v", err)
-	}
+	entitySearch := services.NewEntitySearch(entities)
 
 	e := time.Now()
 
 	log.Printf("searchable entity ndb construction time=%.3f", e.Sub(s).Seconds())
 
-	return es
+	return entitySearch
 }
 
 func verifyResourceFolder(resourceFolder string) {

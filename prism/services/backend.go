@@ -2,6 +2,8 @@ package services
 
 import (
 	"net/http"
+	"prism/prism/api"
+	"prism/prism/entity_search"
 	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/reports"
@@ -20,7 +22,7 @@ type BackendService struct {
 	userAuth auth.TokenVerifier
 }
 
-func NewBackend(db *gorm.DB, oa openalex.KnowledgeBase, entitySearch EntitySearch, userAuth auth.TokenVerifier, licensing *licensing.LicenseVerifier, resourceFolder string) *BackendService {
+func NewBackend(db *gorm.DB, oa openalex.KnowledgeBase, entitySearch *entity_search.EntityIndex[api.MatchedEntity], userAuth auth.TokenVerifier, licensing *licensing.LicenseVerifier, resourceFolder string) *BackendService {
 	return &BackendService{
 		report: ReportService{
 			manager:        reports.NewManager(db),
