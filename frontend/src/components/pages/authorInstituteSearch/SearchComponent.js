@@ -97,7 +97,6 @@ const SearchComponent = () => {
         </div>
         <div style={{
           marginTop: '1rem',
-          color: 'rgb(100, 100, 100)',
         }}>
           <RowRadioButtonsGroup
             selectedSearchType={selectedSearchType}
