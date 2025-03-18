@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/licensing"
 	"prism/prism/openalex"
@@ -73,19 +72,8 @@ func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 		t.Fatal(err)
 	}
 
-	ndbPath := filepath.Join(t.TempDir(), "entity.ndb")
-	entitySearch, err := services.NewEntitySearch(ndbPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() {
-		entitySearch.Free()
-	})
-
 	entities := []api.MatchedEntity{{Names: "abc university"}, {Names: "institute of xyz"}, {Names: "123 org"}}
-	if err := entitySearch.Insert(entities); err != nil {
-		t.Fatal(err)
-	}
+	entitySearch := services.NewEntitySearch(entities)
 
 	licensing, err := licensing.NewLicenseVerifier("AC013F-FD0B48-00B160-64836E-76E88D-V3")
 	if err != nil {

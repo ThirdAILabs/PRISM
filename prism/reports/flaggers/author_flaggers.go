@@ -299,9 +299,16 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 	return flags, nil
 }
 
+type LinkMetadata struct {
+	Title    string
+	Url      string
+	Entities []string
+	Text     string
+}
+
 type AuthorIsAssociatedWithEOCFlagger struct {
-	docNDB search.NeuralDB
-	auxNDB search.NeuralDB
+	docIndex *search.ManyToOneIndex[LinkMetadata]
+	auxIndex *search.ManyToOneIndex[LinkMetadata]
 }
 
 func (flagger *AuthorIsAssociatedWithEOCFlagger) Name() string {
@@ -375,44 +382,37 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 		}
 
 		// TODO(question): do we need to use the name combinations, since the tokenizer will split on whitespace and lowercase?
-		results, err := flagger.docNDB.Query(author.author, numDOJDocumentsToRetrieve, nil)
-		if err != nil {
-			return nil, fmt.Errorf("error querying ndb: %w", err)
-		}
+		results := flagger.docIndex.Query(author.author, 5)
 
 		temporaryFlags := make([]api.Flag, 0)
 		texts := make([]string, 0)
 		for _, result := range results {
-			if !matcher.matchesText(result.Text) {
+			if !matcher.matchesText(result.Entity) {
 				continue
 			}
 
-			texts = append(texts, result.Text)
+			texts = append(texts, result.Metadata.Text)
 
-			url, _ := result.Metadata["url"].(string)
-			if seen[url] {
+			if seen[result.Metadata.Url] {
 				continue
 			}
 
-			seen[url] = true
-
-			title, _ := result.Metadata["title"].(string)
-			entities := result.Metadata["entities"].(string)
+			seen[result.Metadata.Url] = true
 
 			if primaryMatcher.matchesEntity(author.author) {
 				temporaryFlags = append(temporaryFlags, &api.MiscHighRiskAssociationFlag{
 					Message:         "The author or a frequent associate may be mentioned in a press release.",
-					DocTitle:        title,
-					DocUrl:          url,
-					DocEntities:     strings.Split(entities, ";"),
+					DocTitle:        result.Metadata.Title,
+					DocUrl:          result.Metadata.Url,
+					DocEntities:     result.Metadata.Entities,
 					EntityMentioned: author.author,
 				})
 			} else {
 				temporaryFlags = append(temporaryFlags, &api.MiscHighRiskAssociationFlag{
 					Message:          "The author or a frequent associate may be mentioned in a press release.",
-					DocTitle:         title,
-					DocUrl:           url,
-					DocEntities:      strings.Split(entities, ";"),
+					DocTitle:         result.Metadata.Title,
+					DocUrl:           result.Metadata.Url,
+					DocEntities:      result.Metadata.Entities,
 					EntityMentioned:  author.author,
 					Connections:      []api.Connection{{DocTitle: author.author + " (frequent coauthor)", DocUrl: ""}},
 					FrequentCoauthor: &author.author,
@@ -449,33 +449,26 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 
 	queryToConn := make(map[string][]api.Connection)
 
-	results, err := flagger.auxNDB.Query(authorName, numAuxillaryDocumentsToRetrieve, nil)
-	if err != nil {
-		logger.Error("error querying aux ndb", "error", err)
-		return nil, fmt.Errorf("error querying ndb: %w", err)
-	}
+	results := flagger.auxIndex.Query(authorName, 5)
 
 	for _, result := range results {
 		// skip if already seen the URL
-		url, _ := result.Metadata["url"].(string)
-		if seen[url] {
+		if seen[result.Metadata.Url] {
 			continue
 		}
-		seen[url] = true
+		seen[result.Metadata.Url] = true
 
 		// iterate over entities and check if any of them match the primary matcher
 		// skip if no entity matches the primary matcher
 		// this is not always accurate as Thomas J. Smith will match with J. Smith
-		entities, _ := result.Metadata["entities"].(string)
-		if !primaryMatcher.matchesAnyEntity(strings.Split(entities, ";")) {
+		if !primaryMatcher.matchesAnyEntity(result.Metadata.Entities) {
 			continue
 		}
 
 		// add neighbouring entities to the queryToConn map
-		for _, entity := range strings.Split(entities, ";") {
+		for _, entity := range result.Metadata.Entities {
 			if _, ok := queryToConn[entity]; !ok {
-				title, _ := result.Metadata["title"].(string)
-				queryToConn[entity] = []api.Connection{{DocTitle: title, DocUrl: url}}
+				queryToConn[entity] = []api.Connection{{DocTitle: result.Metadata.Title, DocUrl: result.Metadata.Url}}
 			}
 		}
 	}
@@ -484,11 +477,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 	level2Entities := make(map[string][]api.Connection)
 
 	for query, level1Entity := range queryToConn {
-		results, err := flagger.auxNDB.Query(query, numAuxillaryDocumentsToRetrieve, nil)
-		if err != nil {
-			logger.Error("error querying aux ndb", "error", err)
-			return nil, fmt.Errorf("error querying ndb: %w", err)
-		}
+		results := flagger.auxIndex.Query(query, 5)
 
 		secondaryMatcher, validName := newNameMatcher(query)
 		if !validName {
@@ -497,26 +486,23 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 		}
 
 		for _, result := range results {
-			if !strings.Contains(result.Text, query) {
+			if !strings.Contains(result.Entity, query) {
 				continue
 			}
 
-			url, _ := result.Metadata["url"].(string)
-			if seen[url] {
+			if seen[result.Metadata.Url] {
 				continue
 			}
-			seen[url] = true
+			seen[result.Metadata.Url] = true
 
 			// skip if no entity matches the secondary matcher
-			entities, _ := result.Metadata["entities"].(string)
-			if !secondaryMatcher.matchesAnyEntity(strings.Split(entities, ";")) {
+			if !secondaryMatcher.matchesAnyEntity(result.Metadata.Entities) {
 				continue
 			}
 
-			for _, entity := range strings.Split(entities, ";") {
+			for _, entity := range result.Metadata.Entities {
 				if _, ok := level2Entities[entity]; !ok {
-					title, _ := result.Metadata["title"].(string)
-					level2Entities[entity] = append(level1Entity, api.Connection{DocTitle: title, DocUrl: url})
+					level2Entities[entity] = append(level1Entity, api.Connection{DocTitle: result.Metadata.Title, DocUrl: result.Metadata.Url})
 				}
 			}
 		}
@@ -529,11 +515,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 	flags := make([]api.Flag, 0)
 	seenFlags := make(map[[sha256.Size]byte]bool)
 	for query, conns := range queryToConn {
-		results, err := flagger.docNDB.Query(query, numDOJDocumentsToRetrieve, nil)
-		if err != nil {
-			slog.Error("error querying doc ndb", "error", err)
-			return nil, fmt.Errorf("error querying ndb: %w", err)
-		}
+		results := flagger.docIndex.Query(query, 5)
 
 		tempFlags := make([]api.Flag, 0)
 
@@ -542,19 +524,15 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 		for _, result := range results {
 			// searching for exact match
 			// this increases the false negatives for the names
-			if !strings.Contains(result.Text, query) {
+			if !strings.Contains(result.Entity, query) {
 				continue
 			}
 
-			title, _ := result.Metadata["title"].(string)
-			url, _ := result.Metadata["url"].(string)
-
-			entities, _ := result.Metadata["entities"].(string)
 			flag := &api.MiscHighRiskAssociationFlag{
 				Message:         "The author may be associated be an entity who/which may be mentioned in a press release.\n",
-				DocTitle:        title,
-				DocUrl:          url,
-				DocEntities:     strings.Split(entities, ";"),
+				DocTitle:        result.Metadata.Title,
+				DocUrl:          result.Metadata.Url,
+				DocEntities:     result.Metadata.Entities,
 				EntityMentioned: query,
 				Connections:     conns,
 			}
@@ -567,7 +545,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 
 			seenFlags[hash] = true
 			tempFlags = append(tempFlags, flag)
-			texts = append(texts, result.Text)
+			texts = append(texts, result.Metadata.Text)
 		}
 
 		if useLLMVerification {

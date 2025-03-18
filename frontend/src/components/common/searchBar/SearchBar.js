@@ -10,7 +10,6 @@ export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInst
   const [author, setAuthor] = useState(defaultAuthor || null);
   const [institution, setInstitution] = useState(defaultInstitution || null);
   const { searchState, setSearchState } = useContext(SearchContext);
-  const [results, setResults] = useState([]);
   const debouncedSearch = useCallOnPause(300); // 300ms delay
 
   const autocompleteInstitution = useCallback(
