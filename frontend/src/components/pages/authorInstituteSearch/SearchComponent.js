@@ -62,7 +62,7 @@ const SearchComponent = () => {
       { value: 'author', label: 'Author & Institution' },
       { value: 'paper', label: 'Paper Title' },
       { value: 'orcid', label: 'ORCID ID' },
-    ])
+    ]);
   }, []);
 
   return (
@@ -79,7 +79,14 @@ const SearchComponent = () => {
             animation: 'fade-in 0.5s',
           }}
         />
-        <h1 style={{ fontWeight: 'bold', marginTop: 20, animation: 'fade-in 0.75s', fontFamily: 'serif' }}>
+        <h1
+          style={{
+            fontWeight: 'bold',
+            marginTop: 20,
+            animation: 'fade-in 0.75s',
+            fontFamily: 'serif',
+          }}
+        >
           Individual Assessment
         </h1>
         <div style={{ animation: 'fade-in 1s' }}>
@@ -95,9 +102,11 @@ const SearchComponent = () => {
             </div>
           </div>
         </div>
-        <div style={{
-          marginTop: '1rem',
-        }}>
+        <div
+          style={{
+            marginTop: '1rem',
+          }}
+        >
           <RowRadioButtonsGroup
             selectedSearchType={selectedSearchType}
             formControlProps={radioButtonProps}
