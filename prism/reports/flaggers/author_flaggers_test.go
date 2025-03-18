@@ -3,7 +3,6 @@ package flaggers
 import (
 	"log/slog"
 	"prism/prism/api"
-	"prism/prism/entity_search"
 	"prism/prism/openalex"
 	"prism/prism/search"
 	"slices"
@@ -60,13 +59,13 @@ func TestAuthorIsFacultyAtEOC(t *testing.T) {
 }
 
 var (
-	mockPressReleases = []entity_search.Record[LinkMetadata]{
+	mockPressReleases = []search.Record[LinkMetadata]{
 		{Entity: "abc", Metadata: LinkMetadata{Title: "indicted", Url: "indicted.com", Entities: []string{"abc", "xyz"}, Text: "abc and xyz are indicted"}},
 		{Entity: "xyz", Metadata: LinkMetadata{Title: "indicted", Url: "indicted.com", Entities: []string{"abc", "xyz"}, Text: "abc and xyz are indicted"}},
 		{Entity: "qrs", Metadata: LinkMetadata{Title: "leaked docs", Url: "leakeddocs.com", Entities: []string{"qrs"}, Text: "qrs is implicated by leaked docs"}},
 	}
 
-	mockAuxDocs = []entity_search.Record[LinkMetadata]{
+	mockAuxDocs = []search.Record[LinkMetadata]{
 		{Entity: "xyz", Metadata: LinkMetadata{Title: "new company", Url: "newcompany.com", Entities: []string{"xyz", "123"}, Text: "xyz and 123 found company"}},
 		{Entity: "123", Metadata: LinkMetadata{Title: "new company", Url: "newcompany.com", Entities: []string{"xyz", "123"}, Text: "xyz and 123 found company"}},
 		{Entity: "456", Metadata: LinkMetadata{Title: "graduate students", Url: "graduatestudents.com", Entities: []string{"456", "qrs"}, Text: "456 and qrs are graduate students together"}},
@@ -77,7 +76,7 @@ var (
 )
 
 func TestAuthorAssociationIsEOC(t *testing.T) {
-	flagger := AuthorIsAssociatedWithEOCFlagger{docIndex: entity_search.NewIndex(mockPressReleases), auxIndex: entity_search.NewIndex(mockAuxDocs)}
+	flagger := AuthorIsAssociatedWithEOCFlagger{docIndex: search.NewIndex(mockPressReleases), auxIndex: search.NewIndex(mockAuxDocs)}
 
 	t.Run("test primary connection", func(t *testing.T) {
 		works := []openalex.Work{ // Only the author names are used in this flagger

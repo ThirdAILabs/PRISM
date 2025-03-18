@@ -6,12 +6,12 @@ import (
 	"log/slog"
 	"net/http"
 	"prism/prism/api"
-	"prism/prism/entity_search"
 	"prism/prism/gscholar"
 	"prism/prism/llms"
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers"
+	"prism/prism/search"
 	"sort"
 	"strconv"
 	"strings"
@@ -26,7 +26,7 @@ type SearchService struct {
 	openalex openalex.KnowledgeBase
 
 	// entitySearch EntitySearch
-	entitySearch *entity_search.EntityIndex[api.MatchedEntity]
+	entitySearch *search.EntityIndex[api.MatchedEntity]
 }
 
 func hybridInstitutionNamesSort(originalInstitution string, institutionNames []string, similarityThreshold float64) []string {
@@ -208,16 +208,16 @@ func formatForPrompt(e api.MatchedEntity, id int) string {
 	return base + "[ENTITY END]"
 }
 
-func NewEntitySearch(entities []api.MatchedEntity) *entity_search.EntityIndex[api.MatchedEntity] {
-	records := make([]entity_search.Record[api.MatchedEntity], 0, len(entities))
+func NewEntitySearch(entities []api.MatchedEntity) *search.EntityIndex[api.MatchedEntity] {
+	records := make([]search.Record[api.MatchedEntity], 0, len(entities))
 	for _, entity := range entities {
 		names := strings.Split(entity.Names, "\n")
 		for _, name := range names {
-			records = append(records, entity_search.Record[api.MatchedEntity]{Entity: name, Metadata: entity})
+			records = append(records, search.Record[api.MatchedEntity]{Entity: name, Metadata: entity})
 		}
 	}
 
-	return entity_search.NewIndex(records)
+	return search.NewIndex(records)
 }
 
 const (

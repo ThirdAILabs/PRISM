@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"path/filepath"
 	"prism/prism/api"
-	"prism/prism/entity_search"
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers/eoc"
@@ -27,11 +26,11 @@ type ReportProcessor struct {
 
 type ReportProcessorOptions struct {
 	UniversityNDB   search.NeuralDB
-	DocIndex        *entity_search.EntityIndex[LinkMetadata]
-	AuxIndex        *entity_search.EntityIndex[LinkMetadata]
+	DocIndex        *search.EntityIndex[LinkMetadata]
+	AuxIndex        *search.EntityIndex[LinkMetadata]
 	TriangulationDB *triangulation.TriangulationDB
 
-	EntityLookup *entity_search.EntityIndex[string]
+	EntityLookup *search.EntityIndex[string]
 
 	ConcerningEntities     eoc.EocSet
 	ConcerningInstitutions eoc.EocSet

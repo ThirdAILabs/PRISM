@@ -8,10 +8,10 @@ import (
 	"strings"
 
 	"prism/prism/api"
-	"prism/prism/entity_search"
 	"prism/prism/llms"
 	"prism/prism/openalex"
 	"prism/prism/reports/flaggers/eoc"
+	"prism/prism/search"
 	"prism/prism/triangulation"
 )
 
@@ -241,17 +241,17 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works
 	return flags, nil
 }
 
-func BuildWatchlistEntityIndex(aliasToSource map[string]string) *entity_search.EntityIndex[string] {
-	records := make([]entity_search.Record[string], 0, len(aliasToSource))
+func BuildWatchlistEntityIndex(aliasToSource map[string]string) *search.EntityIndex[string] {
+	records := make([]search.Record[string], 0, len(aliasToSource))
 	for alias, source := range aliasToSource {
-		records = append(records, entity_search.Record[string]{Entity: alias, Metadata: source})
+		records = append(records, search.Record[string]{Entity: alias, Metadata: source})
 	}
-	return entity_search.NewIndex(records)
+	return search.NewIndex(records)
 }
 
 type OpenAlexAcknowledgementIsEOC struct {
 	openalex        openalex.KnowledgeBase
-	entityLookup    *entity_search.EntityIndex[string]
+	entityLookup    *search.EntityIndex[string]
 	authorCache     DataCache[openalex.Author]
 	extractor       AcknowledgementsExtractor
 	sussyBakas      []string

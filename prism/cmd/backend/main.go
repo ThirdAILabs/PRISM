@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/cmd"
-	"prism/prism/entity_search"
 	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/schema/migrations"
@@ -68,7 +67,7 @@ func (c *Config) port() int {
 	return c.Port
 }
 
-func buildEntityNdb(entityPath string) *entity_search.EntityIndex[api.MatchedEntity] {
+func buildEntityNdb(entityPath string) *search.EntityIndex[api.MatchedEntity] {
 	const entityNdbPath = "searchable_entities.ndb"
 	if err := os.RemoveAll(entityNdbPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		log.Fatalf("error deleting existing ndb: %v", err)

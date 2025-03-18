@@ -7,18 +7,17 @@ import (
 	"log"
 	"os"
 	"prism/benchmarks/entity_search/utils"
-	"prism/prism/entity_search"
 	"prism/prism/search"
 	"strings"
 )
 
 func evaluateEntitySearch(queries []utils.Sample) {
-	entities := make([]entity_search.Record[struct{}], 0, len(queries))
+	entities := make([]search.Record[struct{}], 0, len(queries))
 	for _, query := range queries {
-		entities = append(entities, entity_search.Record[struct{}]{Entity: query.Entity})
+		entities = append(entities, search.Record[struct{}]{Entity: query.Entity})
 	}
 
-	index := entity_search.NewIndex(entities)
+	index := search.NewIndex(entities)
 
 	p_at_1, p_at_10, total := 0, 0, 0
 	for _, sample := range queries {

@@ -1,7 +1,7 @@
-package entity_search_test
+package search_test
 
 import (
-	"prism/prism/entity_search"
+	"prism/prism/search"
 	"testing"
 )
 
@@ -23,12 +23,12 @@ func TestEntitySearch(t *testing.T) {
 		{Entity: "Office of Public Affairs", Queries: []string{"Office of Public Affairs", "OPA", "Public Affairs Office"}},
 	}
 
-	records := make([]entity_search.Record[int], 0, len(samples))
+	records := make([]search.Record[int], 0, len(samples))
 	for i, s := range samples {
-		records = append(records, entity_search.Record[int]{Entity: s.Entity, Metadata: i})
+		records = append(records, search.Record[int]{Entity: s.Entity, Metadata: i})
 	}
 
-	index := entity_search.NewIndex(records)
+	index := search.NewIndex(records)
 
 	correct, total := 0, 0
 	for _, sample := range samples {

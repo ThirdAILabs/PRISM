@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"prism/prism/entity_search"
 	"prism/prism/search"
 	"time"
 )
@@ -79,7 +78,7 @@ type dojArticleRecord struct {
 	Entities []string `json:"entities"`
 }
 
-func BuildDocIndex(dataPath string) *entity_search.EntityIndex[LinkMetadata] {
+func BuildDocIndex(dataPath string) *search.EntityIndex[LinkMetadata] {
 	log.Printf("creating doc index from data %s", dataPath)
 
 	var countryToArticles map[string][]dojArticleRecord
@@ -92,10 +91,10 @@ func BuildDocIndex(dataPath string) *entity_search.EntityIndex[LinkMetadata] {
 
 	log.Printf("loaded %d records", len(data))
 
-	records := make([]entity_search.Record[LinkMetadata], 0, len(data))
+	records := make([]search.Record[LinkMetadata], 0, len(data))
 	for _, record := range data {
 		for _, entity := range record.Entities {
-			records = append(records, entity_search.Record[LinkMetadata]{
+			records = append(records, search.Record[LinkMetadata]{
 				Entity: entity,
 				Metadata: LinkMetadata{
 					Title:    record.Title,
@@ -109,7 +108,7 @@ func BuildDocIndex(dataPath string) *entity_search.EntityIndex[LinkMetadata] {
 
 	s := time.Now()
 
-	index := entity_search.NewIndex(records)
+	index := search.NewIndex(records)
 
 	e := time.Now()
 
@@ -127,7 +126,7 @@ type releveantWebpageRecord struct {
 	Entities []string `json:"entities"`
 }
 
-func BuildAuxIndex(dataPath string) *entity_search.EntityIndex[LinkMetadata] {
+func BuildAuxIndex(dataPath string) *search.EntityIndex[LinkMetadata] {
 	log.Printf("creating aux index from data %s", dataPath)
 
 	var data []releveantWebpageRecord
@@ -135,10 +134,10 @@ func BuildAuxIndex(dataPath string) *entity_search.EntityIndex[LinkMetadata] {
 
 	log.Printf("loaded %d records", len(data))
 
-	records := make([]entity_search.Record[LinkMetadata], 0, len(data))
+	records := make([]search.Record[LinkMetadata], 0, len(data))
 	for _, record := range data {
 		for _, entity := range record.Entities {
-			records = append(records, entity_search.Record[LinkMetadata]{
+			records = append(records, search.Record[LinkMetadata]{
 				Entity: entity,
 				Metadata: LinkMetadata{
 					Title:    record.Title,
@@ -152,7 +151,7 @@ func BuildAuxIndex(dataPath string) *entity_search.EntityIndex[LinkMetadata] {
 
 	s := time.Now()
 
-	index := entity_search.NewIndex(records)
+	index := search.NewIndex(records)
 
 	e := time.Now()
 

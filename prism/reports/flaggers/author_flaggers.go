@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 	"prism/prism/api"
-	"prism/prism/entity_search"
 	"prism/prism/llms"
 	"prism/prism/openalex"
 	"prism/prism/search"
@@ -308,8 +307,8 @@ type LinkMetadata struct {
 }
 
 type AuthorIsAssociatedWithEOCFlagger struct {
-	docIndex *entity_search.EntityIndex[LinkMetadata]
-	auxIndex *entity_search.EntityIndex[LinkMetadata]
+	docIndex *search.EntityIndex[LinkMetadata]
+	auxIndex *search.EntityIndex[LinkMetadata]
 }
 
 func (flagger *AuthorIsAssociatedWithEOCFlagger) Name() string {

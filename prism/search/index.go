@@ -1,4 +1,4 @@
-package entity_search
+package search
 
 import (
 	"fmt"
