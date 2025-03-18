@@ -286,12 +286,12 @@ func TestCheckDisclosure(t *testing.T) {
 		},
 	}
 
-	nextReport, isUniversityQueued, err := manager.GetNextAuthorReport()
+	nextReport, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if isUniversityQueued {
-		t.Fatal("isUniversityQueued should be false")
+	if nextReport.ForUniversityReport {
+		t.Fatal("next report should not be for university report")
 	}
 	if nextReport == nil {
 		t.Fatal("next report should not be nil")
@@ -374,12 +374,12 @@ func TestDownloadReportAllFormats(t *testing.T) {
 		},
 	}
 
-	nextReport, isUniversityQueued, err := manager.GetNextAuthorReport()
+	nextReport, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if isUniversityQueued {
-		t.Fatal("isUniversityQueued should be false")
+	if nextReport.ForUniversityReport {
+		t.Fatal("next report should not be for university report")
 	}
 	if nextReport == nil {
 		t.Fatal("next report should not be nil")
@@ -558,13 +558,13 @@ func TestUniversityReportEndpoints(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nextAuthorReport, isUniversityQueued, err := manager.GetNextAuthorReport()
+	nextAuthorReport, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if !isUniversityQueued {
-		t.Fatal("isUniversityQueued should be true")
+	if !nextAuthorReport.ForUniversityReport {
+		t.Fatal("next author report should be for university report")
 	}
 
 	if err := manager.UpdateAuthorReport(nextAuthorReport.Id, schema.ReportCompleted, time.Now(), []api.Flag{

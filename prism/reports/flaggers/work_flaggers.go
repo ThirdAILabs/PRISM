@@ -17,6 +17,8 @@ type WorkFlagger interface {
 	Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error)
 
 	Name() string
+
+	DisableForUniversityReport() bool
 }
 
 func getWorkSummary(w openalex.Work) api.WorkSummary {
@@ -55,6 +57,10 @@ func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(logger *slog.Logger, wo
 	return flags, nil
 }
 
+func (flagger *OpenAlexMultipleAffiliationsFlagger) DisableForUniversityReport() bool {
+	return false
+}
+
 type OpenAlexFunderIsEOC struct {
 	concerningFunders  eoc.EocSet
 	concerningEntities eoc.EocSet
@@ -87,6 +93,10 @@ func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.W
 	return flags, nil
 }
 
+func (flagger *OpenAlexFunderIsEOC) DisableForUniversityReport() bool {
+	return false
+}
+
 type OpenAlexPublisherIsEOC struct {
 	concerningPublishers eoc.EocSet
 }
@@ -116,6 +126,10 @@ func (flagger *OpenAlexPublisherIsEOC) Flag(logger *slog.Logger, works []openale
 	}
 
 	return flags, nil
+}
+
+func (flagger *OpenAlexPublisherIsEOC) DisableForUniversityReport() bool {
+	return false
 }
 
 type OpenAlexCoauthorIsEOC struct {
@@ -157,6 +171,10 @@ func getKeys(m map[string]bool) []string {
 	return keys
 }
 
+func (flagger *OpenAlexCoauthorIsEOC) DisableForUniversityReport() bool {
+	return false
+}
+
 type OpenAlexAuthorAffiliationIsEOC struct {
 	concerningEntities     eoc.EocSet
 	concerningInstitutions eoc.EocSet
@@ -194,6 +212,10 @@ func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works [
 	}
 
 	return flags, nil
+}
+
+func (flagger *OpenAlexAuthorAffiliationIsEOC) DisableForUniversityReport() bool {
+	return false
 }
 
 type OpenAlexCoauthorAffiliationIsEOC struct {
@@ -237,6 +259,10 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works
 	}
 
 	return flags, nil
+}
+
+func (flagger *OpenAlexCoauthorAffiliationIsEOC) DisableForUniversityReport() bool {
+	return false
 }
 
 type OpenAlexAcknowledgementIsEOC struct {
@@ -458,6 +484,10 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			FundCodeTriangulation: triangulationResults,
 		}
 	}
+}
+
+func (flagger *OpenAlexAcknowledgementIsEOC) DisableForUniversityReport() bool {
+	return true
 }
 
 func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {

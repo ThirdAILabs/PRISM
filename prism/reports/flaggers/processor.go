@@ -108,7 +108,7 @@ func (processor *ReportProcessor) getWorkStream(report reports.ReportUpdateTask)
 	}
 }
 
-func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName string, workStream chan openalex.WorkBatch, flagsCh chan []api.Flag, isUniversityQueued bool) {
+func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName string, workStream chan openalex.WorkBatch, flagsCh chan []api.Flag, ForUniversityReport bool) {
 	wg := sync.WaitGroup{}
 
 	batch := -1
@@ -121,7 +121,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 		logger.Info("got next batch of works", "batch", batch, "n_works", len(works.Works))
 		for _, flagger := range processor.workFlaggers {
 
-			if isUniversityQueued && flagger.Name() == "AcknowledgementEOC" {
+			if ForUniversityReport && flagger.DisableForUniversityReport() {
 				continue
 			}
 
@@ -185,10 +185,10 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 	close(flagsCh)
 }
 
-func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdateTask, isUniversityQueued bool) {
+func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdateTask) {
 	logger := slog.With("report_id", report.Id)
 
-	logger.Info("starting report processing", "author_id", report.AuthorId, "author_name", report.AuthorName, "source", report.Source, "is_university_queued", isUniversityQueued)
+	logger.Info("starting report processing", "author_id", report.AuthorId, "author_name", report.AuthorName, "source", report.Source, "is_university_queued", report.ForUniversityReport)
 
 	workStream, err := processor.getWorkStream(report)
 	if err != nil {
@@ -201,7 +201,7 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 
 	flagsCh := make(chan []api.Flag, 100)
 
-	go processor.processWorks(logger, report.AuthorName, workStream, flagsCh, isUniversityQueued)
+	go processor.processWorks(logger, report.AuthorName, workStream, flagsCh, report.ForUniversityReport)
 
 	seen := make(map[[sha256.Size]byte]struct{})
 	flagCounts := make(map[string]int)
@@ -222,7 +222,13 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 		}
 	}
 
-	logger.Info("report complete", "n_flags", len(seen))
+	attrs := make([]any, 0, len(flagCounts)+1)
+	attrs = append(attrs, slog.Int("n_flags", len(seen)))
+	for flagType, count := range flagCounts {
+		attrs = append(attrs, slog.Int(flagType, count))
+	}
+
+	logger.Info("report complete", attrs...)
 
 	if err := processor.manager.UpdateAuthorReport(report.Id, schema.ReportCompleted, report.EndDate, nil); err != nil {
 		slog.Error("error updating author report status to complete", "error", err)
@@ -230,7 +236,7 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 }
 
 func (processor *ReportProcessor) ProcessNextAuthorReport() bool {
-	report, isUniversityQueued, err := processor.manager.GetNextAuthorReport()
+	report, err := processor.manager.GetNextAuthorReport()
 	if err != nil {
 		slog.Error("error checking for next report", "error", err)
 		return false
@@ -239,7 +245,7 @@ func (processor *ReportProcessor) ProcessNextAuthorReport() bool {
 		return false
 	}
 
-	processor.ProcessAuthorReport(*report, isUniversityQueued)
+	processor.ProcessAuthorReport(*report)
 
 	return true
 }

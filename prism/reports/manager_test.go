@@ -62,15 +62,15 @@ func checkAuthorReport(t *testing.T, manager *reports.ReportManager, userId, rep
 }
 
 func checkNoNextAuthorReport(t *testing.T, manager *reports.ReportManager) {
-	next, isUniversityQueued, err := manager.GetNextAuthorReport()
+	next, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
 	if next != nil {
 		t.Fatal("should be no report")
 	}
-	if isUniversityQueued {
-		t.Fatal("isUniversityQueued should be false")
+	if next.ForUniversityReport {
+		t.Fatal("should be no university report")
 	}
 }
 
@@ -109,12 +109,12 @@ func TestCreateGetAuthorReports(t *testing.T) {
 
 	checkAuthorReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "queued", 0)
 
-	next1, isUniversityQueued, err := manager.GetNextAuthorReport()
+	next1, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if isUniversityQueued {
-		t.Fatal("isUniversityQueued should be false")
+	if next1.ForUniversityReport {
+		t.Fatal("should be no university report")
 	}
 	report1End := time.Now()
 	checkNextAuthorReport(t, next1, "1", "author1", api.OpenAlexSource, reports.EarliestReportDate, report1End)
@@ -127,12 +127,12 @@ func TestCreateGetAuthorReports(t *testing.T) {
 
 	checkAuthorReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "complete", 1)
 
-	next2, isUniversityQueued, err := manager.GetNextAuthorReport()
+	next2, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if isUniversityQueued {
-		t.Fatal("isUniversityQueued should be false")
+	if next2.ForUniversityReport {
+		t.Fatal("should be no university report")
 	}
 	report2End := time.Now()
 	checkNextAuthorReport(t, next2, "2", "author2", api.GoogleScholarSource, reports.EarliestReportDate, report2End)
@@ -171,12 +171,12 @@ func TestCreateGetAuthorReports(t *testing.T) {
 	// Perform multiple accesses to ensure it is only added once
 	checkAuthorReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "queued", 1)
 
-	next3, isUniversityQueued, err := manager.GetNextAuthorReport()
+	next3, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if isUniversityQueued {
-		t.Fatal("isUniversityQueued should be false")
+	if next3.ForUniversityReport {
+		t.Fatal("should be no university report")
 	}
 	checkNextAuthorReport(t, next3, "2", "author2", api.GoogleScholarSource, report2End, time.Now())
 	// Check report was only queued once
@@ -203,12 +203,12 @@ func TestCreateGetAuthorReports(t *testing.T) {
 	// Check that the original report is being updated as well
 	checkAuthorReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "queued", 1)
 
-	next4, isUniversityQueued, err := manager.GetNextAuthorReport()
+	next4, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if isUniversityQueued {
-		t.Fatal("isUniversityQueued should be false")
+	if next4.ForUniversityReport {
+		t.Fatal("should be no university report")
 	}
 	checkNextAuthorReport(t, next4, "1", "author1", api.OpenAlexSource, report1End, time.Now())
 	checkNoNextAuthorReport(t, manager)
@@ -312,12 +312,12 @@ func TestListAuthorReports(t *testing.T) {
 	}
 
 	// Update a report to complete
-	next, isUniversityQueued, err := manager.GetNextAuthorReport()
+	next, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if isUniversityQueued {
-		t.Fatal("isUniversityQueued should be false")
+	if next.ForUniversityReport {
+		t.Fatal("should be no university report")
 	}
 	if next == nil {
 		t.Fatal("report should not be nil")
@@ -435,12 +435,12 @@ func TestCreateGetUniversityReports(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nextAuthor1, isUniversityQueued, err := manager.GetNextAuthorReport()
+	nextAuthor1, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if isUniversityQueued {
-		t.Fatal("isUniversityQueued should be false")
+	if nextAuthor1.ForUniversityReport {
+		t.Fatal("should be no university report")
 	}
 	report1End := time.Now()
 	if err := manager.UpdateAuthorReport(nextAuthor1.Id, "complete", nextAuthor1.EndDate, dummyReportUpdate()); err != nil {
@@ -472,28 +472,28 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	// Flags from first author should not be immediately visible in the university report
 	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 0, 0, 0, 2)
 
-	nextAuthor1, isUnisUniversityQueued, err := manager.GetNextAuthorReport()
+	nextAuthor1Univ, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !isUnisUniversityQueued {
-		t.Fatal("isUniversityQueued should be true")
+	if !nextAuthor1Univ.ForUniversityReport {
+		t.Fatal("should be university report")
 	}
 	report1EndUniv := time.Now()
-	checkNextAuthorReport(t, nextAuthor1, "1", "author1", api.OpenAlexSource, reports.EarliestReportDate, report1EndUniv)
-	if err := manager.UpdateAuthorReport(nextAuthor1.Id, "complete", nextAuthor1.EndDate, dummyReportUpdate()); err != nil {
+	checkNextAuthorReport(t, nextAuthor1Univ, "1", "author1", api.OpenAlexSource, reports.EarliestReportDate, report1EndUniv)
+	if err := manager.UpdateAuthorReport(nextAuthor1Univ.Id, "complete", nextAuthor1Univ.EndDate, dummyReportUpdate()); err != nil {
 		t.Fatal(err)
 	}
 
-	// Now First Authopr flags should appear in the Univeristy report
+	// Now First Author flags should appear in the Univeristy report
 	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 1, 1, 1, 2)
 
-	nextAuthor2, isUnisUniversityQueued, err := manager.GetNextAuthorReport()
+	nextAuthor2, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !isUnisUniversityQueued {
-		t.Fatal("isUniversityQueued should be true")
+	if !nextAuthor2.ForUniversityReport {
+		t.Fatal("should be university report")
 	}
 	report2End := time.Now()
 	checkNextAuthorReport(t, nextAuthor2, "2", "author2", api.OpenAlexSource, reports.EarliestReportDate, report2End)
@@ -525,12 +525,12 @@ func TestCreateGetUniversityReports(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nextAuthor3, isUniversityQueued, err := manager.GetNextAuthorReport()
+	nextAuthor3, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !isUniversityQueued {
-		t.Fatal("isUniversityQueued should be true")
+	if !nextAuthor3.ForUniversityReport {
+		t.Fatal("should be university report")
 	}
 	report3End := time.Now()
 	checkNextAuthorReport(t, nextAuthor3, "3", "author3", api.OpenAlexSource, reports.EarliestReportDate, report3End)
@@ -587,12 +587,12 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	}
 
 	// Author report should be queued too since it's stale
-	nextAuthor4, isUniversityQueued, err := manager.GetNextAuthorReport()
+	nextAuthor4, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !isUniversityQueued {
-		t.Fatal("isUniversityQueued should be true")
+	if !nextAuthor4.ForUniversityReport {
+		t.Fatal("should be university report")
 	}
 	checkNextAuthorReport(t, nextAuthor4, "3", "author3", api.OpenAlexSource, report3End, time.Now())
 	checkNoNextAuthorReport(t, manager)
@@ -604,12 +604,12 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	checkAuthorReport(t, manager, user1, authorId1, "1", "author1", api.OpenAlexSource, "queued", 1)
 
 	// Process this author report so the queue is empty
-	nextAuthor5, isUniversityQueued, err := manager.GetNextAuthorReport()
+	nextAuthor5, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if isUniversityQueued {
-		t.Fatal("isUniversityQueued should be false")
+	if nextAuthor5.ForUniversityReport {
+		t.Fatal("should be no university report")
 	}
 	checkNextAuthorReport(t, nextAuthor5, "1", "author1", api.OpenAlexSource, report1End, time.Now())
 	if err := manager.UpdateAuthorReport(nextAuthor5.Id, "complete", nextAuthor5.EndDate, dummyReportUpdate()); err != nil {
@@ -657,21 +657,21 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 3, 3, 1, 3)
 
 	// Check that author2 is queued because it's stale
-	nextAuthor6, isUniversityQueued, err := manager.GetNextAuthorReport()
+	nextAuthor6, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !isUniversityQueued {
-		t.Fatal("isUniversityQueued should be true")
+	if !nextAuthor6.ForUniversityReport {
+		t.Fatal("should be university report")
 	}
 	checkNextAuthorReport(t, nextAuthor6, "1", "author1", api.OpenAlexSource, report3End, time.Now())
 
-	nextAuthor7, isUniversityQueued, err := manager.GetNextAuthorReport()
+	nextAuthor7, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !isUniversityQueued {
-		t.Fatal("isUniversityQueued should be true")
+	if !nextAuthor7.ForUniversityReport {
+		t.Fatal("should be university report")
 	}
 	checkNextAuthorReport(t, nextAuthor7, "2", "author2", api.OpenAlexSource, report3End, time.Now())
 
@@ -803,12 +803,12 @@ func TestUniversityReportsFilterFlagsByDate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nextAuthor, isUniversityQueued, err := manager.GetNextAuthorReport()
+	nextAuthor, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !isUniversityQueued {
-		t.Fatal("isUniversityQueued should be true")
+	if !nextAuthor.ForUniversityReport {
+		t.Fatal("should be university report")
 	}
 
 	content := []api.Flag{
@@ -866,41 +866,41 @@ func TestUserQueuedReportsArePrioritizedOverUniversityReports(t *testing.T) {
 	}
 
 	// Author 1 report was queued by user
-	nextAuthor1, isUniversityQueued, err := manager.GetNextAuthorReport()
+	nextAuthor1, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if isUniversityQueued {
-		t.Fatal("isUniversityQueued should be false")
+	if nextAuthor1.ForUniversityReport {
+		t.Fatal("should be no university report")
 	}
 	checkNextAuthorReport(t, nextAuthor1, "1", "author1", api.OpenAlexSource, reports.EarliestReportDate, time.Now())
 
 	// University report was queued first, but author report 3 was queued by user
-	nextAuthor3, isUnisUniversityQueued, err := manager.GetNextAuthorReport()
+	nextAuthor3, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if isUnisUniversityQueued {
-		t.Fatal("isUniversityQueued should be false")
+	if nextAuthor3.ForUniversityReport {
+		t.Fatal("should be no university report")
 	}
 	checkNextAuthorReport(t, nextAuthor3, "3", "author3", api.OpenAlexSource, reports.EarliestReportDate, time.Now())
 
 	// Author 2 report was queued by university
-	nextAuthor1, isUisUniversityQueued, err := manager.GetNextAuthorReport()
+	nextAuthor1Univ, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !isUisUniversityQueued {
-		t.Fatal("isUniversityQueued should be true")
+	if !nextAuthor1Univ.ForUniversityReport {
+		t.Fatal("should be university report")
 	}
-	checkNextAuthorReport(t, nextAuthor1, "1", "author1", api.OpenAlexSource, reports.EarliestReportDate, time.Now())
+	checkNextAuthorReport(t, nextAuthor1Univ, "1", "author1", api.OpenAlexSource, reports.EarliestReportDate, time.Now())
 
-	nextAuthor2, isUisUniversityQueued, err := manager.GetNextAuthorReport()
+	nextAuthor2, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !isUisUniversityQueued {
-		t.Fatal("isUniversityQueued should be true")
+	if !nextAuthor2.ForUniversityReport {
+		t.Fatal("should be university report")
 	}
 	checkNextAuthorReport(t, nextAuthor2, "2", "author2", api.OpenAlexSource, reports.EarliestReportDate, time.Now())
 }
@@ -917,12 +917,12 @@ func TestAuthorReportRetry(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	next1, isUniversityQueued, err := manager.GetNextAuthorReport()
+	next1, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if isUniversityQueued {
-		t.Fatal("isUniversityQueued should be false")
+	if next1.ForUniversityReport {
+		t.Fatal("should be no university report")
 	}
 	checkNextAuthorReport(t, next1, "1", "author1", api.OpenAlexSource, reports.EarliestReportDate, time.Now())
 
@@ -930,23 +930,23 @@ func TestAuthorReportRetry(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	next2, isUniversityQueued, err := manager.GetNextAuthorReport()
+	next2, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if isUniversityQueued {
-		t.Fatal("isUniversityQueued should be false")
+	if next2.ForUniversityReport {
+		t.Fatal("should be no university report")
 	}
 	checkNextAuthorReport(t, next2, "2", "author2", api.OpenAlexSource, reports.EarliestReportDate, time.Now())
 
 	time.Sleep(time.Second)
 
-	next3, isUniversityQueued, err := manager.GetNextAuthorReport()
+	next3, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if isUniversityQueued {
-		t.Fatal("isUniversityQueued should be false")
+	if next3.ForUniversityReport {
+		t.Fatal("should be no university report")
 	}
 
 	// Author report 1 should be retried because the timeout is expired, and its status is left as in-progress.

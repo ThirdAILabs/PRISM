@@ -61,7 +61,7 @@ func getReportContent(t *testing.T, report reports.ReportUpdateTask, processor *
 		t.Fatal(err)
 	}
 
-	nextReport, isUniversityQueued, err := manager.GetNextAuthorReport()
+	nextReport, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,7 +70,7 @@ func getReportContent(t *testing.T, report reports.ReportUpdateTask, processor *
 	}
 
 	report.Id = nextReport.Id
-	processor.ProcessAuthorReport(report, isUniversityQueued)
+	processor.ProcessAuthorReport(report)
 
 	content, err := manager.GetAuthorReport(user, reportId)
 	if err != nil {
