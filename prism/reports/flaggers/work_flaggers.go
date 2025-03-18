@@ -11,6 +11,7 @@ import (
 	"prism/prism/llms"
 	"prism/prism/openalex"
 	"prism/prism/reports/flaggers/eoc"
+	"prism/prism/search"
 	"prism/prism/triangulation"
 )
 
@@ -240,9 +241,17 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works
 	return flags, nil
 }
 
+func BuildWatchlistEntityIndex(aliasToSource map[string]string) *search.EntityIndex[string] {
+	records := make([]search.Record[string], 0, len(aliasToSource))
+	for alias, source := range aliasToSource {
+		records = append(records, search.Record[string]{Entity: alias, Metadata: source})
+	}
+	return search.NewIndex(records)
+}
+
 type OpenAlexAcknowledgementIsEOC struct {
 	openalex        openalex.KnowledgeBase
-	entityLookup    *EntityStore
+	entityLookup    *search.EntityIndex[string]
 	authorCache     DataCache[openalex.Author]
 	extractor       AcknowledgementsExtractor
 	sussyBakas      []string
@@ -321,8 +330,31 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForSussyBaka(ack Acknowledgeme
 	return flagger.containsSussyBakas(newText)
 }
 
+type SourceToAliases map[string][]string
+
+func (flagger *OpenAlexAcknowledgementIsEOC) searchWatchlistEntities(entities []string) map[string]SourceToAliases {
+	matches := make(map[string]SourceToAliases)
+
+	for _, entity := range entities {
+		results := flagger.entityLookup.Query(entity, 10)
+
+		sourceToAliases := make(SourceToAliases)
+		for _, result := range results {
+			sim := IndelSimilarity(entity, result.Entity)
+			if sim > 0.9 {
+				sourceToAliases[result.Metadata] = append(sourceToAliases[result.Entity], result.Entity)
+			}
+		}
+		if len(sourceToAliases) > 0 {
+			matches[entity] = sourceToAliases
+		}
+	}
+
+	return matches
+}
+
 func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
-	logger *slog.Logger, acknowledgements []Acknowledgement, allAuthorNames []string,
+	acknowledgements []Acknowledgement, allAuthorNames []string,
 ) (bool, map[string]SourceToAliases, string, error) {
 	message := ""
 	flagged := false
@@ -360,10 +392,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 		}
 
 		if len(entityQueries) > 0 {
-			matches, err := flagger.entityLookup.SearchEntities(logger, entityQueries)
-			if err != nil {
-				return false, nil, "", fmt.Errorf("error looking up entity matches: %w", err)
-			}
+			matches := flagger.searchWatchlistEntities(entityQueries)
 
 			for _, entity := range entityQueries {
 				if sources, ok := matches[entity]; ok {
@@ -550,7 +579,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 		}
 
 		flagged, flaggedEntities, message, err := flagger.checkAcknowledgementEntities(
-			workLogger, acks.Result.Acknowledgements, allAuthorNames,
+			acks.Result.Acknowledgements, allAuthorNames,
 		)
 		if err != nil {
 			workLogger.Error("error checking acknowledgements: skipping work", "error", err)
