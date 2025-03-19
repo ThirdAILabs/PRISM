@@ -749,3 +749,47 @@ func convertUniversityReport(report schema.UserUniversityReport, content api.Uni
 		Content:        content,
 	}
 }
+
+func (r *ReportManager) CreateFlagFeedback(reportId uuid.UUID, userId uuid.UUID, flagHash string, feedback api.FlagFeedback) error {
+	var flag schema.AuthorFlag
+	return r.db.Transaction(func(txn *gorm.DB) error {
+		// Check if the report exists
+		if err := txn.Where("id = ?", reportId).First(&schema.AuthorReport{}).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return fmt.Errorf("report not found: %w", ErrReportNotFound)
+			}
+			slog.Error("error checking report existence", "error", err)
+
+			return ErrReportAccessFailed
+		}
+
+		if err := txn.Where("report_id = ? AND flag_hash = ?", reportId, flagHash).First(&flag).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return fmt.Errorf("flag not found")
+			}
+			slog.Error("error checking flag existence", "error", err)
+			return fmt.Errorf("error checking flag existence: %w", err)
+		}
+
+		// create the flag feedback entry
+		feedbackData, err := json.Marshal(feedback)
+		if err != nil {
+			return fmt.Errorf("error serializing feedback: %w", err)
+		}
+
+		feedbackEntry := schema.Feedback{
+			Id:        uuid.New(),
+			UserId:    userId,
+			Flag:      flag,
+			Timestamp: time.Now(),
+			Data:      feedbackData,
+		}
+
+		if err := txn.Create(&feedbackEntry).Error; err != nil {
+			slog.Error("error creating feedback entry", "error", err)
+			return fmt.Errorf("error creating feedback entry: %w", err)
+		}
+
+		return nil
+	})
+}

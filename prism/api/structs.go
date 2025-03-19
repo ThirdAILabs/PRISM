@@ -165,3 +165,8 @@ type License struct {
 	Expiration  time.Time
 	Deactivated bool
 }
+
+type FlagFeedbackRequest struct {
+	Type string          `json:"type"`
+	Data json.RawMessage `json:"data"`
+}
