@@ -208,8 +208,6 @@ const ItemDetails = () => {
 
         if (!isMounted) return;
 
-        console.log('Report:', Content);
-
         setAuthorName(report.AuthorName);
         setReportContent(report.Content);
         setInitialReportContent(report.Content);
