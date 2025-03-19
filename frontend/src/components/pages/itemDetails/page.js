@@ -302,17 +302,17 @@ const ItemDetails = () => {
 
     const displayStart = startDate
       ? parseLocalDate(startDate).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
       : 'earliest';
     const displayEnd = endDate
       ? parseLocalDate(endDate).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
       : 'today';
 
     setFilterMessage(`${displayStart} - ${displayEnd}`);
@@ -356,11 +356,10 @@ const ItemDetails = () => {
                                   type="button"
                                   className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
                                   style={{ minWidth: '180px', textAlign: 'center' }}
-                                  title={`${innerKey}: ${
-                                    value
-                                      ? 'The author likely IS a primary recipient of this grant.'
-                                      : 'The author likely IS NOT a primary recipient of this grant.'
-                                  }`}
+                                  title={`${innerKey}: ${value
+                                    ? 'The author likely IS a primary recipient of this grant.'
+                                    : 'The author likely IS NOT a primary recipient of this grant.'
+                                    }`}
                                 >
                                   {innerKey}
                                   {/* : {value ? 'Yes' : 'No'} */}
@@ -478,11 +477,11 @@ const ItemDetails = () => {
                 );
               })}
           </ul>
-          {Array.isArray(flag.RawAcknowledgements) && flag.RawAcknowledgements.length > 0 && (
+          {Array.isArray(flag.RawAcknowledgements) && flag.RawAcknowledgements?.length > 0 && (
             <>
               <strong>Acknowledgements Text</strong>
               <ul className="bulleted-list">
-                {flag.RawAcknowledgements.map((item, index2) => {
+                {flag.RawAcknowledgements?.map((item, index2) => {
                   const key = `ack-${index} ${index2}`;
                   return <li key={key}>{item}</li>;
                 })}
@@ -665,12 +664,12 @@ const ItemDetails = () => {
             })}
           </ul>
           <strong>Acknowledgement Text</strong>
-          {flag.RawAcknowledgements.map((item, index3) => {
+          {flag.RawAcknowledgements?.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
-          <p>{}</p>
+          <p>{ }</p>
         </p>
-        {}
+        { }
 
         <div>{fundCodeTriangulation(flag, index)}</div>
       </div>
