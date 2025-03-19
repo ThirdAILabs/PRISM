@@ -28,6 +28,7 @@ type PDFDownloader struct {
 	s3Client       *s3.Client
 	pw             *playwright.Playwright
 	browser        playwright.Browser
+	context        playwright.BrowserContext
 }
 
 var headers = map[string]string{
@@ -72,27 +73,30 @@ func NewPDFDownloader(s3CacheBucket string) *PDFDownloader {
 	}
 	downloader.browser = browser
 
-	return downloader
-}
-
-func (downloader *PDFDownloader) downloadWithPlaywright(url string) (string, error) {
 	context, err := downloader.browser.NewContext(playwright.BrowserNewContextOptions{
 		AcceptDownloads:   playwright.Bool(true),
 		IgnoreHttpsErrors: playwright.Bool(true),
 	})
 	if err != nil {
-		return "", fmt.Errorf("error creating browser context: %w", err)
+		log.Fatalf("error starting playwright: %v", err)
 	}
-	defer context.Close()
 
 	// When pdfs fail to download it is often just because they reach the timeout,
 	// which slows down processing. Decreasing the timeout will hopefully speed this up.
 	context.SetDefaultTimeout(15000)
 
-	page, err := context.NewPage()
+	downloader.context = context
+
+	return downloader
+}
+
+func (downloader *PDFDownloader) downloadWithPlaywright(url string) (string, error) {
+
+	page, err := downloader.context.NewPage()
 	if err != nil {
 		return "", fmt.Errorf("error opening browser page: %w", err)
 	}
+	defer page.Close()
 
 	download, err := page.ExpectDownload(func() error {
 		// Page.Goto returns an error saying that the download is starting, so we ignore the error
@@ -263,17 +267,17 @@ func (downloader *PDFDownloader) DeleteFromCache(doi string) error {
 func (downloader *PDFDownloader) downloadPdf(doi, oaURL string) (string, error) {
 	var errs []error
 
-	if path, err := downloader.downloadFromCache(doi); err == nil {
-		return path, nil
-	} else {
-		errs = append(errs, fmt.Errorf("s3 cache download: %w", err))
-	}
+	// if path, err := downloader.downloadFromCache(doi); err == nil {
+	// 	return path, nil
+	// } else {
+	// 	errs = append(errs, fmt.Errorf("s3 cache download: %w", err))
+	// }
 
-	if path, err := downloader.downloadWithHttp(oaURL); err == nil {
-		return path, nil
-	} else {
-		errs = append(errs, fmt.Errorf("http download: %w", err))
-	}
+	// if path, err := downloader.downloadWithHttp(oaURL); err == nil {
+	// 	return path, nil
+	// } else {
+	// 	errs = append(errs, fmt.Errorf("http download: %w", err))
+	// }
 
 	if path, err := downloader.downloadWithPlaywright(oaURL); err == nil {
 		return path, nil

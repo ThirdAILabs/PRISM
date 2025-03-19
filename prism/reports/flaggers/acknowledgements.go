@@ -121,6 +121,8 @@ func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId 
 	}
 	defer os.Remove(pdfPath)
 
+	// pdfPath := "/app/data/test.pdf"
+
 	if err := extractor.grobidSem.Acquire(context.Background(), 1); err != nil {
 		// I don't think this can fail if we use context.Background, so this error check
 		// is just in case.
