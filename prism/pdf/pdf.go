@@ -10,6 +10,7 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"prism/prism/monitoring"
 	"prism/prism/openalex"
 	"strings"
 	"time"
@@ -165,6 +166,8 @@ func (downloader *PDFDownloader) downloadWithHttp(url string) (string, error) {
 	return tmpFile.Name(), nil
 }
 
+var ErrNotFound = errors.New("cache file not found")
+
 func (downloader *PDFDownloader) downloadFromCache(doi string) (string, error) {
 	key := fmt.Sprintf("pdfs/%s.pdf", doi)
 	input := &s3.GetObjectInput{
@@ -179,7 +182,7 @@ func (downloader *PDFDownloader) downloadFromCache(doi string) (string, error) {
 	if err != nil {
 		var apiErr smithy.APIError
 		if errors.As(err, &apiErr) && apiErr.ErrorCode() == "NoSuchKey" {
-			return "", fmt.Errorf("cache file not found: %w", err)
+			return "", ErrNotFound
 		}
 		slog.Error("error retrieving file from S3 cache", "error", err)
 		return "", fmt.Errorf("error retrieving file from S3 cache: %w", err)
@@ -264,20 +267,30 @@ func (downloader *PDFDownloader) downloadPdf(doi, oaURL string) (string, error) 
 	var errs []error
 
 	if path, err := downloader.downloadFromCache(doi); err == nil {
+		monitoring.PdfCacheHits.Inc()
 		return path, nil
 	} else {
+		if err == ErrNotFound {
+			monitoring.PdfCacheMisses.Inc()
+		} else {
+			monitoring.PdfCacheErrors.Inc()
+		}
 		errs = append(errs, fmt.Errorf("s3 cache download: %w", err))
 	}
 
 	if path, err := downloader.downloadWithHttp(oaURL); err == nil {
+		monitoring.HttpDownloadSuccesses.Inc()
 		return path, nil
 	} else {
+		monitoring.HttpDownloadErrors.Inc()
 		errs = append(errs, fmt.Errorf("http download: %w", err))
 	}
 
 	if path, err := downloader.downloadWithPlaywright(oaURL); err == nil {
+		monitoring.PlaywrightDownloadSuccesses.Inc()
 		return path, nil
 	} else {
+		monitoring.PlaywrightDownloadErrors.Inc()
 		errs = append(errs, fmt.Errorf("playwright download: %w", err))
 	}
 
@@ -295,6 +308,7 @@ func (downloader *PDFDownloader) DownloadWork(work openalex.Work) (string, error
 
 	if err := downloader.uploadToCache(doi, pdfPath); err != nil {
 		slog.Error("failed to upload pdf to S3 cache", "error", err)
+		monitoring.PdfCacheUploadErrors.Inc()
 	}
 
 	return pdfPath, nil

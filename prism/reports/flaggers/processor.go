@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"path/filepath"
 	"prism/prism/api"
+	"prism/prism/monitoring"
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers/eoc"
@@ -137,6 +138,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 				flags, err := flagger.Flag(logger, works, authorIds)
 				if err != nil {
 					logger.Error("flagger error", "error", err)
+					monitoring.FlaggerErrors.WithLabelValues(flagger.Name()).Inc()
 				} else {
 					flagsCh <- flags
 				}
@@ -157,6 +159,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 			flags, err := flagger.Flag(logger, authorName, works)
 			if err != nil {
 				logger.Error("flagger error", "error", err)
+				monitoring.FlaggerErrors.WithLabelValues(flagger.Name()).Inc()
 			} else {
 				flagsCh <- flags
 			}
@@ -178,6 +181,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 		flags, err := flagger.Flag(logger, authorName)
 		if err != nil {
 			logger.Error("flagger error", "error", err)
+			monitoring.FlaggerErrors.WithLabelValues(flagger.Name()).Inc()
 		} else {
 			flagsCh <- flags
 		}
@@ -188,6 +192,8 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 }
 
 func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdateTask) {
+	start := time.Now()
+
 	logger := slog.With("report_id", report.Id)
 
 	logger.Info("starting report processing", "author_id", report.AuthorId, "author_name", report.AuthorName, "source", report.Source, "is_university_queued", report.ForUniversityReport)
@@ -197,6 +203,7 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 		logger.Error("report failed: unable to get author works", "error", err)
 		if err := processor.manager.UpdateAuthorReport(report.Id, schema.ReportFailed, time.Time{}, nil); err != nil {
 			slog.Error("error updating author report status to failed", "error", err)
+			monitoring.ReportUpdateErrors.Inc()
 		}
 		return
 	}
@@ -213,6 +220,7 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 			if _, ok := seen[hash]; !ok {
 				seen[hash] = struct{}{}
 				flagCounts[flag.Type()]++
+				monitoring.TotalFlags.WithLabelValues(flag.Type()).Inc()
 			}
 		}
 
@@ -220,6 +228,7 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 			slog.Info("received batch of flags", "type", flags[0].Type(), "n_flags", len(flags))
 			if err := processor.manager.UpdateAuthorReport(report.Id, schema.ReportInProgress, report.EndDate, flags); err != nil {
 				slog.Error("error updating author report status for partial flags", "error", err)
+				monitoring.ReportUpdateErrors.Inc()
 			}
 		}
 	}
@@ -234,7 +243,10 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 
 	if err := processor.manager.UpdateAuthorReport(report.Id, schema.ReportCompleted, report.EndDate, nil); err != nil {
 		slog.Error("error updating author report status to complete", "error", err)
+		monitoring.ReportUpdateErrors.Inc()
 	}
+
+	monitoring.ReportsProcessed.Observe(time.Since(start).Seconds())
 }
 
 func (processor *ReportProcessor) ProcessNextAuthorReport() bool {

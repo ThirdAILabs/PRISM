@@ -8,9 +8,11 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"prism/prism/monitoring"
 	"prism/prism/openalex"
 	"prism/prism/pdf"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -249,8 +251,11 @@ func (extractor *GrobidAcknowledgementsExtractor) processPdfWithGrobid(pdf io.Re
 		SetMultipartField("input", "filename.pdf", "application/pdf", pdf).
 		Post("/api/processHeaderFundingDocument")
 	if err != nil {
+		monitoring.GrobidCalls.WithLabelValues("error").Inc()
 		return nil, fmt.Errorf("error making request to grobid: %w", err)
 	}
+
+	monitoring.GrobidCalls.WithLabelValues(strconv.Itoa(res.StatusCode())).Inc()
 
 	if !res.IsSuccess() {
 		return nil, fmt.Errorf("grobid returned status=%d, error=%v", res.StatusCode(), res.String())
