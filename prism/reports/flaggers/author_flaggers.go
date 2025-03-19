@@ -4,15 +4,26 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log/slog"
+	"net/http"
 	"prism/prism/api"
+	"prism/prism/gscholar"
 	"prism/prism/llms"
 	"prism/prism/openalex"
 	"prism/prism/search"
 	"regexp"
 	"slices"
+	"sort"
 	"strings"
+	"time"
 )
+
+type AuthorFlagger interface {
+	Flag(logger *slog.Logger, authorName string) ([]api.Flag, error)
+
+	Name() string
+}
 
 type AuthorIsFacultyAtEOCFlagger struct {
 	universityNDB search.NeuralDB
@@ -311,6 +322,10 @@ type AuthorIsAssociatedWithEOCFlagger struct {
 	auxIndex *search.ManyToOneIndex[LinkMetadata]
 }
 
+func (flagger *AuthorIsAssociatedWithEOCFlagger) DisableForUniversityReport() bool {
+	return false
+}
+
 func (flagger *AuthorIsAssociatedWithEOCFlagger) Name() string {
 	return "MiscAssociationWithEOC"
 }
@@ -561,7 +576,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 	return flags, nil
 }
 
-func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(logger *slog.Logger, authorName string, works []openalex.Work) ([]api.Flag, error) {
+func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	firstSecondLevelFlags, err := flagger.findFirstSecondHopEntities(authorName, works)
 	if err != nil {
 		logger.Error("error checking first/second level flags", "error", err)
@@ -575,6 +590,146 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(logger *slog.Logger, autho
 	}
 
 	flags := slices.Concat(firstSecondLevelFlags, secondThirdLevelFlags)
+
+	return flags, nil
+}
+
+type AuthorNewsArticlesFlagger struct {
+	llm llms.LLM
+}
+
+func (flagger *AuthorNewsArticlesFlagger) Name() string {
+	return "NewsArticles"
+}
+
+func fetchArticleWebpage(link string) (string, error) {
+	req, err := http.NewRequest("GET", link, nil)
+	if err != nil {
+		return "", err
+	}
+
+	headers := map[string]string{
+		"User-Agent":                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+		"Accept-Language":           "en-US,en;q=0.9",
+		"Connection":                "keep-alive",
+		"Accept":                    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+		"Referer":                   "https://www.google.com/",
+		"Upgrade-Insecure-Requests": "1",
+	}
+
+	for k, v := range headers {
+		req.Header.Add(k, v)
+	}
+
+	client := http.Client{Timeout: 10 * time.Second}
+	res, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("request returned status: %d", res.StatusCode)
+	}
+
+	const maxBytes = 300000
+
+	text := make([]byte, maxBytes) // TODO(question): this seems like a lot?
+	n, err := io.ReadFull(res.Body, text)
+	if err != nil && err != io.ErrUnexpectedEOF { // UnexpectedEOF is returned if < N bytes are read
+		return "", err
+	}
+
+	return string(text[:n]), nil
+}
+
+const articleCheckTemplate = `I will give you an author name, the title of a news article, and part of the html webpage for the article. 
+If the article is about the author, and indicates misconduct of some kind you must reply with a short sentence explaining the misconduct indicated by the article and the role of the author in it.
+If the article is not about the author, or does not indicate misconduct, you must reply with just the word "none".
+
+Author Name: %s
+Title: %s
+Html Content: %s
+`
+
+type checkArticleTask struct {
+	article    gscholar.NewsArticle
+	authorName string
+}
+
+type checkArticleResult struct {
+	article gscholar.NewsArticle
+	msg     string
+	flagged bool
+}
+
+func (flagger *AuthorNewsArticlesFlagger) checkArticle(task checkArticleTask) (checkArticleResult, error) {
+	html, err := fetchArticleWebpage(task.article.Link)
+	if err != nil {
+		return checkArticleResult{article: task.article, flagged: false}, err
+	}
+
+	response, err := flagger.llm.Generate(fmt.Sprintf(articleCheckTemplate, task.authorName, task.article.Title, html), nil)
+	if err != nil {
+		return checkArticleResult{article: task.article, flagged: false}, err
+	}
+
+	if strings.Contains(strings.ToLower(response), "none") {
+		return checkArticleResult{article: task.article, flagged: false}, nil
+	}
+
+	return checkArticleResult{article: task.article, msg: response, flagged: true}, nil
+}
+
+const maxArticles = 20
+
+func (flagger *AuthorNewsArticlesFlagger) Flag(logger *slog.Logger, authorName string) ([]api.Flag, error) {
+	articles, err := gscholar.GetNewsArticles(authorName)
+	if err != nil {
+		logger.Error("error getting news articles for author", "author_name", authorName, "error", err)
+		return nil, err
+	}
+
+	articles = articles[:min(maxArticles, len(articles))]
+
+	queue := make(chan checkArticleTask, len(articles))
+
+	for _, article := range articles {
+		queue <- checkArticleTask{article: article, authorName: authorName}
+	}
+	close(queue)
+
+	completed := make(chan CompletedTask[checkArticleResult], len(articles))
+
+	RunInPool(flagger.checkArticle, queue, completed, 5)
+
+	flaggedArticles := make([]checkArticleResult, 0)
+	for result := range completed {
+		if result.Error != nil {
+			logger.Error("error checking article", "error", err)
+		} else {
+			if result.Result.flagged {
+				flaggedArticles = append(flaggedArticles, result.Result)
+			}
+		}
+	}
+
+	sort.Slice(flaggedArticles, func(i, j int) bool {
+		return flaggedArticles[i].article.Date.After(flaggedArticles[j].article.Date)
+	})
+
+	flaggedArticles = flaggedArticles[:min(5, len(flaggedArticles))]
+
+	flags := make([]api.Flag, 0, len(flaggedArticles))
+	for _, result := range flaggedArticles {
+		flags = append(flags, &api.MiscHighRiskAssociationFlag{
+			Message:  result.msg,
+			DocTitle: result.article.Title,
+			DocUrl:   result.article.Link,
+			// TODO: add date support in this flag and use article.Date
+			EntityMentioned: authorName,
+		})
+	}
 
 	return flags, nil
 }

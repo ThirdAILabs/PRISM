@@ -259,8 +259,10 @@ func TestProcessorUniversityFacultySeach(t *testing.T) {
 	manager := setupReportManager(t)
 	processor := &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
-		authorFacultyAtEOC: &AuthorIsFacultyAtEOCFlagger{
-			universityNDB: universityNDB,
+		authorFlaggers: []AuthorFlagger{
+			&AuthorIsFacultyAtEOCFlagger{
+				universityNDB: universityNDB,
+			},
 		},
 		manager: manager,
 	}
@@ -326,9 +328,11 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 	manager := setupReportManager(t)
 	processor := &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
-		authorAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlagger{
-			docIndex: BuildDocIndex("../../../data/docs_and_press_releases.json"),
-			auxIndex: BuildAuxIndex("../../../data/auxiliary_webpages.json"),
+		workFlaggers: []WorkFlagger{
+			&AuthorIsAssociatedWithEOCFlagger{
+				docIndex: BuildDocIndex("../../../data/docs_and_press_releases.json"),
+				auxIndex: BuildAuxIndex("../../../data/auxiliary_webpages.json"),
+			},
 		},
 		manager: manager,
 	}
