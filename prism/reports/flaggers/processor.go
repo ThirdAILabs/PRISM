@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"path/filepath"
 	"prism/prism/api"
+	"prism/prism/llms"
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers/eoc"
@@ -17,20 +18,19 @@ import (
 )
 
 type ReportProcessor struct {
-	openalex                openalex.KnowledgeBase
-	workFlaggers            []WorkFlagger
-	authorFacultyAtEOC      *AuthorIsFacultyAtEOCFlagger
-	authorAssociatedWithEOC *AuthorIsAssociatedWithEOCFlagger
-	manager                 *reports.ReportManager
+	openalex       openalex.KnowledgeBase
+	workFlaggers   []WorkFlagger
+	authorFlaggers []AuthorFlagger
+	manager        *reports.ReportManager
 }
 
 type ReportProcessorOptions struct {
 	UniversityNDB   search.NeuralDB
-	DocNDB          search.NeuralDB
-	AuxNDB          search.NeuralDB
+	DocIndex        *search.ManyToOneIndex[LinkMetadata]
+	AuxIndex        *search.ManyToOneIndex[LinkMetadata]
 	TriangulationDB *triangulation.TriangulationDB
 
-	EntityLookup *EntityStore
+	EntityLookup *search.EntityIndex[string]
 
 	ConcerningEntities     eoc.EocSet
 	ConcerningInstitutions eoc.EocSet
@@ -83,13 +83,18 @@ func NewReportProcessor(manager *reports.ReportManager, opts ReportProcessorOpti
 				sussyBakas:      opts.SussyBakas,
 				triangulationDB: opts.TriangulationDB,
 			},
+			&AuthorIsAssociatedWithEOCFlagger{
+				docIndex: opts.DocIndex,
+				auxIndex: opts.AuxIndex,
+			},
 		},
-		authorFacultyAtEOC: &AuthorIsFacultyAtEOCFlagger{
-			universityNDB: opts.UniversityNDB,
-		},
-		authorAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlagger{
-			docNDB: opts.DocNDB,
-			auxNDB: opts.AuxNDB,
+		authorFlaggers: []AuthorFlagger{
+			&AuthorIsFacultyAtEOCFlagger{
+				universityNDB: opts.UniversityNDB,
+			},
+			&AuthorNewsArticlesFlagger{
+				llm: llms.New(),
+			},
 		},
 		manager: manager,
 	}, nil
@@ -110,7 +115,7 @@ func (processor *ReportProcessor) getWorkStream(report reports.ReportUpdateTask)
 	}
 }
 
-func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName string, workStream chan openalex.WorkBatch, flagsCh chan []api.Flag) {
+func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName string, workStream chan openalex.WorkBatch, flagsCh chan []api.Flag, forUniversityReport bool) {
 	wg := sync.WaitGroup{}
 
 	batch := -1
@@ -122,6 +127,11 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 		}
 		logger.Info("got next batch of works", "batch", batch, "n_works", len(works.Works))
 		for _, flagger := range processor.workFlaggers {
+
+			if forUniversityReport && flagger.DisableForUniversityReport() {
+				continue
+			}
+
 			wg.Add(1)
 
 			go func(flagger WorkFlagger, works []openalex.Work, authorIds []string) {
@@ -129,7 +139,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 
 				logger := logger.With("flagger", flagger.Name(), "batch", batch)
 
-				flags, err := flagger.Flag(logger, works, authorIds)
+				flags, err := flagger.Flag(logger, works, authorIds, authorName)
 				if err != nil {
 					logger.Error("flagger error", "error", err)
 				} else {
@@ -137,46 +147,23 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 				}
 			}(flagger, works.Works, works.TargetAuthorIds)
 		}
+	}
 
+	for _, flagger := range processor.authorFlaggers {
 		wg.Add(1)
-		go func(batch int, works []openalex.Work) {
+		go func(flagger AuthorFlagger) {
 			defer wg.Done()
 
-			flagger := processor.authorAssociatedWithEOC
-			if flagger == nil {
-				return
-			}
+			logger := logger.With("flagger", flagger.Name())
 
-			logger := logger.With("flagger", flagger.Name(), "batch", batch)
-
-			flags, err := flagger.Flag(logger, authorName, works)
+			flags, err := flagger.Flag(logger, authorName)
 			if err != nil {
 				logger.Error("flagger error", "error", err)
 			} else {
 				flagsCh <- flags
 			}
-
-		}(batch, works.Works)
+		}(flagger)
 	}
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		flagger := processor.authorFacultyAtEOC
-		if flagger == nil {
-			return
-		}
-
-		logger := logger.With("flagger", flagger.Name())
-
-		flags, err := flagger.Flag(logger, authorName)
-		if err != nil {
-			logger.Error("flagger error", "error", err)
-		} else {
-			flagsCh <- flags
-		}
-	}()
 
 	wg.Wait()
 	close(flagsCh)
@@ -185,7 +172,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdateTask) {
 	logger := slog.With("report_id", report.Id)
 
-	logger.Info("starting report processing", "author_id", report.AuthorId, "author_name", report.AuthorName, "source", report.Source)
+	logger.Info("starting report processing", "author_id", report.AuthorId, "author_name", report.AuthorName, "source", report.Source, "is_university_queued", report.ForUniversityReport)
 
 	workStream, err := processor.getWorkStream(report)
 	if err != nil {
@@ -197,7 +184,8 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 	}
 
 	flagsCh := make(chan []api.Flag, 100)
-	go processor.processWorks(logger, report.AuthorName, workStream, flagsCh)
+
+	go processor.processWorks(logger, report.AuthorName, workStream, flagsCh, report.ForUniversityReport)
 
 	seen := make(map[[sha256.Size]byte]struct{})
 	flagCounts := make(map[string]int)

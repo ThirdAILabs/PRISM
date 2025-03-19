@@ -8,15 +8,19 @@ import (
 	"strings"
 
 	"prism/prism/api"
+	"prism/prism/llms"
 	"prism/prism/openalex"
 	"prism/prism/reports/flaggers/eoc"
+	"prism/prism/search"
 	"prism/prism/triangulation"
 )
 
 type WorkFlagger interface {
-	Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error)
+	Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error)
 
 	Name() string
+
+	DisableForUniversityReport() bool
 }
 
 func getWorkSummary(w openalex.Work) api.WorkSummary {
@@ -35,7 +39,7 @@ func (flagger *OpenAlexMultipleAffiliationsFlagger) Name() string {
 	return "MultipleAffiliations"
 }
 
-func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -55,6 +59,10 @@ func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(logger *slog.Logger, wo
 	return flags, nil
 }
 
+func (flagger *OpenAlexMultipleAffiliationsFlagger) DisableForUniversityReport() bool {
+	return false
+}
+
 type OpenAlexFunderIsEOC struct {
 	concerningFunders  eoc.EocSet
 	concerningEntities eoc.EocSet
@@ -64,7 +72,7 @@ func (flagger *OpenAlexFunderIsEOC) Name() string {
 	return "FunderEOC"
 }
 
-func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -87,6 +95,10 @@ func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.W
 	return flags, nil
 }
 
+func (flagger *OpenAlexFunderIsEOC) DisableForUniversityReport() bool {
+	return false
+}
+
 type OpenAlexPublisherIsEOC struct {
 	concerningPublishers eoc.EocSet
 }
@@ -95,7 +107,7 @@ func (flagger *OpenAlexPublisherIsEOC) Name() string {
 	return "PublisherEOC"
 }
 
-func (flagger *OpenAlexPublisherIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexPublisherIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -118,6 +130,10 @@ func (flagger *OpenAlexPublisherIsEOC) Flag(logger *slog.Logger, works []openale
 	return flags, nil
 }
 
+func (flagger *OpenAlexPublisherIsEOC) DisableForUniversityReport() bool {
+	return false
+}
+
 type OpenAlexCoauthorIsEOC struct {
 	concerningEntities eoc.EocSet
 }
@@ -126,7 +142,7 @@ func (flagger *OpenAlexCoauthorIsEOC) Name() string {
 	return "CoauthorEOC"
 }
 
-func (flagger *OpenAlexCoauthorIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexCoauthorIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -157,6 +173,10 @@ func getKeys(m map[string]bool) []string {
 	return keys
 }
 
+func (flagger *OpenAlexCoauthorIsEOC) DisableForUniversityReport() bool {
+	return false
+}
+
 type OpenAlexAuthorAffiliationIsEOC struct {
 	concerningEntities     eoc.EocSet
 	concerningInstitutions eoc.EocSet
@@ -166,7 +186,7 @@ func (flagger *OpenAlexAuthorAffiliationIsEOC) Name() string {
 	return "AuthorAffiliationEOC"
 }
 
-func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -196,6 +216,10 @@ func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works [
 	return flags, nil
 }
 
+func (flagger *OpenAlexAuthorAffiliationIsEOC) DisableForUniversityReport() bool {
+	return false
+}
+
 type OpenAlexCoauthorAffiliationIsEOC struct {
 	concerningEntities     eoc.EocSet
 	concerningInstitutions eoc.EocSet
@@ -205,7 +229,7 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Name() string {
 	return "CoauthorAffiliationEOC"
 }
 
-func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -239,9 +263,21 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works
 	return flags, nil
 }
 
+func (flagger *OpenAlexCoauthorAffiliationIsEOC) DisableForUniversityReport() bool {
+	return false
+}
+
+func BuildWatchlistEntityIndex(aliasToSource map[string]string) *search.EntityIndex[string] {
+	records := make([]search.Record[string], 0, len(aliasToSource))
+	for alias, source := range aliasToSource {
+		records = append(records, search.Record[string]{Entity: alias, Metadata: source})
+	}
+	return search.NewIndex(records)
+}
+
 type OpenAlexAcknowledgementIsEOC struct {
 	openalex        openalex.KnowledgeBase
-	entityLookup    *EntityStore
+	entityLookup    *search.EntityIndex[string]
 	authorCache     DataCache[openalex.Author]
 	extractor       AcknowledgementsExtractor
 	sussyBakas      []string
@@ -320,8 +356,31 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForSussyBaka(ack Acknowledgeme
 	return flagger.containsSussyBakas(newText)
 }
 
+type SourceToAliases map[string][]string
+
+func (flagger *OpenAlexAcknowledgementIsEOC) searchWatchlistEntities(entities []string) map[string]SourceToAliases {
+	matches := make(map[string]SourceToAliases)
+
+	for _, entity := range entities {
+		results := flagger.entityLookup.Query(entity, 10)
+
+		sourceToAliases := make(SourceToAliases)
+		for _, result := range results {
+			sim := IndelSimilarity(entity, result.Entity)
+			if sim > 0.9 {
+				sourceToAliases[result.Metadata] = append(sourceToAliases[result.Entity], result.Entity)
+			}
+		}
+		if len(sourceToAliases) > 0 {
+			matches[entity] = sourceToAliases
+		}
+	}
+
+	return matches
+}
+
 func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
-	logger *slog.Logger, acknowledgements []Acknowledgement, allAuthorNames []string,
+	acknowledgements []Acknowledgement, allAuthorNames []string,
 ) (bool, map[string]SourceToAliases, string, error) {
 	message := ""
 	flagged := false
@@ -359,10 +418,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 		}
 
 		if len(entityQueries) > 0 {
-			matches, err := flagger.entityLookup.SearchEntities(logger, entityQueries)
-			if err != nil {
-				return false, nil, "", fmt.Errorf("error looking up entity matches: %w", err)
-			}
+			matches := flagger.searchWatchlistEntities(entityQueries)
 
 			for _, entity := range entityQueries {
 				if sources, ok := matches[entity]; ok {
@@ -377,8 +433,39 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 	return flagged, flaggedEntities, message, nil
 }
 
+func (flagger *OpenAlexAcknowledgementIsEOC) verifyGrantRecipientWithLLM(authorName string, grantNumber string, acknowledgementText string) (bool, error) {
+	llm := llms.New()
+
+	prompt := `Analyze this paper acknowledgment and determine if author %s might be the primary recipient/investigator of grant code %s.
+
+	Important instructions:
+	1. The author might be referred to by their initials (e.g., "J.S." or "JS" for "John Smith") in the text.
+	2. For grant codes that are listed as supporting general work without specifying who the primary recipient is, assume that the given author could be a primary recipient.
+	3. Only return "false" if there is EXPLICIT evidence that someone else is a primary recipient of the grant.
+	4. If multiple grants are listed together, and it's not clear who is the primary recipient of which grant, return "true".
+
+	Acknowledgment:
+	%s
+	`
+
+	res, err := llm.Generate(fmt.Sprintf(prompt, authorName, grantNumber, acknowledgementText), &llms.Options{
+		Model:        llms.GPT4oMini,
+		ZeroTemp:     true,
+		SystemPrompt: "You are a scientific paper analysis assistant who responds with only 'true' or 'false'.",
+	})
+	if err != nil {
+		return true, fmt.Errorf("llm match verification failed: %w", err)
+	}
+
+	if strings.Contains(strings.ToLower(res), "true") {
+		return true, nil
+	}
+
+	return false, nil
+}
+
 func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
-	acknowledgements []Acknowledgement, allAuthorNames []string,
+	fundCodes map[string]bool, acknowledgements []Acknowledgement, allAuthorNames []string,
 ) (map[string]map[string]bool, error) {
 	triangulationResults := make(map[string]map[string]bool)
 
@@ -391,12 +478,24 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForGrantRecipient(
 					}
 
 					for _, grantNumber := range entity.FundCodes {
+						if res, ok := fundCodes[grantNumber]; ok && !res {
+							triangulationResults[entity.EntityText][grantNumber] = false
+							continue
+						}
+
 						for _, authorName := range allAuthorNames {
 							result, err := flagger.triangulationDB.IsAuthorGrantRecipient(authorName, grantNumber)
 							if err != nil {
 								continue
 							}
 
+							if result {
+								result, err = flagger.verifyGrantRecipientWithLLM(authorName, grantNumber, ack.RawText)
+								if err != nil {
+									continue
+								}
+							}
+							fundCodes[grantNumber] = result
 							triangulationResults[entity.EntityText][grantNumber] = result
 							break
 						}
@@ -435,15 +534,15 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			Message:               message,
 			Work:                  getWorkSummary(work),
 			Entities:              entities,
-			RawAcknowledements:    rawAcks,
+			RawAcknowledgements:   rawAcks,
 			FundCodeTriangulation: triangulationResults,
 		}
 	} else if containsSource(entities, deniedEntities) {
 		return &api.AssociationWithDeniedEntityFlag{
-			Message:            message,
-			Work:               getWorkSummary(work),
-			Entities:           entities,
-			RawAcknowledements: rawAcks,
+			Message:             message,
+			Work:                getWorkSummary(work),
+			Entities:            entities,
+			RawAcknowledgements: rawAcks,
 		}
 	} else {
 		entityNames := make([]string, 0, len(entities))
@@ -454,13 +553,18 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			Message:               message,
 			Work:                  getWorkSummary(work),
 			Funders:               entityNames,
-			RawAcknowledements:    rawAcks,
+			RawAcknowledgements:   rawAcks,
 			FundCodeTriangulation: triangulationResults,
 		}
 	}
 }
 
-func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexAcknowledgementIsEOC) DisableForUniversityReport() bool {
+	return true
+}
+
+func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
+
 	flags := make([]api.Flag, 0)
 
 	remaining := make([]openalex.Work, 0)
@@ -492,6 +596,8 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 
 	acknowledgementsStream := flagger.extractor.GetAcknowledgements(logger, remaining)
 
+	fundCodes := make(map[string]bool)
+
 	for acks := range acknowledgementsStream {
 		if acks.Error != nil {
 			logger.Warn("error retreiving acknowledgments for work", "error", acks.Error)
@@ -504,7 +610,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 		}
 
 		flagged, flaggedEntities, message, err := flagger.checkAcknowledgementEntities(
-			workLogger, acks.Result.Acknowledgements, allAuthorNames,
+			acks.Result.Acknowledgements, allAuthorNames,
 		)
 		if err != nil {
 			workLogger.Error("error checking acknowledgements: skipping work", "error", err)
@@ -516,7 +622,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 		if flagged {
 			var err error
 			triangulationResults, err = flagger.checkForGrantRecipient(
-				acks.Result.Acknowledgements, allAuthorNames,
+				fundCodes, acks.Result.Acknowledgements, allAuthorNames,
 			)
 			if err != nil {
 				workLogger.Error("error checking for grant recipient", "error", err)
@@ -546,6 +652,27 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 				entities,
 				ackTexts,
 				triangulationResults))
+		}
+	}
+
+	updateFundCodeTriangulation := func(flagFundCodeTriangulation map[string]map[string]bool) {
+		for funder, innerMap := range flagFundCodeTriangulation {
+			for grantNumber := range innerMap {
+				if val, ok := fundCodes[grantNumber]; ok {
+					flagFundCodeTriangulation[funder][grantNumber] = val
+				}
+			}
+		}
+	}
+
+	for _, flag := range flags {
+		switch f := flag.(type) {
+		case *api.TalentContractFlag:
+			updateFundCodeTriangulation(f.FundCodeTriangulation)
+		case *api.HighRiskFunderFlag:
+			updateFundCodeTriangulation(f.FundCodeTriangulation)
+		default:
+			continue
 		}
 	}
 

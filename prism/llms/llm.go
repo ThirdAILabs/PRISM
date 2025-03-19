@@ -27,6 +27,7 @@ func New() LLM {
 
 const (
 	GPT4oMini = openai.ChatModelGPT4oMini
+	GPT4o     = openai.ChatModelGPT4o
 )
 
 type OpenAI struct {

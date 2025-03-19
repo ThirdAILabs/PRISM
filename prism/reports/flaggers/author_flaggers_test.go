@@ -3,6 +3,7 @@ package flaggers
 import (
 	"log/slog"
 	"prism/prism/api"
+	"prism/prism/llms"
 	"prism/prism/openalex"
 	"prism/prism/search"
 	"slices"
@@ -59,62 +60,38 @@ func TestAuthorIsFacultyAtEOC(t *testing.T) {
 }
 
 var (
-	mockPressReleases = []string{
-		"abc and xyz are indicted by the justice department",
-		"some other news about legal stuff",
-		"one last random sentence",
-		"new leaked documents implicate qrs today",
+	mockPressReleaseEntities = [][]string{
+		{"abc", "xyz"},
+		{"qrs"},
 	}
 
-	mockPressReleaseMetadata = []map[string]any{
-		{"title": "indicted", "url": "indicted.com", "entities": "abc;xyz"},
-		{"title": "other news", "url": "othernews.com", "entities": ""},
-		{"title": "random", "url": "random.com", "entities": ""},
-		{"title": "leaked docs", "url": "leakeddocs.com", "entities": "qrs"},
+	mockPressReleaseMetadata = []LinkMetadata{
+		{Title: "indicted", Url: "indicted.com", Entities: []string{"abc", "xyz"}, Text: "abc and xyz are indicted"},
+		{Title: "leaked docs", Url: "leakeddocs.com", Entities: []string{"qrs"}, Text: "qrs is implicated by leaked docs"},
 	}
 
-	mockAuxDocs = []string{
-		"xyz and 123 have started a new company together",
-		"graduate student 456 thanks advisor qrs",
-		"best friends and collaborators 456 and 789 announce new paper",
+	mockAuxDocEntities = [][]string{
+		{"xyz", "123"},
+		{"456", "qrs"},
+		{"456", "789"},
 	}
 
-	mockAuxDocMetadata = []map[string]any{
-		{"title": "new company", "url": "newcompany.com", "entities": "xyz;123"},
-		{"title": "graduate students", "url": "graduatestudents.com", "entities": "456;qrs"},
-		{"title": "best friends", "url": "bestfriends.com", "entities": "456;789"},
+	mockAuxDocMetadata = []LinkMetadata{
+		{Title: "new company", Url: "newcompany.com", Entities: []string{"xyz", "123"}, Text: "xyz and 123 found company"},
+		{Title: "graduate students", Url: "graduatestudents.com", Entities: []string{"456", "qrs"}, Text: "456 and qrs are graduate students together"},
+		{Title: "best friends", Url: "bestfriends.com", Entities: []string{"456", "789"}, Text: "456 and 789 are best friends"},
 	}
 )
 
 func TestAuthorAssociationIsEOC(t *testing.T) {
-	docNdb, err := search.NewNeuralDB(t.TempDir())
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer docNdb.Free()
-
-	if err := docNdb.Insert("doc", "id", mockPressReleases, mockPressReleaseMetadata, nil); err != nil {
-		t.Fatal(err)
-	}
-
-	auxNdb, err := search.NewNeuralDB(t.TempDir())
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer auxNdb.Free()
-
-	if err := auxNdb.Insert("doc", "id", mockAuxDocs, mockAuxDocMetadata, nil); err != nil {
-		t.Fatal(err)
-	}
-
-	flagger := AuthorIsAssociatedWithEOCFlagger{docNDB: docNdb, auxNDB: auxNdb}
+	flagger := AuthorIsAssociatedWithEOCFlagger{docIndex: search.NewManyToOneIndex(mockPressReleaseEntities, mockPressReleaseMetadata), auxIndex: search.NewManyToOneIndex(mockAuxDocEntities, mockAuxDocMetadata)}
 
 	t.Run("test primary connection", func(t *testing.T) {
 		works := []openalex.Work{ // Only the author names are used in this flagger
 			{Authors: []openalex.Author{{DisplayName: "abc"}, {DisplayName: "def"}}},
 		}
 
-		flags, err := flagger.Flag(slog.Default(), "abc", works)
+		flags, err := flagger.Flag(slog.Default(), works, nil, "abc")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -139,7 +116,7 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			{Authors: []openalex.Author{{DisplayName: "abc"}, {DisplayName: "def"}}},
 		}
 
-		flags, err := flagger.Flag(slog.Default(), "def", works)
+		flags, err := flagger.Flag(slog.Default(), works, nil, "def")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -163,7 +140,7 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 	})
 
 	t.Run("test secondary connection", func(t *testing.T) {
-		flags, err := flagger.Flag(slog.Default(), "123", []openalex.Work{})
+		flags, err := flagger.Flag(slog.Default(), []openalex.Work{}, nil, "123")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -188,7 +165,7 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 	})
 
 	t.Run("test tertiary connection", func(t *testing.T) {
-		flags, err := flagger.Flag(slog.Default(), "789", []openalex.Work{})
+		flags, err := flagger.Flag(slog.Default(), []openalex.Work{}, nil, "789")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -212,4 +189,19 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			t.Fatalf("incorrect flag: %v", *flag)
 		}
 	})
+}
+
+func TestAuthorNewsArticleFlagger(t *testing.T) {
+	flagger := AuthorNewsArticlesFlagger{
+		llm: llms.New(),
+	}
+
+	flags, err := flagger.Flag(slog.Default(), "charles lieber")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(flags) < 1 {
+		t.Fatal("expected flags")
+	}
 }

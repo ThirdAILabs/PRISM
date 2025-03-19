@@ -259,8 +259,10 @@ func TestProcessorUniversityFacultySeach(t *testing.T) {
 	manager := setupReportManager(t)
 	processor := &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
-		authorFacultyAtEOC: &AuthorIsFacultyAtEOCFlagger{
-			universityNDB: universityNDB,
+		authorFlaggers: []AuthorFlagger{
+			&AuthorIsFacultyAtEOCFlagger{
+				universityNDB: universityNDB,
+			},
 		},
 		manager: manager,
 	}
@@ -323,18 +325,14 @@ func TestProcessorUniversityFacultySeach(t *testing.T) {
 }
 
 func TestProcessorAuthorAssociations(t *testing.T) {
-	docNDB := BuildDocNDB("../../../data/docs_and_press_releases.json", t.TempDir())
-	defer docNDB.Free()
-
-	auxNDB := BuildAuxNDB("../../../data/auxiliary_webpages.json", t.TempDir())
-	defer auxNDB.Free()
-
 	manager := setupReportManager(t)
 	processor := &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
-		authorAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlagger{
-			docNDB: docNDB,
-			auxNDB: auxNDB,
+		workFlaggers: []WorkFlagger{
+			&AuthorIsAssociatedWithEOCFlagger{
+				docIndex: BuildDocIndex("../../../data/docs_and_press_releases.json"),
+				auxIndex: BuildAuxIndex("../../../data/auxiliary_webpages.json"),
+			},
 		},
 		manager: manager,
 	}
@@ -432,7 +430,7 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 				flag.Connections[0].DocUrl != "https://nuprobe.com/about-us/" ||
 				flag.Connections[1].DocTitle != "NuProbe Announces $11 Million Series A Funding Round" ||
 				flag.Connections[1].DocUrl != "https://nuprobe.com/2018/04/nuprobe-announces-11-million-series-a-funding-round-2/" {
-				t.Fatal("incorrect flag")
+				t.Fatalf("incorrect flag; %+v", flag)
 			}
 			entitiesMentioned[flag.EntityMentioned] = true
 		}
@@ -462,11 +460,7 @@ func TestProcessorAcknowledgements(t *testing.T) {
 	}
 	defer ackCache.Close()
 
-	entityStore, err := NewEntityStore(filepath.Join(testDir, "entity_lookup.ndb"), eoc.LoadSourceToAlias())
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer entityStore.Free()
+	entityStore := BuildWatchlistEntityIndex(eoc.LoadSourceToAlias())
 
 	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
 	if err != nil {
@@ -539,7 +533,7 @@ func TestProcessorAcknowledgements(t *testing.T) {
 			flag := flag.(*api.HighRiskFunderFlag)
 			if flag.Work.WorkId == "https://openalex.org/W4384197626" {
 				found = true
-				if len(flag.RawAcknowledements) == 0 || !strings.Contains(flag.Funders[0], "Zhejiang University") {
+				if len(flag.RawAcknowledgements) == 0 || !strings.Contains(flag.Funders[0], "Zhejiang University") {
 					t.Fatal("incorrect acknowledgement found")
 				}
 			}

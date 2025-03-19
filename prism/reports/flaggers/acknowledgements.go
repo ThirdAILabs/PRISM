@@ -121,8 +121,6 @@ func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId 
 	}
 	defer os.Remove(pdfPath)
 
-	// pdfPath := "/app/data/test.pdf"
-
 	if err := extractor.grobidSem.Acquire(context.Background(), 1); err != nil {
 		// I don't think this can fail if we use context.Background, so this error check
 		// is just in case.
@@ -198,7 +196,7 @@ func mergeFundersAndFundCodes(entities []Entity) []Entity {
 // A better approach would be to fix the root cause in the Grobid response itself,
 // but that was giving unexpected results. We will revisit that when time permits.
 func cleanAckHeader(raw string) string {
-	re := regexp.MustCompile(`(?i)^\s*(acknowledgements|acknowledgments|funding)[:\s-]*`)
+	re := regexp.MustCompile(`(?i)^\s*(acknowledgements|acknowledgments|acknowledgment|acknowledge|funding)[:\s-]*`)
 	return re.ReplaceAllString(raw, "")
 }
 

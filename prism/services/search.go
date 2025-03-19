@@ -25,7 +25,8 @@ const institutionNameSimilarityThreshold = 0.8
 type SearchService struct {
 	openalex openalex.KnowledgeBase
 
-	entitySearch EntitySearch
+	// entitySearch EntitySearch
+	entitySearch *search.ManyToOneIndex[api.MatchedEntity]
 }
 
 func hybridInstitutionNamesSort(originalInstitution string, institutionNames []string, similarityThreshold float64) []string {
@@ -207,57 +208,13 @@ func formatForPrompt(e api.MatchedEntity, id int) string {
 	return base + "[ENTITY END]"
 }
 
-type EntitySearch struct {
-	ndb search.NeuralDB
-}
-
-func NewEntitySearch(path string) (EntitySearch, error) {
-	ndb, err := search.NewNeuralDB(path)
-	if err != nil {
-		return EntitySearch{}, err
-	}
-	return EntitySearch{ndb: ndb}, nil
-}
-
-func (es *EntitySearch) Insert(entities []api.MatchedEntity) error {
-	data := make([]string, 0, len(entities))
-	metadata := make([]map[string]interface{}, 0, len(entities))
+func NewEntitySearch(entities []api.MatchedEntity) *search.ManyToOneIndex[api.MatchedEntity] {
+	entityNames := make([][]string, 0, len(entities))
 	for _, entity := range entities {
-		data = append(data, entity.Names)
-
-		metadata = append(metadata, map[string]interface{}{
-			"address":  entity.Address,
-			"country":  entity.Country,
-			"type":     entity.Type,
-			"resource": entity.Resource,
-		})
+		entityNames = append(entityNames, strings.Split(entity.Names, "\n"))
 	}
 
-	return es.ndb.Insert("entities", "id", data, metadata, nil)
-}
-
-func (es *EntitySearch) Query(query string, topk int) ([]api.MatchedEntity, error) {
-	results, err := es.ndb.Query(query, topk, nil)
-	if err != nil {
-		slog.Error("match entities: ndb search failed", "query", query, "error", err)
-		return nil, errors.New("entity search failed")
-	}
-
-	entities := make([]api.MatchedEntity, 0, len(results))
-	for i := range results {
-		entities = append(entities, api.MatchedEntity{
-			Names:    results[i].Text,
-			Address:  results[i].Metadata["address"].(string),
-			Country:  results[i].Metadata["country"].(string),
-			Type:     results[i].Metadata["type"].(string),
-			Resource: results[i].Metadata["resource"].(string),
-		})
-	}
-	return entities, nil
-}
-
-func (es *EntitySearch) Free() {
-	es.ndb.Free()
+	return search.NewManyToOneIndex(entityNames, entities)
 }
 
 const (
@@ -273,18 +230,19 @@ const (
 func (s *SearchService) MatchEntities(r *http.Request) (any, error) {
 	query := r.URL.Query().Get("query")
 
-	results, err := s.entitySearch.Query(query, 15)
-	if err != nil {
-		slog.Error("match entities: ndb search failed", "query", query, "error", err)
-		return nil, CodedError(errors.New("entity search failed"), http.StatusInternalServerError)
-	}
+	results := s.entitySearch.Query(query, 15)
 
 	idToEntity := make(map[int]api.MatchedEntity)
 
+	seen := make(map[string]bool)
 	candidates := make([]string, 0, len(results))
 	for id, entity := range results {
-		idToEntity[id] = entity
-		candidates = append(candidates, formatForPrompt(entity, id))
+		if seen[entity.Metadata.Names] {
+			continue
+		}
+		seen[entity.Metadata.Names] = true
+		idToEntity[id] = entity.Metadata
+		candidates = append(candidates, formatForPrompt(entity.Metadata, id))
 	}
 
 	// TODO(question): does the prompt make sense with the entities in front?

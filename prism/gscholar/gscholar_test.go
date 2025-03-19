@@ -84,3 +84,20 @@ func TestAuthorPaperIterator(t *testing.T) {
 		}
 	}
 }
+
+func TestNewsSearch(t *testing.T) {
+	results, err := gscholar.GetNewsArticles("charles lieber")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(results) == 0 {
+		t.Fatal("expect > 0 news articles")
+	}
+
+	for _, article := range results {
+		if article.Title == "" || article.Link == "" || article.Date.IsZero() {
+			t.Fatal("expected article link and title")
+		}
+	}
+}

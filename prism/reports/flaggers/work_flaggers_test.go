@@ -26,7 +26,7 @@ func TestMultipleAssociations(t *testing.T) {
 		}},
 	}
 
-	flags, err := flagger.Flag(slog.Default(), works, []string{"2", "3"})
+	flags, err := flagger.Flag(slog.Default(), works, []string{"2", "3"}, "abc")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,7 +34,7 @@ func TestMultipleAssociations(t *testing.T) {
 		t.Fatal("expected 1 flag")
 	}
 
-	noflags, err := flagger.Flag(slog.Default(), works, []string{"5", "6"})
+	noflags, err := flagger.Flag(slog.Default(), works, []string{"5", "6"}, "abc")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,7 +65,7 @@ func TestFunderEOC(t *testing.T) {
 			}},
 		}
 
-		flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"})
+		flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"}, "abc")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -89,7 +89,7 @@ func TestPublisherEOC(t *testing.T) {
 			}},
 		}
 
-		flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"})
+		flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"}, "abc")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -112,7 +112,7 @@ func TestCoauthorEOC(t *testing.T) {
 			}},
 		}
 
-		flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"})
+		flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"}, "abc")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -137,7 +137,7 @@ func TestAuthorAffiliationEOC(t *testing.T) {
 				}},
 			}
 
-			flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"})
+			flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"}, "abc")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -163,7 +163,7 @@ func TestCoauthorAffiliationEOC(t *testing.T) {
 				}},
 			}
 
-			flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"})
+			flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"}, "abc")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -209,12 +209,6 @@ func TestAcknowledgementEOC(t *testing.T) {
 		"bad entity xzy": "source_a", "a worse entity": "source_b",
 	}
 
-	entityStore, err := NewEntityStore(t.TempDir(), aliasToSource)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer entityStore.Free()
-
 	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
 	if err != nil {
 		t.Fatal(err)
@@ -230,14 +224,14 @@ func TestAcknowledgementEOC(t *testing.T) {
 
 	flagger := OpenAlexAcknowledgementIsEOC{
 		openalex:        openalex.NewRemoteKnowledgeBase(),
-		entityLookup:    entityStore,
+		entityLookup:    BuildWatchlistEntityIndex(aliasToSource),
 		authorCache:     authorCache,
 		extractor:       &mockAcknowledgmentExtractor{},
 		sussyBakas:      []string{"bad entity xyz"},
 		triangulationDB: triangulationDB,
 	}
 
-	flags, err := flagger.Flag(slog.Default(), []openalex.Work{{WorkId: "a/b", DownloadUrl: "n/a"}}, []string{})
+	flags, err := flagger.Flag(slog.Default(), []openalex.Work{{WorkId: "a/b", DownloadUrl: "n/a"}}, []string{}, "abc")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -260,12 +254,6 @@ func TestFundCodeTriangulation(t *testing.T) {
 	aliasToSource := map[string]string{
 		"bad entity xyz": "source_a",
 	}
-
-	entityStore, err := NewEntityStore(t.TempDir(), aliasToSource)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer entityStore.Free()
 
 	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
 	if err != nil {
@@ -318,7 +306,7 @@ func TestFundCodeTriangulation(t *testing.T) {
 
 	flagger := OpenAlexAcknowledgementIsEOC{
 		openalex:        openalex.NewRemoteKnowledgeBase(),
-		entityLookup:    entityStore,
+		entityLookup:    BuildWatchlistEntityIndex(aliasToSource),
 		authorCache:     authorCache,
 		extractor:       &mockAcknowledgmentExtractor{},
 		sussyBakas:      []string{"bad entity xyz"},
@@ -331,7 +319,7 @@ func TestFundCodeTriangulation(t *testing.T) {
 		}},
 	}
 
-	flags, err := flagger.Flag(slog.Default(), works, []string{"1"})
+	flags, err := flagger.Flag(slog.Default(), works, []string{"1"}, "abc")
 	if err != nil {
 		t.Fatal(err)
 	}
