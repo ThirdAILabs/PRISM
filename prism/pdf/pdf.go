@@ -296,7 +296,7 @@ func (downloader *PDFDownloader) DownloadWork(work openalex.Work) (string, error
 
 	pdfPath, err := downloader.downloadPdf(cachedPDFName, oaURL)
 	if err != nil {
-		return "", fmt.Errorf("unable to download pdf from %s / %s: %w", oaURL, doi, err)
+		return "", fmt.Errorf("unable to download pdf from %s / %s: %w", cachedPDFName, oaURL, err)
 	}
 
 	if err := downloader.uploadToCache(cachedPDFName, pdfPath); err != nil {
