@@ -84,6 +84,8 @@ func ExposeBackendMetrics(port int) {
 		UniAuthorReportsFoundInCache,
 		UniReportsCreated,
 		UniReportsFoundInCache,
+		OpenalexCalls,
+		SerpapiCalls,
 	)
 
 	slog.Info("exposing backend metrics", "port", port)

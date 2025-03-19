@@ -278,19 +278,21 @@ func (downloader *PDFDownloader) downloadPdf(doi, oaURL string) (string, error) 
 		errs = append(errs, fmt.Errorf("s3 cache download: %w", err))
 	}
 
+	httpStart := time.Now()
 	if path, err := downloader.downloadWithHttp(oaURL); err == nil {
-		monitoring.HttpDownloadSuccesses.Inc()
+		monitoring.HttpDownloads.WithLabelValues("success").Observe(time.Since(httpStart).Seconds())
 		return path, nil
 	} else {
-		monitoring.HttpDownloadErrors.Inc()
+		monitoring.HttpDownloads.WithLabelValues("error").Observe(time.Since(httpStart).Seconds())
 		errs = append(errs, fmt.Errorf("http download: %w", err))
 	}
 
+	playwrightStart := time.Now()
 	if path, err := downloader.downloadWithPlaywright(oaURL); err == nil {
-		monitoring.PlaywrightDownloadSuccesses.Inc()
+		monitoring.PlaywrightDownloads.WithLabelValues("success").Observe(time.Since(playwrightStart).Seconds())
 		return path, nil
 	} else {
-		monitoring.PlaywrightDownloadErrors.Inc()
+		monitoring.PlaywrightDownloads.WithLabelValues("error").Observe(time.Since(playwrightStart).Seconds())
 		errs = append(errs, fmt.Errorf("playwright download: %w", err))
 	}
 
@@ -298,11 +300,14 @@ func (downloader *PDFDownloader) downloadPdf(doi, oaURL string) (string, error) 
 }
 
 func (downloader *PDFDownloader) DownloadWork(work openalex.Work) (string, error) {
+	start := time.Now()
+
 	oaURL := work.DownloadUrl
 	doi := strings.TrimPrefix(work.DOI, "https://doi.org/")
 
 	pdfPath, err := downloader.downloadPdf(doi, oaURL)
 	if err != nil {
+		monitoring.TotalDownloads.WithLabelValues("error").Observe(time.Since(start).Seconds())
 		return "", fmt.Errorf("unable to download pdf from %s / %s: %w", oaURL, doi, err)
 	}
 
@@ -310,6 +315,8 @@ func (downloader *PDFDownloader) DownloadWork(work openalex.Work) (string, error
 		slog.Error("failed to upload pdf to S3 cache", "error", err)
 		monitoring.PdfCacheUploadErrors.Inc()
 	}
+
+	monitoring.TotalDownloads.WithLabelValues("success").Observe(time.Since(start).Seconds())
 
 	return pdfPath, nil
 

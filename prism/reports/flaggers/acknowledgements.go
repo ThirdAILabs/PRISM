@@ -247,15 +247,16 @@ func parseGrobidReponse(data io.Reader) ([]Acknowledgement, error) {
 }
 
 func (extractor *GrobidAcknowledgementsExtractor) processPdfWithGrobid(pdf io.Reader) ([]Acknowledgement, error) {
+	start := time.Now()
 	res, err := extractor.grobidClient.R().
 		SetMultipartField("input", "filename.pdf", "application/pdf", pdf).
 		Post("/api/processHeaderFundingDocument")
 	if err != nil {
-		monitoring.GrobidCalls.WithLabelValues("error").Inc()
+		monitoring.GrobidCalls.WithLabelValues("error").Observe(float64(time.Since(start).Milliseconds()))
 		return nil, fmt.Errorf("error making request to grobid: %w", err)
 	}
 
-	monitoring.GrobidCalls.WithLabelValues(strconv.Itoa(res.StatusCode())).Inc()
+	monitoring.GrobidCalls.WithLabelValues(strconv.Itoa(res.StatusCode())).Observe(float64(time.Since(start).Milliseconds()))
 
 	if !res.IsSuccess() {
 		return nil, fmt.Errorf("grobid returned status=%d, error=%v", res.StatusCode(), res.String())

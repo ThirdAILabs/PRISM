@@ -32,7 +32,7 @@ var (
 		Help: "Total report update errors",
 	})
 
-	GrobidCalls = prometheus.NewCounterVec(prometheus.CounterOpts{
+	GrobidCalls = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Name: "grobid_calls",
 		Help: "Total calls made to grobid",
 	}, []string{"status"})
@@ -43,7 +43,7 @@ var (
 	})
 
 	PdfCacheMisses = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "pdf_cache_hits",
+		Name: "pdf_cache_misses",
 		Help: "Total number of pdf cache misses",
 	})
 
@@ -57,38 +57,21 @@ var (
 		Help: "Total number of pdf cache upload errors",
 	})
 
-	HttpDownloadSuccesses = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "http_download_successes",
-		Help: "Total number of successful http downloads",
-	})
+	HttpDownloads = prometheus.NewSummaryVec(prometheus.SummaryOpts{
+		Name: "http_downloads",
+		Help: "Total http downloads",
+	}, []string{"status"})
 
-	HttpDownloadErrors = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "http_download_errors",
-		Help: "Total number of failed http downloads",
-	})
+	PlaywrightDownloads = prometheus.NewSummaryVec(prometheus.SummaryOpts{
+		Name: "playwright_downloads",
+		Help: "Total playwright downloads",
+	}, []string{"status"})
 
-	PlaywrightDownloadSuccesses = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "playwright_download_successes",
-		Help: "Total number of successful playwright downloads",
-	})
-
-	PlaywrightDownloadErrors = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "playwright_download_errors",
-		Help: "Total number of failed playwright downloads",
-	})
+	TotalDownloads = prometheus.NewSummaryVec(prometheus.SummaryOpts{
+		Name: "total_downloads",
+		Help: "Total downloads",
+	}, []string{"status"})
 )
-
-func WorkRegistry() *prometheus.Registry {
-	registry := prometheus.NewRegistry()
-
-	registry.MustRegister(
-		collectors.NewGoCollector(),
-		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
-		GrobidCalls,
-	)
-
-	return registry
-}
 
 func ExposeWorkerMetrics(port int) {
 	registry := prometheus.NewRegistry()
@@ -105,10 +88,11 @@ func ExposeWorkerMetrics(port int) {
 		PdfCacheMisses,
 		PdfCacheErrors,
 		PdfCacheUploadErrors,
-		HttpDownloadSuccesses,
-		HttpDownloadErrors,
-		PlaywrightDownloadSuccesses,
-		PlaywrightDownloadErrors,
+		HttpDownloads,
+		PlaywrightDownloads,
+		TotalDownloads,
+		OpenalexCalls,
+		SerpapiCalls,
 	)
 
 	slog.Info("exposing worker metrics", "port", port)

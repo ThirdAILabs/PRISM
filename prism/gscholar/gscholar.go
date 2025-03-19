@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"prism/prism/api"
+	"prism/prism/monitoring"
 	"slices"
 	"strconv"
 	"strings"
@@ -29,7 +30,11 @@ var client = resty.New().
 		// There's no reason to retry other 400 requests since the outcome should not change
 		return response != nil && (response.StatusCode() > 499 || response.StatusCode() == http.StatusTooManyRequests)
 	}).
-	SetRetryCount(2)
+	SetRetryCount(2).
+	OnAfterResponse(func(client *resty.Client, response *resty.Response) error {
+		monitoring.SerpapiCalls.WithLabelValues(strconv.Itoa(response.StatusCode())).Inc()
+		return nil
+	})
 
 var (
 	ErrGoogleScholarSearchFailed = errors.New("google scholar search failed")
