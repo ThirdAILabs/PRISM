@@ -23,9 +23,9 @@ type AuthorReport struct {
 	AuthorName string
 	Source     string
 
-	StatusUpdatedAt time.Time
-	Status          string `gorm:"size:20;not null"`
-	QueuedByUser    bool
+	StatusUpdatedAt     time.Time
+	Status              string `gorm:"size:20;not null"`
+	ForUniversityReport bool
 
 	Flags []AuthorFlag `gorm:"foreignKey:ReportId;constraint:OnDelete:CASCADE"`
 }

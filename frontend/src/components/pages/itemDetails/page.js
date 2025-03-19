@@ -21,12 +21,11 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import Shimmer from './Shimmer.js';
 import MuiAlert from '@mui/material/Alert';
 import { Snackbar, Tooltip } from '@mui/material';
 import useGoBack from '../../../hooks/useGoBack.js';
 import useOutsideClick from '../../../hooks/useOutsideClick.js';
-import { getTrailingWhiteSpace } from '../../../utils/helper.js';
+import { getRawTextFromXML, getTrailingWhiteSpace } from '../../../utils/helper.js';
 import Collapsible from '../../common/tools/CollapsibleComponent.js';
 
 const FLAG_ORDER = [
@@ -82,10 +81,11 @@ const TitlesAndDescriptions = {
 };
 
 const get_paper_url = (flag) => {
+  // getRawTextFromXML(flag.Work.DisplayName);
   return (
     <>
       <a href={flag.Work.WorkUrl} target="_blank" rel="noopener noreferrer">
-        {flag.Work.DisplayName}
+        {getRawTextFromXML(flag.Work.DisplayName)}
       </a>
       {flag.Work.OaUrl && (
         <text>
@@ -484,11 +484,11 @@ const ItemDetails = () => {
                 );
               })}
           </ul>
-          {Array.isArray(flag.RawAcknowledements) && flag.RawAcknowledements.length > 0 && (
+          {Array.isArray(flag.RawAcknowledgements) && flag.RawAcknowledgements?.length > 0 && (
             <>
               <strong>Acknowledgements Text</strong>
               <ul className="bulleted-list">
-                {flag.RawAcknowledements.map((item, index2) => {
+                {flag.RawAcknowledgements?.map((item, index2) => {
                   const key = `ack-${index} ${index2}`;
                   return <li key={key}>{item}</li>;
                 })}
@@ -697,7 +697,7 @@ const ItemDetails = () => {
             })}
           </ul>
           <strong>Acknowledgement Text</strong>
-          {flag.RawAcknowledements.map((item, index3) => {
+          {flag.RawAcknowledgements?.map((item, index3) => {
             return <p key={index3}>{item}</p>;
           })}
           <p>{}</p>

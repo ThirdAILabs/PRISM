@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import '../components/common/searchBar/SearchBar.css';
 import '../components/common/tools/button/button1.css';
 

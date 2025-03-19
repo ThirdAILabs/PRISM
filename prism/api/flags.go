@@ -183,7 +183,7 @@ type TalentContractFlag struct {
 	Message               string
 	Work                  WorkSummary
 	Entities              []AcknowledgementEntity
-	RawAcknowledements    []string
+	RawAcknowledgements   []string
 	FundCodeTriangulation map[string]map[string]bool
 }
 
@@ -214,7 +214,7 @@ func (flag *TalentContractFlag) GetDetailFields() []KeyValue {
 		{Key: "Title", Value: flag.Work.DisplayName},
 		{Key: "URL", Value: flag.Work.WorkUrl},
 		{Key: "Publication Date", Value: flag.Work.PublicationDate.String()},
-		{Key: "Acknowledgements", Value: strings.Join(flag.RawAcknowledements, ", ")},
+		{Key: "Acknowledgements", Value: strings.Join(flag.RawAcknowledgements, ", ")},
 	}
 }
 
@@ -226,7 +226,7 @@ func (flag *TalentContractFlag) GetDetailsFieldsForReport(useDisclosure bool) []
 	fields := []KeyValueURL{
 		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
 		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
-		{Key: "Acknowledgements", Value: strings.Join(flag.RawAcknowledements, ", ")},
+		{Key: "Acknowledgements", Value: strings.Join(flag.RawAcknowledgements, ", ")},
 	}
 	if useDisclosure {
 		fields = append([]KeyValueURL{
@@ -238,10 +238,10 @@ func (flag *TalentContractFlag) GetDetailsFieldsForReport(useDisclosure bool) []
 
 type AssociationWithDeniedEntityFlag struct {
 	DisclosableFlag
-	Message            string
-	Work               WorkSummary
-	Entities           []AcknowledgementEntity
-	RawAcknowledements []string
+	Message             string
+	Work                WorkSummary
+	Entities            []AcknowledgementEntity
+	RawAcknowledgements []string
 }
 
 func (flag *AssociationWithDeniedEntityFlag) Type() string {
@@ -271,7 +271,7 @@ func (flag *AssociationWithDeniedEntityFlag) GetDetailFields() []KeyValue {
 		{Key: "Title", Value: flag.Work.DisplayName},
 		{Key: "URL", Value: flag.Work.WorkUrl},
 		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
-		{Key: "Acknowledgements", Value: strings.Join(flag.RawAcknowledements, ", ")},
+		{Key: "Acknowledgements", Value: strings.Join(flag.RawAcknowledgements, ", ")},
 	}
 }
 
@@ -283,7 +283,7 @@ func (flag *AssociationWithDeniedEntityFlag) GetDetailsFieldsForReport(useDisclo
 	fields := []KeyValueURL{
 		{Key: "Title", Value: flag.Work.DisplayName, Url: flag.Work.WorkUrl},
 		{Key: "Publication Date", Value: flag.Work.PublicationDate.Format(time.DateOnly)},
-		{Key: "Acknowledgements", Value: strings.Join(flag.RawAcknowledements, ", ")},
+		{Key: "Acknowledgements", Value: strings.Join(flag.RawAcknowledgements, ", ")},
 	}
 	if useDisclosure {
 		fields = append([]KeyValueURL{
@@ -298,7 +298,7 @@ type HighRiskFunderFlag struct {
 	Message               string
 	Work                  WorkSummary
 	Funders               []string
-	RawAcknowledements    []string
+	RawAcknowledgements   []string
 	FundCodeTriangulation map[string]map[string]bool
 }
 

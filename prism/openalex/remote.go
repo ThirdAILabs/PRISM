@@ -211,6 +211,7 @@ type oaWorkResults struct {
 // Response Format: https://docs.openalex.org/api-entities/works/get-lists-of-works
 type oaWork struct {
 	Id              string `json:"id"`
+	DOI             string `json:"doi"`
 	DisplayName     string `json:"display_name"`
 	PublicationDate string `json:"publication_date"`
 
@@ -334,6 +335,7 @@ func convertOpenalexWork(work oaWork) Work {
 		Authors:         authors,
 		Grants:          grants,
 		Locations:       locations,
+		DOI:             work.DOI,
 	}
 }
 

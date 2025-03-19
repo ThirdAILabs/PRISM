@@ -209,12 +209,6 @@ func TestAcknowledgementEOC(t *testing.T) {
 		"bad entity xzy": "source_a", "a worse entity": "source_b",
 	}
 
-	entityStore, err := NewEntityStore(t.TempDir(), aliasToSource)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer entityStore.Free()
-
 	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
 	if err != nil {
 		t.Fatal(err)
@@ -230,7 +224,7 @@ func TestAcknowledgementEOC(t *testing.T) {
 
 	flagger := OpenAlexAcknowledgementIsEOC{
 		openalex:        openalex.NewRemoteKnowledgeBase(),
-		entityLookup:    entityStore,
+		entityLookup:    BuildWatchlistEntityIndex(aliasToSource),
 		authorCache:     authorCache,
 		extractor:       &mockAcknowledgmentExtractor{},
 		sussyBakas:      []string{"bad entity xyz"},
@@ -260,12 +254,6 @@ func TestFundCodeTriangulation(t *testing.T) {
 	aliasToSource := map[string]string{
 		"bad entity xyz": "source_a",
 	}
-
-	entityStore, err := NewEntityStore(t.TempDir(), aliasToSource)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer entityStore.Free()
 
 	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
 	if err != nil {
@@ -318,7 +306,7 @@ func TestFundCodeTriangulation(t *testing.T) {
 
 	flagger := OpenAlexAcknowledgementIsEOC{
 		openalex:        openalex.NewRemoteKnowledgeBase(),
-		entityLookup:    entityStore,
+		entityLookup:    BuildWatchlistEntityIndex(aliasToSource),
 		authorCache:     authorCache,
 		extractor:       &mockAcknowledgmentExtractor{},
 		sussyBakas:      []string{"bad entity xyz"},

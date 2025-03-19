@@ -26,11 +26,11 @@ type ReportProcessor struct {
 
 type ReportProcessorOptions struct {
 	UniversityNDB   search.NeuralDB
-	DocNDB          search.NeuralDB
-	AuxNDB          search.NeuralDB
+	DocIndex        *search.ManyToOneIndex[LinkMetadata]
+	AuxIndex        *search.ManyToOneIndex[LinkMetadata]
 	TriangulationDB *triangulation.TriangulationDB
 
-	EntityLookup *EntityStore
+	EntityLookup *search.EntityIndex[string]
 
 	ConcerningEntities     eoc.EocSet
 	ConcerningInstitutions eoc.EocSet
@@ -45,6 +45,8 @@ type ReportProcessorOptions struct {
 
 	MaxDownloadThreads int
 	MaxGrobidThreads   int
+
+	PDFS3CacheBucket string
 }
 
 // TODO(Nicholas): How to do cleanup for this, or just let it get cleaned up at the end of the process?
@@ -77,13 +79,13 @@ func NewReportProcessor(manager *reports.ReportManager, opts ReportProcessorOpti
 				openalex:        openalex.NewRemoteKnowledgeBase(),
 				entityLookup:    opts.EntityLookup,
 				authorCache:     authorCache,
-				extractor:       NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.WorkDir, opts.MaxDownloadThreads, opts.MaxGrobidThreads),
+				extractor:       NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.MaxDownloadThreads, opts.MaxGrobidThreads, opts.PDFS3CacheBucket),
 				sussyBakas:      opts.SussyBakas,
 				triangulationDB: opts.TriangulationDB,
 			},
 			&AuthorIsAssociatedWithEOCFlagger{
-				docNDB: opts.DocNDB,
-				auxNDB: opts.AuxNDB,
+				docIndex: opts.DocIndex,
+				auxIndex: opts.AuxIndex,
 			},
 		},
 		authorFlaggers: []AuthorFlagger{
@@ -113,7 +115,7 @@ func (processor *ReportProcessor) getWorkStream(report reports.ReportUpdateTask)
 	}
 }
 
-func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName string, workStream chan openalex.WorkBatch, flagsCh chan []api.Flag) {
+func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName string, workStream chan openalex.WorkBatch, flagsCh chan []api.Flag, forUniversityReport bool) {
 	wg := sync.WaitGroup{}
 
 	batch := -1
@@ -125,6 +127,11 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 		}
 		logger.Info("got next batch of works", "batch", batch, "n_works", len(works.Works))
 		for _, flagger := range processor.workFlaggers {
+
+			if forUniversityReport && flagger.DisableForUniversityReport() {
+				continue
+			}
+
 			wg.Add(1)
 
 			go func(flagger WorkFlagger, works []openalex.Work, authorIds []string) {
@@ -165,7 +172,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdateTask) {
 	logger := slog.With("report_id", report.Id)
 
-	logger.Info("starting report processing", "author_id", report.AuthorId, "author_name", report.AuthorName, "source", report.Source)
+	logger.Info("starting report processing", "author_id", report.AuthorId, "author_name", report.AuthorName, "source", report.Source, "is_university_queued", report.ForUniversityReport)
 
 	workStream, err := processor.getWorkStream(report)
 	if err != nil {
@@ -177,7 +184,8 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 	}
 
 	flagsCh := make(chan []api.Flag, 100)
-	go processor.processWorks(logger, report.AuthorName, workStream, flagsCh)
+
+	go processor.processWorks(logger, report.AuthorName, workStream, flagsCh, report.ForUniversityReport)
 
 	seen := make(map[[sha256.Size]byte]struct{})
 	flagCounts := make(map[string]int)
