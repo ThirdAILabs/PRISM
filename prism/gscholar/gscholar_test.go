@@ -86,7 +86,7 @@ func TestAuthorPaperIterator(t *testing.T) {
 }
 
 func TestNewsSearch(t *testing.T) {
-	results, err := gscholar.GetNewsArticles("charles lieber", "harvard university")
+	results, err := gscholar.GetNewsArticles("charles lieber")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +96,7 @@ func TestNewsSearch(t *testing.T) {
 	}
 
 	for _, article := range results {
-		if article.Title == "" || article.Link == "" {
+		if article.Title == "" || article.Link == "" || article.Date.IsZero() {
 			t.Fatal("expected article link and title")
 		}
 	}

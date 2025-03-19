@@ -1,8 +1,6 @@
 package flaggers
 
 import (
-	"encoding/json"
-	"fmt"
 	"log/slog"
 	"prism/prism/api"
 	"prism/prism/llms"
@@ -203,7 +201,7 @@ func TestAuthorNewsArticleFlagger(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, _ := json.MarshalIndent(flags, "", "  ")
-
-	fmt.Println(string(data))
+	if len(flags) < 1 {
+		t.Fatal("expected flags")
+	}
 }

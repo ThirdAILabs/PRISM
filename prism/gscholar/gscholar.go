@@ -432,16 +432,15 @@ type NewsArticle struct {
 	Date  time.Time
 }
 
-func GetNewsArticles(authorName, universityName string) ([]NewsArticle, error) {
-	query := fmt.Sprintf("%s %s", authorName, universityName)
+func GetNewsArticles(authorName string) ([]NewsArticle, error) {
 	res, err := client.R().
 		SetResult(&googleNewsResults{}).
 		SetQueryParam("engine", "google_news").
-		SetQueryParam("q", query).
+		SetQueryParam("q", authorName).
 		Get("/search")
 
 	if err != nil {
-		slog.Error("google news search failed", "query", query, "error", err)
+		slog.Error("google news search failed", "query", authorName, "error", err)
 		return nil, fmt.Errorf("google news error: %w", err)
 	}
 

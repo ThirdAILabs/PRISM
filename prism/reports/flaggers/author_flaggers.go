@@ -14,6 +14,7 @@ import (
 	"prism/prism/search"
 	"regexp"
 	"slices"
+	"sort"
 	"strings"
 	"time"
 )
@@ -683,7 +684,7 @@ func (flagger *AuthorNewsArticlesFlagger) checkArticle(task checkArticleTask) (c
 const maxArticles = 20
 
 func (flagger *AuthorNewsArticlesFlagger) Flag(logger *slog.Logger, authorName string) ([]api.Flag, error) {
-	articles, err := gscholar.GetNewsArticles(authorName, "")
+	articles, err := gscholar.GetNewsArticles(authorName)
 	if err != nil {
 		logger.Error("error getting news articles for author", "author_name", authorName, "error", err)
 		return nil, err
@@ -702,21 +703,32 @@ func (flagger *AuthorNewsArticlesFlagger) Flag(logger *slog.Logger, authorName s
 
 	RunInPool(flagger.checkArticle, queue, completed, 5)
 
-	flags := make([]api.Flag, 0)
+	flaggedArticles := make([]checkArticleResult, 0)
 	for result := range completed {
 		if result.Error != nil {
 			logger.Error("error checking article", "error", err)
 		} else {
 			if result.Result.flagged {
-				flags = append(flags, &api.MiscHighRiskAssociationFlag{
-					Message:  result.Result.msg,
-					DocTitle: result.Result.article.Title,
-					DocUrl:   result.Result.article.Link,
-					// Date: result.Result.article.Date,
-					EntityMentioned: authorName,
-				})
+				flaggedArticles = append(flaggedArticles, result.Result)
 			}
 		}
+	}
+
+	sort.Slice(flaggedArticles, func(i, j int) bool {
+		return flaggedArticles[i].article.Date.After(flaggedArticles[j].article.Date)
+	})
+
+	flaggedArticles = flaggedArticles[:min(5, len(flaggedArticles))]
+
+	flags := make([]api.Flag, 0, len(flaggedArticles))
+	for _, result := range flaggedArticles {
+		flags = append(flags, &api.MiscHighRiskAssociationFlag{
+			Message:  result.msg,
+			DocTitle: result.article.Title,
+			DocUrl:   result.article.Link,
+			// TODO: add date support in this flag and use article.Date
+			EntityMentioned: authorName,
+		})
 	}
 
 	return flags, nil
