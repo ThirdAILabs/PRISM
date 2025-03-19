@@ -288,14 +288,13 @@ func (downloader *PDFDownloader) downloadPdf(cachedPDFName, oaURL string) (strin
 func (downloader *PDFDownloader) DownloadWork(work openalex.Work) (string, error) {
 	oaURL := work.DownloadUrl
 	doi := strings.TrimPrefix(work.DOI, "https://doi.org/")
-	openAlexID := work.WorkId
 
 	cachedPDFName := doi
 	if cachedPDFName == "" {
-		cachedPDFName = openAlexID
+		cachedPDFName = work.WorkId
 	}
 
-	pdfPath, err := downloader.downloadPdf(cachedPDFName, doi)
+	pdfPath, err := downloader.downloadPdf(cachedPDFName, oaURL)
 	if err != nil {
 		return "", fmt.Errorf("unable to download pdf from %s / %s: %w", oaURL, doi, err)
 	}
