@@ -196,7 +196,7 @@ func mergeFundersAndFundCodes(entities []Entity) []Entity {
 // A better approach would be to fix the root cause in the Grobid response itself,
 // but that was giving unexpected results. We will revisit that when time permits.
 func cleanAckHeader(raw string) string {
-	re := regexp.MustCompile(`(?i)^\s*(acknowledgements|acknowledgments|funding)[:\s-]*`)
+	re := regexp.MustCompile(`(?i)^\s*(acknowledgements|acknowledgments|acknowledgment|acknowledge|funding)[:\s-]*`)
 	return re.ReplaceAllString(raw, "")
 }
 
