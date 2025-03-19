@@ -15,6 +15,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { AUTHOR_AFFILIATIONS } from '../../../constants/constants.js';
+import { getRawTextFromXML } from '../../../utils/helper.js';
 
 function getNodeTitle(flagType, flag) {
   if (flagType == AUTHOR_AFFILIATIONS) {
@@ -557,7 +558,7 @@ const Graph = ({ authorName, reportContent }) => {
                             onMouseEnter={(e) => (e.target.style.textDecoration = 'underline')}
                             onMouseLeave={(e) => (e.target.style.textDecoration = 'none')}
                           >
-                            {child.title}
+                            {getRawTextFromXML(child.title)}
                           </Link>
                           <Divider
                             sx={{
