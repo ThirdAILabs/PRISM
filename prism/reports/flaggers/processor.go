@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"path/filepath"
 	"prism/prism/api"
+	"prism/prism/llms"
 	"prism/prism/monitoring"
 	"prism/prism/openalex"
 	"prism/prism/reports"
@@ -18,11 +19,10 @@ import (
 )
 
 type ReportProcessor struct {
-	openalex                openalex.KnowledgeBase
-	workFlaggers            []WorkFlagger
-	authorFacultyAtEOC      *AuthorIsFacultyAtEOCFlagger
-	authorAssociatedWithEOC *AuthorIsAssociatedWithEOCFlagger
-	manager                 *reports.ReportManager
+	openalex       openalex.KnowledgeBase
+	workFlaggers   []WorkFlagger
+	authorFlaggers []AuthorFlagger
+	manager        *reports.ReportManager
 }
 
 type ReportProcessorOptions struct {
@@ -84,13 +84,18 @@ func NewReportProcessor(manager *reports.ReportManager, opts ReportProcessorOpti
 				sussyBakas:      opts.SussyBakas,
 				triangulationDB: opts.TriangulationDB,
 			},
+			&AuthorIsAssociatedWithEOCFlagger{
+				docIndex: opts.DocIndex,
+				auxIndex: opts.AuxIndex,
+			},
 		},
-		authorFacultyAtEOC: &AuthorIsFacultyAtEOCFlagger{
-			universityNDB: opts.UniversityNDB,
-		},
-		authorAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlagger{
-			docIndex: opts.DocIndex,
-			auxIndex: opts.AuxIndex,
+		authorFlaggers: []AuthorFlagger{
+			&AuthorIsFacultyAtEOCFlagger{
+				universityNDB: opts.UniversityNDB,
+			},
+			&AuthorNewsArticlesFlagger{
+				llm: llms.New(),
+			},
 		},
 		manager: manager,
 	}, nil
@@ -135,7 +140,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 
 				logger := logger.With("flagger", flagger.Name(), "batch", batch)
 
-				flags, err := flagger.Flag(logger, works, authorIds)
+				flags, err := flagger.Flag(logger, works, authorIds, authorName)
 				if err != nil {
 					logger.Error("flagger error", "error", err)
 					monitoring.FlaggerErrors.WithLabelValues(flagger.Name()).Inc()
@@ -144,48 +149,24 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 				}
 			}(flagger, works.Works, works.TargetAuthorIds)
 		}
+	}
 
+	for _, flagger := range processor.authorFlaggers {
 		wg.Add(1)
-		go func(batch int, works []openalex.Work) {
+		go func(flagger AuthorFlagger) {
 			defer wg.Done()
 
-			flagger := processor.authorAssociatedWithEOC
-			if flagger == nil {
-				return
-			}
+			logger := logger.With("flagger", flagger.Name())
 
-			logger := logger.With("flagger", flagger.Name(), "batch", batch)
-
-			flags, err := flagger.Flag(logger, authorName, works)
+			flags, err := flagger.Flag(logger, authorName)
 			if err != nil {
 				logger.Error("flagger error", "error", err)
 				monitoring.FlaggerErrors.WithLabelValues(flagger.Name()).Inc()
 			} else {
 				flagsCh <- flags
 			}
-
-		}(batch, works.Works)
+		}(flagger)
 	}
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		flagger := processor.authorFacultyAtEOC
-		if flagger == nil {
-			return
-		}
-
-		logger := logger.With("flagger", flagger.Name())
-
-		flags, err := flagger.Flag(logger, authorName)
-		if err != nil {
-			logger.Error("flagger error", "error", err)
-			monitoring.FlaggerErrors.WithLabelValues(flagger.Name()).Inc()
-		} else {
-			flagsCh <- flags
-		}
-	}()
 
 	wg.Wait()
 	close(flagsCh)
