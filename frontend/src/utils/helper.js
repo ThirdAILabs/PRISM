@@ -22,9 +22,9 @@ export function getRawTextFromXML(xml) {
   if (!xml) return returnText;
 
   const length = xml.length;
-  const flagStart = '<mml:',
-    flagEnd = '</mml:';
-  //Need to find the first occurence of <mml: and last occurence of </mml: to get the correct xml
+  const flagStart = '<',
+    flagEnd = '</';
+  //Need to find the first occurence of < and last occurence of </ to get the correct xml
 
   let start = xml.indexOf(flagStart);
   let end = xml.lastIndexOf(flagEnd);
@@ -36,15 +36,15 @@ export function getRawTextFromXML(xml) {
   while (end < length && xml[end] !== '>') {
     end++;
   }
+  if (end < length) end++;
 
   returnText += xml.substring(0, start);
-  if (end !== length) end++;
+  let newXml = xml.substring(start, end);
 
-  xml = xml.substring(start, end);
-
-  const validation = XMLValidator.validate(xml);
+  const validation = XMLValidator.validate(newXml);
   if (validation !== true) {
     //In case if xml is not valid, then simply skip the value between < and >
+
     for (let index = start; index < end; index++) {
       const charValue = xml[index];
       if (charValue === '<') {
@@ -56,8 +56,10 @@ export function getRawTextFromXML(xml) {
     return returnText;
   }
 
-  const doc = new DOMParser().parseFromString(xml, 'text/xml');
+  const doc = new DOMParser().parseFromString(newXml, 'text/xml');
   returnText += doc.documentElement.textContent;
-  returnText += xml.substring(end, length);
+
+  if (end < length) returnText += xml.substring(end, length);
+
   return returnText;
 }
