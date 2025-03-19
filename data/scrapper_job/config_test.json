@@ -1,0 +1,21 @@
+{
+    "jobs": [
+        {
+            "name": "csl_data",
+            "module": "jobs.csl",
+            "fetcher": "fetch_source",
+            "processor": "process_source",
+            "updater": "update_local_store",
+            "config": {
+                "csv_url": "https://data.trade.gov/downloadable_consolidated_screening_list/v1/consolidated.csv",
+                "original_file": "data/csl_data/original.csv",
+                "output_file": "data/csl_data/new_data.csv"
+            }
+        }
+    ],
+    "global": {
+        "openai_api_key": "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",
+        "email": "pratik@thirdai.com",
+        "data_folder": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data"
+    }
+}
