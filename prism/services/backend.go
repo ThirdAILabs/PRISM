@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"prism/prism/api"
 	"prism/prism/licensing"
+	"prism/prism/monitoring"
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/search"
@@ -45,6 +46,7 @@ func (s *BackendService) Routes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
+	r.Use(monitoring.HandlerMetrics)
 	r.Use(middleware.Recoverer)
 
 	r.With(auth.Middleware(s.userAuth)).Mount("/report", s.report.Routes())
