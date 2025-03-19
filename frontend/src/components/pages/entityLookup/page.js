@@ -72,7 +72,6 @@ function EntityLookup() {
                   fontWeight: 'bold',
                   color: 'black',
                   animation: 'fade-in 0.75s',
-                  fontFamily: 'serif',
                 }}
               >
                 Entity Lookup
