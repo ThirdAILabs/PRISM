@@ -4,8 +4,13 @@ type FlagFeedback interface {
 	Type() string
 }
 
+type AuthorIssue struct {
+	IncorrectAuthor bool
+	AuthorNotFound  bool
+}
+
 type TalentContractFeedback struct {
-	Feedbacks []Feedbacks
+	AuthorIssue
 }
 
 func (feedback *TalentContractFeedback) Type() string {
@@ -13,7 +18,8 @@ func (feedback *TalentContractFeedback) Type() string {
 }
 
 type AssociationWithDeniedEntityFeedback struct {
-	Feedbacks []Feedbacks
+	AuthorIssue
+	ForeignEntityNotFound bool // glagged foreign entity is not found in the url
 }
 
 func (feedback *AssociationWithDeniedEntityFeedback) Type() string {
@@ -21,7 +27,8 @@ func (feedback *AssociationWithDeniedEntityFeedback) Type() string {
 }
 
 type HighRiskFunderFeedback struct {
-	Feedbacks []Feedbacks
+	AuthorIssue
+	FundingNotEoc bool
 }
 
 func (feedback *HighRiskFunderFeedback) Type() string {
@@ -29,7 +36,8 @@ func (feedback *HighRiskFunderFeedback) Type() string {
 }
 
 type AuthorAffiliationFeedback struct {
-	Feedbacks []Feedbacks
+	AuthorIssue
+	Alliliates []string // the affiliation is incorrect
 }
 
 func (feedback *AuthorAffiliationFeedback) Type() string {
@@ -37,7 +45,8 @@ func (feedback *AuthorAffiliationFeedback) Type() string {
 }
 
 type PotentialAuthorAffiliationFeedback struct {
-	Feedbacks []Feedbacks
+	AuthorIssue
+	IncorrectInstitutionAffiliation bool
 }
 
 func (feedback *PotentialAuthorAffiliationFeedback) Type() string {
@@ -45,7 +54,10 @@ func (feedback *PotentialAuthorAffiliationFeedback) Type() string {
 }
 
 type MiscHighRiskAssociationFeedback struct {
-	Feedbacks []Feedbacks
+	AuthorIssue
+	EntityNotMentioned bool     // the entity is not mentioned in the Press release
+	IncorrectDocUrl    string   // the document url for this document title is incorrect
+	Affiliates         []string // the affiliated authors are incorrect
 }
 
 func (feedback *MiscHighRiskAssociationFeedback) Type() string {
@@ -53,7 +65,8 @@ func (feedback *MiscHighRiskAssociationFeedback) Type() string {
 }
 
 type CoauthorAffiliationFeedback struct {
-	Feedbacks []Feedbacks
+	AuthorIssue
+	Affiliates []string // the affiliated authors are incorrect
 }
 
 func (feedback *CoauthorAffiliationFeedback) Type() string {
