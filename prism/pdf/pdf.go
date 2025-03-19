@@ -199,8 +199,8 @@ func (downloader *PDFDownloader) downloadFromCache(pdfName string) (string, erro
 	return tmpFile.Name(), nil
 }
 
-func (downloader *PDFDownloader) uploadToCache(doi string, pdfPath string) error {
-	key := fmt.Sprintf("pdfs/%s.pdf", doi)
+func (downloader *PDFDownloader) uploadToCache(cachedPDFName string, pdfPath string) error {
+	key := fmt.Sprintf("pdfs/%s.pdf", cachedPDFName)
 
 	headInput := &s3.HeadObjectInput{
 		Bucket: aws.String(downloader.s3CacheBucket),
@@ -261,13 +261,8 @@ func (downloader *PDFDownloader) DeleteFromCache(doi string) error {
 	return nil
 }
 
-func (downloader *PDFDownloader) downloadPdf(doi, oaURL, openAlexID string) (string, error) {
+func (downloader *PDFDownloader) downloadPdf(cachedPDFName, oaURL string) (string, error) {
 	var errs []error
-
-	cachedPDFName := doi
-	if cachedPDFName == "" {
-		cachedPDFName = openAlexID
-	}
 
 	if path, err := downloader.downloadFromCache(cachedPDFName); err == nil {
 		return path, nil
@@ -295,12 +290,17 @@ func (downloader *PDFDownloader) DownloadWork(work openalex.Work) (string, error
 	doi := strings.TrimPrefix(work.DOI, "https://doi.org/")
 	openAlexID := work.WorkId
 
-	pdfPath, err := downloader.downloadPdf(doi, oaURL, openAlexID)
+	cachedPDFName := doi
+	if cachedPDFName == "" {
+		cachedPDFName = openAlexID
+	}
+
+	pdfPath, err := downloader.downloadPdf(cachedPDFName, doi)
 	if err != nil {
 		return "", fmt.Errorf("unable to download pdf from %s / %s: %w", oaURL, doi, err)
 	}
 
-	if err := downloader.uploadToCache(doi, pdfPath); err != nil {
+	if err := downloader.uploadToCache(cachedPDFName, pdfPath); err != nil {
 		slog.Error("failed to upload pdf to S3 cache", "error", err)
 	}
 
