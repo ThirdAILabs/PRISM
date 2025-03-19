@@ -9,7 +9,6 @@ import {
   POTENTIAL_AUTHOR_AFFILIATIONS,
   MISC_HIGH_RISK_AFFILIATIONS,
   COAUTHOR_AFFILIATIONS,
-  NEWS_ARTICLES,
 } from '../../../constants/constants.js';
 import ConcernVisualizer, { BaseFontSize, getFontSize } from '../../ConcernVisualization.js';
 import Graph from '../../common/graph/graph.js';
@@ -36,7 +35,6 @@ const FLAG_ORDER = [
   POTENTIAL_AUTHOR_AFFILIATIONS,
   MISC_HIGH_RISK_AFFILIATIONS,
   COAUTHOR_AFFILIATIONS,
-  NEWS_ARTICLES,
 ];
 
 const Alert = React.forwardRef(function Alert(props, ref) {
@@ -73,10 +71,6 @@ const TitlesAndDescriptions = {
   [COAUTHOR_AFFILIATIONS]: {
     title: "Co-authors' affiliations with High Risk Foreign Institutes",
     desc: 'Co-authors in these papers are affiliated with high-risk foreign institutes.',
-  },
-  [NEWS_ARTICLES]: {
-    title: 'News Articles that may indicate Misconduct',
-    desc: 'The author may be implicated in wrongdoing by these news articles.\n\n*Collated information from the web, might contain false positives.',
   },
 };
 
@@ -603,31 +597,7 @@ const ItemDetails = () => {
     );
   }
 
-  function newsArticleFlag(flag, index) {
-    const publicationDate = new Date(flag.ArticleDate);
-    const formattedDate = publicationDate.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-    return (
-      <div
-        key={index}
-        className="p-3 px-5 w-75 detail-item"
-        style={{
-          boxShadow: 'none',
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h5 className="fw-bold mt-3">News Articles that may indicate Misconduct</h5>
-          <span className="fw-bold mt-3">{formattedDate}</span>
-        </div>
-        <p>
-          {flag.Title} <a href={flag.Link}>(link)</a>
-        </p>
-      </div>
-    );
-  }
+
 
   function authorAffiliationFlag(flag, index) {
     return (
@@ -768,8 +738,6 @@ const ItemDetails = () => {
           return PRFlag(flag, index);
         case COAUTHOR_AFFILIATIONS:
           return coauthorAffiliationFlag(flag, index);
-        case NEWS_ARTICLES:
-          return newsArticleFlag(flag, index);
         default:
           return null;
       }

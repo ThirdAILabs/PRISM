@@ -703,11 +703,12 @@ func (flagger *AuthorNewsArticlesFlagger) Flag(logger *slog.Logger, authorName s
 			logger.Error("error checking article", "error", err)
 		} else {
 			if result.Result.flag {
-				flags = append(flags, &api.NewsArticleFlag{
-					Message:     "The author may be mentioned in a news article that indicates misconduct.",
-					Title:       result.Result.article.Title,
-					Link:        result.Result.article.Link,
-					ArticleDate: result.Result.article.Date,
+				flags = append(flags, &api.MiscHighRiskAssociationFlag{
+					Message:  "The author may be mentioned in a news article that indicates misconduct.",
+					DocTitle: result.Result.article.Title,
+					DocUrl:   result.Result.article.Link,
+					// Date: result.Result.article.Date,
+					EntityMentioned: authorName,
 				})
 			}
 		}
