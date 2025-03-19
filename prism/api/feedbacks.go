@@ -1,7 +1,6 @@
 package api
 
 const (
-	IncorrectAcknowledgementType = "IncorrectAcknowledgement"
 	IncorrectAuthorType          = "IncorrectAuthor"
 	IncorrectPaperTrailType      = "IncorrectPaperTrail"
 	IncorrectEntityDetectionType = "IncorrectEntityDetection"
@@ -13,18 +12,11 @@ type Feedbacks interface {
 	Type() string
 }
 
-type IncorrectAcknowledgement struct {
-	Text   string
-	DocUrl string
-}
-
-func (feedback *IncorrectAcknowledgement) Type() string {
-	return IncorrectAcknowledgementType
-}
-
 type IncorrectAuthor struct {
 	AuthorId string
 }
+
+// ------------------------------------------
 
 func (feedback *IncorrectAuthor) Type() string {
 	return IncorrectAuthorType

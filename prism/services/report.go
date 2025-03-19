@@ -133,6 +133,7 @@ func (s *ReportService) Routes() chi.Router {
 		r.Delete("/{report_id}", WrapRestHandler(s.DeleteAuthorReport))
 		r.Post("/{report_id}/check-disclosure", WrapRestHandler(s.CheckDisclosure))
 		r.Post("/{report_id}/download", s.DownloadReport)
+		// r.Post("/{report_id}/feedback", WrapRestHandler(s.HandleFlagFeedback))
 	})
 
 	r.Route("/university", func(r chi.Router) {
@@ -469,3 +470,15 @@ func (s *ReportService) DeleteUniversityReport(r *http.Request) (any, error) {
 
 	return nil, nil
 }
+
+// func (s *ReportService) HandleFlagFeedback(r *http.Request) error {
+// 	userId, err := auth.GetUserId(r)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	reportId, err := URLParamUUID(r, "report_id")
+// 	if err != nil {
+// 		return err
+// 	}
+// }
