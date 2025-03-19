@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/bbalet/stopwords"
+	"github.com/gen2brain/go-fitz"
 	"github.com/jung-kurt/gofpdf"
-	"github.com/ledongthuc/pdf"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -42,20 +42,20 @@ func parseFileContent(ext string, fileBytes []byte) (string, error) {
 }
 
 func extractTextFromPDF(fileBytes []byte) (string, error) {
-	reader, err := pdf.NewReader(bytes.NewReader(fileBytes), int64(len(fileBytes)))
+	doc, err := fitz.NewFromMemory(fileBytes)
 	if err != nil {
 		return "", err
 	}
+	defer doc.Close()
 
 	var textBuilder strings.Builder
-	numPages := reader.NumPage()
+	numPages := doc.NumPage()
 	for i := 1; i <= numPages; i++ {
-		page := reader.Page(i)
-		pageText, err := page.GetPlainText(nil)
+		text, err := doc.Text(i)
 		if err != nil {
 			return "", err
 		}
-		textBuilder.WriteString(pageText)
+		textBuilder.WriteString(text)
 	}
 
 	return textBuilder.String(), nil

@@ -47,6 +47,7 @@ type Work struct {
 	Authors         []Author
 	Grants          []Grant
 	Locations       []Location
+	DOI             string
 }
 
 func (w *Work) GetDisplayName() string {

@@ -479,7 +479,7 @@ func TestProcessorAcknowledgements(t *testing.T) {
 				openalex:        openalex.NewRemoteKnowledgeBase(),
 				entityLookup:    entityStore,
 				authorCache:     authorCache,
-				extractor:       NewGrobidExtractor(ackCache, grobidEndpoint, testDir, 40, 10),
+				extractor:       NewGrobidExtractor(ackCache, grobidEndpoint, 40, 10, "thirdai-prism"),
 				sussyBakas:      eoc.LoadSussyBakas(),
 				triangulationDB: triangulationDB,
 			},

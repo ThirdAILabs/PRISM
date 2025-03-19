@@ -39,6 +39,8 @@ type Config struct {
 
 	MaxDownloadThreads int `env:"MAX_DOWNLOAD_THREADS" envDefault:"40"`
 	MaxGrobidThreads   int `env:"MAX_GROBID_THREADS" envDefault:"10"`
+
+	S3Bucket string `env:"S3_BUCKET" envDefault:"thirdai-prism"`
 }
 
 func (c *Config) logfile() string {
@@ -103,6 +105,8 @@ func main() {
 
 		MaxDownloadThreads: config.MaxDownloadThreads,
 		MaxGrobidThreads:   config.MaxGrobidThreads,
+
+		PDFS3CacheBucket: config.S3Bucket,
 	}
 
 	db := cmd.OpenDB(config.PostgresUri)
