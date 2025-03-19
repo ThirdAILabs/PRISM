@@ -20,12 +20,11 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import Shimmer from './Shimmer.js';
 import MuiAlert from '@mui/material/Alert';
 import { Snackbar, Tooltip } from '@mui/material';
 import useGoBack from '../../../hooks/useGoBack.js';
 import useOutsideClick from '../../../hooks/useOutsideClick.js';
-import { getTrailingWhiteSpace } from '../../../utils/helper.js';
+import { getRawTextFromXML, getTrailingWhiteSpace } from '../../../utils/helper.js';
 import Collapsible from '../../common/tools/CollapsibleComponent.js';
 
 const FLAG_ORDER = [
@@ -76,10 +75,11 @@ const TitlesAndDescriptions = {
 };
 
 const get_paper_url = (flag) => {
+  // getRawTextFromXML(flag.Work.DisplayName);
   return (
     <>
       <a href={flag.Work.WorkUrl} target="_blank" rel="noopener noreferrer">
-        {flag.Work.DisplayName}
+        {getRawTextFromXML(flag.Work.DisplayName)}
       </a>
       {flag.Work.OaUrl && (
         <text>

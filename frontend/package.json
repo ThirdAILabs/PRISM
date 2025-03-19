@@ -20,7 +20,6 @@
     "bootstrap": "^5.3.3",
     "d3-force": "^3.0.0",
     "date-fns": "^4.1.0",
-    "fast-xml-parser": "^5.0.9",
     "keycloak-js": "^26.1.1",
     "lucide-react": "^0.473.0",
     "react": "^18.3.1",

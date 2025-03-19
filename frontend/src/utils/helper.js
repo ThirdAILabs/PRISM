@@ -18,10 +18,37 @@ export function getTrailingWhiteSpace(count) {
 }
 
 export function getRawTextFromXML(xml) {
-  const validation = XMLValidator.validate(xml);
-  if (validation !== true) {
-    return;
+  console.log('consoling the xml', xml);
+  let returnText = '';
+  if (!xml) return returnText;
+  // let xmlStart = false;
+  // let newXML = "";
+  // for (let index = 0; index < xml.length; index++) {
+  //   const charValue = xml[index];
+  //   if (charValue === '<') {
+  //     xmlStart = true;
+  //   }
+  //   if (xmlStart && charValue === '>') {
+  //     newXML += charValue;
+  //   }
+  //   else {
+  //     returnText += charValue;
+  //   }
+  // }
+  // const validation = XMLValidator.validate(newXML);
+  // if (validation !== true) {
+  //   return xml;
+  // }
+
+  // const doc = new DOMParser().parseFromString(newXML, 'text/xml');
+  // returnText += doc.documentElement.textContent;
+  for (let index = 0; index < xml.length; index++) {
+    const charValue = xml[index];
+    if (charValue === '<') {
+      while (index < xml.length && xml[index] !== '>') {
+        index++;
+      }
+    } else returnText += charValue;
   }
-  const doc = new DOMParser().parseFromString(xml, 'text/xml');
-  return doc.documentElement.textContent;
+  return returnText;
 }
