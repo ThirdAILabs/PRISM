@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router-dom';
-import { XMLValidator } from 'fast-xml-parser';
+
 export function GetShowMenuIcon() {
   const location = useLocation();
   let showMenuIcon = true;
