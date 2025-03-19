@@ -199,8 +199,8 @@ func (downloader *PDFDownloader) downloadFromCache(pdfName string) (string, erro
 	return tmpFile.Name(), nil
 }
 
-func (downloader *PDFDownloader) uploadToCache(cachedPDFName string, pdfPath string) error {
-	key := fmt.Sprintf("pdfs/%s.pdf", cachedPDFName)
+func (downloader *PDFDownloader) uploadToCache(pdfName string, pdfPath string) error {
+	key := fmt.Sprintf("pdfs/%s.pdf", pdfName)
 
 	headInput := &s3.HeadObjectInput{
 		Bucket: aws.String(downloader.s3CacheBucket),
