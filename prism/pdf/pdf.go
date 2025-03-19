@@ -165,8 +165,8 @@ func (downloader *PDFDownloader) downloadWithHttp(url string) (string, error) {
 	return tmpFile.Name(), nil
 }
 
-func (downloader *PDFDownloader) downloadFromCache(doi string) (string, error) {
-	key := fmt.Sprintf("pdfs/%s.pdf", doi)
+func (downloader *PDFDownloader) downloadFromCache(pdfName string) (string, error) {
+	key := fmt.Sprintf("pdfs/%s.pdf", pdfName)
 	input := &s3.GetObjectInput{
 		Bucket: aws.String(downloader.s3CacheBucket),
 		Key:    aws.String(key),
@@ -218,6 +218,7 @@ func (downloader *PDFDownloader) uploadToCache(doi string, pdfPath string) error
 	var apiErr smithy.APIError
 	if errors.As(err, &apiErr) {
 		if apiErr.ErrorCode() != "NotFound" {
+			slog.Error("failed to check if object exists in S3", "error", err)
 			return fmt.Errorf("failed to check if object exists in S3: %w", err)
 		}
 	} else {
@@ -260,10 +261,15 @@ func (downloader *PDFDownloader) DeleteFromCache(doi string) error {
 	return nil
 }
 
-func (downloader *PDFDownloader) downloadPdf(doi, oaURL string) (string, error) {
+func (downloader *PDFDownloader) downloadPdf(doi, oaURL, openAlexID string) (string, error) {
 	var errs []error
 
-	if path, err := downloader.downloadFromCache(doi); err == nil {
+	cachedPDFName := doi
+	if cachedPDFName == "" {
+		cachedPDFName = openAlexID
+	}
+
+	if path, err := downloader.downloadFromCache(cachedPDFName); err == nil {
 		return path, nil
 	} else {
 		errs = append(errs, fmt.Errorf("s3 cache download: %w", err))
@@ -287,8 +293,9 @@ func (downloader *PDFDownloader) downloadPdf(doi, oaURL string) (string, error) 
 func (downloader *PDFDownloader) DownloadWork(work openalex.Work) (string, error) {
 	oaURL := work.DownloadUrl
 	doi := strings.TrimPrefix(work.DOI, "https://doi.org/")
+	openAlexID := work.WorkId
 
-	pdfPath, err := downloader.downloadPdf(doi, oaURL)
+	pdfPath, err := downloader.downloadPdf(doi, oaURL, openAlexID)
 	if err != nil {
 		return "", fmt.Errorf("unable to download pdf from %s / %s: %w", oaURL, doi, err)
 	}
