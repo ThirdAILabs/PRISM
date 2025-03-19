@@ -643,7 +643,7 @@ func fetchArticleWebpage(link string) (string, error) {
 }
 
 const articleCheckTemplate = `I will give you an author name, the title of a news article, and part of the html webpage for the article. 
-If the article is about the author, and indicates misconduct of some kind you must reply with just the word "flag".
+If the article is about the author, and indicates misconduct of some kind you must reply with a short sentence explaining the misconduct indicated by the article and the role of the author in it.
 If the article is not about the author, or does not indicate misconduct, you must reply with just the word "none".
 
 Author Name: %s
@@ -658,21 +658,26 @@ type checkArticleTask struct {
 
 type checkArticleResult struct {
 	article gscholar.NewsArticle
-	flag    bool
+	msg     string
+	flagged bool
 }
 
 func (flagger *AuthorNewsArticlesFlagger) checkArticle(task checkArticleTask) (checkArticleResult, error) {
 	html, err := fetchArticleWebpage(task.article.Link)
 	if err != nil {
-		return checkArticleResult{article: task.article, flag: false}, err
+		return checkArticleResult{article: task.article, flagged: false}, err
 	}
 
 	response, err := flagger.llm.Generate(fmt.Sprintf(articleCheckTemplate, task.authorName, task.article.Title, html), nil)
 	if err != nil {
-		return checkArticleResult{article: task.article, flag: false}, err
+		return checkArticleResult{article: task.article, flagged: false}, err
 	}
 
-	return checkArticleResult{article: task.article, flag: strings.Contains(strings.ToLower(response), "flag")}, nil
+	if strings.Contains(strings.ToLower(response), "none") {
+		return checkArticleResult{article: task.article, flagged: false}, nil
+	}
+
+	return checkArticleResult{article: task.article, msg: response, flagged: true}, nil
 }
 
 const maxArticles = 20
@@ -702,9 +707,9 @@ func (flagger *AuthorNewsArticlesFlagger) Flag(logger *slog.Logger, authorName s
 		if result.Error != nil {
 			logger.Error("error checking article", "error", err)
 		} else {
-			if result.Result.flag {
+			if result.Result.flagged {
 				flags = append(flags, &api.MiscHighRiskAssociationFlag{
-					Message:  "The author may be mentioned in a news article that indicates misconduct.",
+					Message:  result.Result.msg,
 					DocTitle: result.Result.article.Title,
 					DocUrl:   result.Result.article.Link,
 					// Date: result.Result.article.Date,
