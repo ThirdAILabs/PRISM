@@ -18,7 +18,6 @@ export function getTrailingWhiteSpace(count) {
 }
 
 export function getRawTextFromXML(xml) {
-
   const validation = XMLValidator.validate(xml);
   if (validation !== true) {
     return;
