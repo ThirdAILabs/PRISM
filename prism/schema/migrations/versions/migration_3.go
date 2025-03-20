@@ -10,7 +10,7 @@ import (
 )
 
 func Migration3(db *gorm.DB) error {
-	err := db.AutoMigrate(&schema.Feedback{})
+	err := db.AutoMigrate(&schema.FlagFeedback{})
 	if err != nil {
 		return fmt.Errorf("failed to migrate Feedback: %w", err)
 	}

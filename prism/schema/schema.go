@@ -72,7 +72,7 @@ type UserUniversityReport struct {
 	Report   *UniversityReport `gorm:"foreignKey:ReportId"`
 }
 
-type Feedback struct {
+type FlagFeedback struct {
 	Id        uuid.UUID  `gorm:"type:uuid;primaryKey"`
 	UserId    uuid.UUID  `gorm:"type:uuid;not null;index"`
 	Flag      AuthorFlag `gorm:"foreignKey:ReportId;constraint:OnDelete:CASCADE"`

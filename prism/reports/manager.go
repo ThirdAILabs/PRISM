@@ -794,7 +794,7 @@ func (r *ReportManager) SaveFlagFeedback(reportId uuid.UUID, userId uuid.UUID, f
 			return fmt.Errorf("error serializing feedback: %w", err)
 		}
 
-		feedbackEntry := schema.Feedback{
+		feedbackEntry := schema.FlagFeedback{
 			Id:        uuid.New(),
 			UserId:    userId,
 			Flag:      flag,
