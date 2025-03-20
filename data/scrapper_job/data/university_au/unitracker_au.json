@@ -1,1722 +1,1742 @@
 [
-    {
-      "title": "Academy of Military Science",
-      "permalink": "https://unitracker.aspi.org.au/universities/academy-of-military-science",
-      "also_known_as": "中国人民解放军军事科学院, AMS, Academy of Military Sciences",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Aero Engine Corporation of China",
-      "permalink": "https://unitracker.aspi.org.au/universities/aero-engine-corporation-of-china",
-      "also_known_as": "中国航空发动机集团有限公司, 中国航发, AECC",
-      "kind": "Defence industry conglomerate",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Air Force Command College",
-      "permalink": "https://unitracker.aspi.org.au/universities/air-force-command-college",
-      "also_known_as": "中国人民解放军空军指挥学院, 空军指挥学院, 空指, PLA Air Force Command College, Air Force Command College, AFCC, PLA Air Force Command Academy",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Air Force Communication NCO Academy",
-      "permalink": "https://unitracker.aspi.org.au/universities/air-force-communications-officers-college",
-      "also_known_as": "中国人民解放军空军通信士官学校, 空军通信士官学校, 大连通信士官学校, Air Force Communications NCO Academy, Dalian Communications NCO Academy",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Air Force Early Warning Academy",
-      "permalink": "https://unitracker.aspi.org.au/universities/air-force-early-warning-academy",
-      "also_known_as": "中国人民解放军空军预警学院, 空军预警学院, 空军雷达学院, Wuhan Radar Institute",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Air Force Engineering University",
-      "permalink": "https://unitracker.aspi.org.au/universities/air-force-engineering-university",
-      "also_known_as": "中国人民解放军空军工程大学, 空军工程大学, AFEU",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Air Force Flight Academy Shijiazhuang",
-      "permalink": "https://unitracker.aspi.org.au/universities/air-force-flight-academy-shijiazhuang",
-      "also_known_as": "空军石家庄飞行学院, PLA Air Force Shijiazhuang Flight Academy, Shijiazhuang Flight Academy, Shijiazhuang Flying College of the PLA Air Force, Shijiazhuang Flight College of Air Force",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Air Force Harbin Flight Academy",
-      "permalink": "https://unitracker.aspi.org.au/universities/air-force-harbin-flight-academy",
-      "also_known_as": "空军哈尔滨飞行学院, Air Force Harbin Flight Academy, Harbin Flight College of Air Force",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Air Force Logistics University",
-      "permalink": "https://unitracker.aspi.org.au/universities/air-force-logistics-university",
-      "also_known_as": "中国人民解放军空军后勤学院, 空军后勤学院, Air Force Logistics University",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Air Force Medical University",
-      "permalink": "https://unitracker.aspi.org.au/universities/fourth-military-medical-university",
-      "also_known_as": "中国人民解放军空军军医大学, 空军军医大学, 第四军医大学, 四医大, Air Force Medical University, Air Force Military Medical University, Fourth Military Medical University, Fourth Medical University",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Air Force Research Institute",
-      "permalink": "https://unitracker.aspi.org.au/universities/air-force-research-institute",
-      "also_known_as": "中国人民解放军空军研究院, 空军研究院, Air Force Equipment Academy, Key Laboratory of Complex Aviation System Simulation",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Air Force Xi’an Flight Academy",
-      "permalink": "https://unitracker.aspi.org.au/universities/air-force-xian-flight-academy",
-      "also_known_as": "中国人民解放军空军西安飞行学院, 空军西安飞行学院, 中国人民解放军空军第二飞行学院, 空军第二飞行学院, PLA Air Force Xi’an Flight Academy, Air Force Xi’an Flight Academy, Xi’an Flying College of PLA Air Force",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Anhui University",
-      "permalink": "https://unitracker.aspi.org.au/universities/anhui-university",
-      "also_known_as": "安徽大学, AHU",
-      "kind": "Civilian",
-      "risk": "4 Low",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Army Academy of Armored Forces",
-      "permalink": "https://unitracker.aspi.org.au/universities/army-academy-of-armored-forces",
-      "also_known_as": "中国人民解放军陆军装甲兵学院, 陆军装甲兵学院, 装甲兵工程学院, Army Armored Forces Academy, Armored Forces Engineering Academy",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Army Academy of Artillery and Air Defense",
-      "permalink": "https://unitracker.aspi.org.au/universities/army-academy-of-artillery-and-air-defense",
-      "also_known_as": "中国人民解放军陆军炮兵防空兵学院, 陆军炮兵防空兵学院",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Army Academy of Border and Coastal Defense",
-      "permalink": "https://unitracker.aspi.org.au/universities/army-academy-of-border-and-coastal-defense",
-      "also_known_as": "中国人民解放军陆军边海学院, 陆军边海防学院",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Army Aviation College",
-      "permalink": "https://unitracker.aspi.org.au/universities/army-aviation-college",
-      "also_known_as": "中国人民解放军陆军航空兵学院, 陆军航空兵学院, Army Aviation School",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Army Engineering University",
-      "permalink": "https://unitracker.aspi.org.au/universities/army-engineering-university",
-      "also_known_as": "中国人民解放军陆军工程大学, 陆军工程大学, Army Engineering University of the PLA, PLA University of Science and Technology",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Army Infantry Academy",
-      "permalink": "https://unitracker.aspi.org.au/universities/army-infantry-academy",
-      "also_known_as": "中国人民解放军陆军步兵学院, 陆军步兵学院, 南昌陆院, Army Infantry Academy of PLA, PLA Army Infantry Academy, Nanchang Army Academy",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Army Medical University",
-      "permalink": "https://unitracker.aspi.org.au/universities/army-medical-university",
-      "also_known_as": "中国人民解放军陆军军医大学, 中国人民解放军第三军医大学, 陆军军医大学, Third Military Medical University",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Army Military Transportation Academy",
-      "permalink": "https://unitracker.aspi.org.au/universities/army-military-transportation-academy-2",
-      "also_known_as": "中国人民解放军陆军军事交通学院, 陆军军事交通学院, Academy of Military Transportation",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Army Research Institute",
-      "permalink": "https://unitracker.aspi.org.au/universities/army-research-institute",
-      "also_known_as": "中国人民解放军陆军研究院, 军陆军研究院",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Army Service Academy",
-      "permalink": "https://unitracker.aspi.org.au/universities/army-service-academy",
-      "also_known_as": "中国人民解放军陆军勤务学院, 陆军勤务学院, PLA Army Service Academy",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Army Special Operations Academy",
-      "permalink": "https://unitracker.aspi.org.au/universities/army-special-operations-academy",
-      "also_known_as": "中国人民解放军陆军特种作战学院, 陆军特种作战学院, Army Special Operations College",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Aviation Industry Corporation of China",
-      "permalink": "https://unitracker.aspi.org.au/universities/aviation-industry-corporation-of-china",
-      "also_known_as": "中国航空工业集团有限公司, 航空工业, AVIC, Beijing Aeronautical Manufacturing Technology Research Institute (a.k.a. AVIC Institute 625)",
-      "kind": "Defence industry conglomerate",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Aviation University of Air Force",
-      "permalink": "https://unitracker.aspi.org.au/universities/aviation-university-of-air-force",
-      "also_known_as": "中国人民解放军空军航空大学, 空军航空大学, PLA Air Force Aviation University, Aviation University Air Force, Air Force Aviation University, Aviation University of PLA Air Force, AUAF",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Beihang University",
-      "permalink": "https://unitracker.aspi.org.au/universities/beihang-university",
-      "also_known_as": "北京航空航天大学, Beijing University of Aeronautics and Astronautics, BUAA",
-      "kind": "Seven sons of national defence",
-      "risk": "1 Very high",
-      "security_credentials": "1 Top secret",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Beijing Electronic Science and Technology Institute",
-      "permalink": "https://unitracker.aspi.org.au/universities/beijing-electronic-science-and-technology-institute",
-      "also_known_as": "北京电子科技学院, BESTI",
-      "kind": "Security",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Beijing Institute of Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/beijing-institute-of-technology",
-      "also_known_as": "北京理工大学, BIT",
-      "kind": "Seven sons of national defence",
-      "risk": "1 Very high",
-      "security_credentials": "1 Top secret",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Beijing Jiaotong University",
-      "permalink": "https://unitracker.aspi.org.au/universities/beijing-jiaotong-university",
-      "also_known_as": "北京交通大学, 北京交大, 北交大, BJTU",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Beijing Normal University",
-      "permalink": "https://unitracker.aspi.org.au/universities/beijing-normal-university",
-      "also_known_as": "北京师范大学, BNU, 北师大",
-      "kind": "Civilian",
-      "risk": "4 Low",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Beijing University of Chemical Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/beijing-university-of-chemical-technology",
-      "also_known_as": "北京化工大学, BUCT",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Beijing University of Posts and Telecommunications",
-      "permalink": "https://unitracker.aspi.org.au/universities/beijing-university-of-posts-and-telecommunications",
-      "also_known_as": "北京邮电大学, BUPT",
-      "kind": "Civilian",
-      "risk": "1 Very high",
-      "security_credentials": "1 Top secret",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Central South University",
-      "permalink": "https://unitracker.aspi.org.au/universities/central-south-university",
-      "also_known_as": "中南大学, CSU",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Changchun University of Science and Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/changchun-university-of-science-and-technology",
-      "also_known_as": "长春理工大学, CUST",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "China Aerodynamics Research and Development Center",
-      "permalink": "https://unitracker.aspi.org.au/universities/china-aerodynamics-research-and-development-center",
-      "also_known_as": "中国空气动力研究与发展中心, CARDC, Unit 63820, 63820部队, 第29试验训练基地, 29th Testing and Training Base, Academy of Military Science Aerodynamics Testing Base, 中国人民解放军军事科学院空气动力试验基地",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "China Aerospace Science and Industry Corporation",
-      "permalink": "https://unitracker.aspi.org.au/universities/china-aerospace-science-and-industry-corporation",
-      "also_known_as": "中国航天科工集团有限公司, 航天科工, China Aerospace Science & Industry Corp, CASIC, No. 33 Research Institute, Third Academy of CASIC, No. 31 Research Institute, Third Academy of CASIC, Second Academy of CASIC, China Changfeng Mechanics and Electronics Technology Academy, China Chang Feng Mechano-Electronic Engineering Academy, CASIC Second Academy, China Chang Feng Mechano-Electronic Engineering Company, CASIC Academy of Defense Technology, Second Research Academy of CASIC, Changfeng Electromechanical Technology Design Institute, China Chang Feng Mechanics and Electronics Technology Academy, 33 Institute of CASIC’s Third Academy, Beijing Automation Control Equipment Institute (BACEI), Beijing Institute of Automatic Control Equipment, China Haiying Electromechanical Technology Academy, 35 Institute of CASIC’s Third Academy, Beijing Hangxing Machine Building Corporation, Beijing Huahang Radio Measurements Research Institute, China Haiying Electronic Mechanical Technical Research Academy, Huahang Institute of Radio Measurement, Beijing Power Machinery Institute of CASIC’s 31 Institute, China Haiying Electromechanical Technology Academy (a.k.a., China Haiying Science & Technology Corporation), Beijing Power Generating Machinery Institute, Beijing Power Machinery Research Laboratory",
-      "kind": "Defence industry conglomerate",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "China Aerospace Science and Technology Corporation",
-      "permalink": "https://unitracker.aspi.org.au/universities/china-aerospace-science-and-technology-corporation",
-      "also_known_as": "中国航天科技集团, 中国航天, CASC, 1st General Design Department of the China Aerospace Science and Technology Corporation’s First Academy (CALT), Planning Department No 1 of the China Aerospace Science and Technology Corporation’s First Academy (CALT), Beijing Institute of Astronautic Systems Engineering, Beijing Institute of Space System Engineering, 13th Research Institute, 9th Academy of CASC, 13th Institute, China Aerospace Science and Technology Corporation (CALT), 13th Institute China Aerospace Times Electronics Corporation (CATEC), Beijing Aerospace Control Instruments Institute, Design and Manufacture Center of Navigation and Control Device, Beijing Aerospace Automatic Control Institute, 12th Research Institute, China Aerospace Science and Technology Corporation (CALT), Beijing Institute of Space Automatic Control, Beijing Spaceflight Autocontrol Research Institute, Design and Manufacture Center of Navigation and Control Device, 5th Academy of CASC, China Academy of Space Technology (CAST)",
-      "kind": "Defence industry conglomerate",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "China Agricultural University",
-      "permalink": "https://unitracker.aspi.org.au/universities/china-agricultural-university",
-      "also_known_as": "中国农业大学, 中国农大, CAU",
-      "kind": "Civilian",
-      "risk": "4 Low",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "China Coast Guard Academy",
-      "permalink": "https://unitracker.aspi.org.au/universities/china-coast-guard-academy",
-      "also_known_as": "中国人民武装警察部队海警学院, 武警海警学院, 公安海警学院, China Maritime Police Academy, People's Armed Police China Coast Guard Academy, PAP China Coast Guard Academy",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "China Electronics Corporation",
-      "permalink": "https://unitracker.aspi.org.au/universities/china-electronics-corporation",
-      "also_known_as": "中国电子信息产业集团有限公司, 中国电子产业集团, 中国电子, China Electronics, CEC",
-      "kind": "Defence industry conglomerate",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "China Electronics Technology Group Corporation",
-      "permalink": "https://unitracker.aspi.org.au/universities/china-electronics-technology-group-corporation",
-      "also_known_as": "中国电子科技集团公司, 中国电科, CETC, CETGC",
-      "kind": "Defence industry conglomerate",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "China National Nuclear Corporation",
-      "permalink": "https://unitracker.aspi.org.au/universities/china-national-nuclear-corporation",
-      "also_known_as": "中国核工业集团有限公司, 中核集团, CNNC",
-      "kind": "Defence industry conglomerate",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "China North Industries Group",
-      "permalink": "https://unitracker.aspi.org.au/universities/china-north-industries-group",
-      "also_known_as": "中国兵器工业集团公司, 中国北方工业集团公司, China Ordnance Industries Group Corporation Limited, CNGC, Norinco, Norinco Group",
-      "kind": "Defence industry conglomerate",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "China People’s Police University",
-      "permalink": "https://unitracker.aspi.org.au/universities/china-peoples-police-university",
-      "also_known_as": "中国人民警察大学, 警察大学, CPPU, Ministry of Public Security China People's Police University, MPS China People's Police University",
-      "kind": "Security",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "China Shipbuilding Industry Corporation",
-      "permalink": "https://unitracker.aspi.org.au/universities/china-shipbuilding-industry-corporation",
-      "also_known_as": "中国船舶重工集团有限公司, 中船重工, CSIC",
-      "kind": "Defence industry conglomerate",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "China South Industries Group",
-      "permalink": "https://unitracker.aspi.org.au/universities/china-south-industries-group",
-      "also_known_as": "中国兵器装备集团有限公司, 中国南方工业集团公司, 兵装集团, 中国兵装, China South Industries Group Corporation, CSGC, China Ordnance Equipment Group Corporation, China Ordnance Group Corporation",
-      "kind": "Defence industry conglomerate",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "China State Shipbuilding Corporation",
-      "permalink": "https://unitracker.aspi.org.au/universities/china-state-shipbuilding-corporation",
-      "also_known_as": "中国船舶工业集团有限公司, 中船集团, China State Shipbuilding Corporation Limited",
-      "kind": "Defence industry conglomerate",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "China University of Geosciences (Wuhan)",
-      "permalink": "https://unitracker.aspi.org.au/universities/china-university-of-geosciences-wuhan",
-      "also_known_as": "中国地质大学, 中国地质大学(武汉), CUG",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "China University of Mining and Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/china-university-of-mining-and-technology",
-      "also_known_as": "中国矿业大学, CUMT",
-      "kind": "Civilian",
-      "risk": "4 Low",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Chinese Academy of Engineering Physics",
-      "permalink": "https://unitracker.aspi.org.au/universities/chinese-academy-of-engineering-physics",
-      "also_known_as": "中国工程物理研究院, China Academy of Engineering Physics, CAEP, Beijing Computational Science Research Center, 北京计算科学研究中心, Ninth Academy, 九院, Southwest Computing Center, Southwest Institute of Applied Electronics, Southwest Institute of Chemical Materials, Southwest Institute of Electronic Engineering, Southwest Institute of Environmental Testing, Southwest Institute of Explosives and Chemical Engineering, Southwest Institute of Fluid Physics, Southwest Institute of General Designing and Assembly, Southwest Institute of Machining Technology, Southwest Institute of Materials, Southwest Institute of Nuclear Physics and Chemistry, Southwest Institute of Research and Applications of Special Materials Factory, Southwest Institute of Structural Mechanics, The High Power Laser Laboratory, Shanghai, The Institute of Applied Physics and Computational Mathematics, Beijing, 北京应用物理与计算数学研究所, 901 Institute, Center for High Pressure Science & Technology Advanced Research, 北京高压科学研究中心, HPSTAR, China Jiuyuan Trading Corporation, Peac Institute of Multiscale Science, Sichuan Dingcheng Material Trade Co., Ltd., Sichuan Haitian New Technology Group Co. Ltd., Sichuan Zhonghe Import and Export Trade Co., Ltd., Skyeye Laser Technology Limited, Chengdu Fine Optical Engineering Research Center, Beijing Jincheng Huanyu Electronics Co., Ltd.",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Chongqing University",
-      "permalink": "https://unitracker.aspi.org.au/universities/chongqing-university",
-      "also_known_as": "重庆大学, CQU",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Chongqing University of Posts and Telecommunications",
-      "permalink": "https://unitracker.aspi.org.au/universities/chongqing-university-of-posts-and-telecommunications",
-      "also_known_as": "重庆邮电大学, CQUPT",
-      "kind": "Civilian",
-      "risk": "4 Low",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Chongqing University of Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/chongqing-university-of-technology",
-      "also_known_as": "重庆理工大学, CQUT",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Commercial Aircraft Corporation of China",
-      "permalink": "https://unitracker.aspi.org.au/universities/commercial-aircraft-corporation-of-china",
-      "also_known_as": "中国商用飞机有限责任公司, 中国商飞, COMAC",
-      "kind": "Defence industry conglomerate",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Criminal Investigation Police University of China",
-      "permalink": "https://unitracker.aspi.org.au/universities/criminal-investigation-police-university-of-china",
-      "also_known_as": "中国刑事警察学院, CIPUC",
-      "kind": "Security",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Dalian Maritime University",
-      "permalink": "https://unitracker.aspi.org.au/universities/dalian-maritime-university",
-      "also_known_as": "大连海事大学, 海大, DMU, DLMU",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Dalian Minzu University",
-      "permalink": "https://unitracker.aspi.org.au/universities/dalian-minzu-university",
-      "also_known_as": "大连民族大学, 大连民大, DLMU, Dalian Nationalities University, DLNU",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Dalian Naval Academy",
-      "permalink": "https://unitracker.aspi.org.au/universities/dalian-naval-academy",
-      "also_known_as": "中国人民解放军海军大连舰艇学院, PLA Dalian Naval Academy",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Dalian University of Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/dalian-university-of-technology",
-      "also_known_as": "大连理工大学, DLUT",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Donghua University",
-      "permalink": "https://unitracker.aspi.org.au/universities/donghua-university",
-      "also_known_as": "东华大学, DHU",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "East China Normal University",
-      "permalink": "https://unitracker.aspi.org.au/universities/east-china-normal-university",
-      "also_known_as": "华东师范大学, 华东师大, ECNU",
-      "kind": "Civilian",
-      "risk": "4 Low",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "East China University of Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/east-china-university-of-technology",
-      "also_known_as": "东华理工大学, ECUT, East China Institute of Technology",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Engineering University of the CAPF",
-      "permalink": "https://unitracker.aspi.org.au/universities/engineering-university-of-the-capf",
-      "also_known_as": "中国人民武装警察部队工程大学, 武警工程大学, PAP Engineering University",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Fudan University",
-      "permalink": "https://unitracker.aspi.org.au/universities/fudan-university",
-      "also_known_as": "复旦大学",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Fuzhou University",
-      "permalink": "https://unitracker.aspi.org.au/universities/fuzhou-university",
-      "also_known_as": "福州大学, FZU",
-      "kind": "Civilian",
-      "risk": "4 Low",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Guangdong University of Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/guangdong-university-of-technology",
-      "also_known_as": "广东工业大学, 广工, GDUT",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Guilin University of Electronic Science and Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/guilin-university-of-electronic-science-and-technology",
-      "also_known_as": "桂林电子科技大学, GUET, Guilin Institute of Electronic Technology",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Hangzhou Dianzi University",
-      "permalink": "https://unitracker.aspi.org.au/universities/hangzhou-dianzi-university",
-      "also_known_as": "杭州电子科技大学, HDU, Hangzhou Institute of Electrical Engineering",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Hangzhou Normal University",
-      "permalink": "https://unitracker.aspi.org.au/universities/hangzhou-normal-university",
-      "also_known_as": "杭州师范大学, 杭师大, HZNU",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Harbin Engineering University",
-      "permalink": "https://unitracker.aspi.org.au/universities/harbin-engineering-university",
-      "also_known_as": "哈尔滨工程大学, HEU",
-      "kind": "Seven sons of national defence",
-      "risk": "1 Very high",
-      "security_credentials": "1 Top secret",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Harbin Institute of Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/harbin-institute-of-technology",
-      "also_known_as": "哈尔滨工业大学, HIT",
-      "kind": "Seven sons of national defence",
-      "risk": "1 Very high",
-      "security_credentials": "1 Top secret",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Harbin University of Science and Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/harbin-university-of-science-and-technology",
-      "also_known_as": "哈尔滨理工大学, HRBUST",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Hebei University",
-      "permalink": "https://unitracker.aspi.org.au/universities/hebei-university",
-      "also_known_as": "河北大学, HBU",
-      "kind": "Civilian",
-      "risk": "4 Low",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Hebei University of Science and Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/hebei-university-of-science-and-technology",
-      "also_known_as": "河北科技大学, HEBUST",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Hefei University of Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/hefei-university-of-technology",
-      "also_known_as": "合肥工业大学, HFUT",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Heilongjiang Institute of Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/heilongjiang-institute-of-technology",
-      "also_known_as": "黑龙江工程学院, HLJIY",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "3 Confidential",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Heilongjiang University",
-      "permalink": "https://unitracker.aspi.org.au/universities/heilongjiang-university",
-      "also_known_as": "黑龙江大学, HLJU",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "3 Confidential",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Henan University of Science and Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/henan-university-of-science-and-technology",
-      "also_known_as": "河南科技大学, HAUST",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Huazhong University of Science and Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/huazhong-university-of-science-and-technology",
-      "also_known_as": "华中科技大学, HUST",
-      "kind": "Civilian",
-      "risk": "1 Very high",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Hunan University",
-      "permalink": "https://unitracker.aspi.org.au/universities/hunan-university",
-      "also_known_as": "湖南大学, HNU",
-      "kind": "Civilian",
-      "risk": "1 Very high",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Hunan University of Science and Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/hunan-university-of-science-and-technology",
-      "also_known_as": "湖南科技大学, HNUST",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "3 Confidential",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Information Engineering University",
-      "permalink": "https://unitracker.aspi.org.au/universities/information-engineering-university-2",
-      "also_known_as": "中国人民解放军信息工程大学, PLAIEU, IEU, 中国人民解放军外国语学院, 洛阳外语学院, Luoyang Foreign Languages University, PLA Foreign Languages University, Luoyang Foreign Language Institute, Luoyang University, 郑州测绘学院, Zhengzhou Institute of Surveying and Mapping, Zhengzhou Information Science and Technology Institute, 国家数字交换系统工程技术研究中心, National Digital Switching System Engineering and Technology Research Center, 数学工程与先进计算国家重点实验室, State Key Laboratory of Mathematical Engineering and Advanced Computing",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Institute of NBC Defense",
-      "permalink": "https://unitracker.aspi.org.au/universities/institute-of-nbc-defense",
-      "also_known_as": "陆军防化学院, 中国人民解放军陆军防化学院",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Jiangnan Social University",
-      "permalink": "https://unitracker.aspi.org.au/universities/jiangnan-social-university",
-      "also_known_as": "江南社会学院, Institute of Cadre Management, Institute of International Relations Suzhou Campus, Jiangnan Institute of Social Studies, Ministry of State Security Administrative Institute, 国家安全部行政学院",
-      "kind": "Security",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Jiangsu University of Science and Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/jiangsu",
-      "also_known_as": "江苏科技大学, JUST",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Jilin University",
-      "permalink": "https://unitracker.aspi.org.au/universities/jilin-university",
-      "also_known_as": "吉林大学, JLU",
-      "kind": "Civilian",
-      "risk": "1 Very high",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Kunming University of Science and Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/kunming-university-of-science-and-technology",
-      "also_known_as": "昆明理工大学, KMUST",
-      "kind": "Civilian",
-      "risk": "4 Low",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Lanzhou University",
-      "permalink": "https://unitracker.aspi.org.au/universities/lanzhou-university",
-      "also_known_as": "兰州大学, LZU",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Lanzhou University of Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/lanzhou-university-of-technology",
-      "also_known_as": "兰州理工大学, LUT, Gansu University of Technology",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Logistics University of the People’s Armed Police Force",
-      "permalink": "https://unitracker.aspi.org.au/universities/logistics-university-of-the-peoples-armed-police-force",
-      "also_known_as": "中国人民武装警察部队后勤学院, 武警后勤学院, PAP Logistics University",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Minzu University of China",
-      "permalink": "https://unitracker.aspi.org.au/universities/minzu-university-of-china",
-      "also_known_as": "中央民族大学, 中央民大, MUC",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Nanchang Hangkong University",
-      "permalink": "https://unitracker.aspi.org.au/universities/nanchang-hangkong-university",
-      "also_known_as": "南昌航空大学, Nanchang Aviation University, NCHU, Nanchang Aeronautical University",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Nanchang University",
-      "permalink": "https://unitracker.aspi.org.au/universities/nanchang-university",
-      "also_known_as": "南昌大学, NCU",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Nanjing Army Command College",
-      "permalink": "https://unitracker.aspi.org.au/universities/nanjing-army-command-college",
-      "also_known_as": "南京陆军指挥学院, PLA Nanjing Army Command College",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Nanjing Institute of Information Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/nanjing-institute-of-information-technology",
-      "also_known_as": "南京信息技术研究院, 南京841研究所, Nanjing 841 Institute, Nanjing Research Institute of Information Technology, Nanjing Information Technology Institute, Nanjing Information Technology Academe, Nanjing Institute of Information Technology, Nanjing Information Technology Research Institute",
-      "kind": "Security",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Nanjing Normal University",
-      "permalink": "https://unitracker.aspi.org.au/universities/nanjing-normal-university",
-      "also_known_as": "南京师范大学, 南京师大, 南师大, 南师, NNU, NJNU",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Nanjing Tech University",
-      "permalink": "https://unitracker.aspi.org.au/universities/nanjing-tech-university",
-      "also_known_as": "南京工业大学, NJTech",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Nanjing University",
-      "permalink": "https://unitracker.aspi.org.au/universities/nanjing-university",
-      "also_known_as": "南京大学, NJU",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Nanjing University of Aeronautics and Astronautics",
-      "permalink": "https://unitracker.aspi.org.au/universities/nanjing-university-of-aeronautics-and-astronautics",
-      "also_known_as": "南京航空航天大学, Nanhang University, NUAA",
-      "kind": "Seven sons of national defence",
-      "risk": "1 Very high",
-      "security_credentials": "1 Top secret",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Nanjing University of Posts and Telecommunications",
-      "permalink": "https://unitracker.aspi.org.au/universities/nanjing-university-of-posts-and-telecommunications",
-      "also_known_as": "南京邮电大学, NJUPT",
-      "kind": "Civilian",
-      "risk": "4 Low",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Nanjing University of Science and Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/nanjing-university-of-science-and-technology",
-      "also_known_as": "南京理工大学, NJUST",
-      "kind": "Seven sons of national defence",
-      "risk": "1 Very high",
-      "security_credentials": "1 Top secret",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Nankai University",
-      "permalink": "https://unitracker.aspi.org.au/universities/nankai-university",
-      "also_known_as": "南开大学, NKU",
-      "kind": "Civilian",
-      "risk": "4 Low",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "National Defense University",
-      "permalink": "https://unitracker.aspi.org.au/universities/national-defense-university",
-      "also_known_as": "中国人民解放军国防大学, 国防大学, NDU",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "National University of Defense Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/national-university-of-defense-technology",
-      "also_known_as": "中国人民解放军国防科技大学, NUDT, Changsha Institute of Technology, National Key Laboratory for Parallel and Distributed Processing, 并行与分布处理国家重点实验室, Hunan Guofang Kei University",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Naval Command College",
-      "permalink": "https://unitracker.aspi.org.au/universities/naval-command-college",
-      "also_known_as": "中国人民解放军海军指挥学院, 海军指挥学院, PLA Navy Command College, Navy Command College, Naval Command Academy",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Naval Petty Officer Academy",
-      "permalink": "https://unitracker.aspi.org.au/universities/naval-petty-officer-academy",
-      "also_known_as": "中国人民解放军海军士官学校, 海军士官学校, 中国人民解放军海军蚌埠士官学校, PLA Navy Bengbu Petty Officer Academy, Naval Petty Officer Academy",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Naval Research Academy",
-      "permalink": "https://unitracker.aspi.org.au/universities/naval-research-academy",
-      "also_known_as": "中国人民解放军海军研究院, 海军研究院, 中国人民解放军海军装备论证研究中心, 海军装备论证研究中心, 中国人民解放军海军装备研究院, 海军装备研究院, PLA Navy Research Academy, PLA Navy Equipment Academy, Naval Equipment Academy, Naval Academy",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Naval University of Engineering",
-      "permalink": "https://unitracker.aspi.org.au/universities/naval-university-of-engineering",
-      "also_known_as": "中国人民解放军海军工程大学, 海军工程大学, 海工大, Naval Engineering University, NUE",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Navy Aviation University",
-      "permalink": "https://unitracker.aspi.org.au/universities/navy-aviation-university",
-      "also_known_as": "中国人民解放军海军航空大学, 海军航空大学, 海军航大, Naval Aviation University, Naval Aeronautics and Astronautics University",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Navy Logistics Academy",
-      "permalink": "https://unitracker.aspi.org.au/universities/navy-logistics-academy",
-      "also_known_as": "中国人民解放军海军勤务学院, 海军勤务学院",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Navy Medical University",
-      "permalink": "https://unitracker.aspi.org.au/universities/navy-medical-university",
-      "also_known_as": "中国人民解放军海军军医大学, 中国人民解放军第二军医大, 海军军医大学, Second Military Medical University",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Navy Submarine Academy",
-      "permalink": "https://unitracker.aspi.org.au/universities/navy-submarine-academy",
-      "also_known_as": "中国人民解放军海军潜艇学院, 海军潜艇学院, PLA Navy Submarine Academy",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "North China Institute of Aerospace Engineering",
-      "permalink": "https://unitracker.aspi.org.au/universities/north-china-institute-of-aerospace-engineering",
-      "also_known_as": "北华航天工业学院, NCIAE",
-      "kind": "Civilian",
-      "risk": "1 Very high",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "North China University of Science and Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/north-china-university-of-science-and-technology",
-      "also_known_as": "华北理工大学, NCST, Hebei United University, 河北联合大学",
-      "kind": "Civilian",
-      "risk": "4 Low",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "North University of China",
-      "permalink": "https://unitracker.aspi.org.au/universities/north-university-of-china",
-      "also_known_as": "中北大学, NUC",
-      "kind": "Civilian",
-      "risk": "1 Very high",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Northeastern University",
-      "permalink": "https://unitracker.aspi.org.au/universities/northeastern-university",
-      "also_known_as": "东北大学, NEU",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Northwest A&F University",
-      "permalink": "https://unitracker.aspi.org.au/universities/northwest-af-university",
-      "also_known_as": "西北农林科技大学, 西农, 西农大, 西北农大, NWAFU",
-      "kind": "Civilian",
-      "risk": "4 Low",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Northwest Institute of Nuclear Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/northwest-institute-of-nuclear-technology",
-      "also_known_as": "西北核技术研究所, NINT, Institute of Northwest Nuclear Technology, Northwest Nuclear Technology Institute",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Northwestern Polytechnical University",
-      "permalink": "https://unitracker.aspi.org.au/universities/northwestern-polytechnical-university",
-      "also_known_as": "西北工业大学, NWPU, NPU, Northwest Polytechnic University, Northwest Polytechnical University, Northwestern Polytechnic University",
-      "kind": "Seven sons of national defence",
-      "risk": "1 Very high",
-      "security_credentials": "1 Top secret",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Ocean University of China",
-      "permalink": "https://unitracker.aspi.org.au/universities/ocean-university-of-china",
-      "also_known_as": "中国海洋大学, 中国海大, 海大, OUC",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Officers College of the PAP",
-      "permalink": "https://unitracker.aspi.org.au/universities/officers-college-of-the-pap",
-      "also_known_as": "中国人民武装警察部队警官学院, 武警警官学院, PAP Officers’ College, People's Armed Police Officers’ College",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "PAP NCO College",
-      "permalink": "https://unitracker.aspi.org.au/universities/pap-nco-college",
-      "also_known_as": "中国人民武装警察部队士官学校, People's Armed Police NCO College, 武警士官学校, 中国人民武装警察部队杭州士官学校",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Peking University",
-      "permalink": "https://unitracker.aspi.org.au/universities/peking-university",
-      "also_known_as": "北京大学, 北大, Beijing University, Beida, PKU",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "People’s Armed Police Command College",
-      "permalink": "https://unitracker.aspi.org.au/universities/peoples-armed-police-command-college",
-      "also_known_as": "中国人民武装警察指挥学院, 武警指挥学院, PAP Command College, The People’s Armed Police College China, The Chinese People’s Armed Police Forces Academy",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "People’s Public Security University of China",
-      "permalink": "https://unitracker.aspi.org.au/universities/peoples-public-security-university-of-china",
-      "also_known_as": "中国人民公安大学, Chinese People Public Security University, PPSUC",
-      "kind": "Security",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Railway Police College",
-      "permalink": "https://unitracker.aspi.org.au/universities/railway-police-college",
-      "also_known_as": "铁道警察学院, 铁道警院, Ministry of Public Security Railway Police College, MPS Railway Police College",
-      "kind": "Security",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Renmin University",
-      "permalink": "https://unitracker.aspi.org.au/universities/renmin-university",
-      "also_known_as": "人民大学, RUC",
-      "kind": "Civilian",
-      "risk": "4 Low",
-      "security_credentials": "5. None",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Rocket Force Command College",
-      "permalink": "https://unitracker.aspi.org.au/universities/rocket-force-command-college",
-      "also_known_as": "中国人民解放军火箭指挥学院, 火箭指挥学院, SMF (Strategic Missile Force) Command College",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Rocket Force Research Institute",
-      "permalink": "https://unitracker.aspi.org.au/universities/rocket-force-research-institute",
-      "also_known_as": "中国人民解放军火箭军研究院, 火箭军研究院, 二炮兵装备研究院, 火箭军装备研究院, Second Artillery Equipment Academy, Rocket Force Equipment Academy",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Rocket Force Sergeant School",
-      "permalink": "https://unitracker.aspi.org.au/universities/rocket-force-sergeant-school",
-      "also_known_as": "中国人民解放军火箭军士官学校, 火箭军士官学校, PLA Rocket Force NCO College, Rocket Force Sergeancy School, Rocket Force Sergeant School of the PLA, PLA Rocket Force Academy, Rocket Force NCO College, Rocket Sergeant School",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Rocket Force University of Engineering",
-      "permalink": "https://unitracker.aspi.org.au/universities/rocket-force-university-of-engineering",
-      "also_known_as": "中国人民解放军火箭军工程大学, 火箭军工程大学, 第二炮兵工程大学, 西安高技术研究所, Rocket Force Engineering University, RFUE, RFEU, Xi’an Research Institute of High Technology, Xi’an Research Institute of High-Tech",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Shandong University",
-      "permalink": "https://unitracker.aspi.org.au/universities/shandong-university",
-      "also_known_as": "山东大学, SDU",
-      "kind": "Civilian",
-      "risk": "1 Very high",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Shandong University of Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/shandong-university-of-technology",
-      "also_known_as": "山东理工大学, SDUT",
-      "kind": "Civilian",
-      "risk": "4 Low",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Shanghai Jiao Tong University",
-      "permalink": "https://unitracker.aspi.org.au/universities/shanghai-jiaotong-university",
-      "also_known_as": "上海交通大学, SJTU",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Shanghai University",
-      "permalink": "https://unitracker.aspi.org.au/universities/shanghai-university",
-      "also_known_as": "上海大学, SHU",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Shenyang Aerospace University",
-      "permalink": "https://unitracker.aspi.org.au/universities/shenyang-aerospace-university",
-      "also_known_as": "沈阳航空航天大学, SAU",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Shenyang Ligong University",
-      "permalink": "https://unitracker.aspi.org.au/universities/shenyang-ligong-university",
-      "also_known_as": "沈阳理工大学, SYLU",
-      "kind": "Civilian",
-      "risk": "1 Very high",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Shenzhen University",
-      "permalink": "https://unitracker.aspi.org.au/universities/shenzhen-university",
-      "also_known_as": "深圳大学, SZU",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Shijiazhuang Tiedao University",
-      "permalink": "https://unitracker.aspi.org.au/universities/shijiazhuang-tiedao-university",
-      "also_known_as": "石家庄铁道大学, STDU",
-      "kind": "Civilian",
-      "risk": "4 Low",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Sichuan University",
-      "permalink": "https://unitracker.aspi.org.au/universities/sichuan-university",
-      "also_known_as": "四川大学, SCU",
-      "kind": "Civilian",
-      "risk": "1 Very high",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Soochow University",
-      "permalink": "https://unitracker.aspi.org.au/universities/soochow-university",
-      "also_known_as": "苏州大学, Suzhou University",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "South China University of Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/south-china-university-of-technology",
-      "also_known_as": "华南理工大学, SCUT",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Southeast University",
-      "permalink": "https://unitracker.aspi.org.au/universities/southeast-university",
-      "also_known_as": "东南大学, SEU",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Southern University of Science and Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/southern-university-of-science-and-technology",
-      "also_known_as": "南方科技大学, 南科大, SUSTech",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Southwest University of Science and Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/southwest-university-of-science-and-technology",
-      "also_known_as": "西南科技大学, SWUST",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Space Engineering University",
-      "permalink": "https://unitracker.aspi.org.au/universities/space-engineering-university",
-      "also_known_as": "中国人民解放军战略支援部队航天工程大学, PLA Equipment Academy, Aerospace Engineering University, A/SEU, PLA Equipment Command and Technology Academy",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Special Police Academy",
-      "permalink": "https://unitracker.aspi.org.au/universities/special-police-academy",
-      "also_known_as": "中国武装警察部队特种警察学院, SPA, Special Police of China, PAP Special Police Academy, People's Armed Police Special Police Academy, SPC",
-      "kind": "Military",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Sun Yat-sen University",
-      "permalink": "https://unitracker.aspi.org.au/universities/sun-yat-sen-university",
-      "also_known_as": "中山大学, SYSU",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "5. None",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Tianjin Polytechnic University",
-      "permalink": "https://unitracker.aspi.org.au/universities/tianjin-polytechnic-university",
-      "also_known_as": "天津工业大学, TJPU",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Tianjin University",
-      "permalink": "https://unitracker.aspi.org.au/universities/tianjin-university",
-      "also_known_as": "天津大学, TJU",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Tongji University",
-      "permalink": "https://unitracker.aspi.org.au/universities/tongji-university",
-      "also_known_as": "同济大学",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Tsinghua University",
-      "permalink": "https://unitracker.aspi.org.au/universities/tsinghua-university",
-      "also_known_as": "清华大学, Qinghua University, THU",
-      "kind": "Civilian",
-      "risk": "1 Very high",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "University of Chinese Academy of Sciences",
-      "permalink": "https://unitracker.aspi.org.au/universities/university-of-chinese-academy-of-sciences",
-      "also_known_as": "中国科学院大学, 国科大, UCAS",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "University of Electronic Science and Technology of China",
-      "permalink": "https://unitracker.aspi.org.au/universities/university-of-electronic-science-and-technology-of-china",
-      "also_known_as": "电子科技大学, UESTC, 成都电子科技大学",
-      "kind": "Civilian",
-      "risk": "1 Very high",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "University of International Relations",
-      "permalink": "https://unitracker.aspi.org.au/universities/university-of-international-relations",
-      "also_known_as": "国际关系学院, UIR, Institute of International Politics",
-      "kind": "Security",
-      "risk": "1 Very high",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "University of Science and Technology Beijing",
-      "permalink": "https://unitracker.aspi.org.au/universities/university-of-science-and-technology-beijing",
-      "also_known_as": "北京科技大学, USTB",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "University of Science and Technology of China",
-      "permalink": "https://unitracker.aspi.org.au/universities/university-of-science-and-technology-of-china",
-      "also_known_as": "中国科学技术大学, 中国科技大学, USTC",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "University of Shanghai for Science and Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/university-of-shanghai-for-science-and-technology",
-      "also_known_as": "上海理工大学, USST",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "University of South China",
-      "permalink": "https://unitracker.aspi.org.au/universities/university-of-south-china",
-      "also_known_as": "南华大学, USC",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Wuhan University",
-      "permalink": "https://unitracker.aspi.org.au/universities/wuhan-university",
-      "also_known_as": "武汉大学, WHU",
-      "kind": "Civilian",
-      "risk": "1 Very high",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Wuhan University of Technology",
-      "permalink": "https://unitracker.aspi.org.au/universities/wuhan-university-of-technology",
-      "also_known_as": "武汉理工大学, WHUT",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Xiamen University",
-      "permalink": "https://unitracker.aspi.org.au/universities/xiamen-university",
-      "also_known_as": "厦门大学, XMU",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Xiangtan University",
-      "permalink": "https://unitracker.aspi.org.au/universities/xiangtan-university",
-      "also_known_as": "湘潭大学, XTU",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Xidian University",
-      "permalink": "https://unitracker.aspi.org.au/universities/xidian-university",
-      "also_known_as": "西安电子科技大学, 西电大学, Xi'an University of Electronic Science and Technology",
-      "kind": "Civilian",
-      "risk": "1 Very high",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Xinjiang University",
-      "permalink": "https://unitracker.aspi.org.au/universities/xinjiang-university",
-      "also_known_as": "新疆大学, شىنجاڭ داشۆ, 新大, XJU",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Xi’an Jiaotong University",
-      "permalink": "https://unitracker.aspi.org.au/universities/xian-jiaotong-university",
-      "also_known_as": "西安交通大学, XJTU",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "✓",
-      "espionage_or_misconduct": "✓"
-    },
-    {
-      "title": "Xi’an Technological University",
-      "permalink": "https://unitracker.aspi.org.au/universities/xian-technological-university",
-      "also_known_as": "西安工业大学, XATU",
-      "kind": "Civilian",
-      "risk": "1 Very high",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Xi’an University of Posts and Telecommunications",
-      "permalink": "https://unitracker.aspi.org.au/universities/xian-university-of-posts-and-telecommunications",
-      "also_known_as": "西安邮电大学, XUPT",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Yanshan University",
-      "permalink": "https://unitracker.aspi.org.au/universities/yanshan-university",
-      "also_known_as": "燕山大学, YSU",
-      "kind": "Civilian",
-      "risk": "2 High",
-      "security_credentials": "2 Secret",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Yunnan Normal University",
-      "permalink": "https://unitracker.aspi.org.au/universities/yunnan-normal-university",
-      "also_known_as": "云南师范大学, 云南师大, 云师大, YNNU",
-      "kind": "Civilian",
-      "risk": "3 Medium",
-      "security_credentials": "5. None",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    },
-    {
-      "title": "Yunnan University",
-      "permalink": "https://unitracker.aspi.org.au/universities/yunnan-university",
-      "also_known_as": "云南大学, 云大, YNU",
-      "kind": "Civilian",
-      "risk": "4 Low",
-      "security_credentials": "3 Confidential",
-      "end_user_lists": "None",
-      "espionage_or_misconduct": "None"
-    }
-  ]
+  {
+    "title": "Academy of Military Science",
+    "permalink": "https://unitracker.aspi.org.au/universities/academy-of-military-science",
+    "also_known_as": "中国人民解放军军事科学院, AMS, Academy of Military Sciences",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Aero Engine Corporation of China",
+    "permalink": "https://unitracker.aspi.org.au/universities/aero-engine-corporation-of-china",
+    "also_known_as": "中国航空发动机集团有限公司, 中国航发, AECC",
+    "kind": "Defence industry conglomerate",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Air Force Command College",
+    "permalink": "https://unitracker.aspi.org.au/universities/air-force-command-college",
+    "also_known_as": "中国人民解放军空军指挥学院, 空军指挥学院, 空指, PLA Air Force Command College, Air Force Command College, AFCC, PLA Air Force Command Academy",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Air Force Communication NCO Academy",
+    "permalink": "https://unitracker.aspi.org.au/universities/air-force-communications-officers-college",
+    "also_known_as": "中国人民解放军空军通信士官学校, 空军通信士官学校, 大连通信士官学校, Air Force Communications NCO Academy, Dalian Communications NCO Academy",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Air Force Early Warning Academy",
+    "permalink": "https://unitracker.aspi.org.au/universities/air-force-early-warning-academy",
+    "also_known_as": "中国人民解放军空军预警学院, 空军预警学院, 空军雷达学院, Wuhan Radar Institute",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Air Force Engineering University",
+    "permalink": "https://unitracker.aspi.org.au/universities/air-force-engineering-university",
+    "also_known_as": "中国人民解放军空军工程大学, 空军工程大学, AFEU",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Air Force Flight Academy Shijiazhuang",
+    "permalink": "https://unitracker.aspi.org.au/universities/air-force-flight-academy-shijiazhuang",
+    "also_known_as": "空军石家庄飞行学院, PLA Air Force Shijiazhuang Flight Academy, Shijiazhuang Flight Academy, Shijiazhuang Flying College of the PLA Air Force, Shijiazhuang Flight College of Air Force",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Air Force Harbin Flight Academy",
+    "permalink": "https://unitracker.aspi.org.au/universities/air-force-harbin-flight-academy",
+    "also_known_as": "空军哈尔滨飞行学院, Air Force Harbin Flight Academy, Harbin Flight College of Air Force",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Air Force Logistics University",
+    "permalink": "https://unitracker.aspi.org.au/universities/air-force-logistics-university",
+    "also_known_as": "中国人民解放军空军后勤学院, 空军后勤学院, Air Force Logistics University",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Air Force Medical University",
+    "permalink": "https://unitracker.aspi.org.au/universities/fourth-military-medical-university",
+    "also_known_as": "中国人民解放军空军军医大学, 空军军医大学, 第四军医大学, 四医大, Air Force Medical University, Air Force Military Medical University, Fourth Military Medical University, Fourth Medical University",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Air Force Research Institute",
+    "permalink": "https://unitracker.aspi.org.au/universities/air-force-research-institute",
+    "also_known_as": "中国人民解放军空军研究院, 空军研究院, Air Force Equipment Academy, Key Laboratory of Complex Aviation System Simulation",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Air Force Xi’an Flight Academy",
+    "permalink": "https://unitracker.aspi.org.au/universities/air-force-xian-flight-academy",
+    "also_known_as": "中国人民解放军空军西安飞行学院, 空军西安飞行学院, 中国人民解放军空军第二飞行学院, 空军第二飞行学院, PLA Air Force Xi’an Flight Academy, Air Force Xi’an Flight Academy, Xi’an Flying College of PLA Air Force",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Anhui University",
+    "permalink": "https://unitracker.aspi.org.au/universities/anhui-university",
+    "also_known_as": "安徽大学, AHU",
+    "kind": "Civilian",
+    "risk": "4 Low",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Army Academy of Armored Forces",
+    "permalink": "https://unitracker.aspi.org.au/universities/army-academy-of-armored-forces",
+    "also_known_as": "中国人民解放军陆军装甲兵学院, 陆军装甲兵学院, 装甲兵工程学院, Army Armored Forces Academy, Armored Forces Engineering Academy",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Army Academy of Artillery and Air Defense",
+    "permalink": "https://unitracker.aspi.org.au/universities/army-academy-of-artillery-and-air-defense",
+    "also_known_as": "中国人民解放军陆军炮兵防空兵学院, 陆军炮兵防空兵学院",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Army Academy of Border and Coastal Defense",
+    "permalink": "https://unitracker.aspi.org.au/universities/army-academy-of-border-and-coastal-defense",
+    "also_known_as": "中国人民解放军陆军边海学院, 陆军边海防学院",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Army Aviation College",
+    "permalink": "https://unitracker.aspi.org.au/universities/army-aviation-college",
+    "also_known_as": "中国人民解放军陆军航空兵学院, 陆军航空兵学院, Army Aviation School",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Army Engineering University",
+    "permalink": "https://unitracker.aspi.org.au/universities/army-engineering-university",
+    "also_known_as": "中国人民解放军陆军工程大学, 陆军工程大学, Army Engineering University of the PLA, PLA University of Science and Technology",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Army Infantry Academy",
+    "permalink": "https://unitracker.aspi.org.au/universities/army-infantry-academy",
+    "also_known_as": "中国人民解放军陆军步兵学院, 陆军步兵学院, 南昌陆院, Army Infantry Academy of PLA, PLA Army Infantry Academy, Nanchang Army Academy",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Army Medical University",
+    "permalink": "https://unitracker.aspi.org.au/universities/army-medical-university",
+    "also_known_as": "中国人民解放军陆军军医大学, 中国人民解放军第三军医大学, 陆军军医大学, Third Military Medical University",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Army Military Transportation Academy",
+    "permalink": "https://unitracker.aspi.org.au/universities/army-military-transportation-academy-2",
+    "also_known_as": "中国人民解放军陆军军事交通学院, 陆军军事交通学院, Academy of Military Transportation",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Army Research Institute",
+    "permalink": "https://unitracker.aspi.org.au/universities/army-research-institute",
+    "also_known_as": "中国人民解放军陆军研究院, 军陆军研究院",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Army Service Academy",
+    "permalink": "https://unitracker.aspi.org.au/universities/army-service-academy",
+    "also_known_as": "中国人民解放军陆军勤务学院, 陆军勤务学院, PLA Army Service Academy",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Army Special Operations Academy",
+    "permalink": "https://unitracker.aspi.org.au/universities/army-special-operations-academy",
+    "also_known_as": "中国人民解放军陆军特种作战学院, 陆军特种作战学院, Army Special Operations College",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Aviation Industry Corporation of China",
+    "permalink": "https://unitracker.aspi.org.au/universities/aviation-industry-corporation-of-china",
+    "also_known_as": "中国航空工业集团有限公司, 航空工业, AVIC, Beijing Aeronautical Manufacturing Technology Research Institute (a.k.a. AVIC Institute 625)",
+    "kind": "Defence industry conglomerate",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Aviation University of Air Force",
+    "permalink": "https://unitracker.aspi.org.au/universities/aviation-university-of-air-force",
+    "also_known_as": "中国人民解放军空军航空大学, 空军航空大学, PLA Air Force Aviation University, Aviation University Air Force, Air Force Aviation University, Aviation University of PLA Air Force, AUAF",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Beihang University",
+    "permalink": "https://unitracker.aspi.org.au/universities/beihang-university",
+    "also_known_as": "北京航空航天大学, Beijing University of Aeronautics and Astronautics, BUAA",
+    "kind": "Seven sons of national defence",
+    "risk": "1 Very high",
+    "security_credentials": "1 Top secret",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Beijing Electronic Science and Technology Institute",
+    "permalink": "https://unitracker.aspi.org.au/universities/beijing-electronic-science-and-technology-institute",
+    "also_known_as": "北京电子科技学院, BESTI",
+    "kind": "Security",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Beijing Institute of Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/beijing-institute-of-technology",
+    "also_known_as": "北京理工大学, BIT",
+    "kind": "Seven sons of national defence",
+    "risk": "1 Very high",
+    "security_credentials": "1 Top secret",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Beijing Jiaotong University",
+    "permalink": "https://unitracker.aspi.org.au/universities/beijing-jiaotong-university",
+    "also_known_as": "北京交通大学, 北京交大, 北交大, BJTU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Beijing Normal University",
+    "permalink": "https://unitracker.aspi.org.au/universities/beijing-normal-university",
+    "also_known_as": "北京师范大学, BNU, 北师大",
+    "kind": "Civilian",
+    "risk": "4 Low",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Beijing University of Chemical Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/beijing-university-of-chemical-technology",
+    "also_known_as": "北京化工大学, BUCT",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Beijing University of Posts and Telecommunications",
+    "permalink": "https://unitracker.aspi.org.au/universities/beijing-university-of-posts-and-telecommunications",
+    "also_known_as": "北京邮电大学, BUPT",
+    "kind": "Civilian",
+    "risk": "1 Very high",
+    "security_credentials": "1 Top secret",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Central South University",
+    "permalink": "https://unitracker.aspi.org.au/universities/central-south-university",
+    "also_known_as": "中南大学, CSU",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Changchun University of Science and Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/changchun-university-of-science-and-technology",
+    "also_known_as": "长春理工大学, CUST",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "China Aerodynamics Research and Development Center",
+    "permalink": "https://unitracker.aspi.org.au/universities/china-aerodynamics-research-and-development-center",
+    "also_known_as": "中国空气动力研究与发展中心, CARDC, Unit 63820, 63820部队, 第29试验训练基地, 29th Testing and Training Base, Academy of Military Science Aerodynamics Testing Base, 中国人民解放军军事科学院空气动力试验基地",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "China Aerospace Science and Industry Corporation",
+    "permalink": "https://unitracker.aspi.org.au/universities/china-aerospace-science-and-industry-corporation",
+    "also_known_as": "中国航天科工集团有限公司, 航天科工, China Aerospace Science & Industry Corp, CASIC, No. 33 Research Institute, Third Academy of CASIC, No. 31 Research Institute, Third Academy of CASIC, Second Academy of CASIC, China Changfeng Mechanics and Electronics Technology Academy, China Chang Feng Mechano-Electronic Engineering Academy, CASIC Second Academy, China Chang Feng Mechano-Electronic Engineering Company, CASIC Academy of Defense Technology, Second Research Academy of CASIC, Changfeng Electromechanical Technology Design Institute, China Chang Feng Mechanics and Electronics Technology Academy, 33 Institute of CASIC’s Third Academy, Beijing Automation Control Equipment Institute (BACEI), Beijing Institute of Automatic Control Equipment, China Haiying Electromechanical Technology Academy, 35 Institute of CASIC’s Third Academy, Beijing Hangxing Machine Building Corporation, Beijing Huahang Radio Measurements Research Institute, China Haiying Electronic Mechanical Technical Research Academy, Huahang Institute of Radio Measurement, Beijing Power Machinery Institute of CASIC’s 31 Institute, China Haiying Electromechanical Technology Academy (a.k.a., China Haiying Science & Technology Corporation), Beijing Power Generating Machinery Institute, Beijing Power Machinery Research Laboratory",
+    "kind": "Defence industry conglomerate",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "China Aerospace Science and Technology Corporation",
+    "permalink": "https://unitracker.aspi.org.au/universities/china-aerospace-science-and-technology-corporation",
+    "also_known_as": "中国航天科技集团, 中国航天, CASC, 1st General Design Department of the China Aerospace Science and Technology Corporation’s First Academy (CALT), Planning Department No 1 of the China Aerospace Science and Technology Corporation’s First Academy (CALT), Beijing Institute of Astronautic Systems Engineering, Beijing Institute of Space System Engineering, 13th Research Institute, 9th Academy of CASC, 13th Institute, China Aerospace Science and Technology Corporation (CALT), 13th Institute China Aerospace Times Electronics Corporation (CATEC), Beijing Aerospace Control Instruments Institute, Design and Manufacture Center of Navigation and Control Device, Beijing Aerospace Automatic Control Institute, 12th Research Institute, China Aerospace Science and Technology Corporation (CALT), Beijing Institute of Space Automatic Control, Beijing Spaceflight Autocontrol Research Institute, Design and Manufacture Center of Navigation and Control Device, 5th Academy of CASC, China Academy of Space Technology (CAST)",
+    "kind": "Defence industry conglomerate",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "China Agricultural University",
+    "permalink": "https://unitracker.aspi.org.au/universities/china-agricultural-university",
+    "also_known_as": "中国农业大学, 中国农大, CAU",
+    "kind": "Civilian",
+    "risk": "4 Low",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "China Coast Guard Academy",
+    "permalink": "https://unitracker.aspi.org.au/universities/china-coast-guard-academy",
+    "also_known_as": "中国人民武装警察部队海警学院, 武警海警学院, 公安海警学院, China Maritime Police Academy, People's Armed Police China Coast Guard Academy, PAP China Coast Guard Academy",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "China Electronics Corporation",
+    "permalink": "https://unitracker.aspi.org.au/universities/china-electronics-corporation",
+    "also_known_as": "中国电子信息产业集团有限公司, 中国电子产业集团, 中国电子, China Electronics, CEC",
+    "kind": "Defence industry conglomerate",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "China Electronics Technology Group Corporation",
+    "permalink": "https://unitracker.aspi.org.au/universities/china-electronics-technology-group-corporation",
+    "also_known_as": "中国电子科技集团公司, 中国电科, CETC, CETGC",
+    "kind": "Defence industry conglomerate",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "China National Nuclear Corporation",
+    "permalink": "https://unitracker.aspi.org.au/universities/china-national-nuclear-corporation",
+    "also_known_as": "中国核工业集团有限公司, 中核集团, CNNC",
+    "kind": "Defence industry conglomerate",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "China North Industries Group",
+    "permalink": "https://unitracker.aspi.org.au/universities/china-north-industries-group",
+    "also_known_as": "中国兵器工业集团公司, 中国北方工业集团公司, China Ordnance Industries Group Corporation Limited, CNGC, Norinco, Norinco Group",
+    "kind": "Defence industry conglomerate",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "China People’s Police University",
+    "permalink": "https://unitracker.aspi.org.au/universities/china-peoples-police-university",
+    "also_known_as": "中国人民警察大学, 警察大学, CPPU, Ministry of Public Security China People's Police University, MPS China People's Police University",
+    "kind": "Security",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "China Shipbuilding Industry Corporation",
+    "permalink": "https://unitracker.aspi.org.au/universities/china-shipbuilding-industry-corporation",
+    "also_known_as": "中国船舶重工集团有限公司, 中船重工, CSIC",
+    "kind": "Defence industry conglomerate",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "China South Industries Group",
+    "permalink": "https://unitracker.aspi.org.au/universities/china-south-industries-group",
+    "also_known_as": "中国兵器装备集团有限公司, 中国南方工业集团公司, 兵装集团, 中国兵装, China South Industries Group Corporation, CSGC, China Ordnance Equipment Group Corporation, China Ordnance Group Corporation",
+    "kind": "Defence industry conglomerate",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "China State Shipbuilding Corporation",
+    "permalink": "https://unitracker.aspi.org.au/universities/china-state-shipbuilding-corporation",
+    "also_known_as": "中国船舶工业集团有限公司, 中船集团, China State Shipbuilding Corporation Limited",
+    "kind": "Defence industry conglomerate",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "China University of Geosciences (Wuhan)",
+    "permalink": "https://unitracker.aspi.org.au/universities/china-university-of-geosciences-wuhan",
+    "also_known_as": "中国地质大学, 中国地质大学(武汉), CUG",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "China University of Mining and Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/china-university-of-mining-and-technology",
+    "also_known_as": "中国矿业大学, CUMT",
+    "kind": "Civilian",
+    "risk": "4 Low",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Chinese Academy of Engineering Physics",
+    "permalink": "https://unitracker.aspi.org.au/universities/chinese-academy-of-engineering-physics",
+    "also_known_as": "中国工程物理研究院, China Academy of Engineering Physics, CAEP, Beijing Computational Science Research Center, 北京计算科学研究中心, Ninth Academy, 九院, Southwest Computing Center, Southwest Institute of Applied Electronics, Southwest Institute of Chemical Materials, Southwest Institute of Electronic Engineering, Southwest Institute of Environmental Testing, Southwest Institute of Explosives and Chemical Engineering, Southwest Institute of Fluid Physics, Southwest Institute of General Designing and Assembly, Southwest Institute of Machining Technology, Southwest Institute of Materials, Southwest Institute of Nuclear Physics and Chemistry, Southwest Institute of Research and Applications of Special Materials Factory, Southwest Institute of Structural Mechanics, The High Power Laser Laboratory, Shanghai, The Institute of Applied Physics and Computational Mathematics, Beijing, 北京应用物理与计算数学研究所, 901 Institute, Center for High Pressure Science & Technology Advanced Research, 北京高压科学研究中心, HPSTAR, China Jiuyuan Trading Corporation, Peac Institute of Multiscale Science, Sichuan Dingcheng Material Trade Co., Ltd., Sichuan Haitian New Technology Group Co. Ltd., Sichuan Zhonghe Import and Export Trade Co., Ltd., Skyeye Laser Technology Limited, Chengdu Fine Optical Engineering Research Center, Beijing Jincheng Huanyu Electronics Co., Ltd.",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Chongqing University",
+    "permalink": "https://unitracker.aspi.org.au/universities/chongqing-university",
+    "also_known_as": "重庆大学, CQU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Chongqing University of Posts and Telecommunications",
+    "permalink": "https://unitracker.aspi.org.au/universities/chongqing-university-of-posts-and-telecommunications",
+    "also_known_as": "重庆邮电大学, CQUPT",
+    "kind": "Civilian",
+    "risk": "4 Low",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Chongqing University of Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/chongqing-university-of-technology",
+    "also_known_as": "重庆理工大学, CQUT",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Commercial Aircraft Corporation of China",
+    "permalink": "https://unitracker.aspi.org.au/universities/commercial-aircraft-corporation-of-china",
+    "also_known_as": "中国商用飞机有限责任公司, 中国商飞, COMAC",
+    "kind": "Defence industry conglomerate",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Criminal Investigation Police University of China",
+    "permalink": "https://unitracker.aspi.org.au/universities/criminal-investigation-police-university-of-china",
+    "also_known_as": "中国刑事警察学院, CIPUC",
+    "kind": "Security",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Dalian Maritime University",
+    "permalink": "https://unitracker.aspi.org.au/universities/dalian-maritime-university",
+    "also_known_as": "大连海事大学, 海大, DMU, DLMU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Dalian Minzu University",
+    "permalink": "https://unitracker.aspi.org.au/universities/dalian-minzu-university",
+    "also_known_as": "大连民族大学, 大连民大, DLMU, Dalian Nationalities University, DLNU",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Dalian Naval Academy",
+    "permalink": "https://unitracker.aspi.org.au/universities/dalian-naval-academy",
+    "also_known_as": "中国人民解放军海军大连舰艇学院, PLA Dalian Naval Academy",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Dalian University of Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/dalian-university-of-technology",
+    "also_known_as": "大连理工大学, DLUT",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Donghua University",
+    "permalink": "https://unitracker.aspi.org.au/universities/donghua-university",
+    "also_known_as": "东华大学, DHU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "East China Normal University",
+    "permalink": "https://unitracker.aspi.org.au/universities/east-china-normal-university",
+    "also_known_as": "华东师范大学, 华东师大, ECNU",
+    "kind": "Civilian",
+    "risk": "4 Low",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "East China University of Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/east-china-university-of-technology",
+    "also_known_as": "东华理工大学, ECUT, East China Institute of Technology",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Engineering University of the CAPF",
+    "permalink": "https://unitracker.aspi.org.au/universities/engineering-university-of-the-capf",
+    "also_known_as": "中国人民武装警察部队工程大学, 武警工程大学, PAP Engineering University",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Fudan University",
+    "permalink": "https://unitracker.aspi.org.au/universities/fudan-university",
+    "also_known_as": "复旦大学",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Fuzhou University",
+    "permalink": "https://unitracker.aspi.org.au/universities/fuzhou-university",
+    "also_known_as": "福州大学, FZU",
+    "kind": "Civilian",
+    "risk": "4 Low",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Guangdong University of Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/guangdong-university-of-technology",
+    "also_known_as": "广东工业大学, 广工, GDUT",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Guilin University of Electronic Science and Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/guilin-university-of-electronic-science-and-technology",
+    "also_known_as": "桂林电子科技大学, GUET, Guilin Institute of Electronic Technology",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Hangzhou Dianzi University",
+    "permalink": "https://unitracker.aspi.org.au/universities/hangzhou-dianzi-university",
+    "also_known_as": "杭州电子科技大学, HDU, Hangzhou Institute of Electrical Engineering",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Hangzhou Normal University",
+    "permalink": "https://unitracker.aspi.org.au/universities/hangzhou-normal-university",
+    "also_known_as": "杭州师范大学, 杭师大, HZNU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Harbin Engineering University",
+    "permalink": "https://unitracker.aspi.org.au/universities/harbin-engineering-university",
+    "also_known_as": "哈尔滨工程大学, HEU",
+    "kind": "Seven sons of national defence",
+    "risk": "1 Very high",
+    "security_credentials": "1 Top secret",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Harbin Institute of Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/harbin-institute-of-technology",
+    "also_known_as": "哈尔滨工业大学, HIT",
+    "kind": "Seven sons of national defence",
+    "risk": "1 Very high",
+    "security_credentials": "1 Top secret",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Harbin University of Science and Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/harbin-university-of-science-and-technology",
+    "also_known_as": "哈尔滨理工大学, HRBUST",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Hebei University",
+    "permalink": "https://unitracker.aspi.org.au/universities/hebei-university",
+    "also_known_as": "河北大学, HBU",
+    "kind": "Civilian",
+    "risk": "4 Low",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Hebei University of Science and Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/hebei-university-of-science-and-technology",
+    "also_known_as": "河北科技大学, HEBUST",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Hefei University of Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/hefei-university-of-technology",
+    "also_known_as": "合肥工业大学, HFUT",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Heilongjiang Institute of Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/heilongjiang-institute-of-technology",
+    "also_known_as": "黑龙江工程学院, HLJIY",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "3 Confidential",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Heilongjiang University",
+    "permalink": "https://unitracker.aspi.org.au/universities/heilongjiang-university",
+    "also_known_as": "黑龙江大学, HLJU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "3 Confidential",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Henan University of Science and Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/henan-university-of-science-and-technology",
+    "also_known_as": "河南科技大学, HAUST",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Huazhong University of Science and Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/huazhong-university-of-science-and-technology",
+    "also_known_as": "华中科技大学, HUST",
+    "kind": "Civilian",
+    "risk": "1 Very high",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Hunan University",
+    "permalink": "https://unitracker.aspi.org.au/universities/hunan-university",
+    "also_known_as": "湖南大学, HNU",
+    "kind": "Civilian",
+    "risk": "1 Very high",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Hunan University of Science and Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/hunan-university-of-science-and-technology",
+    "also_known_as": "湖南科技大学, HNUST",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "3 Confidential",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Information Engineering University",
+    "permalink": "https://unitracker.aspi.org.au/universities/information-engineering-university-2",
+    "also_known_as": "中国人民解放军信息工程大学, PLAIEU, IEU, 中国人民解放军外国语学院, 洛阳外语学院, Luoyang Foreign Languages University, PLA Foreign Languages University, Luoyang Foreign Language Institute, Luoyang University, 郑州测绘学院, Zhengzhou Institute of Surveying and Mapping, Zhengzhou Information Science and Technology Institute, 国家数字交换系统工程技术研究中心, National Digital Switching System Engineering and Technology Research Center, 数学工程与先进计算国家重点实验室, State Key Laboratory of Mathematical Engineering and Advanced Computing",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Institute of NBC Defense",
+    "permalink": "https://unitracker.aspi.org.au/universities/institute-of-nbc-defense",
+    "also_known_as": "陆军防化学院, 中国人民解放军陆军防化学院",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Jiangnan Social University",
+    "permalink": "https://unitracker.aspi.org.au/universities/jiangnan-social-university",
+    "also_known_as": "江南社会学院, Institute of Cadre Management, Institute of International Relations Suzhou Campus, Jiangnan Institute of Social Studies, Ministry of State Security Administrative Institute, 国家安全部行政学院",
+    "kind": "Security",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Jiangsu University of Science and Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/jiangsu",
+    "also_known_as": "江苏科技大学, JUST",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Jilin University",
+    "permalink": "https://unitracker.aspi.org.au/universities/jilin-university",
+    "also_known_as": "吉林大学, JLU",
+    "kind": "Civilian",
+    "risk": "1 Very high",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Kunming University of Science and Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/kunming-university-of-science-and-technology",
+    "also_known_as": "昆明理工大学, KMUST",
+    "kind": "Civilian",
+    "risk": "4 Low",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Lanzhou University",
+    "permalink": "https://unitracker.aspi.org.au/universities/lanzhou-university",
+    "also_known_as": "兰州大学, LZU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Lanzhou University of Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/lanzhou-university-of-technology",
+    "also_known_as": "兰州理工大学, LUT, Gansu University of Technology",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Logistics University of the People’s Armed Police Force",
+    "permalink": "https://unitracker.aspi.org.au/universities/logistics-university-of-the-peoples-armed-police-force",
+    "also_known_as": "中国人民武装警察部队后勤学院, 武警后勤学院, PAP Logistics University",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Minzu University of China",
+    "permalink": "https://unitracker.aspi.org.au/universities/minzu-university-of-china",
+    "also_known_as": "中央民族大学, 中央民大, MUC",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Nanchang Hangkong University",
+    "permalink": "https://unitracker.aspi.org.au/universities/nanchang-hangkong-university",
+    "also_known_as": "南昌航空大学, Nanchang Aviation University, NCHU, Nanchang Aeronautical University",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Nanchang University",
+    "permalink": "https://unitracker.aspi.org.au/universities/nanchang-university",
+    "also_known_as": "南昌大学, NCU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Nanjing Army Command College",
+    "permalink": "https://unitracker.aspi.org.au/universities/nanjing-army-command-college",
+    "also_known_as": "南京陆军指挥学院, PLA Nanjing Army Command College",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Nanjing Institute of Information Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/nanjing-institute-of-information-technology",
+    "also_known_as": "南京信息技术研究院, 南京841研究所, Nanjing 841 Institute, Nanjing Research Institute of Information Technology, Nanjing Information Technology Institute, Nanjing Information Technology Academe, Nanjing Institute of Information Technology, Nanjing Information Technology Research Institute",
+    "kind": "Security",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Nanjing Normal University",
+    "permalink": "https://unitracker.aspi.org.au/universities/nanjing-normal-university",
+    "also_known_as": "南京师范大学, 南京师大, 南师大, 南师, NNU, NJNU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Nanjing Tech University",
+    "permalink": "https://unitracker.aspi.org.au/universities/nanjing-tech-university",
+    "also_known_as": "南京工业大学, NJTech",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Nanjing University",
+    "permalink": "https://unitracker.aspi.org.au/universities/nanjing-university",
+    "also_known_as": "南京大学, NJU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Nanjing University of Aeronautics and Astronautics",
+    "permalink": "https://unitracker.aspi.org.au/universities/nanjing-university-of-aeronautics-and-astronautics",
+    "also_known_as": "南京航空航天大学, Nanhang University, NUAA",
+    "kind": "Seven sons of national defence",
+    "risk": "1 Very high",
+    "security_credentials": "1 Top secret",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Nanjing University of Posts and Telecommunications",
+    "permalink": "https://unitracker.aspi.org.au/universities/nanjing-university-of-posts-and-telecommunications",
+    "also_known_as": "南京邮电大学, NJUPT",
+    "kind": "Civilian",
+    "risk": "4 Low",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Nanjing University of Science and Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/nanjing-university-of-science-and-technology",
+    "also_known_as": "南京理工大学, NJUST",
+    "kind": "Seven sons of national defence",
+    "risk": "1 Very high",
+    "security_credentials": "1 Top secret",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Nankai University",
+    "permalink": "https://unitracker.aspi.org.au/universities/nankai-university",
+    "also_known_as": "南开大学, NKU",
+    "kind": "Civilian",
+    "risk": "4 Low",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "National Defense University",
+    "permalink": "https://unitracker.aspi.org.au/universities/national-defense-university",
+    "also_known_as": "中国人民解放军国防大学, 国防大学, NDU",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "National University of Defense Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/national-university-of-defense-technology",
+    "also_known_as": "中国人民解放军国防科技大学, NUDT, Changsha Institute of Technology, National Key Laboratory for Parallel and Distributed Processing, 并行与分布处理国家重点实验室, Hunan Guofang Kei University",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Naval Command College",
+    "permalink": "https://unitracker.aspi.org.au/universities/naval-command-college",
+    "also_known_as": "中国人民解放军海军指挥学院, 海军指挥学院, PLA Navy Command College, Navy Command College, Naval Command Academy",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Naval Petty Officer Academy",
+    "permalink": "https://unitracker.aspi.org.au/universities/naval-petty-officer-academy",
+    "also_known_as": "中国人民解放军海军士官学校, 海军士官学校, 中国人民解放军海军蚌埠士官学校, PLA Navy Bengbu Petty Officer Academy, Naval Petty Officer Academy",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Naval Research Academy",
+    "permalink": "https://unitracker.aspi.org.au/universities/naval-research-academy",
+    "also_known_as": "中国人民解放军海军研究院, 海军研究院, 中国人民解放军海军装备论证研究中心, 海军装备论证研究中心, 中国人民解放军海军装备研究院, 海军装备研究院, PLA Navy Research Academy, PLA Navy Equipment Academy, Naval Equipment Academy, Naval Academy",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Naval University of Engineering",
+    "permalink": "https://unitracker.aspi.org.au/universities/naval-university-of-engineering",
+    "also_known_as": "中国人民解放军海军工程大学, 海军工程大学, 海工大, Naval Engineering University, NUE",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Navy Aviation University",
+    "permalink": "https://unitracker.aspi.org.au/universities/navy-aviation-university",
+    "also_known_as": "中国人民解放军海军航空大学, 海军航空大学, 海军航大, Naval Aviation University, Naval Aeronautics and Astronautics University",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Navy Logistics Academy",
+    "permalink": "https://unitracker.aspi.org.au/universities/navy-logistics-academy",
+    "also_known_as": "中国人民解放军海军勤务学院, 海军勤务学院",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Navy Medical University",
+    "permalink": "https://unitracker.aspi.org.au/universities/navy-medical-university",
+    "also_known_as": "中国人民解放军海军军医大学, 中国人民解放军第二军医大, 海军军医大学, Second Military Medical University",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Navy Submarine Academy",
+    "permalink": "https://unitracker.aspi.org.au/universities/navy-submarine-academy",
+    "also_known_as": "中国人民解放军海军潜艇学院, 海军潜艇学院, PLA Navy Submarine Academy",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "North China Institute of Aerospace Engineering",
+    "permalink": "https://unitracker.aspi.org.au/universities/north-china-institute-of-aerospace-engineering",
+    "also_known_as": "北华航天工业学院, NCIAE",
+    "kind": "Civilian",
+    "risk": "1 Very high",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "North China University of Science and Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/north-china-university-of-science-and-technology",
+    "also_known_as": "华北理工大学, NCST, Hebei United University, 河北联合大学",
+    "kind": "Civilian",
+    "risk": "4 Low",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "North University of China",
+    "permalink": "https://unitracker.aspi.org.au/universities/north-university-of-china",
+    "also_known_as": "中北大学, NUC",
+    "kind": "Civilian",
+    "risk": "1 Very high",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Northeastern University",
+    "permalink": "https://unitracker.aspi.org.au/universities/northeastern-university",
+    "also_known_as": "东北大学, NEU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Northwest A&F University",
+    "permalink": "https://unitracker.aspi.org.au/universities/northwest-af-university",
+    "also_known_as": "西北农林科技大学, 西农, 西农大, 西北农大, NWAFU",
+    "kind": "Civilian",
+    "risk": "4 Low",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Northwest Institute of Nuclear Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/northwest-institute-of-nuclear-technology",
+    "also_known_as": "西北核技术研究所, NINT, Institute of Northwest Nuclear Technology, Northwest Nuclear Technology Institute",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Northwestern Polytechnical University",
+    "permalink": "https://unitracker.aspi.org.au/universities/northwestern-polytechnical-university",
+    "also_known_as": "西北工业大学, NWPU, NPU, Northwest Polytechnic University, Northwest Polytechnical University, Northwestern Polytechnic University",
+    "kind": "Seven sons of national defence",
+    "risk": "1 Very high",
+    "security_credentials": "1 Top secret",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Ocean University of China",
+    "permalink": "https://unitracker.aspi.org.au/universities/ocean-university-of-china",
+    "also_known_as": "中国海洋大学, 中国海大, 海大, OUC",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Officers College of the PAP",
+    "permalink": "https://unitracker.aspi.org.au/universities/officers-college-of-the-pap",
+    "also_known_as": "中国人民武装警察部队警官学院, 武警警官学院, PAP Officers’ College, People's Armed Police Officers’ College",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "PAP NCO College",
+    "permalink": "https://unitracker.aspi.org.au/universities/pap-nco-college",
+    "also_known_as": "中国人民武装警察部队士官学校, People's Armed Police NCO College, 武警士官学校, 中国人民武装警察部队杭州士官学校",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Peking University",
+    "permalink": "https://unitracker.aspi.org.au/universities/peking-university",
+    "also_known_as": "北京大学, 北大, Beijing University, Beida, PKU",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "People’s Armed Police Command College",
+    "permalink": "https://unitracker.aspi.org.au/universities/peoples-armed-police-command-college",
+    "also_known_as": "中国人民武装警察指挥学院, 武警指挥学院, PAP Command College, The People’s Armed Police College China, The Chinese People’s Armed Police Forces Academy",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "People’s Public Security University of China",
+    "permalink": "https://unitracker.aspi.org.au/universities/peoples-public-security-university-of-china",
+    "also_known_as": "中国人民公安大学, Chinese People Public Security University, PPSUC",
+    "kind": "Security",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Railway Police College",
+    "permalink": "https://unitracker.aspi.org.au/universities/railway-police-college",
+    "also_known_as": "铁道警察学院, 铁道警院, Ministry of Public Security Railway Police College, MPS Railway Police College",
+    "kind": "Security",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Renmin University",
+    "permalink": "https://unitracker.aspi.org.au/universities/renmin-university",
+    "also_known_as": "人民大学, RUC",
+    "kind": "Civilian",
+    "risk": "4 Low",
+    "security_credentials": "5. None",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Rocket Force Command College",
+    "permalink": "https://unitracker.aspi.org.au/universities/rocket-force-command-college",
+    "also_known_as": "中国人民解放军火箭指挥学院, 火箭指挥学院, SMF (Strategic Missile Force) Command College",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Rocket Force Research Institute",
+    "permalink": "https://unitracker.aspi.org.au/universities/rocket-force-research-institute",
+    "also_known_as": "中国人民解放军火箭军研究院, 火箭军研究院, 二炮兵装备研究院, 火箭军装备研究院, Second Artillery Equipment Academy, Rocket Force Equipment Academy",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Rocket Force Sergeant School",
+    "permalink": "https://unitracker.aspi.org.au/universities/rocket-force-sergeant-school",
+    "also_known_as": "中国人民解放军火箭军士官学校, 火箭军士官学校, PLA Rocket Force NCO College, Rocket Force Sergeancy School, Rocket Force Sergeant School of the PLA, PLA Rocket Force Academy, Rocket Force NCO College, Rocket Sergeant School",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Rocket Force University of Engineering",
+    "permalink": "https://unitracker.aspi.org.au/universities/rocket-force-university-of-engineering",
+    "also_known_as": "中国人民解放军火箭军工程大学, 火箭军工程大学, 第二炮兵工程大学, 西安高技术研究所, Rocket Force Engineering University, RFUE, RFEU, Xi’an Research Institute of High Technology, Xi’an Research Institute of High-Tech",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Shandong University",
+    "permalink": "https://unitracker.aspi.org.au/universities/shandong-university",
+    "also_known_as": "山东大学, SDU",
+    "kind": "Civilian",
+    "risk": "1 Very high",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Shandong University of Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/shandong-university-of-technology",
+    "also_known_as": "山东理工大学, SDUT",
+    "kind": "Civilian",
+    "risk": "4 Low",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Shanghai Jiao Tong University",
+    "permalink": "https://unitracker.aspi.org.au/universities/shanghai-jiaotong-university",
+    "also_known_as": "上海交通大学, SJTU",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Shanghai University",
+    "permalink": "https://unitracker.aspi.org.au/universities/shanghai-university",
+    "also_known_as": "上海大学, SHU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Shenyang Aerospace University",
+    "permalink": "https://unitracker.aspi.org.au/universities/shenyang-aerospace-university",
+    "also_known_as": "沈阳航空航天大学, SAU",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Shenyang Ligong University",
+    "permalink": "https://unitracker.aspi.org.au/universities/shenyang-ligong-university",
+    "also_known_as": "沈阳理工大学, SYLU",
+    "kind": "Civilian",
+    "risk": "1 Very high",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Shenzhen University",
+    "permalink": "https://unitracker.aspi.org.au/universities/shenzhen-university",
+    "also_known_as": "深圳大学, SZU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Shijiazhuang Tiedao University",
+    "permalink": "https://unitracker.aspi.org.au/universities/shijiazhuang-tiedao-university",
+    "also_known_as": "石家庄铁道大学, STDU",
+    "kind": "Civilian",
+    "risk": "4 Low",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Sichuan University",
+    "permalink": "https://unitracker.aspi.org.au/universities/sichuan-university",
+    "also_known_as": "四川大学, SCU",
+    "kind": "Civilian",
+    "risk": "1 Very high",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Soochow University",
+    "permalink": "https://unitracker.aspi.org.au/universities/soochow-university",
+    "also_known_as": "苏州大学, Suzhou University",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "South China University of Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/south-china-university-of-technology",
+    "also_known_as": "华南理工大学, SCUT",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Southeast University",
+    "permalink": "https://unitracker.aspi.org.au/universities/southeast-university",
+    "also_known_as": "东南大学, SEU",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Southern University of Science and Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/southern-university-of-science-and-technology",
+    "also_known_as": "南方科技大学, 南科大, SUSTech",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Southwest University of Science and Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/southwest-university-of-science-and-technology",
+    "also_known_as": "西南科技大学, SWUST",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Space Engineering University",
+    "permalink": "https://unitracker.aspi.org.au/universities/space-engineering-university",
+    "also_known_as": "中国人民解放军战略支援部队航天工程大学, PLA Equipment Academy, Aerospace Engineering University, A/SEU, PLA Equipment Command and Technology Academy",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Special Police Academy",
+    "permalink": "https://unitracker.aspi.org.au/universities/special-police-academy",
+    "also_known_as": "中国武装警察部队特种警察学院, SPA, Special Police of China, PAP Special Police Academy, People's Armed Police Special Police Academy, SPC",
+    "kind": "Military",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Sun Yat-sen University",
+    "permalink": "https://unitracker.aspi.org.au/universities/sun-yat-sen-university",
+    "also_known_as": "中山大学, SYSU",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "5. None",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Tianjin Polytechnic University",
+    "permalink": "https://unitracker.aspi.org.au/universities/tianjin-polytechnic-university",
+    "also_known_as": "天津工业大学, TJPU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Tianjin University",
+    "permalink": "https://unitracker.aspi.org.au/universities/tianjin-university",
+    "also_known_as": "天津大学, TJU",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Tongji University",
+    "permalink": "https://unitracker.aspi.org.au/universities/tongji-university",
+    "also_known_as": "同济大学",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Tsinghua University",
+    "permalink": "https://unitracker.aspi.org.au/universities/tsinghua-university",
+    "also_known_as": "清华大学, Qinghua University, THU",
+    "kind": "Civilian",
+    "risk": "1 Very high",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "University of Chinese Academy of Sciences",
+    "permalink": "https://unitracker.aspi.org.au/universities/university-of-chinese-academy-of-sciences",
+    "also_known_as": "中国科学院大学, 国科大, UCAS",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "University of Electronic Science and Technology of China",
+    "permalink": "https://unitracker.aspi.org.au/universities/university-of-electronic-science-and-technology-of-china",
+    "also_known_as": "电子科技大学, UESTC, 成都电子科技大学",
+    "kind": "Civilian",
+    "risk": "1 Very high",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "University of International Relations",
+    "permalink": "https://unitracker.aspi.org.au/universities/university-of-international-relations",
+    "also_known_as": "国际关系学院, UIR, Institute of International Politics",
+    "kind": "Security",
+    "risk": "1 Very high",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "University of Science and Technology Beijing",
+    "permalink": "https://unitracker.aspi.org.au/universities/university-of-science-and-technology-beijing",
+    "also_known_as": "北京科技大学, USTB",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "University of Science and Technology of China",
+    "permalink": "https://unitracker.aspi.org.au/universities/university-of-science-and-technology-of-china",
+    "also_known_as": "中国科学技术大学, 中国科技大学, USTC",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "University of Shanghai for Science and Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/university-of-shanghai-for-science-and-technology",
+    "also_known_as": "上海理工大学, USST",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "University of South China",
+    "permalink": "https://unitracker.aspi.org.au/universities/university-of-south-china",
+    "also_known_as": "南华大学, USC",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Wuhan University",
+    "permalink": "https://unitracker.aspi.org.au/universities/wuhan-university",
+    "also_known_as": "武汉大学, WHU",
+    "kind": "Civilian",
+    "risk": "1 Very high",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Wuhan University of Technology",
+    "permalink": "https://unitracker.aspi.org.au/universities/wuhan-university-of-technology",
+    "also_known_as": "武汉理工大学, WHUT",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Xiamen University",
+    "permalink": "https://unitracker.aspi.org.au/universities/xiamen-university",
+    "also_known_as": "厦门大学, XMU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Xiangtan University",
+    "permalink": "https://unitracker.aspi.org.au/universities/xiangtan-university",
+    "also_known_as": "湘潭大学, XTU",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Xidian University",
+    "permalink": "https://unitracker.aspi.org.au/universities/xidian-university",
+    "also_known_as": "西安电子科技大学, 西电大学, Xi'an University of Electronic Science and Technology",
+    "kind": "Civilian",
+    "risk": "1 Very high",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Xinjiang University",
+    "permalink": "https://unitracker.aspi.org.au/universities/xinjiang-university",
+    "also_known_as": "新疆大学, شىنجاڭ داشۆ, 新大, XJU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Xi’an Jiaotong University",
+    "permalink": "https://unitracker.aspi.org.au/universities/xian-jiaotong-university",
+    "also_known_as": "西安交通大学, XJTU",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Xi’an Technological University",
+    "permalink": "https://unitracker.aspi.org.au/universities/xian-technological-university",
+    "also_known_as": "西安工业大学, XATU",
+    "kind": "Civilian",
+    "risk": "1 Very high",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Xi’an University of Posts and Telecommunications",
+    "permalink": "https://unitracker.aspi.org.au/universities/xian-university-of-posts-and-telecommunications",
+    "also_known_as": "西安邮电大学, XUPT",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Yanshan University",
+    "permalink": "https://unitracker.aspi.org.au/universities/yanshan-university",
+    "also_known_as": "燕山大学, YSU",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Yunnan Normal University",
+    "permalink": "https://unitracker.aspi.org.au/universities/yunnan-normal-university",
+    "also_known_as": "云南师范大学, 云南师大, 云师大, YNNU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "5. None",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Yunnan University",
+    "permalink": "https://unitracker.aspi.org.au/universities/yunnan-university",
+    "also_known_as": "云南大学, 云大, YNU",
+    "kind": "Civilian",
+    "risk": "4 Low",
+    "security_credentials": "3 Confidential",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "None"
+  },
+  {
+    "title": "Zhejiang University",
+    "permalink": "https://unitracker.aspi.org.au/universities/zhejiang-university",
+    "also_known_as": "浙江大学, ZJU",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Zhengzhou University",
+    "permalink": "https://unitracker.aspi.org.au/universities/zhengzhou-university",
+    "also_known_as": "郑州大学, 郑大, ZZU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "None"
+  }
+]

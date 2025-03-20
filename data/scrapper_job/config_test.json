@@ -1,28 +1,15 @@
 {
     "jobs": [
         {
-            "name": "doj_pr",
-            "module": "jobs.doj",
-            "fetcher": "fetch_articles",
-            "processor": "process_articles",
-            "updater": "update_articles",
+            "name": "university_au",
+            "module": "jobs.university_au",
+            "fetcher": "crawl_university_data",
+            "processor": "process_university_data",
+            "updater": "update_university_store",
             "config": {
-              "rss_url_template": "https://www.justice.gov/news/rss?type=press_release&m={}",
-              "start_date": "2025-01-01",
-              "output_file": "data/doj_pr/doj_articles_with_content_and_entities.json",
-              "country_keywords": [    
-                    "china",
-                    "chinese",
-                    "russia",
-                    "russian",
-                    "iran",
-                    "iranian"
-                ],
-              "academic_keywords": [  
-                    "professor",
-                    "university",
-                    "college"
-                ]
+              "start_urls": ["https://unitracker.aspi.org.au/"],
+              "intermediate_json": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data/university_au/unitracker_au_new.json",
+              "final_store": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data/university_au/unitracker_au.json"
             }
           }
     ],

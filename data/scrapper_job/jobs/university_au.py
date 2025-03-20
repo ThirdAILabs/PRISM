@@ -6,16 +6,21 @@ import subprocess
 def crawl_university_data(config):
     intermediate_json = config["intermediate_json"]
     os.makedirs(os.path.dirname(intermediate_json), exist_ok=True)
+
+    # Set the working directory to the location of the spider.
+    cwd = os.path.join(os.path.dirname(__file__), "spider", "unitracker")
+
+    # Use 'scrapy runspider' to execute main.py.
     cmd = [
-        "cd spider/unitracker &&",
         "scrapy",
-        "run",
+        "runspider",
         "main.py",
         "-o",
         intermediate_json,
         "--nolog",
     ]
-    subprocess.run(cmd, check=True)
+    subprocess.run(cmd, cwd=cwd, check=True)
+
     with open(intermediate_json, "r", encoding="utf-8") as f:
         data = json.load(f)
     return data
