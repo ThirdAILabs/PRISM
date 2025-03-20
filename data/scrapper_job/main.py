@@ -69,6 +69,10 @@ def main():
     config = load_config()
     jobs = config.get("jobs", [])
 
+    for key, val in config.get("global", {}).items():
+        for job in jobs:
+            job.setdefault("config", {})[key] = val
+
     sorted_jobs = resolve_dependencies(jobs)
     print("Jobs will run in the following order:")
     for job in sorted_jobs:

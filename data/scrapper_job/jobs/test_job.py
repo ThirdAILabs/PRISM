@@ -3,7 +3,7 @@ import importlib
 import traceback
 
 
-def load_config(path="../config_test.json"):
+def load_config(path="config_test.json"):
     with open(path, "r") as f:
         return json.load(f)
 
@@ -55,6 +55,11 @@ def test_job(job):
 def main():
     config = load_config()
     jobs = config.get("jobs", [])
+
+    for key, val in config.get("global", {}).items():
+        for job in jobs:
+            job.setdefault("config", {})[key] = val
+
     if not jobs:
         print("No jobs defined in config.")
         return

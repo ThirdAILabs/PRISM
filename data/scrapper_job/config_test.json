@@ -1,17 +1,30 @@
 {
     "jobs": [
         {
-            "name": "csl_data",
-            "module": "jobs.csl",
-            "fetcher": "fetch_source",
-            "processor": "process_source",
-            "updater": "update_local_store",
+            "name": "doj_pr",
+            "module": "jobs.doj",
+            "fetcher": "fetch_articles",
+            "processor": "process_articles",
+            "updater": "update_articles",
             "config": {
-                "csv_url": "https://data.trade.gov/downloadable_consolidated_screening_list/v1/consolidated.csv",
-                "original_file": "data/csl_data/original.csv",
-                "output_file": "data/csl_data/new_data.csv"
+              "rss_url_template": "https://www.justice.gov/news/rss?type=press_release&m={}",
+              "start_date": "2025-01-01",
+              "output_file": "data/doj_pr/doj_articles_with_content_and_entities.json",
+              "country_keywords": [    
+                    "china",
+                    "chinese",
+                    "russia",
+                    "russian",
+                    "iran",
+                    "iranian"
+                ],
+              "academic_keywords": [  
+                    "professor",
+                    "university",
+                    "college"
+                ]
             }
-        }
+          }
     ],
     "global": {
         "openai_api_key": "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",
