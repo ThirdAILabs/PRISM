@@ -95,7 +95,10 @@ const PaperTitleSearchComponent = () => {
         ></div>
       )}
       {hasSearchedPaper && !isLoading && paperResults.length === 0 && (
-        <NoResultsFound msg="Authors Not Found" submsg="We couldn't find any authors associated with this paper." />
+        <NoResultsFound
+          msg="Authors Not Found"
+          submsg="We couldn't find any authors associated with this paper."
+        />
       )}
       {hasSearchedPaper && paperResults.length > 0 && <TodoListComponent results={paperResults} />}
     </div>

@@ -5,7 +5,6 @@ import { reportService } from '../../../api/reports';
 import './TodoListComponent.css';
 import NoResultsFound from '../../common/tools/NoResultsFound';
 
-
 const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadingMore }) => {
   const navigate = useNavigate();
 

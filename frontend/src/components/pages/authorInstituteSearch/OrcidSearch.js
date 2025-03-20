@@ -57,7 +57,10 @@ const OrcidSearchComponent = () => {
         ></div>
       )}
       {hasSearchedOrcid && !isLoading && orcidResults.length === 0 && (
-        <NoResultsFound msg="Author Not Found" submsg="We couldn't find an author associated with this ORCID ID." />
+        <NoResultsFound
+          msg="Author Not Found"
+          submsg="We couldn't find an author associated with this ORCID ID."
+        />
       )}
       {hasSearchedOrcid && orcidResults.length > 0 && <TodoListComponent results={orcidResults} />}
     </div>

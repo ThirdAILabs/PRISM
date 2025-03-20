@@ -161,10 +161,7 @@ function EntityLookup() {
           ))}
         </div>
       ) : (
-        !isLoading &&
-        hasSearched && (
-          <NoResultsFound />
-        )
+        !isLoading && hasSearched && <NoResultsFound />
       )}
     </div>
   );
