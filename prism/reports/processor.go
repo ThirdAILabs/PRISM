@@ -1,19 +1,13 @@
-package flaggers
+package reports
 
 import (
 	"crypto/sha256"
 	"fmt"
 	"log/slog"
-	"path/filepath"
 	"prism/prism/api"
-	"prism/prism/llms"
 	"prism/prism/monitoring"
 	"prism/prism/openalex"
-	"prism/prism/reports"
-	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/schema"
-	"prism/prism/search"
-	"prism/prism/triangulation"
 	"sync"
 	"time"
 )
@@ -22,86 +16,19 @@ type ReportProcessor struct {
 	openalex       openalex.KnowledgeBase
 	workFlaggers   []WorkFlagger
 	authorFlaggers []AuthorFlagger
-	manager        *reports.ReportManager
+	manager        *ReportManager
 }
 
-type ReportProcessorOptions struct {
-	UniversityNDB   search.NeuralDB
-	DocIndex        *search.ManyToOneIndex[LinkMetadata]
-	AuxIndex        *search.ManyToOneIndex[LinkMetadata]
-	TriangulationDB *triangulation.TriangulationDB
-
-	EntityLookup *search.EntityIndex[string]
-
-	ConcerningEntities     eoc.EocSet
-	ConcerningInstitutions eoc.EocSet
-	ConcerningFunders      eoc.EocSet
-	ConcerningPublishers   eoc.EocSet
-
-	SussyBakas []string
-
-	GrobidEndpoint string
-
-	WorkDir string
-
-	MaxDownloadThreads int
-	MaxGrobidThreads   int
-
-	PDFS3CacheBucket string
-}
-
-// TODO(Nicholas): How to do cleanup for this, or just let it get cleaned up at the end of the process?
-func NewReportProcessor(manager *reports.ReportManager, opts ReportProcessorOptions) (*ReportProcessor, error) {
-	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(opts.WorkDir, "authors.cache"))
-	if err != nil {
-		return nil, fmt.Errorf("error loading author cache: %w", err)
-	}
-	ackCache, err := NewCache[Acknowledgements]("acks", filepath.Join(opts.WorkDir, "acks.cache"))
-	if err != nil {
-		return nil, fmt.Errorf("error loading ack cache: %w", err)
-	}
-
+func NewProcessor(workFlaggers []WorkFlagger, authorFlaggers []AuthorFlagger, manager *ReportManager) *ReportProcessor {
 	return &ReportProcessor{
-		openalex: openalex.NewRemoteKnowledgeBase(),
-		workFlaggers: []WorkFlagger{
-			&OpenAlexFunderIsEOC{
-				concerningFunders:  opts.ConcerningFunders,
-				concerningEntities: opts.ConcerningEntities,
-			},
-			&OpenAlexAuthorAffiliationIsEOC{
-				concerningEntities:     opts.ConcerningEntities,
-				concerningInstitutions: opts.ConcerningInstitutions,
-			},
-			&OpenAlexCoauthorAffiliationIsEOC{
-				concerningEntities:     opts.ConcerningEntities,
-				concerningInstitutions: opts.ConcerningInstitutions,
-			},
-			&OpenAlexAcknowledgementIsEOC{
-				openalex:        openalex.NewRemoteKnowledgeBase(),
-				entityLookup:    opts.EntityLookup,
-				authorCache:     authorCache,
-				extractor:       NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.MaxDownloadThreads, opts.MaxGrobidThreads, opts.PDFS3CacheBucket),
-				sussyBakas:      opts.SussyBakas,
-				triangulationDB: opts.TriangulationDB,
-			},
-			&AuthorIsAssociatedWithEOCFlagger{
-				docIndex: opts.DocIndex,
-				auxIndex: opts.AuxIndex,
-			},
-		},
-		authorFlaggers: []AuthorFlagger{
-			&AuthorIsFacultyAtEOCFlagger{
-				universityNDB: opts.UniversityNDB,
-			},
-			&AuthorNewsArticlesFlagger{
-				llm: llms.New(),
-			},
-		},
-		manager: manager,
-	}, nil
+		openalex:       openalex.NewRemoteKnowledgeBase(),
+		workFlaggers:   workFlaggers,
+		authorFlaggers: authorFlaggers,
+		manager:        manager,
+	}
 }
 
-func (processor *ReportProcessor) getWorkStream(report reports.ReportUpdateTask) (chan openalex.WorkBatch, error) {
+func (processor *ReportProcessor) getWorkStream(report ReportUpdateTask) (chan openalex.WorkBatch, error) {
 	switch report.Source {
 	case api.OpenAlexSource:
 		return streamOpenAlexWorks(processor.openalex, report.AuthorId, report.StartDate, report.EndDate), nil
@@ -172,7 +99,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 	close(flagsCh)
 }
 
-func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdateTask) {
+func (processor *ReportProcessor) ProcessAuthorReport(report ReportUpdateTask) {
 	start := time.Now()
 
 	logger := slog.With("report_id", report.Id)
@@ -245,15 +172,15 @@ func (processor *ReportProcessor) ProcessNextAuthorReport() bool {
 	return true
 }
 
-func (processor *ReportProcessor) getUniversityAuthors(report reports.UniversityReportUpdateTask) ([]reports.UniversityAuthorReport, error) {
+func (processor *ReportProcessor) getUniversityAuthors(report UniversityReportUpdateTask) ([]UniversityAuthorReport, error) {
 	authors, err := processor.openalex.GetInstitutionAuthors(report.UniversityId, time.Now().AddDate(-4, 0, 0), time.Now())
 	if err != nil {
 		return nil, err
 	}
 
-	output := make([]reports.UniversityAuthorReport, 0, len(authors))
+	output := make([]UniversityAuthorReport, 0, len(authors))
 	for _, author := range authors {
-		output = append(output, reports.UniversityAuthorReport{
+		output = append(output, UniversityAuthorReport{
 			AuthorId:   author.AuthorId,
 			AuthorName: author.AuthorName,
 			Source:     api.OpenAlexSource,

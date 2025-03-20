@@ -1,7 +1,8 @@
-package flaggers
+package utils_test
 
 import (
 	"path/filepath"
+	"prism/prism/reports/utils"
 	"testing"
 )
 
@@ -11,7 +12,7 @@ func TestCache(t *testing.T) {
 		Cnt  int
 	}
 
-	cache, err := NewCache[cachedData]("somebucket", filepath.Join(t.TempDir(), "test.db"))
+	cache, err := utils.NewCache[cachedData]("somebucket", filepath.Join(t.TempDir(), "test.db"))
 	if err != nil {
 		t.Fatal(err)
 	}

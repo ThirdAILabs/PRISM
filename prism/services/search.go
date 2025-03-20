@@ -10,7 +10,7 @@ import (
 	"prism/prism/llms"
 	"prism/prism/openalex"
 	"prism/prism/reports"
-	"prism/prism/reports/flaggers"
+	"prism/prism/reports/utils"
 	"prism/prism/search"
 	"sort"
 	"strconv"
@@ -41,7 +41,7 @@ func hybridInstitutionNamesSort(originalInstitution string, institutionNames []s
 	var differentInstitutes []string
 
 	for _, inst := range institutionNames {
-		if similarity := flaggers.JaroWinklerSimilarity(originalInstitution, inst); similarity >= similarityThreshold {
+		if similarity := utils.JaroWinklerSimilarity(originalInstitution, inst); similarity >= similarityThreshold {
 			similarInstitutesSimilarity = append(similarInstitutesSimilarity, InstitutionSimilarity{Name: inst, Similarity: similarity})
 		} else {
 			differentInstitutes = append(differentInstitutes, inst)
@@ -153,7 +153,7 @@ func filterAuthorsBySimilarity(authors []api.Author, queryName string) []api.Aut
 	}
 	authorSims := make([]pair, 0, len(authors))
 	for _, author := range authors {
-		sim := flaggers.IndelSimilarity(author.AuthorName, queryName)
+		sim := utils.IndelSimilarity(author.AuthorName, queryName)
 		if sim > minSimilarity {
 			authorSims = append(authorSims, pair{author: &author, sim: sim})
 		}
