@@ -122,7 +122,7 @@ func TestFlagParsing(t *testing.T) {
 				t.Fatal("invalid type")
 			}
 
-			if flags[i].Hash() != flag.Hash() {
+			if flags[i].CalculateHash() != flag.CalculateHash() {
 				t.Fatal("invalid hash")
 			}
 		}

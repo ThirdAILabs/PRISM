@@ -288,11 +288,13 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 
 			url, _ := result.Metadata["url"].(string)
 
-			flags = append(flags, &api.PotentialAuthorAffiliationFlag{
+			temp := &api.PotentialAuthorAffiliationFlag{
 				Message:       fmt.Sprintf("The author %s may be associated with this concerning entity: %s\n", authorName, university),
 				University:    university,
 				UniversityUrl: url,
-			})
+			}
+			temp.UpdateFlagHash()
+			flags = append(flags, temp)
 		}
 	}
 
@@ -400,15 +402,17 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 			seen[result.Metadata.Url] = true
 
 			if primaryMatcher.matchesEntity(author.author) {
-				temporaryFlags = append(temporaryFlags, &api.MiscHighRiskAssociationFlag{
+				temp := &api.MiscHighRiskAssociationFlag{
 					Message:         "The author or a frequent associate may be mentioned in a press release.",
 					DocTitle:        result.Metadata.Title,
 					DocUrl:          result.Metadata.Url,
 					DocEntities:     result.Metadata.Entities,
 					EntityMentioned: author.author,
-				})
+				}
+				temp.UpdateFlagHash()
+				temporaryFlags = append(temporaryFlags, temp)
 			} else {
-				temporaryFlags = append(temporaryFlags, &api.MiscHighRiskAssociationFlag{
+				temp := &api.MiscHighRiskAssociationFlag{
 					Message:          "The author or a frequent associate may be mentioned in a press release.",
 					DocTitle:         result.Metadata.Title,
 					DocUrl:           result.Metadata.Url,
@@ -416,7 +420,9 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 					EntityMentioned:  author.author,
 					Connections:      []api.Connection{{DocTitle: author.author + " (frequent coauthor)", DocUrl: ""}},
 					FrequentCoauthor: &author.author,
-				})
+				}
+				temp.UpdateFlagHash()
+				temporaryFlags = append(temporaryFlags, temp)
 			}
 		}
 
@@ -536,8 +542,9 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 				EntityMentioned: query,
 				Connections:     conns,
 			}
+			flag.UpdateFlagHash()
 
-			hash := flag.Hash()
+			hash := flag.CalculateHash()
 
 			if _, ok := seenFlags[hash]; ok {
 				continue

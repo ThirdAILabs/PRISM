@@ -207,7 +207,7 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 	flagCounts := make(map[string]int)
 	for flags := range flagsCh {
 		for _, flag := range flags {
-			hash := flag.Hash()
+			hash := flag.CalculateHash()
 			if _, ok := seen[hash]; !ok {
 				seen[hash] = struct{}{}
 				flagCounts[flag.Type()]++

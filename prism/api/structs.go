@@ -167,6 +167,7 @@ type License struct {
 }
 
 type FlagFeedbackRequest struct {
-	Type string          `json:"type"`
-	Data json.RawMessage `json:"data"`
+	Type     string          `json:"type"`
+	FlagHash string          `json:"hash"`
+	Data     json.RawMessage `json:"data"`
 }

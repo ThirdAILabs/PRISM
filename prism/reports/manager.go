@@ -327,7 +327,7 @@ func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTi
 				return fmt.Errorf("error serializing flag: %w", err)
 			}
 
-			flagHash := flag.Hash()
+			flagHash := flag.CalculateHash()
 
 			date, dateValid := flag.Date()
 
@@ -750,7 +750,7 @@ func convertUniversityReport(report schema.UserUniversityReport, content api.Uni
 	}
 }
 
-func (r *ReportManager) CreateFlagFeedback(reportId uuid.UUID, userId uuid.UUID, flagHash string, feedback api.FlagFeedback) error {
+func (r *ReportManager) SaveFlagFeedback(reportId uuid.UUID, userId uuid.UUID, flagHash string, feedback api.FlagFeedback) error {
 	var flag schema.AuthorFlag
 	return r.db.Transaction(func(txn *gorm.DB) error {
 		// Check if the report exists

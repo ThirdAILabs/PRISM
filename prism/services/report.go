@@ -492,5 +492,9 @@ func (s *ReportService) LogFlagFeedback(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusBadRequest)
 	}
 
+	if err := s.manager.SaveFlagFeedback(reportId, userId, params.FlagHash, flagFeedbacks); err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
 	return nil, nil
 }
