@@ -250,7 +250,7 @@ func TestProcessorAuthorAffiliation(t *testing.T) {
 }
 
 func TestProcessorUniversityFacultySeach(t *testing.T) {
-	universityNDB := flaggers.BuildUniversityNDB("../../../data/university_webpages.json", t.TempDir())
+	universityNDB := flaggers.BuildUniversityNDB("../../data/university_webpages.json", t.TempDir())
 	defer universityNDB.Free()
 
 	manager := setupReportManager(t)
