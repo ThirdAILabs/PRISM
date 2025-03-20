@@ -20,12 +20,11 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import Shimmer from './Shimmer.js';
 import MuiAlert from '@mui/material/Alert';
 import { Snackbar, Tooltip } from '@mui/material';
 import useGoBack from '../../../hooks/useGoBack.js';
 import useOutsideClick from '../../../hooks/useOutsideClick.js';
-import { getTrailingWhiteSpace } from '../../../utils/helper.js';
+import { getRawTextFromXML, getTrailingWhiteSpace } from '../../../utils/helper.js';
 import Collapsible from '../../common/tools/CollapsibleComponent.js';
 
 const FLAG_ORDER = [
@@ -76,10 +75,11 @@ const TitlesAndDescriptions = {
 };
 
 const get_paper_url = (flag) => {
+  // getRawTextFromXML(flag.Work.DisplayName);
   return (
     <>
       <a href={flag.Work.WorkUrl} target="_blank" rel="noopener noreferrer">
-        {flag.Work.DisplayName}
+        {getRawTextFromXML(flag.Work.DisplayName)}
       </a>
       {flag.Work.OaUrl && (
         <text>
@@ -334,70 +334,24 @@ const ItemDetails = () => {
 
   const [review, setReview] = useState();
 
-  function fundCodeTriangulation(flag, index) {
+  function triangulationLegend() {
     return (
-      <>
-        {flag.FundCodeTriangulation &&
-          typeof flag.FundCodeTriangulation === 'object' &&
-          Object.keys(flag.FundCodeTriangulation).length > 0 && (
-            <>
-              <Collapsible title="High-Risk Grants" initiallyExpanded={false}>
-                {/* <strong>High-Risk Grants</strong> */}
-                <ul className="bulleted-list">
-                  {Object.entries(flag.FundCodeTriangulation).map(
-                    ([outerKey, innerMap], index1) => (
-                      <li key={`fund-${index}-${index1}`} className="mb-3">
-                        {outerKey}
-                        <ul className="non-bulleted-list ms-3">
-                          {Object.entries(innerMap).map(([innerKey, value], index2) => (
-                            <li key={`fund-${index}-${index1}-${index2}`} className="mb-2">
-                              {typeof value === 'boolean' ? (
-                                <button
-                                  type="button"
-                                  className={`btn ${value ? 'btn-outline-danger' : 'btn-outline-success'} btn-sm`}
-                                  style={{ minWidth: '180px', textAlign: 'center' }}
-                                  title={`${innerKey}: ${
-                                    value
-                                      ? 'The author likely IS a primary recipient of this grant.'
-                                      : 'The author likely IS NOT a primary recipient of this grant.'
-                                  }`}
-                                >
-                                  {innerKey}
-                                  {/* : {value ? 'Yes' : 'No'} */}
-                                </button>
-                              ) : (
-                                <>
-                                  <strong>{innerKey}:</strong> {JSON.stringify(value)}
-                                </>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      </li>
-                    )
-                  )}
-                </ul>
-                {/* Legend Section */}
-                <div className="mt-4 d-flex flex-column small">
-                  <span className="me-3">
-                    <span
-                      className="rounded-circle d-inline-block me-2"
-                      style={{ width: '8px', height: '8px', backgroundColor: 'green' }}
-                    ></span>
-                    The author likely <b>is not</b> a primary recipient of these grants.
-                  </span>
-                  <span>
-                    <span
-                      className="rounded-circle d-inline-block me-2"
-                      style={{ width: '8px', height: '8px', backgroundColor: 'red' }}
-                    ></span>
-                    The author likely <b>is</b> a primary recipient of these grants.
-                  </span>
-                </div>
-              </Collapsible>
-            </>
-          )}
-      </>
+      <div className="mt-4 d-flex flex-column small">
+        <span className="me-3">
+          <span
+            className="rounded-circle d-inline-block me-2"
+            style={{ width: '8px', height: '8px', backgroundColor: 'green' }}
+          ></span>
+          The author likely <b>is not</b> a primary recipient of these high-risk grants.
+        </span>
+        <span>
+          <span
+            className="rounded-circle d-inline-block me-2"
+            style={{ width: '8px', height: '8px', backgroundColor: 'red' }}
+          ></span>
+          The author likely <b>is</b> a primary recipient of these high-risk grants.
+        </span>
+      </div>
     );
   }
 
@@ -478,20 +432,68 @@ const ItemDetails = () => {
                 );
               })}
           </ul>
-          {Array.isArray(flag.RawAcknowledgements) && flag.RawAcknowledgements.length > 0 && (
+          {Array.isArray(flag.RawAcknowledgements) && flag.RawAcknowledgements?.length > 0 && (
             <>
               <strong>Acknowledgements Text</strong>
-              <ul className="bulleted-list">
-                {flag.RawAcknowledgements.map((item, index2) => {
-                  const key = `ack-${index} ${index2}`;
-                  return <li key={key}>{item}</li>;
-                })}
-              </ul>
+              {flag.FundCodeTriangulation &&
+              typeof flag.FundCodeTriangulation === 'object' &&
+              Object.keys(flag.FundCodeTriangulation).length > 0 ? (
+                <>
+                  <ul className="bulleted-list">
+                    {flag.RawAcknowledgements?.map((item, index2) => {
+                      const key = `ack-${index} ${index2}`;
+
+                      const highlights = Object.entries(flag.FundCodeTriangulation || {}).flatMap(
+                        ([funderName, funderMap]) =>
+                          Object.entries(funderMap).flatMap(([grantCode, isRecipient]) => {
+                            if (typeof isRecipient === 'boolean') {
+                              return [
+                                {
+                                  regex: new RegExp(grantCode, 'i'),
+                                  color: isRecipient ? 'red' : 'green',
+                                  tooltip: `${authorName} is ${isRecipient ? 'likely' : 'likely NOT'} a primary recipient of this fund.`,
+                                },
+                              ];
+                            }
+                            return [];
+                          })
+                      );
+
+                      let parts = [item];
+
+                      highlights.forEach(({ regex, color, tooltip }) => {
+                        parts = parts.flatMap((text, i) =>
+                          typeof text === 'string'
+                            ? text.split(regex).flatMap((part, j, arr) =>
+                                j < arr.length - 1
+                                  ? [
+                                      part,
+                                      <span key={`${i}-${j}`} style={{ color }} title={tooltip}>
+                                        <strong>{text.match(regex)[0]}</strong>
+                                      </span>,
+                                    ]
+                                  : part
+                              )
+                            : text
+                        );
+                      });
+
+                      return <li key={key}>{parts}</li>;
+                    })}
+                  </ul>
+                  {triangulationLegend()}
+                </>
+              ) : (
+                <ul className="bulleted-list">
+                  {flag.RawAcknowledgements?.map((item, index2) => {
+                    const key = `ack-${index} ${index2}`;
+                    return <li key={key}>{item}</li>;
+                  })}
+                </ul>
+              )}
             </>
           )}
         </p>
-
-        <div>{fundCodeTriangulation(flag, index)}</div>
       </div>
     );
   }
@@ -665,14 +667,61 @@ const ItemDetails = () => {
             })}
           </ul>
           <strong>Acknowledgement Text</strong>
-          {flag.RawAcknowledgements.map((item, index3) => {
-            return <p key={index3}>{item}</p>;
-          })}
-          <p>{}</p>
-        </p>
-        {}
+          <br />
+          {flag.FundCodeTriangulation &&
+          typeof flag.FundCodeTriangulation === 'object' &&
+          Object.keys(flag.FundCodeTriangulation).length > 0 ? (
+            <>
+              {flag.RawAcknowledgements?.map((item, index2) => {
+                const key = `ack-${index} ${index2}`;
 
-        <div>{fundCodeTriangulation(flag, index)}</div>
+                const highlights = Object.entries(flag.FundCodeTriangulation || {}).flatMap(
+                  ([funderName, funderMap]) =>
+                    Object.entries(funderMap).flatMap(([grantCode, isRecipient]) => {
+                      if (typeof isRecipient === 'boolean') {
+                        return [
+                          {
+                            regex: new RegExp(grantCode, 'i'),
+                            color: isRecipient ? 'red' : 'green',
+                            tooltip: `${authorName} is ${isRecipient ? 'likely' : 'likely NOT'} a primary recipient of this fund.`,
+                          },
+                        ];
+                      }
+                      return [];
+                    })
+                );
+
+                let parts = [item];
+
+                highlights.forEach(({ regex, color, tooltip }) => {
+                  parts = parts.flatMap((text, i) =>
+                    typeof text === 'string'
+                      ? text.split(regex).flatMap((part, j, arr) =>
+                          j < arr.length - 1
+                            ? [
+                                part,
+                                <span key={`${i}-${j}`} style={{ color }} title={tooltip}>
+                                  <strong>{text.match(regex)[0]}</strong>
+                                </span>,
+                              ]
+                            : part
+                        )
+                      : text
+                  );
+                });
+
+                return <p key={index2}>{parts}</p>;
+              })}
+              {triangulationLegend()}
+            </>
+          ) : (
+            <>
+              {flag.RawAcknowledgements?.map((item, index3) => {
+                return <p key={index3}>{item}</p>;
+              })}
+            </>
+          )}
+        </p>
       </div>
     );
   }
@@ -861,17 +910,21 @@ const ItemDetails = () => {
               })}
             </ul>
           </>
-          <strong>Potential affiliate(s)</strong>
-          <ul className="bulleted-list">
-            {flag.DocEntities.map((item, index2) => {
-              const key = `${index} ${index2}`;
-              return (
-                <li key={key}>
-                  <a>{item}</a>
-                </li>
-              );
-            })}
-          </ul>
+          {flag.DocEntities && flag.DocEntities.length > 0 && (
+            <>
+              <strong>Potential affiliate(s)</strong>
+              <ul className="bulleted-list">
+                {flag.DocEntities.map((item, index2) => {
+                  const key = `${index} ${index2}`;
+                  return (
+                    <li key={key}>
+                      <a>{item}</a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          )}
         </p>
       </div>
     );

@@ -259,8 +259,10 @@ func TestProcessorUniversityFacultySeach(t *testing.T) {
 	manager := setupReportManager(t)
 	processor := &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
-		authorFacultyAtEOC: &AuthorIsFacultyAtEOCFlagger{
-			universityNDB: universityNDB,
+		authorFlaggers: []AuthorFlagger{
+			&AuthorIsFacultyAtEOCFlagger{
+				universityNDB: universityNDB,
+			},
 		},
 		manager: manager,
 	}
@@ -326,9 +328,11 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 	manager := setupReportManager(t)
 	processor := &ReportProcessor{
 		openalex: openalex.NewRemoteKnowledgeBase(),
-		authorAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlagger{
-			docIndex: BuildDocIndex("../../../data/docs_and_press_releases.json"),
-			auxIndex: BuildAuxIndex("../../../data/auxiliary_webpages.json"),
+		workFlaggers: []WorkFlagger{
+			&AuthorIsAssociatedWithEOCFlagger{
+				docIndex: BuildDocIndex("../../../data/docs_and_press_releases.json"),
+				auxIndex: BuildAuxIndex("../../../data/auxiliary_webpages.json"),
+			},
 		},
 		manager: manager,
 	}
@@ -479,7 +483,7 @@ func TestProcessorAcknowledgements(t *testing.T) {
 				openalex:        openalex.NewRemoteKnowledgeBase(),
 				entityLookup:    entityStore,
 				authorCache:     authorCache,
-				extractor:       NewGrobidExtractor(ackCache, grobidEndpoint, testDir, 40, 10),
+				extractor:       NewGrobidExtractor(ackCache, grobidEndpoint, 40, 10, "thirdai-prism"),
 				sussyBakas:      eoc.LoadSussyBakas(),
 				triangulationDB: triangulationDB,
 			},

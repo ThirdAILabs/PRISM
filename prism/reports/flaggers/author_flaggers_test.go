@@ -3,6 +3,7 @@ package flaggers
 import (
 	"log/slog"
 	"prism/prism/api"
+	"prism/prism/llms"
 	"prism/prism/openalex"
 	"prism/prism/search"
 	"slices"
@@ -90,7 +91,7 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			{Authors: []openalex.Author{{DisplayName: "abc"}, {DisplayName: "def"}}},
 		}
 
-		flags, err := flagger.Flag(slog.Default(), "abc", works)
+		flags, err := flagger.Flag(slog.Default(), works, nil, "abc")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -115,7 +116,7 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			{Authors: []openalex.Author{{DisplayName: "abc"}, {DisplayName: "def"}}},
 		}
 
-		flags, err := flagger.Flag(slog.Default(), "def", works)
+		flags, err := flagger.Flag(slog.Default(), works, nil, "def")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -139,7 +140,7 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 	})
 
 	t.Run("test secondary connection", func(t *testing.T) {
-		flags, err := flagger.Flag(slog.Default(), "123", []openalex.Work{})
+		flags, err := flagger.Flag(slog.Default(), []openalex.Work{}, nil, "123")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -164,7 +165,7 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 	})
 
 	t.Run("test tertiary connection", func(t *testing.T) {
-		flags, err := flagger.Flag(slog.Default(), "789", []openalex.Work{})
+		flags, err := flagger.Flag(slog.Default(), []openalex.Work{}, nil, "789")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -188,4 +189,19 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 			t.Fatalf("incorrect flag: %v", *flag)
 		}
 	})
+}
+
+func TestAuthorNewsArticleFlagger(t *testing.T) {
+	flagger := AuthorNewsArticlesFlagger{
+		llm: llms.New(),
+	}
+
+	flags, err := flagger.Flag(slog.Default(), "charles lieber")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(flags) < 1 {
+		t.Fatal("expected flags")
+	}
 }

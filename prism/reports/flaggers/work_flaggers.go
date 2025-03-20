@@ -16,7 +16,7 @@ import (
 )
 
 type WorkFlagger interface {
-	Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error)
+	Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error)
 
 	Name() string
 
@@ -39,7 +39,7 @@ func (flagger *OpenAlexMultipleAffiliationsFlagger) Name() string {
 	return "MultipleAffiliations"
 }
 
-func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -74,7 +74,7 @@ func (flagger *OpenAlexFunderIsEOC) Name() string {
 	return "FunderEOC"
 }
 
-func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -111,7 +111,7 @@ func (flagger *OpenAlexPublisherIsEOC) Name() string {
 	return "PublisherEOC"
 }
 
-func (flagger *OpenAlexPublisherIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexPublisherIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -148,7 +148,7 @@ func (flagger *OpenAlexCoauthorIsEOC) Name() string {
 	return "CoauthorEOC"
 }
 
-func (flagger *OpenAlexCoauthorIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexCoauthorIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -194,7 +194,7 @@ func (flagger *OpenAlexAuthorAffiliationIsEOC) Name() string {
 	return "AuthorAffiliationEOC"
 }
 
-func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -239,7 +239,7 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Name() string {
 	return "CoauthorAffiliationEOC"
 }
 
-func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -578,7 +578,8 @@ func (flagger *OpenAlexAcknowledgementIsEOC) DisableForUniversityReport() bool {
 	return true
 }
 
-func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
+
 	flags := make([]api.Flag, 0)
 
 	remaining := make([]openalex.Work, 0)

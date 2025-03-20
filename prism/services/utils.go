@@ -48,7 +48,11 @@ func WrapRestHandler(handler RestHandler) http.HandlerFunc {
 			var cerr *codedError
 			if errors.As(err, &cerr) {
 				http.Error(w, err.Error(), cerr.code)
+				if cerr.code == http.StatusInternalServerError {
+					slog.Error("internal server error received in endpoint", "error", err)
+				}
 			} else {
+				slog.Error("recieved non coded error from endpoint", "error", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 			return

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 	"prism/prism/api"
+	"prism/prism/monitoring"
 	"prism/prism/schema"
 	"sort"
 	"time"
@@ -122,6 +123,18 @@ func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string, 
 			slog.Error("error creating new author report", "error", err)
 			return schema.AuthorReport{}, ErrReportCreationFailed
 		}
+	} else {
+		if forUniversityReport {
+			monitoring.UniAuthorReportsFoundInCache.WithLabelValues("TODO ORG").Inc()
+		} else {
+			monitoring.AuthorReportsFoundInCache.WithLabelValues("TODO ORG").Inc()
+		}
+	}
+
+	if forUniversityReport {
+		monitoring.UniAuthorReportsCreated.WithLabelValues("TODO ORG").Inc()
+	} else {
+		monitoring.AuthorReportsCreated.WithLabelValues("TODO ORG").Inc()
 	}
 
 	return report, nil
@@ -446,7 +459,11 @@ func (r *ReportManager) CreateUniversityReport(userId uuid.UUID, universityId, u
 				slog.Error("error creating new university report", "error", err)
 				return ErrReportCreationFailed
 			}
+		} else {
+			monitoring.UniAuthorReportsFoundInCache.WithLabelValues("TODO ORG").Inc()
 		}
+
+		monitoring.UniAuthorReportsCreated.WithLabelValues("TODO ORG").Inc()
 
 		if err := r.queueUniversityReportUpdateIfNeeded(txn, &report); err != nil {
 			return err

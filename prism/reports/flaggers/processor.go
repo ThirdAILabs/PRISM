@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"path/filepath"
 	"prism/prism/api"
+	"prism/prism/llms"
+	"prism/prism/monitoring"
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers/eoc"
@@ -17,11 +19,10 @@ import (
 )
 
 type ReportProcessor struct {
-	openalex                openalex.KnowledgeBase
-	workFlaggers            []WorkFlagger
-	authorFacultyAtEOC      *AuthorIsFacultyAtEOCFlagger
-	authorAssociatedWithEOC *AuthorIsAssociatedWithEOCFlagger
-	manager                 *reports.ReportManager
+	openalex       openalex.KnowledgeBase
+	workFlaggers   []WorkFlagger
+	authorFlaggers []AuthorFlagger
+	manager        *reports.ReportManager
 }
 
 type ReportProcessorOptions struct {
@@ -45,6 +46,8 @@ type ReportProcessorOptions struct {
 
 	MaxDownloadThreads int
 	MaxGrobidThreads   int
+
+	PDFS3CacheBucket string
 }
 
 // TODO(Nicholas): How to do cleanup for this, or just let it get cleaned up at the end of the process?
@@ -77,17 +80,22 @@ func NewReportProcessor(manager *reports.ReportManager, opts ReportProcessorOpti
 				openalex:        openalex.NewRemoteKnowledgeBase(),
 				entityLookup:    opts.EntityLookup,
 				authorCache:     authorCache,
-				extractor:       NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.WorkDir, opts.MaxDownloadThreads, opts.MaxGrobidThreads),
+				extractor:       NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.MaxDownloadThreads, opts.MaxGrobidThreads, opts.PDFS3CacheBucket),
 				sussyBakas:      opts.SussyBakas,
 				triangulationDB: opts.TriangulationDB,
 			},
+			&AuthorIsAssociatedWithEOCFlagger{
+				docIndex: opts.DocIndex,
+				auxIndex: opts.AuxIndex,
+			},
 		},
-		authorFacultyAtEOC: &AuthorIsFacultyAtEOCFlagger{
-			universityNDB: opts.UniversityNDB,
-		},
-		authorAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlagger{
-			docIndex: opts.DocIndex,
-			auxIndex: opts.AuxIndex,
+		authorFlaggers: []AuthorFlagger{
+			&AuthorIsFacultyAtEOCFlagger{
+				universityNDB: opts.UniversityNDB,
+			},
+			&AuthorNewsArticlesFlagger{
+				llm: llms.New(),
+			},
 		},
 		manager: manager,
 	}, nil
@@ -132,60 +140,41 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 
 				logger := logger.With("flagger", flagger.Name(), "batch", batch)
 
-				flags, err := flagger.Flag(logger, works, authorIds)
+				flags, err := flagger.Flag(logger, works, authorIds, authorName)
 				if err != nil {
 					logger.Error("flagger error", "error", err)
+					monitoring.FlaggerErrors.WithLabelValues(flagger.Name()).Inc()
 				} else {
 					flagsCh <- flags
 				}
 			}(flagger, works.Works, works.TargetAuthorIds)
 		}
+	}
 
+	for _, flagger := range processor.authorFlaggers {
 		wg.Add(1)
-		go func(batch int, works []openalex.Work) {
+		go func(flagger AuthorFlagger) {
 			defer wg.Done()
 
-			flagger := processor.authorAssociatedWithEOC
-			if flagger == nil {
-				return
-			}
+			logger := logger.With("flagger", flagger.Name())
 
-			logger := logger.With("flagger", flagger.Name(), "batch", batch)
-
-			flags, err := flagger.Flag(logger, authorName, works)
+			flags, err := flagger.Flag(logger, authorName)
 			if err != nil {
 				logger.Error("flagger error", "error", err)
+				monitoring.FlaggerErrors.WithLabelValues(flagger.Name()).Inc()
 			} else {
 				flagsCh <- flags
 			}
-
-		}(batch, works.Works)
+		}(flagger)
 	}
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		flagger := processor.authorFacultyAtEOC
-		if flagger == nil {
-			return
-		}
-
-		logger := logger.With("flagger", flagger.Name())
-
-		flags, err := flagger.Flag(logger, authorName)
-		if err != nil {
-			logger.Error("flagger error", "error", err)
-		} else {
-			flagsCh <- flags
-		}
-	}()
 
 	wg.Wait()
 	close(flagsCh)
 }
 
 func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdateTask) {
+	start := time.Now()
+
 	logger := slog.With("report_id", report.Id)
 
 	logger.Info("starting report processing", "author_id", report.AuthorId, "author_name", report.AuthorName, "source", report.Source, "is_university_queued", report.ForUniversityReport)
@@ -195,6 +184,7 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 		logger.Error("report failed: unable to get author works", "error", err)
 		if err := processor.manager.UpdateAuthorReport(report.Id, schema.ReportFailed, time.Time{}, nil); err != nil {
 			slog.Error("error updating author report status to failed", "error", err)
+			monitoring.ReportUpdateErrors.Inc()
 		}
 		return
 	}
@@ -211,6 +201,7 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 			if _, ok := seen[hash]; !ok {
 				seen[hash] = struct{}{}
 				flagCounts[flag.Type()]++
+				monitoring.TotalFlags.WithLabelValues(flag.Type()).Inc()
 			}
 		}
 
@@ -218,6 +209,7 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 			slog.Info("received batch of flags", "type", flags[0].Type(), "n_flags", len(flags))
 			if err := processor.manager.UpdateAuthorReport(report.Id, schema.ReportInProgress, report.EndDate, flags); err != nil {
 				slog.Error("error updating author report status for partial flags", "error", err)
+				monitoring.ReportUpdateErrors.Inc()
 			}
 		}
 	}
@@ -232,7 +224,10 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 
 	if err := processor.manager.UpdateAuthorReport(report.Id, schema.ReportCompleted, report.EndDate, nil); err != nil {
 		slog.Error("error updating author report status to complete", "error", err)
+		monitoring.ReportUpdateErrors.Inc()
 	}
+
+	monitoring.ReportsProcessed.Observe(time.Since(start).Seconds())
 }
 
 func (processor *ReportProcessor) ProcessNextAuthorReport() bool {

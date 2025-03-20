@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"net/http"
 	"prism/prism/api"
+	"prism/prism/monitoring"
+	"strconv"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -34,7 +36,11 @@ func NewRemoteKnowledgeBase() KnowledgeBase {
 			SetRetryCount(2).
 			// Providing the contact moves requests to a new pool that can have better response times:
 			// https://docs.openalex.org/how-to-use-the-api/rate-limits-and-authentication#the-polite-pool
-			SetQueryParam("mailto", "contact@thirdai.com"),
+			SetQueryParam("mailto", "contact@thirdai.com").
+			OnAfterResponse(func(client *resty.Client, response *resty.Response) error {
+				monitoring.OpenalexCalls.WithLabelValues(strconv.Itoa(response.StatusCode())).Inc()
+				return nil
+			}),
 	}
 }
 
@@ -211,6 +217,7 @@ type oaWorkResults struct {
 // Response Format: https://docs.openalex.org/api-entities/works/get-lists-of-works
 type oaWork struct {
 	Id              string `json:"id"`
+	DOI             string `json:"doi"`
 	DisplayName     string `json:"display_name"`
 	PublicationDate string `json:"publication_date"`
 
@@ -334,6 +341,7 @@ func convertOpenalexWork(work oaWork) Work {
 		Authors:         authors,
 		Grants:          grants,
 		Locations:       locations,
+		DOI:             work.DOI,
 	}
 }
 
