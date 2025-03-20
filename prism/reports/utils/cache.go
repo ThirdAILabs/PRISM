@@ -1,4 +1,4 @@
-package flaggers
+package utils
 
 import (
 	"encoding/json"

@@ -8,9 +8,12 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"prism/prism/monitoring"
 	"prism/prism/openalex"
 	"prism/prism/pdf"
+	"prism/prism/reports/utils"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -20,18 +23,18 @@ import (
 )
 
 type AcknowledgementsExtractor interface {
-	GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan CompletedTask[Acknowledgements]
+	GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan utils.CompletedTask[Acknowledgements]
 }
 
 type GrobidAcknowledgementsExtractor struct {
-	cache            DataCache[Acknowledgements]
+	cache            utils.DataCache[Acknowledgements]
 	maxThreads       int
 	grobidSem        *semaphore.Weighted
 	grobidClient     *resty.Client
 	pdfS3CacheBucket string
 }
 
-func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint string, maxDownloadThreads, maxGrobidThreads int, pdfS3CacheBucket string) *GrobidAcknowledgementsExtractor {
+func NewGrobidExtractor(cache utils.DataCache[Acknowledgements], grobidEndpoint string, maxDownloadThreads, maxGrobidThreads int, pdfS3CacheBucket string) *GrobidAcknowledgementsExtractor {
 	return &GrobidAcknowledgementsExtractor{
 		cache:      cache,
 		maxThreads: max(maxDownloadThreads, maxGrobidThreads),
@@ -74,8 +77,8 @@ type Acknowledgements struct {
 	Acknowledgements []Acknowledgement
 }
 
-func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan CompletedTask[Acknowledgements] {
-	outputCh := make(chan CompletedTask[Acknowledgements], len(works))
+func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan utils.CompletedTask[Acknowledgements] {
+	outputCh := make(chan utils.CompletedTask[Acknowledgements], len(works))
 
 	queue := make(chan openalex.Work, len(works))
 
@@ -86,7 +89,7 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 		}
 
 		if cachedAck := extractor.cache.Lookup(workId); cachedAck != nil {
-			outputCh <- CompletedTask[Acknowledgements]{Result: *cachedAck, Error: nil}
+			outputCh <- utils.CompletedTask[Acknowledgements]{Result: *cachedAck, Error: nil}
 		} else {
 			queue <- work
 		}
@@ -111,7 +114,7 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 
 	nWorkers := min(len(queue), extractor.maxThreads)
 
-	RunInPool(worker, queue, outputCh, nWorkers, func() { downloader.Close() })
+	utils.RunInPool(worker, queue, outputCh, nWorkers, func() { downloader.Close() })
 
 	return outputCh
 }
@@ -247,12 +250,16 @@ func parseGrobidReponse(data io.Reader) ([]Acknowledgement, error) {
 }
 
 func (extractor *GrobidAcknowledgementsExtractor) processPdfWithGrobid(pdf io.Reader) ([]Acknowledgement, error) {
+	start := time.Now()
 	res, err := extractor.grobidClient.R().
 		SetMultipartField("input", "filename.pdf", "application/pdf", pdf).
 		Post("/api/processHeaderFundingDocument")
 	if err != nil {
+		monitoring.GrobidCalls.WithLabelValues("error").Observe(float64(time.Since(start).Milliseconds()))
 		return nil, fmt.Errorf("error making request to grobid: %w", err)
 	}
+
+	monitoring.GrobidCalls.WithLabelValues(strconv.Itoa(res.StatusCode())).Observe(float64(time.Since(start).Milliseconds()))
 
 	if !res.IsSuccess() {
 		return nil, fmt.Errorf("grobid returned status=%d, error=%v", res.StatusCode(), res.String())

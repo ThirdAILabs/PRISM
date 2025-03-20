@@ -9,9 +9,11 @@ import (
 
 	"prism/prism/cmd"
 	"prism/prism/licensing"
+	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers"
 	"prism/prism/reports/flaggers/eoc"
+	"prism/prism/reports/utils"
 	"prism/prism/search"
 	"prism/prism/triangulation"
 	"time"
@@ -86,37 +88,60 @@ func main() {
 
 	entityStore := flaggers.BuildWatchlistEntityIndex(eoc.LoadSourceToAlias())
 
-	opts := flaggers.ReportProcessorOptions{
-		UniversityNDB:   flaggers.BuildUniversityNDB(config.UniversityData, filepath.Join(ndbDir, "university.ndb")),
-		DocIndex:        flaggers.BuildDocIndex(config.DocData),
-		AuxIndex:        flaggers.BuildAuxIndex(config.AuxData),
-		TriangulationDB: triangulation.CreateTriangulationDB(cmd.OpenDB(config.FundcodeTriangulationUri)),
-
-		EntityLookup: entityStore,
-
-		ConcerningEntities:     eoc.LoadGeneralEOC(),
-		ConcerningInstitutions: eoc.LoadInstitutionEOC(),
-		ConcerningFunders:      eoc.LoadFunderEOC(),
-		ConcerningPublishers:   eoc.LoadPublisherEOC(),
-		SussyBakas:             eoc.LoadSussyBakas(),
-
-		GrobidEndpoint: config.GrobidEndpoint,
-		WorkDir:        config.WorkDir,
-
-		MaxDownloadThreads: config.MaxDownloadThreads,
-		MaxGrobidThreads:   config.MaxGrobidThreads,
-
-		PDFS3CacheBucket: config.S3Bucket,
+	authorCache, err := utils.NewCache[openalex.Author]("authors", filepath.Join(config.WorkDir, "authors.cache"))
+	if err != nil {
+		log.Fatalf("error creating author info cache: %v", err)
+	}
+	ackCache, err := utils.NewCache[flaggers.Acknowledgements]("acks", filepath.Join(config.WorkDir, "acks.cache"))
+	if err != nil {
+		log.Fatalf("error creating ack cache: %v", err)
 	}
 
 	db := cmd.OpenDB(config.PostgresUri)
 
 	reportManager := reports.NewManager(db)
 
-	processor, err := flaggers.NewReportProcessor(reportManager, opts)
-	if err != nil {
-		log.Fatalf("error creating work processor: %v", err)
-	}
+	concerningEntities := eoc.LoadGeneralEOC()
+	concerningFunders := eoc.LoadFunderEOC()
+	concerningInstitutions := eoc.LoadInstitutionEOC()
+
+	processor := reports.NewProcessor(
+		[]reports.WorkFlagger{
+			flaggers.NewOpenAlexFunderIsEOC(
+				concerningFunders, concerningEntities,
+			),
+			flaggers.NewOpenAlexAuthorAffiliationIsEOC(
+				concerningEntities, concerningInstitutions,
+			),
+			flaggers.NewOpenAlexCoauthorAffiliationIsEOC(
+				concerningEntities, concerningInstitutions,
+			),
+			flaggers.NewOpenAlexAcknowledgementIsEOC(
+				entityStore,
+				authorCache,
+				flaggers.NewGrobidExtractor(
+					ackCache,
+					config.GrobidEndpoint,
+					config.MaxGrobidThreads,
+					config.MaxDownloadThreads,
+					config.S3Bucket,
+				),
+				eoc.LoadSussyBakas(),
+				triangulation.CreateTriangulationDB(cmd.OpenDB(config.FundcodeTriangulationUri)),
+			),
+			flaggers.NewAuthorIsAssociatedWithEOCFlagger(
+				flaggers.BuildDocIndex(config.DocData),
+				flaggers.BuildAuxIndex(config.AuxData),
+			),
+		},
+		[]reports.AuthorFlagger{
+			flaggers.NewAuthorIsFacultyAtEOCFlagger(
+				flaggers.BuildUniversityNDB(config.UniversityData, filepath.Join(ndbDir, "university.ndb")),
+			),
+			flaggers.NewAuthorNewsArticlesFlagger(),
+		},
+		reportManager,
+	)
 
 	lastLicenseCheck := time.Now()
 	for {

@@ -1,6 +1,6 @@
-package flaggers
+package utils
 
-func levenshteinDistance(s1, s2 string, subWeight int) int {
+func LevenshteinDistance(s1, s2 string, subWeight int) int {
 	if len(s1) == 0 {
 		return len(s2)
 	}
@@ -41,7 +41,7 @@ func levenshteinDistance(s1, s2 string, subWeight int) int {
 }
 
 func IndelSimilarity(s1, s2 string) float64 {
-	return 1 - float64(levenshteinDistance(s1, s2, 2))/(float64(len(s1)+len(s2)))
+	return 1 - float64(LevenshteinDistance(s1, s2, 2))/(float64(len(s1)+len(s2)))
 }
 
 func JaroWinklerSimilarity(s1, s2 string) float64 {

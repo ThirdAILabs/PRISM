@@ -10,6 +10,7 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"prism/prism/monitoring"
 	"prism/prism/openalex"
 	"strings"
 	"time"
@@ -193,6 +194,8 @@ func (downloader *PDFDownloader) downloadWithHttp(url string) (string, error) {
 	return tmpFile.Name(), nil
 }
 
+// var ErrNotFound = errors.New("cache file not found")
+
 func (downloader *PDFDownloader) downloadFromCache(pdfName string) (string, error) {
 	key := fmt.Sprintf("pdfs/%s.pdf", pdfName)
 	input := &s3.GetObjectInput{
@@ -207,7 +210,7 @@ func (downloader *PDFDownloader) downloadFromCache(pdfName string) (string, erro
 	if err != nil {
 		var apiErr smithy.APIError
 		if errors.As(err, &apiErr) && apiErr.ErrorCode() == "NoSuchKey" {
-			return "", fmt.Errorf("cache file not found: %w", err)
+			return "", ErrNotFound
 		}
 		slog.Error("error retrieving file from S3 cache", "error", err)
 		return "", fmt.Errorf("error retrieving file from S3 cache: %w", err)
@@ -289,24 +292,38 @@ func (downloader *PDFDownloader) DeleteFromCache(doi string) error {
 	return nil
 }
 
+var ErrNotFound = errors.New("cache file not found")
+
 func (downloader *PDFDownloader) downloadPdf(cachedPDFName, oaURL string) (string, error) {
 	var errs []error
 
 	if path, err := downloader.downloadFromCache(cachedPDFName); err == nil {
+		monitoring.PdfCacheHits.Inc()
 		return path, nil
 	} else {
+		if err == ErrNotFound {
+			monitoring.PdfCacheMisses.Inc()
+		} else {
+			monitoring.PdfCacheErrors.Inc()
+		}
 		errs = append(errs, fmt.Errorf("s3 cache download: %w", err))
 	}
 
+	httpStart := time.Now()
 	if path, err := downloader.downloadWithHttp(oaURL); err == nil {
+		monitoring.HttpDownloads.WithLabelValues("success").Observe(time.Since(httpStart).Seconds())
 		return path, nil
 	} else {
+		monitoring.HttpDownloads.WithLabelValues("error").Observe(time.Since(httpStart).Seconds())
 		errs = append(errs, fmt.Errorf("http download: %w", err))
 	}
 
+	playwrightStart := time.Now()
 	if path, err := downloader.downloadWithPlaywright(oaURL); err == nil {
+		monitoring.PlaywrightDownloads.WithLabelValues("success").Observe(time.Since(playwrightStart).Seconds())
 		return path, nil
 	} else {
+		monitoring.PlaywrightDownloads.WithLabelValues("error").Observe(time.Since(playwrightStart).Seconds())
 		errs = append(errs, fmt.Errorf("playwright download: %w", err))
 	}
 
@@ -314,6 +331,8 @@ func (downloader *PDFDownloader) downloadPdf(cachedPDFName, oaURL string) (strin
 }
 
 func (downloader *PDFDownloader) DownloadWork(work openalex.Work) (string, error) {
+	start := time.Now()
+
 	oaURL := work.DownloadUrl
 	doi := strings.TrimPrefix(work.DOI, "https://doi.org/")
 
@@ -324,12 +343,16 @@ func (downloader *PDFDownloader) DownloadWork(work openalex.Work) (string, error
 
 	pdfPath, err := downloader.downloadPdf(cachedPDFName, oaURL)
 	if err != nil {
+		monitoring.TotalDownloads.WithLabelValues("error").Observe(time.Since(start).Seconds())
 		return "", fmt.Errorf("unable to download pdf from %s / %s: %w", cachedPDFName, oaURL, err)
 	}
 
 	if err := downloader.uploadToCache(cachedPDFName, pdfPath); err != nil {
 		slog.Error("failed to upload pdf to S3 cache", "error", err)
+		monitoring.PdfCacheUploadErrors.Inc()
 	}
+
+	monitoring.TotalDownloads.WithLabelValues("success").Observe(time.Since(start).Seconds())
 
 	return pdfPath, nil
 

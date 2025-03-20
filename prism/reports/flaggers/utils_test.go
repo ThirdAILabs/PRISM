@@ -1,12 +1,11 @@
 package flaggers
 
 import (
-	"fmt"
 	"slices"
 	"testing"
-	"time"
 )
 
+<<<<<<< HEAD
 func TestRunInpool(t *testing.T) {
 	worker := func(i int) (string, error) {
 		if i%4 == 3 {
@@ -42,6 +41,8 @@ func TestRunInpool(t *testing.T) {
 	}
 }
 
+=======
+>>>>>>> main
 func TestInitialsCombinations(t *testing.T) {
 	combos := getInitialsCombinations("aa bb cc")
 
