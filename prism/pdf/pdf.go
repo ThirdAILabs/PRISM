@@ -90,6 +90,42 @@ func NewPDFDownloader(s3CacheBucket string) *PDFDownloader {
 	return downloader
 }
 
+func (downloader *PDFDownloader) Close() error {
+	var errors []error
+
+	if downloader.context != nil {
+		if err := downloader.context.Close(); err != nil {
+			errors = append(errors, fmt.Errorf("error closing browser context: %w", err))
+		}
+	}
+
+	if downloader.browser != nil {
+		if err := downloader.browser.Close(); err != nil {
+			errors = append(errors, fmt.Errorf("error closing browser: %w", err))
+		}
+	}
+
+	if downloader.pw != nil {
+		if err := downloader.pw.Stop(); err != nil {
+			errors = append(errors, fmt.Errorf("error stopping playwright: %w", err))
+		}
+	}
+
+	if len(errors) > 0 {
+		var combinedErr error
+		for _, err := range errors {
+			if combinedErr == nil {
+				combinedErr = err
+			} else {
+				combinedErr = fmt.Errorf("%v; %w", combinedErr, err)
+			}
+		}
+		return combinedErr
+	}
+
+	return nil
+}
+
 func (downloader *PDFDownloader) downloadWithPlaywright(url string) (string, error) {
 
 	page, err := downloader.context.NewPage()
