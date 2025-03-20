@@ -10,19 +10,9 @@ import (
 )
 
 func Migration3(db *gorm.DB) error {
-	err := db.AutoMigrate(&schema.FlagFeedback{})
+	err := db.AutoMigrate(&schema.FlagFeedback{}, &schema.AuthorFlag{})
 	if err != nil {
 		return fmt.Errorf("failed to migrate Feedback: %w", err)
-	}
-
-	if err := db.Exec(`
-	    ALTER TABLE flag_feedbacks
-	    ADD CONSTRAINT fk_flag_feedbacks_flag
-	    FOREIGN KEY (report_id, flag_hash)
-	    REFERENCES author_flags(report_id, flag_hash)
-	    ON DELETE CASCADE
-	`).Error; err != nil {
-		return fmt.Errorf("failed to add foreign key constraint to FlagFeedback: %w", err)
 	}
 
 	// port the new data byte of AuthorFlag to the DB
