@@ -51,7 +51,6 @@ func (c *Config) logfile() string {
 }
 
 func main() {
-
 	cmd.LoadEnvFile()
 
 	var config Config

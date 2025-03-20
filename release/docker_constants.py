@@ -25,12 +25,12 @@ images_to_build = [
         dockerfile_path="Dockerfile",
         context_path=".",
     ),
-    Image(
-        key="prism_frontend",
-        name="prism_frontend",
-        dockerfile_path="Dockerfile",
-        context_path="frontend",
-    ),
+    # Image(
+    #     key="prism_frontend",
+    #     name="prism_frontend",
+    #     dockerfile_path="Dockerfile",
+    #     context_path="frontend",
+    # ),
     Image(
         key="keycloak",
         name="keycloak",
