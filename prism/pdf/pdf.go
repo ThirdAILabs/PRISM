@@ -91,39 +91,27 @@ func NewPDFDownloader(s3CacheBucket string) *PDFDownloader {
 }
 
 func (downloader *PDFDownloader) Close() error {
-	var errors []error
+	var errs []error
 
 	if downloader.context != nil {
 		if err := downloader.context.Close(); err != nil {
-			errors = append(errors, fmt.Errorf("error closing browser context: %w", err))
+			errs = append(errs, fmt.Errorf("error closing browser context: %w", err))
 		}
 	}
 
 	if downloader.browser != nil {
 		if err := downloader.browser.Close(); err != nil {
-			errors = append(errors, fmt.Errorf("error closing browser: %w", err))
+			errs = append(errs, fmt.Errorf("error closing browser: %w", err))
 		}
 	}
 
 	if downloader.pw != nil {
 		if err := downloader.pw.Stop(); err != nil {
-			errors = append(errors, fmt.Errorf("error stopping playwright: %w", err))
+			errs = append(errs, fmt.Errorf("error stopping playwright: %w", err))
 		}
 	}
 
-	if len(errors) > 0 {
-		var combinedErr error
-		for _, err := range errors {
-			if combinedErr == nil {
-				combinedErr = err
-			} else {
-				combinedErr = fmt.Errorf("%v; %w", combinedErr, err)
-			}
-		}
-		return combinedErr
-	}
-
-	return nil
+	return errors.Join(errs...)
 }
 
 func (downloader *PDFDownloader) downloadWithPlaywright(url string) (string, error) {
@@ -304,17 +292,17 @@ func (downloader *PDFDownloader) DeleteFromCache(doi string) error {
 func (downloader *PDFDownloader) downloadPdf(cachedPDFName, oaURL string) (string, error) {
 	var errs []error
 
-	// if path, err := downloader.downloadFromCache(cachedPDFName); err == nil {
-	// 	return path, nil
-	// } else {
-	// 	errs = append(errs, fmt.Errorf("s3 cache download: %w", err))
-	// }
+	if path, err := downloader.downloadFromCache(cachedPDFName); err == nil {
+		return path, nil
+	} else {
+		errs = append(errs, fmt.Errorf("s3 cache download: %w", err))
+	}
 
-	// if path, err := downloader.downloadWithHttp(oaURL); err == nil {
-	// 	return path, nil
-	// } else {
-	// 	errs = append(errs, fmt.Errorf("http download: %w", err))
-	// }
+	if path, err := downloader.downloadWithHttp(oaURL); err == nil {
+		return path, nil
+	} else {
+		errs = append(errs, fmt.Errorf("http download: %w", err))
+	}
 
 	if path, err := downloader.downloadWithPlaywright(oaURL); err == nil {
 		return path, nil

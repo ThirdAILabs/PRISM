@@ -26,7 +26,7 @@ func TestRunInpool(t *testing.T) {
 
 	output := make(chan CompletedTask[string], 10)
 
-	RunInPool(worker, queue, output, 5)
+	RunInPool(worker, queue, output, 5, nil)
 
 	success, errors := 0, 0
 	for result := range output {

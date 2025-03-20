@@ -1,13 +1,5 @@
 azure:
   branches:
-    pdf-cache:
-      pull_credentials:
-        password: 9yvLqpBOTW0Yz3zjkjT2DXX18FR901QQh+xuGwMhbe+ACRB9C/BS
-        username: prism-pull-pdf-cache
-      push_credentials:
-        password: 5Tw0/my7uhkfUl5zXYgAPUlYkcbbtsfxxU/pQqW/qp+ACRAVgdqK
-        username: prism-push-pdf-cache
-      version: 0.0.12
     prod:
       pull_credentials:
         password: YA5Rm8350UhKrEQaaqNjbGk2TfjN+ri7Cy0Di9UReB+ACRBRSYKs

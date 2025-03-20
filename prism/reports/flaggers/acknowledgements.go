@@ -95,7 +95,6 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 	close(queue)
 
 	downloader := pdf.NewPDFDownloader(extractor.pdfS3CacheBucket)
-	defer downloader.Close()
 
 	worker := func(next openalex.Work) (Acknowledgements, error) {
 		workId := parseOpenAlexId(next)
@@ -112,7 +111,7 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 
 	nWorkers := min(len(queue), extractor.maxThreads)
 
-	RunInPool(worker, queue, outputCh, nWorkers)
+	RunInPool(worker, queue, outputCh, nWorkers, func() { downloader.Close() })
 
 	return outputCh
 }

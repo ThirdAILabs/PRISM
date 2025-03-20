@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log"
 	"log/slog"
-	"net/http"
 	"os"
 	"path/filepath"
 
@@ -16,8 +15,6 @@ import (
 	"prism/prism/search"
 	"prism/prism/triangulation"
 	"time"
-
-	_ "net/http/pprof"
 
 	"github.com/caarlos0/env/v11"
 )
@@ -54,10 +51,6 @@ func (c *Config) logfile() string {
 }
 
 func main() {
-
-	go func() {
-		log.Println(http.ListenAndServe(":6060", nil))
-	}()
 
 	cmd.LoadEnvFile()
 
