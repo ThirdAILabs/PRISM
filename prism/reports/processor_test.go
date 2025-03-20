@@ -10,6 +10,7 @@ import (
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/reports/utils"
 	"prism/prism/schema"
+	"prism/prism/search"
 	"prism/prism/triangulation"
 	"slices"
 	"strings"
@@ -20,6 +21,13 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
+
+func init() {
+	const licensePath = "../../.test_license/thirdai.license"
+	if err := search.SetLicensePath(licensePath); err != nil {
+		panic(err)
+	}
+}
 
 func setupReportManager(t *testing.T) *reports.ReportManager {
 	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
