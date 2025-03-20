@@ -334,8 +334,8 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 	processor := reports.NewProcessor(
 		[]reports.WorkFlagger{
 			flaggers.NewAuthorIsAssociatedWithEOCFlagger(
-				flaggers.BuildDocIndex("../../../data/docs_and_press_releases.json"),
-				flaggers.BuildAuxIndex("../../../data/auxiliary_webpages.json"),
+				flaggers.BuildDocIndex("../../data/docs_and_press_releases.json"),
+				flaggers.BuildAuxIndex("../../data/auxiliary_webpages.json"),
 			),
 		},
 		nil,
