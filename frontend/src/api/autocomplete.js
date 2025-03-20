@@ -2,9 +2,9 @@ import axiosInstance from './axios.config';
 import { API_ROUTES } from './constants';
 
 export const autocompleteService = {
-  autocompleteAuthors: async (query, institution_id) => {
+  autocompleteAuthors: async (query) => {
     const response = await axiosInstance.get(API_ROUTES.AUTOCOMPLETE.AUTHOR, {
-      params: { query, institution_id },
+      params: { query },
     });
     return response.data;
   },

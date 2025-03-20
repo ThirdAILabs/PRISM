@@ -24,9 +24,8 @@ func (s *AutocompleteService) Routes() chi.Router {
 
 func (s *AutocompleteService) AutocompleteAuthor(r *http.Request) (any, error) {
 	query := r.URL.Query().Get("query")
-	institutionId := r.URL.Query().Get("institution_id")
 
-	authors, err := s.openalex.AutocompleteAuthor(query, institutionId)
+	authors, err := s.openalex.AutocompleteAuthor(query)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
