@@ -10,34 +10,20 @@ import (
 )
 
 func Migration3(db *gorm.DB) error {
-	if err := db.Exec(`
-        CREATE TABLE IF NOT EXISTS flag_feedbacks (
-            id UUID PRIMARY KEY,
-            user_id UUID NOT NULL,
-            report_id UUID NOT NULL,
-            flag_hash CHAR(64) NOT NULL,
-            timestamp TIMESTAMPTZ,
-            data BYTEA
-        )
-    `).Error; err != nil {
-		return fmt.Errorf("failed to create FlagFeedback table: %w", err)
+	err := db.AutoMigrate(&schema.FlagFeedback{})
+	if err != nil {
+		return fmt.Errorf("failed to migrate Feedback: %w", err)
 	}
 
-	if err := db.Exec(`
-        CREATE INDEX IF NOT EXISTS idx_flag_feedbacks_user_id ON flag_feedbacks(user_id)
-    `).Error; err != nil {
-		return fmt.Errorf("failed to create index on FlagFeedback.user_id: %w", err)
-	}
-
-	if err := db.Exec(`
-        ALTER TABLE flag_feedbacks 
-        ADD CONSTRAINT fk_flag_feedbacks_flag 
-        FOREIGN KEY (report_id, flag_hash) 
-        REFERENCES author_flags(report_id, flag_hash) 
-        ON DELETE CASCADE
-    `).Error; err != nil {
-		return fmt.Errorf("failed to add foreign key constraint to FlagFeedback: %w", err)
-	}
+	// if err := db.Exec(`
+	//     ALTER TABLE flag_feedbacks
+	//     ADD CONSTRAINT fk_flag_feedbacks_flag
+	//     FOREIGN KEY (report_id, flag_hash)
+	//     REFERENCES author_flags(report_id, flag_hash)
+	//     ON DELETE CASCADE
+	// `).Error; err != nil {
+	// 	return fmt.Errorf("failed to add foreign key constraint to FlagFeedback: %w", err)
+	// }
 
 	// port the new data byte of AuthorFlag to the DB
 	var flags []schema.AuthorFlag
