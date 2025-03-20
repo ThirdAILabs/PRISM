@@ -78,7 +78,7 @@ func NewPDFDownloader(s3CacheBucket string) *PDFDownloader {
 		IgnoreHttpsErrors: playwright.Bool(true),
 	})
 	if err != nil {
-		log.Fatalf("error starting playwright: %v", err)
+		log.Fatalf("error creating playwright context: %v", err)
 	}
 
 	// When pdfs fail to download it is often just because they reach the timeout,
