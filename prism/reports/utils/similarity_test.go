@@ -1,7 +1,8 @@
-package flaggers
+package utils_test
 
 import (
 	"math"
+	"prism/prism/reports/utils"
 	"testing"
 )
 
@@ -26,17 +27,17 @@ func TestLevensteinDistance(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		dist := levenshteinDistance(test.s1, test.s2, 1)
+		dist := utils.LevenshteinDistance(test.s1, test.s2, 1)
 		if dist != test.expectedDist {
 			t.Errorf("s1=%s s2=%s expected=%d actual=%d", test.s1, test.s2, test.expectedDist, dist)
 		}
 	}
 
-	if levenshteinDistance("abc", "axc", 1) != 1 {
+	if utils.LevenshteinDistance("abc", "axc", 1) != 1 {
 		t.Errorf("incorrect dist with weight 1")
 	}
 
-	if levenshteinDistance("abc", "axc", 2) != 2 {
+	if utils.LevenshteinDistance("abc", "axc", 2) != 2 {
 		t.Errorf("incorrect dist with weight 2")
 	}
 }
@@ -57,7 +58,7 @@ func TestIndelSim(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		sim := IndelSimilarity(test.s1, test.s2)
+		sim := utils.IndelSimilarity(test.s1, test.s2)
 		if sim != test.expectedSim {
 			t.Errorf("s1=%s s2=%s expected=%f actual=%f", test.s1, test.s2, test.expectedSim, sim)
 		}
@@ -118,7 +119,7 @@ func TestJaroSim(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		sim := JaroWinklerSimilarity(test.s1, test.s2)
+		sim := utils.JaroWinklerSimilarity(test.s1, test.s2)
 		if math.Round(1000*sim) != math.Round(1000*test.expectedSim) {
 			t.Errorf("s1=%s s2=%s expected=%f actual=%f", test.s1, test.s2, test.expectedSim, sim)
 		}

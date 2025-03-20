@@ -11,6 +11,7 @@ import (
 	"prism/prism/monitoring"
 	"prism/prism/openalex"
 	"prism/prism/pdf"
+	"prism/prism/reports/utils"
 	"regexp"
 	"strconv"
 	"strings"
@@ -22,18 +23,18 @@ import (
 )
 
 type AcknowledgementsExtractor interface {
-	GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan CompletedTask[Acknowledgements]
+	GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan utils.CompletedTask[Acknowledgements]
 }
 
 type GrobidAcknowledgementsExtractor struct {
-	cache        DataCache[Acknowledgements]
+	cache        utils.DataCache[Acknowledgements]
 	maxThreads   int
 	grobidSem    *semaphore.Weighted
 	grobidClient *resty.Client
 	downloader   *pdf.PDFDownloader
 }
 
-func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint string, maxDownloadThreads, maxGrobidThreads int, pdfS3CacheBucket string) *GrobidAcknowledgementsExtractor {
+func NewGrobidExtractor(cache utils.DataCache[Acknowledgements], grobidEndpoint string, maxDownloadThreads, maxGrobidThreads int, pdfS3CacheBucket string) *GrobidAcknowledgementsExtractor {
 	return &GrobidAcknowledgementsExtractor{
 		cache:      cache,
 		maxThreads: max(maxDownloadThreads, maxGrobidThreads),
@@ -76,8 +77,8 @@ type Acknowledgements struct {
 	Acknowledgements []Acknowledgement
 }
 
-func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan CompletedTask[Acknowledgements] {
-	outputCh := make(chan CompletedTask[Acknowledgements], len(works))
+func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan utils.CompletedTask[Acknowledgements] {
+	outputCh := make(chan utils.CompletedTask[Acknowledgements], len(works))
 
 	queue := make(chan openalex.Work, len(works))
 
@@ -88,7 +89,7 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 		}
 
 		if cachedAck := extractor.cache.Lookup(workId); cachedAck != nil {
-			outputCh <- CompletedTask[Acknowledgements]{Result: *cachedAck, Error: nil}
+			outputCh <- utils.CompletedTask[Acknowledgements]{Result: *cachedAck, Error: nil}
 		} else {
 			queue <- work
 		}
@@ -111,7 +112,7 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 
 	nWorkers := min(len(queue), extractor.maxThreads)
 
-	RunInPool(worker, queue, outputCh, nWorkers)
+	utils.RunInPool(worker, queue, outputCh, nWorkers)
 
 	return outputCh
 }
