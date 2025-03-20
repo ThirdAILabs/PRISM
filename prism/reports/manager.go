@@ -797,7 +797,8 @@ func (r *ReportManager) SaveFlagFeedback(reportId uuid.UUID, userId uuid.UUID, f
 		feedbackEntry := schema.FlagFeedback{
 			Id:        uuid.New(),
 			UserId:    userId,
-			Flag:      flag,
+			ReportId:  reportId,
+			FlagHash:  flagHash,
 			Timestamp: time.Now(),
 			Data:      feedbackData,
 		}

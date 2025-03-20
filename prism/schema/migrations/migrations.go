@@ -40,7 +40,7 @@ func GetMigrator(db *gorm.DB) *gormigrate.Gormigrate {
 		log.Println("clean database detected, running full schema initialization")
 
 		return db.AutoMigrate(
-			&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{},
+			&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.FlagFeedback{}, &schema.UserAuthorReport{},
 			&schema.UniversityReport{}, &schema.UserUniversityReport{},
 		)
 	})
