@@ -11,6 +11,7 @@ import (
 	"prism/prism/gscholar"
 	"prism/prism/llms"
 	"prism/prism/openalex"
+	"prism/prism/reports/utils"
 	"prism/prism/search"
 	"regexp"
 	"slices"
@@ -19,14 +20,12 @@ import (
 	"time"
 )
 
-type AuthorFlagger interface {
-	Flag(logger *slog.Logger, authorName string) ([]api.Flag, error)
-
-	Name() string
-}
-
 type AuthorIsFacultyAtEOCFlagger struct {
 	universityNDB search.NeuralDB
+}
+
+func NewAuthorIsFacultyAtEOCFlagger(universityNDB search.NeuralDB) *AuthorIsFacultyAtEOCFlagger {
+	return &AuthorIsFacultyAtEOCFlagger{universityNDB: universityNDB}
 }
 
 type nameMatcher struct {
@@ -322,6 +321,10 @@ type AuthorIsAssociatedWithEOCFlagger struct {
 	auxIndex *search.ManyToOneIndex[LinkMetadata]
 }
 
+func NewAuthorIsAssociatedWithEOCFlagger(docIndex, auxIndex *search.ManyToOneIndex[LinkMetadata]) *AuthorIsAssociatedWithEOCFlagger {
+	return &AuthorIsAssociatedWithEOCFlagger{docIndex: docIndex, auxIndex: auxIndex}
+}
+
 func (flagger *AuthorIsAssociatedWithEOCFlagger) DisableForUniversityReport() bool {
 	return false
 }
@@ -598,6 +601,10 @@ type AuthorNewsArticlesFlagger struct {
 	llm llms.LLM
 }
 
+func NewAuthorNewsArticlesFlagger() *AuthorNewsArticlesFlagger {
+	return &AuthorNewsArticlesFlagger{llm: llms.New()}
+}
+
 func (flagger *AuthorNewsArticlesFlagger) Name() string {
 	return "NewsArticles"
 }
@@ -699,9 +706,9 @@ func (flagger *AuthorNewsArticlesFlagger) Flag(logger *slog.Logger, authorName s
 	}
 	close(queue)
 
-	completed := make(chan CompletedTask[checkArticleResult], len(articles))
+	completed := make(chan utils.CompletedTask[checkArticleResult], len(articles))
 
-	RunInPool(flagger.checkArticle, queue, completed, 5)
+	utils.RunInPool(flagger.checkArticle, queue, completed, 5)
 
 	flaggedArticles := make([]checkArticleResult, 0)
 	for result := range completed {

@@ -1,4 +1,4 @@
-package flaggers
+package reports
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"prism/prism/gscholar"
 	"prism/prism/llms"
 	"prism/prism/openalex"
+	"prism/prism/reports/utils"
 	"regexp"
 	"strings"
 	"time"
@@ -25,7 +26,7 @@ func findOAAuthorId(work openalex.Work, targetAuthorName string) string {
 			name = *author.RawAuthorName
 		}
 
-		if sim := IndelSimilarity(name, targetAuthorName); sim > maxSim {
+		if sim := utils.IndelSimilarity(name, targetAuthorName); sim > maxSim {
 			maxSim = sim
 			authorId = author.AuthorId
 		}

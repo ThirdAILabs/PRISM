@@ -1,10 +1,10 @@
-package flaggers
+package flaggers_test
 
 import (
 	"log/slog"
 	"prism/prism/api"
-	"prism/prism/llms"
 	"prism/prism/openalex"
+	"prism/prism/reports/flaggers"
 	"prism/prism/search"
 	"slices"
 	"testing"
@@ -33,7 +33,7 @@ func TestAuthorIsFacultyAtEOC(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	flagger := AuthorIsFacultyAtEOCFlagger{universityNDB: ndb}
+	flagger := flaggers.NewAuthorIsFacultyAtEOCFlagger(ndb)
 
 	flags, err := flagger.Flag(slog.Default(), "7 9")
 	if err != nil {
@@ -65,7 +65,7 @@ var (
 		{"qrs"},
 	}
 
-	mockPressReleaseMetadata = []LinkMetadata{
+	mockPressReleaseMetadata = []flaggers.LinkMetadata{
 		{Title: "indicted", Url: "indicted.com", Entities: []string{"abc", "xyz"}, Text: "abc and xyz are indicted"},
 		{Title: "leaked docs", Url: "leakeddocs.com", Entities: []string{"qrs"}, Text: "qrs is implicated by leaked docs"},
 	}
@@ -76,7 +76,7 @@ var (
 		{"456", "789"},
 	}
 
-	mockAuxDocMetadata = []LinkMetadata{
+	mockAuxDocMetadata = []flaggers.LinkMetadata{
 		{Title: "new company", Url: "newcompany.com", Entities: []string{"xyz", "123"}, Text: "xyz and 123 found company"},
 		{Title: "graduate students", Url: "graduatestudents.com", Entities: []string{"456", "qrs"}, Text: "456 and qrs are graduate students together"},
 		{Title: "best friends", Url: "bestfriends.com", Entities: []string{"456", "789"}, Text: "456 and 789 are best friends"},
@@ -84,7 +84,10 @@ var (
 )
 
 func TestAuthorAssociationIsEOC(t *testing.T) {
-	flagger := AuthorIsAssociatedWithEOCFlagger{docIndex: search.NewManyToOneIndex(mockPressReleaseEntities, mockPressReleaseMetadata), auxIndex: search.NewManyToOneIndex(mockAuxDocEntities, mockAuxDocMetadata)}
+	flagger := flaggers.NewAuthorIsAssociatedWithEOCFlagger(
+		search.NewManyToOneIndex(mockPressReleaseEntities, mockPressReleaseMetadata),
+		search.NewManyToOneIndex(mockAuxDocEntities, mockAuxDocMetadata),
+	)
 
 	t.Run("test primary connection", func(t *testing.T) {
 		works := []openalex.Work{ // Only the author names are used in this flagger
@@ -192,9 +195,7 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 }
 
 func TestAuthorNewsArticleFlagger(t *testing.T) {
-	flagger := AuthorNewsArticlesFlagger{
-		llm: llms.New(),
-	}
+	flagger := flaggers.NewAuthorNewsArticlesFlagger()
 
 	flags, err := flagger.Flag(slog.Default(), "charles lieber")
 	if err != nil {
