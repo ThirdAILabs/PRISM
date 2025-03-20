@@ -3,6 +3,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { reportService } from '../../../api/reports';
 import './TodoListComponent.css';
+import NoResultsFound from '../../common/tools/NoResultsFound';
+
 
 const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadingMore }) => {
   const navigate = useNavigate();
@@ -31,11 +33,7 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadi
   return (
     <div className="d-flex flex-column w-100 ">
       {results.length === 0 ? (
-        <div className="no-results">
-          <div className="no-results-icon">🔍</div>
-          <h3>We couldn't find any results</h3>
-          <p>Try adjusting your search to find what you're looking for.</p>
-        </div>
+        <NoResultsFound />
       ) : (
         <>
           <ul className="result-wrapper mt-3">

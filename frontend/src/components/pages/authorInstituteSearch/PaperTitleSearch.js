@@ -5,6 +5,7 @@ import { autocompleteService } from '../../../api/autocomplete';
 import TodoListComponent from './TodoListComponent';
 import AutocompleteSearchBar from '../../../utils/autocomplete';
 import useCallOnPause from '../../../hooks/useCallOnPause';
+import NoResultsFound from '../../common/tools/NoResultsFound';
 
 const PaperTitleSearchComponent = () => {
   const { searchState, setSearchState } = useContext(SearchContext);
@@ -94,11 +95,7 @@ const PaperTitleSearchComponent = () => {
         ></div>
       )}
       {hasSearchedPaper && !isLoading && paperResults.length === 0 && (
-        <div className="no-results">
-          <div className="no-results-icon">🔍</div>
-          <h3>Authors Not Found</h3>
-          <p>We couldn't find any authors associated with this Paper.</p>
-        </div>
+        <NoResultsFound msg="Authors Not Found" submsg="We couldn't find any authors associated with this paper." />
       )}
       {hasSearchedPaper && paperResults.length > 0 && <TodoListComponent results={paperResults} />}
     </div>

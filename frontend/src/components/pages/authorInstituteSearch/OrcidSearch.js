@@ -3,6 +3,7 @@ import { SearchContext } from '../../../store/searchContext';
 import { searchService } from '../../../api/search';
 import TodoListComponent from './TodoListComponent';
 import { SingleSearchBar } from '../../common/searchBar/SearchBar';
+import NoResultsFound from '../../common/tools/NoResultsFound';
 
 const orcidRegex = /^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9X]{4}$/;
 
@@ -56,11 +57,7 @@ const OrcidSearchComponent = () => {
         ></div>
       )}
       {hasSearchedOrcid && !isLoading && orcidResults.length === 0 && (
-        <div className="no-results">
-          <div className="no-results-icon">🔍</div>
-          <h3>Author Not Found</h3>
-          <p>We couldn't find an author associated with this ORCID ID.</p>
-        </div>
+        <NoResultsFound msg="Author Not Found" submsg="We couldn't find an author associated with this ORCID ID." />
       )}
       {hasSearchedOrcid && orcidResults.length > 0 && <TodoListComponent results={orcidResults} />}
     </div>
