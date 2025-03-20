@@ -1,0 +1,95 @@
+[
+    {
+        "name": "China Electronics Technology Group Corporation",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "CETC"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320328844",
+            "name": "China Electronics Technology Group Corporation",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "China Aerospace Science and Technology Corporation",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "CASC"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320327471",
+            "name": "China Aerospace Science and Technology Corporation",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "China Aerospace Science and Technology Corporation",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "CASC"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320329531",
+            "name": "Qian Xuesen Laboratory for Space Technology, China Aerospace Science and Technology Corporation",
+            "type": "entity_type"
+        },
+        "score": 0.6896551724137931
+    },
+    {
+        "name": "China Mobile",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "China Mobile"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320329515",
+            "name": "China Mobile Research Institute",
+            "type": "entity_type"
+        },
+        "score": 0.5581395348837209
+    },
+    {
+        "name": "China Mobile",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "China Mobile"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320336750",
+            "name": "Ministry of Education-China Mobile Research Fund Project",
+            "type": "entity_type"
+        },
+        "score": 0.35294117647058826
+    },
+    {
+        "name": "CHINA NATIONAL NUCLEAR CORPORATION",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "China National Nuclear Corp",
+            "CNNC"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320328717",
+            "name": "China National Nuclear Corporation",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "China National Nuclear Corp",
+        "source": "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department",
+        "aliases": [
+            "China National Nuclear Corp",
+            "CNNC"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320328717",
+            "name": "China National Nuclear Corporation",
+            "type": "entity_type"
+        },
+        "score": 0.8852459016393442
+    }
+]

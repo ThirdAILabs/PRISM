@@ -23,13 +23,10 @@ class UnitrackerSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        # Yield requests with the "playwright" meta key so that the page is rendered in a real browser.
         for url in self.start_urls:
             yield scrapy.Request(url, meta={"playwright": True})
 
     def parse(self, response):
-        print(response.text)
-        # Locate the table with class "data-table"
         rows = response.xpath(
             '//table[contains(@class, "data-table")]//tr[not(ancestor::thead)]'
         )
@@ -38,21 +35,17 @@ class UnitrackerSpider(scrapy.Spider):
             return
 
         for row in rows:
-            # --- First column: Institution ---
             institution_td = row.xpath("./td[1]")
             if institution_td:
-                # Extract the main title from the anchor element
                 title = institution_td.xpath(
                     './/a[contains(@class,"data-table__university-title")]/text()'
                 ).get()
                 title = title.strip() if title else ""
-                # Extract the relative permalink and join with base URL if needed
                 permalink = institution_td.xpath(
                     './/a[contains(@class,"data-table__university-title")]/@href'
                 ).get()
                 if permalink and not permalink.startswith("http"):
                     permalink = response.urljoin(permalink)
-                # Extract aliases from the alias wrapper
                 aliases = institution_td.xpath(
                     './/a[contains(@class,"data-table__aliases")]//span/text()'
                 ).getall()

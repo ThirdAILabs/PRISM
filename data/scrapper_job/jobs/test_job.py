@@ -32,7 +32,6 @@ def test_job(job):
         traceback.print_exc()
         return
 
-    # Test processor
     try:
         processed_data = getattr(module, processor_name)(raw_data, job_config)
         print(
@@ -43,7 +42,6 @@ def test_job(job):
         traceback.print_exc()
         return
 
-    # Test updater
     try:
         getattr(module, updater_name)(processed_data, job_config)
         print(f"[{job['name']}] Updater succeeded.")

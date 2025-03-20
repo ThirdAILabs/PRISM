@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 import time
 import os
+from difflib import SequenceMatcher
 
 
 def fetch_flagger_source(config):
@@ -15,25 +16,39 @@ def fetch_flagger_source(config):
         df = df[df["type"].str.lower() != "individual"]
     entities = []
     for _, row in df.iterrows():
-        name = row["name"]
-        if "aliases" in row and pd.notna(row["aliases"]):
-            aliases = [alias.strip() for alias in str(row["aliases"]).split(",")]
-        else:
-            aliases = [name]
-        entities.append({"name": name, "aliases": aliases})
+        entities.append(row.to_dict())
     return entities
 
 
-def get_results(query, entity_id, entity_type, email="pratik@thirdai.com"):
+def get_results(query, inst, entity_id, entity_type, email="pratik@thirdai.com"):
     try:
         url = f"https://api.openalex.org/autocomplete/{entity_type}?q={quote(query, safe='')}&mailto={email}"
         response = rq.get(url, timeout=1.0)
         response.raise_for_status()
+        if len(response.json()["results"]) == 0:
+            return {}
+
+        def get_similarity(a, b):
+            return SequenceMatcher(None, a.lower(), b.lower()).ratio()
+
         return {
-            "id": entity_id,
             "entity_type": entity_type,
             "results": [
-                {"id": r["id"], "name": r["display_name"], "type": entity_type}
+                {
+                    "name": query,
+                    "source": inst["source"],
+                    "aliases": (
+                        inst.get("alt_names", "").split("; ")
+                        if not pd.isna(inst.get("alt_names"))
+                        else []
+                    ),
+                    "match": {
+                        "id": r["id"],
+                        "name": r["display_name"],
+                        "type": "entity_type",
+                    },
+                    "score": get_similarity(r["display_name"], query),
+                }
                 for r in response.json()["results"]
             ],
         }
@@ -48,8 +63,10 @@ def get_all(all_queries, email="pratik@thirdai.com"):
     with ThreadPoolExecutor(max_workers=AT_A_TIME) as executor:
         for i in range(0, len(all_queries), AT_A_TIME):
             futures = [
-                executor.submit(get_results, query, entity_id, entity_type, email)
-                for query, entity_id, entity_type in all_queries[i : i + AT_A_TIME]
+                executor.submit(get_results, query, inst, entity_id, entity_type, email)
+                for query, inst, entity_id, entity_type in all_queries[
+                    i : i + AT_A_TIME
+                ]
             ]
             for future in as_completed(futures):
                 results.append(future.result())
@@ -60,17 +77,24 @@ def get_all(all_queries, email="pratik@thirdai.com"):
 def process_flagger_source(entities, config):
     all_queries = []
     for entity_id, inst in enumerate(entities):
-        queries = [inst["name"]] + inst.get("aliases", [])
+        if pd.isna(inst["name"]):
+            continue
+        queries = [inst["name"]] + (
+            inst.get("alt_names", "").split("; ")
+            if not pd.isna(inst.get("alt_names"))
+            else []
+        )
+        if "" in queries:
+            queries.remove("")
         for query in queries:
             for entity_type in ["institutions", "funders", "publishers"]:
-                all_queries.append((query, entity_id, entity_type))
-    results = {"institutions": {}, "funders": {}, "publishers": {}}
+                all_queries.append((query, inst, entity_id, entity_type))
+    results = {"institutions": [], "funders": [], "publishers": []}
     for r in tqdm(get_all(all_queries), total=len(all_queries)):
-        etype = r["entity_type"]
-        if r["id"] not in results[etype]:
-            results[etype][r["id"]] = r
-        else:
-            results[etype][r["id"]]["results"].extend(r["results"])
+        if r:
+            etype = r["entity_type"]
+            del r["entity_type"]
+            results[etype].extend(r["results"])
     return results
 
 
@@ -80,9 +104,9 @@ def update_flagger_store(processed_data, config):
     out_publishers = config["output_publishers"]
     os.makedirs(os.path.dirname(out_inst), exist_ok=True)
     with open(out_inst, "w") as f:
-        json.dump(processed_data.get("institutions", {}), f, indent=4)
+        json.dump(processed_data.get("institutions", []), f, indent=4)
     with open(out_funders, "w") as f:
-        json.dump(processed_data.get("funders", {}), f, indent=4)
+        json.dump(processed_data.get("funders", []), f, indent=4)
     with open(out_publishers, "w") as f:
-        json.dump(processed_data.get("publishers", {}), f, indent=4)
+        json.dump(processed_data.get("publishers", []), f, indent=4)
     print(f"[flagger_data] Updated institutions, funders, and publishers JSON files.")

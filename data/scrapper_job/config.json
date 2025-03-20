@@ -51,16 +51,17 @@
           "output_publishers": "data/flagger_data/publishers.json"
         }
       },
-      {
+        {
         "name": "university_au",
-        "module": "jobs.university",
+        "module": "jobs.university_au",
         "fetcher": "crawl_university_data",
         "processor": "process_university_data",
         "updater": "update_university_store",
         "config": {
           "start_urls": ["https://unitracker.aspi.org.au/"],
-          "intermediate_json": "data/university_au/unitracker_au_new.json",
-          "final_store": "data/university_au/unitracker_au.json"
+          "intermediate_json": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data/university_au/intermediate.json",
+          "added_store": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data/university_au/unitracker_au_new.json",
+          "final_store": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data/university_au/unitracker_au.json"
         }
       },
       {
@@ -71,8 +72,8 @@
         "updater": "update_university_webpages",
         "depends_on": ["university_au"],
         "config": {
-          "input_json": "data/university_au/unitracker_au_new.json",
-          "output_file": "data/university_webpages/university_webpages_new.json"
+          "input_json": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data/university_au/unitracker_au_new.json",
+          "output_file": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data/university_webpages/university_webpages_new.jsonl"
         }
       }
     ],

@@ -1,15 +1,29 @@
 {
     "jobs": [
         {
-            "name": "university_au",
-            "module": "jobs.university_au",
-            "fetcher": "crawl_university_data",
-            "processor": "process_university_data",
-            "updater": "update_university_store",
+            "name": "csl_data",
+            "module": "jobs.csl",
+            "fetcher": "fetch_source",
+            "processor": "process_source",
+            "updater": "update_local_store",
             "config": {
-              "start_urls": ["https://unitracker.aspi.org.au/"],
-              "intermediate_json": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data/university_au/unitracker_au_new.json",
-              "final_store": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data/university_au/unitracker_au.json"
+              "csv_url": "https://data.trade.gov/downloadable_consolidated_screening_list/v1/consolidated.csv",
+              "original_file": "data/csl_data/original.csv",
+              "output_file": "data/csl_data/new_data.csv"
+            }
+          },
+          {
+            "name": "flagger_data",
+            "module": "jobs.flagger",
+            "fetcher": "fetch_flagger_source",
+            "processor": "process_flagger_source",
+            "updater": "update_flagger_store",
+            "depends_on": ["csl_data"],
+            "config": {
+              "input_csv": "data/csl_data/new_data.csv",
+              "output_institutions": "data/flagger_data/institutions.json",
+              "output_funders": "data/flagger_data/funders.json",
+              "output_publishers": "data/flagger_data/publishers.json"
             }
           }
     ],

@@ -5,12 +5,12 @@ import subprocess
 
 def crawl_university_data(config):
     intermediate_json = config["intermediate_json"]
+
+    os.remove(intermediate_json) if os.path.exists(intermediate_json) else None
     os.makedirs(os.path.dirname(intermediate_json), exist_ok=True)
 
-    # Set the working directory to the location of the spider.
     cwd = os.path.join(os.path.dirname(__file__), "spider", "unitracker")
 
-    # Use 'scrapy runspider' to execute main.py.
     cmd = [
         "scrapy",
         "runspider",
@@ -32,8 +32,8 @@ def process_university_data(raw_data, config):
 
 def update_university_store(processed_data, config):
     final_store = config["final_store"]
+    added_store = config["added_store"]
     os.makedirs(os.path.dirname(final_store), exist_ok=True)
-    # Load existing data if any.
     if os.path.exists(final_store):
         with open(final_store, "r", encoding="utf-8") as f:
             try:
@@ -55,5 +55,9 @@ def update_university_store(processed_data, config):
         print(
             f"[university_au] Appended {len(new_entries)} new entries to {final_store}"
         )
+
+        with open(added_store, "w", encoding="utf-8") as f:
+            json.dump(new_entries, f, indent=2, ensure_ascii=False)
+        print(f"[university_au] Added {len(new_entries)} new entries to {added_store}")
     else:
         print("[university_au] No new university entries found.")
