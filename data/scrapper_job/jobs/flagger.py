@@ -103,10 +103,18 @@ def update_flagger_store(processed_data, config):
     out_funders = config["output_funders"]
     out_publishers = config["output_publishers"]
     os.makedirs(os.path.dirname(out_inst), exist_ok=True)
-    with open(out_inst, "w") as f:
-        json.dump(processed_data.get("institutions", []), f, indent=4)
-    with open(out_funders, "w") as f:
-        json.dump(processed_data.get("funders", []), f, indent=4)
-    with open(out_publishers, "w") as f:
-        json.dump(processed_data.get("publishers", []), f, indent=4)
+
+    def update_json_file(filepath, new_data):
+        existing_data = []
+        if os.path.exists(filepath):
+            with open(filepath, "r") as f:
+                existing_data = json.load(f)
+        existing_data.extend(new_data)
+        with open(filepath, "w") as f:
+            json.dump(existing_data, f, indent=4)
+
+    update_json_file(out_inst, processed_data.get("institutions", []))
+    update_json_file(out_funders, processed_data.get("funders", []))
+    update_json_file(out_publishers, processed_data.get("publishers", []))
+
     print(f"[flagger_data] Updated institutions, funders, and publishers JSON files.")

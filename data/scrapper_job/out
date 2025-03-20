@@ -1,9 +1,0 @@
-
---- Testing job: csl_data ---
-[csl_data] Fetcher succeeded: returned data of type <class 'pandas.core.frame.DataFrame'>
-[csl_data] Processor succeeded: returned data of type <class 'pandas.core.frame.DataFrame'>
-[csl_data] New rows written to data/csl_data/new_data.csv, total new rows: 3731
-[csl_data] Updater succeeded.
-
---- Testing job: flagger_data ---
-[flagger_data] Fetcher succeeded: returned data of type <class 'list'>

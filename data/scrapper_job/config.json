@@ -8,8 +8,8 @@
         "updater": "update_local_store",
         "config": {
           "csv_url": "https://data.trade.gov/downloadable_consolidated_screening_list/v1/consolidated.csv",
-          "original_file": "data/csl_data/original.csv",
-          "output_file": "data/csl_data/new_data.csv"
+          "original_file": "data.tmp/csl_data/original.csv",
+          "output_file": "data.tmp/csl_data/new_data.csv"
         }
       },
       {
@@ -21,7 +21,7 @@
         "config": {
           "rss_url_template": "https://www.justice.gov/news/rss?type=press_release&m={}",
           "start_date": "2025-01-01",
-          "output_file": "data/doj_pr/doj_articles_with_content_and_entities.json",
+          "output_file": "data.tmp/doj_pr/doj_articles_with_content_and_entities.json",
           "country_keywords": [    
                 "china",
                 "chinese",
@@ -45,10 +45,10 @@
         "updater": "update_flagger_store",
         "depends_on": ["csl_data"],
         "config": {
-          "input_csv": "data/csl_data/new_data.csv",
-          "output_institutions": "data/flagger_data/institutions.json",
-          "output_funders": "data/flagger_data/funders.json",
-          "output_publishers": "data/flagger_data/publishers.json"
+          "input_csv": "data.tmp/csl_data/new_data.csv",
+          "output_institutions": "data.tmp/flagger_data/institutions.json",
+          "output_funders": "data.tmp/flagger_data/funders.json",
+          "output_publishers": "data.tmp/flagger_data/publishers.json"
         }
       },
         {
@@ -59,9 +59,9 @@
         "updater": "update_university_store",
         "config": {
           "start_urls": ["https://unitracker.aspi.org.au/"],
-          "intermediate_json": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data/university_au/intermediate.json",
-          "added_store": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data/university_au/unitracker_au_new.json",
-          "final_store": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data/university_au/unitracker_au.json"
+          "intermediate_json": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data.tmp/university_au/intermediate.json",
+          "added_store": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data.tmp/university_au/unitracker_au_new.json",
+          "final_store": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data.tmp/university_au/unitracker_au.json"
         }
       },
       {
@@ -72,15 +72,15 @@
         "updater": "update_university_webpages",
         "depends_on": ["university_au"],
         "config": {
-          "input_json": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data/university_au/unitracker_au_new.json",
-          "output_file": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data/university_webpages/university_webpages_new.jsonl"
+          "input_json": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data.tmp/university_au/unitracker_au_new.json",
+          "output_file": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data.tmp/university_webpages/university_webpages_new.jsonl"
         }
       }
     ],
     "global": {
       "openai_api_key": "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",
       "email": "pratik@thirdai.com",
-      "data_folder": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data"
+      "data_folder": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data.tmp"
     }
   }
   

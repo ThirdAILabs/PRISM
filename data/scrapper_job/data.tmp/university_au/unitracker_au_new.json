@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Zhejiang University",
+    "permalink": "https://unitracker.aspi.org.au/universities/zhejiang-university",
+    "also_known_as": "浙江大学, ZJU",
+    "kind": "Civilian",
+    "risk": "2 High",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "None",
+    "espionage_or_misconduct": "✓"
+  },
+  {
+    "title": "Zhengzhou University",
+    "permalink": "https://unitracker.aspi.org.au/universities/zhengzhou-university",
+    "also_known_as": "郑州大学, 郑大, ZZU",
+    "kind": "Civilian",
+    "risk": "3 Medium",
+    "security_credentials": "2 Secret",
+    "end_user_lists": "✓",
+    "espionage_or_misconduct": "None"
+  }
+]

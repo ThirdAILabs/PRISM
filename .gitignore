@@ -180,3 +180,5 @@ model/
 *.xlsx
 *.cache
 *.ndb
+
+data.tmp/*
