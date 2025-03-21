@@ -4,6 +4,7 @@ import '../../common/tools/button/button1.css';
 import './entityLookup.css';
 import Logo from '../../../assets/images/prism-logo.png';
 import { searchService } from '../../../api/search';
+import NoResultsFound from '../../common/tools/NoResultsFound';
 
 const makeLinksClickable = (text) => {
   const urlRegex = /((?:http|https):\/\/[^\s]+)/g;
@@ -160,14 +161,7 @@ function EntityLookup() {
           ))}
         </div>
       ) : (
-        !isLoading &&
-        hasSearched && (
-          <div className="no-results">
-            <div className="no-results-icon">🔍</div>
-            <h3>We couldn't find any results</h3>
-            <p>Try adjusting your search to find what you're looking for.</p>
-          </div>
-        )
+        !isLoading && hasSearched && <NoResultsFound />
       )}
     </div>
   );

@@ -11,17 +11,10 @@ import (
 	"prism/prism/llms"
 	"prism/prism/openalex"
 	"prism/prism/reports/flaggers/eoc"
+	"prism/prism/reports/utils"
 	"prism/prism/search"
 	"prism/prism/triangulation"
 )
-
-type WorkFlagger interface {
-	Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error)
-
-	Name() string
-
-	DisableForUniversityReport() bool
-}
 
 func getWorkSummary(w openalex.Work) api.WorkSummary {
 	return api.WorkSummary{
@@ -34,6 +27,10 @@ func getWorkSummary(w openalex.Work) api.WorkSummary {
 }
 
 type OpenAlexMultipleAffiliationsFlagger struct{}
+
+func NewOpenAlexMultipleAffiliationsFlagger() *OpenAlexMultipleAffiliationsFlagger {
+	return &OpenAlexMultipleAffiliationsFlagger{}
+}
 
 func (flagger *OpenAlexMultipleAffiliationsFlagger) Name() string {
 	return "MultipleAffiliations"
@@ -68,6 +65,13 @@ func (flagger *OpenAlexMultipleAffiliationsFlagger) DisableForUniversityReport()
 type OpenAlexFunderIsEOC struct {
 	concerningFunders  eoc.EocSet
 	concerningEntities eoc.EocSet
+}
+
+func NewOpenAlexFunderIsEOC(concerningFunders, concerningEntities eoc.EocSet) *OpenAlexFunderIsEOC {
+	return &OpenAlexFunderIsEOC{
+		concerningFunders:  concerningFunders,
+		concerningEntities: concerningEntities,
+	}
 }
 
 func (flagger *OpenAlexFunderIsEOC) Name() string {
@@ -107,6 +111,12 @@ type OpenAlexPublisherIsEOC struct {
 	concerningPublishers eoc.EocSet
 }
 
+func NewOpenAlexPublisherIsEOC(concerningPublishers eoc.EocSet) *OpenAlexPublisherIsEOC {
+	return &OpenAlexPublisherIsEOC{
+		concerningPublishers: concerningPublishers,
+	}
+}
+
 func (flagger *OpenAlexPublisherIsEOC) Name() string {
 	return "PublisherEOC"
 }
@@ -142,6 +152,12 @@ func (flagger *OpenAlexPublisherIsEOC) DisableForUniversityReport() bool {
 
 type OpenAlexCoauthorIsEOC struct {
 	concerningEntities eoc.EocSet
+}
+
+func NewOpenAlexCoauthorIsEOC(concerningEntities eoc.EocSet) *OpenAlexCoauthorIsEOC {
+	return &OpenAlexCoauthorIsEOC{
+		concerningEntities: concerningEntities,
+	}
 }
 
 func (flagger *OpenAlexCoauthorIsEOC) Name() string {
@@ -190,6 +206,13 @@ type OpenAlexAuthorAffiliationIsEOC struct {
 	concerningInstitutions eoc.EocSet
 }
 
+func NewOpenAlexAuthorAffiliationIsEOC(concerningEntities, concerningInstitutions eoc.EocSet) *OpenAlexAuthorAffiliationIsEOC {
+	return &OpenAlexAuthorAffiliationIsEOC{
+		concerningEntities:     concerningEntities,
+		concerningInstitutions: concerningInstitutions,
+	}
+}
+
 func (flagger *OpenAlexAuthorAffiliationIsEOC) Name() string {
 	return "AuthorAffiliationEOC"
 }
@@ -233,6 +256,13 @@ func (flagger *OpenAlexAuthorAffiliationIsEOC) DisableForUniversityReport() bool
 type OpenAlexCoauthorAffiliationIsEOC struct {
 	concerningEntities     eoc.EocSet
 	concerningInstitutions eoc.EocSet
+}
+
+func NewOpenAlexCoauthorAffiliationIsEOC(concerningEntities, concerningInstitutions eoc.EocSet) *OpenAlexCoauthorAffiliationIsEOC {
+	return &OpenAlexCoauthorAffiliationIsEOC{
+		concerningEntities:     concerningEntities,
+		concerningInstitutions: concerningInstitutions,
+	}
 }
 
 func (flagger *OpenAlexCoauthorAffiliationIsEOC) Name() string {
@@ -290,10 +320,27 @@ func BuildWatchlistEntityIndex(aliasToSource map[string]string) *search.EntityIn
 type OpenAlexAcknowledgementIsEOC struct {
 	openalex        openalex.KnowledgeBase
 	entityLookup    *search.EntityIndex[string]
-	authorCache     DataCache[openalex.Author]
+	authorCache     utils.DataCache[openalex.Author]
 	extractor       AcknowledgementsExtractor
 	sussyBakas      []string
 	triangulationDB *triangulation.TriangulationDB
+}
+
+func NewOpenAlexAcknowledgementIsEOC(
+	entityLookup *search.EntityIndex[string],
+	authorCache utils.DataCache[openalex.Author],
+	extractor AcknowledgementsExtractor,
+	sussyBakas []string,
+	triangulationDB *triangulation.TriangulationDB,
+) *OpenAlexAcknowledgementIsEOC {
+	return &OpenAlexAcknowledgementIsEOC{
+		openalex:        openalex.NewRemoteKnowledgeBase(),
+		entityLookup:    entityLookup,
+		authorCache:     authorCache,
+		extractor:       extractor,
+		sussyBakas:      sussyBakas,
+		triangulationDB: triangulationDB,
+	}
 }
 
 func (flagger *OpenAlexAcknowledgementIsEOC) Name() string {
@@ -378,7 +425,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) searchWatchlistEntities(entities []
 
 		sourceToAliases := make(SourceToAliases)
 		for _, result := range results {
-			sim := IndelSimilarity(entity, result.Entity)
+			sim := utils.IndelSimilarity(entity, result.Entity)
 			if sim > 0.9 {
 				sourceToAliases[result.Metadata] = append(sourceToAliases[result.Entity], result.Entity)
 			}

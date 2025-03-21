@@ -35,10 +35,7 @@ export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInst
       return new Promise((resolve) => {
         debouncedSearch(async () => {
           try {
-            const res = await autocompleteService.autocompleteAuthors(
-              query,
-              institution == null ? '' : institution.Id
-            );
+            const res = await autocompleteService.autocompleteAuthors(query);
             resolve(res);
             return res;
           } catch (error) {
