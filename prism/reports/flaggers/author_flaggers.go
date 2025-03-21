@@ -563,8 +563,6 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 				"EntityMentioned": query,
 				"Connections":     conns,
 			})
-			fmt.Println("line 568")
-			fmt.Println(MhraFlag)
 			if err != nil {
 				logger.Error("error creating flag", "error", err)
 				continue
@@ -753,8 +751,6 @@ func (flagger *AuthorNewsArticlesFlagger) Flag(logger *slog.Logger, authorName s
 				"EntityMentioned": authorName,
 			},
 		)
-		fmt.Println("line 758")
-		fmt.Println(MhraFlag)
 		if err != nil {
 			logger.Error("error creating flag", "error", err)
 			continue
