@@ -30,15 +30,7 @@ func init() {
 }
 
 func setupReportManager(t *testing.T) *reports.ReportManager {
-	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := db.AutoMigrate(&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{},
-		&schema.UniversityReport{}, &schema.UserUniversityReport{}); err != nil {
-		t.Fatal(err)
-	}
+	db := schema.SetupTestDB(t)
 
 	// We're using old date ranges for these so they only process works around the
 	// date of the flagged work, particularly for the acknowledgements flagger, this

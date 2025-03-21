@@ -2,31 +2,19 @@ package cmd
 
 import (
 	"flag"
-	"fmt"
 	"io"
 	"log"
 	"log/slog"
-	"net/url"
 	"os"
-	"strings"
+	"prism/prism/schema"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func uriToDsn(uri string) string {
-	parts, err := url.Parse(uri)
-	if err != nil {
-		log.Fatalf("error parsing db uri: %v", err)
-	}
-	pwd, _ := parts.User.Password()
-	dbname := strings.TrimPrefix(parts.Path, "/")
-	return fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v", parts.Hostname(), parts.User.Username(), pwd, dbname, parts.Port())
-}
-
 func OpenDB(uri string) *gorm.DB {
-	db, err := gorm.Open(postgres.Open(uriToDsn(uri)), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(schema.UriToDsn(uri)), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("error opening database connection: %v", err)
 	}
