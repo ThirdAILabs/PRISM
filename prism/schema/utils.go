@@ -25,8 +25,6 @@ func closeGormDB(t *testing.T, db *gorm.DB) {
 }
 
 func SetupTestDB(t *testing.T) *gorm.DB {
-	tables := []any{&AuthorReport{}, &AuthorFlag{}, &UserAuthorReport{},
-		&UniversityReport{}, &UserUniversityReport{}}
 
 	testUri := os.Getenv("TEST_DB_URI")
 	if testUri == "" {
@@ -38,6 +36,8 @@ func SetupTestDB(t *testing.T) *gorm.DB {
 		log.Fatalf("error opening database connection: %v", err)
 	}
 
+	// We use a unique database name for each test because go test will run tests
+	// for different packages in parallel, and we don't want them to interfere with each other.
 	dbName := fmt.Sprintf("prism_test_%d_%d", os.Getpid(), rand.Int())
 
 	if err := rootDB.Exec("CREATE DATABASE " + dbName).Error; err != nil {
@@ -60,17 +60,8 @@ func SetupTestDB(t *testing.T) *gorm.DB {
 		closeGormDB(t, db)
 	})
 
-	for _, table := range tables {
-		if err := db.Migrator().DropTable(table); err != nil {
-			t.Fatalf("error dropping table %T: %v", table, err)
-		}
-	}
-
-	if err := db.Migrator().DropTable("university_authors"); err != nil {
-		t.Fatalf("error dropping table university_authors: %v", err)
-	}
-
-	if err := db.AutoMigrate(tables...); err != nil {
+	if err := db.AutoMigrate(&AuthorReport{}, &AuthorFlag{}, &UserAuthorReport{},
+		&UniversityReport{}, &UserUniversityReport{}); err != nil {
 		t.Fatalf("error migrating tables: %v", err)
 	}
 
