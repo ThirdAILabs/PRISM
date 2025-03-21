@@ -27,11 +27,11 @@ type AcknowledgementsExtractor interface {
 }
 
 type GrobidAcknowledgementsExtractor struct {
-	cache        utils.DataCache[Acknowledgements]
-	maxThreads   int
-	grobidSem    *semaphore.Weighted
-	grobidClient *resty.Client
-	downloader   *pdf.PDFDownloader
+	cache            utils.DataCache[Acknowledgements]
+	maxThreads       int
+	grobidSem        *semaphore.Weighted
+	grobidClient     *resty.Client
+	pdfS3CacheBucket string
 }
 
 func NewGrobidExtractor(cache utils.DataCache[Acknowledgements], grobidEndpoint string, maxDownloadThreads, maxGrobidThreads int, pdfS3CacheBucket string) *GrobidAcknowledgementsExtractor {
@@ -54,7 +54,7 @@ func NewGrobidExtractor(cache utils.DataCache[Acknowledgements], grobidEndpoint 
 			}).
 			SetRetryWaitTime(2 * time.Second).
 			SetRetryMaxWaitTime(10 * time.Second),
-		downloader: pdf.NewPDFDownloader(pdfS3CacheBucket),
+		pdfS3CacheBucket: pdfS3CacheBucket,
 	}
 }
 
@@ -97,10 +97,12 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 	}
 	close(queue)
 
+	downloader := pdf.NewPDFDownloader(extractor.pdfS3CacheBucket)
+
 	worker := func(next openalex.Work) (Acknowledgements, error) {
 		workId := parseOpenAlexId(next)
 
-		acks, err := extractor.extractAcknowledgments(workId, next)
+		acks, err := extractor.extractAcknowledgments(workId, next, downloader)
 		if err != nil {
 			return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments for work %s: %w", next.WorkId, err)
 		}
@@ -112,13 +114,13 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 
 	nWorkers := min(len(queue), extractor.maxThreads)
 
-	utils.RunInPool(worker, queue, outputCh, nWorkers)
+	utils.RunInPool(worker, queue, outputCh, nWorkers, func() { downloader.Close() })
 
 	return outputCh
 }
 
-func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId string, work openalex.Work) (Acknowledgements, error) {
-	pdfPath, err := extractor.downloader.DownloadWork(work)
+func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId string, work openalex.Work, downloader *pdf.PDFDownloader) (Acknowledgements, error) {
+	pdfPath, err := downloader.DownloadWork(work)
 	if err != nil {
 		return Acknowledgements{}, err
 	}
