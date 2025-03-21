@@ -176,6 +176,7 @@ cython_debug/
 model/
 
 **/*.csv
+!csl_original.csv
 *.pdf
 *.xlsx
 *.cache
