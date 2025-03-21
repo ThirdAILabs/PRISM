@@ -300,9 +300,9 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 
 			PaaFlag, err := api.CreateFlag(api.PotentialAuthorAffiliationType,
 				map[string]interface{}{
-					"message":        fmt.Sprintf("The author %s may be associated with this concerning entity: %s\n", authorName, university),
-					"university":     university,
-					"university_url": url,
+					"Message":       fmt.Sprintf("The author %s may be associated with this concerning entity: %s\n", authorName, university),
+					"University":    university,
+					"UniversityUrl": url,
 				},
 			)
 			if err != nil {
@@ -425,19 +425,18 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 			seen[result.Metadata.Url] = true
 
 			params := map[string]interface{}{
-				"message":          "The author or a frequent associate may be mentioned in a press release.",
-				"doc_title":        result.Metadata.Title,
-				"doc_url":          result.Metadata.Url,
-				"doc_entities":     result.Metadata.Entities,
-				"entity_mentioned": author.author,
+				"Message":         "The author or a frequent associate may be mentioned in a press release.",
+				"DocTitle":        result.Metadata.Title,
+				"DocUrl":          result.Metadata.Url,
+				"DocEntities":     result.Metadata.Entities,
+				"EntityMentioned": author.author,
 			}
 
 			if !primaryMatcher.matchesEntity(author.author) {
-				params["connections"] = []api.Connection{{DocTitle: author.author + " (frequent coauthor)", DocUrl: ""}}
-				params["frequent_coauthor"] = &author.author
+				params["Connections"] = []api.Connection{{DocTitle: author.author + " (frequent coauthor)", DocUrl: ""}}
+				params["FrequentCoauthor"] = &author.author
 
 			}
-
 			MhraFlag, err := api.CreateFlag(api.MiscHighRiskAssociationType, params)
 
 			if err != nil {
@@ -557,13 +556,15 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 			}
 
 			MhraFlag, err := api.CreateFlag(api.MiscHighRiskAssociationType, map[string]interface{}{
-				"message":          "The author may be associated be an entity who/which may be mentioned in a press release.\n",
-				"doc_title":        result.Metadata.Title,
-				"doc_url":          result.Metadata.Url,
-				"doc_entities":     result.Metadata.Entities,
-				"entity_mentioned": query,
-				"connections":      conns,
+				"Message":         "The author may be associated be an entity who/which may be mentioned in a press release.\n",
+				"DocTitle":        result.Metadata.Title,
+				"DocUrl":          result.Metadata.Url,
+				"DocEntities":     result.Metadata.Entities,
+				"EntityMentioned": query,
+				"Connections":     conns,
 			})
+			fmt.Println("line 568")
+			fmt.Println(MhraFlag)
 			if err != nil {
 				logger.Error("error creating flag", "error", err)
 				continue
@@ -745,13 +746,15 @@ func (flagger *AuthorNewsArticlesFlagger) Flag(logger *slog.Logger, authorName s
 	for _, result := range flaggedArticles {
 		MhraFlag, err := api.CreateFlag(api.MiscHighRiskAssociationType,
 			map[string]interface{}{
-				"message":   result.msg,
-				"doc_title": result.article.Title,
-				"doc_url":   result.article.Link,
+				"Message":  result.msg,
+				"DocTitle": result.article.Title,
+				"DocUrl":   result.article.Link,
 				// TODO: add date support in this flag and use article.Date
-				"entity_mentioned": authorName,
+				"EntityMentioned": authorName,
 			},
 		)
+		fmt.Println("line 758")
+		fmt.Println(MhraFlag)
 		if err != nil {
 			logger.Error("error creating flag", "error", err)
 			continue
