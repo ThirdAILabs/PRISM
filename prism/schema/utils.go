@@ -32,6 +32,10 @@ func SetupTestDB(t *testing.T) *gorm.DB {
 		}
 	}
 
+	if err := db.Migrator().DropTable("university_authors"); err != nil {
+		t.Fatalf("error dropping table university_authors: %v", err)
+	}
+
 	if err := db.AutoMigrate(tables...); err != nil {
 		t.Fatalf("error migrating tables: %v", err)
 	}
