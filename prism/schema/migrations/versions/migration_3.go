@@ -1,6 +1,7 @@
 package versions
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"prism/prism/api"
@@ -8,6 +9,102 @@ import (
 
 	"gorm.io/gorm"
 )
+
+func UpdateHash(ftype string, flag api.Flag) (api.Flag, error) {
+	switch ftype {
+	case api.TalentContractType:
+		temp, ok := flag.(*api.TalentContractFlag)
+		if !ok {
+			return nil, fmt.Errorf("invalid flag type for %s", ftype)
+		}
+		hashBytes := temp.CalculateHash()
+		temp.Hash = hex.EncodeToString(hashBytes[:])
+		return temp, nil
+
+	case api.AssociationsWithDeniedEntityType:
+		temp, ok := flag.(*api.AssociationWithDeniedEntityFlag)
+		if !ok {
+			return nil, fmt.Errorf("invalid flag type for %s", ftype)
+		}
+		hashBytes := temp.CalculateHash()
+		temp.Hash = hex.EncodeToString(hashBytes[:])
+		return temp, nil
+
+	case api.HighRiskFunderType:
+		temp, ok := flag.(*api.HighRiskFunderFlag)
+		if !ok {
+			return nil, fmt.Errorf("invalid flag type for %s", ftype)
+		}
+		hashBytes := temp.CalculateHash()
+		temp.Hash = hex.EncodeToString(hashBytes[:])
+		return temp, nil
+
+	case api.AuthorAffiliationType:
+		temp, ok := flag.(*api.AuthorAffiliationFlag)
+		if !ok {
+			return nil, fmt.Errorf("invalid flag type for %s", ftype)
+		}
+		hashBytes := temp.CalculateHash()
+		temp.Hash = hex.EncodeToString(hashBytes[:])
+		return temp, nil
+
+	case api.PotentialAuthorAffiliationType:
+		temp, ok := flag.(*api.PotentialAuthorAffiliationFlag)
+		if !ok {
+			return nil, fmt.Errorf("invalid flag type for %s", ftype)
+		}
+		hashBytes := temp.CalculateHash()
+		temp.Hash = hex.EncodeToString(hashBytes[:])
+		return temp, nil
+
+	case api.MiscHighRiskAssociationType:
+		temp, ok := flag.(*api.MiscHighRiskAssociationFlag)
+		if !ok {
+			return nil, fmt.Errorf("invalid flag type for %s", ftype)
+		}
+		hashBytes := temp.CalculateHash()
+		temp.Hash = hex.EncodeToString(hashBytes[:])
+		return temp, nil
+
+	case api.CoauthorAffiliationType:
+		temp, ok := flag.(*api.CoauthorAffiliationFlag)
+		if !ok {
+			return nil, fmt.Errorf("invalid flag type for %s", ftype)
+		}
+		hashBytes := temp.CalculateHash()
+		temp.Hash = hex.EncodeToString(hashBytes[:])
+		return temp, nil
+
+	case api.MultipleAffiliationType:
+		temp, ok := flag.(*api.MultipleAffiliationFlag)
+		if !ok {
+			return nil, fmt.Errorf("invalid flag type for %s", ftype)
+		}
+		hashBytes := temp.CalculateHash()
+		temp.Hash = hex.EncodeToString(hashBytes[:])
+		return temp, nil
+
+	case api.HighRiskPublisherType:
+		temp, ok := flag.(*api.HighRiskPublisherFlag)
+		if !ok {
+			return nil, fmt.Errorf("invalid flag type for %s", ftype)
+		}
+		hashBytes := temp.CalculateHash()
+		temp.Hash = hex.EncodeToString(hashBytes[:])
+		return temp, nil
+
+	case api.HighRiskCoauthorType:
+		temp, ok := flag.(*api.HighRiskCoauthorFlag)
+		if !ok {
+			return nil, fmt.Errorf("invalid flag type for %s", ftype)
+		}
+		hashBytes := temp.CalculateHash()
+		temp.Hash = hex.EncodeToString(hashBytes[:])
+		return temp, nil
+	}
+
+	return nil, fmt.Errorf("unknown flag type %s", ftype)
+}
 
 func Migration3(db *gorm.DB) error {
 	err := db.AutoMigrate(&schema.FlagFeedback{}, &schema.AuthorFlag{})
@@ -27,9 +124,11 @@ func Migration3(db *gorm.DB) error {
 			return fmt.Errorf("failed to parse flag: %w", err)
 		}
 
-		existingFlag.UpdateFlagHash()
-
-		updatedData, err := json.Marshal(existingFlag)
+		updatedFlag, err := UpdateHash(flag.FlagType, existingFlag)
+		if err != nil {
+			return fmt.Errorf("failed to update flag hash: %w", err)
+		}
+		updatedData, err := json.Marshal(updatedFlag)
 		if err != nil {
 			return fmt.Errorf("failed to serialize updated flag data for flag hash %s: %w", flag.FlagHash, err)
 		}

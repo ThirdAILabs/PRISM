@@ -8,6 +8,8 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 func capitalizeFirstLetter(s string) string {
@@ -38,8 +40,6 @@ type Flag interface {
 	// given work.
 	CalculateHash() [sha256.Size]byte
 
-	UpdateFlagHash()
-
 	GetEntities() []string
 
 	MarkDisclosed()
@@ -54,6 +54,15 @@ type Flag interface {
 	GetDetailsFieldsForReport(useDisclosure bool) []KeyValueURL
 
 	IsDisclosed() bool
+}
+
+type FlagFeedback struct {
+	IncorrectAuthor       bool
+	AuthorNotFound        bool
+	EntityNotFound        bool
+	EntityNotEoc          bool
+	IncorrectDocUrl       KeyValue // DocTitle, DocUrl
+	IncorrectAffiliations []string
 }
 
 const (
@@ -145,6 +154,99 @@ func ParseFlag(ftype string, data []byte) (Flag, error) {
 	default:
 		return nil, fmt.Errorf("invalid flag type '%s'", ftype)
 	}
+}
+
+func CreateFlag(ftype string, params map[string]interface{}) (Flag, error) {
+	switch ftype {
+	case TalentContractType:
+		var flag TalentContractFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+
+	case AssociationsWithDeniedEntityType:
+		var flag AssociationWithDeniedEntityFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+
+	case HighRiskFunderType:
+		var flag HighRiskFunderFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+
+	case AuthorAffiliationType:
+		var flag AuthorAffiliationFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+
+	case PotentialAuthorAffiliationType:
+		var flag PotentialAuthorAffiliationFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+
+	case MiscHighRiskAssociationType:
+		var flag MiscHighRiskAssociationFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+
+	case CoauthorAffiliationType:
+		var flag CoauthorAffiliationFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+
+	case MultipleAffiliationType:
+		var flag MultipleAffiliationFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+	case HighRiskPublisherType:
+		var flag HighRiskPublisherFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+	case HighRiskCoauthorType:
+		var flag HighRiskCoauthorFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+	}
+	return nil, fmt.Errorf("invalid flag type '%s'", ftype)
 }
 
 type DisclosableFlag struct {

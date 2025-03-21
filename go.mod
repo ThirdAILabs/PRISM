@@ -44,6 +44,7 @@ require (
 	github.com/ebitengine/purego v0.8.0 // indirect
 	github.com/jupiterrider/ffi v0.2.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
+	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
