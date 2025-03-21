@@ -28,7 +28,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd data/scrapper_job
           python -m pip install --upgrade pip
           pip install -r data/scrapper_job/requirements.txt
 
