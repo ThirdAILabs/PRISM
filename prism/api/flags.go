@@ -61,7 +61,7 @@ type FlagFeedback struct {
 	AuthorNotFound        bool
 	EntityNotFound        bool
 	EntityNotEoc          bool
-	IncorrectDocUrl       KeyValue // DocTitle, DocUrl
+	IncorrectDoc          KeyValue // DocTitle, DocUrl
 	IncorrectAffiliations []string
 }
 
@@ -294,11 +294,6 @@ func (flag *TalentContractFlag) CalculateHash() [sha256.Size]byte {
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
-func (flag *TalentContractFlag) UpdateFlagHash() {
-	hash := flag.CalculateHash()
-	flag.Hash = hex.EncodeToString(hash[:])
-}
-
 func (flag *TalentContractFlag) GetEntities() []string {
 	entities := make([]string, 0, len(flag.Entities))
 	for _, ack := range flag.Entities {
@@ -355,11 +350,6 @@ func (flag *AssociationWithDeniedEntityFlag) Type() string {
 func (flag *AssociationWithDeniedEntityFlag) CalculateHash() [sha256.Size]byte {
 	// Assumes 1 flag per work
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
-}
-
-func (flag *AssociationWithDeniedEntityFlag) UpdateFlagHash() {
-	hash := flag.CalculateHash()
-	flag.Hash = hex.EncodeToString(hash[:])
 }
 
 func (flag *AssociationWithDeniedEntityFlag) GetEntities() []string {
@@ -421,11 +411,6 @@ func (flag *HighRiskFunderFlag) CalculateHash() [sha256.Size]byte {
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
-func (flag *HighRiskFunderFlag) UpdateFlagHash() {
-	hash := flag.CalculateHash()
-	flag.Hash = hex.EncodeToString(hash[:])
-}
-
 func (flag *HighRiskFunderFlag) GetEntities() []string {
 	return flag.Funders
 }
@@ -479,11 +464,6 @@ func (flag *AuthorAffiliationFlag) CalculateHash() [sha256.Size]byte {
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
-func (flag *AuthorAffiliationFlag) UpdateFlagHash() {
-	hash := flag.CalculateHash()
-	flag.Hash = hex.EncodeToString(hash[:])
-}
-
 func (flag *AuthorAffiliationFlag) GetEntities() []string {
 	return flag.Affiliations
 }
@@ -534,11 +514,6 @@ func (flag *PotentialAuthorAffiliationFlag) Type() string {
 
 func (flag *PotentialAuthorAffiliationFlag) CalculateHash() [sha256.Size]byte {
 	return sha256.Sum256([]byte(flag.Type() + flag.University + flag.UniversityUrl))
-}
-
-func (flag *PotentialAuthorAffiliationFlag) UpdateFlagHash() {
-	hash := flag.CalculateHash()
-	flag.Hash = hex.EncodeToString(hash[:])
 }
 
 func (flag *PotentialAuthorAffiliationFlag) GetEntities() []string {
@@ -601,11 +576,6 @@ func (flag *MiscHighRiskAssociationFlag) CalculateHash() [sha256.Size]byte {
 		data += conn.DocTitle
 	}
 	return sha256.Sum256([]byte(data))
-}
-
-func (flag *MiscHighRiskAssociationFlag) UpdateFlagHash() {
-	hash := flag.CalculateHash()
-	flag.Hash = hex.EncodeToString(hash[:])
 }
 
 func (flag *MiscHighRiskAssociationFlag) GetEntities() []string {
@@ -687,11 +657,6 @@ func (flag *CoauthorAffiliationFlag) CalculateHash() [sha256.Size]byte {
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
-func (flag *CoauthorAffiliationFlag) UpdateFlagHash() {
-	hash := flag.CalculateHash()
-	flag.Hash = hex.EncodeToString(hash[:])
-}
-
 func (flag *CoauthorAffiliationFlag) GetEntities() []string {
 	return slices.Concat(flag.Coauthors, flag.Affiliations)
 }
@@ -750,11 +715,6 @@ func (flag *MultipleAffiliationFlag) CalculateHash() [sha256.Size]byte {
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
-func (flag *MultipleAffiliationFlag) UpdateFlagHash() {
-	hash := flag.CalculateHash()
-	flag.Hash = hex.EncodeToString(hash[:])
-}
-
 func (flag *MultipleAffiliationFlag) GetEntities() []string {
 	return flag.Affiliations
 }
@@ -808,11 +768,6 @@ func (flag *HighRiskPublisherFlag) CalculateHash() [sha256.Size]byte {
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
-func (flag *HighRiskPublisherFlag) UpdateFlagHash() {
-	hash := flag.CalculateHash()
-	flag.Hash = hex.EncodeToString(hash[:])
-}
-
 func (flag *HighRiskPublisherFlag) GetEntities() []string {
 	return flag.Publishers
 }
@@ -864,11 +819,6 @@ func (flag *HighRiskCoauthorFlag) Type() string {
 func (flag *HighRiskCoauthorFlag) CalculateHash() [sha256.Size]byte {
 	// Assumes 1 flag per work
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
-}
-
-func (flag *HighRiskCoauthorFlag) UpdateFlagHash() {
-	hash := flag.CalculateHash()
-	flag.Hash = hex.EncodeToString(hash[:])
 }
 
 func (flag *HighRiskCoauthorFlag) GetEntities() []string {

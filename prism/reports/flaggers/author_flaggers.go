@@ -431,16 +431,15 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 				"doc_entities":     result.Metadata.Entities,
 				"entity_mentioned": author.author,
 			}
-			var MhraFlag api.Flag
-			var err error
-			if primaryMatcher.matchesEntity(author.author) {
-				MhraFlag, err = api.CreateFlag(api.MiscHighRiskAssociationType, params)
 
-			} else {
+			if !primaryMatcher.matchesEntity(author.author) {
 				params["connections"] = []api.Connection{{DocTitle: author.author + " (frequent coauthor)", DocUrl: ""}}
 				params["frequent_coauthor"] = &author.author
-				MhraFlag, err = api.CreateFlag(api.MiscHighRiskAssociationType, params)
+
 			}
+
+			MhraFlag, err := api.CreateFlag(api.MiscHighRiskAssociationType, params)
+
 			if err != nil {
 				slog.Error("error creating flag", "error", err)
 				continue
