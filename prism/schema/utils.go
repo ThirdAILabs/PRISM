@@ -21,7 +21,20 @@ func SetupTestDB(t *testing.T) *gorm.DB {
 		t.Fatal("TEST_DB_URI env not set")
 	}
 
-	db, err := gorm.Open(postgres.Open(UriToDsn(testUri)), &gorm.Config{})
+	rootDB, err := gorm.Open(postgres.Open(UriToDsn(testUri)), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("error opening database connection: %v", err)
+	}
+
+	if err := rootDB.Exec("DROP DATABASE IF EXISTS prism_test").Error; err != nil {
+		t.Fatalf("error dropping database: %v", err)
+	}
+
+	if err := rootDB.Exec("CREATE DATABASE prism_test").Error; err != nil {
+		t.Fatalf("error creating database: %v", err)
+	}
+
+	db, err := gorm.Open(postgres.Open(UriToDsn(testUri+"/prism_test")), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("error opening database connection: %v", err)
 	}
@@ -50,5 +63,10 @@ func UriToDsn(uri string) string {
 	}
 	pwd, _ := parts.User.Password()
 	dbname := strings.TrimPrefix(parts.Path, "/")
-	return fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v", parts.Hostname(), parts.User.Username(), pwd, dbname, parts.Port())
+
+	if dbname != "" {
+		dbname = "dbname=" + dbname
+	}
+
+	return fmt.Sprintf("host=%v user=%v password=%v %v port=%v", parts.Hostname(), parts.User.Username(), pwd, dbname, parts.Port())
 }
