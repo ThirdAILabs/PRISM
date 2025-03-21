@@ -442,6 +442,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 
 			if err != nil {
 				slog.Error("error creating flag", "error", err)
+				seen[result.Metadata.Url] = false
 				continue
 			}
 			temporaryFlags = append(temporaryFlags, MhraFlag)
