@@ -13,6 +13,17 @@ import (
 	"gorm.io/gorm"
 )
 
+func closeGormDB(t *testing.T, db *gorm.DB) {
+	sqlDB, err := db.DB()
+	if err != nil {
+		t.Fatalf("error getting sql.DB: %v", err)
+	}
+
+	if err := sqlDB.Close(); err != nil {
+		t.Fatalf("error closing database connection: %v", err)
+	}
+}
+
 func SetupTestDB(t *testing.T) *gorm.DB {
 	tables := []any{&AuthorReport{}, &AuthorFlag{}, &UserAuthorReport{},
 		&UniversityReport{}, &UserUniversityReport{}}
@@ -37,12 +48,17 @@ func SetupTestDB(t *testing.T) *gorm.DB {
 		if err := rootDB.Exec("DROP DATABASE IF EXISTS " + dbName).Error; err != nil {
 			t.Fatalf("error dropping database: %v", err)
 		}
+		closeGormDB(t, rootDB)
 	})
 
 	db, err := gorm.Open(postgres.Open(UriToDsn(testUri+"/"+dbName)), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("error opening database connection: %v", err)
 	}
+
+	t.Cleanup(func() {
+		closeGormDB(t, db)
+	})
 
 	for _, table := range tables {
 		if err := db.Migrator().DropTable(table); err != nil {
