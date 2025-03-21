@@ -21,6 +21,17 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "pratik@thirdai.com"
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          cd data/scrapper_job
+          python -m pip install --upgrade pip
+          pip install -r data/scrapper_job/requirements.txt
+
       - name: Run data update script
         run: |
           cd data/scrapper_job
