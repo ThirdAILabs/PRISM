@@ -19,9 +19,10 @@ import (
 )
 
 const (
-	StaleReportThreshold    time.Duration = time.Hour * 24 * 14
-	AuthorReportTimeout     time.Duration = time.Minute * 20
-	UniversityReportTimeout time.Duration = time.Minute * 45
+	AuthorReportTimeout        time.Duration = time.Minute * 20
+	UniversityReportTimeout    time.Duration = time.Minute * 45
+	UniversityReportUpdateFreq time.Duration = time.Hour * 24 * 30
+	MinAuthorReportUpdateFreq  int           = 3600 * 24 * 7 // 1 week
 )
 
 var (
@@ -36,19 +37,19 @@ var (
 )
 
 type ReportManager struct {
-	db                      *gorm.DB
-	staleReportThreshold    time.Duration
-	authorReportTimeout     time.Duration
-	universityReportTimeout time.Duration
+	db                         *gorm.DB
+	authorReportTimeout        time.Duration
+	universityReportTimeout    time.Duration
+	universityReportUpdateFreq time.Duration
 }
 
 func NewManager(db *gorm.DB) *ReportManager {
-	return &ReportManager{db: db, staleReportThreshold: StaleReportThreshold, authorReportTimeout: AuthorReportTimeout, universityReportTimeout: UniversityReportTimeout}
-}
-
-func (r *ReportManager) SetStaleReportThreshold(threshold time.Duration) *ReportManager {
-	r.staleReportThreshold = threshold
-	return r
+	return &ReportManager{
+		db:                         db,
+		authorReportTimeout:        AuthorReportTimeout,
+		universityReportTimeout:    UniversityReportTimeout,
+		universityReportUpdateFreq: UniversityReportUpdateFreq,
+	}
 }
 
 func (r *ReportManager) SetAuthorReportTimeout(timeout time.Duration) *ReportManager {
@@ -58,6 +59,11 @@ func (r *ReportManager) SetAuthorReportTimeout(timeout time.Duration) *ReportMan
 
 func (r *ReportManager) SetUniversityReportTimeout(timeout time.Duration) *ReportManager {
 	r.universityReportTimeout = timeout
+	return r
+}
+
+func (r *ReportManager) SetUniversityReportUpdateFreq(freq time.Duration) *ReportManager {
+	r.universityReportUpdateFreq = freq
 	return r
 }
 
@@ -79,22 +85,6 @@ func (r *ReportManager) ListAuthorReports(userId uuid.UUID) ([]api.Report, error
 	}
 
 	return results, nil
-}
-
-// This function is only called from GetAuthorReport or CreateAuthorReport. The university reports
-// use a different methods that can check all the author reports associated with the university report
-// at once.
-func (r *ReportManager) queueAuthorReportUpdateIfNeeded(txn *gorm.DB, report *schema.AuthorReport) error {
-	if time.Now().UTC().Sub(report.LastUpdatedAt) > r.staleReportThreshold &&
-		report.Status != schema.ReportInProgress && report.Status != schema.ReportQueued {
-		updates := map[string]any{"status": schema.ReportQueued, "status_updated_at": time.Now().UTC(), "for_university_report": false}
-		if err := txn.Model(&report).Updates(updates).Error; err != nil {
-			slog.Error("error queueing stale author report for update", "author_report_id", report.Id, "error", err)
-			return ErrReportAccessFailed
-		}
-		report.Status = schema.ReportQueued
-	}
-	return nil
 }
 
 func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string, forUniversityReport bool) (schema.AuthorReport, error) {
@@ -140,7 +130,7 @@ func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string, 
 	return report, nil
 }
 
-func (r *ReportManager) CreateAuthorReport(userId uuid.UUID, authorId, authorName, source string) (uuid.UUID, error) {
+func (r *ReportManager) CreateAuthorReport(userId uuid.UUID, authorId, authorName, source string, updateFreq int) (uuid.UUID, error) {
 	var userReport schema.UserAuthorReport
 	var userReportId uuid.UUID
 	now := time.Now().UTC()
@@ -148,10 +138,6 @@ func (r *ReportManager) CreateAuthorReport(userId uuid.UUID, authorId, authorNam
 	err := r.db.Transaction(func(txn *gorm.DB) error {
 		report, err := createOrGetAuthorReport(txn, authorId, authorName, source, false /*forUniversityReport*/)
 		if err != nil {
-			return err
-		}
-
-		if err := r.queueAuthorReportUpdateIfNeeded(txn, &report); err != nil {
 			return err
 		}
 
@@ -164,10 +150,11 @@ func (r *ReportManager) CreateAuthorReport(userId uuid.UUID, authorId, authorNam
 		if result.RowsAffected == 0 {
 			userReportId = uuid.New()
 			userReport = schema.UserAuthorReport{
-				Id:             userReportId,
-				UserId:         userId,
-				LastAccessedAt: now,
-				ReportId:       report.Id,
+				Id:              userReportId,
+				UserId:          userId,
+				LastAccessedAt:  now,
+				UpdateFrequency: updateFreq,
+				ReportId:        report.Id,
 			}
 			if err := txn.Create(&userReport).Error; err != nil {
 				slog.Error("error creating new user author report", "error", err)
@@ -192,36 +179,54 @@ func (r *ReportManager) CreateAuthorReport(userId uuid.UUID, authorId, authorNam
 	return userReportId, nil
 }
 
+func (r *ReportManager) CheckForStaleAuthorReports() error {
+	// Check for author reports that are stale relative to the update frequency specified in a user author report.
+	if err := r.db.Model(&schema.AuthorReport{}).
+		Where("status != ? AND status != ? AND for_university_report = ?", schema.ReportInProgress, schema.ReportQueued, false).
+		Where("EXISTS (?)", r.db.Model(&schema.UserAuthorReport{}).
+			Where("user_author_reports.report_id = author_reports.id").
+			Where("author_reports.last_updated_at < NOW() - (user_author_reports.update_frequency || ' seconds')::interval"),
+		).
+		Updates(map[string]any{"status": schema.ReportQueued, "status_updated_at": time.Now().UTC()}).Error; err != nil {
+		slog.Error("error checking for stale author reports", "error", err)
+		return ErrReportAccessFailed
+	}
+
+	// Check for author reports that are stale relative to a university report.
+	if err := r.db.Model(&schema.AuthorReport{}).
+		Where("status != ? AND status != ? AND for_university_report = ?", schema.ReportInProgress, schema.ReportQueued, true).
+		Where("last_updated_at < ?", time.Now().UTC().Add(-r.universityReportUpdateFreq)).
+		Updates(map[string]any{"status": schema.ReportQueued, "status_updated_at": time.Now().UTC()}).Error; err != nil {
+		slog.Error("error checking for stale author reports for university reports", "error", err)
+		return ErrReportAccessFailed
+	}
+
+	// Check for author reports that have been in progress for too long.
+	if err := r.db.Model(&schema.AuthorReport{}).
+		Where("status = ?", schema.ReportInProgress).
+		Where("status_updated_at < ?", time.Now().UTC().Add(-r.authorReportTimeout)).
+		Updates(map[string]any{"status": schema.ReportQueued, "status_updated_at": time.Now().UTC()}).Error; err != nil {
+		slog.Error("error checking for long running author reports", "error", err)
+		return ErrReportAccessFailed
+	}
+
+	return nil
+}
+
 func (r *ReportManager) GetAuthorReport(userId, reportId uuid.UUID) (api.Report, error) {
 	var report schema.UserAuthorReport
 
-	if err := r.db.Transaction(func(txn *gorm.DB) error {
-		if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
-			Preload("Report").Preload("Report.Flags").
-			First(&report, "id = ?", reportId).Error; err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return ErrReportNotFound
-			}
-			slog.Error("error getting user author report", "author_report_id", reportId, "error", err)
-			return ErrReportAccessFailed
+	if err := r.db.Preload("Report").Preload("Report.Flags").
+		First(&report, "id = ?", reportId).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return api.Report{}, ErrReportNotFound
 		}
+		slog.Error("error getting user author report", "author_report_id", reportId, "error", err)
+		return api.Report{}, ErrReportAccessFailed
+	}
 
-		if report.UserId != userId {
-			return ErrUserCannotAccessReport
-		}
-
-		if err := r.queueAuthorReportUpdateIfNeeded(txn, report.Report); err != nil {
-			return err
-		}
-
-		if err := txn.Model(&report).Update("last_accessed_at", time.Now().UTC()).Error; err != nil {
-			slog.Error("error updating user author report last_accessed_at", "error", err)
-			return ErrReportAccessFailed
-		}
-
-		return nil
-	}); err != nil {
-		return api.Report{}, err
+	if report.UserId != userId {
+		return api.Report{}, ErrUserCannotAccessReport
 	}
 
 	return convertReport(report)
@@ -250,14 +255,12 @@ type ReportUpdateTask struct {
 }
 
 func (r *ReportManager) findNextAuthorReport(txn *gorm.DB) (*schema.AuthorReport, error) {
-	retryTimestamp := time.Now().UTC().Add(-r.authorReportTimeout)
-
 	var report schema.AuthorReport
 	for _, for_university_report := range [2]bool{false, true} {
 		result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
 			Limit(1).Order("status_updated_at ASC").
 			Where("for_university_report = ?", for_university_report).
-			Where("status = ? OR (status = ? AND status_updated_at < ?)", schema.ReportQueued, schema.ReportInProgress, retryTimestamp).
+			Where("status = ?", schema.ReportQueued).
 			Find(&report)
 		if result.Error != nil {
 			slog.Error("error getting next author report from queue", "error", result.Error)
@@ -418,19 +421,6 @@ func (r *ReportManager) ListUniversityReports(userId uuid.UUID) ([]api.Universit
 	return results, nil
 }
 
-func (r *ReportManager) queueUniversityReportUpdateIfNeeded(txn *gorm.DB, report *schema.UniversityReport) error {
-	if time.Now().UTC().Sub(report.LastUpdatedAt) > r.staleReportThreshold &&
-		report.Status != schema.ReportInProgress && report.Status != schema.ReportQueued {
-		updates := map[string]any{"status": schema.ReportQueued, "status_updated_at": time.Now().UTC()}
-		if err := txn.Model(&report).Updates(updates).Error; err != nil {
-			slog.Error("error queueing stale university report for update", "university_report_id", report.Id, "error", err)
-			return ErrReportAccessFailed
-		}
-		report.Status = schema.ReportQueued
-	}
-	return nil
-}
-
 func (r *ReportManager) CreateUniversityReport(userId uuid.UUID, universityId, universityName string) (uuid.UUID, error) {
 	var userReport schema.UserUniversityReport
 	var userReportId uuid.UUID
@@ -464,10 +454,6 @@ func (r *ReportManager) CreateUniversityReport(userId uuid.UUID, universityId, u
 		}
 
 		monitoring.UniAuthorReportsCreated.WithLabelValues("TODO ORG").Inc()
-
-		if err := r.queueUniversityReportUpdateIfNeeded(txn, &report); err != nil {
-			return err
-		}
 
 		result = txn.Where("user_id = ? AND report_id = ?", userId, report.Id).
 			Limit(1).Find(&userReport)
@@ -507,6 +493,31 @@ func (r *ReportManager) CreateUniversityReport(userId uuid.UUID, universityId, u
 	return userReportId, nil
 }
 
+func (r *ReportManager) CheckForStaleUniversityReports() error {
+	// Check for author reports that are stale relative to the update frequency specified in a user author report.
+	if err := r.db.Model(&schema.UniversityReport{}).
+		Where("status != ? AND status != ?", schema.ReportInProgress, schema.ReportQueued, false).
+		Where("EXISTS (?)", r.db.Model(&schema.UserUniversityReport{}).
+			Where("user_university_reports.report_id = university_reports.id").
+			Where("author_reports.last_updated_at < NOW() - (user_university_reports.update_frequency || ' seconds')::interval"),
+		).
+		Updates(map[string]any{"status": schema.ReportQueued, "status_updated_at": time.Now().UTC()}).Error; err != nil {
+		slog.Error("error checking for stale university reports", "error", err)
+		return ErrReportAccessFailed
+	}
+
+	// Check for author reports that have been in progress for too long.
+	if err := r.db.Model(&schema.UniversityReport{}).
+		Where("status = ?", schema.ReportInProgress).
+		Where("status_updated_at < ?", time.Now().UTC().Add(-r.universityReportTimeout)).
+		Updates(map[string]any{"status": schema.ReportQueued, "status_updated_at": time.Now().UTC()}).Error; err != nil {
+		slog.Error("error checking for long running university reports", "error", err)
+		return ErrReportAccessFailed
+	}
+
+	return nil
+}
+
 const (
 	// The last N years of flags that will be added to the university report.
 	yearsInUniversityReport = 5
@@ -532,9 +543,7 @@ func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.Uni
 	var flags []universityAuthorFlags
 
 	if err := r.db.Transaction(func(txn *gorm.DB) error {
-		if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
-			Preload("Report").
-			First(&report, "id = ?", reportId).Error; err != nil {
+		if err := txn.Preload("Report").First(&report, "id = ?", reportId).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return ErrReportNotFound
 			}
@@ -544,16 +553,6 @@ func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.Uni
 
 		if report.UserId != userId {
 			return ErrUserCannotAccessReport
-		}
-
-		if err := r.queueUniversityReportUpdateIfNeeded(txn, report.Report); err != nil {
-			return err
-		}
-
-		report.LastAccessedAt = time.Now().UTC()
-		if err := txn.Save(&report).Error; err != nil {
-			slog.Error("error updating user university report last_accessed_at", "error", err)
-			return ErrReportAccessFailed
 		}
 
 		if err := txn.Model(&schema.AuthorReport{}).
@@ -682,24 +681,6 @@ func (r *ReportManager) GetNextUniversityReport() (*UniversityReportUpdateTask, 
 	return nil, nil
 }
 
-func (r *ReportManager) queueAuthorReportUpdatesForUniversityReport(txn *gorm.DB, universityReportId uuid.UUID) error {
-	staleCutoff := time.Now().UTC().Add(-r.staleReportThreshold)
-
-	result := txn.Model(&schema.AuthorReport{}).
-		Where("EXISTS (?)", txn.Table("university_authors").Where("university_authors.author_report_id = author_reports.id AND university_authors.university_report_id = ?", universityReportId)).
-		Where("author_reports.last_updated_at < ?", staleCutoff).
-		Where("author_reports.status IN ?", []string{schema.ReportFailed, schema.ReportCompleted}).
-		Updates(map[string]any{"status": schema.ReportQueued, "status_updated_at": time.Now().UTC(), "for_university_report": true})
-
-	if result.Error != nil {
-		slog.Error("error queueing stale author reports for university report", "university_report_id", universityReportId, "error", result.Error)
-		return ErrReportAccessFailed
-	}
-
-	slog.Info("queued updates for author reports for university report", "n_author_reports", result.RowsAffected, "university_report_id", universityReportId)
-	return nil
-}
-
 type UniversityAuthorReport struct {
 	AuthorId   string
 	AuthorName string
@@ -738,11 +719,6 @@ func (r *ReportManager) UpdateUniversityReport(id uuid.UUID, status string, upda
 			if err := txn.Model(&schema.UniversityReport{Id: id}).Association("Authors").Replace(authorReports); err != nil {
 				slog.Error("error replacing author univerisity associations", "university_report_id", id, "error", err)
 				return ErrReportAccessFailed
-			}
-
-			if err := r.queueAuthorReportUpdatesForUniversityReport(txn, id); err != nil {
-				slog.Error("error queueing author report updates for university report", "university_report_id", id, "error", err)
-				return err
 			}
 		}
 

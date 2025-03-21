@@ -59,6 +59,7 @@ type CreateAuthorReportRequest struct {
 	AuthorId   string
 	AuthorName string
 	Source     string
+	UpdateFreq *int
 }
 
 type CreateUniversityReportRequest struct {

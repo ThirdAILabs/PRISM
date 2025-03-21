@@ -14,7 +14,7 @@ import (
 func setup(t *testing.T) *reports.ReportManager {
 	db := schema.SetupTestDB(t)
 
-	return reports.NewManager(db).SetStaleReportThreshold(time.Second)
+	return reports.NewManager(db).SetUniversityReportUpdateFreq(time.Second)
 }
 
 func checkNextAuthorReport(t *testing.T, next *reports.ReportUpdateTask, authorId, authorName, source string, startDate, endDate time.Time) {
@@ -84,12 +84,12 @@ func TestCreateGetAuthorReports(t *testing.T) {
 
 	checkNoNextAuthorReport(t, manager)
 
-	reportId1, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource)
+	reportId1, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource, 10 /*update freq (seconds)*/)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	reportId2, err := manager.CreateAuthorReport(user2, "2", "author2", api.GoogleScholarSource)
+	reportId2, err := manager.CreateAuthorReport(user2, "2", "author2", api.GoogleScholarSource, 1 /*update freq seconds*/)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -135,13 +135,8 @@ func TestCreateGetAuthorReports(t *testing.T) {
 	// Both reports should be removed from queue now
 	checkNoNextAuthorReport(t, manager)
 
-	// Check that report access does not queue report update since we are under threshold
-	checkAuthorReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "complete", 1)
-	checkAuthorReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "complete", 1)
-	checkNoNextAuthorReport(t, manager)
-
 	// Check that reports are reused
-	reportId3, err := manager.CreateAuthorReport(user1, "2", "author2", api.GoogleScholarSource)
+	reportId3, err := manager.CreateAuthorReport(user1, "2", "author2", api.GoogleScholarSource, 1 /*update freq seconds*/)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -153,10 +148,15 @@ func TestCreateGetAuthorReports(t *testing.T) {
 	// This is to ensure reports are stale
 	time.Sleep(time.Second)
 
-	// Accessing a stale report should add it back to the queue, it should still have 1 flag though
+	// Reports should be stale now
+	if err := manager.CheckForStaleAuthorReports(); err != nil {
+		t.Fatal(err)
+	}
+
+	// The stale report check should add the author2 report to the queue.
+	checkAuthorReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "complete", 1)
 	checkAuthorReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "queued", 1)
-	// Perform multiple accesses to ensure it is only added once
-	checkAuthorReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "queued", 1)
+	checkAuthorReport(t, manager, user1, reportId3, "2", "author2", api.GoogleScholarSource, "queued", 1)
 
 	next3, err := manager.GetNextAuthorReport()
 	if err != nil {
@@ -169,50 +169,14 @@ func TestCreateGetAuthorReports(t *testing.T) {
 	// Check report was only queued once
 	checkNoNextAuthorReport(t, manager)
 
-	// Verify that accessing report while it's in progress doesn't queue it again
-	checkAuthorReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "in-progress", 1)
-	checkNoNextAuthorReport(t, manager)
-
 	if err := manager.UpdateAuthorReport(next3.Id, "complete", next3.EndDate, dummyReportUpdate()); err != nil {
 		t.Fatal(err)
 	}
 
 	// Check that report is updated
+	checkAuthorReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "complete", 1)
 	checkAuthorReport(t, manager, user2, reportId2, "2", "author2", api.GoogleScholarSource, "complete", 2)
-
-	// Create a new report from an old report and ensure that it is queued
-	reportId4, err := manager.CreateAuthorReport(user2, "1", "author1", api.OpenAlexSource)
-	if err != nil {
-		t.Fatal(err)
-	}
-	checkAuthorReport(t, manager, user2, reportId4, "1", "author1", api.OpenAlexSource, "queued", 1)
-
-	// Check that the original report is being updated as well
-	checkAuthorReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "queued", 1)
-
-	next4, err := manager.GetNextAuthorReport()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if next4.ForUniversityReport {
-		t.Fatal("should be no university report")
-	}
-	checkNextAuthorReport(t, next4, "1", "author1", api.OpenAlexSource, report1End, time.Now())
-	checkNoNextAuthorReport(t, manager)
-
-	// Verify that the report is in progress
-	checkAuthorReport(t, manager, user2, reportId4, "1", "author1", api.OpenAlexSource, "in-progress", 1)
-	// Check that the original report is being updated as well
-	checkAuthorReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "in-progress", 1)
-
-	if err := manager.UpdateAuthorReport(next4.Id, "complete", next4.EndDate, dummyReportUpdate()); err != nil {
-		t.Fatal(err)
-	}
-
-	// Verify that the report is complete
-	checkAuthorReport(t, manager, user2, reportId4, "1", "author1", api.OpenAlexSource, "complete", 2)
-	// Check that the original report is being updated as well
-	checkAuthorReport(t, manager, user1, reportId1, "1", "author1", api.OpenAlexSource, "complete", 2)
+	checkAuthorReport(t, manager, user1, reportId3, "2", "author2", api.GoogleScholarSource, "complete", 2)
 }
 
 func TestAuthorReportAccessErrors(t *testing.T) {
@@ -220,7 +184,7 @@ func TestAuthorReportAccessErrors(t *testing.T) {
 
 	user1, user2 := uuid.New(), uuid.New()
 
-	reportId, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource)
+	reportId, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource, 1 /*update freq seconds*/)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -243,7 +207,7 @@ func TestListAuthorReports(t *testing.T) {
 
 	user1, user2 := uuid.New(), uuid.New()
 
-	report1, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource)
+	report1, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource, 1 /*update freq seconds*/)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -256,12 +220,12 @@ func TestListAuthorReports(t *testing.T) {
 		t.Fatal("should be no reports for user2")
 	}
 
-	report2, err := manager.CreateAuthorReport(user2, "2", "author2", api.OpenAlexSource)
+	report2, err := manager.CreateAuthorReport(user2, "2", "author2", api.OpenAlexSource, 1 /*update freq seconds*/)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	report3, err := manager.CreateAuthorReport(user1, "3", "author3", api.GoogleScholarSource)
+	report3, err := manager.CreateAuthorReport(user1, "3", "author3", api.GoogleScholarSource, 1 /*update freq seconds*/)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -417,7 +381,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 
 	user1, user2 := uuid.New(), uuid.New()
 
-	authorId1, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource)
+	authorId1, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource, 1 /*update freq seconds*/)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -829,7 +793,7 @@ func TestUserQueuedReportsArePrioritizedOverUniversityReports(t *testing.T) {
 
 	user := uuid.New()
 
-	if _, err := manager.CreateAuthorReport(user, "1", "author1", api.OpenAlexSource); err != nil {
+	if _, err := manager.CreateAuthorReport(user, "1", "author1", api.OpenAlexSource, 1 /*update freq seconds*/); err != nil {
 		t.Fatal(err)
 	}
 
@@ -848,7 +812,7 @@ func TestUserQueuedReportsArePrioritizedOverUniversityReports(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := manager.CreateAuthorReport(user, "3", "author3", api.OpenAlexSource); err != nil {
+	if _, err := manager.CreateAuthorReport(user, "3", "author3", api.OpenAlexSource, 1 /*update freq seconds*/); err != nil {
 		t.Fatal(err)
 	}
 
@@ -893,14 +857,14 @@ func TestUserQueuedReportsArePrioritizedOverUniversityReports(t *testing.T) {
 }
 
 func TestAuthorReportRetry(t *testing.T) {
-	manager := setup(t).SetAuthorReportTimeout(time.Second).SetStaleReportThreshold(reports.StaleReportThreshold)
+	manager := setup(t).SetAuthorReportTimeout(time.Second)
 
 	user := uuid.New()
-	if _, err := manager.CreateAuthorReport(user, "1", "author1", api.OpenAlexSource); err != nil {
+	if _, err := manager.CreateAuthorReport(user, "1", "author1", api.OpenAlexSource, reports.MinAuthorReportUpdateFreq); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := manager.CreateAuthorReport(user, "2", "author2", api.OpenAlexSource); err != nil {
+	if _, err := manager.CreateAuthorReport(user, "2", "author2", api.OpenAlexSource, reports.MinAuthorReportUpdateFreq); err != nil {
 		t.Fatal(err)
 	}
 
@@ -913,7 +877,7 @@ func TestAuthorReportRetry(t *testing.T) {
 	}
 	checkNextAuthorReport(t, next1, "1", "author1", api.OpenAlexSource, reports.EarliestReportDate, time.Now())
 
-	if _, err := manager.CreateAuthorReport(user, "3", "author3", api.OpenAlexSource); err != nil {
+	if _, err := manager.CreateAuthorReport(user, "3", "author3", api.OpenAlexSource, reports.MinAuthorReportUpdateFreq); err != nil {
 		t.Fatal(err)
 	}
 
@@ -941,7 +905,7 @@ func TestAuthorReportRetry(t *testing.T) {
 }
 
 func TestUniversityReportRetry(t *testing.T) {
-	manager := setup(t).SetUniversityReportTimeout(time.Second).SetStaleReportThreshold(reports.StaleReportThreshold)
+	manager := setup(t).SetUniversityReportTimeout(time.Second).SetUniversityReportUpdateFreq(reports.UniversityReportUpdateFreq)
 
 	user := uuid.New()
 	if _, err := manager.CreateUniversityReport(user, "1", "university1"); err != nil {
