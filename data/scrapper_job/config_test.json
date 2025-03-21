@@ -8,7 +8,7 @@
         "updater": "update_articles",
         "config": {
           "start_date": "2025-01-01",
-          "output_file": "data.tmp/doj_pr/doj_articles_with_content_and_entities.json",
+          "output_file_path": "data.tmp/doj_pr/doj_articles_with_content_and_entities.json",
           "country_keywords": [    
                 {"china": "china"},
                 {"chinese": "china"},

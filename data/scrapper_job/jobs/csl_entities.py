@@ -4,10 +4,12 @@ import json
 
 
 def read_csv_source(config):
-    input_csv = config["input_csv"]
-    if not os.path.exists(input_csv):
-        raise FileNotFoundError(f"CSV file not found: {input_csv}")
-    data = pd.read_csv(input_csv)
+    input_csv_path = config["input_csv_path"]
+    if not os.path.exists(input_csv_path):
+        raise FileNotFoundError(
+            f"CSV file not found: {input_csv_path}. CSL Job should be run first."
+        )
+    data = pd.read_csv(input_csv_path)
     return data
 
 
@@ -48,11 +50,11 @@ def convert_csv_to_json(fetched_data, config):
 
 
 def update_json_file(new_data, config):
-    output_file = config["output_file"]
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    output_file_path = config["output_file_path"]
+    os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
 
-    if os.path.exists(output_file):
-        with open(output_file, "r", encoding="utf-8") as f:
+    if os.path.exists(output_file_path):
+        with open(output_file_path, "r", encoding="utf-8") as f:
             try:
                 existing_data = json.load(f)
             except json.JSONDecodeError:
@@ -67,9 +69,9 @@ def update_json_file(new_data, config):
     ]
 
     existing_data.extend(unique_new_data)
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(existing_data, f, indent=2)
+    with open(output_file_path, "w", encoding="utf-8") as f:
+        json.dump(existing_data, f, indent=4)
 
     print(
-        f"[update_entities_with_csl] Appended {len(unique_new_data)} unique entries to {output_file}. Total entries now: {len(existing_data)}"
+        f"[update_entities_with_csl] Appended {len(unique_new_data)} unique entries to {output_file_path}. Total entries now: {len(existing_data)}"
     )

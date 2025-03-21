@@ -10,8 +10,8 @@ from difflib import SequenceMatcher
 
 
 def fetch_flagger_source(config):
-    input_csv = config["input_csv"]
-    df = pd.read_csv(input_csv)
+    input_csv_path = config["input_csv_path"]
+    df = pd.read_csv(input_csv_path)
     if "type" in df.columns:
         df = df[df["type"].str.lower() != "individual"]
     entities = []
@@ -99,9 +99,9 @@ def process_flagger_source(entities, config):
 
 
 def update_flagger_store(processed_data, config):
-    out_inst = config["output_institutions"]
-    out_funders = config["output_funders"]
-    out_publishers = config["output_publishers"]
+    out_inst = config["output_institutions_path"]
+    out_funders = config["output_funders_path"]
+    out_publishers = config["output_publishers_path"]
     os.makedirs(os.path.dirname(out_inst), exist_ok=True)
 
     def update_json_file(filepath, new_data):
@@ -109,7 +109,12 @@ def update_flagger_store(processed_data, config):
         if os.path.exists(filepath):
             with open(filepath, "r") as f:
                 existing_data = json.load(f)
-        existing_data.extend(new_data)
+
+        existing_names = {item["name"] for item in existing_data}
+
+        new_items = [item for item in new_data if item["name"] not in existing_names]
+        existing_data.extend(new_items)
+
         with open(filepath, "w") as f:
             json.dump(existing_data, f, indent=4)
 

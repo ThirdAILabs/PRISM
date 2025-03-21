@@ -4,8 +4,8 @@ import subprocess
 
 
 def crawl_university_webpages(config):
-    output_file = config["intermediate_jsonl"]
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    output_file_path = config["intermediate_jsonl_path"]
+    os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
 
     cwd = os.path.join(os.path.dirname(__file__), "spider", "unicrawler")
 
@@ -14,11 +14,11 @@ def crawl_university_webpages(config):
         "runspider",
         "main.py",
         "-o",
-        output_file,
+        output_file_path,
         "-a",
         f"openai_api_key={config['openai_api_key']}",
         "-a",
-        f"input_json={config['input_json']}",
+        f"input_json_path={config['input_json_path']}",
     ]
     try:
         process = subprocess.run(cmd, cwd=cwd, capture_output=False, text=True)
@@ -35,7 +35,7 @@ def crawl_university_webpages(config):
         raise
 
     data = []
-    with open(output_file, "r", encoding="utf-8") as f:
+    with open(output_file_path, "r", encoding="utf-8") as f:
         for line in f:
             try:
                 data.append(json.loads(line))
@@ -50,17 +50,17 @@ def process_university_webpages(raw_data, config):
 
 
 def update_university_webpages(processed_data, config):
-    output_file = config["output_json"]
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    output_file_path = config["output_json_path"]
+    os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
 
     existing_data = []
-    if os.path.exists(output_file) and os.path.getsize(output_file) > 0:
-        with open(output_file, "r", encoding="utf-8") as f:
+    if os.path.exists(output_file_path) and os.path.getsize(output_file_path) > 0:
+        with open(output_file_path, "r", encoding="utf-8") as f:
             existing_data = json.load(f)
 
     existing_data.extend(processed_data)
 
-    with open(output_file, "w", encoding="utf-8") as f:
+    with open(output_file_path, "w", encoding="utf-8") as f:
         json.dump(existing_data, f, indent=4, ensure_ascii=False)
 
-    print(f"[university_webpages] Updated data in {output_file}")
+    print(f"[university_webpages] Updated data in {output_file_path}")

@@ -1,11 +1,35 @@
 import json
 import importlib
 import traceback
+import os
 
 
 def load_config(path="config.json"):
     with open(path, "r") as f:
         return json.load(f)
+
+
+def process_paths(config):
+    base_dir = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    )
+    base_dir = base_dir.replace("data/scrapper_job/", "")
+
+    def process_dict(d):
+        for key, value in d.items():
+            if isinstance(value, dict):
+                process_dict(value)
+            elif isinstance(value, str) and key.endswith("_path"):
+                d[key] = os.path.join(base_dir, value)
+            elif isinstance(value, list):
+                for i, item in enumerate(value):
+                    if isinstance(item, dict):
+                        process_dict(item)
+                    elif isinstance(item, str) and item.endswith("_path"):
+                        value[i] = os.path.join(base_dir, item)
+
+    process_dict(config)
+    return config
 
 
 def run_job(job):
@@ -67,6 +91,8 @@ def resolve_dependencies(jobs):
 
 def main():
     config = load_config()
+    process_paths(config)
+
     jobs = config.get("jobs", [])
 
     for key, val in config.get("global", {}).items():

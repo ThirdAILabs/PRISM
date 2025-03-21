@@ -1,98 +1,92 @@
 {
-    "jobs": [
-      {
-        "name": "csl_data",
-        "module": "jobs.csl",
-        "fetcher": "fetch_source",
-        "processor": "process_source",
-        "updater": "update_local_store",
-        "config": {
-          "csv_url": "https://data.trade.gov/downloadable_consolidated_screening_list/v1/consolidated.csv",
-          "original_file": "data.tmp/csl_data/original.csv",
-          "output_file": "data.tmp/csl_data/new_data.csv"
-        }
-      },
-      {
-        "name": "update_entities_with_csl",
-        "module": "jobs.csl_entities",
-        "fetcher": "read_csv_source",
-        "processor": "convert_csv_to_json",
-        "updater": "update_json_file",
-        "depends_on": ["csl_data"],
-        "config": {
-          "input_csv": "data.tmp/csl_data/new_data.csv",
-          "output_file": "data.tmp/entities/combined.json"
-        }
-      },
-      {
-        "name": "doj_pr",
-        "module": "jobs.doj",
-        "fetcher": "fetch_articles",
-        "processor": "process_articles",
-        "updater": "update_articles",
-        "config": {
-          "start_date": "2025-01-01",
-          "output_file": "data.tmp/doj_pr/doj_articles_with_content_and_entities.json",
-          "country_keywords": [    
-                {"china": "china"},
-                {"chinese": "china"},
-                {"russia": "russia"},
-                {"russian": "russia"},
-                {"iran": "iran"},
-                {"iranian": "iran"}
-            ],
-          "academic_keywords": [  
-                "professor",
-                "university",
-                "college"
-            ]
-        }
-      },
-      {
-        "name": "flagger_data",
-        "module": "jobs.flagger",
-        "fetcher": "fetch_flagger_source",
-        "processor": "process_flagger_source",
-        "updater": "update_flagger_store",
-        "depends_on": ["csl_data"],
-        "config": {
-          "input_csv": "data.tmp/csl_data/new_data.csv",
-          "output_institutions": "data.tmp/flagger_data/institutions.json",
-          "output_funders": "data.tmp/flagger_data/funders.json",
-          "output_publishers": "data.tmp/flagger_data/publishers.json"
-        }
-      },
-        {
-        "name": "university_au",
-        "module": "jobs.university_au",
-        "fetcher": "crawl_university_data",
-        "processor": "process_university_data",
-        "updater": "update_university_store",
-        "config": {
-          "start_urls": ["https://unitracker.aspi.org.au/"],
-          "intermediate_json": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data.tmp/university_au/intermediate.json",
-          "added_store": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data.tmp/university_au/unitracker_au_new.json",
-          "final_store": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data.tmp/university_au/unitracker_au.json"
-        }
-      },
-      {
-        "name": "university_webpages",
-        "module": "jobs.university_webpages",
-        "fetcher": "crawl_university_webpages",
-        "processor": "process_university_webpages",
-        "updater": "update_university_webpages",
-        "depends_on": ["university_au"],
-        "config": {
-          "input_json": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data.tmp/university_au/unitracker_au_new.json",
-          "intermediate_jsonl": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data.tmp/university_webpages/university_webpages_new.jsonl",
-          "output_json": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data.tmp/university_webpages/university_webpages.json"
-        }
-      }      
-    ],
-    "global": {
-      "openai_api_key": "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",
-      "email": "pratik@thirdai.com",
-      "data_folder": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data.tmp"
+  "jobs": [
+    {
+      "name": "csl_data",
+      "module": "jobs.csl",
+      "fetcher": "fetch_source",
+      "processor": "process_source",
+      "updater": "update_local_store",
+      "config": {
+        "csv_url": "https://data.trade.gov/downloadable_consolidated_screening_list/v1/consolidated.csv",
+        "original_file_path": "data/scrapper_job/reference/csl_original.csv",
+        "output_file_path": "data/scrapper_job/data.tmp/csl_data/new_data.csv"
+      }
+    },
+    {
+      "name": "update_entities_with_csl",
+      "module": "jobs.csl_entities",
+      "fetcher": "read_csv_source",
+      "processor": "convert_csv_to_json",
+      "updater": "update_json_file",
+      "depends_on": ["csl_data"],
+      "config": {
+        "input_csv_path": "data/scrapper_job/data.tmp/csl_data/new_data.csv",
+        "output_file_path": "data/searchable_entities.json"
+      }
+    },
+    {
+      "name": "doj_pr",
+      "module": "jobs.doj",
+      "fetcher": "fetch_articles",
+      "processor": "process_articles",
+      "updater": "update_articles",
+      "config": {
+        "start_date": "2025-01-01",
+        "output_file_path": "data/docs_and_press_releases.json",
+        "country_keywords": [
+          { "china": "china" },
+          { "chinese": "china" },
+          { "russia": "russia" },
+          { "russian": "russia" },
+          { "iran": "iran" },
+          { "iranian": "iran" }
+        ],
+        "academic_keywords": ["professor", "university", "college"]
+      }
+    },
+    {
+      "name": "flagger_data",
+      "module": "jobs.flagger",
+      "fetcher": "fetch_flagger_source",
+      "processor": "process_flagger_source",
+      "updater": "update_flagger_store",
+      "depends_on": ["csl_data"],
+      "config": {
+        "input_csv_path": "data/scrapper_job/data.tmp/csl_data/new_data.csv",
+        "output_institutions_path": "prism/reports/flaggers/eoc/data/institutions.json",
+        "output_funders_path": "prism/reports/flaggers/eoc/data/funders.json",
+        "output_publishers_path": "prism/reports/flaggers/eoc/data/publishers.json"
+      }
+    },
+    {
+      "name": "university_au",
+      "module": "jobs.university_au",
+      "fetcher": "crawl_university_data",
+      "processor": "process_university_data",
+      "updater": "update_university_store",
+      "config": {
+        "start_urls": ["https://unitracker.aspi.org.au/"],
+        "intermediate_json_path": "data/scrapper_job/data.tmp/university_au/intermediate.json",
+        "added_store_path": "data/scrapper_job/data.tmp/university_au/unitracker_au_new.json",
+        "final_store_path": "data/scrapper_job/reference/unitracker_au.json"
+      }
+    },
+    {
+      "name": "university_webpages",
+      "module": "jobs.university_webpages",
+      "fetcher": "crawl_university_webpages",
+      "processor": "process_university_webpages",
+      "updater": "update_university_webpages",
+      "depends_on": ["university_au"],
+      "config": {
+        "input_json_path": "data/scrapper_job/data.tmp/university_au/unitracker_au_new.json",
+        "intermediate_jsonl_path": "data/scrapper_job/data.tmp/university_webpages/university_webpages_new.jsonl",
+        "output_json_path": "data/university_webpages.json"
+      }
     }
+  ],
+  "global": {
+    "openai_api_key": "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",
+    "email": "pratik@thirdai.com"
   }
-  
+}

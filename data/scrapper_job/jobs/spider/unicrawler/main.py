@@ -46,14 +46,14 @@ class UniversitySpider(scrapy.Spider):
             self.logger.error("OPENAI_API_KEY setting not provided!")
             raise ValueError("OPENAI_API_KEY setting is required")
 
-        if not self.input_json:
-            self.logger.error("input_json setting not provided!")
-            raise ValueError("input_json setting is required")
+        if not self.input_json_path:
+            self.logger.error("input_json_path setting not provided!")
+            raise ValueError("input_json_path setting is required")
 
     def start_requests(self):
         self.logger.info("Starting to process university data...")
         with open(
-            self.input_json,
+            self.input_json_path,
             "r",
             encoding="utf-8",
         ) as f:

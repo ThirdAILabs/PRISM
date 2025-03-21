@@ -11,15 +11,15 @@ def fetch_source(config):
 
     data = pd.read_csv(io.StringIO(response.text))
 
-    os.makedirs(os.path.dirname(config["original_file"]), exist_ok=True)
+    os.makedirs(os.path.dirname(config["original_file_path"]), exist_ok=True)
     return data
 
 
 def process_source(fetched_data, config):
-    original_file = config["original_file"]
+    original_file_path = config["original_file_path"]
 
     try:
-        original_data = pd.read_csv(original_file)
+        original_data = pd.read_csv(original_file_path)
     except FileNotFoundError:
         original_data = pd.DataFrame(columns=fetched_data.columns)
     original_ids = (
@@ -30,9 +30,22 @@ def process_source(fetched_data, config):
 
 
 def update_local_store(new_data, config):
-    output_file = config["output_file"]
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
-    new_data.to_csv(output_file, index=False)
+    output_file_path = config["output_file_path"]
+    original_file_path = config["original_file_path"]
+
+    os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
+    new_data.to_csv(output_file_path, index=False)
     print(
-        f"[csl_data] New rows written to {output_file}, total new rows: {len(new_data)}"
+        f"[csl_data] New rows written to {output_file_path}, total new rows: {len(new_data)}"
+    )
+
+    try:
+        original_data = pd.read_csv(original_file_path)
+        combined_data = pd.concat([original_data, new_data], ignore_index=True)
+    except FileNotFoundError:
+        combined_data = new_data
+
+    combined_data.to_csv(original_file_path, index=False)
+    print(
+        f"[csl_data] Updated original file at {original_file_path}, total rows: {len(combined_data)}"
     )

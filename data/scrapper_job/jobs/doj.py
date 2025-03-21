@@ -116,7 +116,7 @@ def fetch_articles(config):
                 "link": link,
                 "pubDate": pub_date.strftime("%Y-%m-%d %H:%M:%S"),
                 "article_text": combined_text,
-                "countries": list(country_matches)[0],
+                "country": list(country_matches)[0],
             }
             articles.append(article)
 
@@ -157,30 +157,31 @@ def process_articles(fetched_articles, config):
 
 
 def update_articles(processed_articles, config):
-    output_file = config["output_file"]
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    output_file_path = config["output_file_path"]
+    os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
 
-    existing_articles = []
-    if os.path.exists(output_file):
-        with open(output_file, "r") as infile:
+    country_articles = {}
+    if os.path.exists(output_file_path):
+        with open(output_file_path, "r") as infile:
             try:
-                existing_articles = json.load(infile)
+                country_articles = json.load(infile)
             except json.JSONDecodeError:
-                existing_articles = []
+                country_articles = {}
 
-    existing_urls = {article["link"] for article in existing_articles}
+    for article in processed_articles:
+        country = article["country"].lower()
 
-    new_articles = [
-        article
-        for article in processed_articles
-        if article["link"] not in existing_urls
-    ]
+        if country not in country_articles:
+            country_articles[country] = []
 
-    final_articles = existing_articles + new_articles
+        existing_urls = {existing["link"] for existing in country_articles[country]}
+        if article["link"] not in existing_urls:
+            country_articles[country].append(article)
 
-    with open(output_file, "w") as outfile:
-        json.dump(final_articles, outfile, indent=4)
+    with open(output_file_path, "w") as outfile:
+        json.dump(country_articles, outfile, indent=4)
+
+    total_articles = sum(len(articles) for articles in country_articles.values())
     print(
-        f"[update_articles] Successfully saved {len(final_articles)} articles "
-        f"({len(new_articles)} new) to {output_file}"
+        f"[update_articles] Successfully saved {total_articles} articles to {output_file_path}"
     )
