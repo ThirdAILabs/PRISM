@@ -5,6 +5,7 @@ import time
 from openai import OpenAI
 import time
 import requests
+from bs4 import BeautifulSoup
 
 
 def ask_gpt(message, config):
@@ -39,7 +40,6 @@ def get_entities(content, config):
 
 
 def fetch_articles(config):
-
     start_date = datetime.strptime(config["start_date"], "%Y-%m-%d")
 
     url_template = (
@@ -48,7 +48,6 @@ def fetch_articles(config):
     )
 
     articles = []
-
     page = 0
     feed_url = url_template.format(page=page)
     try:
@@ -86,18 +85,29 @@ def fetch_articles(config):
                 break
 
             link = entry.get("url", "")
-            combined_text = entry.get("body", "")
+            try:
+                content = entry.get("body", "")
+                soup = BeautifulSoup(content, "html.parser")
+                combined_text = soup.get_text(separator=" ", strip=True)
+            except Exception as e:
+                print(f"[fetch_articles] Error cleaning HTML: {e}")
+                combined_text = content
 
-            # Apply our keyword filters
-            if not any(
-                country.lower() in combined_text.lower()
-                for country in config["country_keywords"]
-            ):
+            # Get matching country keywords
+            country_matches = set()
+            text_lower = combined_text.lower()
+
+            for keyword_dict in config["country_keywords"]:
+                for keyword, country in keyword_dict.items():
+                    if keyword.lower() in text_lower:
+                        country_matches.add(country)
+
+            # Skip if no country matches
+            if not country_matches:
                 continue
 
             if not any(
-                keyword.lower() in combined_text.lower()
-                for keyword in config["academic_keywords"]
+                keyword.lower() in text_lower for keyword in config["academic_keywords"]
             ):
                 continue
 
@@ -106,6 +116,7 @@ def fetch_articles(config):
                 "link": link,
                 "pubDate": pub_date.strftime("%Y-%m-%d %H:%M:%S"),
                 "article_text": combined_text,
+                "countries": list(country_matches)[0],
             }
             articles.append(article)
 
@@ -135,18 +146,41 @@ def fetch_articles(config):
     return articles
 
 
+# TODO(pratik): Add a way to get relevant webpages here
 def process_articles(fetched_articles, config):
     for i, article in enumerate(fetched_articles, 1):
         print(f"[process_articles] Processing article {i}/{len(fetched_articles)}")
         article["entities"] = get_entities(article["article_text"], config)
+        article["entities_as_text"] = " ; ".join(article["entities"])
+        article["relevant_webpages"] = []
     return fetched_articles
 
 
 def update_articles(processed_articles, config):
     output_file = config["output_file"]
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
+
+    existing_articles = []
+    if os.path.exists(output_file):
+        with open(output_file, "r") as infile:
+            try:
+                existing_articles = json.load(infile)
+            except json.JSONDecodeError:
+                existing_articles = []
+
+    existing_urls = {article["link"] for article in existing_articles}
+
+    new_articles = [
+        article
+        for article in processed_articles
+        if article["link"] not in existing_urls
+    ]
+
+    final_articles = existing_articles + new_articles
+
     with open(output_file, "w") as outfile:
-        json.dump(processed_articles, outfile, indent=4)
+        json.dump(final_articles, outfile, indent=4)
     print(
-        f"[update_articles] Successfully saved {len(processed_articles)} articles to {output_file}"
+        f"[update_articles] Successfully saved {len(final_articles)} articles "
+        f"({len(new_articles)} new) to {output_file}"
     )

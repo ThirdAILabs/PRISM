@@ -4,7 +4,7 @@ import subprocess
 
 
 def crawl_university_webpages(config):
-    output_file = config["output_file"]
+    output_file = config["intermediate_jsonl"]
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
     cwd = os.path.join(os.path.dirname(__file__), "spider", "unicrawler")
@@ -37,7 +37,11 @@ def crawl_university_webpages(config):
     data = []
     with open(output_file, "r", encoding="utf-8") as f:
         for line in f:
-            data.append(json.loads(line))
+            try:
+                data.append(json.loads(line))
+            except json.JSONDecodeError as e:
+                print(f"[university_webpages] Error parsing JSON line: {e}")
+                continue
     return data
 
 
@@ -46,7 +50,7 @@ def process_university_webpages(raw_data, config):
 
 
 def update_university_webpages(processed_data, config):
-    output_file = config["output_file"]
+    output_file = config["output_json"]
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
     existing_data = []

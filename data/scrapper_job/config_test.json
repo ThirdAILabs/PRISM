@@ -1,31 +1,29 @@
 {
     "jobs": [
-        {
-            "name": "csl_data",
-            "module": "jobs.csl",
-            "fetcher": "fetch_source",
-            "processor": "process_source",
-            "updater": "update_local_store",
-            "config": {
-              "csv_url": "https://data.trade.gov/downloadable_consolidated_screening_list/v1/consolidated.csv",
-              "original_file": "data/csl_data/original.csv",
-              "output_file": "data/csl_data/new_data.csv"
-            }
-          },
-          {
-            "name": "flagger_data",
-            "module": "jobs.flagger",
-            "fetcher": "fetch_flagger_source",
-            "processor": "process_flagger_source",
-            "updater": "update_flagger_store",
-            "depends_on": ["csl_data"],
-            "config": {
-              "input_csv": "data/csl_data/new_data.csv",
-              "output_institutions": "data/flagger_data/institutions.json",
-              "output_funders": "data/flagger_data/funders.json",
-              "output_publishers": "data/flagger_data/publishers.json"
-            }
-          }
+      {
+        "name": "doj_pr",
+        "module": "jobs.doj",
+        "fetcher": "fetch_articles",
+        "processor": "process_articles",
+        "updater": "update_articles",
+        "config": {
+          "start_date": "2025-01-01",
+          "output_file": "data.tmp/doj_pr/doj_articles_with_content_and_entities.json",
+          "country_keywords": [    
+                {"china": "china"},
+                {"chinese": "china"},
+                {"russia": "russia"},
+                {"russian": "russia"},
+                {"iran": "iran"},
+                {"iranian": "iran"}
+            ],
+          "academic_keywords": [  
+                "professor",
+                "university",
+                "college"
+            ]
+        }
+      }
     ],
     "global": {
         "openai_api_key": "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",

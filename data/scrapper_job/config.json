@@ -13,22 +13,33 @@
         }
       },
       {
+        "name": "update_entities_with_csl",
+        "module": "jobs.csl_entities",
+        "fetcher": "read_csv_source",
+        "processor": "convert_csv_to_json",
+        "updater": "update_json_file",
+        "depends_on": ["csl_data"],
+        "config": {
+          "input_csv": "data.tmp/csl_data/new_data.csv",
+          "output_file": "data.tmp/entities/combined.json"
+        }
+      },
+      {
         "name": "doj_pr",
         "module": "jobs.doj",
         "fetcher": "fetch_articles",
         "processor": "process_articles",
         "updater": "update_articles",
         "config": {
-          "rss_url_template": "https://www.justice.gov/news/rss?type=press_release&m={}",
           "start_date": "2025-01-01",
           "output_file": "data.tmp/doj_pr/doj_articles_with_content_and_entities.json",
           "country_keywords": [    
-                "china",
-                "chinese",
-                "russia",
-                "russian",
-                "iran",
-                "iranian"
+                {"china": "china"},
+                {"chinese": "china"},
+                {"russia": "russia"},
+                {"russian": "russia"},
+                {"iran": "iran"},
+                {"iranian": "iran"}
             ],
           "academic_keywords": [  
                 "professor",
@@ -73,9 +84,10 @@
         "depends_on": ["university_au"],
         "config": {
           "input_json": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data.tmp/university_au/unitracker_au_new.json",
-          "output_file": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data.tmp/university_webpages/university_webpages_new.jsonl"
+          "intermediate_jsonl": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data.tmp/university_webpages/university_webpages_new.jsonl",
+          "output_json": "/Users/pratikqpranav/ThirdAI/PRISM/data/scrapper_job/data.tmp/university_webpages/university_webpages.json"
         }
-      }
+      }      
     ],
     "global": {
       "openai_api_key": "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",
