@@ -3,6 +3,7 @@ package schema
 import (
 	"fmt"
 	"log"
+	"math/rand/v2"
 	"net/url"
 	"os"
 	"strings"
@@ -26,15 +27,19 @@ func SetupTestDB(t *testing.T) *gorm.DB {
 		log.Fatalf("error opening database connection: %v", err)
 	}
 
-	if err := rootDB.Exec("DROP DATABASE IF EXISTS prism_test").Error; err != nil {
-		t.Fatalf("error dropping database: %v", err)
-	}
+	dbName := fmt.Sprintf("prism_test_%d_%d", os.Getpid(), rand.Int())
 
-	if err := rootDB.Exec("CREATE DATABASE prism_test").Error; err != nil {
+	if err := rootDB.Exec("CREATE DATABASE " + dbName).Error; err != nil {
 		t.Fatalf("error creating database: %v", err)
 	}
 
-	db, err := gorm.Open(postgres.Open(UriToDsn(testUri+"/prism_test")), &gorm.Config{})
+	t.Cleanup(func() {
+		if err := rootDB.Exec("DROP DATABASE IF EXISTS " + dbName).Error; err != nil {
+			t.Fatalf("error dropping database: %v", err)
+		}
+	})
+
+	db, err := gorm.Open(postgres.Open(UriToDsn(testUri+"/"+dbName)), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("error opening database connection: %v", err)
 	}
