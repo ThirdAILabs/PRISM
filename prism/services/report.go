@@ -18,12 +18,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type ReportService struct {
 	manager        *reports.ReportManager
-	db             *gorm.DB
 	licensing      *licensing.LicenseVerifier
 	resourceFolder string
 }

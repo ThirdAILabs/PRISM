@@ -13,6 +13,7 @@ import (
 	"prism/prism/cmd"
 	"prism/prism/licensing"
 	"prism/prism/openalex"
+	"prism/prism/reports"
 	"prism/prism/schema/migrations"
 	"prism/prism/search"
 	"prism/prism/services"
@@ -177,7 +178,12 @@ func main() {
 
 	verifyResourceFolder(config.ResourceFolder)
 
-	backend := services.NewBackend(db, openalex, entitySearch, userAuth, licensing, config.ResourceFolder)
+	reportManager := reports.NewManager(db)
+
+	reportManager.StartReportUpdateCheck()
+	defer reportManager.StopReportUpdateCheck()
+
+	backend := services.NewBackend(reportManager, openalex, entitySearch, userAuth, licensing, config.ResourceFolder)
 
 	r := chi.NewRouter()
 

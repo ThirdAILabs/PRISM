@@ -41,6 +41,7 @@ type ReportManager struct {
 	authorReportTimeout        time.Duration
 	universityReportTimeout    time.Duration
 	universityReportUpdateFreq time.Duration
+	stopReportUpdate           chan struct{}
 }
 
 func NewManager(db *gorm.DB) *ReportManager {
@@ -49,6 +50,33 @@ func NewManager(db *gorm.DB) *ReportManager {
 		authorReportTimeout:        AuthorReportTimeout,
 		universityReportTimeout:    UniversityReportTimeout,
 		universityReportUpdateFreq: UniversityReportUpdateFreq,
+	}
+}
+
+func (r *ReportManager) StartReportUpdateCheck() {
+	r.stopReportUpdate = make(chan struct{})
+	go func() {
+		ticker := time.Tick(10 * time.Minute)
+
+		for {
+			select {
+			case <-ticker:
+				if err := r.CheckForStaleAuthorReports(); err != nil {
+					slog.Error("error checking for stale author reports", "error", err)
+				}
+				if err := r.CheckForStaleUniversityReports(); err != nil {
+					slog.Error("error checking for stale university reports", "error", err)
+				}
+			case <-r.stopReportUpdate:
+				return
+			}
+		}
+	}()
+}
+
+func (r *ReportManager) StopReportUpdateCheck() {
+	if r.stopReportUpdate != nil {
+		close(r.stopReportUpdate)
 	}
 }
 
