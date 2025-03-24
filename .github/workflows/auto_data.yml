@@ -31,6 +31,7 @@ jobs:
           python -m pip install --upgrade pip
           cd $GITHUB_WORKSPACE
           pip install -r data/scrapper_job/requirements.txt
+          playwright install --with-deps
 
       - name: Run data update script
         run: |
