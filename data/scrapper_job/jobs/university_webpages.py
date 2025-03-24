@@ -1,6 +1,9 @@
 import json
 import os
 import subprocess
+import json
+from dvc_utils import dvc_read_json, dvc_write_json
+import os
 
 
 def crawl_university_webpages(config):
@@ -51,16 +54,12 @@ def process_university_webpages(raw_data, config):
 
 def update_university_webpages(processed_data, config):
     output_file_path = config["output_json_path"]
-    os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
 
-    existing_data = []
-    if os.path.exists(output_file_path) and os.path.getsize(output_file_path) > 0:
-        with open(output_file_path, "r", encoding="utf-8") as f:
-            existing_data = json.load(f)
+    try:
+        existing_data = dvc_read_json(output_file_path)
+    except (FileNotFoundError, json.JSONDecodeError):
+        existing_data = []
 
     existing_data.extend(processed_data)
-
-    with open(output_file_path, "w", encoding="utf-8") as f:
-        json.dump(existing_data, f, indent=4, ensure_ascii=False)
-
+    dvc_write_json(existing_data, output_file_path)
     print(f"[university_webpages] Updated data in {output_file_path}")

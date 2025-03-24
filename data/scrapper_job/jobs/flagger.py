@@ -7,6 +7,9 @@ from tqdm import tqdm
 import time
 import os
 from difflib import SequenceMatcher
+import json
+from dvc_utils import dvc_read_json, dvc_write_json
+import os
 
 
 def fetch_flagger_source(config):
@@ -103,21 +106,17 @@ def update_flagger_store(processed_data, config):
     out_inst = config["output_institutions_path"]
     out_funders = config["output_funders_path"]
     out_publishers = config["output_publishers_path"]
-    os.makedirs(os.path.dirname(out_inst), exist_ok=True)
 
     def update_json_file(filepath, new_data):
-        existing_data = []
-        if os.path.exists(filepath):
-            with open(filepath, "r") as f:
-                existing_data = json.load(f)
+        try:
+            existing_data = dvc_read_json(filepath)
+        except FileNotFoundError:
+            existing_data = []
 
         existing_names = {item["name"] for item in existing_data}
-
         new_items = [item for item in new_data if item["name"] not in existing_names]
         existing_data.extend(new_items)
-
-        with open(filepath, "w") as f:
-            json.dump(existing_data, f, indent=4)
+        dvc_write_json(existing_data, filepath)
 
     update_json_file(out_inst, processed_data.get("institutions", []))
     update_json_file(out_funders, processed_data.get("funders", []))

@@ -6,6 +6,9 @@ from openai import OpenAI
 import time
 import requests
 from bs4 import BeautifulSoup
+import os
+import json
+from dvc_utils import dvc_read_json, dvc_write_json
 
 
 def ask_gpt(message, config):
@@ -158,19 +161,14 @@ def process_articles(fetched_articles, config):
 
 def update_articles(processed_articles, config):
     output_file_path = config["output_file_path"]
-    os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
 
-    country_articles = {}
-    if os.path.exists(output_file_path):
-        with open(output_file_path, "r") as infile:
-            try:
-                country_articles = json.load(infile)
-            except json.JSONDecodeError:
-                country_articles = {}
+    try:
+        country_articles = dvc_read_json(output_file_path)
+    except (FileNotFoundError, json.JSONDecodeError):
+        country_articles = {}
 
     for article in processed_articles:
         country = article["country"].lower()
-
         if country not in country_articles:
             country_articles[country] = []
 
@@ -178,9 +176,7 @@ def update_articles(processed_articles, config):
         if article["link"] not in existing_urls:
             country_articles[country].append(article)
 
-    with open(output_file_path, "w") as outfile:
-        json.dump(country_articles, outfile, indent=4)
-
+    dvc_write_json(country_articles, output_file_path)
     total_articles = sum(len(articles) for articles in country_articles.values())
     print(
         f"[update_articles] Successfully saved {total_articles} articles to {output_file_path}"

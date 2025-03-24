@@ -1,6 +1,9 @@
 import os
 import json
 import subprocess
+import json
+from dvc_utils import dvc_read_json, dvc_write_json
+import os
 
 
 def crawl_university_data(config):
@@ -30,31 +33,27 @@ def process_university_data(raw_data, config):
 def update_university_store(processed_data, config):
     final_store_path = config["final_store_path"]
     added_store_path = config["added_store_path"]
-    os.makedirs(os.path.dirname(final_store_path), exist_ok=True)
-    if os.path.exists(final_store_path):
-        with open(final_store_path, "r", encoding="utf-8") as f:
-            try:
-                existing = json.load(f)
-            except json.JSONDecodeError:
-                existing = []
-    else:
+
+    try:
+        existing = dvc_read_json(final_store_path)
+    except (FileNotFoundError, json.JSONDecodeError):
         existing = []
+
     existing_keys = {
         entry.get("permalink") for entry in existing if entry.get("permalink")
     }
     new_entries = [
         item for item in processed_data if item.get("permalink") not in existing_keys
     ]
+
     if new_entries:
         existing.extend(new_entries)
-        with open(final_store_path, "w", encoding="utf-8") as f:
-            json.dump(existing, f, indent=4, ensure_ascii=False)
+        dvc_write_json(existing, final_store_path)
         print(
             f"[university_au] Appended {len(new_entries)} new entries to {final_store_path}"
         )
 
-        with open(added_store_path, "w", encoding="utf-8") as f:
-            json.dump(new_entries, f, indent=4, ensure_ascii=False)
+        dvc_write_json(new_entries, added_store_path)
         print(
             f"[university_au] Added {len(new_entries)} new entries to {added_store_path}"
         )
