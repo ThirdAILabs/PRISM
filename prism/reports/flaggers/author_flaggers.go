@@ -309,19 +309,12 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 	return flags, nil
 }
 
-type LinkMetadata struct {
-	Title    string
-	Url      string
-	Entities []string
-	Text     string
-}
-
 type AuthorIsAssociatedWithEOCFlagger struct {
-	docIndex *search.ManyToOneIndex[LinkMetadata]
-	auxIndex *search.ManyToOneIndex[LinkMetadata]
+	docIndex *search.ManyToOneIndex[DojArticleRecord]
+	auxIndex *search.ManyToOneIndex[ReleveantWebpageRecord]
 }
 
-func NewAuthorIsAssociatedWithEOCFlagger(docIndex, auxIndex *search.ManyToOneIndex[LinkMetadata]) *AuthorIsAssociatedWithEOCFlagger {
+func NewAuthorIsAssociatedWithEOCFlagger(docIndex *search.ManyToOneIndex[DojArticleRecord], auxIndex *search.ManyToOneIndex[ReleveantWebpageRecord]) *AuthorIsAssociatedWithEOCFlagger {
 	return &AuthorIsAssociatedWithEOCFlagger{docIndex: docIndex, auxIndex: auxIndex}
 }
 
@@ -422,7 +415,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 					Message:         "The author or a frequent associate may be mentioned in a press release.",
 					DocTitle:        result.Metadata.Title,
 					DocUrl:          result.Metadata.Url,
-					DocEntities:     result.Metadata.Entities,
+					DocEntities:     result.Metadata.getEntitiesForIndexing(),
 					EntityMentioned: author.author,
 				})
 			} else {
@@ -430,7 +423,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findFirstSecondHopEntities(auth
 					Message:          "The author or a frequent associate may be mentioned in a press release.",
 					DocTitle:         result.Metadata.Title,
 					DocUrl:           result.Metadata.Url,
-					DocEntities:      result.Metadata.Entities,
+					DocEntities:      result.Metadata.getEntitiesForIndexing(),
 					EntityMentioned:  author.author,
 					Connections:      []api.Connection{{DocTitle: author.author + " (frequent coauthor)", DocUrl: ""}},
 					FrequentCoauthor: &author.author,
@@ -479,12 +472,12 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 		// iterate over entities and check if any of them match the primary matcher
 		// skip if no entity matches the primary matcher
 		// this is not always accurate as Thomas J. Smith will match with J. Smith
-		if !primaryMatcher.matchesAnyEntity(result.Metadata.Entities) {
+		if !primaryMatcher.matchesAnyEntity(result.Metadata.getEntitiesForIndexing()) {
 			continue
 		}
 
 		// add neighbouring entities to the queryToConn map
-		for _, entity := range result.Metadata.Entities {
+		for _, entity := range result.Metadata.getEntitiesForHops() {
 			if _, ok := queryToConn[entity]; !ok {
 				queryToConn[entity] = []api.Connection{{DocTitle: result.Metadata.Title, DocUrl: result.Metadata.Url}}
 			}
@@ -514,11 +507,11 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 			seen[result.Metadata.Url] = true
 
 			// skip if no entity matches the secondary matcher
-			if !secondaryMatcher.matchesAnyEntity(result.Metadata.Entities) {
+			if !secondaryMatcher.matchesAnyEntity(result.Metadata.getEntitiesForHops()) {
 				continue
 			}
 
-			for _, entity := range result.Metadata.Entities {
+			for _, entity := range result.Metadata.getEntitiesForHops() {
 				if _, ok := level2Entities[entity]; !ok {
 					level2Entities[entity] = append(level1Entity, api.Connection{DocTitle: result.Metadata.Title, DocUrl: result.Metadata.Url})
 				}
@@ -550,7 +543,7 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) findSecondThirdHopEntities(logg
 				Message:         "The author may be associated be an entity who/which may be mentioned in a press release.\n",
 				DocTitle:        result.Metadata.Title,
 				DocUrl:          result.Metadata.Url,
-				DocEntities:     result.Metadata.Entities,
+				DocEntities:     result.Metadata.getEntitiesForIndexing(),
 				EntityMentioned: query,
 				Connections:     conns,
 			}

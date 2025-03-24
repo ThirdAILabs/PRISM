@@ -71,20 +71,13 @@ func BuildUniversityNDB(dataPath string, ndbPath string) search.NeuralDB {
 	return ndb
 }
 
-type dojArticleRecord struct {
-	Title    string   `json:"title"`
-	Url      string   `json:"link"`
-	Text     string   `json:"entities_as_text"`
-	Entities []string `json:"entities"`
-}
-
-func BuildDocIndex(dataPath string) *search.ManyToOneIndex[LinkMetadata] {
+func BuildDocIndex(dataPath string) *search.ManyToOneIndex[DojArticleRecord] {
 	log.Printf("creating doc index from data %s", dataPath)
 
-	var countryToArticles map[string][]dojArticleRecord
+	var countryToArticles map[string][]DojArticleRecord
 	parseJsonData(dataPath, &countryToArticles)
 
-	data := make([]dojArticleRecord, 0)
+	data := make([]DojArticleRecord, 0)
 	for _, articles := range countryToArticles {
 		data = append(data, articles...)
 	}
@@ -92,14 +85,15 @@ func BuildDocIndex(dataPath string) *search.ManyToOneIndex[LinkMetadata] {
 	log.Printf("loaded %d records", len(data))
 
 	entities := make([][]string, 0, len(data))
-	metadata := make([]LinkMetadata, 0, len(data))
+	metadata := make([]DojArticleRecord, 0, len(data))
 	for _, record := range data {
-		entities = append(entities, record.Entities)
-		metadata = append(metadata, LinkMetadata{
-			Title:    record.Title,
-			Url:      record.Url,
-			Entities: record.Entities,
-			Text:     record.Text,
+		entities = append(entities, record.getEntitiesForIndexing())
+		metadata = append(metadata, DojArticleRecord{
+			Title:        record.Title,
+			Url:          record.Url,
+			Text:         record.Text,
+			Individuals:  record.Individuals,
+			Institutions: record.Institutions,
 		})
 	}
 
@@ -114,32 +108,25 @@ func BuildDocIndex(dataPath string) *search.ManyToOneIndex[LinkMetadata] {
 	return index
 }
 
-type releveantWebpageRecord struct {
-	Title    string   `json:"title"`
-	Url      string   `json:"url"`
-	DojTitle string   `json:"doj_title"`
-	DojUrl   string   `json:"doj_url"`
-	Content  string   `json:"content"`
-	Entities []string `json:"entities"`
-}
-
-func BuildAuxIndex(dataPath string) *search.ManyToOneIndex[LinkMetadata] {
+func BuildAuxIndex(dataPath string) *search.ManyToOneIndex[ReleveantWebpageRecord] {
 	log.Printf("creating aux index from data %s", dataPath)
 
-	var data []releveantWebpageRecord
+	var data []ReleveantWebpageRecord
 	parseJsonData(dataPath, &data)
 
 	log.Printf("loaded %d records", len(data))
 
 	entities := make([][]string, 0, len(data))
-	metadata := make([]LinkMetadata, 0, len(data))
+	metadata := make([]ReleveantWebpageRecord, 0, len(data))
 	for _, record := range data {
-		entities = append(entities, record.Entities)
-		metadata = append(metadata, LinkMetadata{
-			Title:    record.Title,
-			Url:      record.Url,
-			Entities: record.Entities,
-			Text:     record.Content,
+		entities = append(entities, record.getEntitiesForIndexing())
+		metadata = append(metadata, ReleveantWebpageRecord{
+			Title:        record.Title,
+			Url:          record.Url,
+			Individuals:  record.Individuals,
+			Institutions: record.Institutions,
+			Text:         record.Text,
+			ReferredFrom: record.ReferredFrom,
 		})
 	}
 
