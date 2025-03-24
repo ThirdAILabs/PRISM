@@ -1,6 +1,4 @@
 import scrapy
-import json
-import html
 
 
 class UnitrackerSpider(scrapy.Spider):

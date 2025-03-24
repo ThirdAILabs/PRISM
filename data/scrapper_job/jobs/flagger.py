@@ -58,7 +58,7 @@ def get_results(query, inst, entity_id, entity_type, email="pratik@thirdai.com")
 
 
 def get_all(all_queries, email="pratik@thirdai.com"):
-    AT_A_TIME = 1
+    AT_A_TIME = 5
     results = []
     with ThreadPoolExecutor(max_workers=AT_A_TIME) as executor:
         for i in range(0, len(all_queries), AT_A_TIME):
@@ -70,7 +70,7 @@ def get_all(all_queries, email="pratik@thirdai.com"):
             ]
             for future in as_completed(futures):
                 results.append(future.result())
-            time.sleep(0.2)
+            time.sleep(1)
     return results
 
 
