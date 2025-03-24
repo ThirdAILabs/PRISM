@@ -32,7 +32,14 @@ func init() {
 func setupReportManager(t *testing.T) *reports.ReportManager {
 	db := schema.SetupTestDB(t)
 
-	return reports.NewManager(db)
+	// We're using old date ranges for these so they only process works around the
+	// date of the flagged work, particularly for the acknowledgements flagger, this
+	// ensures the tests don't take too long to run. However this means that the reports
+	// are viewed as stale and will be reprocessed on the next test. Setting a large
+	// threshold here fixes it. In ~100 years this threshold would again be too small,
+	// but at that point this code will likely not be in use, or if it is, then it
+	// will be someone else's problem (or more likely an AI).
+	return reports.NewManager(db).SetAuthorReportUpdateInterval(100 * 365 * 25 * time.Hour)
 }
 
 func eqOrderInvariant(a, b []string) bool {
@@ -49,20 +56,9 @@ func yearEnd(year int) time.Time {
 	return time.Date(year, 12, 31, 0, 0, 0, 0, time.UTC)
 }
 
-const (
-	// We're using old date ranges for these so they only process works around the
-	// date of the flagged work, particularly for the acknowledgements flagger, this
-	// ensures the tests don't take too long to run. However this means that the reports
-	// are viewed as stale and will be reprocessed on the next test. Setting a large
-	// threshold here fixes it. In ~100 years this threshold would again be too small,
-	// but at that point this code will likely not be in use, or if it is, then it
-	// will be someone else's problem (or more likely an AI).
-	defaultReportUpdateFreq = 100 * 365 * 25 * 3600
-)
-
 func getReportContent(t *testing.T, report reports.ReportUpdateTask, processor *reports.ReportProcessor, manager *reports.ReportManager) map[string][]api.Flag {
 	user := uuid.New()
-	reportId, err := manager.CreateAuthorReport(user, report.AuthorId, report.AuthorName, report.Source, defaultReportUpdateFreq)
+	reportId, err := manager.CreateAuthorReport(user, report.AuthorId, report.AuthorName, report.Source)
 	if err != nil {
 		t.Fatal(err)
 	}

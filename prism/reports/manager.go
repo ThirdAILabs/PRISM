@@ -19,11 +19,10 @@ import (
 )
 
 const (
-	AuthorReportTimeout           time.Duration = time.Minute * 20
-	UniversityReportTimeout       time.Duration = time.Minute * 45
-	UniversityReportUpdateFreq    time.Duration = time.Hour * 24 * 30
-	MinAuthorReportUpdateFreq     int           = 3600 * 24 * 7  // 1 week
-	DefaultAuthorReportUpdateFreq int           = 3600 * 24 * 14 // 2 weeks
+	AuthorReportTimeout            time.Duration = time.Minute * 20
+	UniversityReportTimeout        time.Duration = time.Minute * 45
+	UniversityReportUpdateInterval time.Duration = time.Hour * 24 * 30
+	AuthorReportUpdateInterval     time.Duration = time.Hour * 24 * 14
 )
 
 var (
@@ -38,19 +37,21 @@ var (
 )
 
 type ReportManager struct {
-	db                         *gorm.DB
-	authorReportTimeout        time.Duration
-	universityReportTimeout    time.Duration
-	universityReportUpdateFreq time.Duration
-	stopReportUpdate           chan struct{}
+	db                             *gorm.DB
+	authorReportUpdateInterval     time.Duration
+	authorReportTimeout            time.Duration
+	universityReportUpdateInterval time.Duration
+	universityReportTimeout        time.Duration
+	stopReportUpdate               chan struct{}
 }
 
 func NewManager(db *gorm.DB) *ReportManager {
 	return &ReportManager{
-		db:                         db,
-		authorReportTimeout:        AuthorReportTimeout,
-		universityReportTimeout:    UniversityReportTimeout,
-		universityReportUpdateFreq: UniversityReportUpdateFreq,
+		db:                             db,
+		authorReportUpdateInterval:     AuthorReportUpdateInterval,
+		authorReportTimeout:            AuthorReportTimeout,
+		universityReportUpdateInterval: UniversityReportUpdateInterval,
+		universityReportTimeout:        UniversityReportTimeout,
 	}
 }
 
@@ -81,18 +82,23 @@ func (r *ReportManager) StopReportUpdateCheck() {
 	}
 }
 
+func (r *ReportManager) SetAuthorReportUpdateInterval(interval time.Duration) *ReportManager {
+	r.authorReportUpdateInterval = interval
+	return r
+}
+
 func (r *ReportManager) SetAuthorReportTimeout(timeout time.Duration) *ReportManager {
 	r.authorReportTimeout = timeout
 	return r
 }
 
-func (r *ReportManager) SetUniversityReportTimeout(timeout time.Duration) *ReportManager {
-	r.universityReportTimeout = timeout
+func (r *ReportManager) SetUniversityReportUpdateInterval(interval time.Duration) *ReportManager {
+	r.universityReportUpdateInterval = interval
 	return r
 }
 
-func (r *ReportManager) SetUniversityReportUpdateFreq(freq time.Duration) *ReportManager {
-	r.universityReportUpdateFreq = freq
+func (r *ReportManager) SetUniversityReportTimeout(timeout time.Duration) *ReportManager {
+	r.universityReportTimeout = timeout
 	return r
 }
 
@@ -159,7 +165,7 @@ func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string, 
 	return report, nil
 }
 
-func (r *ReportManager) CreateAuthorReport(userId uuid.UUID, authorId, authorName, source string, updateFreq int) (uuid.UUID, error) {
+func (r *ReportManager) CreateAuthorReport(userId uuid.UUID, authorId, authorName, source string) (uuid.UUID, error) {
 	var userReport schema.UserAuthorReport
 	var userReportId uuid.UUID
 	now := time.Now().UTC()
@@ -179,11 +185,10 @@ func (r *ReportManager) CreateAuthorReport(userId uuid.UUID, authorId, authorNam
 		if result.RowsAffected == 0 {
 			userReportId = uuid.New()
 			userReport = schema.UserAuthorReport{
-				Id:              userReportId,
-				UserId:          userId,
-				LastAccessedAt:  now,
-				UpdateFrequency: updateFreq,
-				ReportId:        report.Id,
+				Id:             userReportId,
+				UserId:         userId,
+				LastAccessedAt: now,
+				ReportId:       report.Id,
 			}
 			if err := txn.Create(&userReport).Error; err != nil {
 				slog.Error("error creating new user author report", "error", err)
@@ -212,10 +217,7 @@ func (r *ReportManager) CheckForStaleAuthorReports() error {
 	// Check for author reports that are stale relative to the update frequency specified in a user author report.
 	if err := r.db.Model(&schema.AuthorReport{}).
 		Where("status != ? AND status != ? AND for_university_report = ?", schema.ReportInProgress, schema.ReportQueued, false).
-		Where("EXISTS (?)", r.db.Model(&schema.UserAuthorReport{}).
-			Where("user_author_reports.report_id = author_reports.id").
-			Where("author_reports.last_updated_at < NOW() - (user_author_reports.update_frequency || ' seconds')::interval"),
-		).
+		Where("last_updated_at < ?", time.Now().UTC().Add(-r.authorReportUpdateInterval)).
 		Updates(map[string]any{"status": schema.ReportQueued, "status_updated_at": time.Now().UTC()}).Error; err != nil {
 		slog.Error("error checking for stale author reports", "error", err)
 		return ErrReportAccessFailed
@@ -224,7 +226,7 @@ func (r *ReportManager) CheckForStaleAuthorReports() error {
 	// Check for author reports that are stale relative to a university report.
 	if err := r.db.Model(&schema.AuthorReport{}).
 		Where("status != ? AND status != ? AND for_university_report = ?", schema.ReportInProgress, schema.ReportQueued, true).
-		Where("last_updated_at < ?", time.Now().UTC().Add(-r.universityReportUpdateFreq)).
+		Where("last_updated_at < ?", time.Now().UTC().Add(-r.universityReportUpdateInterval)).
 		Updates(map[string]any{"status": schema.ReportQueued, "status_updated_at": time.Now().UTC()}).Error; err != nil {
 		slog.Error("error checking for stale author reports for university reports", "error", err)
 		return ErrReportAccessFailed
@@ -526,7 +528,7 @@ func (r *ReportManager) CheckForStaleUniversityReports() error {
 	// Check for university reports that are stale relative to the university report update frequency.
 	if err := r.db.Model(&schema.UniversityReport{}).
 		Where("status != ? AND status != ?", schema.ReportInProgress, schema.ReportQueued).
-		Where("last_updated_at < ?", time.Now().Add(-r.universityReportUpdateFreq)).
+		Where("last_updated_at < ?", time.Now().UTC().Add(-r.universityReportUpdateInterval)).
 		Updates(map[string]any{"status": schema.ReportQueued, "status_updated_at": time.Now().UTC()}).Error; err != nil {
 		slog.Error("error checking for stale university reports", "error", err)
 		return ErrReportAccessFailed
@@ -597,7 +599,7 @@ func (r *ReportManager) GetUniversityReport(userId, reportId uuid.UUID) (api.Uni
 			Select("author_reports.author_name, author_reports.author_id, author_reports.source, author_flags.flag_type, count(*) as count").
 			Joins("JOIN author_reports ON author_flags.report_id = author_reports.id").
 			Joins("JOIN university_authors ON author_reports.id = university_authors.author_report_id AND university_authors.university_report_id = ?", report.ReportId).
-			Where("author_flags.date IS NULL OR author_flags.date > ?", time.Now().AddDate(-yearsInUniversityReport, 0, 0)).
+			Where("author_flags.date IS NULL OR author_flags.date > ?", time.Now().UTC().AddDate(-yearsInUniversityReport, 0, 0)).
 			Group("author_reports.id, author_flags.flag_type").
 			Find(&flags).Error; err != nil {
 			slog.Error("error querying flags for author reports linked to university report", "university_report_id", reportId, "error", err)

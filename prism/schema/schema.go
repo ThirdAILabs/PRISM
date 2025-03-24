@@ -44,9 +44,6 @@ type UserAuthorReport struct {
 
 	LastAccessedAt time.Time
 
-	// Maximum time in seconds between report updates default is 2 weeks
-	UpdateFrequency int `gorm:"default:1209600"`
-
 	ReportId uuid.UUID     `gorm:"type:uuid;not null"`
 	Report   *AuthorReport `gorm:"foreignKey:ReportId"`
 }

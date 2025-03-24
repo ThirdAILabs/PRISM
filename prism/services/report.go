@@ -183,21 +183,12 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 		return nil, CodedError(errors.New("invalid Source"), http.StatusUnprocessableEntity)
 	}
 
-	var updateFreq int = reports.DefaultAuthorReportUpdateFreq
-	if params.UpdateFreq != nil {
-		updateFreq = *params.UpdateFreq
-	}
-
-	if updateFreq < reports.MinAuthorReportUpdateFreq {
-		return nil, CodedError(fmt.Errorf("UpdateFreq must be at least %d seconds (1 week)", reports.MinAuthorReportUpdateFreq), http.StatusUnprocessableEntity)
-	}
-
 	if err := s.licensing.VerifyLicense(); err != nil {
 		slog.Error("cannot create new report, unable to verify license", "error", err)
 		return nil, CodedError(err, licensingErrorStatus(err))
 	}
 
-	id, err := s.manager.CreateAuthorReport(userId, params.AuthorId, params.AuthorName, params.Source, updateFreq)
+	id, err := s.manager.CreateAuthorReport(userId, params.AuthorId, params.AuthorName, params.Source)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
