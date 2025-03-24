@@ -721,7 +721,7 @@ func (flagger *AuthorNewsArticlesFlagger) Flag(logger *slog.Logger, authorName s
 
 	completed := make(chan utils.CompletedTask[checkArticleResult], len(articles))
 
-	utils.RunInPool(flagger.checkArticle, queue, completed, 5)
+	utils.RunInPool(flagger.checkArticle, queue, completed, 5, nil)
 
 	flaggedArticles := make([]checkArticleResult, 0)
 	for result := range completed {

@@ -7,6 +7,6 @@ azure:
       push_credentials:
         password: QfKXji872oiQaHrp+ZgjfSs1ertCeInK+D0PBDXe4c+ACRCB3faT
         username: prism-push
-      version: 0.0.3
+      version: 0.0.6
   registry: prismresearchsecurity.azurecr.io
 provider: azure
