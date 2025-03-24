@@ -15,14 +15,7 @@ def crawl_university_data(config):
 
     cwd = os.path.join(os.path.dirname(__file__), "spider", "unitracker")
 
-    cmd = [
-        "scrapy",
-        "runspider",
-        "main.py",
-        "-o",
-        intermediate_json_path,
-        "--nolog",
-    ]
+    cmd = ["scrapy", "runspider", "main.py", "-o", intermediate_json_path]
     subprocess.run(cmd, cwd=cwd, check=True)
 
     with open(intermediate_json_path, "r", encoding="utf-8") as f:
