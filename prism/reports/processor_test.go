@@ -39,7 +39,7 @@ func setupReportManager(t *testing.T) *reports.ReportManager {
 	// threshold here fixes it. In ~100 years this threshold would again be too small,
 	// but at that point this code will likely not be in use, or if it is, then it
 	// will be someone else's problem (or more likely an AI).
-	return reports.NewManager(db).SetStaleReportThreshold(100 * 365 * 24 * time.Hour)
+	return reports.NewManager(db).SetAuthorReportUpdateInterval(100 * 365 * 25 * time.Hour)
 }
 
 func eqOrderInvariant(a, b []string) bool {
