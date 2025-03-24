@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { reportService } from '../../api/reports';
 import { universityReportService } from '../../api/universityReports';
-import './Sidepanel.css';
+// import './Sidepanel.css';
 import RandomAvatar from '../../assets/images/RandomAvatar.jpg';
 import PRISM_LOGO from '../../assets/images/prism.png';
 import { FaRegUserCircle, FaUniversity, FaSearch } from 'react-icons/fa';
@@ -16,6 +16,7 @@ import { useLocation } from 'react-router-dom';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { Tooltip } from '@mui/material';
+import '../../styles/components/_sidepanel.scss';
 
 const SidePanel = ({ isOpen, onClose }) => {
   const { userInfo } = useUser();
@@ -116,7 +117,7 @@ const SidePanel = ({ isOpen, onClose }) => {
             <img
               src={PRISM_LOGO}
               alt="PRISM"
-              style={{ width: '150px', height: '30px', marginLeft: '5%' }}
+              className="side-panel-header__logo"
             />
           </div>
           {/* Navigation */}
@@ -222,7 +223,7 @@ const SidePanel = ({ isOpen, onClose }) => {
             )}
             <div
               className="collapsible-header"
-              // style={{ marginTop: '10px' }}
+            // style={{ marginTop: '10px' }}
             >
               {universityReports?.length ? (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -278,7 +279,7 @@ const SidePanel = ({ isOpen, onClose }) => {
                         {/* <span><MdDelete style={15} /></span> */}
                         <span className={`status ${universityReport.Status}`}>
                           {universityReport.Status === 'complete' &&
-                          universityReport.Content.TotalAuthors !==
+                            universityReport.Content.TotalAuthors !==
                             universityReport.Content.AuthorsReviewed
                             ? status['in-progress']
                             : status[universityReport.Status]}
@@ -296,19 +297,14 @@ const SidePanel = ({ isOpen, onClose }) => {
           <img
             src={user.avatar}
             alt="User"
-            style={{ width: '40px', height: '40px', borderRadius: '100%' }}
+            className="user-info__avatar"
           />
           <div>
-            <h5 style={{ padding: '0px', margin: '0px', color: 'rgb(40,40,40' }}>
+            <h5 className="user-info__name">
               {user.username}
             </h5>
             <span
-              style={{
-                fontSize: 'smaller',
-                marginTop: '0px',
-                paddingTop: '0px',
-                color: 'rgb(100,100,100',
-              }}
+              className="user-info__email"
             >
               {user.email}
             </span>
