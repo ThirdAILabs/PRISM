@@ -27,7 +27,7 @@ class FinalAuxiliaryWebpage(BaseModel):
     page: WebPage
 
 
-class ResearchManager:
+class SearchManager:
     def __init__(self):
         self.console = Console()
         self.printer = Printer(self.console)

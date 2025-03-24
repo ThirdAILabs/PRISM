@@ -1,4 +1,5 @@
 import mimetypes
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Optional
 from urllib.parse import urlparse
@@ -36,39 +37,12 @@ def google_search(query, k=5):
     """
     Performs a google search and returns the results the top k urls along with the title and snippet
     """
-    api_key = "AIzaSyAkfnkXsbNe90XJUrTYQWk-ECchYOyyQaU"
-    cx = "97bdc9a5ba22448b5"
+    api_key = os.environ["GOOGLE_API_KEY"]
+    cx = os.environ["GOOGLE_CX_CODE"]
     url = "https://www.googleapis.com/customsearch/v1"
     params = {"key": api_key, "cx": cx, "q": query, "num": k}
     response = requests.get(url, params=params)
     return response.json()
-
-
-# def perform_web_search(query):
-#     """
-#     Performs a web search and returns the a list of WebPage Objects where
-#     class WebPage(BaseModel):
-#         url: str
-#         title: str
-#         Markdown: str
-#     """
-#     try:
-#         results = google_search(query)
-#     except Exception as e:
-#         print(f"Error performing web search: {e}")
-#         return None
-
-#     websearch_results = WebSearchResult(results=[])
-#     for result in results["items"]:
-#         markdown = clean_webpage_content(result["link"])
-#         if markdown is None:
-#             continue
-#         websearch_results.results.append(
-#             WebPage(url=result["link"], title=result["title"], Markdown=markdown)
-#         )
-#     if len(websearch_results.results) == 0:
-#         return None
-#     return websearch_results
 
 
 def is_acceptable_url(url: str) -> bool:
