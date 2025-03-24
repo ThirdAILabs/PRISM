@@ -1,0 +1,64 @@
+// Color Palette
+// =============================================================================
+
+// Brand Colors
+$color-primary-900: #0B79D0;
+$color-primary-700: #2196F3;
+$color-primary-500: #64B6F7;
+$color-primary-300: #BBDEFB;
+$color-primary-100: #E9F4FE;
+
+// Text Colors
+$color-text-900: #121B2E;
+$color-text-700: #333F54;
+$color-text-500: #6A798F;
+$color-text-300: #D0DAE4;
+$color-text-100: #FFFFFF;
+
+// Semantic Colors
+$color-error-700: #B71D18;
+$color-error-300: #C9CFD6;
+
+$color-success-700: #36B37E;
+$color-success-300: #C9CFD6;
+
+$color-warning-700: #FFAB00;
+$color-warning-300: #C9CFD6;
+
+$color-info-700: #2196F3;
+$color-info-300: #C9CFD6;
+
+// Semantic Mappings
+// =============================================================================
+$color-text-primary: $color-text-900;
+$color-text-secondary: $color-text-700;
+$color-text-muted: $color-text-500;
+$color-text-disabled: $color-text-300;
+
+$color-background-primary: $color-text-100;
+$color-background-secondary: $color-primary-100;
+
+// Component Specific
+// =============================================================================
+$button-primary-bg: $color-primary-700;
+$button-primary-hover: $color-primary-900;
+$button-disabled: $color-text-300;
+
+$alert-error: $color-error-700;
+$alert-success: $color-success-700;
+$alert-warning: $color-warning-700;
+$alert-info: $color-info-700;
+
+// Usage Example:
+// .button-primary {
+//     background-color: $button-primary-bg;
+//     color: $color-text-100;
+//     
+//     &:hover {
+//         background-color: $button-primary-hover;
+//     }
+//     
+//     &:disabled {
+//         background-color: $button-disabled;
+//     }
+// }
