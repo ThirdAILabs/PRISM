@@ -23,7 +23,7 @@ def fetch_flagger_source(config):
 def get_results(query, inst, entity_id, entity_type, email="pratik@thirdai.com"):
     try:
         url = f"https://api.openalex.org/autocomplete/{entity_type}?q={quote(query, safe='')}&mailto={email}"
-        response = rq.get(url, timeout=3.0)
+        response = rq.get(url, timeout=1.0)
         response.raise_for_status()
         if len(response.json()["results"]) == 0:
             return {}
@@ -58,7 +58,7 @@ def get_results(query, inst, entity_id, entity_type, email="pratik@thirdai.com")
 
 
 def get_all(all_queries, email="pratik@thirdai.com"):
-    AT_A_TIME = 5
+    AT_A_TIME = 7
     results = []
     with ThreadPoolExecutor(max_workers=AT_A_TIME) as executor:
         for i in range(0, len(all_queries), AT_A_TIME):
