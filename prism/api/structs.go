@@ -77,6 +77,12 @@ const (
 	ScopusSource        = "scopus"
 )
 
+type CreateHookRequest struct {
+	Action   string
+	Data     []byte
+	Interval int
+}
+
 type UniversityAuthorFlag struct {
 	AuthorId   string
 	AuthorName string

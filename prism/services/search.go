@@ -29,6 +29,13 @@ type SearchService struct {
 	entitySearch *search.ManyToOneIndex[api.MatchedEntity]
 }
 
+func NewSearchService(oa openalex.KnowledgeBase, entities []api.MatchedEntity) SearchService {
+	return SearchService{
+		openalex:     oa,
+		entitySearch: NewEntitySearch(entities),
+	}
+}
+
 func hybridInstitutionNamesSort(originalInstitution string, institutionNames []string, similarityThreshold float64) []string {
 	// put the institutes with name similar to the Original Institution at the front
 	// sort the rest alphabetically

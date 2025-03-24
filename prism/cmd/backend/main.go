@@ -68,7 +68,7 @@ func (c *Config) port() int {
 	return c.Port
 }
 
-func buildEntitySearch(entityPath string) *search.ManyToOneIndex[api.MatchedEntity] {
+func loadSearchableEntities(entityPath string) []api.MatchedEntity {
 	const entityNdbPath = "searchable_entities.ndb"
 	if err := os.RemoveAll(entityNdbPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		log.Fatalf("error deleting existing ndb: %v", err)
@@ -88,15 +88,7 @@ func buildEntitySearch(entityPath string) *search.ManyToOneIndex[api.MatchedEnti
 
 	log.Printf("loaded %d searchable entities", len(entities))
 
-	s := time.Now()
-
-	entitySearch := services.NewEntitySearch(entities)
-
-	e := time.Now()
-
-	log.Printf("searchable entity ndb construction time=%.3f", e.Sub(s).Seconds())
-
-	return entitySearch
+	return entities
 }
 
 func verifyResourceFolder(resourceFolder string) {
@@ -156,8 +148,6 @@ func main() {
 		log.Fatalf("error activating license key: %v", err)
 	}
 
-	entitySearch := buildEntitySearch(config.SearchableEntitiesData)
-
 	db := cmd.OpenDB(config.PostgresUri)
 	migrations.RunMigrations(db)
 
@@ -183,7 +173,13 @@ func main() {
 	reportManager.StartReportUpdateCheck()
 	defer reportManager.StopReportUpdateCheck()
 
-	backend := services.NewBackend(reportManager, openalex, entitySearch, userAuth, licensing, config.ResourceFolder)
+	backend := services.NewBackend(
+		services.NewReportService(reportManager, licensing, config.ResourceFolder),
+		services.NewSearchService(openalex, loadSearchableEntities(config.SearchableEntitiesData)),
+		services.NewAutoCompleteService(openalex),
+		services.NewHookService(db, map[string]services.Hook{}),
+		userAuth,
+	)
 
 	r := chi.NewRouter()
 

@@ -62,15 +62,20 @@ func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 	db := schema.SetupTestDB(t)
 
 	entities := []api.MatchedEntity{{Names: "abc university"}, {Names: "institute of xyz"}, {Names: "123 org"}}
-	entitySearch := services.NewEntitySearch(entities)
 
 	licensing, err := licensing.NewLicenseVerifier("AC013F-FD0B48-00B160-64836E-76E88D-V3")
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	oa := openalex.NewRemoteKnowledgeBase()
+
 	backend := services.NewBackend(
-		reports.NewManager(db), openalex.NewRemoteKnowledgeBase(), entitySearch, &MockTokenVerifier{prefix: userPrefix}, licensing, "./resources",
+		services.NewReportService(reports.NewManager(db), licensing, "./resources"),
+		services.NewSearchService(oa, entities),
+		services.NewAutoCompleteService(oa),
+		services.NewHookService(db, map[string]services.Hook{}),
+		&MockTokenVerifier{prefix: userPrefix},
 	)
 
 	return backend.Routes(), db
