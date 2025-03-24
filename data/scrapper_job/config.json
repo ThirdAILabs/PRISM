@@ -8,7 +8,7 @@
       "updater": "update_local_store",
       "config": {
         "csv_url": "https://data.trade.gov/downloadable_consolidated_screening_list/v1/consolidated.csv",
-        "original_file_path": "data/scrapper_job/reference/csl_original.csv",
+        "original_file_path": "s3://thirdai-prism-data/csl_original.csv",
         "output_file_path": "data/scrapper_job/data.tmp/csl_data/new_data.csv"
       }
     },
@@ -21,7 +21,7 @@
       "depends_on": ["csl_data"],
       "config": {
         "input_csv_path": "data/scrapper_job/data.tmp/csl_data/new_data.csv",
-        "output_file_path": "data/searchable_entities.json"
+        "output_file_path": "s3://thirdai-prism-data/searchable_entities.json"
       }
     },
     {
@@ -32,7 +32,7 @@
       "updater": "update_articles",
       "config": {
         "start_date": "2025-01-01",
-        "output_file_path": "data/docs_and_press_releases.json",
+        "output_file_path": "s3://thirdai-prism-data/docs_and_press_releases.json",
         "country_keywords": [
           { "china": "china" },
           { "chinese": "china" },
@@ -53,9 +53,9 @@
       "depends_on": ["csl_data"],
       "config": {
         "input_csv_path": "data/scrapper_job/data.tmp/csl_data/new_data.csv",
-        "output_institutions_path": "prism/reports/flaggers/eoc/data/institutions.json",
-        "output_funders_path": "prism/reports/flaggers/eoc/data/funders.json",
-        "output_publishers_path": "prism/reports/flaggers/eoc/data/publishers.json"
+        "output_institutions_path": "s3://thirdai-prism-data/institutions.json",
+        "output_funders_path": "s3://thirdai-prism-data/funders.json",
+        "output_publishers_path": "s3://thirdai-prism-data/publishers.json"
       }
     },
     {
@@ -68,7 +68,7 @@
         "start_urls": ["https://unitracker.aspi.org.au/"],
         "intermediate_json_path": "data/scrapper_job/data.tmp/university_au/intermediate.json",
         "added_store_path": "data/scrapper_job/data.tmp/university_au/unitracker_au_new.json",
-        "final_store_path": "data/scrapper_job/reference/unitracker_au.json"
+        "final_store_path": "s3://thirdai-prism-data/unitracker_au.json"
       }
     },
     {
@@ -81,7 +81,7 @@
       "config": {
         "input_json_path": "data/scrapper_job/data.tmp/university_au/unitracker_au_new.json",
         "intermediate_jsonl_path": "data/scrapper_job/data.tmp/university_webpages/university_webpages_new.jsonl",
-        "output_json_path": "data/university_webpages.json"
+        "output_json_path": "s3://thirdai-prism-data/university_webpages.json"
       }
     }
   ],
