@@ -63,6 +63,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Update data"
           branch: ${{ env.BRANCH_NAME }}
+          base: automate-download
           title: "Automated data update"
           body: "This PR includes updated data generated automatically."
-          reviewers: your-username, ashutosh # Replace 'your-username' with your actual GitHub handle
+          reviewers: pratik, ashutosh

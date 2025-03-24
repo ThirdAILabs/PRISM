@@ -94,7 +94,8 @@ def process_flagger_source(entities, config):
         if r:
             etype = r["entity_type"]
             del r["entity_type"]
-            results[etype].extend(r["results"])
+            filtered_results = [res for res in r["results"] if res["score"] > 0.8]
+            results[etype].extend(filtered_results)
     return results
 
 
