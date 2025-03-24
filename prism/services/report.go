@@ -183,7 +183,7 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 		return nil, CodedError(errors.New("invalid Source"), http.StatusUnprocessableEntity)
 	}
 
-	var updateFreq int = reports.MinAuthorReportUpdateFreq
+	var updateFreq int = reports.DefaultAuthorReportUpdateFreq
 	if params.UpdateFreq != nil {
 		updateFreq = *params.UpdateFreq
 	}

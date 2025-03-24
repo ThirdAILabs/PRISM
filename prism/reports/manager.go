@@ -19,10 +19,11 @@ import (
 )
 
 const (
-	AuthorReportTimeout        time.Duration = time.Minute * 20
-	UniversityReportTimeout    time.Duration = time.Minute * 45
-	UniversityReportUpdateFreq time.Duration = time.Hour * 24 * 30
-	MinAuthorReportUpdateFreq  int           = 3600 * 24 * 7 // 1 week
+	AuthorReportTimeout           time.Duration = time.Minute * 20
+	UniversityReportTimeout       time.Duration = time.Minute * 45
+	UniversityReportUpdateFreq    time.Duration = time.Hour * 24 * 30
+	MinAuthorReportUpdateFreq     int           = 3600 * 24 * 7  // 1 week
+	DefaultAuthorReportUpdateFreq int           = 3600 * 24 * 14 // 2 weeks
 )
 
 var (
