@@ -30,13 +30,14 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           cd $GITHUB_WORKSPACE
-          pip install -r data/scrapper_job/requirements.txt
-          playwright install --with-deps
+          # pip install -r data/scrapper_job/requirements.txt
+          # playwright install --with-deps
 
       - name: Run data update script
         run: |
           cd data/scrapper_job
-          python3 -u -m main
+          # python3 -u -m main
+          echo "This is a test file" > dummy.txt
 
       - name: Check for changes
         run: |
@@ -50,6 +51,7 @@ jobs:
         if: env.CHANGES_DETECTED == 'true'
         run: |
           BRANCH="update-data-$(date +%Y%m%d%H%M%S)"
+          git fetch --all
           git checkout -b $BRANCH
           git add .
           git commit -m "Update data on $(date)"
@@ -63,7 +65,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Update data"
           branch: ${{ env.BRANCH_NAME }}
-          base: automate-download
+          base: main
           title: "Automated data update"
           body: "This PR includes updated data generated automatically."
           reviewers: pratik, ashutosh
