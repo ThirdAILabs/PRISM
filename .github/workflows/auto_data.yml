@@ -35,7 +35,7 @@ jobs:
       - name: Run data update script
         run: |
           cd data/scrapper_job
-          python3 -m main
+          python3 -u -m main
 
       - name: Check for changes
         run: |
