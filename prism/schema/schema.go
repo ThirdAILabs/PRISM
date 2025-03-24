@@ -54,7 +54,7 @@ type AuthorReportHook struct {
 	Id uuid.UUID `gorm:"type:uuid;primaryKey"`
 
 	UserReportId uuid.UUID         `gorm:"type:uuid;not null"`
-	UserReport   *UserAuthorReport `gorm:"foreignKey:ReportId"`
+	UserReport   *UserAuthorReport `gorm:"foreignKey:UserReportId"`
 
 	Action string
 	Data   []byte
@@ -63,7 +63,7 @@ type AuthorReportHook struct {
 	Interval  int
 }
 
-type CompletedAuthorReports struct {
+type CompletedAuthorReport struct {
 	Id          uuid.UUID `gorm:"type:uuid;primaryKey"`
 	CompletedAt time.Time
 }

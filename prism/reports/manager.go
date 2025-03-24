@@ -226,8 +226,11 @@ func (r *ReportManager) CheckForStaleAuthorReports() error {
 	if err := r.db.Model(&schema.AuthorReport{}).
 		Where("status != ? AND status != ? AND for_university_report = ?", schema.ReportInProgress, schema.ReportQueued, false).
 		Where("EXISTS (?)", r.db.Model(&schema.AuthorReportHook{}).
-			Where("author_report_hooks.last_ran_at < NOW() - (author_report_hooks.interval || ' seconds')::interval").
-			Joins("user_author_reports ON user_author_reports.report_id = author_reports.id AND user_author_reports.id = author_report_hooks.user_report_id")).
+			Select("1").
+			Joins("JOIN user_author_reports ON user_author_reports.id = author_report_hooks.user_report_id").
+			Where("user_author_reports.report_id = author_reports.id").
+			Where("author_report_hooks.last_ran_at < NOW() - (author_report_hooks.interval || ' seconds')::interval"),
+		).
 		Updates(map[string]any{"status": schema.ReportQueued, "status_updated_at": time.Now().UTC()}).Error; err != nil {
 		slog.Error("error checking report updates required by hooks", "error", err)
 		return ErrReportAccessFailed
@@ -373,6 +376,13 @@ func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTi
 			return ErrReportNotFound
 		}
 
+		if status == schema.ReportCompleted {
+			if err := txn.Save(&schema.CompletedAuthorReport{Id: id, CompletedAt: updateTime}).Error; err != nil {
+				slog.Error("error adding completed author report", "author_report_id", id, "error", err)
+				return ErrReportAccessFailed
+			}
+		}
+
 		if len(updateFlags) == 0 {
 			return nil
 		}
@@ -400,13 +410,6 @@ func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTi
 		if err := txn.Save(&newFlags).Error; err != nil {
 			slog.Error("error adding new flags to author report", "author_report_id", id, "error", err)
 			return ErrReportAccessFailed
-		}
-
-		if status == schema.ReportCompleted {
-			if err := txn.Save(&schema.CompletedAuthorReports{Id: id, CompletedAt: updateTime}).Error; err != nil {
-				slog.Error("error adding completed author report", "author_report_id", id, "error", err)
-				return ErrReportAccessFailed
-			}
 		}
 
 		return nil

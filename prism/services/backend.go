@@ -38,6 +38,7 @@ func (s *BackendService) Routes() chi.Router {
 	r.With(auth.Middleware(s.userAuth)).Mount("/report", s.report.Routes())
 	r.With(auth.Middleware(s.userAuth)).Mount("/search", s.search.Routes())
 	r.With(auth.Middleware(s.userAuth)).Mount("/autocomplete", s.autocomplete.Routes())
+	r.With(auth.Middleware(s.userAuth)).Mount("/hooks", s.hooks.Routes())
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

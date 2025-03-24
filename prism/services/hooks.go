@@ -40,7 +40,7 @@ func NewHookService(db *gorm.DB, hooks map[string]Hook) HookService {
 func (s *HookService) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Post("/hooks/{report_id}", WrapRestHandler(s.CreateHook))
+	r.Post("/{report_id}", WrapRestHandler(s.CreateHook))
 
 	return r
 }
@@ -105,10 +105,15 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 
 func (s *HookService) RunNextHook() {
 	err := s.db.Transaction(func(txn *gorm.DB) error {
-		var next schema.CompletedAuthorReports
+		var next schema.CompletedAuthorReport
 
-		if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Limit(1).Order("completed_at ASC").First(&next).Error; err != nil {
-			return fmt.Errorf("error retrieving next hook to run: %w", err)
+		result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Limit(1).Order("completed_at ASC").Find(&next)
+		if result.Error != nil {
+			return fmt.Errorf("error retrieving next hook to run: %w", result.Error)
+		}
+
+		if result.RowsAffected != 1 {
+			return nil
 		}
 
 		var userReports []schema.UserAuthorReport
@@ -136,7 +141,7 @@ func (s *HookService) RunNextHook() {
 					return fmt.Errorf("error running hook: %w", err)
 				}
 
-				if err := txn.Model(&hook).Update("last_ran_at", time.Now()).Error; err != nil {
+				if err := txn.Model(&hook).Update("last_ran_at", time.Now().UTC()).Error; err != nil {
 					return fmt.Errorf("error updating hook last ran at: %w", err)
 				}
 			}
