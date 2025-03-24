@@ -10,7 +10,88 @@ import (
 	"github.com/google/uuid"
 )
 
+func createDummyFlags() map[string][]api.Flag {
+	var flags = make(map[string][]api.Flag)
+	TcFlag, _ := api.CreateFlag(
+		api.TalentContractType,
+		map[string]interface{}{
+			"work": api.WorkSummary{
+				WorkId: "work-id-1",
+			},
+			"raw_acknowledgements": []string{"Raw acks 1"},
+		},
+	)
+	flags[api.TalentContractType] = []api.Flag{TcFlag}
+
+	AwDeFlag, _ := api.CreateFlag(
+		api.AssociationsWithDeniedEntityType,
+		map[string]interface{}{
+			"work": api.WorkSummary{
+				WorkId: "work-id-1",
+			},
+			"raw_acknowledgements": []string{"Raw acks 1"},
+		},
+	)
+	flags[api.AssociationsWithDeniedEntityType] = []api.Flag{AwDeFlag}
+
+	HrFtFlag, _ := api.CreateFlag(
+		api.HighRiskFunderType,
+		map[string]interface{}{
+			"work": api.WorkSummary{
+				WorkId: "work-id-1",
+			},
+			"funders": []string{"Funder 1"},
+		},
+	)
+	flags[api.HighRiskFunderType] = []api.Flag{HrFtFlag}
+
+	AaFlag, _ := api.CreateFlag(
+		api.AuthorAffiliationType,
+		map[string]interface{}{
+			"work": api.WorkSummary{
+				WorkId: "work-id-1",
+			},
+			"affiliations": []string{"Affiliation 1"},
+		},
+	)
+	flags[api.AuthorAffiliationType] = []api.Flag{AaFlag}
+
+	PaFlag, _ := api.CreateFlag(
+		api.PotentialAuthorAffiliationType,
+		map[string]interface{}{
+			"university": "uni-1",
+		},
+	)
+	flags[api.PotentialAuthorAffiliationType] = []api.Flag{PaFlag}
+
+	MhRaFlag, _ := api.CreateFlag(
+		api.MiscHighRiskAssociationType,
+		map[string]interface{}{
+			"doc_title":        "doc-title-1",
+			"entity_mentioned": "some entity",
+		},
+	)
+	flags[api.MiscHighRiskAssociationType] = []api.Flag{MhRaFlag}
+
+	CaFlag, _ := api.CreateFlag(
+		api.CoauthorAffiliationType,
+		map[string]interface{}{
+			"message": "talent contract message",
+			"work": api.WorkSummary{
+				WorkId: "work-id-1",
+			},
+			"coauthors": []string{"coauthor-1"},
+		},
+	)
+	flags[api.CoauthorAffiliationType] = []api.Flag{CaFlag}
+
+	return flags
+
+}
+
 func TestFlagParsing(t *testing.T) {
+	DummyFlags := createDummyFlags()
+
 	report := api.Report{
 		Id:             uuid.New(),
 		LastAccessedAt: time.Now(),
@@ -18,60 +99,7 @@ func TestFlagParsing(t *testing.T) {
 		AuthorName:     "Author Name",
 		Source:         api.OpenAlexSource,
 		Status:         schema.ReportInProgress,
-		Content: map[string][]api.Flag{
-			api.TalentContractType: {
-				&api.TalentContractFlag{
-					Work: api.WorkSummary{
-						WorkId: "work-id-1",
-					},
-					RawAcknowledgements: []string{"Raw acks 1"},
-				},
-			},
-			api.AssociationsWithDeniedEntityType: {
-				&api.AssociationWithDeniedEntityFlag{
-					Work: api.WorkSummary{
-						WorkId: "work-id-1",
-					},
-					RawAcknowledgements: []string{"Raw acks 1"},
-				},
-			},
-			api.HighRiskFunderType: {
-				&api.HighRiskFunderFlag{
-					Work: api.WorkSummary{
-						WorkId: "work-id-1",
-					},
-					Funders: []string{"Funder 1"},
-				},
-			},
-			api.AuthorAffiliationType: {
-				&api.AuthorAffiliationFlag{
-					Work: api.WorkSummary{
-						WorkId: "work-id-1",
-					},
-					Affiliations: []string{"Affiliation 1"},
-				},
-			},
-			api.PotentialAuthorAffiliationType: {
-				&api.PotentialAuthorAffiliationFlag{
-					University: "uni-1",
-				},
-			},
-			api.MiscHighRiskAssociationType: {
-				&api.MiscHighRiskAssociationFlag{
-					DocTitle:        "doc-title-1",
-					EntityMentioned: "some entity",
-				},
-			},
-			api.CoauthorAffiliationType: {
-				&api.CoauthorAffiliationFlag{
-					Message: "talent contract message",
-					Work: api.WorkSummary{
-						WorkId: "work-id-1",
-					},
-					Coauthors: []string{"coauthor-1"},
-				},
-			},
-		},
+		Content:        DummyFlags,
 	}
 
 	data, err := json.Marshal(report)

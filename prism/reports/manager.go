@@ -767,7 +767,7 @@ func convertUniversityReport(report schema.UserUniversityReport, content api.Uni
 	}
 }
 
-func (r *ReportManager) SaveFlagFeedback(reportId uuid.UUID, userId uuid.UUID, flagHash string, feedback api.FlagFeedback) error {
+func (r *ReportManager) SaveFlagFeedback(reportId, userId uuid.UUID, flagHash string, feedback api.FlagFeedback) error {
 	var flag schema.AuthorFlag
 	return r.db.Transaction(func(txn *gorm.DB) error {
 		// Check if the report exists
@@ -810,4 +810,43 @@ func (r *ReportManager) SaveFlagFeedback(reportId uuid.UUID, userId uuid.UUID, f
 
 		return nil
 	})
+}
+
+type FlagFeedbackTask struct {
+	Feedback api.FlagFeedback
+	Flag     api.Flag
+}
+
+func (r *ReportManager) GetFlagFeedback(reportId, userId uuid.UUID) ([]FlagFeedbackTask, error) {
+	var feedbacks []schema.FlagFeedback
+
+	if err := r.db.
+		Preload("AuthorFlag").
+		Where("report_id = ? AND user_id = ?", reportId, userId).
+		Find(&feedbacks).Error; err != nil {
+		slog.Error("error getting feedbacks", "error", err)
+		return nil, fmt.Errorf("error getting feedbacks: %w", err)
+	}
+
+	result := make([]FlagFeedbackTask, 0, len(feedbacks))
+	for _, feedback := range feedbacks {
+		flag, err := api.ParseFlag(feedback.AuthorFlag.FlagType, feedback.AuthorFlag.Data)
+		if err != nil {
+			slog.Error("error parsing flag", "error", err)
+			return nil, fmt.Errorf("error parsing flag: %w", err)
+		}
+
+		data, err := api.ParseFlagFeedback(feedback.Data)
+		if err != nil {
+			slog.Error("error parsing feedback", "error", err)
+			return nil, fmt.Errorf("error parsing feedback: %w", err)
+		}
+
+		result = append(result, FlagFeedbackTask{
+			Feedback: data,
+			Flag:     flag,
+		})
+	}
+
+	return result, nil
 }

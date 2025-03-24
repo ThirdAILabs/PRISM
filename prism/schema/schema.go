@@ -74,10 +74,11 @@ type UserUniversityReport struct {
 }
 
 type FlagFeedback struct {
-	Id        uuid.UUID `gorm:"type:uuid;primaryKey"`
-	UserId    uuid.UUID `gorm:"type:uuid;not null;index"`
-	ReportId  uuid.UUID `gorm:"type:uuid;not null"`
-	FlagHash  string    `gorm:"type:char(64);not null"`
-	Timestamp time.Time
-	Data      []byte
+	Id         uuid.UUID `gorm:"type:uuid;primaryKey"`
+	UserId     uuid.UUID `gorm:"type:uuid;not null;index"`
+	ReportId   uuid.UUID `gorm:"type:uuid;not null"`
+	FlagHash   string    `gorm:"type:char(64);not null"`
+	Timestamp  time.Time
+	Data       []byte
+	AuthorFlag AuthorFlag `gorm:"foreignKey:ReportId,FlagHash;references:ReportId,FlagHash"`
 }

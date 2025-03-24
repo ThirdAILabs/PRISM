@@ -40,6 +40,8 @@ type Flag interface {
 	// given work.
 	CalculateHash() [sha256.Size]byte
 
+	GetHash() string
+
 	GetEntities() []string
 
 	MarkDisclosed()
@@ -54,15 +56,6 @@ type Flag interface {
 	GetDetailsFieldsForReport(useDisclosure bool) []KeyValueURL
 
 	IsDisclosed() bool
-}
-
-type FlagFeedback struct {
-	IncorrectAuthor       bool
-	AuthorNotFound        bool
-	EntityNotFound        bool
-	EntityNotEoc          bool
-	IncorrectDoc          KeyValue // DocTitle, DocUrl
-	IncorrectAffiliations []string
 }
 
 const (
@@ -294,6 +287,10 @@ func (flag *TalentContractFlag) CalculateHash() [sha256.Size]byte {
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
+func (flag *TalentContractFlag) GetHash() string {
+	return flag.Hash
+}
+
 func (flag *TalentContractFlag) GetEntities() []string {
 	entities := make([]string, 0, len(flag.Entities))
 	for _, ack := range flag.Entities {
@@ -350,6 +347,10 @@ func (flag *AssociationWithDeniedEntityFlag) Type() string {
 func (flag *AssociationWithDeniedEntityFlag) CalculateHash() [sha256.Size]byte {
 	// Assumes 1 flag per work
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
+}
+
+func (flag *AssociationWithDeniedEntityFlag) GetHash() string {
+	return flag.Hash
 }
 
 func (flag *AssociationWithDeniedEntityFlag) GetEntities() []string {
@@ -411,6 +412,10 @@ func (flag *HighRiskFunderFlag) CalculateHash() [sha256.Size]byte {
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
+func (flag *HighRiskFunderFlag) GetHash() string {
+	return flag.Hash
+}
+
 func (flag *HighRiskFunderFlag) GetEntities() []string {
 	return flag.Funders
 }
@@ -464,6 +469,10 @@ func (flag *AuthorAffiliationFlag) CalculateHash() [sha256.Size]byte {
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
+func (flag *AuthorAffiliationFlag) GetHash() string {
+	return flag.Hash
+}
+
 func (flag *AuthorAffiliationFlag) GetEntities() []string {
 	return flag.Affiliations
 }
@@ -514,6 +523,10 @@ func (flag *PotentialAuthorAffiliationFlag) Type() string {
 
 func (flag *PotentialAuthorAffiliationFlag) CalculateHash() [sha256.Size]byte {
 	return sha256.Sum256([]byte(flag.Type() + flag.University + flag.UniversityUrl))
+}
+
+func (flag *PotentialAuthorAffiliationFlag) GetHash() string {
+	return flag.Hash
 }
 
 func (flag *PotentialAuthorAffiliationFlag) GetEntities() []string {
@@ -576,6 +589,10 @@ func (flag *MiscHighRiskAssociationFlag) CalculateHash() [sha256.Size]byte {
 		data += conn.DocTitle
 	}
 	return sha256.Sum256([]byte(data))
+}
+
+func (flag *MiscHighRiskAssociationFlag) GetHash() string {
+	return flag.Hash
 }
 
 func (flag *MiscHighRiskAssociationFlag) GetEntities() []string {
@@ -657,6 +674,10 @@ func (flag *CoauthorAffiliationFlag) CalculateHash() [sha256.Size]byte {
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
+func (flag *CoauthorAffiliationFlag) GetHash() string {
+	return flag.Hash
+}
+
 func (flag *CoauthorAffiliationFlag) GetEntities() []string {
 	return slices.Concat(flag.Coauthors, flag.Affiliations)
 }
@@ -715,6 +736,10 @@ func (flag *MultipleAffiliationFlag) CalculateHash() [sha256.Size]byte {
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
+func (flag *MultipleAffiliationFlag) GetHash() string {
+	return flag.Hash
+}
+
 func (flag *MultipleAffiliationFlag) GetEntities() []string {
 	return flag.Affiliations
 }
@@ -768,6 +793,10 @@ func (flag *HighRiskPublisherFlag) CalculateHash() [sha256.Size]byte {
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
 }
 
+func (flag *HighRiskPublisherFlag) GetHash() string {
+	return flag.Hash
+}
+
 func (flag *HighRiskPublisherFlag) GetEntities() []string {
 	return flag.Publishers
 }
@@ -819,6 +848,10 @@ func (flag *HighRiskCoauthorFlag) Type() string {
 func (flag *HighRiskCoauthorFlag) CalculateHash() [sha256.Size]byte {
 	// Assumes 1 flag per work
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
+}
+
+func (flag *HighRiskCoauthorFlag) GetHash() string {
+	return flag.Hash
 }
 
 func (flag *HighRiskCoauthorFlag) GetEntities() []string {
