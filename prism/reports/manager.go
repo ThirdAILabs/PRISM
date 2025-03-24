@@ -523,7 +523,7 @@ func (r *ReportManager) CreateUniversityReport(userId uuid.UUID, universityId, u
 }
 
 func (r *ReportManager) CheckForStaleUniversityReports() error {
-	// Check for author reports that are stale relative to the update frequency specified in a user author report.
+	// Check for university reports that are stale relative to the university report update frequency.
 	if err := r.db.Model(&schema.UniversityReport{}).
 		Where("status != ? AND status != ?", schema.ReportInProgress, schema.ReportQueued).
 		Where("last_updated_at < ?", time.Now().Add(-r.universityReportUpdateFreq)).
@@ -532,7 +532,7 @@ func (r *ReportManager) CheckForStaleUniversityReports() error {
 		return ErrReportAccessFailed
 	}
 
-	// Check for author reports that have been in progress for too long.
+	// Check for university reports that have been in progress for too long.
 	if err := r.db.Model(&schema.UniversityReport{}).
 		Where("status = ?", schema.ReportInProgress).
 		Where("status_updated_at < ?", time.Now().UTC().Add(-r.universityReportTimeout)).
