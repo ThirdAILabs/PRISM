@@ -1,7 +1,7 @@
 name: Update Data and Create PR
 
 on:
-  workflow_dispatch: # Allows you to manually trigger the workflow
+  workflow_dispatch:
   schedule:
     - cron: "0 12 * * 1" # Run every Monday at 12:00 UTC
   push:
@@ -34,14 +34,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           cd $GITHUB_WORKSPACE
-          # pip install -r data/scrapper_job/requirements.txt
-          # playwright install --with-deps
+          pip install -r data/scrapper_job/requirements.txt
+          playwright install --with-deps
 
       - name: Run data update script
         run: |
           cd data/scrapper_job
-          # python3 -u -m main
-          echo "This is a test file" > dummy.txt
+          python3 -u -m main
 
       - name: Commit and push changes
         run: |
