@@ -77,7 +77,9 @@ func TestInsertFeedback(t *testing.T) {
 		flattendFlags = append(flattendFlags, flags...)
 	}
 
-	manager.UpdateAuthorReport(reportId, schema.ReportCompleted, time.Now(), flattendFlags)
+	if err = manager.UpdateAuthorReport(reportId, schema.ReportCompleted, time.Now(), flattendFlags); err != nil {
+		t.Fatalf("error updating report: %v", err)
+	}
 
 	//save the flag feedback
 	feedbacks := AddDummyFeedback(dummyFlag)
