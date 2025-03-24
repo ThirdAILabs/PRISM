@@ -30,7 +30,7 @@ type DojArticleRecord struct {
 	Institutions []InstitutionEOC `json:"institutions"`
 }
 
-func (r *DojArticleRecord) getEntitiesForIndexing() []string {
+func (r *DojArticleRecord) getEntities() []string {
 	entities := make([]string, 0, len(r.Individuals)+len(r.Institutions))
 	for _, individual := range r.Individuals {
 		entities = append(entities, individual.Name)
@@ -50,7 +50,7 @@ type ReleveantWebpageRecord struct {
 	ReferredFrom string           `json:"referred_from"`
 }
 
-func (r *ReleveantWebpageRecord) getEntitiesForIndexing() []string {
+func (r *ReleveantWebpageRecord) getEntities() []string {
 	entities := make([]string, 0, len(r.Individuals)+len(r.Institutions))
 	for _, individual := range r.Individuals {
 		entities = append(entities, individual.Name)

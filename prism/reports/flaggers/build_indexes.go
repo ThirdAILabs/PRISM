@@ -87,7 +87,7 @@ func BuildDocIndex(dataPath string) *search.ManyToOneIndex[DojArticleRecord] {
 	entities := make([][]string, 0, len(data))
 	metadata := make([]DojArticleRecord, 0, len(data))
 	for _, record := range data {
-		entities = append(entities, record.getEntitiesForIndexing())
+		entities = append(entities, record.getEntities())
 		metadata = append(metadata, DojArticleRecord{
 			Title:        record.Title,
 			Url:          record.Url,
@@ -119,7 +119,7 @@ func BuildAuxIndex(dataPath string) *search.ManyToOneIndex[ReleveantWebpageRecor
 	entities := make([][]string, 0, len(data))
 	metadata := make([]ReleveantWebpageRecord, 0, len(data))
 	for _, record := range data {
-		entities = append(entities, record.getEntitiesForIndexing())
+		entities = append(entities, record.getEntities())
 		metadata = append(metadata, ReleveantWebpageRecord{
 			Title:        record.Title,
 			Url:          record.Url,
