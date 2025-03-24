@@ -25,7 +25,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/xuri/excelize/v2"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -60,17 +59,7 @@ func (m *MockTokenVerifier) VerifyToken(token string) (uuid.UUID, error) {
 }
 
 func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
-	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := db.AutoMigrate(
-		&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{},
-		&schema.UniversityReport{}, &schema.UserUniversityReport{},
-	); err != nil {
-		t.Fatal(err)
-	}
+	db := schema.SetupTestDB(t)
 
 	entities := []api.MatchedEntity{{Names: "abc university"}, {Names: "institute of xyz"}, {Names: "123 org"}}
 	entitySearch := services.NewEntitySearch(entities)

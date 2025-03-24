@@ -27,6 +27,9 @@ type PDFDownloader struct {
 	downloadClient *resty.Client
 	s3CacheBucket  string
 	s3Client       *s3.Client
+	pw             *playwright.Playwright
+	browser        playwright.Browser
+	context        playwright.BrowserContext
 }
 
 var headers = map[string]string{
@@ -59,41 +62,66 @@ func NewPDFDownloader(s3CacheBucket string) *PDFDownloader {
 	}
 	downloader.s3Client = s3.NewFromConfig(cfg)
 
-	return downloader
-}
-
-func (downloader *PDFDownloader) downloadWithPlaywright(url string) (string, error) {
 	pw, err := playwright.Run(&playwright.RunOptions{Browsers: []string{"firefox"}})
 	if err != nil {
-		return "", fmt.Errorf("error starting playwright: %w", err)
+		log.Fatalf("error starting playwright: %v", err)
 	}
-	// Skipping error check since there's nothing we can do if this fails
-	defer pw.Stop() //nolint:errcheck
+	downloader.pw = pw
 
 	browser, err := pw.Firefox.Launch(playwright.BrowserTypeLaunchOptions{Headless: playwright.Bool(true)})
 	if err != nil {
-		return "", fmt.Errorf("error launching browser: %w", err)
+		log.Fatalf("error launching browser: %v", err)
 	}
-	defer browser.Close()
+	downloader.browser = browser
 
-	context, err := browser.NewContext(playwright.BrowserNewContextOptions{
+	context, err := downloader.browser.NewContext(playwright.BrowserNewContextOptions{
 		AcceptDownloads:   playwright.Bool(true),
 		IgnoreHttpsErrors: playwright.Bool(true),
 	})
 	if err != nil {
-		return "", fmt.Errorf("error creating browser context: %w", err)
+		log.Fatalf("error creating playwright context: %v", err)
 	}
-	defer context.Close()
 
 	// When pdfs fail to download it is often just because they reach the timeout,
 	// which slows down processing. Decreasing the timeout will hopefully speed this up.
 	context.SetDefaultTimeout(15000)
 
-	page, err := context.NewPage()
+	downloader.context = context
+
+	return downloader
+}
+
+func (downloader *PDFDownloader) Close() error {
+	var errs []error
+
+	if downloader.context != nil {
+		if err := downloader.context.Close(); err != nil {
+			errs = append(errs, fmt.Errorf("error closing browser context: %w", err))
+		}
+	}
+
+	if downloader.browser != nil {
+		if err := downloader.browser.Close(); err != nil {
+			errs = append(errs, fmt.Errorf("error closing browser: %w", err))
+		}
+	}
+
+	if downloader.pw != nil {
+		if err := downloader.pw.Stop(); err != nil {
+			errs = append(errs, fmt.Errorf("error stopping playwright: %w", err))
+		}
+	}
+
+	return errors.Join(errs...)
+}
+
+func (downloader *PDFDownloader) downloadWithPlaywright(url string) (string, error) {
+
+	page, err := downloader.context.NewPage()
 	if err != nil {
 		return "", fmt.Errorf("error opening browser page: %w", err)
 	}
-	// context.Close() closes pages in the context
+	defer page.Close()
 
 	download, err := page.ExpectDownload(func() error {
 		// Page.Goto returns an error saying that the download is starting, so we ignore the error

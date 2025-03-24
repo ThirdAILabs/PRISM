@@ -11,6 +11,7 @@ import (
 	"prism/prism/monitoring"
 	"prism/prism/openalex"
 	"prism/prism/pdf"
+	"prism/prism/reports/utils"
 	"regexp"
 	"strconv"
 	"strings"
@@ -22,18 +23,18 @@ import (
 )
 
 type AcknowledgementsExtractor interface {
-	GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan CompletedTask[Acknowledgements]
+	GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan utils.CompletedTask[Acknowledgements]
 }
 
 type GrobidAcknowledgementsExtractor struct {
-	cache        DataCache[Acknowledgements]
-	maxThreads   int
-	grobidSem    *semaphore.Weighted
-	grobidClient *resty.Client
-	downloader   *pdf.PDFDownloader
+	cache            utils.DataCache[Acknowledgements]
+	maxThreads       int
+	grobidSem        *semaphore.Weighted
+	grobidClient     *resty.Client
+	pdfS3CacheBucket string
 }
 
-func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint string, maxDownloadThreads, maxGrobidThreads int, pdfS3CacheBucket string) *GrobidAcknowledgementsExtractor {
+func NewGrobidExtractor(cache utils.DataCache[Acknowledgements], grobidEndpoint string, maxDownloadThreads, maxGrobidThreads int, pdfS3CacheBucket string) *GrobidAcknowledgementsExtractor {
 	return &GrobidAcknowledgementsExtractor{
 		cache:      cache,
 		maxThreads: max(maxDownloadThreads, maxGrobidThreads),
@@ -53,7 +54,7 @@ func NewGrobidExtractor(cache DataCache[Acknowledgements], grobidEndpoint string
 			}).
 			SetRetryWaitTime(2 * time.Second).
 			SetRetryMaxWaitTime(10 * time.Second),
-		downloader: pdf.NewPDFDownloader(pdfS3CacheBucket),
+		pdfS3CacheBucket: pdfS3CacheBucket,
 	}
 }
 
@@ -76,8 +77,8 @@ type Acknowledgements struct {
 	Acknowledgements []Acknowledgement
 }
 
-func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan CompletedTask[Acknowledgements] {
-	outputCh := make(chan CompletedTask[Acknowledgements], len(works))
+func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan utils.CompletedTask[Acknowledgements] {
+	outputCh := make(chan utils.CompletedTask[Acknowledgements], len(works))
 
 	queue := make(chan openalex.Work, len(works))
 
@@ -88,7 +89,7 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 		}
 
 		if cachedAck := extractor.cache.Lookup(workId); cachedAck != nil {
-			outputCh <- CompletedTask[Acknowledgements]{Result: *cachedAck, Error: nil}
+			outputCh <- utils.CompletedTask[Acknowledgements]{Result: *cachedAck, Error: nil}
 		} else {
 			queue <- work
 		}
@@ -96,10 +97,12 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 	}
 	close(queue)
 
+	downloader := pdf.NewPDFDownloader(extractor.pdfS3CacheBucket)
+
 	worker := func(next openalex.Work) (Acknowledgements, error) {
 		workId := parseOpenAlexId(next)
 
-		acks, err := extractor.extractAcknowledgments(workId, next)
+		acks, err := extractor.extractAcknowledgments(workId, next, downloader)
 		if err != nil {
 			return Acknowledgements{}, fmt.Errorf("error extracting acknowledgments for work %s: %w", next.WorkId, err)
 		}
@@ -111,13 +114,13 @@ func (extractor *GrobidAcknowledgementsExtractor) GetAcknowledgements(logger *sl
 
 	nWorkers := min(len(queue), extractor.maxThreads)
 
-	RunInPool(worker, queue, outputCh, nWorkers)
+	utils.RunInPool(worker, queue, outputCh, nWorkers, func() { downloader.Close() })
 
 	return outputCh
 }
 
-func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId string, work openalex.Work) (Acknowledgements, error) {
-	pdfPath, err := extractor.downloader.DownloadWork(work)
+func (extractor *GrobidAcknowledgementsExtractor) extractAcknowledgments(workId string, work openalex.Work, downloader *pdf.PDFDownloader) (Acknowledgements, error) {
+	pdfPath, err := downloader.DownloadWork(work)
 	if err != nil {
 		return Acknowledgements{}, err
 	}

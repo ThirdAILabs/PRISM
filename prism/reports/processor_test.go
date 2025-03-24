@@ -1,4 +1,4 @@
-package flaggers
+package reports_test
 
 import (
 	"os"
@@ -6,8 +6,11 @@ import (
 	"prism/prism/api"
 	"prism/prism/openalex"
 	"prism/prism/reports"
+	"prism/prism/reports/flaggers"
 	"prism/prism/reports/flaggers/eoc"
+	"prism/prism/reports/utils"
 	"prism/prism/schema"
+	"prism/prism/search"
 	"prism/prism/triangulation"
 	"slices"
 	"strings"
@@ -19,16 +22,15 @@ import (
 	"gorm.io/gorm"
 )
 
-func setupReportManager(t *testing.T) *reports.ReportManager {
-	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
-	if err != nil {
-		t.Fatal(err)
+func init() {
+	const licensePath = "../../.test_license/thirdai.license"
+	if err := search.SetLicensePath(licensePath); err != nil {
+		panic(err)
 	}
+}
 
-	if err := db.AutoMigrate(&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{},
-		&schema.UniversityReport{}, &schema.UserUniversityReport{}); err != nil {
-		t.Fatal(err)
-	}
+func setupReportManager(t *testing.T) *reports.ReportManager {
+	db := schema.SetupTestDB(t)
 
 	// We're using old date ranges for these so they only process works around the
 	// date of the flagged work, particularly for the acknowledgements flagger, this
@@ -54,7 +56,7 @@ func yearEnd(year int) time.Time {
 	return time.Date(year, 12, 31, 0, 0, 0, 0, time.UTC)
 }
 
-func getReportContent(t *testing.T, report reports.ReportUpdateTask, processor *ReportProcessor, manager *reports.ReportManager) map[string][]api.Flag {
+func getReportContent(t *testing.T, report reports.ReportUpdateTask, processor *reports.ReportProcessor, manager *reports.ReportManager) map[string][]api.Flag {
 	user := uuid.New()
 	reportId, err := manager.CreateAuthorReport(user, report.AuthorId, report.AuthorName, report.Source)
 	if err != nil {
@@ -82,16 +84,14 @@ func getReportContent(t *testing.T, report reports.ReportUpdateTask, processor *
 
 func TestProcessorCoauthorAffiliation(t *testing.T) {
 	manager := setupReportManager(t)
-	processor := &ReportProcessor{
-		openalex: openalex.NewRemoteKnowledgeBase(),
-		workFlaggers: []WorkFlagger{
-			&OpenAlexCoauthorAffiliationIsEOC{
-				concerningEntities:     eoc.LoadGeneralEOC(),
-				concerningInstitutions: eoc.LoadInstitutionEOC(),
-			},
+
+	processor := reports.NewProcessor(
+		[]reports.WorkFlagger{
+			flaggers.NewOpenAlexCoauthorAffiliationIsEOC(eoc.LoadGeneralEOC(), eoc.LoadInstitutionEOC()),
 		},
-		manager: manager,
-	}
+		nil,
+		manager,
+	)
 
 	t.Run("Case1", func(t *testing.T) {
 		report := getReportContent(
@@ -171,16 +171,13 @@ func TestProcessorCoauthorAffiliation(t *testing.T) {
 func TestProcessorAuthorAffiliation(t *testing.T) {
 	manager := setupReportManager(t)
 
-	processor := &ReportProcessor{
-		openalex: openalex.NewRemoteKnowledgeBase(),
-		workFlaggers: []WorkFlagger{
-			&OpenAlexAuthorAffiliationIsEOC{
-				concerningEntities:     eoc.LoadGeneralEOC(),
-				concerningInstitutions: eoc.LoadInstitutionEOC(),
-			},
+	processor := reports.NewProcessor(
+		[]reports.WorkFlagger{
+			flaggers.NewOpenAlexAuthorAffiliationIsEOC(eoc.LoadGeneralEOC(), eoc.LoadInstitutionEOC()),
 		},
-		manager: manager,
-	}
+		nil,
+		manager,
+	)
 
 	t.Run("Case1", func(t *testing.T) {
 		report := getReportContent(
@@ -253,19 +250,18 @@ func TestProcessorAuthorAffiliation(t *testing.T) {
 }
 
 func TestProcessorUniversityFacultySeach(t *testing.T) {
-	universityNDB := BuildUniversityNDB("../../../data/university_webpages.json", t.TempDir())
+	universityNDB := flaggers.BuildUniversityNDB("../../data/university_webpages.json", t.TempDir())
 	defer universityNDB.Free()
 
 	manager := setupReportManager(t)
-	processor := &ReportProcessor{
-		openalex: openalex.NewRemoteKnowledgeBase(),
-		authorFlaggers: []AuthorFlagger{
-			&AuthorIsFacultyAtEOCFlagger{
-				universityNDB: universityNDB,
-			},
+
+	processor := reports.NewProcessor(
+		nil,
+		[]reports.AuthorFlagger{
+			flaggers.NewAuthorIsFacultyAtEOCFlagger(universityNDB),
 		},
-		manager: manager,
-	}
+		manager,
+	)
 
 	t.Run("Case1", func(t *testing.T) {
 		report := getReportContent(
@@ -326,16 +322,17 @@ func TestProcessorUniversityFacultySeach(t *testing.T) {
 
 func TestProcessorAuthorAssociations(t *testing.T) {
 	manager := setupReportManager(t)
-	processor := &ReportProcessor{
-		openalex: openalex.NewRemoteKnowledgeBase(),
-		workFlaggers: []WorkFlagger{
-			&AuthorIsAssociatedWithEOCFlagger{
-				docIndex: BuildDocIndex("../../../data/docs_and_press_releases.json"),
-				auxIndex: BuildAuxIndex("../../../data/auxiliary_webpages.json"),
-			},
+
+	processor := reports.NewProcessor(
+		[]reports.WorkFlagger{
+			flaggers.NewAuthorIsAssociatedWithEOCFlagger(
+				flaggers.BuildDocIndex("../../data/docs_and_press_releases.json"),
+				flaggers.BuildAuxIndex("../../data/auxiliary_webpages.json"),
+			),
 		},
-		manager: manager,
-	}
+		nil,
+		manager,
+	)
 
 	t.Run("PrimaryConnection", func(t *testing.T) {
 		report := getReportContent(
@@ -448,19 +445,19 @@ func TestProcessorAcknowledgements(t *testing.T) {
 
 	testDir := t.TempDir()
 
-	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(testDir, "authors.cache"))
+	authorCache, err := utils.NewCache[openalex.Author]("authors", filepath.Join(testDir, "authors.cache"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer authorCache.Close()
 
-	ackCache, err := NewCache[Acknowledgements]("acks", filepath.Join(testDir, "acks.cache"))
+	ackCache, err := utils.NewCache[flaggers.Acknowledgements]("acks", filepath.Join(testDir, "acks.cache"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer ackCache.Close()
 
-	entityStore := BuildWatchlistEntityIndex(eoc.LoadSourceToAlias())
+	entityStore := flaggers.BuildWatchlistEntityIndex(eoc.LoadSourceToAlias())
 
 	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
 	if err != nil {
@@ -476,20 +473,16 @@ func TestProcessorAcknowledgements(t *testing.T) {
 	triangulationDB := triangulation.CreateTriangulationDB(db)
 
 	manager := setupReportManager(t)
-	processor := &ReportProcessor{
-		openalex: openalex.NewRemoteKnowledgeBase(),
-		workFlaggers: []WorkFlagger{
-			&OpenAlexAcknowledgementIsEOC{
-				openalex:        openalex.NewRemoteKnowledgeBase(),
-				entityLookup:    entityStore,
-				authorCache:     authorCache,
-				extractor:       NewGrobidExtractor(ackCache, grobidEndpoint, 40, 10, "thirdai-prism"),
-				sussyBakas:      eoc.LoadSussyBakas(),
-				triangulationDB: triangulationDB,
-			},
+
+	processor := reports.NewProcessor(
+		[]reports.WorkFlagger{
+			flaggers.NewOpenAlexAcknowledgementIsEOC(
+				entityStore, authorCache, flaggers.NewGrobidExtractor(ackCache, grobidEndpoint, 40, 10, "thirdai-prism"), eoc.LoadSussyBakas(), triangulationDB,
+			),
 		},
-		manager: manager,
-	}
+		nil,
+		manager,
+	)
 
 	t.Run("Case1", func(t *testing.T) {
 		report := getReportContent(

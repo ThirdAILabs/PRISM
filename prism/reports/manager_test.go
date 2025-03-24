@@ -9,20 +9,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 )
 
 func setup(t *testing.T) *reports.ReportManager {
-	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := db.AutoMigrate(&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{},
-		&schema.UniversityReport{}, &schema.UserUniversityReport{}); err != nil {
-		t.Fatal(err)
-	}
+	db := schema.SetupTestDB(t)
 
 	return reports.NewManager(db).SetStaleReportThreshold(time.Second)
 }

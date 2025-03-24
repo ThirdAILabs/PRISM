@@ -109,7 +109,7 @@ func BuildDocIndex(dataPath string) *search.ManyToOneIndex[LinkMetadata] {
 
 	e := time.Now()
 
-	log.Printf("ndb created successfully time %.3f s", e.Sub(s).Seconds())
+	log.Printf("index created successfully time %.3f s", e.Sub(s).Seconds())
 
 	return index
 }
@@ -149,7 +149,7 @@ func BuildAuxIndex(dataPath string) *search.ManyToOneIndex[LinkMetadata] {
 
 	e := time.Now()
 
-	log.Printf("ndb created successfully time %.3f s", e.Sub(s).Seconds())
+	log.Printf("index created successfully time %.3f s", e.Sub(s).Seconds())
 
 	return index
 }
