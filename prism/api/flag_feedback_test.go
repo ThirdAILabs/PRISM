@@ -4,6 +4,7 @@ import (
 	"prism/prism/api"
 	"prism/prism/reports"
 	"prism/prism/schema"
+	"reflect"
 	"sort"
 	"testing"
 	"time"
@@ -157,10 +158,8 @@ func TestInsertFeedback(t *testing.T) {
 				t.Fatalf("IncorrectAffiliations mismatch")
 			}
 
-			for j := range tempParsedFeedbacks[j].IncorrectAffiliations {
-				if tempParsedFeedbacks[j].IncorrectAffiliations[j] != tempDummyFeedback[j].IncorrectAffiliations[j] {
-					t.Fatalf("IncorrectAffiliations mismatch")
-				}
+			if !reflect.DeepEqual(tempParsedFeedbacks[j].IncorrectAffiliations, tempDummyFeedback[j].IncorrectAffiliations) {
+				t.Fatalf("IncorrectAffiliations mismatch")
 			}
 		}
 
