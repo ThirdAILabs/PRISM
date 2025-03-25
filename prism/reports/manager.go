@@ -376,13 +376,6 @@ func (r *ReportManager) UpdateAuthorReport(id uuid.UUID, status string, updateTi
 			return ErrReportNotFound
 		}
 
-		if status == schema.ReportCompleted {
-			if err := txn.Save(&schema.CompletedAuthorReport{Id: id, CompletedAt: updateTime}).Error; err != nil {
-				slog.Error("error adding completed author report", "author_report_id", id, "error", err)
-				return ErrReportAccessFailed
-			}
-		}
-
 		if len(updateFlags) == 0 {
 			return nil
 		}

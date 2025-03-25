@@ -26,12 +26,7 @@ func Migration3(db *gorm.DB) error {
 		Interval  int
 	}
 
-	type CompletedAuthorReport struct {
-		Id          uuid.UUID `gorm:"type:uuid;primaryKey"`
-		CompletedAt time.Time
-	}
-
-	if err := db.AutoMigrate(&AuthorReportHook{}, &CompletedAuthorReport{}); err != nil {
+	if err := db.AutoMigrate(&AuthorReportHook{}); err != nil {
 		return err
 	}
 
@@ -40,7 +35,7 @@ func Migration3(db *gorm.DB) error {
 
 func Rollback3(db *gorm.DB) error {
 
-	if err := db.Migrator().DropTable("author_report_hooks", "completed_author_reports"); err != nil {
+	if err := db.Migrator().DropTable("author_report_hooks"); err != nil {
 		return err
 	}
 

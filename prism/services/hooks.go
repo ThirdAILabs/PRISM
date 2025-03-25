@@ -105,20 +105,19 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 
 func (s *HookService) RunNextHook() {
 	err := s.db.Transaction(func(txn *gorm.DB) error {
-		var next schema.CompletedAuthorReport
-
-		result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).Limit(1).Order("completed_at ASC").Find(&next)
-		if result.Error != nil {
-			return fmt.Errorf("error retrieving next hook to run: %w", result.Error)
-		}
-
-		if result.RowsAffected != 1 {
-			return nil
-		}
-
 		var userReports []schema.UserAuthorReport
-		if err := txn.Preload("Hooks").Preload("Report").Preload("Report.Flags").Find(&userReports, "report_id = ?", next.Id).Error; err != nil {
-			return fmt.Errorf("error loading user reports: %w", err)
+
+		slog.Info("running hooks")
+		if err := txn.Debug().Clauses(clause.Locking{Strength: "UPDATE"}).
+			Limit(10).
+			Preload("Report").
+			Preload("Report.Flags").
+			Preload("Hooks").
+			Joins("JOIN author_reports ON author_reports.id = user_author_reports.report_id").
+			Joins("JOIN author_report_hooks ON author_report_hooks.user_report_id = user_author_reports.id").
+			Where(`author_reports.last_updated_at > author_report_hooks.last_ran_at + (author_report_hooks.interval || ' seconds')::interval`).
+			Find(&userReports).Error; err != nil {
+			return fmt.Errorf("error retrieving reports with hooks to run: %w", err)
 		}
 
 		for _, report := range userReports {
@@ -128,10 +127,6 @@ func (s *HookService) RunNextHook() {
 			}
 
 			for _, hook := range report.Hooks {
-				if time.Since(hook.LastRanAt) < time.Duration(hook.Interval)*time.Second {
-					continue
-				}
-
 				exec, ok := s.hooks[hook.Action]
 				if !ok {
 					return fmt.Errorf("invalid hook action: %s", hook.Action)
@@ -146,11 +141,6 @@ func (s *HookService) RunNextHook() {
 				}
 			}
 		}
-
-		if err := txn.Delete(&next).Error; err != nil {
-			return fmt.Errorf("error deleting completed author reports: %w", err)
-		}
-
 		return nil
 	})
 

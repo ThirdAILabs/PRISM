@@ -61,8 +61,7 @@ func SetupTestDB(t *testing.T) *gorm.DB {
 	})
 
 	if err := db.AutoMigrate(&AuthorReport{}, &AuthorFlag{}, &UserAuthorReport{},
-		&AuthorReportHook{}, &CompletedAuthorReport{}, &UniversityReport{},
-		&UserUniversityReport{}); err != nil {
+		&AuthorReportHook{}, &UniversityReport{}, &UserUniversityReport{}); err != nil {
 		t.Fatalf("error migrating tables: %v", err)
 	}
 

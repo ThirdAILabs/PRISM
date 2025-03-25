@@ -63,11 +63,6 @@ type AuthorReportHook struct {
 	Interval  int
 }
 
-type CompletedAuthorReport struct {
-	Id          uuid.UUID `gorm:"type:uuid;primaryKey"`
-	CompletedAt time.Time
-}
-
 type UniversityReport struct {
 	Id uuid.UUID `gorm:"type:uuid;primaryKey"`
 
