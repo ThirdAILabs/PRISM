@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { reportService } from '../../api/reports';
 import { universityReportService } from '../../api/universityReports';
-// import './Sidepanel.css';
 import RandomAvatar from '../../assets/images/RandomAvatar.jpg';
 import PRISM_LOGO from '../../assets/images/prism.png';
 import { FaRegUserCircle, FaUniversity, FaSearch } from 'react-icons/fa';
