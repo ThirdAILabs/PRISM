@@ -175,16 +175,18 @@ $z-index-sidebar-header: 1000;
     }
 
     &__name {
-        @include sub-heading-5;
+        @include sub-heading-4;
         padding: 0;
         margin: 0;
+        text-align: left;
         color: $color-grey-900;
     }
 
     &__email {
-        @include paragraph-5;
+        @include paragraph-6;
         margin-top: 0;
         padding-top: 0;
+        text-align: left;
         color: $color-grey-500;
     }
 }
