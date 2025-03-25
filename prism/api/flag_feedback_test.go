@@ -22,41 +22,41 @@ func AddDummyFeedback(flagMap map[string][]api.Flag) []reports.FlagFeedbackTask 
 
 	feedbacks = append(feedbacks, reports.FlagFeedbackTask{
 		Flag: flagMap[api.TalentContractType][0],
-		Feedback: api.FlagFeedback{
+		Feedbacks: []api.FlagFeedback{{
 			IncorrectAuthor: true,
 			EntityNotFound:  true,
-		},
+		}},
 	})
 
 	feedbacks = append(feedbacks, reports.FlagFeedbackTask{
 		Flag: flagMap[api.HighRiskFunderType][0],
-		Feedback: api.FlagFeedback{
+		Feedbacks: []api.FlagFeedback{{
 			EntityNotEoc: true,
-		},
+		}},
 	})
 
 	feedbacks = append(feedbacks, reports.FlagFeedbackTask{
 		Flag: flagMap[api.AuthorAffiliationType][0],
-		Feedback: api.FlagFeedback{
+		Feedbacks: []api.FlagFeedback{{
 			AuthorNotFound: true,
-		},
+		}},
 	})
 
 	feedbacks = append(feedbacks, reports.FlagFeedbackTask{
 		Flag: flagMap[api.CoauthorAffiliationType][0],
-		Feedback: api.FlagFeedback{
+		Feedbacks: []api.FlagFeedback{{
 			IncorrectAffiliations: []string{"Author2", "Author4"},
-		},
+		}},
 	})
 
 	feedbacks = append(feedbacks, reports.FlagFeedbackTask{
 		Flag: flagMap[api.HighRiskPublisherType][0],
-		Feedback: api.FlagFeedback{
+		Feedbacks: []api.FlagFeedback{{
 			IncorrectDoc: api.KeyValue{
 				Key:   "doc1",
 				Value: "https://doc1.article.com",
 			},
-		},
+		}},
 	})
 
 	return feedbacks
@@ -82,70 +82,85 @@ func TestInsertFeedback(t *testing.T) {
 	}
 
 	//save the flag feedback
-	feedbacks := AddDummyFeedback(dummyFlag)
-	for _, feedback := range feedbacks {
-		err := manager.SaveFlagFeedback(reportId, user1, feedback.Flag.GetHash(), feedback.Feedback)
-		if err != nil {
-			t.Fatalf("error inserting feedback: %v", err)
+	DummyFlagsWithfeedbacks := AddDummyFeedback(dummyFlag)
+	for _, flagWithFeedbacks := range DummyFlagsWithfeedbacks {
+		for _, feedback := range flagWithFeedbacks.Feedbacks {
+			err := manager.SaveFlagFeedback(reportId, user1, flagWithFeedbacks.Flag.GetHash(), feedback)
+			if err != nil {
+				t.Fatalf("error inserting feedback: %v", err)
+			}
 		}
 	}
 
 	// check the feedbacks
-	savedFeedbacks, err := manager.GetFlagFeedback(reportId, user1)
+	ParsedFlagsWithFeedbacks, err := manager.GetFlagFeedback(reportId, user1)
 	if err != nil {
 		t.Fatalf("error getting feedback: %v", err)
 	}
 
-	if len(savedFeedbacks) != len(feedbacks) {
-		t.Fatalf("expected %d feedbacks, got %d", len(feedbacks), len(savedFeedbacks))
+	if len(ParsedFlagsWithFeedbacks) != len(DummyFlagsWithfeedbacks) {
+		t.Fatalf("expected %d feedbacks, got %d", len(DummyFlagsWithfeedbacks), len(ParsedFlagsWithFeedbacks))
 	}
 
 	// sorting the feedbacks and savedFeedbacks	for corresponding comparison
-	sort.Slice(feedbacks, func(i, j int) bool {
-		return feedbacks[i].Flag.Type() < feedbacks[j].Flag.Type()
+	sort.Slice(DummyFlagsWithfeedbacks, func(i, j int) bool {
+		return DummyFlagsWithfeedbacks[i].Flag.Type() < DummyFlagsWithfeedbacks[j].Flag.Type()
 	})
 
-	sort.Slice(savedFeedbacks, func(i, j int) bool {
-		return savedFeedbacks[i].Flag.Type() < savedFeedbacks[j].Flag.Type()
+	sort.Slice(ParsedFlagsWithFeedbacks, func(i, j int) bool {
+		return ParsedFlagsWithFeedbacks[i].Flag.Type() < ParsedFlagsWithFeedbacks[j].Flag.Type()
 	})
 
-	for i := range savedFeedbacks {
-		if savedFeedbacks[i].Flag.GetHash() != feedbacks[i].Flag.GetHash() {
+	for i := range ParsedFlagsWithFeedbacks {
+		tempParsedFlag := ParsedFlagsWithFeedbacks[i].Flag
+		tempParsedFeedbacks := ParsedFlagsWithFeedbacks[i].Feedbacks
+		tempDummyFlag := DummyFlagsWithfeedbacks[i].Flag
+		tempDummyFeedback := DummyFlagsWithfeedbacks[i].Feedbacks
+
+		if tempParsedFlag.GetHash() != tempDummyFlag.GetHash() {
 			t.Fatalf("hash mismatch")
 		}
 
-		// Incorrect Author
-		if savedFeedbacks[i].Feedback.AuthorNotFound != feedbacks[i].Feedback.AuthorNotFound {
-			t.Fatalf("AuthorNotFound mismatch")
-		}
+		// verify the feedbacks for this flag
+		for j := range tempParsedFeedbacks {
+			// Author Not Found
+			if tempParsedFeedbacks[j].AuthorNotFound != tempDummyFeedback[j].AuthorNotFound {
+				t.Fatalf("AuthorNotFound mismatch")
+			}
 
-		// EntityNotFound
-		if savedFeedbacks[i].Feedback.EntityNotFound != feedbacks[i].Feedback.EntityNotFound {
-			t.Fatalf("EntityNotFound mismatch")
-		}
+			// IncorrectAuthor
+			if tempParsedFeedbacks[j].IncorrectAuthor != tempDummyFeedback[j].IncorrectAuthor {
+				t.Fatalf("IncorrectAuthor mismatch")
+			}
 
-		// EntityNotEoc
-		if savedFeedbacks[i].Feedback.EntityNotEoc != feedbacks[i].Feedback.EntityNotEoc {
-			t.Fatalf("EntityNotEoc mismatch")
-		}
+			// EntityNotFound
+			if tempParsedFeedbacks[j].EntityNotFound != tempDummyFeedback[j].EntityNotFound {
+				t.Fatalf("EntityNotFound mismatch")
+			}
 
-		// IncorrectDoc
-		if savedFeedbacks[i].Feedback.IncorrectDoc.Key != feedbacks[i].Feedback.IncorrectDoc.Key {
-			t.Fatalf("IncorrectDoc.Key mismatch")
-		}
+			// EntityNotEoc
+			if tempParsedFeedbacks[j].EntityNotEoc != tempDummyFeedback[j].EntityNotEoc {
+				t.Fatalf("EntityNotEoc mismatch")
+			}
 
-		if savedFeedbacks[i].Feedback.IncorrectDoc.Value != feedbacks[i].Feedback.IncorrectDoc.Value {
-			t.Fatalf("IncorrectDoc.Value mismatch")
-		}
+			// IncorrectDoc
+			if tempParsedFeedbacks[j].IncorrectDoc.Key != tempDummyFeedback[j].IncorrectDoc.Key {
+				t.Fatalf("IncorrectDoc.Key mismatch")
+			}
 
-		// IncorrectAffiliations
-		if len(savedFeedbacks[i].Feedback.IncorrectAffiliations) != len(feedbacks[i].Feedback.IncorrectAffiliations) {
-			t.Fatalf("IncorrectAffiliations mismatch")
-		}
+			if tempParsedFeedbacks[j].IncorrectDoc.Value != tempDummyFeedback[j].IncorrectDoc.Value {
+				t.Fatalf("IncorrectDoc.Value mismatch")
+			}
 
-		for j := range savedFeedbacks[i].Feedback.IncorrectAffiliations {
-			if savedFeedbacks[i].Feedback.IncorrectAffiliations[j] != feedbacks[i].Feedback.IncorrectAffiliations[j] {
+			// IncorrectAffiliations
+			if len(tempParsedFeedbacks[j].IncorrectAffiliations) != len(tempDummyFeedback[j].IncorrectAffiliations) {
 				t.Fatalf("IncorrectAffiliations mismatch")
+			}
+
+			for j := range tempParsedFeedbacks[j].IncorrectAffiliations {
+				if tempParsedFeedbacks[j].IncorrectAffiliations[j] != tempDummyFeedback[j].IncorrectAffiliations[j] {
+					t.Fatalf("IncorrectAffiliations mismatch")
+				}
 			}
 		}
 

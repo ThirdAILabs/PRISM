@@ -80,5 +80,5 @@ type FlagFeedback struct {
 	FlagHash   string    `gorm:"type:char(64);not null"`
 	Timestamp  time.Time
 	Data       []byte
-	AuthorFlag AuthorFlag `gorm:"foreignKey:ReportId,FlagHash;references:ReportId,FlagHash"`
+	AuthorFlag *AuthorFlag `gorm:"foreignKey:ReportId,FlagHash;references:ReportId,FlagHash"`
 }

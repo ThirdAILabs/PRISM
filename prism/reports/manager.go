@@ -817,40 +817,47 @@ func (r *ReportManager) SaveFlagFeedback(reportId, userId uuid.UUID, flagHash st
 }
 
 type FlagFeedbackTask struct {
-	Feedback api.FlagFeedback
-	Flag     api.Flag
+	Feedbacks []api.FlagFeedback
+	Flag      api.Flag
 }
 
 func (r *ReportManager) GetFlagFeedback(reportId, userId uuid.UUID) ([]FlagFeedbackTask, error) {
-	var feedbacks []schema.FlagFeedback
+	var report schema.AuthorReport
 
-	if err := r.db.
-		Preload("AuthorFlag").
-		Where("report_id = ? AND user_id = ?", reportId, userId).
-		Find(&feedbacks).Error; err != nil {
+	if err := r.db.Preload("Flags.Feedbacks", "user_id = ?", userId).
+		Preload("Flags").
+		Where("id = ?", reportId).
+		First(&report).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrReportNotFound
+		}
 		slog.Error("error getting feedbacks", "error", err)
-		return nil, fmt.Errorf("error getting feedbacks: %w", err)
+		return nil, ErrReportAccessFailed
 	}
 
-	result := make([]FlagFeedbackTask, 0, len(feedbacks))
-	for _, feedback := range feedbacks {
-		flag, err := api.ParseFlag(feedback.AuthorFlag.FlagType, feedback.AuthorFlag.Data)
+	tasks := make([]FlagFeedbackTask, 0)
+	for _, flag := range report.Flags {
+		temp := make([]api.FlagFeedback, 0)
+		for _, feedback := range flag.Feedbacks {
+			data, err := api.ParseFlagFeedback(feedback.Data)
+			if err != nil {
+				slog.Error("error parsing feedback", "error", err)
+				return nil, fmt.Errorf("error parsing feedback: %w", err)
+			}
+
+			temp = append(temp, data)
+		}
+
+		parsedFlag, err := api.ParseFlag(flag.FlagType, flag.Data)
 		if err != nil {
-			slog.Error("error parsing flag", "error", err)
+			slog.Error("error parsing flag", "flag_type", flag.FlagType)
 			return nil, fmt.Errorf("error parsing flag: %w", err)
 		}
 
-		data, err := api.ParseFlagFeedback(feedback.Data)
-		if err != nil {
-			slog.Error("error parsing feedback", "error", err)
-			return nil, fmt.Errorf("error parsing feedback: %w", err)
-		}
-
-		result = append(result, FlagFeedbackTask{
-			Feedback: data,
-			Flag:     flag,
+		tasks = append(tasks, FlagFeedbackTask{
+			Feedbacks: temp,
+			Flag:      parsedFlag,
 		})
 	}
-
-	return result, nil
+	return tasks, nil
 }
