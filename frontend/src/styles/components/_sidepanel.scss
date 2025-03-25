@@ -141,6 +141,13 @@ $z-index-sidebar-header: 1000;
     &-header {
         background-color: $color-text-100;
         padding: 10px;
+        @include sub-heading-4;
+    }
+
+    &-subheader {
+        display: flex;
+        align-items: center;
+        @include paragraph-5;
     }
 
     &-content {
@@ -149,8 +156,13 @@ $z-index-sidebar-header: 1000;
 
     &-icon {
         cursor: pointer;
-        padding: 0;
+        padding: 2px;
         user-select: none;
+
+        &-text {
+            margin-left: 10px;
+            padding-right: 10px;
+        }
 
         &:hover {
             background-color: $color-grey-100;

@@ -105,14 +105,6 @@ const SidePanel = ({ isOpen, onClose }) => {
           {/* Header */}
           <div
             className="side-panel-header"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              padding: '10px 20px',
-              paddingTop: '0',
-              borderBottom: '1px solid #e0e0e0',
-              gap: '20px',
-            }}
           >
             <img
               src={PRISM_LOGO}
@@ -160,20 +152,13 @@ const SidePanel = ({ isOpen, onClose }) => {
             </h5>
             {reports?.length ? (
               <div className="collapsible-header">
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className='collapsible-subheader'>
                   <div
                     onClick={() => setShowAuthorReports(!showAuthorReports)}
                     className="collapsible-icon"
                   >
                     {showAuthorReports ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
-                    <span
-                      style={{
-                        fontSize: 'medium',
-                        fontWeight: 'normal',
-                        marginLeft: '10px',
-                        marginRight: '10px',
-                      }}
-                    >
+                    <span className='collapsible-icon-text'>
                       Author Report
                     </span>
                   </div>
@@ -213,8 +198,6 @@ const SidePanel = ({ isOpen, onClose }) => {
                         ) : (
                           <span className="text-start">{truncateString(report.AuthorName)}</span>
                         )}
-
-                        {/* <span><MdDelete style={15} /></span> */}
                         <span className={`status ${report.Status}`}>{status[report.Status]}</span>
                       </div>
                     )
@@ -223,16 +206,15 @@ const SidePanel = ({ isOpen, onClose }) => {
             )}
             <div
               className="collapsible-header"
-            // style={{ marginTop: '10px' }}
             >
               {universityReports?.length ? (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className='collapsible-subheader'>
                   <div
                     onClick={() => setShowUniversityReports(!showUniversityReports)}
                     className="collapsible-icon"
                   >
                     {showUniversityReports ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
-                    <span style={{ fontSize: 'medium', marginLeft: '10px', marginRight: '10px' }}>
+                    <span className='collapsible-icon-text'>
                       University Report
                     </span>
                   </div>
@@ -276,7 +258,6 @@ const SidePanel = ({ isOpen, onClose }) => {
                             {truncateString(universityReport.UniversityName)}
                           </span>
                         )}
-                        {/* <span><MdDelete style={15} /></span> */}
                         <span className={`status ${universityReport.Status}`}>
                           {universityReport.Status === 'complete' &&
                             universityReport.Content.TotalAuthors !==
