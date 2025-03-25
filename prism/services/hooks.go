@@ -108,7 +108,7 @@ func (s *HookService) RunNextHook() {
 		var userReports []schema.UserAuthorReport
 
 		slog.Info("running hooks")
-		if err := txn.Debug().Clauses(clause.Locking{Strength: "UPDATE"}).
+		if err := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
 			Limit(10).
 			Preload("Report").
 			Preload("Report.Flags").
