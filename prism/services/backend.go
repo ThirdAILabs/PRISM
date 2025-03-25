@@ -12,7 +12,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"gorm.io/gorm"
 )
 
 type BackendService struct {
@@ -23,11 +22,10 @@ type BackendService struct {
 	userAuth auth.TokenVerifier
 }
 
-func NewBackend(db *gorm.DB, oa openalex.KnowledgeBase, entitySearch *search.ManyToOneIndex[api.MatchedEntity], userAuth auth.TokenVerifier, licensing *licensing.LicenseVerifier, resourceFolder string) *BackendService {
+func NewBackend(manager *reports.ReportManager, oa openalex.KnowledgeBase, entitySearch *search.ManyToOneIndex[api.MatchedEntity], userAuth auth.TokenVerifier, licensing *licensing.LicenseVerifier, resourceFolder string) *BackendService {
 	return &BackendService{
 		report: ReportService{
-			manager:        reports.NewManager(db),
-			db:             db,
+			manager:        manager,
 			licensing:      licensing,
 			resourceFolder: resourceFolder,
 		},
