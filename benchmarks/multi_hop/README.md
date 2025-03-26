@@ -1,5 +1,5 @@
 # Multi-hop Connection Benchmark Dataset
-This dataset is curated to benchmark the quality of PRISM's multi-hop connection scraping.
+This dataset is curated to benchmark the quality of PRISM's multi-hop connection scraping. To create this dataset, we started with a DOJ article, manually identified entities in it, and then recursively searched the web for resources about the indicted entity and entities connected to it. 
 
 ## Tables
 It contains 4 tables, all stored in JSON.
