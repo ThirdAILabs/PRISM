@@ -1,0 +1,826 @@
+{
+  "entities": [
+    {
+      "id": 1,
+      "name": "John Harold Rogers",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": true
+    },
+    {
+      "id": 2,
+      "name": "Federal Reserve Board of Governors",
+      "aliases": [
+        "Federal Reserve",
+        "FRB",
+        "FRB-OIG",
+        "Federal Open Market Committee",
+        "Federal Reserve Board",
+        "Federal Reserve Board International Finance Division"
+      ],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 3,
+      "name": "People's Republic of China",
+      "aliases": [
+        "PRC",
+        "Chinese Government",
+        "Chinese Communist Party",
+        "China"
+      ],
+      "type": "organization",
+      "high_risk": true
+    },
+    {
+      "id": 4,
+      "name": "Devin DeBacker",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 5,
+      "name": "Trump",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 6,
+      "name": "Edward R. Martin Jr.",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 7,
+      "name": "Kevin Vorndran",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 8,
+      "name": "FBI",
+      "aliases": [
+        "FBI Counterintelligence Division",
+        "FBI Washington Field Office"
+      ],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 9,
+      "name": "David Sundberg",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 10,
+      "name": "John T. Perez",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 11,
+      "name": "Kimberly Paschall",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 12,
+      "name": "District of Columbia",
+      "aliases": [],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 13,
+      "name": "Nicholas Hunter",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 14,
+      "name": "Steve Marzen",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 15,
+      "name": "Fudan University",
+      "aliases": [
+        "Fudan International School of Finance",
+        "Fanhai International School of Finance"
+      ],
+      "type": "organization",
+      "high_risk": true
+    },
+    {
+      "id": 16,
+      "name": "Shanghai University of Finance and Economics",
+      "aliases": [],
+      "type": "organization",
+      "high_risk": true
+    },
+    {
+      "id": 17,
+      "name": "University of Virginia",
+      "aliases": [
+        "University of Virginia Darden School of Business"
+      ],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 18,
+      "name": "University of Kentucky",
+      "aliases": [],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 19,
+      "name": "Penn State University",
+      "aliases": [
+        "Penn State"
+      ],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 20,
+      "name": "Johns Hopkins University",
+      "aliases": [
+        "Johns Hopkins"
+      ],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 21,
+      "name": "Georgetown University",
+      "aliases": [
+        "Georgetown"
+      ],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 22,
+      "name": "Charles Engel",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 23,
+      "name": "Chang Ma",
+      "aliases": [
+        "\u9a6c\u7545"
+      ],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 24,
+      "name": "Sili Zhou",
+      "aliases": [
+        "\u5468\u601d\u529b",
+        "Alex Sili Zhou"
+      ],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 25,
+      "name": "Bo Sun",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 26,
+      "name": "Tony Sun",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 27,
+      "name": "Jon Faust",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 28,
+      "name": "Chunya Bu",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 29,
+      "name": "Wenbin Wu",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 30,
+      "name": "Shing-Yi Wang",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 31,
+      "name": "Jonathan Wright",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 32,
+      "name": "Shaghil Ahmed",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 33,
+      "name": "Lucas Husted",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 34,
+      "name": "Jose Ferrer",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 35,
+      "name": "Jiawen Xu",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 36,
+      "name": "Danilo Cascaldi-Garcia",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 37,
+      "name": "National Natural Science Foundation of China",
+      "aliases": [],
+      "type": "organization",
+      "high_risk": true
+    },
+    {
+      "id": 38,
+      "name": "National Natural Science Funds for International Senior Scientists",
+      "aliases": [
+        "Grant No. 72250710168"
+      ],
+      "type": "funding",
+      "high_risk": true
+    },
+    {
+      "id": 39,
+      "name": "Shanghai Leading Talents (Overseas) Project",
+      "aliases": [
+        "2022\u5e74\u4e0a\u6d77\u5e02\u9886\u519b\u4eba\u624d(\u6d77\u5916)\u9879\u76ee"
+      ],
+      "type": "funding",
+      "high_risk": true
+    },
+    {
+      "id": 40,
+      "name": "Changjiang (Overseas) Project",
+      "aliases": [
+        "2022\u5e74\u5ea6\"\u957f\u6c5f\u5b66\u8005\u5956\u52b1\u8ba1\u5212\"\u8bb2\u5e2d\u5b66\u8005\u9879\u76ee"
+      ],
+      "type": "funding",
+      "high_risk": true
+    },
+    {
+      "id": 41,
+      "name": "Daniel Ostry",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 42,
+      "name": "Gabriele Ciminelli",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 43,
+      "name": "Gang Wang",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 44,
+      "name": "Haiqin Liu",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 45,
+      "name": "Jingbo Yao",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 46,
+      "name": "John Ammer",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 47,
+      "name": "Jongrim Han",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 48,
+      "name": "Juanyi Xu",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 49,
+      "name": "Julian di Giovanni",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 50,
+      "name": "Michael Ehrmann",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 51,
+      "name": "Thiago Ferreira",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 52,
+      "name": "Yang Yu",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 53,
+      "name": "World Bank",
+      "aliases": [],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 54,
+      "name": "Hong Kong Institute for Monetary and Financial Research",
+      "aliases": [],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 55,
+      "name": "Journal of Financial and Quantitative Analysis",
+      "aliases": [],
+      "type": "publication",
+      "high_risk": false
+    },
+    {
+      "id": 56,
+      "name": "Journal of Money, Credit, and Banking",
+      "aliases": [],
+      "type": "publication",
+      "high_risk": false
+    },
+    {
+      "id": 57,
+      "name": "Management Science",
+      "aliases": [],
+      "type": "publication",
+      "high_risk": false
+    },
+    {
+      "id": 58,
+      "name": "IMF Economic Review",
+      "aliases": [],
+      "type": "publication",
+      "high_risk": false
+    },
+    {
+      "id": 59,
+      "name": "Journal of the European Economic Association",
+      "aliases": [],
+      "type": "publication",
+      "high_risk": false
+    },
+    {
+      "id": 60,
+      "name": "Journal of Economic Literature",
+      "aliases": [],
+      "type": "publication",
+      "high_risk": false
+    },
+    {
+      "id": 61,
+      "name": "Journal of International Money and Finance",
+      "aliases": [],
+      "type": "publication",
+      "high_risk": false
+    },
+    {
+      "id": 62,
+      "name": "Journal of Monetary Economics",
+      "aliases": [],
+      "type": "publication",
+      "high_risk": false
+    },
+    {
+      "id": 63,
+      "name": "IMF Staff Papers",
+      "aliases": [],
+      "type": "publication",
+      "high_risk": false
+    },
+    {
+      "id": 64,
+      "name": "Peking University",
+      "aliases": [
+        "Guanghua School of Management"
+      ],
+      "type": "organization",
+      "high_risk": true
+    },
+    {
+      "id": 65,
+      "name": "Macro Finance Society",
+      "aliases": [],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 66,
+      "name": "Carnegie Mellon University",
+      "aliases": [],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 67,
+      "name": "American Economic Journal: Microeconomics",
+      "aliases": [],
+      "type": "publication",
+      "high_risk": false
+    },
+    {
+      "id": 68,
+      "name": "American Economic Review",
+      "aliases": [],
+      "type": "publication",
+      "high_risk": false
+    },
+    {
+      "id": 69,
+      "name": "Journal of Economic Dynamics and Control",
+      "aliases": [],
+      "type": "publication",
+      "high_risk": false
+    },
+    {
+      "id": 70,
+      "name": "Economic Theory",
+      "aliases": [],
+      "type": "publication",
+      "high_risk": false
+    },
+    {
+      "id": 71,
+      "name": "Economics Letters",
+      "aliases": [],
+      "type": "publication",
+      "high_risk": false
+    },
+    {
+      "id": 72,
+      "name": "International Economic Review",
+      "aliases": [],
+      "type": "publication",
+      "high_risk": false
+    },
+    {
+      "id": 73,
+      "name": "Jiajun Jiang",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 74,
+      "name": "Qi Liu",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 75,
+      "name": "Da Huo",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 76,
+      "name": "Mingzhu Tai",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 77,
+      "name": "Yuhai Xuan",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 78,
+      "name": "Xi Dong",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 79,
+      "name": "Lei Lu",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 80,
+      "name": "Hongjun Yan",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 81,
+      "name": "Bank of Finland",
+      "aliases": [],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 82,
+      "name": "IMF",
+      "aliases": [],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 83,
+      "name": "Alessandro Rebucci",
+      "aliases": [
+        "A Rebucci"
+      ],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 84,
+      "name": "Dominik Boddin",
+      "aliases": [
+        "D Boddin"
+      ],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 85,
+      "name": "Daniel Marcel te Kaat",
+      "aliases": [
+        "DM te Kaat",
+        "DM Kaat"
+      ],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 86,
+      "name": "Fabian Valencia",
+      "aliases": [
+        "F Valencia"
+      ],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 87,
+      "name": "Haoyuan Ding",
+      "aliases": [
+        "H Ding"
+      ],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 88,
+      "name": "H Du",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 89,
+      "name": "Hidehiko Matsumoto",
+      "aliases": [
+        "H Matsumoto"
+      ],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 90,
+      "name": "H Nguyen",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 91,
+      "name": "Hewei Shen",
+      "aliases": [
+        "H Shen"
+      ],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 92,
+      "name": "Kaiji Chen",
+      "aliases": [
+        "K Chen"
+      ],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 93,
+      "name": "Kees Koedijk",
+      "aliases": [
+        "K Koedijk"
+      ],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 94,
+      "name": "P Bednarek",
+      "aliases": [
+        "Peter Bednarek"
+      ],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 95,
+      "name": "Siming Liu",
+      "aliases": [
+        "S Liu"
+      ],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 96,
+      "name": "Shang-Jin Wei",
+      "aliases": [
+        "SJ Wei"
+      ],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 97,
+      "name": "Y Jin",
+      "aliases": [],
+      "type": "individual",
+      "high_risk": false
+    },
+    {
+      "id": 98,
+      "name": "University of Groningen",
+      "aliases": [],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 99,
+      "name": "Deutsche Bundesbank",
+      "aliases": [],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 100,
+      "name": "University of Oklahoma",
+      "aliases": [],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 101,
+      "name": "Binghamton University",
+      "aliases": [],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 102,
+      "name": "Hoogleraar Utrecht",
+      "aliases": [],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 103,
+      "name": "Emory University",
+      "aliases": [],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 104,
+      "name": "International Macroeconomics and Finance",
+      "aliases": [],
+      "type": "publication",
+      "high_risk": false
+    },
+    {
+      "id": 105,
+      "name": "Monetary Economics and Fluctuations",
+      "aliases": [],
+      "type": "publication",
+      "high_risk": false
+    },
+    {
+      "id": 106,
+      "name": "University of Macau",
+      "aliases": [],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 107,
+      "name": "Asian Bureau of Finance and Economic Research",
+      "aliases": [],
+      "type": "organization",
+      "high_risk": false
+    },
+    {
+      "id": 108,
+      "name": "National Security Division",
+      "aliases": [
+        "National Security Division Counterintelligence and Export Section"
+      ],
+      "type": "organization",
+      "high_risk": false
+    }
+  ]
+}

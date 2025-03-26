@@ -1,0 +1,636 @@
+{
+  "entity_connections": [
+    {
+      "id": 1,
+      "resource_id": 1,
+      "entity1_id": 1,
+      "entity2_id": 2,
+      "relationship": "employed by",
+      "relationship_details": "Senior Advisor for the Federal Reserve Board of Governors"
+    },
+    {
+      "id": 2,
+      "resource_id": 1,
+      "entity1_id": 1,
+      "entity2_id": 3,
+      "relationship": "shared information with",
+      "relationship_details": "Shared U.S. trade secrets since at least 2018"
+    },
+    {
+      "id": 3,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 2,
+      "relationship": "employed by",
+      "relationship_details": "Advisor at Federal Reserve Board from 1994 to 2021"
+    },
+    {
+      "id": 4,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 15,
+      "relationship": "employed by",
+      "relationship_details": "Professor in the Fudan International School of Finance since 2021"
+    },
+    {
+      "id": 5,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 17,
+      "relationship": "taught at",
+      "relationship_details": "Professor"
+    },
+    {
+      "id": 6,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 18,
+      "relationship": "taught at",
+      "relationship_details": "Professor"
+    },
+    {
+      "id": 7,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 19,
+      "relationship": "taught at",
+      "relationship_details": "Professor"
+    },
+    {
+      "id": 8,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 20,
+      "relationship": "taught at",
+      "relationship_details": "Professor"
+    },
+    {
+      "id": 9,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 21,
+      "relationship": "taught at",
+      "relationship_details": "Professor"
+    },
+    {
+      "id": 10,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 16,
+      "relationship": "taught at",
+      "relationship_details": "Professor"
+    },
+    {
+      "id": 11,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 22,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 12,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 23,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 13,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 24,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 14,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 25,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 15,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 26,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 16,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 27,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 17,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 28,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 18,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 29,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 19,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 30,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 20,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 31,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 21,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 32,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 22,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 33,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 23,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 34,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 24,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 35,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 25,
+      "resource_id": 2,
+      "entity1_id": 1,
+      "entity2_id": 36,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 26,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 37,
+      "relationship": "received funding from",
+      "relationship_details": "Received grant from National Natural Science Foundation of China"
+    },
+    {
+      "id": 27,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 38,
+      "relationship": "received",
+      "relationship_details": "Received grant of 1.6 million RMB"
+    },
+    {
+      "id": 28,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 39,
+      "relationship": "received",
+      "relationship_details": "Received grant in 2022"
+    },
+    {
+      "id": 29,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 40,
+      "relationship": "received",
+      "relationship_details": "Received grant in 2022"
+    },
+    {
+      "id": 30,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 25,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 31,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 23,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 32,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 22,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 33,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 28,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 34,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 41,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 35,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 36,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 36,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 42,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 37,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 43,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 38,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 44,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 39,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 35,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 40,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 45,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 41,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 46,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 42,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 47,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 43,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 34,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 44,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 48,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 45,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 49,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 46,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 33,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 47,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 50,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 48,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 24,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 49,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 51,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 50,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 26,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 51,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 29,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 52,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 52,
+      "relationship": "collaborated with",
+      "relationship_details": "Research partner since 2020"
+    },
+    {
+      "id": 53,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 53,
+      "relationship": "worked for",
+      "relationship_details": "Employed"
+    },
+    {
+      "id": 54,
+      "resource_id": 3,
+      "entity1_id": 1,
+      "entity2_id": 54,
+      "relationship": "worked for",
+      "relationship_details": "Employed"
+    },
+    {
+      "id": 55,
+      "resource_id": 14,
+      "entity1_id": 25,
+      "entity2_id": 17,
+      "relationship": "employed by",
+      "relationship_details": "Associate Professor of Business Administration"
+    },
+    {
+      "id": 56,
+      "resource_id": 14,
+      "entity1_id": 25,
+      "entity2_id": 107,
+      "relationship": "affiliated with",
+      "relationship_details": "Fellow"
+    },
+    {
+      "id": 57,
+      "resource_id": 14,
+      "entity1_id": 25,
+      "entity2_id": 56,
+      "relationship": "affiliated with",
+      "relationship_details": "Associate editor"
+    },
+    {
+      "id": 58,
+      "resource_id": 15,
+      "entity1_id": 25,
+      "entity2_id": 1,
+      "relationship": "collaborated with",
+      "relationship_details": "Research publications together"
+    },
+    {
+      "id": 59,
+      "resource_id": 15,
+      "entity1_id": 25,
+      "entity2_id": 17,
+      "relationship": "employed by",
+      "relationship_details": "Associate Professor of Business Administration from 2022 to present"
+    },
+    {
+      "id": 60,
+      "resource_id": 15,
+      "entity1_id": 25,
+      "entity2_id": 2,
+      "relationship": "employed by",
+      "relationship_details": "Economist 2009-2011, Senior Economist 2014-2019, Principal Economist 2019-2022"
+    },
+    {
+      "id": 61,
+      "resource_id": 15,
+      "entity1_id": 25,
+      "entity2_id": 64,
+      "relationship": "employed by",
+      "relationship_details": "Assistant Professor from 2011 to 2014"
+    },
+    {
+      "id": 62,
+      "resource_id": 15,
+      "entity1_id": 25,
+      "entity2_id": 73,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 63,
+      "resource_id": 15,
+      "entity1_id": 25,
+      "entity2_id": 74,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 64,
+      "resource_id": 15,
+      "entity1_id": 25,
+      "entity2_id": 75,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 65,
+      "resource_id": 15,
+      "entity1_id": 25,
+      "entity2_id": 76,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 66,
+      "resource_id": 15,
+      "entity1_id": 25,
+      "entity2_id": 77,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 67,
+      "resource_id": 15,
+      "entity1_id": 25,
+      "entity2_id": 78,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 68,
+      "resource_id": 15,
+      "entity1_id": 25,
+      "entity2_id": 74,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 69,
+      "resource_id": 15,
+      "entity1_id": 25,
+      "entity2_id": 79,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 70,
+      "resource_id": 15,
+      "entity1_id": 25,
+      "entity2_id": 80,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 71,
+      "resource_id": 15,
+      "entity1_id": 25,
+      "entity2_id": 74,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 72,
+      "resource_id": 27,
+      "entity1_id": 23,
+      "entity2_id": 15,
+      "relationship": "employed by",
+      "relationship_details": "Associate Professor of Finance"
+    },
+    {
+      "id": 73,
+      "resource_id": 27,
+      "entity1_id": 23,
+      "entity2_id": 81,
+      "relationship": "affiliated with",
+      "relationship_details": "Employee"
+    },
+    {
+      "id": 74,
+      "resource_id": 27,
+      "entity1_id": 23,
+      "entity2_id": 54,
+      "relationship": "affiliated with",
+      "relationship_details": "Employee"
+    },
+    {
+      "id": 75,
+      "resource_id": 28,
+      "entity1_id": 23,
+      "entity2_id": 1,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 76,
+      "resource_id": 28,
+      "entity1_id": 23,
+      "entity2_id": 24,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 77,
+      "resource_id": 29,
+      "entity1_id": 23,
+      "entity2_id": 15,
+      "relationship": "employed by",
+      "relationship_details": "Associate Professor of Finance at Fanhai International School of Finance"
+    },
+    {
+      "id": 78,
+      "resource_id": 29,
+      "entity1_id": 23,
+      "entity2_id": 1,
+      "relationship": "collaborated with",
+      "relationship_details": "Research collaborator"
+    },
+    {
+      "id": 79,
+      "resource_id": 60,
+      "entity1_id": 24,
+      "entity2_id": 106,
+      "relationship": "employed by",
+      "relationship_details": "Faculty member"
+    }
+  ]
+}

@@ -1,0 +1,424 @@
+{
+  "resources": [
+    {
+      "id": 1,
+      "query_entity_id": 1,
+      "url": "https://www.justice.gov/opa/pr/former-senior-adviser-federal-reserve-indicted-charges-economic-espionage",
+      "true_positive": true
+    },
+    {
+      "id": 2,
+      "query_entity_id": 1,
+      "url": "https://www.johnrogerseconomist.net/",
+      "true_positive": true
+    },
+    {
+      "id": 3,
+      "query_entity_id": 1,
+      "url": "https://www.dropbox.com/scl/fi/28o4owoul4mn5zy0d5twu/JRVITA.pdf?rlkey=bf857rpv2qt1njrzehdf858qo&e=1&dl=0",
+      "true_positive": true
+    },
+    {
+      "id": 4,
+      "query_entity_id": 1,
+      "url": "https://apnews.com/article/federal-reserve-indictment-john-rogers-trade-secrets-85495074e61d8455d9f65e3660f8af1c",
+      "true_positive": true
+    },
+    {
+      "id": 5,
+      "query_entity_id": 1,
+      "url": "https://www.reuters.com/world/us/ex-federal-reserve-adviser-arrested-passing-trade-secrets-china-2025-01-31/",
+      "true_positive": true
+    },
+    {
+      "id": 6,
+      "query_entity_id": 1,
+      "url": "https://www.newsweek.com/john-rogers-china-conspiracy-espionage-2024587",
+      "true_positive": true
+    },
+    {
+      "id": 7,
+      "query_entity_id": 1,
+      "url": "https://www.cbsnews.com/news/former-senior-adviser-for-federal-reserve-indicted-on-economic-espionage-charges/",
+      "true_positive": true
+    },
+    {
+      "id": 8,
+      "query_entity_id": 1,
+      "url": "https://www.fox9.com/news/fed-economic-espionage-china",
+      "true_positive": true
+    },
+    {
+      "id": 9,
+      "query_entity_id": 1,
+      "url": "https://www.texasranger.org/Hall-of-Fame/Rogers-John",
+      "true_positive": false
+    },
+    {
+      "id": 10,
+      "query_entity_id": 1,
+      "url": "https://en.wikipedia.org/wiki/John_H._Rogers",
+      "true_positive": false
+    },
+    {
+      "id": 11,
+      "query_entity_id": 1,
+      "url": "https://malegislature.gov/Legislators/Profile/JHR1",
+      "true_positive": false
+    },
+    {
+      "id": 12,
+      "query_entity_id": 1,
+      "url": "https://ancestors.familysearch.org/en/L6S3-MLB/john-harold-rogers-1898-1966",
+      "true_positive": false
+    },
+    {
+      "id": 13,
+      "query_entity_id": 1,
+      "url": "https://www.johnhrogersantiques.com/",
+      "true_positive": false
+    },
+    {
+      "id": 14,
+      "query_entity_id": 25,
+      "url": "https://sites.google.com/site/bosun09/home",
+      "true_positive": true
+    },
+    {
+      "id": 15,
+      "query_entity_id": 25,
+      "url": "https://drive.google.com/file/d/1H0wHvTrOE36103MGuFGbrnhD_RfvRwP1/view?pli=1",
+      "true_positive": true
+    },
+    {
+      "id": 16,
+      "query_entity_id": 25,
+      "url": "https://www.darden.virginia.edu/faculty-research/directory/bo-sun",
+      "true_positive": true
+    },
+    {
+      "id": 17,
+      "query_entity_id": 25,
+      "url": "https://sites.google.com/view/bosun/home",
+      "true_positive": false
+    },
+    {
+      "id": 18,
+      "query_entity_id": 25,
+      "url": "https://www.lamar.edu/arts-sciences/computer-science/faculty-staff/bo_sun.html",
+      "true_positive": false
+    },
+    {
+      "id": 19,
+      "query_entity_id": 25,
+      "url": "https://physics.oregonstate.edu/directory/bo-sun",
+      "true_positive": false
+    },
+    {
+      "id": 20,
+      "query_entity_id": 25,
+      "url": "https://scholar.google.com/citations?user=H9Yzbw4AAAAJ&hl=en",
+      "true_positive": false
+    },
+    {
+      "id": 21,
+      "query_entity_id": 25,
+      "url": "https://www.vocabulary.com/dictionary/bo'sun",
+      "true_positive": false
+    },
+    {
+      "id": 22,
+      "query_entity_id": 25,
+      "url": "https://en.wikipedia.org/wiki/Boatswain",
+      "true_positive": false
+    },
+    {
+      "id": 23,
+      "query_entity_id": 25,
+      "url": "https://www.linkedin.com/in/bosunnusob",
+      "true_positive": false
+    },
+    {
+      "id": 24,
+      "query_entity_id": 25,
+      "url": "https://sunbo-online.github.io/",
+      "true_positive": false
+    },
+    {
+      "id": 25,
+      "query_entity_id": 25,
+      "url": "http://bo-sun.group/",
+      "true_positive": false
+    },
+    {
+      "id": 26,
+      "query_entity_id": 25,
+      "url": "https://bsun0802.github.io/",
+      "true_positive": false
+    },
+    {
+      "id": 27,
+      "query_entity_id": 23,
+      "url": "https://machang.weebly.com/",
+      "true_positive": true
+    },
+    {
+      "id": 28,
+      "query_entity_id": 23,
+      "url": "https://scholar.google.com/citations?user=JtcSA2YAAAAJ&hl=en",
+      "true_positive": true
+    },
+    {
+      "id": 29,
+      "query_entity_id": 23,
+      "url": "https://cepr.org/about/people/chang-ma",
+      "true_positive": true
+    },
+    {
+      "id": 30,
+      "query_entity_id": 23,
+      "url": "https://machang.weebly.com/research.html",
+      "true_positive": true
+    },
+    {
+      "id": 31,
+      "query_entity_id": 23,
+      "url": "https://voxchina.org/show-4-363.html",
+      "true_positive": true
+    },
+    {
+      "id": 32,
+      "query_entity_id": 23,
+      "url": "https://fisf.fudan.edu.cn/en_show-112-88.html",
+      "true_positive": true
+    },
+    {
+      "id": 33,
+      "query_entity_id": 23,
+      "url": "https://www.suomenpankki.fi/en/bank-of-finland/board-and-organisation/experts/chang-ma/",
+      "true_positive": true
+    },
+    {
+      "id": 34,
+      "query_entity_id": 23,
+      "url": "https://chang-github-00.github.io/-changma/",
+      "true_positive": false
+    },
+    {
+      "id": 35,
+      "query_entity_id": 23,
+      "url": "https://openreview.net/profile?id=~Chang_Ma2",
+      "true_positive": false
+    },
+    {
+      "id": 36,
+      "query_entity_id": 23,
+      "url": "https://www.imdb.com/name/nm0156518/",
+      "true_positive": false
+    },
+    {
+      "id": 37,
+      "query_entity_id": 23,
+      "url": "https://research.rug.nl/en/persons/chang-ma",
+      "true_positive": false
+    },
+    {
+      "id": 38,
+      "query_entity_id": 23,
+      "url": "https://www.linkedin.com/in/chang--ma/en",
+      "true_positive": false
+    },
+    {
+      "id": 39,
+      "query_entity_id": 23,
+      "url": "https://hhs.purdue.edu/directory/chang-evita-ma/",
+      "true_positive": false
+    },
+    {
+      "id": 40,
+      "query_entity_id": 23,
+      "url": "https://www.changseokma.com/",
+      "true_positive": false
+    },
+    {
+      "id": 41,
+      "query_entity_id": 23,
+      "url": "https://www.pfchangs.com/menu/main-entrees/ma-po-tofu",
+      "true_positive": false
+    },
+    {
+      "id": 42,
+      "query_entity_id": 23,
+      "url": "https://mersi.com/peter-y-chang-md/",
+      "true_positive": false
+    },
+    {
+      "id": 43,
+      "query_entity_id": 22,
+      "url": "https://users.ssc.wisc.edu/~cengel/",
+      "true_positive": true
+    },
+    {
+      "id": 44,
+      "query_entity_id": 22,
+      "url": "https://econ.wisc.edu/staff/engel-charles/",
+      "true_positive": true
+    },
+    {
+      "id": 45,
+      "query_entity_id": 22,
+      "url": "https://en.wikipedia.org/wiki/Charles_Engel",
+      "true_positive": true
+    },
+    {
+      "id": 46,
+      "query_entity_id": 22,
+      "url": "https://scholar.google.com/citations?user=XXrsyJAAAAAJ&hl=en",
+      "true_positive": true
+    },
+    {
+      "id": 47,
+      "query_entity_id": 22,
+      "url": "https://www.nber.org/people/charles_engel",
+      "true_positive": true
+    },
+    {
+      "id": 48,
+      "query_entity_id": 22,
+      "url": "https://cepr.org/about/people/charles-engel",
+      "true_positive": true
+    },
+    {
+      "id": 49,
+      "query_entity_id": 22,
+      "url": "https://www.ratemyprofessors.com/professor/913089",
+      "true_positive": true
+    },
+    {
+      "id": 50,
+      "query_entity_id": 22,
+      "url": "https://www.socialscience.international/charles-engel",
+      "true_positive": true
+    },
+    {
+      "id": 51,
+      "query_entity_id": 22,
+      "url": "https://macrohive.com/hive-podcasts/ep-243-charles-engel-on-currency-models-carry-trades-and-capital-flows/",
+      "true_positive": true
+    },
+    {
+      "id": 52,
+      "query_entity_id": 22,
+      "url": "https://psychiatry.uw.edu/profile/charles-engel/",
+      "true_positive": false
+    },
+    {
+      "id": 53,
+      "query_entity_id": 22,
+      "url": "https://www.maxsass.com/obituaries/charles-chuck-c-engel-ii",
+      "true_positive": false
+    },
+    {
+      "id": 54,
+      "query_entity_id": 22,
+      "url": "https://www.kslaw.com/people/charles-engel",
+      "true_positive": false
+    },
+    {
+      "id": 55,
+      "query_entity_id": 22,
+      "url": "https://www.linkedin.com/in/charles-engel-544a6b33",
+      "true_positive": false
+    },
+    {
+      "id": 56,
+      "query_entity_id": 22,
+      "url": "https://www.rand.org/pubs/authors/e/engel_charles_c.html",
+      "true_positive": false
+    },
+    {
+      "id": 57,
+      "query_entity_id": 22,
+      "url": "https://www.instagram.com/charles_engle/?hl=en",
+      "true_positive": false
+    },
+    {
+      "id": 58,
+      "query_entity_id": 22,
+      "url": "https://www.practiceupdate.com/author/charles-engel/498",
+      "true_positive": false
+    },
+    {
+      "id": 59,
+      "query_entity_id": 24,
+      "url": "https://siliz.weebly.com/",
+      "true_positive": true
+    },
+    {
+      "id": 60,
+      "query_entity_id": 24,
+      "url": "https://fba.um.edu.mo/zh-hant/faculty/silizhou/",
+      "true_positive": true
+    },
+    {
+      "id": 61,
+      "query_entity_id": 24,
+      "url": "https://scholar.google.com.sg/citations?user=hfLYmkEAAAAJ&hl=en",
+      "true_positive": true
+    },
+    {
+      "id": 62,
+      "query_entity_id": 24,
+      "url": "https://fss.um.edu.mo/alex-sili-zhou-周思力/",
+      "true_positive": true
+    },
+    {
+      "id": 63,
+      "query_entity_id": 24,
+      "url": "https://voxchina.org/show-4-365.html",
+      "true_positive": true
+    },
+    {
+      "id": 64,
+      "query_entity_id": 24,
+      "url": "https://scholar.google.com/citations?user=hfLYmkEAAAAJ&hl=fr",
+      "true_positive": true
+    },
+    {
+      "id": 65,
+      "query_entity_id": 24,
+      "url": "https://econ.fudan.edu.cn/ema/sili_zhou_cv2020.pdf",
+      "true_positive": true
+    },
+    {
+      "id": 66,
+      "query_entity_id": 24,
+      "url": "https://www.linkedin.com/in/sili-zhou-853005119/?originalSubdomain=cn",
+      "true_positive": false
+    },
+    {
+      "id": 67,
+      "query_entity_id": 24,
+      "url": "https://www.pinterest.com/zhousiliaini/",
+      "true_positive": false
+    },
+    {
+      "id": 68,
+      "query_entity_id": 24,
+      "url": "https://orcid.org/0000-0003-0882-068X",
+      "true_positive": false
+    },
+    {
+      "id": 69,
+      "query_entity_id": 24,
+      "url": "https://sciprofiles.com/profile/3759551?utm_source=mdpi.com&utm_medium=website&utm_campaign=avatar_name",
+      "true_positive": false
+    },
+    {
+      "id": 70,
+      "query_entity_id": 24,
+      "url": "https://www.ceads.net/people/environmental_accounts/2023458.html",
+      "true_positive": false
+    }
+  ]
+}
