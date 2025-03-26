@@ -102,14 +102,8 @@ const SidePanel = ({ isOpen, onClose }) => {
       <div className={`side-panel ${isOpen ? 'open' : ''}`}>
         <div className="panel-content">
           {/* Header */}
-          <div
-            className="side-panel-header"
-          >
-            <img
-              src={PRISM_LOGO}
-              alt="PRISM"
-              className="side-panel-header__logo"
-            />
+          <div className="side-panel-header">
+            <img src={PRISM_LOGO} alt="PRISM" className="side-panel-header__logo" />
           </div>
           {/* Navigation */}
           <nav className="navigation">
@@ -151,15 +145,13 @@ const SidePanel = ({ isOpen, onClose }) => {
             </h5>
             {reports?.length ? (
               <div className="collapsible-header">
-                <div className='collapsible-subheader'>
+                <div className="collapsible-subheader">
                   <div
                     onClick={() => setShowAuthorReports(!showAuthorReports)}
                     className="collapsible-icon"
                   >
                     {showAuthorReports ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
-                    <span className='collapsible-icon-text'>
-                      Author Report
-                    </span>
+                    <span className="collapsible-icon-text">Author Report</span>
                   </div>
                 </div>
               </div>
@@ -203,19 +195,15 @@ const SidePanel = ({ isOpen, onClose }) => {
                 )}
               </div>
             )}
-            <div
-              className="collapsible-header"
-            >
+            <div className="collapsible-header">
               {universityReports?.length ? (
-                <div className='collapsible-subheader'>
+                <div className="collapsible-subheader">
                   <div
                     onClick={() => setShowUniversityReports(!showUniversityReports)}
                     className="collapsible-icon"
                   >
                     {showUniversityReports ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
-                    <span className='collapsible-icon-text'>
-                      University Report
-                    </span>
+                    <span className="collapsible-icon-text">University Report</span>
                   </div>
                 </div>
               ) : null}
@@ -259,7 +247,7 @@ const SidePanel = ({ isOpen, onClose }) => {
                         )}
                         <span className={`status ${universityReport.Status}`}>
                           {universityReport.Status === 'complete' &&
-                            universityReport.Content.TotalAuthors !==
+                          universityReport.Content.TotalAuthors !==
                             universityReport.Content.AuthorsReviewed
                             ? status['in-progress']
                             : status[universityReport.Status]}
@@ -274,20 +262,10 @@ const SidePanel = ({ isOpen, onClose }) => {
 
         {/* User Info */}
         <div className="user-info">
-          <img
-            src={user.avatar}
-            alt="User"
-            className="user-info__avatar"
-          />
+          <img src={user.avatar} alt="User" className="user-info__avatar" />
           <div>
-            <h5 className="user-info__name">
-              {user.username}
-            </h5>
-            <span
-              className="user-info__email"
-            >
-              {user.email}
-            </span>
+            <h5 className="user-info__name">{user.username}</h5>
+            <span className="user-info__email">{user.email}</span>
           </div>
         </div>
 

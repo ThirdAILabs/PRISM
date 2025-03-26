@@ -17,194 +17,194 @@ $color-grey-900: rgb(40, 40, 40);
 $z-index-sidebar-header: 1000;
 
 .side-panel {
-    position: fixed;
-    left: -$sidebar-width;
-    top: 0;
-    width: $sidebar-width;
-    height: 100vh;
-    background: $color-text-100;
-    box-shadow: $sidebar-box-shadow;
-    transition: $sidebar-transition;
-    padding: $sidebar-padding;
-    display: flex;
-    flex-direction: column;
+  position: fixed;
+  left: -$sidebar-width;
+  top: 0;
+  width: $sidebar-width;
+  height: 100vh;
+  background: $color-text-100;
+  box-shadow: $sidebar-box-shadow;
+  transition: $sidebar-transition;
+  padding: $sidebar-padding;
+  display: flex;
+  flex-direction: column;
 
-    &.open {
-        left: 0;
-    }
+  &.open {
+    left: 0;
+  }
 }
 
 .panel-content {
-    flex: 1;
-    overflow-y: auto;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .side-panel-header {
-    position: sticky;
-    top: 0;
-    background: $color-text-100;
-    z-index: $z-index-sidebar-header;
-    display: flex;
-    align-items: center;
-    padding: 10px 20px 10px;
-    padding-top: 0;
-    border-bottom: 1px solid $sidebar-border-color;
-    gap: 20px;
+  position: sticky;
+  top: 0;
+  background: $color-text-100;
+  z-index: $z-index-sidebar-header;
+  display: flex;
+  align-items: center;
+  padding: 10px 20px 10px;
+  padding-top: 0;
+  border-bottom: 1px solid $sidebar-border-color;
+  gap: 20px;
 
-    &__logo {
-        width: 150px;
-        height: 30px;
-        margin-left: 5%;
-        user-select: none;
-    }
+  &__logo {
+    width: 150px;
+    height: 30px;
+    margin-left: 5%;
+    user-select: none;
+  }
 }
 
 .navigation {
-    ul {
-        list-style: none;
-        padding: 0;
-        margin-top: 20px;
-    }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+  }
 }
 
 .nav-list {
-    list-style: none;
-    padding: 0;
+  list-style: none;
+  padding: 0;
 }
 
 .nav-item {
-    display: flex;
-    align-items: center;
-    padding: 8px 0;
-    cursor: pointer;
-    background: $color-text-100;
-    color: $color-grey-500;
-    border-radius: 1rem;
-    border: none;
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  cursor: pointer;
+  background: $color-text-100;
+  color: $color-grey-500;
+  border-radius: 1rem;
+  border: none;
 
-    &:hover {
-        background: $color-grey-100;
-        color: $color-grey-900;
-    }
+  &:hover {
+    background: $color-grey-100;
+    color: $color-grey-900;
+  }
 
-    &.active {
-        background: $color-grey-100;
-        color: $color-grey-900;
-    }
+  &.active {
+    background: $color-grey-100;
+    color: $color-grey-900;
+  }
 }
 
 .nav-icon {
-    width: $sidebar-icon-size;
-    display: flex;
-    justify-content: center;
-    margin-right: 12px;
-    margin-left: 5px;
+  width: $sidebar-icon-size;
+  display: flex;
+  justify-content: center;
+  margin-right: 12px;
+  margin-left: 5px;
 }
 
 .reports {
-    margin-top: 20px;
-    margin-left: 1%;
-    color: $color-grey-500;
+  margin-top: 20px;
+  margin-left: 1%;
+  color: $color-grey-500;
 }
 
 .report-header {
-    display: flex;
-    align-items: center;
-    padding: 8px 0;
-    @include sub-heading-4;
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  @include sub-heading-4;
 }
 
 .report-item {
-    padding-inline: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-left: 4%;
-    cursor: pointer;
-    border-radius: 1rem;
-    padding-block: 5px;
-    color: $color-grey-500;
-    @include paragraph-5;
+  padding-inline: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-left: 4%;
+  cursor: pointer;
+  border-radius: 1rem;
+  padding-block: 5px;
+  color: $color-grey-500;
+  @include paragraph-5;
 
-    &:hover {
-        background: $color-grey-100;
-        color: $color-grey-900;
-    }
+  &:hover {
+    background: $color-grey-100;
+    color: $color-grey-900;
+  }
 }
 
 .status {
-    padding: 3px 8px;
-    border-radius: 12px;
-    @include label-6;
+  padding: 3px 8px;
+  border-radius: 12px;
+  @include label-6;
 }
 
 .collapsible {
-    &-header {
-        background-color: $color-text-100;
-        padding: 10px;
-        @include sub-heading-4;
+  &-header {
+    background-color: $color-text-100;
+    padding: 10px;
+    @include sub-heading-4;
+  }
+
+  &-subheader {
+    display: flex;
+    align-items: center;
+    @include paragraph-5;
+  }
+
+  &-content {
+    padding: 10px;
+  }
+
+  &-icon {
+    cursor: pointer;
+    padding: 2px;
+    user-select: none;
+
+    &-text {
+      margin-left: 10px;
+      padding-right: 10px;
     }
 
-    &-subheader {
-        display: flex;
-        align-items: center;
-        @include paragraph-5;
+    &:hover {
+      background-color: $color-grey-100;
+      border-radius: 0.5rem;
+      color: $color-grey-900;
     }
-
-    &-content {
-        padding: 10px;
-    }
-
-    &-icon {
-        cursor: pointer;
-        padding: 2px;
-        user-select: none;
-
-        &-text {
-            margin-left: 10px;
-            padding-right: 10px;
-        }
-
-        &:hover {
-            background-color: $color-grey-100;
-            border-radius: 0.5rem;
-            color: $color-grey-900;
-        }
-    }
+  }
 }
 
 .user-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-left: 2%;
-    border-top: 1px solid $sidebar-border-color;
-    padding-top: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-left: 2%;
+  border-top: 1px solid $sidebar-border-color;
+  padding-top: 15px;
 
-    &__avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 100%;
-    }
+  &__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 100%;
+  }
 
-    &__name {
-        @include sub-heading-4;
-        padding: 0;
-        margin: 0;
-        text-align: left;
-        color: $color-grey-900;
-    }
+  &__name {
+    @include sub-heading-4;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+    color: $color-grey-900;
+  }
 
-    &__email {
-        @include paragraph-6;
-        margin-top: 0;
-        padding-top: 0;
-        text-align: left;
-        color: $color-grey-500;
-    }
+  &__email {
+    @include paragraph-6;
+    margin-top: 0;
+    padding-top: 0;
+    text-align: left;
+    color: $color-grey-500;
+  }
 }
 
 .logout-section {
-    padding: 10px;
-    background: $color-text-100;
+  padding: 10px;
+  background: $color-text-100;
 }
