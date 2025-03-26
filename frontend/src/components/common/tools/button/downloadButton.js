@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { FaFilePdf, FaFileCsv, FaFileExcel } from 'react-icons/fa';
 import { reportService } from '../../../../api/reports';
 import { Tooltip } from '@mui/material';
-
+import '../../../../styles/components/_primaryButton.scss';
 const StyledWrapper = styled.div`
   position: relative;
   .cssbuttons-io-button {
@@ -78,7 +78,7 @@ const Button = ({ reportId, metadata, content, isOpen, setIsOpen, disabled }) =>
     <StyledWrapper>
       <Tooltip title={disabled ? 'Please wait while the report is being generated.' : ''}>
         <button
-          className="cssbuttons-io-button"
+          className="button"
           onClick={() => setIsOpen(!isOpen)}
           disabled={disabled}
           style={{

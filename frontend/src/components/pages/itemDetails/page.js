@@ -25,7 +25,7 @@ import { Snackbar, Tooltip } from '@mui/material';
 import useGoBack from '../../../hooks/useGoBack.js';
 import useOutsideClick from '../../../hooks/useOutsideClick.js';
 import { getRawTextFromXML, getTrailingWhiteSpace } from '../../../utils/helper.js';
-import Collapsible from '../../common/tools/CollapsibleComponent.js';
+import '../../../styles/components/_primaryButton.scss';
 
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
@@ -1153,20 +1153,18 @@ const ItemDetails = () => {
         </div>
         {activeTab === 0 && (
           <div className="d-flex justify-content-end mt-2 gap-2 px-2">
-            <StyledWrapper>
-              <Tooltip title={loading ? 'Please wait while the report is being generated.' : ''}>
-                <button
-                  className="cssbuttons-io-button"
-                  onClick={handleFileUploadClick}
-                  disabled={loading}
-                  style={{
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                  }}
-                >
-                  Verify with Disclosures
-                </button>
-              </Tooltip>
-            </StyledWrapper>
+            <Tooltip title={loading ? 'Please wait while the report is being generated.' : ''}>
+              <button
+                className="button"
+                onClick={handleFileUploadClick}
+                disabled={loading}
+                style={{
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                }}
+              >
+                Verify with Disclosures
+              </button>
+            </Tooltip>
             <input
               type="file"
               ref={fileInputRef}
@@ -1467,35 +1465,5 @@ const buttonStyles = {
   position: 'relative',
   boxShadow: 'none',
 };
-
-const StyledWrapper = styled.div`
-  position: relative;
-
-  .cssbuttons-io-button {
-    position: relative;
-    transition: all 0.3s ease-in-out;
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
-    padding-block: 0.5rem;
-    padding-inline: 0.75rem;
-    background-color: rgb(0 107 179);
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: #ffff;
-    gap: 10px;
-    font-weight: bold;
-    border: 3px solid #ffffff4d;
-    outline: none;
-    overflow: hidden;
-    font-size: 15px;
-  }
-
-  .cssbuttons-io-button:hover {
-    transform: scale(1.009);
-    border-color: #fff9;
-  }
-`;
 
 export default ItemDetails;

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useContext } from 'react';
 import Logo from '../../assets/images/prism-logo.png';
 import '../common/searchBar/SearchBar.css';
-import '../common/tools/button/button1.css';
+import '../../styles/components/_primaryButton.scss';
 import AutocompleteSearchBar from '../../utils/autocomplete';
 import { autocompleteService } from '../../api/autocomplete';
 import useCallOnPause from '../../hooks/useCallOnPause';

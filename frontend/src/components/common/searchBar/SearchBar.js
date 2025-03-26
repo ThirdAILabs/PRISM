@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { SearchContext } from '../../../store/searchContext';
 import { autocompleteService } from '../../../api/autocomplete';
 import './SearchBar.css';
-import '../tools/button/button1.css';
+import '../../../styles/components/_primaryButton.scss';
 import useCallOnPause from '../../../hooks/useCallOnPause';
 import AutocompleteSearchBar from '../../../utils/autocomplete';
 
