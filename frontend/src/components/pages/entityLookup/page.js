@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import '../../common/searchBar/SearchBar.css';
 import '../../../styles/components/_primaryButton.scss';
 
-import './entityLookup.css';
+import '../../../styles/pages/_entityLookup.scss';
+import '../../../styles/components/_entityCard.scss';
 import Logo from '../../../assets/images/prism-logo.png';
 import { searchService } from '../../../api/search';
 import NoResultsFound from '../../common/tools/NoResultsFound';
@@ -54,21 +55,15 @@ function EntityLookup() {
 
   return (
     <div className="basic-setup" style={{ color: 'white' }}>
-      <div style={{ textAlign: 'center', marginTop: '5%', animation: 'fade-in 0.75s' }}>
+      <div className = 'entity-lookup-base'>
         <img
           src={Logo}
           alt="Logo"
-          style={{
-            width: '320px',
-            marginTop: '1%',
-            marginBottom: '1%',
-            marginRight: '2%',
-            animation: 'fade-in 0.5s',
-          }}
+          className='entity-lookup-logo'
         />
-        <div style={{ animation: 'fade-in 1s' }}>
-          <div className="d-flex justify-content-center align-items-center">
-            <div style={{ color: '#888888' }}>
+        <div className = 'entity-lookup-def'>
+          <div className = 'entity-lookup-def-text'>
+            <div className = 'entity-lookup-def-text-color'>
               <h1
                 style={{
                   marginTop: 20,
