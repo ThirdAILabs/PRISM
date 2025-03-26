@@ -5,7 +5,7 @@ import RandomAvatar from '../../assets/images/RandomAvatar.jpg';
 import PRISM_LOGO from '../../assets/images/prism.png';
 import { FaRegUserCircle, FaUniversity, FaSearch } from 'react-icons/fa';
 import UserService from '../../services/userService';
-import { CiLogout } from 'react-icons/ci';
+import { FiLogOut } from "react-icons/fi";
 import { TbReportSearch } from 'react-icons/tb';
 import { CiCircleList, CiCircleCheck } from 'react-icons/ci';
 import { CgSpinner } from 'react-icons/cg';
@@ -15,7 +15,9 @@ import { useLocation } from 'react-router-dom';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { Tooltip } from '@mui/material';
+import { GRAPHICS } from '../../assets/icons/graphics';
 import '../../styles/components/_sidepanel.scss';
+import '../../styles/icon-styles.scss';
 
 const SidePanel = ({ isOpen, onClose }) => {
   const { userInfo } = useUser();
@@ -120,9 +122,10 @@ const SidePanel = ({ isOpen, onClose }) => {
               <li
                 className={`nav-item ${currentLocation === '/university' ? 'active' : ''}`}
                 onClick={handleUniversityClick}
+                style={{hover:'none'}}
               >
                 <span className="nav-icon">
-                  <FaUniversity />
+                  {currentLocation==='/university'? GRAPHICS.university.clicked:GRAPHICS.university.unclicked}
                 </span>
                 <span className="nav-text">University Assessment</span>
               </li>
@@ -261,21 +264,20 @@ const SidePanel = ({ isOpen, onClose }) => {
         </div>
 
         {/* User Info */}
-        <div className="user-info">
-          <img src={user.avatar} alt="User" className="user-info__avatar" />
-          <div>
-            <h5 className="user-info__name">{user.username}</h5>
-            <span className="user-info__email">{user.email}</span>
-          </div>
-        </div>
 
-        {/* Logout */}
-        <div className="logout-section">
-          <button
-            className="btn btn-dark w-100 d-flex align-items-center justify-content-center gap-2 border"
-            onClick={UserService.doLogout}
-          >
-            <CiLogout /> Logout
+        <div className="user-card">
+          <div className="user-card__profile">
+            <img src={user.avatar} alt="User" className="user-card__avatar" />
+            <div className="user-card__info">
+              <h5 className="user-card__name">{user.username}</h5>
+              <span className="user-card__email">{user.email}</span>
+            </div>
+          </div>
+          <hr className="user-card__divider" />
+
+          <button className="user-card__logout-button" onClick={UserService.doLogout}>
+          <span>Logout</span>
+          <FiLogOut/>
           </button>
         </div>
       </div>

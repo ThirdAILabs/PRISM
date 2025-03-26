@@ -173,38 +173,69 @@ $z-index-sidebar-header: 1000;
   }
 }
 
-.user-info {
+.user-card {
   display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-left: 2%;
-  border-top: 1px solid $sidebar-border-color;
-  padding-top: 15px;
-
-  &__avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 100%;
+  flex-direction: column;
+  background-color: $color-primary-100;
+  border-radius: 12px;
+  padding: 15px;
+  width: 100%;
+  max-width: 400px;
+  
+  &__profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 5px;
   }
-
+  
+  &__avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  &__info {
+    display: flex;
+    flex-direction: column;
+  }
+  
   &__name {
     @include sub-heading-4;
-    padding: 0;
+    color: $color-text-900;
     margin: 0;
-    text-align: left;
-    color: $color-grey-900;
   }
-
+  
   &__email {
     @include paragraph-6;
-    margin-top: 0;
-    padding-top: 0;
-    text-align: left;
-    color: $color-grey-500;
+    color: $color-text-700;
+    margin-top: 2px;
   }
-}
+  
+  &__divider {
+    width: 100%;
+    border: none;
+    border-top: 1px solid;
+    margin: 8px 0;
+  }
 
-.logout-section {
-  padding: 10px;
-  background: $color-text-100;
+  &__logout-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: $color-text-700;
+    font-size: 16px;
+    padding: 8px 0;
+    cursor: pointer;
+    width: 100%;
+    background: none;
+    border: none;
+    text-align: left;
+    
+    &:hover {
+      color: $color-primary-700;
+      background-color: transparent;
+    }
+  }
 }
