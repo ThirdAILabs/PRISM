@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import '../components/common/searchBar/SearchBar.css';
-import '../components/common/tools/button/button1.css';
+import '../styles/components/_primaryButton.scss';
 
 function AutocompleteSearchBar({
   title,
