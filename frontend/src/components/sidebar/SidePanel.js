@@ -3,7 +3,6 @@ import { reportService } from '../../api/reports';
 import { universityReportService } from '../../api/universityReports';
 import RandomAvatar from '../../assets/images/RandomAvatar.jpg';
 import PRISM_LOGO from '../../assets/images/prism.png';
-import { FaRegUserCircle, FaUniversity, FaSearch } from 'react-icons/fa';
 import UserService from '../../services/userService';
 import { FiLogOut } from "react-icons/fi";
 import { TbReportSearch } from 'react-icons/tb';
@@ -17,7 +16,7 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { Tooltip } from '@mui/material';
 import { GRAPHICS } from '../../assets/icons/graphics';
 import '../../styles/components/_sidepanel.scss';
-import '../../styles/icon-styles.scss';
+
 
 const SidePanel = ({ isOpen, onClose }) => {
   const { userInfo } = useUser();
@@ -115,17 +114,16 @@ const SidePanel = ({ isOpen, onClose }) => {
                 onClick={handleIndividualClick}
               >
                 <span className="nav-icon">
-                  <FaRegUserCircle />
+                  { GRAPHICS.individual_assessment }
                 </span>
                 <span className="nav-text">Individual Assessment</span>
               </li>
               <li
                 className={`nav-item ${currentLocation === '/university' ? 'active' : ''}`}
                 onClick={handleUniversityClick}
-                style={{hover:'none'}}
               >
                 <span className="nav-icon">
-                  {currentLocation==='/university'? GRAPHICS.university.clicked:GRAPHICS.university.unclicked}
+                  { GRAPHICS.university }
                 </span>
                 <span className="nav-text">University Assessment</span>
               </li>
@@ -134,7 +132,7 @@ const SidePanel = ({ isOpen, onClose }) => {
                 onClick={handleEntityClick}
               >
                 <span className="nav-icon">
-                  <FaSearch />
+                  {GRAPHICS.entity_lookup}
                 </span>
                 <span className="nav-text">Entity Lookup</span>
               </li>
