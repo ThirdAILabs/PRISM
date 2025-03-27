@@ -3,9 +3,8 @@ import { reportService } from '../../api/reports';
 import { universityReportService } from '../../api/universityReports';
 import RandomAvatar from '../../assets/images/RandomAvatar.jpg';
 import PRISM_LOGO from '../../assets/images/prism.png';
-import { FaRegUserCircle, FaUniversity, FaSearch } from 'react-icons/fa';
 import UserService from '../../services/userService';
-import { CiLogout } from 'react-icons/ci';
+import { FiLogOut } from 'react-icons/fi';
 import { TbReportSearch } from 'react-icons/tb';
 import { CiCircleList, CiCircleCheck } from 'react-icons/ci';
 import { CgSpinner } from 'react-icons/cg';
@@ -15,6 +14,7 @@ import { useLocation } from 'react-router-dom';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { Tooltip } from '@mui/material';
+import { GRAPHICS } from '../../assets/icons/graphics';
 import '../../styles/components/_sidepanel.scss';
 
 const SidePanel = ({ isOpen, onClose }) => {
@@ -112,27 +112,21 @@ const SidePanel = ({ isOpen, onClose }) => {
                 className={`nav-item ${currentLocation === '/' ? 'active' : ''}`}
                 onClick={handleIndividualClick}
               >
-                <span className="nav-icon">
-                  <FaRegUserCircle />
-                </span>
+                <span className="nav-icon">{GRAPHICS.individual_assessment}</span>
                 <span className="nav-text">Individual Assessment</span>
               </li>
               <li
                 className={`nav-item ${currentLocation === '/university' ? 'active' : ''}`}
                 onClick={handleUniversityClick}
               >
-                <span className="nav-icon">
-                  <FaUniversity />
-                </span>
+                <span className="nav-icon">{GRAPHICS.university}</span>
                 <span className="nav-text">University Assessment</span>
               </li>
               <li
                 className={`nav-item ${currentLocation === '/entity-lookup' ? 'active' : ''}`}
                 onClick={handleEntityClick}
               >
-                <span className="nav-icon">
-                  <FaSearch />
-                </span>
+                <span className="nav-icon">{GRAPHICS.entity_lookup}</span>
                 <span className="nav-text">Entity Lookup</span>
               </li>
             </ul>
@@ -261,21 +255,20 @@ const SidePanel = ({ isOpen, onClose }) => {
         </div>
 
         {/* User Info */}
-        <div className="user-info">
-          <img src={user.avatar} alt="User" className="user-info__avatar" />
-          <div>
-            <h5 className="user-info__name">{user.username}</h5>
-            <span className="user-info__email">{user.email}</span>
-          </div>
-        </div>
 
-        {/* Logout */}
-        <div className="logout-section">
-          <button
-            className="btn btn-dark w-100 d-flex align-items-center justify-content-center gap-2 border"
-            onClick={UserService.doLogout}
-          >
-            <CiLogout /> Logout
+        <div className="user-card">
+          <div className="user-card__profile">
+            <img src={user.avatar} alt="User" className="user-card__avatar" />
+            <div className="user-card__info">
+              <h5 className="user-card__name">{user.username}</h5>
+              <span className="user-card__email">{user.email}</span>
+            </div>
+          </div>
+          <hr className="user-card__divider" />
+
+          <button className="user-card__logout-button" onClick={UserService.doLogout}>
+            <span>Logout</span>
+            <FiLogOut size={25} className="user-card__logout-button-icon" />
           </button>
         </div>
       </div>

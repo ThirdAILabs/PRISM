@@ -32,31 +32,28 @@ $z-index-sidebar-header: 1000;
   &.open {
     left: 0;
   }
+  &-header {
+    position: sticky;
+    top: 0;
+    background: $color-text-100;
+    z-index: $z-index-sidebar-header;
+    display: flex;
+    align-items: left;
+    padding-top: 10px;
+    padding-bottom: 20px;
+
+    &__logo {
+      width: 150px;
+      height: 30px;
+      margin-left: 5%;
+      user-select: none;
+    }
+  }
 }
 
 .panel-content {
   flex: 1;
   overflow-y: auto;
-}
-
-.side-panel-header {
-  position: sticky;
-  top: 0;
-  background: $color-text-100;
-  z-index: $z-index-sidebar-header;
-  display: flex;
-  align-items: center;
-  padding: 10px 20px 10px;
-  padding-top: 0;
-  border-bottom: 1px solid $sidebar-border-color;
-  gap: 20px;
-
-  &__logo {
-    width: 150px;
-    height: 30px;
-    margin-left: 5%;
-    user-select: none;
-  }
 }
 
 .navigation {
@@ -75,21 +72,27 @@ $z-index-sidebar-header: 1000;
 .nav-item {
   display: flex;
   align-items: center;
-  padding: 8px 0;
+  padding: 8px 10px;
+  margin-bottom: 10px;
   cursor: pointer;
   background: $color-text-100;
-  color: $color-grey-500;
-  border-radius: 1rem;
+  color: $color-text-700;
+  border-radius: 0.5rem;
   border: none;
 
   &:hover {
-    background: $color-grey-100;
-    color: $color-grey-900;
+    background: $color-primary-100;
   }
 
   &.active {
-    background: $color-grey-100;
-    color: $color-grey-900;
+    background: $color-primary-100;
+    color: $color-primary-700;
+    .nav-item-svg-icon {
+      fill: $color-primary-700;
+    }
+  }
+  &-svg-icon {
+    fill: $color-text-700;
   }
 }
 
@@ -99,6 +102,10 @@ $z-index-sidebar-header: 1000;
   justify-content: center;
   margin-right: 12px;
   margin-left: 5px;
+}
+
+.nav-text {
+  @include sub-heading-4;
 }
 
 .reports {
@@ -121,13 +128,13 @@ $z-index-sidebar-header: 1000;
   align-items: center;
   margin-left: 4%;
   cursor: pointer;
-  border-radius: 1rem;
+  border-radius: 0.5rem;
   padding-block: 5px;
   color: $color-grey-500;
   @include paragraph-5;
 
   &:hover {
-    background: $color-grey-100;
+    background: $color-primary-100;
     color: $color-grey-900;
   }
 }
@@ -166,45 +173,86 @@ $z-index-sidebar-header: 1000;
     }
 
     &:hover {
-      background-color: $color-grey-100;
+      background-color: $color-primary-100;
       border-radius: 0.5rem;
       color: $color-grey-900;
     }
   }
 }
 
-.user-info {
+.user-card {
   display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-left: 2%;
-  border-top: 1px solid $sidebar-border-color;
-  padding-top: 15px;
+  flex-direction: column;
+  background-color: $color-primary-100;
+  border-radius: 12px;
+  padding: 15px;
+  width: 100%;
+  max-width: 400px;
+
+  &__profile {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 5px;
+  }
 
   &__avatar {
     width: 40px;
     height: 40px;
-    border-radius: 100%;
+    border-radius: 50%;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
   }
 
   &__name {
-    @include sub-heading-4;
-    padding: 0;
-    margin: 0;
+    @include sub-heading-3;
+    color: $color-text-900;
     text-align: left;
-    color: $color-grey-900;
+    margin: 0;
   }
 
   &__email {
-    @include paragraph-6;
-    margin-top: 0;
-    padding-top: 0;
+    @include paragraph-5;
+    color: $color-text-700;
     text-align: left;
-    color: $color-grey-500;
+    margin-top: 2px;
   }
-}
 
-.logout-section {
-  padding: 10px;
-  background: $color-text-100;
+  &__divider {
+    width: 100%;
+    border: none;
+    border-top: 1px solid;
+    margin: 8px 0;
+  }
+
+  &__logout-button {
+    @include paragraph-4;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: $color-text-500;
+    // font-size: 16px;
+    padding: 0;
+    padding-left: 16px;
+    cursor: pointer;
+    width: 100%;
+    background: none;
+    border: none;
+
+    &:hover {
+      color: $color-primary-700;
+      background-color: transparent;
+
+      .user-card__logout-button-icon {
+        color: $color-primary-700;
+      }
+    }
+
+    &-icon {
+      color: $color-text-900;
+    }
+  }
 }
