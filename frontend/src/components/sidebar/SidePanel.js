@@ -4,7 +4,7 @@ import { universityReportService } from '../../api/universityReports';
 import RandomAvatar from '../../assets/images/RandomAvatar.jpg';
 import PRISM_LOGO from '../../assets/images/prism.png';
 import UserService from '../../services/userService';
-import { FiLogOut } from "react-icons/fi";
+import { FiLogOut } from 'react-icons/fi';
 import { TbReportSearch } from 'react-icons/tb';
 import { CiCircleList, CiCircleCheck } from 'react-icons/ci';
 import { CgSpinner } from 'react-icons/cg';
@@ -16,7 +16,6 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { Tooltip } from '@mui/material';
 import { GRAPHICS } from '../../assets/icons/graphics';
 import '../../styles/components/_sidepanel.scss';
-
 
 const SidePanel = ({ isOpen, onClose }) => {
   const { userInfo } = useUser();
@@ -113,27 +112,21 @@ const SidePanel = ({ isOpen, onClose }) => {
                 className={`nav-item ${currentLocation === '/' ? 'active' : ''}`}
                 onClick={handleIndividualClick}
               >
-                <span className="nav-icon">
-                  { GRAPHICS.individual_assessment }
-                </span>
+                <span className="nav-icon">{GRAPHICS.individual_assessment}</span>
                 <span className="nav-text">Individual Assessment</span>
               </li>
               <li
                 className={`nav-item ${currentLocation === '/university' ? 'active' : ''}`}
                 onClick={handleUniversityClick}
               >
-                <span className="nav-icon">
-                  { GRAPHICS.university }
-                </span>
+                <span className="nav-icon">{GRAPHICS.university}</span>
                 <span className="nav-text">University Assessment</span>
               </li>
               <li
                 className={`nav-item ${currentLocation === '/entity-lookup' ? 'active' : ''}`}
                 onClick={handleEntityClick}
               >
-                <span className="nav-icon">
-                  {GRAPHICS.entity_lookup}
-                </span>
+                <span className="nav-icon">{GRAPHICS.entity_lookup}</span>
                 <span className="nav-text">Entity Lookup</span>
               </li>
             </ul>
@@ -274,8 +267,8 @@ const SidePanel = ({ isOpen, onClose }) => {
           <hr className="user-card__divider" />
 
           <button className="user-card__logout-button" onClick={UserService.doLogout}>
-          <span>Logout</span>
-          <FiLogOut/>
+            <span>Logout</span>
+            <FiLogOut size={25} className="user-card__logout-button-icon" />
           </button>
         </div>
       </div>

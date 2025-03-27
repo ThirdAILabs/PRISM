@@ -248,4 +248,35 @@ li {
   font-size: 2rem;
   color: rgb(111, 111, 111);
   cursor: pointer;
+  position: fixed;
+  top: 10px;
+  z-index: 1000;
+  transition: left 0.3s ease;
+}
+
+.sidebar-toggle.open {
+  left: 240px;
+}
+
+.sidebar-toggle.closed {
+  left: 20px;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 900;
+  transition: opacity 0.3s ease;
+}
+.sidepanel-container {
+  position: relative;
+  z-index: 1000;
+}
+
+.content-container {
+  position: relative;
 }
