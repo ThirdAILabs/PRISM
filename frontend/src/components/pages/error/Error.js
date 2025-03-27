@@ -1,5 +1,6 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import '../../common/tools/button/button1.css';
+import '../../../styles/components/_primaryButton.scss';
+
 import './Error.css';
 
 export default function Error() {

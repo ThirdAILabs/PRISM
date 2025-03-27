@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import '../../common/searchBar/SearchBar.css';
-import '../../common/tools/button/button1.css';
+import '../../../styles/components/_primaryButton.scss';
+
 import './entityLookup.css';
 import Logo from '../../../assets/images/prism-logo.png';
 import { searchService } from '../../../api/search';
 import NoResultsFound from '../../common/tools/NoResultsFound';
+import { Tooltip } from '@mui/material';
 
 const makeLinksClickable = (text) => {
   const urlRegex = /((?:http|https):\/\/[^\s]+)/g;
@@ -101,13 +103,15 @@ function EntityLookup() {
                   />
                 </div>
                 <div className="author-institution-search-button-container">
-                  <button
-                    type="submit"
-                    disabled={isLoading || query.length === 0}
-                    className="button"
-                  >
-                    {isLoading ? 'Searching...' : 'Search'}
-                  </button>
+                  <Tooltip title={query.length === 0 ? 'Please enter a search query' : ''}>
+                    <button
+                      type="submit"
+                      disabled={isLoading || query.length === 0}
+                      className="button"
+                    >
+                      {isLoading ? 'Searching...' : 'Search'}
+                    </button>
+                  </Tooltip>
                 </div>
               </form>
             </div>
