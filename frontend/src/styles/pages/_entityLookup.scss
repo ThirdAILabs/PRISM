@@ -1,0 +1,50 @@
+@import '../base/varialbes';
+@import '../base/typography';
+
+
+.entity-lookup-search-bar-container {
+    width: 80%;
+    margin-left: 2.5%;
+}
+
+.entity-lookup {
+    &-base{
+        text-align: center;
+        margin-top: 5%;
+        animation: fadeIn 0.75s;
+    }
+    &-logo{
+        width: 320px;
+        margin-top: 1%;
+        margin-bottom: 1%;
+        margin-right: 2%;
+        animation: fadeIn 0.5s;
+    }
+    &-def{
+        animation: fadeIn 1s;
+
+        &-text{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            &-color {
+                color: $color-text-700;
+            }
+        }
+    }
+    &-search-bar {
+        width: 80%;
+        margin-left: 2.5%;
+    }
+}
+  
+  
+.no-results {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    margin: 2rem auto;
+}

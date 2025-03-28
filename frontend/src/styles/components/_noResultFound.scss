@@ -1,0 +1,21 @@
+@import '../base/varialbes';
+@import '../base/typography';
+
+.no-results {
+    &-icon{
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.8;
+    }
+    &-heading{
+        color: $color-text-700;
+        @include heading-3;
+        margin-bottom: 0.5rem;
+    }
+    &-text{
+        color: $color-text-500;
+        @include paragraph-4;
+        max-width: 280px;
+        margin:0;
+    }
+}
