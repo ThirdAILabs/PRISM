@@ -180,5 +180,93 @@
             "type": "publishers"
         },
         "score": 1.0
+    },
+    {
+        "name": "Shanghai Institute of Optics and Fine Mechanics",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "SIOM",
+            "CAS SIOM",
+            "Hangzhou Spectrometer Laser PH",
+            "Lab of Information Optics",
+            "Shanghai Institute of Optics",
+            "Shanghai Institute of Optics & Fine Mechanics",
+            "SIOM Chinese Academy of Sciences"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4320800602",
+            "name": "Shanghai Institute of Optics and Fine Mechanics",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Air Force Engineering University",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "China People\u00e2\u0080\u0099s Liberation Army Air Force Engineering University",
+            "AFEU"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4360969231",
+            "name": "Air Force Engineering University",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "FORTUNA",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "FORTUNA"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4310320539",
+            "name": "Fortuna",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "MOSCOW AVIATION INSTITUTE",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "FEDERALNOE GOSUDARSTVENNOE BYUDZHETNOE OBRAZOVATELNOE UCHREZHDENIE VYSSHEGO OBRAZOVANIYA MOSKOVSKII AVIATSIONNYI INSTITUT NATSIONALNYI ISSLEDOVATELSKII UNIVERSITET",
+            "MAI"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4310319898",
+            "name": "Moscow Aviation Institute",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "NOVA",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "QUEEN REEM"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4310314090",
+            "name": "NOVA",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "INSTITUTE FOR SYSTEM PROGRAMMING OF THE RUSSIAN ACADEMY OF SCIENCES",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "ISP RAN",
+            "INSTITUTE OF SYSTEM PROGRAMMING NAMED AFTER V P IVANNIKOV RAN",
+            "FEDERAL STATE BUDGETARY SCIENTIFIC INSTITUTION V P IVANNIKOV INSTITUTE FOR SYSTEM PROGRAMMING OF THE RUSSIAN ACADEMY OF SCIENCES"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4310312722",
+            "name": "Institute for System Programming of the Russian Academy of Sciences (ISPRAS)",
+            "type": "entity_type"
+        },
+        "score": 0.9370629370629371
     }
 ]
