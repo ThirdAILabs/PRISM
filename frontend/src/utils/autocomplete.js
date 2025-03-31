@@ -4,10 +4,9 @@ import '../styles/components/_primaryButton.scss';
 import TextField from '../components/common/tools/TextField';
 
 function AutocompleteSearchBar({
-  title,
+  label,
   autocomplete,
   onSelect,
-  placeholder,
   showHint,
   setSearchState,
   initialValue = '',
@@ -50,7 +49,7 @@ function AutocompleteSearchBar({
 
       {/* Search bar */}
       <TextField
-        label={`Enter ${title} Name`}
+        label={label}
         variant="outlined"
         fullWidth
         value={query}

@@ -106,9 +106,8 @@ function UniversityAssessment() {
                       setInstitution(selected);
                       setUniversityState((prev) => ({ ...prev, institution: selected }));
                     }}
-                    title={'University'}
+                    label={'Enter University Name'}
                     showHint={true}
-                    placeholder={'E.g. University of XYZ'}
                     initialValue={institution ? institution.InstitutionName : ''}
                   />
                 </div>

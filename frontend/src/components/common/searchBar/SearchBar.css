@@ -129,7 +129,8 @@
 }
 
 .single-search-button-container {
-  width: 10%;
+  width: 13%;
+  margin-top: -6px;
 }
 
 .single-search-bar-label {

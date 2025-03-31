@@ -63,24 +63,22 @@ export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInst
     <div className="author-institution-search-bar">
       <div className="author-institution-search-bar-container">
         <AutocompleteSearchBar
-          title="Author"
+          label="Enter Author Name"
           autocomplete={autocompleteAuthor}
           onSelect={setAuthor}
           setSearchState={setSearchState}
           showHint={false}
-          placeholder={'E.g. John Doe'}
           initialValue={defaultAuthor ? defaultAuthor.Name : ''}
         />
       </div>
 
       <div className="author-institution-search-bar-container">
         <AutocompleteSearchBar
-          title="Institution"
+          label="Enter Institution Name"
           autocomplete={autocompleteInstitution}
           onSelect={setInstitution}
           setSearchState={setSearchState}
           showHint={true}
-          placeholder={'E.g. University of XYZ'}
           initialValue={defaultInstitution ? defaultInstitution.Name : ''}
         />
       </div>
@@ -95,9 +93,8 @@ export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInst
 }
 
 export function SingleSearchBar({
-  title = '',
+  label,
   onSearch,
-  placeholder = 'Enter Value',
   initialValue = '',
 }) {
   const [value, setValue] = useState(initialValue);
@@ -122,7 +119,7 @@ export function SingleSearchBar({
               <form onSubmit={handleSubmit}>
 
                 <TextField
-                  label={`Enter ${title} Name`}
+                  label={label}
                   variant="outlined"
                   fullWidth
                   autoComplete="off"
@@ -132,7 +129,7 @@ export function SingleSearchBar({
               </form>
             </div>
 
-            <div className="single-search-button-container">
+            <div className="single-search-button-container" style={{ marginTop: '-2px' }}>
               <button className="button button-3d" onClick={handleSubmit}>
                 Search
               </button>
