@@ -1,0 +1,47 @@
+:root {
+    --color-primary-900: #0b79d0;
+    --color-primary-700: #2196f3;
+    --text-color: #ffffff;
+    --transition-speed: 0.3s;
+    --border-radius: 8px;
+    --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.button-container {
+    display: grid;
+    grid-template-columns: repeat(3, 180px);
+    gap: 25px;
+    perspective: 1000px;
+}
+
+.button {
+    padding: 15px 30px;
+    border: none;
+    cursor: pointer;
+    color: var(--text-color);
+    font-size: 16px;
+    border-radius: var(--border-radius);
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed), var(--transition-speed);
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.button-3d {
+    background: #2196f3;
+    box-shadow: 0 5px #0b79d0;
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.button-3d:active {
+    box-shadow: 0 4px #0b79d0;
+    transform: translateY(6px);
+}

@@ -241,7 +241,7 @@ const SidePanel = ({ isOpen, onClose }) => {
                         )}
                         <span className={`status ${universityReport.Status}`}>
                           {universityReport.Status === 'complete' &&
-                          universityReport.Content.TotalAuthors !==
+                            universityReport.Content.TotalAuthors !==
                             universityReport.Content.AuthorsReviewed
                             ? status['in-progress']
                             : status[universityReport.Status]}

@@ -60,7 +60,7 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadi
           </ul>
           {canLoadMore && (
             <div className="show-more-results-button">
-              <button className="button" onClick={getMoreResults} disabled={isLoadingMore}>
+              <button className="button button-3d" onClick={getMoreResults} disabled={isLoadingMore}>
                 {isLoadingMore ? <div className="spinner"></div> : 'Show More'}
               </button>
             </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../components/common/searchBar/SearchBar.css';
 import '../styles/components/_primaryButton.scss';
+import TextField from '../components/common/tools/TextField';
 
 function AutocompleteSearchBar({
   title,
@@ -46,15 +47,14 @@ function AutocompleteSearchBar({
   return (
     // Column
     <div className="autocomplete-search-bar">
-      {/* Header 2 or 3, bold */}
-      <div className="autocomplete-search-bar-title">{title}</div>
 
       {/* Search bar */}
-      <input
-        type="text"
-        placeholder={placeholder}
-        className="search-bar"
+      <TextField
+        label={`Enter ${title} Name`}
+        variant="outlined"
+        fullWidth
         value={query}
+        autoComplete="off"
         onChange={handleInputChange}
       />
 

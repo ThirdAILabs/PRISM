@@ -80,8 +80,8 @@ const PaperTitleSearchComponent = () => {
             />
           </div>
           <div style={{ width: '40px' }} />
-          <div style={{ width: '200px', marginTop: '40px' }}>
-            <button className="button" onClick={() => search(paperTitle)}>
+          <div style={{ width: '200px', marginTop: '-2px' }}>
+            <button className="button button-3d" onClick={() => search(paperTitle)}>
               {isLoading ? 'Searching...' : 'Search'}
             </button>
           </div>

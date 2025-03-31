@@ -48,7 +48,8 @@
   width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 30px;
   margin-left: 7.5%;
   margin-top: 60px;
 }
@@ -68,7 +69,7 @@
 
 .author-institution-search-button-container {
   width: 10%;
-  margin-top: 40px;
+  margin-top: -2px;
 }
 
 .search-type-container {

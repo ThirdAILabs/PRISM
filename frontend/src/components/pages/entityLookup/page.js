@@ -7,6 +7,7 @@ import Logo from '../../../assets/images/prism-logo.png';
 import { searchService } from '../../../api/search';
 import NoResultsFound from '../../common/tools/NoResultsFound';
 import { Tooltip } from '@mui/material';
+import TextField from '../../common/tools/TextField';
 
 const makeLinksClickable = (text) => {
   const urlRegex = /((?:http|https):\/\/[^\s]+)/g;
@@ -93,13 +94,13 @@ function EntityLookup() {
             <div style={{ width: '80%' }}>
               <form onSubmit={handleSubmit} className="author-institution-search-bar">
                 <div className="entity-lookup-search-bar-container">
-                  <div className="autocomplete-search-bar-title">Entity</div>
-                  <input
-                    type="text"
+                  <TextField
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="E.g. PQR Company"
-                    className="search-bar"
+                    label="Enter Entity Name"
+                    variant="outlined"
+                    fullWidth
+                    autoComplete="off"
                   />
                 </div>
                 <div className="author-institution-search-button-container">
@@ -107,7 +108,7 @@ function EntityLookup() {
                     <button
                       type="submit"
                       disabled={isLoading || query.length === 0}
-                      className="button"
+                      className="button button-3d"
                     >
                       {isLoading ? 'Searching...' : 'Search'}
                     </button>

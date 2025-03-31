@@ -5,7 +5,10 @@ import './SearchBar.css';
 import '../../../styles/components/_primaryButton.scss';
 import useCallOnPause from '../../../hooks/useCallOnPause';
 import AutocompleteSearchBar from '../../../utils/autocomplete';
-
+// import { TextField } from '@mui/material';
+import TextField from '../tools/TextField';
+// import '../../../styles/components/_primaryButton2.scss';
+import '../tools/button/button2.css';
 export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInstitution }) {
   const [author, setAuthor] = useState(defaultAuthor || null);
   const [institution, setInstitution] = useState(defaultInstitution || null);
@@ -83,7 +86,7 @@ export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInst
       </div>
 
       <div className="author-institution-search-button-container">
-        <button className="button" onClick={search}>
+        <button class="button button-3d" onClick={search}>
           Search
         </button>
       </div>
@@ -111,16 +114,18 @@ export function SingleSearchBar({
       <div style={{ marginTop: '1rem' }}>
         <div className="single-search-container">
           {/* Same large title style as Author/Institution */}
-          {title && <label className="single-search-bar-label">{title}</label>}
+          {/* {title && <label className="single-search-bar-label">{title}</label>} */}
 
           {/* Row containing input and button side-by-side */}
           <div className="single-search-row">
             <div className="single-search-bar-container">
               <form onSubmit={handleSubmit}>
-                <input
-                  type="text"
-                  className="search-bar"
-                  placeholder={placeholder}
+
+                <TextField
+                  label={`Enter ${title} Name`}
+                  variant="outlined"
+                  fullWidth
+                  autoComplete="off"
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
                 />
@@ -128,7 +133,7 @@ export function SingleSearchBar({
             </div>
 
             <div className="single-search-button-container">
-              <button className="button" onClick={handleSubmit}>
+              <button className="button button-3d" onClick={handleSubmit}>
                 Search
               </button>
             </div>

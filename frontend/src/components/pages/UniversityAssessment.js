@@ -114,7 +114,7 @@ function UniversityAssessment() {
                 </div>
                 <div style={{ width: '40px' }} />
                 <div style={{ width: '200px', marginTop: '40px' }}>
-                  <button className="button" onClick={handleSearch}>
+                  <button className="button button-3d" onClick={handleSearch}>
                     {isLoading ? 'Searching...' : 'Search'}
                   </button>
                 </div>

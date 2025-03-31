@@ -302,17 +302,17 @@ const ItemDetails = () => {
 
     const displayStart = startDate
       ? parseLocalDate(startDate).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
       : 'earliest';
     const displayEnd = endDate
       ? parseLocalDate(endDate).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
       : 'today';
 
     setFilterMessage(`${displayStart} - ${displayEnd}`);
@@ -436,8 +436,8 @@ const ItemDetails = () => {
             <>
               <strong>Acknowledgements Text</strong>
               {flag.FundCodeTriangulation &&
-              typeof flag.FundCodeTriangulation === 'object' &&
-              Object.keys(flag.FundCodeTriangulation).length > 0 ? (
+                typeof flag.FundCodeTriangulation === 'object' &&
+                Object.keys(flag.FundCodeTriangulation).length > 0 ? (
                 <>
                   <ul className="bulleted-list">
                     {flag.RawAcknowledgements?.map((item, index2) => {
@@ -465,15 +465,15 @@ const ItemDetails = () => {
                         parts = parts.flatMap((text, i) =>
                           typeof text === 'string'
                             ? text.split(regex).flatMap((part, j, arr) =>
-                                j < arr.length - 1
-                                  ? [
-                                      part,
-                                      <span key={`${i}-${j}`} style={{ color }} title={tooltip}>
-                                        <strong>{text.match(regex)[0]}</strong>
-                                      </span>,
-                                    ]
-                                  : part
-                              )
+                              j < arr.length - 1
+                                ? [
+                                  part,
+                                  <span key={`${i}-${j}`} style={{ color }} title={tooltip}>
+                                    <strong>{text.match(regex)[0]}</strong>
+                                  </span>,
+                                ]
+                                : part
+                            )
                             : text
                         );
                       });
@@ -669,8 +669,8 @@ const ItemDetails = () => {
           <strong>Acknowledgement Text</strong>
           <br />
           {flag.FundCodeTriangulation &&
-          typeof flag.FundCodeTriangulation === 'object' &&
-          Object.keys(flag.FundCodeTriangulation).length > 0 ? (
+            typeof flag.FundCodeTriangulation === 'object' &&
+            Object.keys(flag.FundCodeTriangulation).length > 0 ? (
             <>
               {flag.RawAcknowledgements?.map((item, index2) => {
                 const key = `ack-${index} ${index2}`;
@@ -697,15 +697,15 @@ const ItemDetails = () => {
                   parts = parts.flatMap((text, i) =>
                     typeof text === 'string'
                       ? text.split(regex).flatMap((part, j, arr) =>
-                          j < arr.length - 1
-                            ? [
-                                part,
-                                <span key={`${i}-${j}`} style={{ color }} title={tooltip}>
-                                  <strong>{text.match(regex)[0]}</strong>
-                                </span>,
-                              ]
-                            : part
-                        )
+                        j < arr.length - 1
+                          ? [
+                            part,
+                            <span key={`${i}-${j}`} style={{ color }} title={tooltip}>
+                              <strong>{text.match(regex)[0]}</strong>
+                            </span>,
+                          ]
+                          : part
+                      )
                       : text
                   );
                 });
