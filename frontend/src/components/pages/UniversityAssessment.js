@@ -112,8 +112,7 @@ function UniversityAssessment() {
                     initialValue={institution ? institution.InstitutionName : ''}
                   />
                 </div>
-                <div style={{ width: '40px' }} />
-                <div style={{ width: '200px', marginTop: '40px' }}>
+                <div style={{ width: '200px', marginTop: '-2px' }}>
                   <button className="button button-3d" onClick={handleSearch}>
                     {isLoading ? 'Searching...' : 'Search'}
                   </button>
