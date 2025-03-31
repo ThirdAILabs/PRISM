@@ -3,6 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { reportService } from '../../../api/reports';
 import './TodoListComponent.css';
+import Scholar from '../../../assets/icons/Scholar.svg';
 import NoResultsFound from '../../common/tools/NoResultsFound';
 
 const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadingMore }) => {
@@ -40,6 +41,15 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadi
               <li key={index} onClick={() => handleItemClick(result)} className="result-item">
                 <div className="text-start px-5">
                   <div className="d-flex align-items-center mb-2">
+                    <img
+                      src={Scholar}
+                      alt="Scholar"
+                      style={{
+                        width: '30px',
+                        height: '30px',
+                        marginRight: '10px',
+                      }}
+                    />
                     <h5 className="m-0">{result.AuthorName}</h5>
                   </div>
                   <p className="m-0 p-0" style={{ fontSize: 'small' }}>
