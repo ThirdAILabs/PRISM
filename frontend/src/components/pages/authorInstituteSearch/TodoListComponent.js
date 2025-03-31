@@ -2,8 +2,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { reportService } from '../../../api/reports';
-import './TodoListComponent.css';
+import '../../../styles/components/_todoListComponent.scss';
 import Scholar from '../../../assets/icons/Scholar.svg';
+import University from '../../../assets/icons/University.svg';
+import Research from '../../../assets/icons/Research.svg';
+
 import NoResultsFound from '../../common/tools/NoResultsFound';
 
 const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadingMore }) => {
@@ -40,28 +43,32 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadi
             {results.map((result, index) => (
               <li key={index} onClick={() => handleItemClick(result)} className="result-item">
                 <div className="text-start px-5">
-                  <div className="d-flex align-items-center mb-2">
+                  <div className="info-row">
                     <img
                       src={Scholar}
                       alt="Scholar"
-                      style={{
-                        width: '30px',
-                        height: '30px',
-                        marginRight: '10px',
-                      }}
+                      className="icon scholar"
                     />
-                    <h5 className="m-0">{result.AuthorName}</h5>
+                    <h5 className="title">{result.AuthorName}</h5>
                   </div>
-                  <p className="m-0 p-0" style={{ fontSize: 'small' }}>
-                    <b>Affiliations: </b>
-                    {result.Institutions.join(', ')}
-                  </p>
+
+                  <div className="info-row">
+                    <img
+                      src={University}
+                      alt="Affiliation"
+                      className="icon"
+                    />
+                    <span className="content">{result.Institutions.join(', ')}</span>
+                  </div>
+
                   {result.Interests && result.Interests.length > 0 && (
-                    <div>
-                      <p className="m-0 p-0 pt-1" style={{ fontSize: 'small' }}>
-                        <b>Research Interests: </b>
-                        {result.Interests.slice(0, 3).join(', ')}
-                      </p>
+                    <div className="info-row">
+                      <img
+                        src={Research}
+                        alt="Research"
+                        className="icon"
+                      />
+                      <span className="content">{result.Interests.slice(0, 3).join(', ')}</span>
                     </div>
                   )}
                 </div>
