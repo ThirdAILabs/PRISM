@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { SearchContext } from '../../../store/searchContext';
 import { autocompleteService } from '../../../api/autocomplete';
 import './SearchBar.css';
-import '../tools/button/button1.css';
+import '../../../styles/components/_primaryButton.scss';
 import useCallOnPause from '../../../hooks/useCallOnPause';
 import AutocompleteSearchBar from '../../../utils/autocomplete';
 
@@ -10,7 +10,6 @@ export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInst
   const [author, setAuthor] = useState(defaultAuthor || null);
   const [institution, setInstitution] = useState(defaultInstitution || null);
   const { searchState, setSearchState } = useContext(SearchContext);
-  const [results, setResults] = useState([]);
   const debouncedSearch = useCallOnPause(300); // 300ms delay
 
   const autocompleteInstitution = useCallback(
@@ -36,10 +35,7 @@ export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInst
       return new Promise((resolve) => {
         debouncedSearch(async () => {
           try {
-            const res = await autocompleteService.autocompleteAuthors(
-              query,
-              institution == null ? '' : institution.Id
-            );
+            const res = await autocompleteService.autocompleteAuthors(query);
             resolve(res);
             return res;
           } catch (error) {

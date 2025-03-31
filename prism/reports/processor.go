@@ -1,99 +1,34 @@
-package flaggers
+package reports
 
 import (
 	"crypto/sha256"
 	"fmt"
 	"log/slog"
-	"path/filepath"
 	"prism/prism/api"
+	"prism/prism/monitoring"
 	"prism/prism/openalex"
-	"prism/prism/reports"
-	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/schema"
-	"prism/prism/search"
-	"prism/prism/triangulation"
 	"sync"
 	"time"
 )
 
 type ReportProcessor struct {
-	openalex                openalex.KnowledgeBase
-	workFlaggers            []WorkFlagger
-	authorFacultyAtEOC      *AuthorIsFacultyAtEOCFlagger
-	authorAssociatedWithEOC *AuthorIsAssociatedWithEOCFlagger
-	manager                 *reports.ReportManager
+	openalex       openalex.KnowledgeBase
+	workFlaggers   []WorkFlagger
+	authorFlaggers []AuthorFlagger
+	manager        *ReportManager
 }
 
-type ReportProcessorOptions struct {
-	UniversityNDB   search.NeuralDB
-	DocNDB          search.NeuralDB
-	AuxNDB          search.NeuralDB
-	TriangulationDB *triangulation.TriangulationDB
-
-	EntityLookup *EntityStore
-
-	ConcerningEntities     eoc.EocSet
-	ConcerningInstitutions eoc.EocSet
-	ConcerningFunders      eoc.EocSet
-	ConcerningPublishers   eoc.EocSet
-
-	SussyBakas []string
-
-	GrobidEndpoint string
-
-	WorkDir string
-
-	MaxDownloadThreads int
-	MaxGrobidThreads   int
-}
-
-// TODO(Nicholas): How to do cleanup for this, or just let it get cleaned up at the end of the process?
-func NewReportProcessor(manager *reports.ReportManager, opts ReportProcessorOptions) (*ReportProcessor, error) {
-	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(opts.WorkDir, "authors.cache"))
-	if err != nil {
-		return nil, fmt.Errorf("error loading author cache: %w", err)
-	}
-	ackCache, err := NewCache[Acknowledgements]("acks", filepath.Join(opts.WorkDir, "acks.cache"))
-	if err != nil {
-		return nil, fmt.Errorf("error loading ack cache: %w", err)
-	}
-
+func NewProcessor(workFlaggers []WorkFlagger, authorFlaggers []AuthorFlagger, manager *ReportManager) *ReportProcessor {
 	return &ReportProcessor{
-		openalex: openalex.NewRemoteKnowledgeBase(),
-		workFlaggers: []WorkFlagger{
-			&OpenAlexFunderIsEOC{
-				concerningFunders:  opts.ConcerningFunders,
-				concerningEntities: opts.ConcerningEntities,
-			},
-			&OpenAlexAuthorAffiliationIsEOC{
-				concerningEntities:     opts.ConcerningEntities,
-				concerningInstitutions: opts.ConcerningInstitutions,
-			},
-			&OpenAlexCoauthorAffiliationIsEOC{
-				concerningEntities:     opts.ConcerningEntities,
-				concerningInstitutions: opts.ConcerningInstitutions,
-			},
-			&OpenAlexAcknowledgementIsEOC{
-				openalex:        openalex.NewRemoteKnowledgeBase(),
-				entityLookup:    opts.EntityLookup,
-				authorCache:     authorCache,
-				extractor:       NewGrobidExtractor(ackCache, opts.GrobidEndpoint, opts.WorkDir, opts.MaxDownloadThreads, opts.MaxGrobidThreads),
-				sussyBakas:      opts.SussyBakas,
-				triangulationDB: opts.TriangulationDB,
-			},
-		},
-		authorFacultyAtEOC: &AuthorIsFacultyAtEOCFlagger{
-			universityNDB: opts.UniversityNDB,
-		},
-		authorAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlagger{
-			docNDB: opts.DocNDB,
-			auxNDB: opts.AuxNDB,
-		},
-		manager: manager,
-	}, nil
+		openalex:       openalex.NewRemoteKnowledgeBase(),
+		workFlaggers:   workFlaggers,
+		authorFlaggers: authorFlaggers,
+		manager:        manager,
+	}
 }
 
-func (processor *ReportProcessor) getWorkStream(report reports.ReportUpdateTask) (chan openalex.WorkBatch, error) {
+func (processor *ReportProcessor) getWorkStream(report ReportUpdateTask) (chan openalex.WorkBatch, error) {
 	switch report.Source {
 	case api.OpenAlexSource:
 		return streamOpenAlexWorks(processor.openalex, report.AuthorId, report.StartDate, report.EndDate), nil
@@ -108,7 +43,7 @@ func (processor *ReportProcessor) getWorkStream(report reports.ReportUpdateTask)
 	}
 }
 
-func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName string, workStream chan openalex.WorkBatch, flagsCh chan []api.Flag) {
+func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName string, workStream chan openalex.WorkBatch, flagsCh chan []api.Flag, forUniversityReport bool) {
 	wg := sync.WaitGroup{}
 
 	batch := -1
@@ -120,6 +55,11 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 		}
 		logger.Info("got next batch of works", "batch", batch, "n_works", len(works.Works))
 		for _, flagger := range processor.workFlaggers {
+
+			if forUniversityReport && flagger.DisableForUniversityReport() {
+				continue
+			}
+
 			wg.Add(1)
 
 			go func(flagger WorkFlagger, works []openalex.Work, authorIds []string) {
@@ -127,75 +67,58 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 
 				logger := logger.With("flagger", flagger.Name(), "batch", batch)
 
-				flags, err := flagger.Flag(logger, works, authorIds)
+				flags, err := flagger.Flag(logger, works, authorIds, authorName)
 				if err != nil {
 					logger.Error("flagger error", "error", err)
+					monitoring.FlaggerErrors.WithLabelValues(flagger.Name()).Inc()
 				} else {
 					flagsCh <- flags
 				}
 			}(flagger, works.Works, works.TargetAuthorIds)
 		}
+	}
 
+	for _, flagger := range processor.authorFlaggers {
 		wg.Add(1)
-		go func(batch int, works []openalex.Work) {
+		go func(flagger AuthorFlagger) {
 			defer wg.Done()
 
-			flagger := processor.authorAssociatedWithEOC
-			if flagger == nil {
-				return
-			}
+			logger := logger.With("flagger", flagger.Name())
 
-			logger := logger.With("flagger", flagger.Name(), "batch", batch)
-
-			flags, err := flagger.Flag(logger, authorName, works)
+			flags, err := flagger.Flag(logger, authorName)
 			if err != nil {
 				logger.Error("flagger error", "error", err)
+				monitoring.FlaggerErrors.WithLabelValues(flagger.Name()).Inc()
 			} else {
 				flagsCh <- flags
 			}
-
-		}(batch, works.Works)
+		}(flagger)
 	}
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		flagger := processor.authorFacultyAtEOC
-		if flagger == nil {
-			return
-		}
-
-		logger := logger.With("flagger", flagger.Name())
-
-		flags, err := flagger.Flag(logger, authorName)
-		if err != nil {
-			logger.Error("flagger error", "error", err)
-		} else {
-			flagsCh <- flags
-		}
-	}()
 
 	wg.Wait()
 	close(flagsCh)
 }
 
-func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdateTask) {
+func (processor *ReportProcessor) ProcessAuthorReport(report ReportUpdateTask) {
+	start := time.Now()
+
 	logger := slog.With("report_id", report.Id)
 
-	logger.Info("starting report processing", "author_id", report.AuthorId, "author_name", report.AuthorName, "source", report.Source)
+	logger.Info("starting report processing", "author_id", report.AuthorId, "author_name", report.AuthorName, "source", report.Source, "is_university_queued", report.ForUniversityReport)
 
 	workStream, err := processor.getWorkStream(report)
 	if err != nil {
 		logger.Error("report failed: unable to get author works", "error", err)
 		if err := processor.manager.UpdateAuthorReport(report.Id, schema.ReportFailed, time.Time{}, nil); err != nil {
 			slog.Error("error updating author report status to failed", "error", err)
+			monitoring.ReportUpdateErrors.Inc()
 		}
 		return
 	}
 
 	flagsCh := make(chan []api.Flag, 100)
-	go processor.processWorks(logger, report.AuthorName, workStream, flagsCh)
+
+	go processor.processWorks(logger, report.AuthorName, workStream, flagsCh, report.ForUniversityReport)
 
 	seen := make(map[[sha256.Size]byte]struct{})
 	flagCounts := make(map[string]int)
@@ -205,6 +128,7 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 			if _, ok := seen[hash]; !ok {
 				seen[hash] = struct{}{}
 				flagCounts[flag.Type()]++
+				monitoring.TotalFlags.WithLabelValues(flag.Type()).Inc()
 			}
 		}
 
@@ -212,6 +136,7 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 			slog.Info("received batch of flags", "type", flags[0].Type(), "n_flags", len(flags))
 			if err := processor.manager.UpdateAuthorReport(report.Id, schema.ReportInProgress, report.EndDate, flags); err != nil {
 				slog.Error("error updating author report status for partial flags", "error", err)
+				monitoring.ReportUpdateErrors.Inc()
 			}
 		}
 	}
@@ -226,7 +151,10 @@ func (processor *ReportProcessor) ProcessAuthorReport(report reports.ReportUpdat
 
 	if err := processor.manager.UpdateAuthorReport(report.Id, schema.ReportCompleted, report.EndDate, nil); err != nil {
 		slog.Error("error updating author report status to complete", "error", err)
+		monitoring.ReportUpdateErrors.Inc()
 	}
+
+	monitoring.ReportsProcessed.Observe(time.Since(start).Seconds())
 }
 
 func (processor *ReportProcessor) ProcessNextAuthorReport() bool {
@@ -244,15 +172,15 @@ func (processor *ReportProcessor) ProcessNextAuthorReport() bool {
 	return true
 }
 
-func (processor *ReportProcessor) getUniversityAuthors(report reports.UniversityReportUpdateTask) ([]reports.UniversityAuthorReport, error) {
+func (processor *ReportProcessor) getUniversityAuthors(report UniversityReportUpdateTask) ([]UniversityAuthorReport, error) {
 	authors, err := processor.openalex.GetInstitutionAuthors(report.UniversityId, time.Now().AddDate(-4, 0, 0), time.Now())
 	if err != nil {
 		return nil, err
 	}
 
-	output := make([]reports.UniversityAuthorReport, 0, len(authors))
+	output := make([]UniversityAuthorReport, 0, len(authors))
 	for _, author := range authors {
-		output = append(output, reports.UniversityAuthorReport{
+		output = append(output, UniversityAuthorReport{
 			AuthorId:   author.AuthorId,
 			AuthorName: author.AuthorName,
 			Source:     api.OpenAlexSource,

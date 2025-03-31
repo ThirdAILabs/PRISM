@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import '../../common/searchBar/SearchBar.css';
-import '../../common/tools/button/button1.css';
+import '../../../styles/components/_primaryButton.scss';
+
 import './entityLookup.css';
 import Logo from '../../../assets/images/prism-logo.png';
 import { searchService } from '../../../api/search';
+import NoResultsFound from '../../common/tools/NoResultsFound';
+import { Tooltip } from '@mui/material';
 
 const makeLinksClickable = (text) => {
   const urlRegex = /((?:http|https):\/\/[^\s]+)/g;
@@ -51,13 +54,13 @@ function EntityLookup() {
 
   return (
     <div className="basic-setup" style={{ color: 'white' }}>
-      <div style={{ textAlign: 'center', marginTop: '5.5%', animation: 'fade-in 0.75s' }}>
+      <div style={{ textAlign: 'center', marginTop: '5%', animation: 'fade-in 0.75s' }}>
         <img
           src={Logo}
           alt="Logo"
           style={{
             width: '320px',
-            marginTop: '5%',
+            marginTop: '1%',
             marginBottom: '1%',
             marginRight: '2%',
             animation: 'fade-in 0.5s',
@@ -100,13 +103,15 @@ function EntityLookup() {
                   />
                 </div>
                 <div className="author-institution-search-button-container">
-                  <button
-                    type="submit"
-                    disabled={isLoading || query.length === 0}
-                    className="button"
-                  >
-                    {isLoading ? 'Searching...' : 'Search'}
-                  </button>
+                  <Tooltip title={query.length === 0 ? 'Please enter a search query' : ''}>
+                    <button
+                      type="submit"
+                      disabled={isLoading || query.length === 0}
+                      className="button"
+                    >
+                      {isLoading ? 'Searching...' : 'Search'}
+                    </button>
+                  </Tooltip>
                 </div>
               </form>
             </div>
@@ -160,14 +165,7 @@ function EntityLookup() {
           ))}
         </div>
       ) : (
-        !isLoading &&
-        hasSearched && (
-          <div className="no-results">
-            <div className="no-results-icon">🔍</div>
-            <h3>We couldn't find any results</h3>
-            <p>Try adjusting your search to find what you're looking for.</p>
-          </div>
-        )
+        !isLoading && hasSearched && <NoResultsFound />
       )}
     </div>
   );

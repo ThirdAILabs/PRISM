@@ -13,6 +13,7 @@ import (
 	"prism/prism/cmd"
 	"prism/prism/licensing"
 	"prism/prism/openalex"
+	"prism/prism/reports"
 	"prism/prism/schema/migrations"
 	"prism/prism/search"
 	"prism/prism/services"
@@ -67,7 +68,7 @@ func (c *Config) port() int {
 	return c.Port
 }
 
-func buildEntityNdb(entityPath string) services.EntitySearch {
+func buildEntitySearch(entityPath string) *search.ManyToOneIndex[api.MatchedEntity] {
 	const entityNdbPath = "searchable_entities.ndb"
 	if err := os.RemoveAll(entityNdbPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		log.Fatalf("error deleting existing ndb: %v", err)
@@ -88,20 +89,14 @@ func buildEntityNdb(entityPath string) services.EntitySearch {
 	log.Printf("loaded %d searchable entities", len(entities))
 
 	s := time.Now()
-	es, err := services.NewEntitySearch(entityNdbPath)
-	if err != nil {
-		log.Fatalf("error openning ndb: %v", err)
-	}
 
-	if err := es.Insert(entities); err != nil {
-		log.Fatalf("error inserting into ndb: %v", err)
-	}
+	entitySearch := services.NewEntitySearch(entities)
 
 	e := time.Now()
 
 	log.Printf("searchable entity ndb construction time=%.3f", e.Sub(s).Seconds())
 
-	return es
+	return entitySearch
 }
 
 func verifyResourceFolder(resourceFolder string) {
@@ -161,7 +156,7 @@ func main() {
 		log.Fatalf("error activating license key: %v", err)
 	}
 
-	entitySearch := buildEntityNdb(config.SearchableEntitiesData)
+	entitySearch := buildEntitySearch(config.SearchableEntitiesData)
 
 	db := cmd.OpenDB(config.PostgresUri)
 	migrations.RunMigrations(db)
@@ -183,7 +178,12 @@ func main() {
 
 	verifyResourceFolder(config.ResourceFolder)
 
-	backend := services.NewBackend(db, openalex, entitySearch, userAuth, licensing, config.ResourceFolder)
+	reportManager := reports.NewManager(db)
+
+	reportManager.StartReportUpdateCheck()
+	defer reportManager.StopReportUpdateCheck()
+
+	backend := services.NewBackend(reportManager, openalex, entitySearch, userAuth, licensing, config.ResourceFolder)
 
 	r := chi.NewRouter()
 

@@ -1,11 +1,13 @@
-package flaggers
+package flaggers_test
 
 import (
 	"log/slog"
 	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/openalex"
+	"prism/prism/reports/flaggers"
 	"prism/prism/reports/flaggers/eoc"
+	"prism/prism/reports/utils"
 	"prism/prism/triangulation"
 	"testing"
 
@@ -14,7 +16,7 @@ import (
 )
 
 func TestMultipleAssociations(t *testing.T) {
-	flagger := OpenAlexMultipleAffiliationsFlagger{}
+	flagger := flaggers.NewOpenAlexMultipleAffiliationsFlagger()
 
 	works := []openalex.Work{
 		{Authors: []openalex.Author{
@@ -26,7 +28,7 @@ func TestMultipleAssociations(t *testing.T) {
 		}},
 	}
 
-	flags, err := flagger.Flag(slog.Default(), works, []string{"2", "3"})
+	flags, err := flagger.Flag(slog.Default(), works, []string{"2", "3"}, "abc")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,7 +36,7 @@ func TestMultipleAssociations(t *testing.T) {
 		t.Fatal("expected 1 flag")
 	}
 
-	noflags, err := flagger.Flag(slog.Default(), works, []string{"5", "6"})
+	noflags, err := flagger.Flag(slog.Default(), works, []string{"5", "6"}, "abc")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,10 +54,10 @@ func makeSet(entities ...string) eoc.EocSet {
 }
 
 func TestFunderEOC(t *testing.T) {
-	flagger := OpenAlexFunderIsEOC{
-		concerningFunders:  makeSet("bad-abc", "bad-xyz"),
-		concerningEntities: makeSet("bad-123", "bad-456"),
-	}
+	flagger := flaggers.NewOpenAlexFunderIsEOC(
+		makeSet("bad-abc", "bad-xyz"),
+		makeSet("bad-123", "bad-456"),
+	)
 
 	for funder, nflags := range map[string]int{"bad-xyz": 1, "bad-456": 1, "abc": 0, "123": 0} {
 		works := []openalex.Work{
@@ -65,7 +67,7 @@ func TestFunderEOC(t *testing.T) {
 			}},
 		}
 
-		flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"})
+		flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"}, "abc")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -77,9 +79,9 @@ func TestFunderEOC(t *testing.T) {
 }
 
 func TestPublisherEOC(t *testing.T) {
-	flagger := OpenAlexPublisherIsEOC{
-		concerningPublishers: makeSet("bad-abc", "bad-xyz"),
-	}
+	flagger := flaggers.NewOpenAlexPublisherIsEOC(
+		makeSet("bad-abc", "bad-xyz"),
+	)
 
 	for publisher, nflags := range map[string]int{"abc": 0, "bad-xyz": 1} {
 		works := []openalex.Work{
@@ -89,7 +91,7 @@ func TestPublisherEOC(t *testing.T) {
 			}},
 		}
 
-		flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"})
+		flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"}, "abc")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -100,9 +102,9 @@ func TestPublisherEOC(t *testing.T) {
 }
 
 func TestCoauthorEOC(t *testing.T) {
-	flagger := OpenAlexCoauthorIsEOC{
-		concerningEntities: makeSet("bad-abc", "bad-xyz"),
-	}
+	flagger := flaggers.NewOpenAlexCoauthorIsEOC(
+		makeSet("bad-abc", "bad-xyz"),
+	)
 
 	for coauthor, nflags := range map[string]int{"abc": 0, "bad-xyz": 1} {
 		works := []openalex.Work{
@@ -112,7 +114,7 @@ func TestCoauthorEOC(t *testing.T) {
 			}},
 		}
 
-		flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"})
+		flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"}, "abc")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -123,10 +125,10 @@ func TestCoauthorEOC(t *testing.T) {
 }
 
 func TestAuthorAffiliationEOC(t *testing.T) {
-	flagger := OpenAlexAuthorAffiliationIsEOC{
-		concerningEntities:     makeSet("bad-abc", "bad-xyz"),
-		concerningInstitutions: makeSet("bad-123", "bad-456"),
-	}
+	flagger := flaggers.NewOpenAlexAuthorAffiliationIsEOC(
+		makeSet("bad-abc", "bad-xyz"),
+		makeSet("bad-123", "bad-456"),
+	)
 
 	for author, isTarget := range map[string]int{"a": 1, "c": 0} {
 		for institution, isBad := range map[string]int{"abc": 0, "bad-xyz": 1, "bad-123": 1} {
@@ -137,7 +139,7 @@ func TestAuthorAffiliationEOC(t *testing.T) {
 				}},
 			}
 
-			flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"})
+			flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"}, "abc")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -149,10 +151,10 @@ func TestAuthorAffiliationEOC(t *testing.T) {
 }
 
 func TestCoauthorAffiliationEOC(t *testing.T) {
-	flagger := OpenAlexCoauthorAffiliationIsEOC{
-		concerningEntities:     makeSet("bad-abc", "bad-xyz"),
-		concerningInstitutions: makeSet("bad-123", "bad-456"),
-	}
+	flagger := flaggers.NewOpenAlexCoauthorAffiliationIsEOC(
+		makeSet("bad-abc", "bad-xyz"),
+		makeSet("bad-123", "bad-456"),
+	)
 
 	for author, isTarget := range map[string]int{"a": 1, "c": 0} {
 		for institution, isBad := range map[string]int{"abc": 0, "bad-xyz": 1, "bad-123": 1} {
@@ -163,7 +165,7 @@ func TestCoauthorAffiliationEOC(t *testing.T) {
 				}},
 			}
 
-			flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"})
+			flags, err := flagger.Flag(slog.Default(), works, []string{"a", "b"}, "abc")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -176,15 +178,15 @@ func TestCoauthorAffiliationEOC(t *testing.T) {
 
 type mockAcknowledgmentExtractor struct{}
 
-func (m *mockAcknowledgmentExtractor) GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan CompletedTask[Acknowledgements] {
-	output := make(chan CompletedTask[Acknowledgements], 1)
+func (m *mockAcknowledgmentExtractor) GetAcknowledgements(logger *slog.Logger, works []openalex.Work) chan utils.CompletedTask[flaggers.Acknowledgements] {
+	output := make(chan utils.CompletedTask[flaggers.Acknowledgements], 1)
 
-	output <- CompletedTask[Acknowledgements]{
-		Result: Acknowledgements{
+	output <- utils.CompletedTask[flaggers.Acknowledgements]{
+		Result: flaggers.Acknowledgements{
 			WorkId: works[0].WorkId,
-			Acknowledgements: []Acknowledgement{{
+			Acknowledgements: []flaggers.Acknowledgement{{
 				RawText: "special thanks to bad entity xyz for grants ABC-123456 and XYZ-9876",
-				SearchableEntities: []Entity{
+				SearchableEntities: []flaggers.Entity{
 					{EntityText: "bad entity xyz", EntityType: "", StartPosition: 0, FundCodes: []string{"ABC-123456", "XYZ-9876"}},
 				},
 			}},
@@ -199,7 +201,7 @@ func (m *mockAcknowledgmentExtractor) GetAcknowledgements(logger *slog.Logger, w
 func TestAcknowledgementEOC(t *testing.T) {
 	testDir := t.TempDir()
 
-	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(testDir, "author.cache"))
+	authorCache, err := utils.NewCache[openalex.Author]("authors", filepath.Join(testDir, "author.cache"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -208,12 +210,6 @@ func TestAcknowledgementEOC(t *testing.T) {
 	aliasToSource := map[string]string{
 		"bad entity xzy": "source_a", "a worse entity": "source_b",
 	}
-
-	entityStore, err := NewEntityStore(t.TempDir(), aliasToSource)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer entityStore.Free()
 
 	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
 	if err != nil {
@@ -228,16 +224,15 @@ func TestAcknowledgementEOC(t *testing.T) {
 
 	triangulationDB := triangulation.CreateTriangulationDB(db)
 
-	flagger := OpenAlexAcknowledgementIsEOC{
-		openalex:        openalex.NewRemoteKnowledgeBase(),
-		entityLookup:    entityStore,
-		authorCache:     authorCache,
-		extractor:       &mockAcknowledgmentExtractor{},
-		sussyBakas:      []string{"bad entity xyz"},
-		triangulationDB: triangulationDB,
-	}
+	flagger := flaggers.NewOpenAlexAcknowledgementIsEOC(
+		flaggers.BuildWatchlistEntityIndex(aliasToSource),
+		authorCache,
+		&mockAcknowledgmentExtractor{},
+		[]string{"bad entity xyz"},
+		triangulationDB,
+	)
 
-	flags, err := flagger.Flag(slog.Default(), []openalex.Work{{WorkId: "a/b", DownloadUrl: "n/a"}}, []string{})
+	flags, err := flagger.Flag(slog.Default(), []openalex.Work{{WorkId: "a/b", DownloadUrl: "n/a"}}, []string{}, "abc")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -250,7 +245,7 @@ func TestAcknowledgementEOC(t *testing.T) {
 func TestFundCodeTriangulation(t *testing.T) {
 	testDir := t.TempDir()
 
-	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(testDir, "author.cache"))
+	authorCache, err := utils.NewCache[openalex.Author]("authors", filepath.Join(testDir, "author.cache"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -260,12 +255,6 @@ func TestFundCodeTriangulation(t *testing.T) {
 	aliasToSource := map[string]string{
 		"bad entity xyz": "source_a",
 	}
-
-	entityStore, err := NewEntityStore(t.TempDir(), aliasToSource)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer entityStore.Free()
 
 	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
 	if err != nil {
@@ -316,14 +305,13 @@ func TestFundCodeTriangulation(t *testing.T) {
 
 	triangulationDB := triangulation.CreateTriangulationDB(db)
 
-	flagger := OpenAlexAcknowledgementIsEOC{
-		openalex:        openalex.NewRemoteKnowledgeBase(),
-		entityLookup:    entityStore,
-		authorCache:     authorCache,
-		extractor:       &mockAcknowledgmentExtractor{},
-		sussyBakas:      []string{"bad entity xyz"},
-		triangulationDB: triangulationDB,
-	}
+	flagger := flaggers.NewOpenAlexAcknowledgementIsEOC(
+		flaggers.BuildWatchlistEntityIndex(aliasToSource),
+		authorCache,
+		&mockAcknowledgmentExtractor{},
+		[]string{"bad entity xyz"},
+		triangulationDB,
+	)
 
 	works := []openalex.Work{
 		{WorkId: "a/b", DownloadUrl: "n/a", Authors: []openalex.Author{
@@ -331,7 +319,7 @@ func TestFundCodeTriangulation(t *testing.T) {
 		}},
 	}
 
-	flags, err := flagger.Flag(slog.Default(), works, []string{"1"})
+	flags, err := flagger.Flag(slog.Default(), works, []string{"1"}, "abc")
 	if err != nil {
 		t.Fatal(err)
 	}

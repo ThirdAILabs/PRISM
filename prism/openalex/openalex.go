@@ -47,6 +47,7 @@ type Work struct {
 	Authors         []Author
 	Grants          []Grant
 	Locations       []Location
+	DOI             string
 }
 
 func (w *Work) GetDisplayName() string {
@@ -68,7 +69,7 @@ type InstitutionAuthor struct {
 }
 
 type KnowledgeBase interface {
-	AutocompleteAuthor(authorNameQuery, institutionId string) ([]api.Autocompletion, error)
+	AutocompleteAuthor(query string) ([]api.Autocompletion, error)
 
 	AutocompleteInstitution(query string) ([]api.Autocompletion, error)
 

@@ -11,14 +11,10 @@ import (
 	"prism/prism/llms"
 	"prism/prism/openalex"
 	"prism/prism/reports/flaggers/eoc"
+	"prism/prism/reports/utils"
+	"prism/prism/search"
 	"prism/prism/triangulation"
 )
-
-type WorkFlagger interface {
-	Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error)
-
-	Name() string
-}
 
 func getWorkSummary(w openalex.Work) api.WorkSummary {
 	return api.WorkSummary{
@@ -32,11 +28,15 @@ func getWorkSummary(w openalex.Work) api.WorkSummary {
 
 type OpenAlexMultipleAffiliationsFlagger struct{}
 
+func NewOpenAlexMultipleAffiliationsFlagger() *OpenAlexMultipleAffiliationsFlagger {
+	return &OpenAlexMultipleAffiliationsFlagger{}
+}
+
 func (flagger *OpenAlexMultipleAffiliationsFlagger) Name() string {
 	return "MultipleAffiliations"
 }
 
-func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -56,16 +56,27 @@ func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(logger *slog.Logger, wo
 	return flags, nil
 }
 
+func (flagger *OpenAlexMultipleAffiliationsFlagger) DisableForUniversityReport() bool {
+	return false
+}
+
 type OpenAlexFunderIsEOC struct {
 	concerningFunders  eoc.EocSet
 	concerningEntities eoc.EocSet
+}
+
+func NewOpenAlexFunderIsEOC(concerningFunders, concerningEntities eoc.EocSet) *OpenAlexFunderIsEOC {
+	return &OpenAlexFunderIsEOC{
+		concerningFunders:  concerningFunders,
+		concerningEntities: concerningEntities,
+	}
 }
 
 func (flagger *OpenAlexFunderIsEOC) Name() string {
 	return "FunderEOC"
 }
 
-func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -88,15 +99,25 @@ func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.W
 	return flags, nil
 }
 
+func (flagger *OpenAlexFunderIsEOC) DisableForUniversityReport() bool {
+	return false
+}
+
 type OpenAlexPublisherIsEOC struct {
 	concerningPublishers eoc.EocSet
+}
+
+func NewOpenAlexPublisherIsEOC(concerningPublishers eoc.EocSet) *OpenAlexPublisherIsEOC {
+	return &OpenAlexPublisherIsEOC{
+		concerningPublishers: concerningPublishers,
+	}
 }
 
 func (flagger *OpenAlexPublisherIsEOC) Name() string {
 	return "PublisherEOC"
 }
 
-func (flagger *OpenAlexPublisherIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexPublisherIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -119,15 +140,25 @@ func (flagger *OpenAlexPublisherIsEOC) Flag(logger *slog.Logger, works []openale
 	return flags, nil
 }
 
+func (flagger *OpenAlexPublisherIsEOC) DisableForUniversityReport() bool {
+	return false
+}
+
 type OpenAlexCoauthorIsEOC struct {
 	concerningEntities eoc.EocSet
+}
+
+func NewOpenAlexCoauthorIsEOC(concerningEntities eoc.EocSet) *OpenAlexCoauthorIsEOC {
+	return &OpenAlexCoauthorIsEOC{
+		concerningEntities: concerningEntities,
+	}
 }
 
 func (flagger *OpenAlexCoauthorIsEOC) Name() string {
 	return "CoauthorEOC"
 }
 
-func (flagger *OpenAlexCoauthorIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexCoauthorIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -158,16 +189,27 @@ func getKeys(m map[string]bool) []string {
 	return keys
 }
 
+func (flagger *OpenAlexCoauthorIsEOC) DisableForUniversityReport() bool {
+	return false
+}
+
 type OpenAlexAuthorAffiliationIsEOC struct {
 	concerningEntities     eoc.EocSet
 	concerningInstitutions eoc.EocSet
+}
+
+func NewOpenAlexAuthorAffiliationIsEOC(concerningEntities, concerningInstitutions eoc.EocSet) *OpenAlexAuthorAffiliationIsEOC {
+	return &OpenAlexAuthorAffiliationIsEOC{
+		concerningEntities:     concerningEntities,
+		concerningInstitutions: concerningInstitutions,
+	}
 }
 
 func (flagger *OpenAlexAuthorAffiliationIsEOC) Name() string {
 	return "AuthorAffiliationEOC"
 }
 
-func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -197,16 +239,27 @@ func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works [
 	return flags, nil
 }
 
+func (flagger *OpenAlexAuthorAffiliationIsEOC) DisableForUniversityReport() bool {
+	return false
+}
+
 type OpenAlexCoauthorAffiliationIsEOC struct {
 	concerningEntities     eoc.EocSet
 	concerningInstitutions eoc.EocSet
+}
+
+func NewOpenAlexCoauthorAffiliationIsEOC(concerningEntities, concerningInstitutions eoc.EocSet) *OpenAlexCoauthorAffiliationIsEOC {
+	return &OpenAlexCoauthorAffiliationIsEOC{
+		concerningEntities:     concerningEntities,
+		concerningInstitutions: concerningInstitutions,
+	}
 }
 
 func (flagger *OpenAlexCoauthorAffiliationIsEOC) Name() string {
 	return "CoauthorAffiliationEOC"
 }
 
-func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
 	flags := make([]api.Flag, 0)
 
 	for _, work := range works {
@@ -240,13 +293,42 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works
 	return flags, nil
 }
 
+func (flagger *OpenAlexCoauthorAffiliationIsEOC) DisableForUniversityReport() bool {
+	return false
+}
+
+func BuildWatchlistEntityIndex(aliasToSource map[string]string) *search.EntityIndex[string] {
+	records := make([]search.Record[string], 0, len(aliasToSource))
+	for alias, source := range aliasToSource {
+		records = append(records, search.Record[string]{Entity: alias, Metadata: source})
+	}
+	return search.NewIndex(records)
+}
+
 type OpenAlexAcknowledgementIsEOC struct {
 	openalex        openalex.KnowledgeBase
-	entityLookup    *EntityStore
-	authorCache     DataCache[openalex.Author]
+	entityLookup    *search.EntityIndex[string]
+	authorCache     utils.DataCache[openalex.Author]
 	extractor       AcknowledgementsExtractor
 	sussyBakas      []string
 	triangulationDB *triangulation.TriangulationDB
+}
+
+func NewOpenAlexAcknowledgementIsEOC(
+	entityLookup *search.EntityIndex[string],
+	authorCache utils.DataCache[openalex.Author],
+	extractor AcknowledgementsExtractor,
+	sussyBakas []string,
+	triangulationDB *triangulation.TriangulationDB,
+) *OpenAlexAcknowledgementIsEOC {
+	return &OpenAlexAcknowledgementIsEOC{
+		openalex:        openalex.NewRemoteKnowledgeBase(),
+		entityLookup:    entityLookup,
+		authorCache:     authorCache,
+		extractor:       extractor,
+		sussyBakas:      sussyBakas,
+		triangulationDB: triangulationDB,
+	}
 }
 
 func (flagger *OpenAlexAcknowledgementIsEOC) Name() string {
@@ -321,8 +403,31 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkForSussyBaka(ack Acknowledgeme
 	return flagger.containsSussyBakas(newText)
 }
 
+type SourceToAliases map[string][]string
+
+func (flagger *OpenAlexAcknowledgementIsEOC) searchWatchlistEntities(entities []string) map[string]SourceToAliases {
+	matches := make(map[string]SourceToAliases)
+
+	for _, entity := range entities {
+		results := flagger.entityLookup.Query(entity, 10)
+
+		sourceToAliases := make(SourceToAliases)
+		for _, result := range results {
+			sim := utils.IndelSimilarity(entity, result.Entity)
+			if sim > 0.9 {
+				sourceToAliases[result.Metadata] = append(sourceToAliases[result.Entity], result.Entity)
+			}
+		}
+		if len(sourceToAliases) > 0 {
+			matches[entity] = sourceToAliases
+		}
+	}
+
+	return matches
+}
+
 func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
-	logger *slog.Logger, acknowledgements []Acknowledgement, allAuthorNames []string,
+	acknowledgements []Acknowledgement, allAuthorNames []string,
 ) (bool, map[string]SourceToAliases, string, error) {
 	message := ""
 	flagged := false
@@ -360,10 +465,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) checkAcknowledgementEntities(
 		}
 
 		if len(entityQueries) > 0 {
-			matches, err := flagger.entityLookup.SearchEntities(logger, entityQueries)
-			if err != nil {
-				return false, nil, "", fmt.Errorf("error looking up entity matches: %w", err)
-			}
+			matches := flagger.searchWatchlistEntities(entityQueries)
 
 			for _, entity := range entityQueries {
 				if sources, ok := matches[entity]; ok {
@@ -479,15 +581,15 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			Message:               message,
 			Work:                  getWorkSummary(work),
 			Entities:              entities,
-			RawAcknowledements:    rawAcks,
+			RawAcknowledgements:   rawAcks,
 			FundCodeTriangulation: triangulationResults,
 		}
 	} else if containsSource(entities, deniedEntities) {
 		return &api.AssociationWithDeniedEntityFlag{
-			Message:            message,
-			Work:               getWorkSummary(work),
-			Entities:           entities,
-			RawAcknowledements: rawAcks,
+			Message:             message,
+			Work:                getWorkSummary(work),
+			Entities:            entities,
+			RawAcknowledgements: rawAcks,
 		}
 	} else {
 		entityNames := make([]string, 0, len(entities))
@@ -498,13 +600,18 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			Message:               message,
 			Work:                  getWorkSummary(work),
 			Funders:               entityNames,
-			RawAcknowledements:    rawAcks,
+			RawAcknowledgements:   rawAcks,
 			FundCodeTriangulation: triangulationResults,
 		}
 	}
 }
 
-func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string) ([]api.Flag, error) {
+func (flagger *OpenAlexAcknowledgementIsEOC) DisableForUniversityReport() bool {
+	return true
+}
+
+func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []openalex.Work, targetAuthorIds []string, authorName string) ([]api.Flag, error) {
+
 	flags := make([]api.Flag, 0)
 
 	remaining := make([]openalex.Work, 0)
@@ -550,7 +657,7 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 		}
 
 		flagged, flaggedEntities, message, err := flagger.checkAcknowledgementEntities(
-			workLogger, acks.Result.Acknowledgements, allAuthorNames,
+			acks.Result.Acknowledgements, allAuthorNames,
 		)
 		if err != nil {
 			workLogger.Error("error checking acknowledgements: skipping work", "error", err)

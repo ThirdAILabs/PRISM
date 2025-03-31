@@ -1,4 +1,4 @@
-package flaggers
+package reports_test
 
 import (
 	"os"
@@ -6,8 +6,11 @@ import (
 	"prism/prism/api"
 	"prism/prism/openalex"
 	"prism/prism/reports"
+	"prism/prism/reports/flaggers"
 	"prism/prism/reports/flaggers/eoc"
+	"prism/prism/reports/utils"
 	"prism/prism/schema"
+	"prism/prism/search"
 	"prism/prism/triangulation"
 	"slices"
 	"strings"
@@ -19,16 +22,15 @@ import (
 	"gorm.io/gorm"
 )
 
-func setupReportManager(t *testing.T) *reports.ReportManager {
-	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
-	if err != nil {
-		t.Fatal(err)
+func init() {
+	const licensePath = "../../.test_license/thirdai.license"
+	if err := search.SetLicensePath(licensePath); err != nil {
+		panic(err)
 	}
+}
 
-	if err := db.AutoMigrate(&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{},
-		&schema.UniversityReport{}, &schema.UserUniversityReport{}); err != nil {
-		t.Fatal(err)
-	}
+func setupReportManager(t *testing.T) *reports.ReportManager {
+	db := schema.SetupTestDB(t)
 
 	// We're using old date ranges for these so they only process works around the
 	// date of the flagged work, particularly for the acknowledgements flagger, this
@@ -37,7 +39,7 @@ func setupReportManager(t *testing.T) *reports.ReportManager {
 	// threshold here fixes it. In ~100 years this threshold would again be too small,
 	// but at that point this code will likely not be in use, or if it is, then it
 	// will be someone else's problem (or more likely an AI).
-	return reports.NewManager(db).SetStaleReportThreshold(100 * 365 * 24 * time.Hour)
+	return reports.NewManager(db).SetAuthorReportUpdateInterval(100 * 365 * 25 * time.Hour)
 }
 
 func eqOrderInvariant(a, b []string) bool {
@@ -54,7 +56,7 @@ func yearEnd(year int) time.Time {
 	return time.Date(year, 12, 31, 0, 0, 0, 0, time.UTC)
 }
 
-func getReportContent(t *testing.T, report reports.ReportUpdateTask, processor *ReportProcessor, manager *reports.ReportManager) map[string][]api.Flag {
+func getReportContent(t *testing.T, report reports.ReportUpdateTask, processor *reports.ReportProcessor, manager *reports.ReportManager) map[string][]api.Flag {
 	user := uuid.New()
 	reportId, err := manager.CreateAuthorReport(user, report.AuthorId, report.AuthorName, report.Source)
 	if err != nil {
@@ -82,16 +84,14 @@ func getReportContent(t *testing.T, report reports.ReportUpdateTask, processor *
 
 func TestProcessorCoauthorAffiliation(t *testing.T) {
 	manager := setupReportManager(t)
-	processor := &ReportProcessor{
-		openalex: openalex.NewRemoteKnowledgeBase(),
-		workFlaggers: []WorkFlagger{
-			&OpenAlexCoauthorAffiliationIsEOC{
-				concerningEntities:     eoc.LoadGeneralEOC(),
-				concerningInstitutions: eoc.LoadInstitutionEOC(),
-			},
+
+	processor := reports.NewProcessor(
+		[]reports.WorkFlagger{
+			flaggers.NewOpenAlexCoauthorAffiliationIsEOC(eoc.LoadGeneralEOC(), eoc.LoadInstitutionEOC()),
 		},
-		manager: manager,
-	}
+		nil,
+		manager,
+	)
 
 	t.Run("Case1", func(t *testing.T) {
 		report := getReportContent(
@@ -171,16 +171,13 @@ func TestProcessorCoauthorAffiliation(t *testing.T) {
 func TestProcessorAuthorAffiliation(t *testing.T) {
 	manager := setupReportManager(t)
 
-	processor := &ReportProcessor{
-		openalex: openalex.NewRemoteKnowledgeBase(),
-		workFlaggers: []WorkFlagger{
-			&OpenAlexAuthorAffiliationIsEOC{
-				concerningEntities:     eoc.LoadGeneralEOC(),
-				concerningInstitutions: eoc.LoadInstitutionEOC(),
-			},
+	processor := reports.NewProcessor(
+		[]reports.WorkFlagger{
+			flaggers.NewOpenAlexAuthorAffiliationIsEOC(eoc.LoadGeneralEOC(), eoc.LoadInstitutionEOC()),
 		},
-		manager: manager,
-	}
+		nil,
+		manager,
+	)
 
 	t.Run("Case1", func(t *testing.T) {
 		report := getReportContent(
@@ -253,17 +250,18 @@ func TestProcessorAuthorAffiliation(t *testing.T) {
 }
 
 func TestProcessorUniversityFacultySeach(t *testing.T) {
-	universityNDB := BuildUniversityNDB("../../../data/university_webpages.json", t.TempDir())
+	universityNDB := flaggers.BuildUniversityNDB("../../data/university_webpages.json", t.TempDir())
 	defer universityNDB.Free()
 
 	manager := setupReportManager(t)
-	processor := &ReportProcessor{
-		openalex: openalex.NewRemoteKnowledgeBase(),
-		authorFacultyAtEOC: &AuthorIsFacultyAtEOCFlagger{
-			universityNDB: universityNDB,
+
+	processor := reports.NewProcessor(
+		nil,
+		[]reports.AuthorFlagger{
+			flaggers.NewAuthorIsFacultyAtEOCFlagger(universityNDB),
 		},
-		manager: manager,
-	}
+		manager,
+	)
 
 	t.Run("Case1", func(t *testing.T) {
 		report := getReportContent(
@@ -323,21 +321,18 @@ func TestProcessorUniversityFacultySeach(t *testing.T) {
 }
 
 func TestProcessorAuthorAssociations(t *testing.T) {
-	docNDB := BuildDocNDB("../../../data/docs_and_press_releases.json", t.TempDir())
-	defer docNDB.Free()
-
-	auxNDB := BuildAuxNDB("../../../data/auxiliary_webpages.json", t.TempDir())
-	defer auxNDB.Free()
-
 	manager := setupReportManager(t)
-	processor := &ReportProcessor{
-		openalex: openalex.NewRemoteKnowledgeBase(),
-		authorAssociatedWithEOC: &AuthorIsAssociatedWithEOCFlagger{
-			docNDB: docNDB,
-			auxNDB: auxNDB,
+
+	processor := reports.NewProcessor(
+		[]reports.WorkFlagger{
+			flaggers.NewAuthorIsAssociatedWithEOCFlagger(
+				flaggers.BuildDocIndex("../../data/docs_and_press_releases.json"),
+				flaggers.BuildAuxIndex("../../data/auxiliary_webpages.json"),
+			),
 		},
-		manager: manager,
-	}
+		nil,
+		manager,
+	)
 
 	t.Run("PrimaryConnection", func(t *testing.T) {
 		report := getReportContent(
@@ -432,7 +427,7 @@ func TestProcessorAuthorAssociations(t *testing.T) {
 				flag.Connections[0].DocUrl != "https://nuprobe.com/about-us/" ||
 				flag.Connections[1].DocTitle != "NuProbe Announces $11 Million Series A Funding Round" ||
 				flag.Connections[1].DocUrl != "https://nuprobe.com/2018/04/nuprobe-announces-11-million-series-a-funding-round-2/" {
-				t.Fatal("incorrect flag")
+				t.Fatalf("incorrect flag; %+v", flag)
 			}
 			entitiesMentioned[flag.EntityMentioned] = true
 		}
@@ -450,23 +445,19 @@ func TestProcessorAcknowledgements(t *testing.T) {
 
 	testDir := t.TempDir()
 
-	authorCache, err := NewCache[openalex.Author]("authors", filepath.Join(testDir, "authors.cache"))
+	authorCache, err := utils.NewCache[openalex.Author]("authors", filepath.Join(testDir, "authors.cache"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer authorCache.Close()
 
-	ackCache, err := NewCache[Acknowledgements]("acks", filepath.Join(testDir, "acks.cache"))
+	ackCache, err := utils.NewCache[flaggers.Acknowledgements]("acks", filepath.Join(testDir, "acks.cache"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer ackCache.Close()
 
-	entityStore, err := NewEntityStore(filepath.Join(testDir, "entity_lookup.ndb"), eoc.LoadSourceToAlias())
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer entityStore.Free()
+	entityStore := flaggers.BuildWatchlistEntityIndex(eoc.LoadSourceToAlias())
 
 	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
 	if err != nil {
@@ -482,20 +473,16 @@ func TestProcessorAcknowledgements(t *testing.T) {
 	triangulationDB := triangulation.CreateTriangulationDB(db)
 
 	manager := setupReportManager(t)
-	processor := &ReportProcessor{
-		openalex: openalex.NewRemoteKnowledgeBase(),
-		workFlaggers: []WorkFlagger{
-			&OpenAlexAcknowledgementIsEOC{
-				openalex:        openalex.NewRemoteKnowledgeBase(),
-				entityLookup:    entityStore,
-				authorCache:     authorCache,
-				extractor:       NewGrobidExtractor(ackCache, grobidEndpoint, testDir, 40, 10),
-				sussyBakas:      eoc.LoadSussyBakas(),
-				triangulationDB: triangulationDB,
-			},
+
+	processor := reports.NewProcessor(
+		[]reports.WorkFlagger{
+			flaggers.NewOpenAlexAcknowledgementIsEOC(
+				entityStore, authorCache, flaggers.NewGrobidExtractor(ackCache, grobidEndpoint, 40, 10, "thirdai-prism"), eoc.LoadSussyBakas(), triangulationDB,
+			),
 		},
-		manager: manager,
-	}
+		nil,
+		manager,
+	)
 
 	t.Run("Case1", func(t *testing.T) {
 		report := getReportContent(
@@ -539,7 +526,7 @@ func TestProcessorAcknowledgements(t *testing.T) {
 			flag := flag.(*api.HighRiskFunderFlag)
 			if flag.Work.WorkId == "https://openalex.org/W4384197626" {
 				found = true
-				if len(flag.RawAcknowledements) == 0 || !strings.Contains(flag.Funders[0], "Zhejiang University") {
+				if len(flag.RawAcknowledgements) == 0 || !strings.Contains(flag.Funders[0], "Zhejiang University") {
 					t.Fatal("incorrect acknowledgement found")
 				}
 			}

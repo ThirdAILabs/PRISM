@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/licensing"
 	"prism/prism/openalex"
@@ -26,7 +25,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/xuri/excelize/v2"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -61,31 +59,10 @@ func (m *MockTokenVerifier) VerifyToken(token string) (uuid.UUID, error) {
 }
 
 func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
-	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := db.AutoMigrate(
-		&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{},
-		&schema.UniversityReport{}, &schema.UserUniversityReport{},
-	); err != nil {
-		t.Fatal(err)
-	}
-
-	ndbPath := filepath.Join(t.TempDir(), "entity.ndb")
-	entitySearch, err := services.NewEntitySearch(ndbPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() {
-		entitySearch.Free()
-	})
+	db := schema.SetupTestDB(t)
 
 	entities := []api.MatchedEntity{{Names: "abc university"}, {Names: "institute of xyz"}, {Names: "123 org"}}
-	if err := entitySearch.Insert(entities); err != nil {
-		t.Fatal(err)
-	}
+	entitySearch := services.NewEntitySearch(entities)
 
 	licensing, err := licensing.NewLicenseVerifier("AC013F-FD0B48-00B160-64836E-76E88D-V3")
 	if err != nil {
@@ -93,7 +70,7 @@ func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 	}
 
 	backend := services.NewBackend(
-		db, openalex.NewRemoteKnowledgeBase(), entitySearch, &MockTokenVerifier{prefix: userPrefix}, licensing, "./resources",
+		reports.NewManager(db), openalex.NewRemoteKnowledgeBase(), entitySearch, &MockTokenVerifier{prefix: userPrefix}, licensing, "./resources",
 	)
 
 	return backend.Routes(), db
@@ -290,6 +267,9 @@ func TestCheckDisclosure(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if nextReport.ForUniversityReport {
+		t.Fatal("next report should not be for university report")
+	}
 	if nextReport == nil {
 		t.Fatal("next report should not be nil")
 	}
@@ -367,13 +347,16 @@ func TestDownloadReportAllFormats(t *testing.T) {
 				OaUrl:           "http://example.com/oa/work-1",
 				PublicationDate: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
-			RawAcknowledements: []string{"flag-content"},
+			RawAcknowledgements: []string{"flag-content"},
 		},
 	}
 
 	nextReport, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
+	}
+	if nextReport.ForUniversityReport {
+		t.Fatal("next report should not be for university report")
 	}
 	if nextReport == nil {
 		t.Fatal("next report should not be nil")
@@ -555,6 +538,10 @@ func TestUniversityReportEndpoints(t *testing.T) {
 	nextAuthorReport, err := manager.GetNextAuthorReport()
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if !nextAuthorReport.ForUniversityReport {
+		t.Fatal("next author report should be for university report")
 	}
 
 	if err := manager.UpdateAuthorReport(nextAuthorReport.Id, schema.ReportCompleted, time.Now(), []api.Flag{
