@@ -44,9 +44,8 @@ jobs:
 
       - name: Run data update script
         run: |
-          git checkout -b ${{ env.BRANCH_NAME }}
           cd data/scrapper_job
-          touch output.csv
+          python3 -u -m main
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
@@ -54,7 +53,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Update data"
           branch: ${{ env.BRANCH_NAME }}
-          base: main
+          base: automate-download
           title: "Automated data update"
           body: "This PR includes updated data generated automatically."
           reviewers: pratik, ashutosh
