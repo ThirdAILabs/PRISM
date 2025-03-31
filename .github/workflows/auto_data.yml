@@ -56,4 +56,4 @@ jobs:
           base: automate-download
           title: "Automated data update"
           body: "This PR includes updated data generated automatically."
-          reviewers: pratik, ashutosh
+          reviewers: pratik
