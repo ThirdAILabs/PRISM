@@ -341,5 +341,136 @@
             "type": "funders"
         },
         "score": 1.0
+    },
+    {
+        "name": "Institute of Microelectronics of the Chinese Academy of Sciences",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "CAS IME",
+            "IME CAS",
+            "IMECAS",
+            "CAS Institute of Microelectronics",
+            "CAS Microelectronics Institute",
+            "Institute of Microelectronics of the Chinese Academy of Sciences"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320335624",
+            "name": "Institute of Microelectronics of the Chinese Academy of Sciences",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Ji Hua Laboratory",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Guangdong Provincial Laboratory of Advanced Manufacturing Science and Technology",
+            "Guangdong Provincial Lab of Chemicals and Fine Chemicals",
+            "Ji Hua Lab",
+            "Yan Chang Ji Hua Lab"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320317139",
+            "name": "Ji Hua Laboratory",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Peng Cheng Laboratory",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Pengcheng Laboratory",
+            "Peng Cheng Lab",
+            "Pengcheng Lab",
+            "Shenzhen Provincial Laboratory of Cyberspace Science and Technology",
+            "PCL"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320318558",
+            "name": "Peng Cheng Laboratory",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Air Force Engineering University",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "China People\u00e2\u0080\u0099s Liberation Army Air Force Engineering University",
+            "AFEU"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320329509",
+            "name": "Air Force Engineering University",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Ningbo Institute of Materials Technology and Engineering, Chinese Academy of Sciences",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Ningbo Institute of Materials",
+            "CNITECH",
+            "Ningbo Inst of Mat Tech & Eng",
+            "Qianwan Institute of CNITECH",
+            "Ningbo Inst. Of Materials Tech",
+            "Ningbo Institute of Mat",
+            "Ningbo Institute of Materials Technology and Engineering, Chinese Academy of Sciences",
+            "CAS Ningbo Institute of Materials Technology and Engineering"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320336172",
+            "name": "Ningbo Institute of Materials Technology and Engineering, Chinese Academy of Sciences",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "NOVA",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "QUEEN REEM"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320326444",
+            "name": "Nova",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "DIAMOND",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [],
+        "match": {
+            "id": "https://openalex.org/F4320312432",
+            "name": "Diamond V",
+            "type": "entity_type"
+        },
+        "score": 0.875
+    },
+    {
+        "name": "UNIVERSAL",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [],
+        "match": {
+            "id": "https://openalex.org/F4320316670",
+            "name": "Universal",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "SAMSUN",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [],
+        "match": {
+            "id": "https://openalex.org/F4320332195",
+            "name": "Samsung",
+            "type": "entity_type"
+        },
+        "score": 0.9230769230769231
     }
 ]
