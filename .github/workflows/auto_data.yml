@@ -37,15 +37,16 @@ jobs:
           pip install -r data/scrapper_job/requirements.txt
           playwright install --with-deps
 
-      - name: Run data update script
-        run: |
-          cd data/scrapper_job
-          python3 -u -m main
-
-      - name: Commit and push changes
+      - name: Set Variables
         run: |
           BRANCH="update-data-$(date +%Y%m%d%H%M%S)"
           echo "BRANCH_NAME=$BRANCH" >> $GITHUB_ENV
+
+      - name: Run data update script
+        run: |
+          git checkout -b ${{ env.BRANCH_NAME }}
+          cd data/scrapper_job
+          touch output.csv
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
