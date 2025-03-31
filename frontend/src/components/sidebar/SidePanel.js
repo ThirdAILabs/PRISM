@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../store/userContext';
 import { useLocation } from 'react-router-dom';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { MdKeyboardArrowRight } from "react-icons/md";
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { Tooltip } from '@mui/material';
 import { GRAPHICS } from '../../assets/icons/graphics';
@@ -38,7 +39,6 @@ const SidePanel = ({ isOpen, onClose }) => {
     complete: <CiCircleCheck title="Completed" size={16} />,
   };
   const location = useLocation();
-  const currentLocation = location.pathname;
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -109,25 +109,28 @@ const SidePanel = ({ isOpen, onClose }) => {
           <nav className="navigation">
             <ul className="nav-list">
               <li
-                className={`nav-item ${currentLocation === '/' ? 'active' : ''}`}
+                className={'nav-item'}
                 onClick={handleIndividualClick}
               >
                 <span className="nav-icon">{GRAPHICS.individual_assessment}</span>
                 <span className="nav-text">Individual Assessment</span>
+                <MdKeyboardArrowRight className='nav-arrow'/>
               </li>
               <li
-                className={`nav-item ${currentLocation === '/university' ? 'active' : ''}`}
+                className={'nav-item'}
                 onClick={handleUniversityClick}
               >
                 <span className="nav-icon">{GRAPHICS.university}</span>
                 <span className="nav-text">University Assessment</span>
+                <span className="nav-arrow"><MdKeyboardArrowRight /></span>
               </li>
               <li
-                className={`nav-item ${currentLocation === '/entity-lookup' ? 'active' : ''}`}
+                className={'nav-item'}
                 onClick={handleEntityClick}
               >
                 <span className="nav-icon">{GRAPHICS.entity_lookup}</span>
                 <span className="nav-text">Entity Lookup</span>
+                <span className="nav-arrow"><MdKeyboardArrowRight /></span>
               </li>
             </ul>
           </nav>
@@ -266,10 +269,12 @@ const SidePanel = ({ isOpen, onClose }) => {
           </div>
           <hr className="user-card__divider" />
 
-          <button className="user-card__logout-button" onClick={UserService.doLogout}>
-            <span>Logout</span>
-            <FiLogOut size={25} className="user-card__logout-button-icon" />
-          </button>
+          <div className="user-card__logout-container">
+            <span className="user-card__logout-text">Logout</span>
+            <button className="user-card__logout-button" onClick={UserService.doLogout}>
+              <FiLogOut size={25} className="user-card__logout-button-icon" />
+            </button>
+          </div>
         </div>
       </div>
     </>
