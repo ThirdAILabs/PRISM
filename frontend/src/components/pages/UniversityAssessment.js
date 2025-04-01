@@ -63,10 +63,11 @@ function UniversityAssessment() {
       <div style={{ textAlign: 'center', marginTop: '5%', animation: 'fade-in 0.75s' }}>
         <img
           src={Logo}
+          alt="Prism Logo"
           style={{
-            width: '320px',
-            marginTop: '1%',
-            marginBottom: '1%',
+            width: '240px',
+            marginTop: '3%',
+            marginBottom: '0.25%',
             marginRight: '2%',
             animation: 'fade-in 0.5s',
           }}
@@ -75,7 +76,7 @@ function UniversityAssessment() {
         <div style={{ animation: 'fade-in 1s' }}>
           <div className="d-flex justify-content-center align-items-center">
             <div style={{ marginTop: 10, color: '#888888' }}>
-              <h1
+              <h3
                 style={{
                   fontWeight: 'bold',
                   color: 'black',
@@ -84,13 +85,11 @@ function UniversityAssessment() {
                 }}
               >
                 University Assessment
-              </h1>
-              We help you comply with research security requirements by automating university
-              assessments.
+              </h3>
             </div>
           </div>
           <div className="d-flex justify-content-center align-items-center">
-            <div style={{ marginTop: 10, marginBottom: '2%', color: '#888888' }}>
+            <div style={{ marginTop: 10, marginBottom: '0.5%', color: '#888888', fontWeight: 'bold', fontSize: 'large' }}>
               Which university would you like to conduct an assessment on?
             </div>
           </div>
