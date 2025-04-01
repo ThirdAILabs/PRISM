@@ -107,16 +107,21 @@ $z-index-sidebar-header: 1000;
 }
 
 .reports {
-  margin-top: 20px;
-  margin-left: 1%;
   color: $color-grey-500;
+  margin-top: 20px;
+
+  &-header {
+    cursor: default;
+    
+    &:hover {
+      transform: none;
+    }
+  }
 }
 
+.report-icon,
 .report-header {
-  display: flex;
-  align-items: center;
-  padding: 8px 0;
-  @include sub-heading-4;
+  display: none;
 }
 
 .report-item {

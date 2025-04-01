@@ -3,9 +3,9 @@ import { reportService } from '../../api/reports';
 import { universityReportService } from '../../api/universityReports';
 import RandomAvatar from '../../assets/images/RandomAvatar.jpg';
 import PRISM_LOGO from '../../assets/images/prism.png';
+import all_reports from '../../assets/icons/all_reports.svg';
 import UserService from '../../services/userService';
 import { FiLogOut } from 'react-icons/fi';
-import { TbReportSearch } from 'react-icons/tb';
 import { CiCircleList, CiCircleCheck } from 'react-icons/ci';
 import { CgSpinner } from 'react-icons/cg';
 import { useNavigate } from 'react-router-dom';
@@ -116,25 +116,25 @@ const SidePanel = ({ isOpen, onClose }) => {
               <li className={'nav-item'} onClick={handleUniversityClick}>
                 <span className="nav-icon">{GRAPHICS.university}</span>
                 <span className="nav-text">University Assessment</span>
-                <span className="nav-arrow">
-                  <MdKeyboardArrowRight />
-                </span>
+                <MdKeyboardArrowRight className="nav-arrow"  />
               </li>
               <li className={'nav-item'} onClick={handleEntityClick}>
                 <span className="nav-icon">{GRAPHICS.entity_lookup}</span>
                 <span className="nav-text">Entity Lookup</span>
-                <span className="nav-arrow">
-                  <MdKeyboardArrowRight />
-                </span>
+                <MdKeyboardArrowRight className="nav-arrow"  />
               </li>
             </ul>
           </nav>
 
           {/* Reports */}
           <div className="reports">
-            <h5 className="report-header">
-              <TbReportSearch /> Reports
-            </h5>
+            <div className="nav-item reports-header">
+              <span className="nav-icon">
+                <img src={all_reports} alt="all_reports" />
+              </span>
+              <span className="nav-text">Reports</span>
+            </div>
+            
             {reports?.length ? (
               <div className="collapsible-header">
                 <div className="collapsible-subheader">
