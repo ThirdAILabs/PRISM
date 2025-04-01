@@ -11,6 +11,7 @@
 .entity-lookup-search-bar-container {
   width: 80%;
   margin-left: 2.5%;
+  margin-top: -2%;
 }
 
 .entity-lookup-items {

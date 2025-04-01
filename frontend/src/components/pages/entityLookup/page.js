@@ -57,11 +57,11 @@ function EntityLookup() {
       <div style={{ textAlign: 'center', marginTop: '5%', animation: 'fade-in 0.75s' }}>
         <img
           src={Logo}
-          alt="Logo"
+          alt="Prism Logo"
           style={{
-            width: '320px',
-            marginTop: '1%',
-            marginBottom: '1%',
+            width: '240px',
+            marginTop: '3%',
+            marginBottom: '0.35%',
             marginRight: '2%',
             animation: 'fade-in 0.5s',
           }}
@@ -69,21 +69,20 @@ function EntityLookup() {
         <div style={{ animation: 'fade-in 1s' }}>
           <div className="d-flex justify-content-center align-items-center">
             <div style={{ color: '#888888' }}>
-              <h1
+              <h3
                 style={{
-                  marginTop: 20,
                   fontWeight: 'bold',
                   color: 'black',
+                  marginTop: 20,
                   animation: 'fade-in 0.75s',
                 }}
               >
                 Entity Lookup
-              </h1>
-              We help you comply with research security requirements.
+              </h3>
             </div>
           </div>
           <div className="d-flex justify-content-center align-items-center">
-            <div style={{ marginTop: 10, marginBottom: '0%', color: '#888888' }}>
+            <div style={{ marginTop: 10, marginBottom: '0%', color: '#888888', fontWeight: 'bold', fontSize: 'large' }}>
               Search for an entity to see if it is on any list of concerning entities.
             </div>
           </div>
@@ -102,11 +101,13 @@ function EntityLookup() {
                     autoComplete="off"
                   />
                 </div>
-                <div className="author-institution-search-button-container">
+                <div className="author-institution-search-button-container"
+                  style={{ marginTop: '-2%' }}>
                   <button
                     type="submit"
                     disabled={isLoading || query.length === 0}
                     className="button button-3d"
+
                   >
                     {isLoading ? 'Searching...' : 'Search'}
                   </button>
