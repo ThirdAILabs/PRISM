@@ -930,21 +930,6 @@ const ItemDetails = () => {
     );
   }
 
-  function wrapLinks(origtext) {
-    const linkStart = Math.max(origtext.indexOf('https://'), origtext.indexOf('http://'));
-    if (linkStart === -1) {
-      return [origtext];
-    }
-    const message = origtext.slice(0, linkStart);
-    const link = origtext.slice(linkStart);
-    return [
-      message,
-      <a href={link} target="_blank" rel="noopener noreferrer">
-        {link}
-      </a>,
-    ];
-  }
-
   const items = review ? reportContent[review] || [] : [];
   const hasDates = items.some(
     (item) => item?.Work?.PublicationDate && !isNaN(new Date(item.Work.PublicationDate).getTime())
