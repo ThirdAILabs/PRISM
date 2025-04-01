@@ -1,0 +1,52 @@
+@import '../base/varialbes';
+
+// Button Variables
+:root {
+  --transition-speed: 0.3s;
+  --border-radius: 8px;
+  --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.button-container {
+  display: grid;
+  grid-template-columns: repeat(3, 180px);
+  gap: 25px;
+  perspective: 1000px;
+}
+
+.button {
+  padding: 15px 30px;
+  border: none;
+  cursor: pointer;
+  color: $color-text-100;
+  border-radius: var(--border-radius);
+  transition:
+    transform var(--transition-speed),
+    box-shadow var(--transition-speed);
+  position: relative;
+  overflow: hidden;
+
+  &-3d {
+    background: $color-primary-700;
+    box-shadow: 0 5px darken($color-primary-700, 15%);
+    transition:
+      transform var(--transition-speed),
+      box-shadow var(--transition-speed);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px darken($color-primary-700, 15%);
+    }
+
+    &:active {
+      box-shadow: 0 4px darken($color-primary-700, 25%);
+      transform: translateY(6px);
+    }
+
+    &:disabled {
+      background: $button-disabled;
+      box-shadow: 0 5px darken($button-disabled, 15%);
+      cursor: not-allowed;
+    }
+  }
+}

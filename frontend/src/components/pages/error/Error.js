@@ -28,7 +28,7 @@ export default function Error() {
         <p class="lead error-message mb-5">{errorMessages[status][1]}</p>
         <div class="d-flex justify-content-center gap-3">
           <button
-            className="button"
+            className="button button-3d"
             onClick={() => {
               navigate('/');
             }}
