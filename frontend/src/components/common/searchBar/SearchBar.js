@@ -7,8 +7,9 @@ import useCallOnPause from '../../../hooks/useCallOnPause';
 import AutocompleteSearchBar from '../../../utils/autocomplete';
 // import { TextField } from '@mui/material';
 import TextField from '../tools/TextField';
-// import '../../../styles/components/_primaryButton2.scss';
-import '../tools/button/button2.css';
+import '../../../styles/components/_primaryButton2.scss';
+import { Tooltip } from '@mui/material';
+
 export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInstitution }) {
   const [author, setAuthor] = useState(defaultAuthor || null);
   const [institution, setInstitution] = useState(defaultInstitution || null);
@@ -84,7 +85,7 @@ export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInst
       </div>
 
       <div className="author-institution-search-button-container">
-        <button class="button button-3d" onClick={search}>
+        <button class="button button-3d" onClick={search} disabled={!author || !institution}>
           Search
         </button>
       </div>
@@ -97,6 +98,7 @@ export function SingleSearchBar({
   onSearch,
   initialValue = '',
 }) {
+  const orcidRegex = /^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9X]{4}$/;
   const [value, setValue] = useState(initialValue);
 
   const handleSubmit = (e) => {
@@ -130,9 +132,11 @@ export function SingleSearchBar({
             </div>
 
             <div className="single-search-button-container" style={{ marginTop: '-2px' }}>
-              <button className="button button-3d" onClick={handleSubmit}>
-                Search
-              </button>
+              <Tooltip title="Please enter a valid ORCID ID in the format 0000-0000-0000-0000 (last digit can be 0-9 or X).">
+                <button className="button button-3d" onClick={handleSubmit} disabled={!orcidRegex.test(value)}>
+                  Search
+                </button>
+              </Tooltip>
             </div>
           </div>
         </div>

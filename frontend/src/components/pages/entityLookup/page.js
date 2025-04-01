@@ -6,7 +6,6 @@ import './entityLookup.css';
 import Logo from '../../../assets/images/prism-logo.png';
 import { searchService } from '../../../api/search';
 import NoResultsFound from '../../common/tools/NoResultsFound';
-import { Tooltip } from '@mui/material';
 import TextField from '../../common/tools/TextField';
 
 const makeLinksClickable = (text) => {
@@ -104,15 +103,13 @@ function EntityLookup() {
                   />
                 </div>
                 <div className="author-institution-search-button-container">
-                  <Tooltip title={query.length === 0 ? 'Please enter a search query' : ''}>
-                    <button
-                      type="submit"
-                      disabled={isLoading || query.length === 0}
-                      className="button button-3d"
-                    >
-                      {isLoading ? 'Searching...' : 'Search'}
-                    </button>
-                  </Tooltip>
+                  <button
+                    type="submit"
+                    disabled={isLoading || query.length === 0}
+                    className="button button-3d"
+                  >
+                    {isLoading ? 'Searching...' : 'Search'}
+                  </button>
                 </div>
               </form>
             </div>

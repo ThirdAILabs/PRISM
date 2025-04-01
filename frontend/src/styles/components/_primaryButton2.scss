@@ -19,27 +19,25 @@
     border: none;
     cursor: pointer;
     color: $color-text-100;
-    font-size: 16px;
     border-radius: var(--border-radius);
     transition: transform var(--transition-speed),
         box-shadow var(--transition-speed);
     position: relative;
     overflow: hidden;
-    letter-spacing: 1px;
 
     &-3d {
-        background: $color-success-700;
-        box-shadow: 0 5px darken($color-success-700, 15%);
+        background: $color-primary-700;
+        box-shadow: 0 5px darken($color-primary-700, 15%);
         transition: transform var(--transition-speed),
             box-shadow var(--transition-speed);
 
         &:hover {
             transform: translateY(-2px);
-            box-shadow: 0 7px darken($color-success-700, 15%);
+            box-shadow: 0 7px darken($color-primary-700, 15%);
         }
 
         &:active {
-            box-shadow: 0 4px darken($color-success-700, 25%);
+            box-shadow: 0 4px darken($color-primary-700, 25%);
             transform: translateY(6px);
         }
 
