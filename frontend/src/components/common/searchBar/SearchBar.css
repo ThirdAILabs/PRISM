@@ -25,21 +25,26 @@
 
 .suggestion-container {
   width: 100%;
-  background-color: rgb(245, 240, 240);
+  background-color: white;
   padding: 10px;
-  border-radius: 2px 2px 10px 10px;
+  border-radius: 0px 0px 8px 8px;
+  border: 1px solid rgb(230, 230, 230);
+  border-top: none;
   color: black;
 }
 
 .suggestion {
-  padding: 5px;
+  padding: 15px;
+  padding-top: 5px;
+  padding-bottom: 0px;
+  margin-bottom: 0px;
   text-align: left;
   color: black;
 }
 
 .suggestion:hover {
-  background-color: rgb(225, 220, 220);
-  border-radius: 2px;
+  background-color: #e9f4fe;
+  border-radius: 8px;
   cursor: pointer;
   color: black;
 }
@@ -48,7 +53,8 @@
   width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 3%;
   margin-left: 7.5%;
   margin-top: 60px;
 }
@@ -68,7 +74,7 @@
 
 .author-institution-search-button-container {
   width: 10%;
-  margin-top: 40px;
+  margin-top: -2px;
 }
 
 .search-type-container {
@@ -128,7 +134,8 @@
 }
 
 .single-search-button-container {
-  width: 10%;
+  width: 13%;
+  margin-top: -6px;
 }
 
 .single-search-bar-label {
