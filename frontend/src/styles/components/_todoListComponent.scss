@@ -48,7 +48,12 @@
 
             .content {
                 color: $color-text-500;
-                @include paragraph-6;
+                @include paragraph-5;
+
+                &-research {
+                    @include label-5;
+                }
+
             }
         }
     }

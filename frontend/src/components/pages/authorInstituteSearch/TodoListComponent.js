@@ -32,7 +32,6 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadi
       setResults(results.concat(await loadMore()));
     }
   };
-
   return (
     <div className="d-flex flex-column w-100 ">
       {results.length === 0 ? (
@@ -58,7 +57,7 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadi
                       alt="Affiliation"
                       className="icon"
                     />
-                    <span className="content">{result.Institutions.join(', ')}</span>
+                    <span className="content"><span className='content-research'>{result.Institutions[0]}</span>{result.Institutions.length > 1 && ", " + result.Institutions.slice(1,).join(', ')}</span>
                   </div>
 
                   {result.Interests && result.Interests.length > 0 && (
@@ -68,7 +67,7 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadi
                         alt="Research"
                         className="icon"
                       />
-                      <span className="content">{result.Interests.slice(0, 3).join(', ')}</span>
+                      <span className="content content-research">{result.Interests.slice(0, 3).join(', ')}</span>
                     </div>
                   )}
                 </div>
