@@ -59,10 +59,10 @@ function AppContent() {
 
       {showMenuIcon && (
         <div
-          className={`sidebar-toggle ${isSidePanelOpen ? 'open' : 'closed'}`}
+          className={`sidebar-toggle ${isSidePanelOpen ? '' : 'closed'}`}
           onClick={() => setIsSidePanelOpen(!isSidePanelOpen)}
         >
-          {isSidePanelOpen ? <GoSidebarExpand size={30} /> : <GoSidebarCollapse size={30} />}
+          {<GoSidebarCollapse size={30} />}
         </div>
       )}
 

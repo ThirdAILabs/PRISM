@@ -1,7 +1,7 @@
 @import '../base/varialbes';
 @import '../base/typography';
 
-$sidebar-width: 300px;
+$sidebar-width: 320px;
 $sidebar-padding: 20px;
 $sidebar-border-color: #e0e0e0;
 $sidebar-icon-size: 24px;
@@ -32,6 +32,7 @@ $z-index-sidebar-header: 1000;
   &.open {
     left: 0;
   }
+
   &-header {
     position: sticky;
     top: 0;
@@ -43,9 +44,8 @@ $z-index-sidebar-header: 1000;
     padding-bottom: 20px;
 
     &__logo {
-      width: 150px;
-      height: 30px;
-      margin-left: 5%;
+      width: 120px;
+      margin-left: 2%;
       user-select: none;
     }
   }
@@ -61,6 +61,7 @@ $z-index-sidebar-header: 1000;
     list-style: none;
     padding: 0;
     margin-top: 20px;
+    overflow: hidden;
   }
 }
 
@@ -72,27 +73,18 @@ $z-index-sidebar-header: 1000;
 .nav-item {
   display: flex;
   align-items: center;
-  padding: 8px 10px;
+  padding: 8px 0px;
   margin-bottom: 10px;
   cursor: pointer;
   background: $color-text-100;
   color: $color-text-700;
-  border-radius: 0.5rem;
   border: none;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 
   &:hover {
-    background: $color-primary-100;
-  }
-
-  &.active {
-    background: $color-primary-100;
-    color: $color-primary-700;
-    .nav-item-svg-icon {
-      fill: $color-primary-700;
-    }
-  }
-  &-svg-icon {
-    fill: $color-text-700;
+    transform: scale(1.03);
   }
 }
 
@@ -108,17 +100,27 @@ $z-index-sidebar-header: 1000;
   @include sub-heading-4;
 }
 
+.nav-arrow {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
 .reports {
-  margin-top: 20px;
-  margin-left: 1%;
   color: $color-grey-500;
+  margin-top: 20px;
+
+  &-header {
+    cursor: default;
+
+    &:hover {
+      transform: none;
+    }
+  }
 }
 
 .report-header {
-  display: flex;
-  align-items: center;
-  padding: 8px 0;
-  @include sub-heading-4;
+  display: none;
 }
 
 .report-item {
@@ -168,6 +170,7 @@ $z-index-sidebar-header: 1000;
     user-select: none;
 
     &-text {
+      @include paragraph-5;
       margin-left: 10px;
       padding-right: 10px;
     }
@@ -228,31 +231,33 @@ $z-index-sidebar-header: 1000;
     margin: 8px 0;
   }
 
-  &__logout-button {
-    @include paragraph-4;
+  &__logout-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: $color-text-500;
-    // font-size: 16px;
-    padding: 0;
     padding-left: 16px;
+  }
+
+  &__logout-text {
+    @include paragraph-4;
+    color: $color-text-500;
+  }
+
+  &__logout-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    width: 100%;
     background: none;
     border: none;
+    padding: 0;
 
     &:hover {
-      color: $color-primary-700;
       background-color: transparent;
-
-      .user-card__logout-button-icon {
-        color: $color-primary-700;
-      }
     }
 
     &-icon {
-      color: $color-text-900;
+      color: $color-primary-700;
     }
   }
 }
