@@ -116,12 +116,12 @@ const SidePanel = ({ isOpen, onClose }) => {
               <li className={'nav-item'} onClick={handleUniversityClick}>
                 <span className="nav-icon">{GRAPHICS.university}</span>
                 <span className="nav-text">University Assessment</span>
-                <MdKeyboardArrowRight className="nav-arrow"  />
+                <MdKeyboardArrowRight className="nav-arrow" />
               </li>
               <li className={'nav-item'} onClick={handleEntityClick}>
                 <span className="nav-icon">{GRAPHICS.entity_lookup}</span>
                 <span className="nav-text">Entity Lookup</span>
-                <MdKeyboardArrowRight className="nav-arrow"  />
+                <MdKeyboardArrowRight className="nav-arrow" />
               </li>
             </ul>
           </nav>
@@ -132,9 +132,11 @@ const SidePanel = ({ isOpen, onClose }) => {
               <span className="nav-icon">
                 <img src={all_reports} alt="all_reports" />
               </span>
-              <span className="nav-text" style = {{ marginTop: '-3px' }}>Reports</span>
+              <span className="nav-text" style={{ marginTop: '-3px' }}>
+                Reports
+              </span>
             </div>
-            
+
             {reports?.length ? (
               <div className="collapsible-header">
                 <div className="collapsible-subheader">
