@@ -132,7 +132,7 @@ const SidePanel = ({ isOpen, onClose }) => {
               <span className="nav-icon">
                 <img src={all_reports} alt="all_reports" />
               </span>
-              <span className="nav-text">Reports</span>
+              <span className="nav-text" style = {{ marginTop: '-3px' }}>Reports</span>
             </div>
             
             {reports?.length ? (

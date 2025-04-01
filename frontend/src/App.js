@@ -62,7 +62,7 @@ function AppContent() {
           className={`sidebar-toggle ${isSidePanelOpen ? '' : 'closed'}`}
           onClick={() => setIsSidePanelOpen(!isSidePanelOpen)}
         >
-          {<GoSidebarExpand size={30} />}
+          {<GoSidebarCollapse size={30} />}
         </div>
       )}
 

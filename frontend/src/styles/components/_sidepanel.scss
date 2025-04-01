@@ -119,7 +119,6 @@ $z-index-sidebar-header: 1000;
   }
 }
 
-.report-icon,
 .report-header {
   display: none;
 }
@@ -171,6 +170,7 @@ $z-index-sidebar-header: 1000;
     user-select: none;
 
     &-text {
+      @include paragraph-5;
       margin-left: 10px;
       padding-right: 10px;
     }
