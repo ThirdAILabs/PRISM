@@ -302,17 +302,17 @@ const ItemDetails = () => {
 
     const displayStart = startDate
       ? parseLocalDate(startDate).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
       : 'earliest';
     const displayEnd = endDate
       ? parseLocalDate(endDate).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
       : 'today';
 
     setFilterMessage(`${displayStart} - ${displayEnd}`);
@@ -436,8 +436,8 @@ const ItemDetails = () => {
             <>
               <strong>Acknowledgements Text</strong>
               {flag.FundCodeTriangulation &&
-              typeof flag.FundCodeTriangulation === 'object' &&
-              Object.keys(flag.FundCodeTriangulation).length > 0 ? (
+                typeof flag.FundCodeTriangulation === 'object' &&
+                Object.keys(flag.FundCodeTriangulation).length > 0 ? (
                 <>
                   <ul className="bulleted-list">
                     {flag.RawAcknowledgements?.map((item, index2) => {
@@ -465,15 +465,15 @@ const ItemDetails = () => {
                         parts = parts.flatMap((text, i) =>
                           typeof text === 'string'
                             ? text.split(regex).flatMap((part, j, arr) =>
-                                j < arr.length - 1
-                                  ? [
-                                      part,
-                                      <span key={`${i}-${j}`} style={{ color }} title={tooltip}>
-                                        <strong>{text.match(regex)[0]}</strong>
-                                      </span>,
-                                    ]
-                                  : part
-                              )
+                              j < arr.length - 1
+                                ? [
+                                  part,
+                                  <span key={`${i}-${j}`} style={{ color }} title={tooltip}>
+                                    <strong>{text.match(regex)[0]}</strong>
+                                  </span>,
+                                ]
+                                : part
+                            )
                             : text
                         );
                       });
@@ -669,8 +669,8 @@ const ItemDetails = () => {
           <strong>Acknowledgement Text</strong>
           <br />
           {flag.FundCodeTriangulation &&
-          typeof flag.FundCodeTriangulation === 'object' &&
-          Object.keys(flag.FundCodeTriangulation).length > 0 ? (
+            typeof flag.FundCodeTriangulation === 'object' &&
+            Object.keys(flag.FundCodeTriangulation).length > 0 ? (
             <>
               {flag.RawAcknowledgements?.map((item, index2) => {
                 const key = `ack-${index} ${index2}`;
@@ -697,15 +697,15 @@ const ItemDetails = () => {
                   parts = parts.flatMap((text, i) =>
                     typeof text === 'string'
                       ? text.split(regex).flatMap((part, j, arr) =>
-                          j < arr.length - 1
-                            ? [
-                                part,
-                                <span key={`${i}-${j}`} style={{ color }} title={tooltip}>
-                                  <strong>{text.match(regex)[0]}</strong>
-                                </span>,
-                              ]
-                            : part
-                        )
+                        j < arr.length - 1
+                          ? [
+                            part,
+                            <span key={`${i}-${j}`} style={{ color }} title={tooltip}>
+                              <strong>{text.match(regex)[0]}</strong>
+                            </span>,
+                          ]
+                          : part
+                      )
                       : text
                   );
                 });
@@ -929,14 +929,6 @@ const ItemDetails = () => {
       </div>
     );
   }
-  // function formalRelationFlag(flag, index) {
-  //   return (
-  //     <li key={index} className='p-3 px-5 w-75 detail-item'>
-  //       {withPublicationDate(<h5 className='fw-bold mt-3'>{flag.title}</h5>, flag)}
-  //       <p>{wrapLinks(flag.message)}</p>
-  //     </li>
-  //   )
-  // }
 
   const [showPopover, setShowPopover] = useState(false);
 
@@ -1433,37 +1425,6 @@ const ItemDetails = () => {
       {activeTab === 1 && <Graph authorName={authorName} reportContent={reportContent} />}
     </div>
   );
-};
-
-const popoverStyles = {
-  position: 'absolute',
-  top: '30px',
-  left: '50%',
-  transform: 'translateX(-50%)',
-  zIndex: 1,
-  backgroundColor: '#fff',
-  border: '1px solid rgba(0, 0, 0, 0.2)',
-  boxShadow: '0 0.5rem 1rem rgba(0, 0, 0, 0.15)',
-  borderRadius: '0.3rem',
-  padding: '0.5rem',
-  width: '200px',
-};
-
-const buttonStyles = {
-  marginLeft: '5px',
-  width: '14px',
-  height: '14px',
-  padding: '1px 0',
-  borderRadius: '7.5px',
-  textAlign: 'center',
-  fontSize: '8px',
-  lineHeight: '1.42857',
-  border: '1px solid grey',
-  borderWidth: '1px',
-  backgroundColor: 'transparent',
-  color: 'grey',
-  position: 'relative',
-  boxShadow: 'none',
 };
 
 export default ItemDetails;
