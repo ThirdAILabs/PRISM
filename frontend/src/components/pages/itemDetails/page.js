@@ -930,8 +930,6 @@ const ItemDetails = () => {
     );
   }
 
-  const [showPopover, setShowPopover] = useState(false);
-
   function wrapLinks(origtext) {
     const linkStart = Math.max(origtext.indexOf('https://'), origtext.indexOf('http://'));
     if (linkStart === -1) {
