@@ -89,7 +89,15 @@ function UniversityAssessment() {
             </div>
           </div>
           <div className="d-flex justify-content-center align-items-center">
-            <div style={{ marginTop: 10, marginBottom: '0.5%', color: '#888888', fontWeight: 'bold', fontSize: 'large' }}>
+            <div
+              style={{
+                marginTop: 10,
+                marginBottom: '0.5%',
+                color: '#888888',
+                fontWeight: 'bold',
+                fontSize: 'large',
+              }}
+            >
               Which university would you like to conduct an assessment on?
             </div>
           </div>
@@ -111,7 +119,11 @@ function UniversityAssessment() {
                   />
                 </div>
                 <div style={{ width: '200px', marginTop: '-2px' }}>
-                  <button className="button button-3d" onClick={handleSearch} disabled={!institution}>
+                  <button
+                    className="button button-3d"
+                    onClick={handleSearch}
+                    disabled={!institution}
+                  >
                     {isLoading ? 'Searching...' : 'Search'}
                   </button>
                 </div>

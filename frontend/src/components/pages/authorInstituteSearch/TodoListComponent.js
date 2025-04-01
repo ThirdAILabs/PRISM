@@ -43,31 +43,25 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadi
               <li key={index} onClick={() => handleItemClick(result)} className="result-item">
                 <div className="text-start px-5">
                   <div className="info-row">
-                    <img
-                      src={Scholar}
-                      alt="Scholar"
-                      className="icon scholar"
-                    />
+                    <img src={Scholar} alt="Scholar" className="icon scholar" />
                     <h5 className="title">{result.AuthorName}</h5>
                   </div>
 
                   <div className="info-row">
-                    <img
-                      src={University}
-                      alt="Affiliation"
-                      className="icon"
-                    />
-                    <span className="content"><span className='content-research'>{result.Institutions[0]}</span>{result.Institutions.length > 1 && ", " + result.Institutions.slice(1,).join(', ')}</span>
+                    <img src={University} alt="Affiliation" className="icon" />
+                    <span className="content">
+                      <span className="content-research">{result.Institutions[0]}</span>
+                      {result.Institutions.length > 1 &&
+                        ', ' + result.Institutions.slice(1).join(', ')}
+                    </span>
                   </div>
 
                   {result.Interests && result.Interests.length > 0 && (
                     <div className="info-row">
-                      <img
-                        src={Research}
-                        alt="Research"
-                        className="icon"
-                      />
-                      <span className="content content-research">{result.Interests.slice(0, 3).join(', ')}</span>
+                      <img src={Research} alt="Research" className="icon" />
+                      <span className="content content-research">
+                        {result.Interests.slice(0, 3).join(', ')}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -76,7 +70,11 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadi
           </ul>
           {canLoadMore && (
             <div className="show-more-results-button">
-              <button className="button button-3d" onClick={getMoreResults} disabled={isLoadingMore}>
+              <button
+                className="button button-3d"
+                onClick={getMoreResults}
+                disabled={isLoadingMore}
+              >
                 {isLoadingMore ? <div className="spinner"></div> : 'Show More'}
               </button>
             </div>

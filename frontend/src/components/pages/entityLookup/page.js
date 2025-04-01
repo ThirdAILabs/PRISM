@@ -82,7 +82,15 @@ function EntityLookup() {
             </div>
           </div>
           <div className="d-flex justify-content-center align-items-center">
-            <div style={{ marginTop: 10, marginBottom: '0%', color: '#888888', fontWeight: 'bold', fontSize: 'large' }}>
+            <div
+              style={{
+                marginTop: 10,
+                marginBottom: '0%',
+                color: '#888888',
+                fontWeight: 'bold',
+                fontSize: 'large',
+              }}
+            >
               Search for an entity to see if it is on any list of concerning entities.
             </div>
           </div>
@@ -101,13 +109,14 @@ function EntityLookup() {
                     autoComplete="off"
                   />
                 </div>
-                <div className="author-institution-search-button-container"
-                  style={{ marginTop: '-2%' }}>
+                <div
+                  className="author-institution-search-button-container"
+                  style={{ marginTop: '-2%' }}
+                >
                   <button
                     type="submit"
                     disabled={isLoading || query.length === 0}
                     className="button button-3d"
-
                   >
                     {isLoading ? 'Searching...' : 'Search'}
                   </button>

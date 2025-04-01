@@ -93,11 +93,7 @@ export function AuthorInstiutionSearchBar({ onSearch, defaultAuthor, defaultInst
   );
 }
 
-export function SingleSearchBar({
-  label,
-  onSearch,
-  initialValue = '',
-}) {
+export function SingleSearchBar({ label, onSearch, initialValue = '' }) {
   const orcidRegex = /^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9X]{4}$/;
   const [value, setValue] = useState(initialValue);
 
@@ -119,7 +115,6 @@ export function SingleSearchBar({
           <div className="single-search-row">
             <div className="single-search-bar-container">
               <form onSubmit={handleSubmit}>
-
                 <TextField
                   label={label}
                   variant="outlined"
@@ -133,7 +128,11 @@ export function SingleSearchBar({
 
             <div className="single-search-button-container" style={{ marginTop: '-2px' }}>
               <Tooltip title="Please enter a valid ORCID ID in the format 0000-0000-0000-0000 (last digit can be 0-9 or X).">
-                <button className="button button-3d" onClick={handleSubmit} disabled={!orcidRegex.test(value)}>
+                <button
+                  className="button button-3d"
+                  onClick={handleSubmit}
+                  disabled={!orcidRegex.test(value)}
+                >
                   Search
                 </button>
               </Tooltip>

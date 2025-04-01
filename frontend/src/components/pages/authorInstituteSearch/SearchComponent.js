@@ -66,7 +66,15 @@ const SearchComponent = () => {
         </h4>
         <div style={{ animation: 'fade-in 1s' }}>
           <div className="d-flex justify-content-center align-items-center">
-            <div style={{ marginTop: 10, marginBottom: '1%', color: '#888888', fontWeight: 'bold', fontSize: 'large' }}>
+            <div
+              style={{
+                marginTop: 10,
+                marginBottom: '1%',
+                color: '#888888',
+                fontWeight: 'bold',
+                fontSize: 'large',
+              }}
+            >
               Who would you like to assess?
             </div>
           </div>

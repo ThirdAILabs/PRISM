@@ -46,7 +46,6 @@ function AutocompleteSearchBar({
   return (
     // Column
     <div className="autocomplete-search-bar">
-
       {/* Search bar */}
       <TextField
         label={label}
