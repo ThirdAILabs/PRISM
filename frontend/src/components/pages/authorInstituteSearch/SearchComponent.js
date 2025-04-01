@@ -48,32 +48,26 @@ const SearchComponent = () => {
           src={Logo}
           alt="Prism Logo"
           style={{
-            width: '320px',
-            marginTop: '1%',
-            marginBottom: '1%',
+            width: '240px',
+            marginTop: '5%',
+            marginBottom: '0.25%',
             marginRight: '2%',
             animation: 'fade-in 0.5s',
           }}
         />
-        <h1
+        <h4
           style={{
             fontWeight: 'bold',
             marginTop: 20,
             animation: 'fade-in 0.75s',
           }}
         >
-          Individual Assessment
-        </h1>
+          We Simplify Research Security Compliance
+        </h4>
         <div style={{ animation: 'fade-in 1s' }}>
           <div className="d-flex justify-content-center align-items-center">
-            <div style={{ marginTop: 10, color: '#888888' }}>
-              We help you comply with research security requirements by automating author
-              assessments.
-            </div>
-          </div>
-          <div className="d-flex justify-content-center align-items-center">
-            <div style={{ marginTop: 10, marginBottom: '1%', color: '#888888' }}>
-              Who would you like to conduct an assessment on?
+            <div style={{ marginTop: 10, marginBottom: '1%', color: '#888888', fontWeight: 'bold', fontSize: 'large' }}>
+              Who would you like to assess?
             </div>
           </div>
         </div>
