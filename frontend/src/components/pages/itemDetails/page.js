@@ -1,6 +1,6 @@
 // src/ItemDetails.js
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   TALENT_CONTRACTS,
   ASSOCIATIONS_WITH_DENIED_ENTITIES,
@@ -97,6 +97,9 @@ const get_paper_url = (flag) => {
 
 const ItemDetails = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const authorInfo = location.state?.authorInfo;
+  console.log("Author Info: ", authorInfo);
   const { report_id } = useParams();
 
   const [yearDropdownOpen, setYearDropdownOpen] = useState(false);

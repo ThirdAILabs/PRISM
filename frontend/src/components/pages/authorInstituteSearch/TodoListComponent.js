@@ -1,13 +1,10 @@
-// src/TodoListComponent.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { reportService } from '../../../api/reports';
 import '../../../styles/components/_todoListComponent.scss';
-import Scholar from '../../../assets/icons/Scholar.svg';
-import University from '../../../assets/icons/University.svg';
-import Research from '../../../assets/icons/Research.svg';
 
 import NoResultsFound from '../../common/tools/NoResultsFound';
+import AuthorInfoCard from './AuthorInfoCard';
 
 const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadingMore }) => {
   const navigate = useNavigate();
@@ -19,9 +16,11 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadi
       Source: result.Source,
       StartYear: 1990,
     });
+
     navigate(`/report/${response.Id}`, {
       state: {
         canGoBack: true,
+        authorInfo: result,
       },
     });
     return;
@@ -41,7 +40,7 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadi
           <ul className="result-wrapper mt-3">
             {results.map((result, index) => (
               <li key={index} onClick={() => handleItemClick(result)} className="result-item">
-                <div className="text-start px-5">
+                {/* <div className="text-start px-5">
                   <div className="info-row">
                     <img src={Scholar} alt="Scholar" className="icon scholar" />
                     <h5 className="title">{result.AuthorName}</h5>
@@ -64,7 +63,8 @@ const TodoListComponent = ({ results, setResults, canLoadMore, loadMore, isLoadi
                       </span>
                     </div>
                   )}
-                </div>
+                </div> */}
+                <AuthorInfoCard result={result} />
               </li>
             ))}
           </ul>
