@@ -928,4 +928,10 @@ func TestHooks(t *testing.T) {
 		t.Fatal("hook should be invoked")
 	}
 
+	mockHook.invoked = nil
+
+	hookService.RunNextHook()
+	if mockHook.invoked != nil {
+		t.Fatal("hook should not be invoked")
+	}
 }
