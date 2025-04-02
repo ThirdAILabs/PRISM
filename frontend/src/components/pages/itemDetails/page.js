@@ -1044,27 +1044,27 @@ const ItemDetails = () => {
       {
         activeTab === 0 && (
           <>
-            {loading && (
+            {/* {loading && (
               <div class="d-flex justify-content-start">
                 <div class="spinner-border text-secondary ms-5 mb-3" role="status" />
               </div>
-            )}
+            )} */}
             <div
               className="d-flex w-100 flex-column align-items-center"
               style={{ color: 'rgb(78, 78, 78)', marginTop: '0px' }}
             >
-              <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Score</div>
+              {/* <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Score</div>
               <div style={{ fontSize: '60px', fontWeight: 'bold' }}>
                 {Object.keys(reportContent || {})
                   .map((name) => (reportContent[name] || []).length)
                   .reduce((prev, curr) => prev + curr, 0)}
-              </div>
+              </div> */}
             </div>
 
             <div
               style={{
                 display: 'flex',
-                justifyContent: 'space-around',
+                justifyContent: 'space-between',
                 flexWrap: 'wrap',
                 marginTop: '20px',
               }}
@@ -1073,16 +1073,23 @@ const ItemDetails = () => {
                 const flagCount = reportContent[flag] ? reportContent[flag].length : 0;
                 const isSelected = review === flag;
                 return (
-                  <ConcernVisualizer
-                    title={TitlesAndDescriptions[flag].title}
-                    hoverText={TitlesAndDescriptions[flag].desc}
-                    value={flagCount}
-                    speedometerHoverText={`${flagCount} Issues`}
-                    onReview={() => setReview(flag)}
-                    key={index}
-                    selected={isSelected}
-                    valueFontSize={valueFontSize}
-                  />
+                  <div style={{
+                    // border: '1px solid #ccc',
+                    // boxShadow: '0 0px 10px rgba(0, 0, 0, 0.1)',
+                    // borderRadius: '8px',
+                    // padding: '0px',
+                  }}>
+                    <ConcernVisualizer
+                      title={TitlesAndDescriptions[flag].title}
+                      hoverText={TitlesAndDescriptions[flag].desc}
+                      value={flagCount}
+                      speedometerHoverText={`${flagCount} Issues`}
+                      onReview={() => setReview(flag)}
+                      key={index}
+                      selected={isSelected}
+                      valueFontSize={valueFontSize}
+                    />
+                  </div>
                 );
               })}
             </div>

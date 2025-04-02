@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Speedometer } from './common/tools/Speedometer';
 import '../App.css';
-
+import '../styles/components/_primaryButton.scss';
 const Hover = ({ text }) => {
   return (
     <div className="popover-container">
@@ -55,32 +55,33 @@ export default function ConcernVisualizer({
   speedometerHoverText,
   valueFontSize,
 }) {
+  //200,344
   return (
-    <div style={{ width: '200px', height: '300px', position: 'relative' }}>
+    <div style={{ width: '200px', height: '356px', position: 'relative' }}>
       <Speedometer
-        scale={scale || [0, 1, 2, 3, 5, 10, 20]}
+        scale={scale || [0, 10, 20, 30, 50, 100, 200]}
         value={value}
         speedometerHoverText={speedometerHoverText}
         valueFontSize={valueFontSize}
       />
 
-      <div className="mt-3 mb-4 text-dark" style={{ height: '50px' }}>
-        {title} <Hover text={hoverText} />
+      <div className="mt-3 text-dark" style={{ height: '50px', paddingInline: '8px', marginBottom: '34px' }}>
+        {title}
+        <Hover text={hoverText} />
       </div>
       {onReview && (
-        <button
-          className={`btn btn-dark rounded rounded-5 px-4`}
-          style={{
-            background: !value ? 'ghostwhite' : 'lightgrey',
-            border: 'none',
-            color: 'black',
-            boxShadow: selected ? '0 0px 12px rgb(57, 57, 57)' : 'none',
-          }}
-          disabled={!value}
-          onClick={onReview}
-        >
-          Review
-        </button>
+        <div style={{ marginLeft: '2rem' }}>
+          <button
+            className={`button button-3d`}
+            style={{
+              padding: '8px 48px',
+            }}
+            disabled={!value}
+            onClick={onReview}
+          >
+            View
+          </button>
+        </div>
       )}
     </div>
   );
