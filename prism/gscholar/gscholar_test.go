@@ -1,13 +1,22 @@
 package gscholar_test
 
 import (
+	"os"
 	"prism/prism/api"
 	"prism/prism/gscholar"
 	"slices"
 	"testing"
 )
 
+func shouldSkip(t *testing.T) {
+	if os.Getenv("SKIP_SERP_TESTS") != "" {
+		t.Skip("Skipping SERP tests due to SKIP_SERP_TESTS env var")
+	}
+}
+
 func TestAuthorSearch(t *testing.T) {
+	shouldSkip(t)
+
 	authorName := "anshumali shrivastava"
 
 	authors, _, err := gscholar.NextGScholarPage(authorName, "")
@@ -25,6 +34,8 @@ func TestAuthorSearch(t *testing.T) {
 }
 
 func TestAuthorSearchWithCursor(t *testing.T) {
+	shouldSkip(t)
+
 	checkQuery := func(authors []api.Author) {
 		if len(authors) == 0 {
 			t.Fatal("expect > 0 results for query")
@@ -65,6 +76,8 @@ func TestAuthorSearchWithCursor(t *testing.T) {
 }
 
 func TestAuthorPaperIterator(t *testing.T) {
+	shouldSkip(t)
+
 	iter := gscholar.NewAuthorPaperIterator("SGT23RAAAAAJ")
 
 	seen := make(map[string]bool)
@@ -86,6 +99,8 @@ func TestAuthorPaperIterator(t *testing.T) {
 }
 
 func TestNewsSearch(t *testing.T) {
+	shouldSkip(t)
+
 	results, err := gscholar.GetNewsArticles("charles lieber")
 	if err != nil {
 		t.Fatal(err)
