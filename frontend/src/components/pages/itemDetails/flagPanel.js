@@ -17,6 +17,8 @@ import { getRawTextFromXML } from '../../../utils/helper.js';
 import useOutsideClick from '../../../hooks/useOutsideClick.js';
 import '../../../styles/components/_flagPanel.scss';
 import { Divider } from '@mui/material';
+import { IoMdClose } from "react-icons/io";
+
 
 const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureChecked, disclosedItems, showDisclosed, setShowDisclosed, undisclosedItems, showUndisclosed, setShowUndisclosed}) => {    
   const [isRendered, setIsRendered] = useState(false);
@@ -724,8 +726,14 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
 
     return (
       <div ref={sidepanelRef} className={`flag-panel ${isRendered ? 'open' : ''}`}>
-          <h4 className = "flag-panel-title">{TitlesAndDescriptions[review].title}</h4>
-          <Divider className='divider'/>
+          <div className="flag-panel-header">
+            <h4 className="flag-panel-title">{TitlesAndDescriptions[review].title}</h4>
+            <button className="flag-panel-close-button">
+                <IoMdClose />
+            </button>
+          </div>
+          <Divider />
+          {/* show 'sort-by' button if any work contains date */}
           {(() => {
             const items = reportContent[review] || [];
             const hasDates = items.some(
