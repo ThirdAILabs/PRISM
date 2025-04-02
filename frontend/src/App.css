@@ -53,10 +53,11 @@
 }
 
 .detail-header {
-  background-color: rgb(245, 240, 240);
+  background-color: rgb(255, 255, 255);
   display: flex;
   color: rgb(44, 44, 44);
-  padding: 20px;
+  /* padding: 20px; */
+  padding-top: 20px;
   justify-content: space-between;
 }
 
@@ -99,6 +100,7 @@
   padding: 0;
   /* Removes padding */
 }
+
 .non-bulleted-list {
   list-style-type: none;
   padding-left: 20px;
@@ -243,7 +245,8 @@ li {
 }
 
 .sidebar-toggle {
-  font-family: monospace; /* Makes the arrows look better */
+  font-family: monospace;
+  /* Makes the arrows look better */
   font-weight: bold;
   font-size: 2rem;
   color: rgb(111, 111, 111);
@@ -269,6 +272,7 @@ li {
   z-index: 900;
   transition: opacity 0.3s ease;
 }
+
 .sidepanel-container {
   position: relative;
   z-index: 1000;
