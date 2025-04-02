@@ -35,6 +35,12 @@ func init() {
 	}
 }
 
+func shouldSkip(t *testing.T) {
+	if os.Getenv("SKIP_SERP_TESTS") != "" {
+		t.Skip("Skipping SERP tests due to SKIP_SERP_TESTS env var")
+	}
+}
+
 const (
 	userPrefix = "user"
 )
@@ -728,6 +734,8 @@ func TestSearchAuthors(t *testing.T) {
 }
 
 func TestSearchGoogleScholarAuthors(t *testing.T) {
+	shouldSkip(t)
+
 	backend, _ := createBackend(t)
 
 	user := newUser()
@@ -750,6 +758,8 @@ func TestSearchGoogleScholarAuthors(t *testing.T) {
 }
 
 func TestSearchGoogleScholarAuthorsWithCursor(t *testing.T) {
+	shouldSkip(t)
+	
 	backend, _ := createBackend(t)
 
 	user := newUser()
