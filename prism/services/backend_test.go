@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"prism/prism/api"
 	"prism/prism/licensing"
 	"prism/prism/openalex"
@@ -759,7 +760,7 @@ func TestSearchGoogleScholarAuthors(t *testing.T) {
 
 func TestSearchGoogleScholarAuthorsWithCursor(t *testing.T) {
 	shouldSkip(t)
-	
+
 	backend, _ := createBackend(t)
 
 	user := newUser()
