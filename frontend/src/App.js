@@ -50,42 +50,43 @@ function AppContent() {
   const sidepanelRef = useOutsideClick(() => {
     setIsSidePanelOpen(false);
   });
+
   return (
     <div className="App">
+      {isSidePanelOpen && showMenuIcon && (
+        <div className="overlay" onClick={() => setIsSidePanelOpen(false)} />
+      )}
+
       {showMenuIcon && (
         <div
-          style={{
-            cursor: 'pointer',
-            position: 'fixed',
-            left: isSidePanelOpen ? '240px' : '20px',
-            top: '10px',
-            zIndex: 1000,
-            transition: 'left 0.3s ease',
-          }}
+          className={`sidebar-toggle ${isSidePanelOpen ? '' : 'closed'}`}
           onClick={() => setIsSidePanelOpen(!isSidePanelOpen)}
-          className="sidebar-toggle"
         >
-          {isSidePanelOpen ? <GoSidebarExpand size={30} /> : <GoSidebarCollapse size={30} />}
+          {<GoSidebarCollapse size={30} />}
         </div>
       )}
-      <div ref={sidepanelRef}>
+
+      <div ref={sidepanelRef} className="sidepanel-container">
         <SidePanel
           isOpen={isSidePanelOpen && showMenuIcon}
           onClose={() => setIsSidePanelOpen(false)}
         />
       </div>
-      <Routes>
-        <Route element={<SearchProviderWrapper />}>
-          <Route path="/" element={<SearchComponent />} />
-          <Route path="/report/:report_id" element={<ItemDetails />} />
-        </Route>
-        <Route path="/entity-lookup" element={<EntityLookup />} />
-        <Route element={<UniversityProviderWrapper />}>
-          <Route path="/university" element={<UniversityAssessment />} />
-          <Route path="/university/report/:report_id" element={<UniversityReport />} />
-        </Route>
-        <Route path="/error" element={<Error />} />
-      </Routes>
+
+      <div className="content-container">
+        <Routes>
+          <Route element={<SearchProviderWrapper />}>
+            <Route path="/" element={<SearchComponent />} />
+            <Route path="/report/:report_id" element={<ItemDetails />} />
+          </Route>
+          <Route path="/entity-lookup" element={<EntityLookup />} />
+          <Route element={<UniversityProviderWrapper />}>
+            <Route path="/university" element={<UniversityAssessment />} />
+            <Route path="/university/report/:report_id" element={<UniversityReport />} />
+          </Route>
+          <Route path="/error" element={<Error />} />
+        </Routes>
+      </div>
     </div>
   );
 }

@@ -68,6 +68,10 @@ jobs:
           echo "Grobid did not start in time"
           exit 1
 
+      - name: set SKIP_SERP_TESTS env for non-push events
+        if: ${{ github.event_name != 'push' }}
+        run: echo "SKIP_SERP_TESTS=true" >> $GITHUB_ENV
+
       - name: run unit tests
         env:
           TEST_DB_URI: postgres://postgres:password@localhost:5432

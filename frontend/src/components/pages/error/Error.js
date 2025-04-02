@@ -1,5 +1,6 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import '../../common/tools/button/button1.css';
+import '../../../styles/components/_primaryButton.scss';
+
 import './Error.css';
 
 export default function Error() {
@@ -27,7 +28,7 @@ export default function Error() {
         <p class="lead error-message mb-5">{errorMessages[status][1]}</p>
         <div class="d-flex justify-content-center gap-3">
           <button
-            className="button"
+            className="button button-3d"
             onClick={() => {
               navigate('/');
             }}

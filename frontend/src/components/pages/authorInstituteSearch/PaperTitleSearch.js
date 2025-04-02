@@ -68,20 +68,23 @@ const PaperTitleSearchComponent = () => {
         <div className="paper-search-bar">
           <div className="paper-title-search-bar">
             <AutocompleteSearchBar
-              title="Paper Title"
+              label={'Enter Paper Title'}
               autocomplete={autocompletePaperTitle}
               onSelect={(selected) => {
                 setPaperTitle(selected.Name);
                 setSearchState((prev) => ({ ...prev, paperTitleQuery: selected.Name }));
                 setIsSelected(true);
               }}
-              placeholder="E.g. Deep Learning for NLP"
               initialValue={paperTitle}
             />
           </div>
           <div style={{ width: '40px' }} />
-          <div style={{ width: '200px', marginTop: '40px' }}>
-            <button className="button" onClick={() => search(paperTitle)}>
+          <div style={{ width: '200px', marginTop: '-2px' }}>
+            <button
+              className="button button-3d"
+              onClick={() => search(paperTitle)}
+              disabled={!isSelected}
+            >
               {isLoading ? 'Searching...' : 'Search'}
             </button>
           </div>

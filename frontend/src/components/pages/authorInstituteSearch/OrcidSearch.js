@@ -43,7 +43,7 @@ const OrcidSearchComponent = () => {
     <div style={{ textAlign: 'center', marginTop: '3%' }}>
       <div style={{ marginTop: '1rem' }}>
         <SingleSearchBar
-          title="ORCID ID"
+          label="Enter ORCID ID"
           onSearch={search}
           placeholder="E.g. 0000-0002-1825-0097"
           initialValue={orcidQuery}
