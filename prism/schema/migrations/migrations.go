@@ -25,6 +25,11 @@ func GetMigrator(db *gorm.DB) *gormigrate.Gormigrate {
 			Migrate:  versions.Migration2,
 			Rollback: versions.Rollback2,
 		},
+		{
+			ID:       "3",
+			Migrate:  versions.Migration3,
+			Rollback: versions.Rollback3,
+		},
 	})
 
 	migrator.InitSchema(func(txn *gorm.DB) error {
@@ -35,7 +40,7 @@ func GetMigrator(db *gorm.DB) *gormigrate.Gormigrate {
 		log.Println("clean database detected, running full schema initialization")
 
 		return db.AutoMigrate(
-			&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{},
+			&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.FlagFeedback{}, &schema.UserAuthorReport{},
 			&schema.UniversityReport{}, &schema.UserUniversityReport{},
 		)
 	})

@@ -165,3 +165,9 @@ type License struct {
 	Expiration  time.Time
 	Deactivated bool
 }
+
+type FlagFeedbackRequest struct {
+	Type     string       `json:"type"`
+	FlagHash string       `json:"hash"`
+	Feedback FlagFeedback `json:"data"`
+}

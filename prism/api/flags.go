@@ -2,11 +2,14 @@ package api
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"slices"
 	"strings"
 	"time"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 func capitalizeFirstLetter(s string) string {
@@ -35,7 +38,9 @@ type Flag interface {
 	// finding the author is faculty at an EOC. For work flags, the key is just the
 	// hash of the flagger type and work id since we can only have 1 flag for a
 	// given work.
-	Hash() [sha256.Size]byte
+	CalculateHash() [sha256.Size]byte
+
+	GetHash() string
 
 	GetEntities() []string
 
@@ -144,6 +149,99 @@ func ParseFlag(ftype string, data []byte) (Flag, error) {
 	}
 }
 
+func CreateFlag(ftype string, params map[string]interface{}) (Flag, error) {
+	switch ftype {
+	case TalentContractType:
+		var flag TalentContractFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+
+	case AssociationsWithDeniedEntityType:
+		var flag AssociationWithDeniedEntityFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+
+	case HighRiskFunderType:
+		var flag HighRiskFunderFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+
+	case AuthorAffiliationType:
+		var flag AuthorAffiliationFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+
+	case PotentialAuthorAffiliationType:
+		var flag PotentialAuthorAffiliationFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+
+	case MiscHighRiskAssociationType:
+		var flag MiscHighRiskAssociationFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+
+	case CoauthorAffiliationType:
+		var flag CoauthorAffiliationFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+
+	case MultipleAffiliationType:
+		var flag MultipleAffiliationFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+	case HighRiskPublisherType:
+		var flag HighRiskPublisherFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+	case HighRiskCoauthorType:
+		var flag HighRiskCoauthorFlag
+		if err := mapstructure.Decode(params, &flag); err != nil {
+			return nil, fmt.Errorf("error creating flag of type '%s': %w", ftype, err)
+		}
+		hash := flag.CalculateHash()
+		flag.Hash = hex.EncodeToString(hash[:])
+		return &flag, nil
+	}
+	return nil, fmt.Errorf("invalid flag type '%s'", ftype)
+}
+
 type DisclosableFlag struct {
 	Disclosed bool
 }
@@ -172,6 +270,7 @@ type AcknowledgementEntity struct {
 
 type TalentContractFlag struct {
 	DisclosableFlag
+	Hash                  string
 	Message               string
 	Work                  WorkSummary
 	Entities              []AcknowledgementEntity
@@ -183,9 +282,13 @@ func (flag *TalentContractFlag) Type() string {
 	return TalentContractType
 }
 
-func (flag *TalentContractFlag) Hash() [sha256.Size]byte {
+func (flag *TalentContractFlag) CalculateHash() [sha256.Size]byte {
 	// Assumes 1 flag per work
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
+}
+
+func (flag *TalentContractFlag) GetHash() string {
+	return flag.Hash
 }
 
 func (flag *TalentContractFlag) GetEntities() []string {
@@ -230,6 +333,7 @@ func (flag *TalentContractFlag) GetDetailsFieldsForReport(useDisclosure bool) []
 
 type AssociationWithDeniedEntityFlag struct {
 	DisclosableFlag
+	Hash                string
 	Message             string
 	Work                WorkSummary
 	Entities            []AcknowledgementEntity
@@ -240,9 +344,13 @@ func (flag *AssociationWithDeniedEntityFlag) Type() string {
 	return AssociationsWithDeniedEntityType
 }
 
-func (flag *AssociationWithDeniedEntityFlag) Hash() [sha256.Size]byte {
+func (flag *AssociationWithDeniedEntityFlag) CalculateHash() [sha256.Size]byte {
 	// Assumes 1 flag per work
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
+}
+
+func (flag *AssociationWithDeniedEntityFlag) GetHash() string {
+	return flag.Hash
 }
 
 func (flag *AssociationWithDeniedEntityFlag) GetEntities() []string {
@@ -287,6 +395,7 @@ func (flag *AssociationWithDeniedEntityFlag) GetDetailsFieldsForReport(useDisclo
 
 type HighRiskFunderFlag struct {
 	DisclosableFlag
+	Hash                  string
 	Message               string
 	Work                  WorkSummary
 	Funders               []string
@@ -298,9 +407,13 @@ func (flag *HighRiskFunderFlag) Type() string {
 	return HighRiskFunderType
 }
 
-func (flag *HighRiskFunderFlag) Hash() [sha256.Size]byte {
+func (flag *HighRiskFunderFlag) CalculateHash() [sha256.Size]byte {
 	// Assumes 1 flag per work
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
+}
+
+func (flag *HighRiskFunderFlag) GetHash() string {
+	return flag.Hash
 }
 
 func (flag *HighRiskFunderFlag) GetEntities() []string {
@@ -341,6 +454,7 @@ func (flag *HighRiskFunderFlag) GetDetailsFieldsForReport(useDisclosure bool) []
 
 type AuthorAffiliationFlag struct {
 	DisclosableFlag
+	Hash         string
 	Message      string
 	Work         WorkSummary
 	Affiliations []string
@@ -350,9 +464,13 @@ func (flag *AuthorAffiliationFlag) Type() string {
 	return AuthorAffiliationType
 }
 
-func (flag *AuthorAffiliationFlag) Hash() [sha256.Size]byte {
+func (flag *AuthorAffiliationFlag) CalculateHash() [sha256.Size]byte {
 	// Assumes 1 flag per work
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
+}
+
+func (flag *AuthorAffiliationFlag) GetHash() string {
+	return flag.Hash
 }
 
 func (flag *AuthorAffiliationFlag) GetEntities() []string {
@@ -393,6 +511,7 @@ func (flag *AuthorAffiliationFlag) GetDetailsFieldsForReport(useDisclosure bool)
 
 type PotentialAuthorAffiliationFlag struct {
 	DisclosableFlag
+	Hash          string
 	Message       string
 	University    string
 	UniversityUrl string
@@ -402,8 +521,12 @@ func (flag *PotentialAuthorAffiliationFlag) Type() string {
 	return PotentialAuthorAffiliationType
 }
 
-func (flag *PotentialAuthorAffiliationFlag) Hash() [sha256.Size]byte {
+func (flag *PotentialAuthorAffiliationFlag) CalculateHash() [sha256.Size]byte {
 	return sha256.Sum256([]byte(flag.Type() + flag.University + flag.UniversityUrl))
+}
+
+func (flag *PotentialAuthorAffiliationFlag) GetHash() string {
+	return flag.Hash
 }
 
 func (flag *PotentialAuthorAffiliationFlag) GetEntities() []string {
@@ -446,6 +569,7 @@ type Connection struct {
 
 type MiscHighRiskAssociationFlag struct {
 	DisclosableFlag
+	Hash             string
 	Message          string
 	DocTitle         string
 	DocUrl           string
@@ -459,12 +583,16 @@ func (flag *MiscHighRiskAssociationFlag) Type() string {
 	return MiscHighRiskAssociationType
 }
 
-func (flag *MiscHighRiskAssociationFlag) Hash() [sha256.Size]byte {
+func (flag *MiscHighRiskAssociationFlag) CalculateHash() [sha256.Size]byte {
 	data := flag.Type() + flag.DocTitle + flag.EntityMentioned
 	for _, conn := range flag.Connections {
 		data += conn.DocTitle
 	}
 	return sha256.Sum256([]byte(data))
+}
+
+func (flag *MiscHighRiskAssociationFlag) GetHash() string {
+	return flag.Hash
 }
 
 func (flag *MiscHighRiskAssociationFlag) GetEntities() []string {
@@ -530,6 +658,7 @@ func (flag *MiscHighRiskAssociationFlag) GetDetailsFieldsForReport(useDisclosure
 
 type CoauthorAffiliationFlag struct {
 	DisclosableFlag
+	Hash         string
 	Message      string
 	Work         WorkSummary
 	Coauthors    []string
@@ -540,9 +669,13 @@ func (flag *CoauthorAffiliationFlag) Type() string {
 	return CoauthorAffiliationType
 }
 
-func (flag *CoauthorAffiliationFlag) Hash() [sha256.Size]byte {
+func (flag *CoauthorAffiliationFlag) CalculateHash() [sha256.Size]byte {
 	// Assumes 1 flag per work
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
+}
+
+func (flag *CoauthorAffiliationFlag) GetHash() string {
+	return flag.Hash
 }
 
 func (flag *CoauthorAffiliationFlag) GetEntities() []string {
@@ -588,6 +721,7 @@ func (flag *CoauthorAffiliationFlag) GetDetailsFieldsForReport(useDisclosure boo
 
 type MultipleAffiliationFlag struct {
 	DisclosableFlag
+	Hash         string
 	Message      string
 	Work         WorkSummary
 	Affiliations []string
@@ -597,9 +731,13 @@ func (flag *MultipleAffiliationFlag) Type() string {
 	return MultipleAffiliationType
 }
 
-func (flag *MultipleAffiliationFlag) Hash() [sha256.Size]byte {
+func (flag *MultipleAffiliationFlag) CalculateHash() [sha256.Size]byte {
 	// Assumes 1 flag per work
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
+}
+
+func (flag *MultipleAffiliationFlag) GetHash() string {
+	return flag.Hash
 }
 
 func (flag *MultipleAffiliationFlag) GetEntities() []string {
@@ -640,6 +778,7 @@ func (flag *MultipleAffiliationFlag) GetDetailsFieldsForReport(useDisclosure boo
 
 type HighRiskPublisherFlag struct {
 	DisclosableFlag
+	Hash       string
 	Message    string
 	Work       WorkSummary
 	Publishers []string
@@ -649,9 +788,13 @@ func (flag *HighRiskPublisherFlag) Type() string {
 	return HighRiskPublisherType
 }
 
-func (flag *HighRiskPublisherFlag) Hash() [sha256.Size]byte {
+func (flag *HighRiskPublisherFlag) CalculateHash() [sha256.Size]byte {
 	// Assumes 1 flag per work
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
+}
+
+func (flag *HighRiskPublisherFlag) GetHash() string {
+	return flag.Hash
 }
 
 func (flag *HighRiskPublisherFlag) GetEntities() []string {
@@ -692,6 +835,7 @@ func (flag *HighRiskPublisherFlag) GetDetailsFieldsForReport(useDisclosure bool)
 
 type HighRiskCoauthorFlag struct {
 	DisclosableFlag
+	Hash      string
 	Message   string
 	Work      WorkSummary
 	Coauthors []string
@@ -701,9 +845,13 @@ func (flag *HighRiskCoauthorFlag) Type() string {
 	return HighRiskCoauthorType
 }
 
-func (flag *HighRiskCoauthorFlag) Hash() [sha256.Size]byte {
+func (flag *HighRiskCoauthorFlag) CalculateHash() [sha256.Size]byte {
 	// Assumes 1 flag per work
 	return sha256.Sum256([]byte(flag.Type() + flag.Work.WorkId))
+}
+
+func (flag *HighRiskCoauthorFlag) GetHash() string {
+	return flag.Hash
 }
 
 func (flag *HighRiskCoauthorFlag) GetEntities() []string {

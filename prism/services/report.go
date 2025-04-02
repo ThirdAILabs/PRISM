@@ -131,6 +131,7 @@ func (s *ReportService) Routes() chi.Router {
 		r.Delete("/{report_id}", WrapRestHandler(s.DeleteAuthorReport))
 		r.Post("/{report_id}/check-disclosure", WrapRestHandler(s.CheckDisclosure))
 		r.Post("/{report_id}/download", s.DownloadReport)
+		r.Post("/{report_id}/feedback", WrapRestHandler(s.LogFlagFeedback))
 	})
 
 	r.Route("/university", func(r chi.Router) {
@@ -463,6 +464,29 @@ func (s *ReportService) DeleteUniversityReport(r *http.Request) (any, error) {
 
 	if err := s.manager.DeleteUniversityReport(userId, id); err != nil {
 		return nil, CodedError(err, reportErrorStatus(err))
+	}
+
+	return nil, nil
+}
+
+func (s *ReportService) LogFlagFeedback(r *http.Request) (any, error) {
+	userId, err := auth.GetUserId(r)
+	if err != nil {
+		return nil, err
+	}
+
+	reportId, err := URLParamUUID(r, "report_id")
+	if err != nil {
+		return nil, err
+	}
+
+	params, err := ParseRequestBody[api.FlagFeedbackRequest](r)
+	if err != nil {
+		return nil, CodedError(err, http.StatusBadRequest)
+	}
+
+	if err := s.manager.SaveFlagFeedback(reportId, userId, params.FlagHash, params.Feedback); err != nil {
+		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
 	return nil, nil

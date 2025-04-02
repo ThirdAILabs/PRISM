@@ -43,11 +43,17 @@ func (flagger *OpenAlexMultipleAffiliationsFlagger) Flag(logger *slog.Logger, wo
 		for _, author := range work.Authors {
 			if len(author.Institutions) > 1 && slices.Contains(targetAuthorIds, author.AuthorId) {
 				affiliations := author.InstitutionNames()
-				flags = append(flags, &api.MultipleAffiliationFlag{
-					Message:      fmt.Sprintf("%s has multiple affilitions in work '%s'\n%s", author.DisplayName, work.GetDisplayName(), strings.Join(affiliations, "\n")),
-					Work:         getWorkSummary(work),
-					Affiliations: affiliations,
-				})
+				MaFlag, err := api.CreateFlag(api.MultipleAffiliationType,
+					map[string]interface{}{
+						"Message":      fmt.Sprintf("%s has multiple affilitions in work '%s'\n%s", author.DisplayName, work.GetDisplayName(), strings.Join(affiliations, "\n")),
+						"Work":         getWorkSummary(work),
+						"Affiliations": affiliations,
+					})
+				if err != nil {
+					slog.Error("error creating flag", "error", err)
+					continue
+				}
+				flags = append(flags, MaFlag)
 				break
 			}
 		}
@@ -88,11 +94,17 @@ func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.W
 		}
 
 		if len(concerningFunders) > 0 {
-			flags = append(flags, &api.HighRiskFunderFlag{
-				Message: fmt.Sprintf("The following funders of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningFunders, "\n")),
-				Work:    getWorkSummary(work),
-				Funders: concerningFunders,
-			})
+			HrfFlag, err := api.CreateFlag(api.HighRiskFunderType,
+				map[string]interface{}{
+					"Message": fmt.Sprintf("The following funders of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningFunders, "\n")),
+					"Work":    getWorkSummary(work),
+					"Funders": concerningFunders,
+				})
+			if err != nil {
+				slog.Error("error creating flag", "error", err)
+				continue
+			}
+			flags = append(flags, HrfFlag)
 		}
 	}
 
@@ -129,11 +141,18 @@ func (flagger *OpenAlexPublisherIsEOC) Flag(logger *slog.Logger, works []openale
 		}
 
 		if len(concerningPublishers) > 0 {
-			flags = append(flags, &api.HighRiskPublisherFlag{
-				Message:    fmt.Sprintf("The following publishers of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningPublishers, "\n")),
-				Work:       getWorkSummary(work),
-				Publishers: concerningPublishers,
-			})
+			HrpFlag, err := api.CreateFlag(api.HighRiskPublisherType,
+				map[string]interface{}{
+					"Message":    fmt.Sprintf("The following publishers of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningPublishers, "\n")),
+					"Work":       getWorkSummary(work),
+					"Publishers": concerningPublishers,
+				})
+			if err != nil {
+				slog.Error("error creating flag", "error", err)
+				continue
+			}
+
+			flags = append(flags, HrpFlag)
 		}
 	}
 
@@ -170,11 +189,17 @@ func (flagger *OpenAlexCoauthorIsEOC) Flag(logger *slog.Logger, works []openalex
 		}
 
 		if len(concerningAuthors) > 0 {
-			flags = append(flags, &api.HighRiskCoauthorFlag{
-				Message:   fmt.Sprintf("The following co-authors of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningAuthors, "\n")),
-				Work:      getWorkSummary(work),
-				Coauthors: concerningAuthors,
-			})
+			HrcaFlag, err := api.CreateFlag(api.HighRiskCoauthorType,
+				map[string]interface{}{
+					"Message":   fmt.Sprintf("The following co-authors of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningAuthors, "\n")),
+					"Work":      getWorkSummary(work),
+					"Coauthors": concerningAuthors,
+				})
+			if err != nil {
+				slog.Error("error creating flag", "error", err)
+				continue
+			}
+			flags = append(flags, HrcaFlag)
 		}
 	}
 
@@ -228,11 +253,17 @@ func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works [
 
 		if len(concerningAffiliations) > 0 {
 			concerningAffiliations := getKeys(concerningAffiliations)
-			flags = append(flags, &api.AuthorAffiliationFlag{
-				Message:      fmt.Sprintf("In '%s', this author is affiliated with entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningAffiliations, "\n")),
-				Work:         getWorkSummary(work),
-				Affiliations: concerningAffiliations,
-			})
+			AaFlag, err := api.CreateFlag(api.AuthorAffiliationType,
+				map[string]interface{}{
+					"Message": fmt.Sprintf("In '%s', this author is affiliated with entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningAffiliations, "\n")),
+					"work":    getWorkSummary(work),
+					"Work":    concerningAffiliations,
+				})
+			if err != nil {
+				slog.Error("error creating flag", "error", err)
+				continue
+			}
+			flags = append(flags, AaFlag)
 		}
 	}
 
@@ -281,12 +312,18 @@ func (flagger *OpenAlexCoauthorAffiliationIsEOC) Flag(logger *slog.Logger, works
 		if len(concerningAffiliations) > 0 {
 			concerningCoauthors := getKeys(concerningCoauthors)
 			concerningAffiliations := getKeys(concerningAffiliations)
-			flags = append(flags, &api.CoauthorAffiliationFlag{
-				Message:      fmt.Sprintf("In '%s', some of the co-authors are affiliated with entities of concern:\n%s\n\nAffiliated authors:\n%s", work.GetDisplayName(), strings.Join(concerningAffiliations, "\n"), strings.Join(concerningCoauthors, "\n")),
-				Work:         getWorkSummary(work),
-				Coauthors:    concerningCoauthors,
-				Affiliations: concerningAffiliations,
-			})
+			CaaFlag, err := api.CreateFlag(api.CoauthorAffiliationType,
+				map[string]interface{}{
+					"Message":      fmt.Sprintf("In '%s', some of the co-authors are affiliated with entities of concern:\n%s\n\nAffiliated authors:\n%s", work.GetDisplayName(), strings.Join(concerningAffiliations, "\n"), strings.Join(concerningCoauthors, "\n")),
+					"Work":         getWorkSummary(work),
+					"Coauthors":    concerningCoauthors,
+					"Affiliations": concerningAffiliations,
+				})
+			if err != nil {
+				slog.Error("error creating flag", "error", err)
+				continue
+			}
+			flags = append(flags, CaaFlag)
 		}
 	}
 
@@ -575,35 +612,49 @@ func containsSource(entities []api.AcknowledgementEntity, sourcesOfInterest []st
 	return false
 }
 
-func createAcknowledgementFlag(work openalex.Work, message string, entities []api.AcknowledgementEntity, rawAcks []string, triangulationResults map[string]map[string]bool) api.Flag {
+func createAcknowledgementFlag(work openalex.Work, message string, entities []api.AcknowledgementEntity, rawAcks []string, triangulationResults map[string]map[string]bool) (api.Flag, error) {
+	var flag api.Flag
+	var err error
 	if strings.Contains(message, "talent") || strings.Contains(message, "Talent") || containsSource(entities, talentPrograms) {
-		return &api.TalentContractFlag{
-			Message:               message,
-			Work:                  getWorkSummary(work),
-			Entities:              entities,
-			RawAcknowledgements:   rawAcks,
-			FundCodeTriangulation: triangulationResults,
+		flag, err = api.CreateFlag(api.TalentContractType,
+			map[string]interface{}{
+				"Message":               message,
+				"Work":                  getWorkSummary(work),
+				"Entities":              entities,
+				"RawAcknowledgements":   rawAcks,
+				"FundCodeTriangulation": triangulationResults})
+		if err != nil {
+			return nil, fmt.Errorf("error creating flag: %w", err)
 		}
 	} else if containsSource(entities, deniedEntities) {
-		return &api.AssociationWithDeniedEntityFlag{
-			Message:             message,
-			Work:                getWorkSummary(work),
-			Entities:            entities,
-			RawAcknowledgements: rawAcks,
+		flag, err = api.CreateFlag(api.AssociationsWithDeniedEntityType,
+			map[string]interface{}{
+				"Message":             message,
+				"Work":                getWorkSummary(work),
+				"Entities":            entities,
+				"RawAcknowledgements": rawAcks,
+			})
+		if err != nil {
+			return nil, fmt.Errorf("error creating flag: %w", err)
 		}
 	} else {
 		entityNames := make([]string, 0, len(entities))
 		for _, entity := range entities {
 			entityNames = append(entityNames, entity.Entity)
 		}
-		return &api.HighRiskFunderFlag{
-			Message:               message,
-			Work:                  getWorkSummary(work),
-			Funders:               entityNames,
-			RawAcknowledgements:   rawAcks,
-			FundCodeTriangulation: triangulationResults,
+		flag, err = api.CreateFlag(api.HighRiskFunderType,
+			map[string]interface{}{
+				"Message":               message,
+				"Work":                  getWorkSummary(work),
+				"Funders":               entityNames,
+				"RawAcknowledgements":   rawAcks,
+				"FundCodeTriangulation": triangulationResults,
+			})
+		if err != nil {
+			return nil, fmt.Errorf("error creating flag: %w", err)
 		}
 	}
+	return flag, nil
 }
 
 func (flagger *OpenAlexAcknowledgementIsEOC) DisableForUniversityReport() bool {
@@ -693,12 +744,17 @@ func (flagger *OpenAlexAcknowledgementIsEOC) Flag(logger *slog.Logger, works []o
 				})
 			}
 
-			flags = append(flags, createAcknowledgementFlag(
+			acknowkedgementFlag, err := createAcknowledgementFlag(
 				workIdToWork[acks.Result.WorkId],
 				fmt.Sprintf("%s\n%s", message, strings.Join(ackTexts, "\n")),
 				entities,
 				ackTexts,
-				triangulationResults))
+				triangulationResults)
+			if err != nil {
+				workLogger.Error("error creating acknowledgement flag", "error", err)
+				continue
+			}
+			flags = append(flags, acknowkedgementFlag)
 		}
 	}
 

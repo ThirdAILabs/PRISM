@@ -31,11 +31,12 @@ type AuthorReport struct {
 }
 
 type AuthorFlag struct {
-	ReportId uuid.UUID `gorm:"type:uuid;primaryKey"`
-	FlagHash string    `gorm:"type:char(64);primaryKey"` // This will be the sha256 hash of the flag data (or enough of the flag data to uniquly identify the flag)
-	FlagType string    `gorm:"size:40;not null"`
-	Date     sql.NullTime
-	Data     []byte
+	ReportId  uuid.UUID `gorm:"type:uuid;primaryKey"`
+	FlagHash  string    `gorm:"type:char(64);primaryKey"` // This will be the sha256 hash of the flag data (or enough of the flag data to uniquly identify the flag)
+	FlagType  string    `gorm:"size:40;not null"`
+	Date      sql.NullTime
+	Data      []byte
+	Feedbacks []FlagFeedback `gorm:"foreignKey:ReportId,FlagHash;references:ReportId,FlagHash;constraint:OnDelete:CASCADE"`
 }
 
 type UserAuthorReport struct {
@@ -70,4 +71,14 @@ type UserUniversityReport struct {
 
 	ReportId uuid.UUID         `gorm:"type:uuid;not null"`
 	Report   *UniversityReport `gorm:"foreignKey:ReportId"`
+}
+
+type FlagFeedback struct {
+	Id         uuid.UUID `gorm:"type:uuid;primaryKey"`
+	UserId     uuid.UUID `gorm:"type:uuid;not null;index"`
+	ReportId   uuid.UUID `gorm:"type:uuid;not null"`
+	FlagHash   string    `gorm:"type:char(64);not null"`
+	Timestamp  time.Time
+	Data       []byte
+	AuthorFlag *AuthorFlag `gorm:"foreignKey:ReportId,FlagHash;references:ReportId,FlagHash"`
 }
