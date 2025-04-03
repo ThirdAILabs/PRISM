@@ -46,8 +46,8 @@ $z-index-sidebar-header: 1000;
     width: 100%;
     margin: 10px 0;
   }
-  
-  &-title{
+
+  &-title {
     @include heading-6;
     margin: 0;
   }
@@ -59,7 +59,7 @@ $z-index-sidebar-header: 1000;
     padding: 0;
     transition: transform 0.3s ease;
     cursor: pointer;
-    
+
     &:hover {
       background: none;
       transform: scale(1.2);
@@ -84,18 +84,18 @@ $z-index-sidebar-header: 1000;
     align-items: center;
     margin: 10px 0;
     flex: 1;
-    
+
     .score-pill {
       background-color: $color-text-100;
       border-radius: 0 20px 20px 0;
       padding: 8px 16px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-      @include sub-heading-4; 
+      @include sub-heading-4;
       .score-label {
         color: $color-error-700;
         margin-right: 7px;
       }
-      
+
       .score-value {
         color: $color-error-700;
       }
@@ -105,7 +105,7 @@ $z-index-sidebar-header: 1000;
   .tab-group {
     display: flex;
     padding-left: 15px;
-    
+
     .tab-button {
       padding: 8px 24px;
       border-radius: 7px;
@@ -114,19 +114,18 @@ $z-index-sidebar-header: 1000;
       transition: all 0.2s ease;
       border-color: transparent;
       margin-left: 12px;
-      
+
       &.active {
         background-color: white;
         border: 1px solid $color-primary-700;
         color: $color-primary-900; // blue-500 equivalent
         @include sub-heading-5;
       }
-      
+
       &:hover:not(.active) {
         background-color: #e5e7eb; // gray-200 equivalent
       }
     }
-
   }
 }
 .sort-by-container {
@@ -135,16 +134,16 @@ $z-index-sidebar-header: 1000;
   align-items: center;
   gap: 10px;
   padding-right: 20px;
-  
+
   .sort-label {
-    @include sub-heading-4; 
+    @include sub-heading-4;
   }
-  
+
   .sort-icon {
     cursor: pointer;
     display: flex;
     align-items: center;
-    
+
     svg {
       color: $color-text-900;
     }

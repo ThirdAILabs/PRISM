@@ -4,15 +4,31 @@
 .flag-container {
   display: flex;
   flex-direction: column;
-  width: 80%;
+  width: 90%;
   position: relative;
-  margin: 10px auto;
+  margin: 25px auto;
 
   &-box {
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    border-radius: 10px;
-    text-align: left;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    background-color: $color-text-100;
+    width: 100%;
+
+    h5 {
+      margin-bottom: 1rem;
+    }
+
+    p {
+      margin-bottom: 1rem;
+    }
+
+    .bulleted-list {
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+      list-style-type: disc;
+    }
   }
 
   &-badge {
@@ -21,38 +37,44 @@
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: $color-text-100;
-    border: 1px solid;
-    border-radius: 10px; 
-    padding: 0.25rem 0.75rem; 
+    padding: 4px 12px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
+    gap: 8px;
+    z-index: 1;
 
-    .disclosed{
-        border-color: $color-primary-700;
+    &.disclosed {
+      border: 2px solid $color-primary-700;
     }
 
-    .undisclosed{
-        border-color: $color-error-700;
+    &.undisclosed {
+      border: 2px solid $color-error-700;
     }
 
     &-text {
-        @include sub-heading-6;
+      @include sub-heading-6;
+      margin: 0;
     }
 
-    &-check-circle{
+    &-check-circle {
       background-color: $color-primary-500;
-      border-radius: 10px;
-      padding: 0.125rem;
+      border-radius: 50%;
+      padding: 2px;
       display: flex;
       align-items: center;
       justify-content: center;
 
       svg {
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
         color: white;
-        stroke-width: 3;
       }
     }
   }
+}
+
+.flag-sub-container {
+  margin: 10px 0;
+  width: 100%;
 }

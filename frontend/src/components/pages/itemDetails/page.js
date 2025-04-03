@@ -557,7 +557,21 @@ const ItemDetails = () => {
               );
             })}
           </div>
-          {review && <FlagPanel reportContent={reportContent} review={review} setReview={setReview} authorName={authorName} isDisclosureChecked={isDisclosureChecked} disclosedItems={disclosedItems} showDisclosed={showDisclosed} setShowDisclosed={setShowDisclosed} undisclosedItems={undisclosedItems} showUndisclosed = {showUndisclosed} setShowUndisclosed={setShowUndisclosed} />}
+          {review && (
+            <FlagPanel
+              reportContent={reportContent}
+              review={review}
+              setReview={setReview}
+              authorName={authorName}
+              isDisclosureChecked={isDisclosureChecked}
+              disclosedItems={disclosedItems}
+              showDisclosed={showDisclosed}
+              setShowDisclosed={setShowDisclosed}
+              undisclosedItems={undisclosedItems}
+              showUndisclosed={showUndisclosed}
+              setShowUndisclosed={setShowUndisclosed}
+            />
+          )}
         </>
       )}
 
