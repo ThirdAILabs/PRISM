@@ -732,7 +732,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
                 <IoMdClose />
             </button>
           </div>
-          <Divider />
+          <Divider className='divider'/>
           {/* show 'sort-by' button if any work contains date */}
           {(() => {
             const items = reportContent[review] || [];
