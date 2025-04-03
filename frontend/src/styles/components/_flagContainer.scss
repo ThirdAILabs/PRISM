@@ -7,12 +7,12 @@
   width: 80%;
   position: relative;
   margin: 10px auto;
-  text-align: left;
 
   &-box {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     padding: 10px;
     border-radius: 10px;
+    text-align: left;
   }
 
   &-badge {

@@ -18,6 +18,7 @@ import { Divider } from '@mui/material';
 import { IoMdClose } from "react-icons/io";
 import { IoIosArrowDown } from "react-icons/io";
 import { IoIosArrowUp } from "react-icons/io";
+import FlagContainer from './flagContainer.js';
 
 
 const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureChecked, disclosedItems, showDisclosed, setShowDisclosed, undisclosedItems, showUndisclosed, setShowUndisclosed}) => {    
@@ -91,10 +92,10 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
             return acknowledgementFlag(flag, index);
           case HIGH_RISK_FUNDERS:
             return funderFlag(flag, index);
-          case AUTHOR_AFFILIATIONS:
-            return authorAffiliationFlag(flag, index);
-          case POTENTIAL_AUTHOR_AFFILIATIONS:
-            return universityFacultyFlag(flag, index);
+            case AUTHOR_AFFILIATIONS:
+              return <FlagContainer showDisclosure={isDisclosureChecked} isDisclosed={flag.Disclosed} children = {authorAffiliationFlag(flag, index)} />
+            case POTENTIAL_AUTHOR_AFFILIATIONS:
+              return universityFacultyFlag(flag, index);
           case MISC_HIGH_RISK_AFFILIATIONS:
             return PRFlag(flag, index);
           case COAUTHOR_AFFILIATIONS:
@@ -439,10 +440,6 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
         return (
             <div
             key={index}
-            className="p-3 px-5 w-75 detail-item"
-            style={{
-                boxShadow: !isDisclosureChecked ? 'none' : flag.Disclosed ? greenBoxShadow : redBoxShadow,
-            }}
             >
             {withPublicationDate(
                 <h5 className="fw-bold mt-3">Author is affiliated with an Entity of Concern</h5>,
