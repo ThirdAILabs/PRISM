@@ -46,6 +46,21 @@ type UserAuthorReport struct {
 
 	ReportId uuid.UUID     `gorm:"type:uuid;not null"`
 	Report   *AuthorReport `gorm:"foreignKey:ReportId"`
+
+	Hooks []AuthorReportHook `gorm:"foreignKey:UserReportId;constraint:OnDelete:CASCADE"`
+}
+
+type AuthorReportHook struct {
+	Id uuid.UUID `gorm:"type:uuid;primaryKey"`
+
+	UserReportId uuid.UUID         `gorm:"type:uuid;not null"`
+	UserReport   *UserAuthorReport `gorm:"foreignKey:UserReportId"`
+
+	Action string
+	Data   []byte
+
+	LastRanAt time.Time
+	Interval  int
 }
 
 type UniversityReport struct {
