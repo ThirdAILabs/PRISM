@@ -215,7 +215,8 @@ const ItemDetails = () => {
           AuthorName: report.AuthorName,
           Institutions: ['Texas A&M University', 'College Station Medical Center', 'Colorado State University',
             'Houston Methodist', 'Mitchell Institute', 'Purdue University West Lafayette', 'State Street (United States)'],
-          Interests: ['Artificial Intelligence', 'Machine Learning', 'Computer Vision', 'Natural Language Processing'],
+          Interests: ['Artificial Intelligence', 'Machine Learning', 'Computer Vision', 'Natural Language Processing'
+          ],
           Source: report.Source,
         })
         if (!isMounted) return;
@@ -1063,7 +1064,7 @@ const ItemDetails = () => {
             )} */}
             {authorInfo &&
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <div className="author-item" style={{ marginTop: '20px', marginBottom: '20px', marginLeft: '3%', width: '45%' }}>
+                <div className="author-item" style={{ marginTop: '20px', marginBottom: '20px', marginLeft: '3%', width: '45%', height: '0%' }}>
                   <AuthorInfoCard result={authorInfo} />
                 </div>
                 <div className='author-item' style={{ marginTop: '20px', marginBottom: '20px', marginRight: '3%', width: '45%' }}>

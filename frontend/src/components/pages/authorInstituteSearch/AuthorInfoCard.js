@@ -7,7 +7,7 @@ const AuthorInfoCard = ({ result }) => {
     console.log("Result in AuthorInfoCard", result);
 
     return (
-        <div className="text-start" style={{ padding: '20px 60px 20px 30px', width: "100%" }}>
+        <div className="text-start" style={{ padding: '20px 60px 10px 30px', width: "100%" }}>
             <div className="info-row">
                 <img src={Scholar} alt="Scholar" className="icon scholar" />
                 <h5 className="title">{result.AuthorName}</h5>
