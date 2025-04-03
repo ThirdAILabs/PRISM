@@ -52,6 +52,9 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 	}
 
 	reportId, err := URLParamUUID(r, "report_id")
+	if err != nil {
+		return nil, CodedError(err, http.StatusBadRequest)
+	}
 
 	params, err := ParseRequestBody[api.CreateHookRequest](r)
 	if err != nil {
