@@ -1,5 +1,5 @@
-@import '../../base/varialbes';
-@import '../../base/typography';
+@import '../base/varialbes';
+@import '../base/typography';
 
 .flag-container {
   display: flex;
@@ -9,20 +9,12 @@
   margin: 25px auto;
 
   &-box {
-    border: 1px solid #e5e7eb;
+    border: 1px solid $color-text-300;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 20px;
     border-radius: 8px;
-    background-color: $color-text-100;
+    background-color: transparent;
     width: 100%;
-
-    h5 {
-      margin-bottom: 1rem;
-    }
-
-    p {
-      margin-bottom: 1rem;
-    }
 
     .bulleted-list {
       margin-left: 1.5rem;

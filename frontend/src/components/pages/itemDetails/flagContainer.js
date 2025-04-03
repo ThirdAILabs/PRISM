@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check } from 'lucide-react';
-import '../../../styles/components/_flagPanel.scss';
+import '../../../styles/components/_flagContainer.scss';
 
 export default function FlagContainer({ showDisclosure, isDisclosed = false, children }) {
   return (

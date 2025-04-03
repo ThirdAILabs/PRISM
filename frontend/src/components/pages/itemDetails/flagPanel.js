@@ -147,7 +147,7 @@ const FlagPanel = ({
       });
     }
     return (
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         {header}
         <span className="fw-bold mt-3">{formattedDate}</span>
       </div>
@@ -479,108 +479,90 @@ const FlagPanel = ({
 
   function PRFlag(flag, index) {
     const connections = flag.Connections || [];
+    
+    function pressRelease(){
+      return (
+        <>
+          <strong>Press Release</strong>
+          <ul className="bulleted-list">
+            <li>
+              <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">
+                {flag.DocTitle}
+              </a>
+            </li>
+          </ul>
+        </>
+      )
+    }
+    
+    function relevantDocuments(){
+      return (
+        <>
+          <strong>Relevant Document(s)</strong>
+          <ul className="bulleted-list">
+            {connections.map((item, index2) => {
+              const key = `${index} ${index2}`;
+              return (
+                <li key={key}>
+                  <a href={item.DocUrl} target="_blank" rel="noopener noreferrer">
+                    {item.DocTitle}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )
+    }
     return (
       <div>
-        {true && (
-          <>
-            {connections.length == 0 ? (
-              <>
-                <h5 className="fw-bold mt-3">
-                  The author or an associate may be mentioned in a Press Release
-                </h5>
-              </>
-            ) : connections.length == 1 ? (
-              <>
-                <h5 className="fw-bold mt-3">
-                  The author's associate may be mentioned in a Press Release
-                </h5>
-              </>
-            ) : connections.length === 2 ? (
-              <>
-                <h5 className="fw-bold mt-3">
-                  The author may potentially be connected to an entity/individual mentioned in a
-                  Press Release
-                </h5>
-              </>
-            ) : null}
-          </>
-        )}
+        <h5 className="flag-header">
+          {
+            connections.length == 0 ? 'The author or an associate may be mentioned in a Press Release' :
+            connections.length == 1 ? 'The author\'s associate may be mentioned in a Press Release' :
+            connections.length == 2 ? 'The author may potentially be connected to an entity/individual mentioned in a Press Release' :''
+          }
+        </h5>
         <p>
           {flag.Message}
-          <p />
-          <>
-            {connections.length === 0 ? (
-              <>
-                <strong>Press Release</strong>
-                <ul className="bulleted-list">
-                  <li>
-                    <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">
-                      {flag.DocTitle}
-                    </a>
-                  </li>
-                </ul>
-              </>
-            ) : connections.length === 1 ? (
-              <>
-                {flag.FrequentCoauthor ? (
-                  <>Frequent Coauthor: {flag.FrequentCoauthor}</>
-                ) : (
-                  <>
-                    <strong>Relevant Document</strong>
-                    <ul className="bulleted-list">
-                      <li>
-                        <a
-                          href={flag.Connections[0].DocUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {flag.Connections[0].DocTitle}
-                        </a>{' '}
-                      </li>
-                    </ul>
-                  </>
-                )}
-                <strong>Press Release</strong>
-                <ul className="bulleted-list">
-                  <li>
-                    <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">
-                      {flag.DocTitle}
-                    </a>
-                  </li>
-                </ul>
-              </>
-            ) : connections.length == 2 ? (
-              <>
-                <strong>Relevant Documents</strong>
-                <ul className="bulleted-list">
-                  <li>
-                    <a href={flag.Connections[0].DocUrl} target="_blank" rel="noopener noreferrer">
-                      {flag.Connections[0].DocTitle}
-                    </a>
-                  </li>
-                  <li>
-                    <a href={flag.Connections[1].DocUrl} target="_blank" rel="noopener noreferrer">
-                      {flag.Connections[1].DocTitle}
-                    </a>
-                  </li>
-                </ul>
-                <strong>Press Release</strong>
-                <ul className="bulleted-list">
-                  <li>
-                    <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">
-                      {flag.DocTitle}
-                    </a>
-                  </li>
-                </ul>
-              </>
-            ) : null}
-          </>
         </p>
-        <p>
+        {connections.length === 0 ? (
+          pressRelease()
+        ) : connections.length === 1 ? (
           <>
-            <strong>Entity/individual mentioned</strong>
+            {flag.FrequentCoauthor ? (
+              <>
+                Frequent Coauthor: {flag.FrequentCoauthor}
+              </>
+            ) : (
+              relevantDocuments()
+            )}
+            {pressRelease()}
+          </>
+        ) : connections.length == 2 ? (
+          <>
+            {relevantDocuments()}
+            {pressRelease()}
+          </>
+        ) : null}
+        <>
+          <strong>Entity/individual mentioned</strong>
+          <ul className="bulleted-list">
+            {[flag.EntityMentioned].map((item, index2) => {
+              const key = `${index} ${index2}`;
+              return (
+                <li key={key}>
+                  <a>{item}</a>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+        {flag.DocEntities && flag.DocEntities.length > 0 && (
+          <>
+            <strong>Potential affiliate(s)</strong>
             <ul className="bulleted-list">
-              {[flag.EntityMentioned].map((item, index2) => {
+              {flag.DocEntities.map((item, index2) => {
                 const key = `${index} ${index2}`;
                 return (
                   <li key={key}>
@@ -590,22 +572,7 @@ const FlagPanel = ({
               })}
             </ul>
           </>
-          {flag.DocEntities && flag.DocEntities.length > 0 && (
-            <>
-              <strong>Potential affiliate(s)</strong>
-              <ul className="bulleted-list">
-                {flag.DocEntities.map((item, index2) => {
-                  const key = `${index} ${index2}`;
-                  return (
-                    <li key={key}>
-                      <a>{item}</a>
-                    </li>
-                  );
-                })}
-              </ul>
-            </>
-          )}
-        </p>
+        )}
       </div>
     );
   }

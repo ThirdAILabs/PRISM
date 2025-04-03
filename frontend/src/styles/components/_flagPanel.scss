@@ -149,3 +149,7 @@ $z-index-sidebar-header: 1000;
     }
   }
 }
+
+.flag-header {
+  @include heading-3;
+}
