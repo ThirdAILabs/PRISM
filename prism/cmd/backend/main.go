@@ -173,11 +173,16 @@ func main() {
 	reportManager.StartReportUpdateCheck()
 	defer reportManager.StopReportUpdateCheck()
 
+	hooks := services.NewHookService(db, map[string]services.Hook{})
+
+	hooks.RunHooks(30 * time.Minute)
+	defer hooks.Stop()
+
 	backend := services.NewBackend(
 		services.NewReportService(reportManager, licensing, config.ResourceFolder),
 		services.NewSearchService(openalex, loadSearchableEntities(config.SearchableEntitiesData)),
 		services.NewAutoCompleteService(openalex),
-		services.NewHookService(db, map[string]services.Hook{}),
+		hooks,
 		userAuth,
 	)
 
