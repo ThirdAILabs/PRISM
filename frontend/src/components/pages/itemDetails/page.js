@@ -26,7 +26,7 @@ import useGoBack from '../../../hooks/useGoBack.js';
 import useOutsideClick from '../../../hooks/useOutsideClick.js';
 import { getRawTextFromXML, getTrailingWhiteSpace } from '../../../utils/helper.js';
 import '../../../styles/components/_primaryButton.scss';
-import '../../../styles/components/_todoListComponent.scss';
+import '../../../styles/components/_authorInfoCard.scss';
 import AuthorInfoCard from '../authorInstituteSearch/AuthorInfoCard.js';
 import ScoreCard from './ScoreCard.js';
 
@@ -1063,10 +1063,10 @@ const ItemDetails = () => {
             )} */}
             {authorInfo &&
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <div className="result-item" style={{ marginTop: '20px', marginBottom: '20px', marginLeft: '3%', width: '45%' }}>
+                <div className="author-item" style={{ marginTop: '20px', marginBottom: '20px', marginLeft: '3%', width: '45%' }}>
                   <AuthorInfoCard result={authorInfo} />
                 </div>
-                <div className='result-item' style={{ marginTop: '20px', marginBottom: '20px', marginRight: '3%', width: '45%' }}>
+                <div className='author-item' style={{ marginTop: '20px', marginBottom: '20px', marginRight: '3%', width: '45%' }}>
                   <ScoreCard score={Object.keys(reportContent || {})
                     .map((name) => (reportContent[name] || []).length)
                     .reduce((prev, curr) => prev + curr, 0)} />
