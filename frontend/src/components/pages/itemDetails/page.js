@@ -26,6 +26,9 @@ import useGoBack from '../../../hooks/useGoBack.js';
 import useOutsideClick from '../../../hooks/useOutsideClick.js';
 import { getRawTextFromXML, getTrailingWhiteSpace } from '../../../utils/helper.js';
 import '../../../styles/components/_primaryButton.scss';
+import '../../../styles/components/_todoListComponent.scss';
+import AuthorInfoCard from '../authorInstituteSearch/AuthorInfoCard.js';
+import ScoreCard from './ScoreCard.js';
 
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
@@ -96,15 +99,13 @@ const get_paper_url = (flag) => {
 };
 
 const ItemDetails = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const authorInfo = location.state?.authorInfo;
-  console.log("Author Info: ", authorInfo);
+
   const { report_id } = useParams();
 
   const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
   const [downloadDropdownOpen, setDownloadDropdownOpen] = useState(false);
   const [reportContent, setReportContent] = useState({});
+  const [authorInfo, setAuthorInfo] = useState(null);
   const [authorName, setAuthorName] = useState('');
   const [institutions, setInstitutions] = useState([]);
   const [initialReportContent, setInitialReportContent] = useState({});
@@ -208,7 +209,15 @@ const ItemDetails = () => {
       try {
         const report = await reportService.getReport(report_id);
         const { Content, ...metadata } = report;
-
+        console.log("All report data", report);
+        setAuthorInfo({
+          AuthorId: report.AuthorId,
+          AuthorName: report.AuthorName,
+          Institutions: ['Texas A&M University', 'College Station Medical Center', 'Colorado State University',
+            'Houston Methodist', 'Mitchell Institute', 'Purdue University West Lafayette', 'State Street (United States)'],
+          Interests: ['Artificial Intelligence', 'Machine Learning', 'Computer Vision', 'Natural Language Processing'],
+          Source: report.Source,
+        })
         if (!isMounted) return;
 
         setAuthorName(report.AuthorName);
@@ -985,7 +994,7 @@ const ItemDetails = () => {
                   />
                 </svg>
               </button>
-              <h5>Individual Assessment Result
+              <h5 >Individual Assessment Result
               </h5>
             </div>
           </div>
@@ -1052,6 +1061,17 @@ const ItemDetails = () => {
                 <div class="spinner-border text-secondary ms-5 mb-3" role="status" />
               </div>
             )} */}
+            {authorInfo &&
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div className="result-item" style={{ marginTop: '20px', marginBottom: '20px', marginLeft: '3%', width: '45%' }}>
+                  <AuthorInfoCard result={authorInfo} />
+                </div>
+                <div className='result-item' style={{ marginTop: '20px', marginBottom: '20px', marginRight: '3%', width: '45%' }}>
+                  <ScoreCard score={Object.keys(reportContent || {})
+                    .map((name) => (reportContent[name] || []).length)
+                    .reduce((prev, curr) => prev + curr, 0)} />
+                </div></div>}
+
             <div
               className="d-flex w-100 flex-column align-items-center"
               style={{ color: 'rgb(78, 78, 78)', marginTop: '0px' }}
