@@ -1,0 +1,58 @@
+@import '../../base/varialbes';
+@import '../../base/typography';
+
+.flag-container {
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  position: relative;
+  margin: 10px auto;
+  text-align: left;
+
+  &-box {
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  &-badge {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: $color-text-100;
+    border: 1px solid;
+    border-radius: 10px; 
+    padding: 0.25rem 0.75rem; 
+    display: flex;
+    align-items: center;
+
+    .disclosed{
+        border-color: $color-primary-700;
+    }
+
+    .undisclosed{
+        border-color: $color-error-700;
+    }
+
+    &-text {
+        @include sub-heading-6;
+    }
+
+    &-check-circle{
+      background-color: $color-primary-500;
+      border-radius: 10px;
+      padding: 0.125rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      svg {
+        width: 16px;
+        height: 16px;
+        color: white;
+        stroke-width: 3;
+      }
+    }
+  }
+}

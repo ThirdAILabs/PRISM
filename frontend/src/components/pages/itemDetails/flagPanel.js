@@ -11,13 +11,13 @@ import {
 } from '../../../constants/constants.js';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { getRawTextFromXML } from '../../../utils/helper.js';
 import useOutsideClick from '../../../hooks/useOutsideClick.js';
 import '../../../styles/components/_flagPanel.scss';
 import { Divider } from '@mui/material';
 import { IoMdClose } from "react-icons/io";
+import { IoIosArrowDown } from "react-icons/io";
+import { IoIosArrowUp } from "react-icons/io";
 
 
 const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureChecked, disclosedItems, showDisclosed, setShowDisclosed, undisclosedItems, showUndisclosed, setShowUndisclosed}) => {    
@@ -36,7 +36,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
 
   const sidepanelRef = useOutsideClick(() => {
     setIsRendered(false);
-    setTimeout(() => setReview(''), 300); // Match transition duration
+    setTimeout(() => setReview(''), 300);
   });
 
     // box shadow for disclosed/undisclosed buttons
@@ -724,6 +724,30 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
         );
     }
 
+    function sortByComponent(){
+      const items = reportContent[review] || [];
+      const hasDates = items.some(
+        (item) =>
+          item?.Work?.PublicationDate &&
+          !isNaN(new Date(item.Work.PublicationDate).getTime())
+      );
+      if (!hasDates) 
+        return null;
+
+      return (
+        <div className="sort-by-container">
+          <span className="sort-label">Sort by Date</span>
+          <div onClick={toggleSortOrder} className="sort-icon">
+            {sortOrder === 'asc' ? (
+              <IoIosArrowUp />
+            ) : (
+              <IoIosArrowDown />
+            )}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div ref={sidepanelRef} className={`flag-panel ${isRendered ? 'open' : ''}`}>
           <div className="flag-panel-header">
@@ -733,36 +757,24 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
             </button>
           </div>
           <Divider className='divider'/>
-          {/* show 'sort-by' button if any work contains date */}
-          {(() => {
-            const items = reportContent[review] || [];
-            const hasDates = items.some(
-              (item) =>
-                item?.Work?.PublicationDate &&
-                !isNaN(new Date(item.Work.PublicationDate).getTime())
-            );
-            if (!hasDates) return null;
-            return (
-              <div
-                style={{
-                  marginBottom: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px',
-                }}
-              >
-                <span style={{ marginRight: '10px' }}>Sort by Date</span>
-                <div onClick={toggleSortOrder} style={{ cursor: 'pointer' }}>
-                  {sortOrder === 'asc' ? (
-                    <ArrowUpwardIcon style={{ color: 'black' }} />
-                  ) : (
-                    <ArrowDownwardIcon style={{ color: 'black' }} />
-                  )}
-                </div>
+          <div className='selection-container'>
+            <div className="score-box-container">
+              <div className="score-pill">
+                <span className="score-label">Score:</span>
+                <span className="score-value">{reportContent[review] ? reportContent[review].length : 0}</span>
               </div>
-            );
-          })()}
+              { isDisclosureChecked && (
+                <div className="tab-group">
+                  <button className="tab-button active">All</button>
+                  <button className="tab-button">Disclosed</button>
+                  <button className="tab-button">Undisclosed</button>
+                </div>
+                )
+              }
+              {sortByComponent()}
+            </div>
+          </div>
+          
 
           {isDisclosureChecked ? (
             <>

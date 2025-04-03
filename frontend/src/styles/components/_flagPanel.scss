@@ -26,7 +26,6 @@ $z-index-sidebar-header: 1000;
   background: $color-text-100;
   box-shadow: $sidebar-box-shadow;
   transition: $sidebar-transition;
-  padding: $sidebar-padding;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -42,6 +41,7 @@ $z-index-sidebar-header: 1000;
   &-header {
     display: flex;
     justify-content: space-between;
+    padding: $sidebar-padding;
     align-items: center;
     width: 100%;
     margin: 10px 0;
@@ -70,4 +70,83 @@ $z-index-sidebar-header: 1000;
 .divider {
   height: 1px;
   background-color: $color-grey-500;
+}
+
+.selection-container {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  width: 100%;
+  justify-content: space-between;
+
+  .score-box-container {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    flex: 1;
+    
+    .score-pill {
+      background-color: $color-text-100;
+      border-radius: 0 20px 20px 0;
+      padding: 8px 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+      @include sub-heading-4; 
+      .score-label {
+        color: $color-error-700;
+        margin-right: 7px;
+      }
+      
+      .score-value {
+        color: $color-error-700;
+      }
+    }
+  }
+
+  .tab-group {
+    display: flex;
+    padding-left: 15px;
+    
+    .tab-button {
+      padding: 8px 24px;
+      border-radius: 7px;
+      background-color: #f3f4f6; // gray-100 equivalent
+      font-size: 14px;
+      transition: all 0.2s ease;
+      border-color: transparent;
+      margin-left: 12px;
+      
+      &.active {
+        background-color: white;
+        border: 1px solid $color-primary-700;
+        color: $color-primary-900; // blue-500 equivalent
+        @include sub-heading-5;
+      }
+      
+      &:hover:not(.active) {
+        background-color: #e5e7eb; // gray-200 equivalent
+      }
+    }
+
+  }
+}
+.sort-by-container {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 20px;
+  
+  .sort-label {
+    @include sub-heading-4; 
+  }
+  
+  .sort-icon {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    
+    svg {
+      color: $color-text-900;
+    }
+  }
 }
