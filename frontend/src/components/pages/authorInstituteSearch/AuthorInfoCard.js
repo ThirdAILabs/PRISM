@@ -1,4 +1,4 @@
-import '../../../styles/components/_todoListComponent.scss';
+import '../../../styles/components/_authorInfoCard.scss';
 import Scholar from '../../../assets/icons/Scholar.svg';
 import University from '../../../assets/icons/University.svg';
 import Research from '../../../assets/icons/Research.svg';

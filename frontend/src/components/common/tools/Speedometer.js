@@ -92,7 +92,7 @@ export function Speedometer({ scale, value, speedometerHoverText, valueFontSize 
         startAngle={-120}
         endAngle={120}
         cornerRadius="50%"
-        innerRadius="80%"
+        innerRadius="84%"
         outerRadius="100%"
         sx={(theme) => ({
           [`& .${gaugeClasses.referenceArc}`]: {
