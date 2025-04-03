@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"prism/prism/api"
 	"prism/prism/licensing"
 	"prism/prism/openalex"
@@ -32,6 +33,12 @@ func init() {
 	const licensePath = "../../.test_license/thirdai.license"
 	if err := search.SetLicensePath(licensePath); err != nil {
 		panic(err)
+	}
+}
+
+func shouldSkip(t *testing.T) {
+	if os.Getenv("SKIP_SERP_TESTS") != "" {
+		t.Skip("Skipping SERP tests due to SKIP_SERP_TESTS env var")
 	}
 }
 
@@ -728,6 +735,8 @@ func TestSearchAuthors(t *testing.T) {
 }
 
 func TestSearchGoogleScholarAuthors(t *testing.T) {
+	shouldSkip(t)
+
 	backend, _ := createBackend(t)
 
 	user := newUser()
@@ -750,6 +759,8 @@ func TestSearchGoogleScholarAuthors(t *testing.T) {
 }
 
 func TestSearchGoogleScholarAuthorsWithCursor(t *testing.T) {
+	shouldSkip(t)
+
 	backend, _ := createBackend(t)
 
 	user := newUser()
