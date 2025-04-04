@@ -444,17 +444,19 @@ const FlagPanel = ({
         )}
         <div>
           {authorName} is affiliated with an entity of concern in {get_paper_url(flag)}.<p></p>
-          <strong>Detected Affiliations</strong>
-          <ul className="bulleted-list">
-            {flag.Affiliations.map((item, index2) => {
-              const key = `${index} ${index2}`;
-              return (
-                <li key={key}>
-                  <a>{item}</a>
-                </li>
-              );
-            })}
-          </ul>
+          <div className='flag-sub-container'>
+            <strong>Detected Affiliations</strong>
+            <div className="concerned-tags">
+              {flag.Affiliations.map((item, index2) => {
+                const key = `${index} ${index2}`;
+                return (
+                  <span key={key} className="concerned-tag-item">
+                    {item}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -547,30 +549,30 @@ const FlagPanel = ({
         </div>
         <div className='flag-sub-container'>
           <strong>Entity/individual mentioned</strong>
-          <ul className="bulleted-list">
+          <div className="concerned-tags">
             {[flag.EntityMentioned].map((item, index2) => {
               const key = `${index} ${index2}`;
               return (
-                <li key={key}>
-                  <a>{item}</a>
-                </li>
+                <span key={key} className="concerned-tag-item">
+                  {item}
+                </span>
               );
             })}
-          </ul>
+          </div>
         </div>
         {flag.DocEntities && flag.DocEntities.length > 0 && (
           <div className='flag-sub-container'>
             <strong>Potential affiliate(s)</strong>
-            <ul className="bulleted-list">
+            <div className="concerned-tags">
               {flag.DocEntities.map((item, index2) => {
                 const key = `${index} ${index2}`;
                 return (
-                  <li key={key}>
-                    <a>{item}</a>
-                  </li>
+                  <span key={key} className="concerned-tag-item">
+                    {item}
+                  </span>
                 );
               })}
-            </ul>
+            </div>
           </div>
         )}
       </div>

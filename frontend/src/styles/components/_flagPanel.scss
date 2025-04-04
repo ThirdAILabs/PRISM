@@ -157,7 +157,7 @@ $z-index-sidebar-header: 1000;
 .flag-sub-container {
   width: 100%;
   border: 1px solid $color-text-300;
-  // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
   margin-bottom: 8px;
   padding: 10px;
@@ -165,10 +165,35 @@ $z-index-sidebar-header: 1000;
 
 .bulleted-list {
   list-style-type: none;
-  margin-left: 10px;
-  padding-left: 0;
+  padding-left: 10px;
   
   & a{
     color: $color-primary-700;
   }
+}
+
+.bulleted-list-concerning-items {
+  list-style-type: none;
+  color: $color-error-700;
+  
+  & a {
+    color: $color-error-700;
+  }
+}
+
+.concerned-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.concerned-tag-item {
+  @include paragraph-4;
+  display: inline-block;
+  background-color: #fce8e6;  /* Light red/pink background */
+  color: $color-error-700;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 14px;
 }
