@@ -153,3 +153,22 @@ $z-index-sidebar-header: 1000;
 .flag-header {
   @include heading-3;
 }
+
+.flag-sub-container {
+  width: 100%;
+  border: 1px solid $color-text-300;
+  // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  margin-bottom: 8px;
+  padding: 10px;
+}
+
+.bulleted-list {
+  list-style-type: none;
+  margin-left: 10px;
+  padding-left: 0;
+  
+  & a{
+    color: $color-primary-700;
+  }
+}

@@ -526,10 +526,8 @@ const FlagPanel = ({
         <p>
           {flag.Message}
         </p>
-        {connections.length === 0 ? (
-          pressRelease()
-        ) : connections.length === 1 ? (
-          <>
+        {connections.length == 1 && (
+          <div className='flag-sub-container'>
             {flag.FrequentCoauthor ? (
               <>
                 Frequent Coauthor: {flag.FrequentCoauthor}
@@ -537,15 +535,17 @@ const FlagPanel = ({
             ) : (
               relevantDocuments()
             )}
-            {pressRelease()}
-          </>
-        ) : connections.length == 2 ? (
-          <>
+          </div>
+        )}
+        {connections.length == 2 && (
+          <div className='flag-sub-container'>
             {relevantDocuments()}
-            {pressRelease()}
-          </>
-        ) : null}
-        <>
+          </div>
+        )}
+        <div className='flag-sub-container'>
+          {pressRelease()}
+        </div>
+        <div className='flag-sub-container'>
           <strong>Entity/individual mentioned</strong>
           <ul className="bulleted-list">
             {[flag.EntityMentioned].map((item, index2) => {
@@ -557,9 +557,9 @@ const FlagPanel = ({
               );
             })}
           </ul>
-        </>
+        </div>
         {flag.DocEntities && flag.DocEntities.length > 0 && (
-          <>
+          <div className='flag-sub-container'>
             <strong>Potential affiliate(s)</strong>
             <ul className="bulleted-list">
               {flag.DocEntities.map((item, index2) => {
@@ -571,7 +571,7 @@ const FlagPanel = ({
                 );
               })}
             </ul>
-          </>
+          </div>
         )}
       </div>
     );
@@ -611,13 +611,17 @@ const FlagPanel = ({
               {reportContent[review] ? reportContent[review].length : 0}
             </span>
           </div>
-          {isDisclosureChecked && (
+          
             <div className="tab-group">
               <button className="tab-button active">All</button>
-              <button className="tab-button">Disclosed</button>
-              <button className="tab-button">Undisclosed</button>
+              {isDisclosureChecked && (
+                <>
+                  <button className="tab-button">Disclosed</button>
+                  <button className="tab-button">Undisclosed</button>
+                </>
+              )}
             </div>
-          )}
+
           {sortByComponent()}
         </div>
       </div>
@@ -774,4 +778,5 @@ const FlagPanel = ({
     </div>
   );
 };
+
 export default FlagPanel;

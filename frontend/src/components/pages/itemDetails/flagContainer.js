@@ -18,7 +18,3 @@ export default function FlagContainer({ showDisclosure, isDisclosed = false, chi
     </div>
   );
 }
-
-export function FlagSubContainer({ children }) {
-  return <div className="flag-sub-container">{children}</div>;
-}
