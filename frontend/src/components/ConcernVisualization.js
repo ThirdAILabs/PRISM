@@ -56,14 +56,16 @@ export default function ConcernVisualizer({
   valueFontSize,
 }) {
   return (
-    <div style={{
-      width: '180px',
-      height: '340px',
-      position: 'relative',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center'
-    }}>
+    <div
+      style={{
+        width: '180px',
+        height: '340px',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}
+    >
       <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '-12px' }}>
         <Speedometer
           scale={scale || [0, 10, 20, 30, 50, 100, 200]}
@@ -73,28 +75,32 @@ export default function ConcernVisualizer({
         />
       </div>
 
-      <div style={{
-        height: '50px',
-        padding: '8px',
-        marginBottom: '48px',
-        marginTop: '-16px',
-        textAlign: 'center',
-        width: '100%',
-        fontSize: '14px',
-        lineHeight: '20px',
-        letterSpacing: '0.1px',
-        fontWeight: 'bold',
-        color: value !== 0 ? '#333f54' : '#6a798f'
-      }}>
+      <div
+        style={{
+          height: '50px',
+          padding: '8px',
+          marginBottom: '48px',
+          marginTop: '-16px',
+          textAlign: 'center',
+          width: '100%',
+          fontSize: '14px',
+          lineHeight: '20px',
+          letterSpacing: '0.1px',
+          fontWeight: 'bold',
+          color: value !== 0 ? '#333f54' : '#6a798f',
+        }}
+      >
         {title}
       </div>
 
       {onReview && (
-        <div style={{
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'center'
-        }}>
+        <div
+          style={{
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
           <button
             className="button button-3d"
             style={{

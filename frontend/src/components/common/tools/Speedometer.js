@@ -18,7 +18,8 @@ export function GradientValueGauge() {
   );
 }
 
-export function Ticks({ scale, showNumbers = false }) {  // Added showNumbers prop
+export function Ticks({ scale, showNumbers = false }) {
+  // Added showNumbers prop
   const { innerRadius, cx, cy, startAngle, endAngle } = useGaugeState();
   const radius = innerRadius * 0.8;
   function angleAtStep(step) {
@@ -26,24 +27,26 @@ export function Ticks({ scale, showNumbers = false }) {  // Added showNumbers pr
   }
   return (
     <g>
-      {showNumbers && scale.map((val, step) => {  // Added conditional rendering
-        const tickCx = cx + radius * Math.cos(angleAtStep(step));
-        const tickCy = cy + radius * Math.sin(angleAtStep(step));
-        return (
-          <text
-            key={step}
-            x={tickCx}
-            y={tickCy}
-            style={{ fill: 'black' }}
-            fontSize={0.2 * radius}
-            textAnchor="middle"
-            dominantBaseline="middle"
-          >
-            {val}
-            {step === scale.length - 1 ? '+' : ''}
-          </text>
-        );
-      })}
+      {showNumbers &&
+        scale.map((val, step) => {
+          // Added conditional rendering
+          const tickCx = cx + radius * Math.cos(angleAtStep(step));
+          const tickCy = cy + radius * Math.sin(angleAtStep(step));
+          return (
+            <text
+              key={step}
+              x={tickCx}
+              y={tickCy}
+              style={{ fill: 'black' }}
+              fontSize={0.2 * radius}
+              textAnchor="middle"
+              dominantBaseline="middle"
+            >
+              {val}
+              {step === scale.length - 1 ? '+' : ''}
+            </text>
+          );
+        })}
     </g>
   );
 }
@@ -54,7 +57,7 @@ export function Value({ value, speedometerHoverText, valueFontSize }) {
     <g>
       <text
         x={cx}
-        y={cy - (innerRadius / 4)} // Position text above center
+        y={cy - innerRadius / 4} // Position text above center
         style={{
           fill: value !== 0 ? '#b71d18' : '#6a798f', // Changed color to black
           fontSize: valueFontSize ? valueFontSize : innerRadius * 0.8,
