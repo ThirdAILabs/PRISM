@@ -88,6 +88,7 @@ export default function ConcernVisualizer({
           letterSpacing: '0.1px',
           fontWeight: 'bold',
           color: value !== 0 ? '#333f54' : '#6a798f',
+          paddingInline: '16px',
         }}
       >
         {title}
