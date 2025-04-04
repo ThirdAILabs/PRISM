@@ -26,6 +26,14 @@ type ReportService struct {
 	resourceFolder string
 }
 
+func NewReportService(manager *reports.ReportManager, licensing *licensing.LicenseVerifier, resourceFolder string) ReportService {
+	return ReportService{
+		manager:        manager,
+		licensing:      licensing,
+		resourceFolder: resourceFolder,
+	}
+}
+
 type ReportRequest struct {
 	Id                    string                     `json:"Id"`
 	LastAccessedAt        string                     `json:"LastAccessedAt"`

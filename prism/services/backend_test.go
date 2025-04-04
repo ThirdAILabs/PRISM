@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"prism/prism/api"
 	"prism/prism/licensing"
 	"prism/prism/openalex"
@@ -32,6 +33,12 @@ func init() {
 	const licensePath = "../../.test_license/thirdai.license"
 	if err := search.SetLicensePath(licensePath); err != nil {
 		panic(err)
+	}
+}
+
+func shouldSkip(t *testing.T) {
+	if os.Getenv("SKIP_SERP_TESTS") != "" {
+		t.Skip("Skipping SERP tests due to SKIP_SERP_TESTS env var")
 	}
 }
 
@@ -62,15 +69,20 @@ func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 	db := schema.SetupTestDB(t)
 
 	entities := []api.MatchedEntity{{Names: "abc university"}, {Names: "institute of xyz"}, {Names: "123 org"}}
-	entitySearch := services.NewEntitySearch(entities)
 
 	licensing, err := licensing.NewLicenseVerifier("AC013F-FD0B48-00B160-64836E-76E88D-V3")
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	oa := openalex.NewRemoteKnowledgeBase()
+
 	backend := services.NewBackend(
-		reports.NewManager(db), openalex.NewRemoteKnowledgeBase(), entitySearch, &MockTokenVerifier{prefix: userPrefix}, licensing, "./resources",
+		services.NewReportService(reports.NewManager(db), licensing, "./resources"),
+		services.NewSearchService(oa, entities),
+		services.NewAutoCompleteService(oa),
+		services.NewHookService(db, map[string]services.Hook{}),
+		&MockTokenVerifier{prefix: userPrefix},
 	)
 
 	return backend.Routes(), db
@@ -728,6 +740,8 @@ func TestSearchAuthors(t *testing.T) {
 }
 
 func TestSearchGoogleScholarAuthors(t *testing.T) {
+	shouldSkip(t)
+
 	backend, _ := createBackend(t)
 
 	user := newUser()
@@ -750,6 +764,8 @@ func TestSearchGoogleScholarAuthors(t *testing.T) {
 }
 
 func TestSearchGoogleScholarAuthorsWithCursor(t *testing.T) {
+	shouldSkip(t)
+
 	backend, _ := createBackend(t)
 
 	user := newUser()
@@ -783,4 +799,150 @@ func TestSearchGoogleScholarAuthorsWithCursor(t *testing.T) {
 	}
 
 	checkQuery(results2.Authors)
+}
+
+type hookInvocation struct {
+	reportId  uuid.UUID
+	data      []byte
+	lastRanAt time.Time
+}
+
+type testHook struct {
+	invoked *hookInvocation
+}
+
+func (t *testHook) Validate(data []byte, interval int) error {
+	return nil
+}
+
+func (t *testHook) Run(report api.Report, data []byte, lastRanAt time.Time) error {
+	t.invoked = &hookInvocation{reportId: report.Id, data: data, lastRanAt: lastRanAt}
+	return nil
+}
+
+func createReportHook(backend http.Handler, reportId uuid.UUID, user string, payload string, interval int) error {
+	return Post(backend, "/hooks/"+reportId.String(), user, api.CreateHookRequest{
+		Action: "test", Data: []byte(payload), Interval: interval,
+	}, nil)
+}
+
+func TestHooks(t *testing.T) {
+	db := schema.SetupTestDB(t)
+
+	licensing, err := licensing.NewLicenseVerifier("AC013F-FD0B48-00B160-64836E-76E88D-V3")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	oa := openalex.NewRemoteKnowledgeBase()
+
+	mockHook := &testHook{invoked: nil}
+
+	manager := reports.NewManager(db).SetAuthorReportUpdateInterval(2 * time.Second)
+
+	hookService := services.NewHookService(db, map[string]services.Hook{"test": mockHook})
+
+	backend := services.NewBackend(
+		services.NewReportService(manager, licensing, "./resources"),
+		services.NewSearchService(oa, nil),
+		services.NewAutoCompleteService(oa),
+		hookService,
+		&MockTokenVerifier{prefix: userPrefix},
+	)
+
+	api := backend.Routes()
+
+	user := newUser()
+
+	report, err := createAuthorReport(api, user, "hook-report")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := createReportHook(api, report.Id, user, "hook-1", 3); err != nil {
+		t.Fatal(err)
+	}
+
+	completeNextReport := func() {
+		next, err := manager.GetNextAuthorReport()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if next == nil {
+			t.Fatal("should be next report")
+		}
+
+		if err := manager.UpdateAuthorReport(next.Id, schema.ReportCompleted, time.Now(), nil); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if mockHook.invoked != nil {
+		t.Fatal("hook should not be invoked")
+	}
+
+	checkNoQueuedReport := func() {
+		next, err := manager.GetNextAuthorReport()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if next != nil {
+			t.Fatal("should be no next report")
+		}
+	}
+
+	completeNextReport()
+	checkNoQueuedReport()
+
+	hookRun := time.Now()
+	hookService.RunNextHook()
+
+	if mockHook.invoked == nil ||
+		mockHook.invoked.reportId != report.Id ||
+		string(mockHook.invoked.data) != "hook-1" ||
+		mockHook.invoked.lastRanAt.Sub(reports.EarliestReportDate).Abs() > 100*time.Millisecond {
+		t.Fatal("hook should be invoked")
+	}
+
+	mockHook.invoked = nil
+
+	time.Sleep(2 * time.Second)
+
+	if err := manager.CheckForStaleAuthorReports(); err != nil {
+		t.Fatal(err)
+	}
+
+	completeNextReport()
+	checkNoQueuedReport()
+
+	hookService.RunNextHook()
+
+	if mockHook.invoked != nil {
+		t.Fatal("hook should not be invoked")
+	}
+
+	time.Sleep(time.Second)
+
+	if err := manager.CheckForStaleAuthorReports(); err != nil {
+		t.Fatal(err)
+	}
+
+	completeNextReport()
+	checkNoQueuedReport()
+
+	hookService.RunNextHook()
+
+	if mockHook.invoked == nil ||
+		mockHook.invoked.reportId != report.Id ||
+		string(mockHook.invoked.data) != "hook-1" ||
+		mockHook.invoked.lastRanAt.Sub(hookRun).Abs() > 100*time.Millisecond {
+		t.Fatal("hook should be invoked")
+	}
+
+	mockHook.invoked = nil
+
+	hookService.RunNextHook()
+	if mockHook.invoked != nil {
+		t.Fatal("hook should not be invoked")
+	}
 }

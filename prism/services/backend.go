@@ -2,12 +2,7 @@ package services
 
 import (
 	"net/http"
-	"prism/prism/api"
-	"prism/prism/licensing"
 	"prism/prism/monitoring"
-	"prism/prism/openalex"
-	"prism/prism/reports"
-	"prism/prism/search"
 	"prism/prism/services/auth"
 
 	"github.com/go-chi/chi/v5"
@@ -18,25 +13,18 @@ type BackendService struct {
 	report       ReportService
 	search       SearchService
 	autocomplete AutocompleteService
+	hooks        HookService
 
 	userAuth auth.TokenVerifier
 }
 
-func NewBackend(manager *reports.ReportManager, oa openalex.KnowledgeBase, entitySearch *search.ManyToOneIndex[api.MatchedEntity], userAuth auth.TokenVerifier, licensing *licensing.LicenseVerifier, resourceFolder string) *BackendService {
+func NewBackend(report ReportService, search SearchService, autocomplete AutocompleteService, hooks HookService, userAuth auth.TokenVerifier) *BackendService {
 	return &BackendService{
-		report: ReportService{
-			manager:        manager,
-			licensing:      licensing,
-			resourceFolder: resourceFolder,
-		},
-		search: SearchService{
-			openalex:     oa,
-			entitySearch: entitySearch,
-		},
-		autocomplete: AutocompleteService{
-			openalex: oa,
-		},
-		userAuth: userAuth,
+		report:       report,
+		search:       search,
+		autocomplete: autocomplete,
+		hooks:        hooks,
+		userAuth:     userAuth,
 	}
 }
 
@@ -50,6 +38,7 @@ func (s *BackendService) Routes() chi.Router {
 	r.With(auth.Middleware(s.userAuth)).Mount("/report", s.report.Routes())
 	r.With(auth.Middleware(s.userAuth)).Mount("/search", s.search.Routes())
 	r.With(auth.Middleware(s.userAuth)).Mount("/autocomplete", s.autocomplete.Routes())
+	r.With(auth.Middleware(s.userAuth)).Mount("/hooks", s.hooks.Routes())
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
