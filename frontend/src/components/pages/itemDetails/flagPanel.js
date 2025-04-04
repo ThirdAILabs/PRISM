@@ -404,33 +404,38 @@ const FlagPanel = ({
     return (
       <div>
         {withPublicationDate(
-          <h5 className="fw-bold mt-3">Co-authors are affiliated with Entities of Concern</h5>,
+          <h5 className="fw-bold mt-">Co-authors are affiliated with Entities of Concern</h5>,
           flag
         )}
         <p>
           Some authors of {get_paper_url(flag)} are affiliated with entities of concern:
-          <ul className="bulleted-list">
+        </p>
+        <div className='flag-sub-container'>
+          <strong>Concerning entity</strong>
+          <div className="concerned-tags">
             {flag.Affiliations.map((item, index2) => {
               const key = `${index} ${index2}`;
               return (
-                <li key={key}>
-                  <a>{item}</a>
-                </li>
+                <span key={key} className="concerned-tag-item">
+                  {item}
+                </span>
               );
             })}
-          </ul>
-          <strong>Affiliated Authors</strong>
-          <ul className="bulleted-list">
+          </div>
+        </div>
+        <div className='flag-sub-container'>
+          <strong>Affiliated author(s)</strong>
+          <div className="concerned-tags">
             {flag.Coauthors.map((item, index2) => {
               const key = `${index} ${index2}`;
               return (
-                <li key={key}>
-                  <a>{item}</a>
-                </li>
+                <span key={key} className="concerned-tag-item">
+                  {item}
+                </span>
               );
             })}
-          </ul>
-        </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -468,13 +473,20 @@ const FlagPanel = ({
         <h5 className="fw-bold mt-3">
           The author may potentially be linked with an Entity of Concern
         </h5>
-        <p>
-          {flag.Message}
-          Relevant Webpage:{' '}
+        <div className='flag-sub-container'>
+          <strong>Concering entity</strong>
+          <div className="concerned-tags">
+            <span key={key} className="concerned-tag-item">
+              {item}
+            </span>
+          </div>
+        </div>
+        <div className='flag-sub-container'>
+          <strong>Relevant Webpage</strong>
           <a href={flag.UniversityUrl} target="_blank" rel="noopener noreferrer">
             {flag.UniversityUrl}
           </a>
-        </p>
+        </div>
       </div>
     );
   }

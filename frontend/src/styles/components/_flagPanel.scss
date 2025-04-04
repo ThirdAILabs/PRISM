@@ -9,12 +9,7 @@ $sidebar-transition: right 0.3s ease;
 $sidebar-box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
 
 // Additional Colors
-$color-grey-100: rgb(245, 240, 240);
 $color-grey-500: rgb(100, 100, 100);
-$color-grey-900: rgb(40, 40, 40);
-
-// Z-index
-$z-index-sidebar-header: 1000;
 
 //side panel from right side
 .flag-panel {
@@ -169,15 +164,6 @@ $z-index-sidebar-header: 1000;
   
   & a{
     color: $color-primary-700;
-  }
-}
-
-.bulleted-list-concerning-items {
-  list-style-type: none;
-  color: $color-error-700;
-  
-  & a {
-    color: $color-error-700;
   }
 }
 
