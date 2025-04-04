@@ -1090,7 +1090,8 @@ const ItemDetails = () => {
                 display: 'flex',
                 justifyContent: 'space-between',
                 flexWrap: 'wrap',
-                marginTop: '20px',
+                marginTop: '40px',
+                marginInline: '3%'
               }}
             >
               {FLAG_ORDER.map((flag, index) => {
@@ -1098,10 +1099,9 @@ const ItemDetails = () => {
                 const isSelected = review === flag;
                 return (
                   <div style={{
-                    // border: '1px solid #ccc',
-                    // boxShadow: '0 0px 10px rgba(0, 0, 0, 0.1)',
-                    // borderRadius: '8px',
-                    // padding: '0px',
+                    border: '1px solid rgb(230, 230, 230)',
+                    borderRadius: '8px',
+                    padding: '0px',
                   }}>
                     <ConcernVisualizer
                       title={TitlesAndDescriptions[flag].title}

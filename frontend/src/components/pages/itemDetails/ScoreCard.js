@@ -22,7 +22,7 @@ const ScoreCard = ({ score = 0 }) => {
                         {score}
                     </span>
                     <button
-                        className="button button-3d"
+                        className="button button-3d score-card-button"
                         style={{ padding: '8px 48px' }}
                         disabled={!score}
                     >

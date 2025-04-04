@@ -41,8 +41,8 @@ export function getFontSize(value) {
   const digits = String(value).length;
 
   // Each additional digit reduces size by 4px
-  const newSize = BaseFontSize - (digits - 1) * 4;
-  return Math.max(newSize, 28);
+  const newSize = BaseFontSize - (digits - 1) * 12;
+  return 28;
 }
 
 export default function ConcernVisualizer({
@@ -55,26 +55,51 @@ export default function ConcernVisualizer({
   speedometerHoverText,
   valueFontSize,
 }) {
-  //200,344
   return (
-    <div style={{ width: '200px', height: '356px', position: 'relative' }}>
-      <Speedometer
-        scale={scale || [0, 10, 20, 30, 50, 100, 200]}
-        value={value}
-        speedometerHoverText={speedometerHoverText}
-        valueFontSize={valueFontSize}
-      />
-
-      <div className="mt-3 text-dark" style={{ height: '50px', paddingInline: '8px', marginBottom: '34px' }}>
-        {title}
-        <Hover text={hoverText} />
+    <div style={{
+      width: '180px',
+      height: '340px',
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center'
+    }}>
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '-12px' }}>
+        <Speedometer
+          scale={scale || [0, 10, 20, 30, 50, 100, 200]}
+          value={value}
+          speedometerHoverText={speedometerHoverText}
+          valueFontSize={valueFontSize}
+        />
       </div>
+
+      <div style={{
+        height: '50px',
+        padding: '8px',
+        marginBottom: '48px',
+        marginTop: '-16px',
+        textAlign: 'center',
+        width: '100%',
+        fontSize: '14px',
+        lineHeight: '20px',
+        letterSpacing: '0.1px',
+        fontWeight: 'bold',
+        color: value !== 0 ? '#333f54' : '#6a798f'
+      }}>
+        {title}
+      </div>
+
       {onReview && (
-        <div style={{ marginLeft: '2rem' }}>
+        <div style={{
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center'
+        }}>
           <button
-            className={`button button-3d`}
+            className="button button-3d"
             style={{
               padding: '8px 48px',
+              backgroundColor: value && '#64b6f7',
             }}
             disabled={!value}
             onClick={onReview}
