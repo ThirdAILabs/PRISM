@@ -12,6 +12,12 @@ type AutocompleteService struct {
 	openalex openalex.KnowledgeBase
 }
 
+func NewAutoCompleteService(oa openalex.KnowledgeBase) AutocompleteService {
+	return AutocompleteService{
+		openalex: oa,
+	}
+}
+
 func (s *AutocompleteService) Routes() chi.Router {
 	r := chi.NewRouter()
 
