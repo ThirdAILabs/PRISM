@@ -59,14 +59,14 @@ export default function ConcernVisualizer({
     <div
       style={{
         width: '180px',
-        height: '340px',
+        height: '320px',
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
       }}
     >
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '-12px' }}>
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '-20px' }}>
         <Speedometer
           scale={scale || [0, 10, 20, 30, 50, 100, 200]}
           value={value}

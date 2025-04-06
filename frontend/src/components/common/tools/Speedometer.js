@@ -9,8 +9,10 @@ export function GradientValueGauge() {
     <svg width="200" height="200">
       <defs>
         <linearGradient id="gauge-gradient" x1={x1} x2={x2} gradientUnits="userSpaceOnUse">
-          <stop offset="0%" style={{ stopColor: 'blue', stopOpacity: 1 }} />
-          <stop offset="100%" style={{ stopColor: 'red', stopOpacity: 1 }} />
+          {/* <stop offset="0%" style={{ stopColor: '#d3d3d3', stopOpacity: 1 }} /> */}
+          {/* <stop offset="0%" style={{ stopColor: '#ee5253', stopOpacity: 1 }} /> */}
+          <stop offset="0%" style={{ stopColor: '#f56545', stopOpacity: 1 }} />
+          <stop offset="100%" style={{ stopColor: '#99201c', stopOpacity: 1 }} />
         </linearGradient>
       </defs>
       <GaugeValueArc style={{ fill: 'url(#gauge-gradient)' }} />
