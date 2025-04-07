@@ -3,7 +3,7 @@ import VisualColored from '../../../assets/images/VisualColored.svg';
 import '../../../styles/components/_scoreCard.scss';
 import '../../../styles/components/_primaryButton.scss';
 
-const ScoreCard = ({ score = 0 }) => {
+const ScoreCard = ({ score = 0, setActiveTab }) => {
     const backgroundImage = score === 0 ? VisualEmpty : VisualColored;
 
     return (
@@ -18,6 +18,7 @@ const ScoreCard = ({ score = 0 }) => {
                         className="button button-3d score-card-button"
                         style={{ padding: '8px 48px' }}
                         disabled={!score}
+                        onClick={() => setActiveTab(1)}
                     >
                         Visualise
                     </button>

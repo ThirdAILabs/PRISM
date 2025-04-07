@@ -11,7 +11,6 @@ import { useState } from 'react';
 import useOutsideClick from '../../../hooks/useOutsideClick';
 
 const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps }) => {
-    console.log('Result in AuthorInfoCard', result);
 
     const [downloadDropdownOpen, setDownloadDropdownOpen] = useState(false);
 

@@ -276,7 +276,7 @@ const ItemDetails = () => {
   const [filterMessage, setFilterMessage] = useState(
     getTrailingWhiteSpace(12) + 'Filter by Timeline'
   );
-  const handleTabChange = (event, newValue) => {
+  const handleTabChange = (newValue) => {
     setActiveTab(newValue);
   };
   const handleStartDateChange = (e) => setStartDate(e.target.value);
@@ -977,6 +977,15 @@ const ItemDetails = () => {
     disabled: loading,
   }
 
+  const handleBackButtonClick = () => {
+    if (activeTab === 1) {
+      setActiveTab(0);
+    }
+    else {
+      goBack();
+    }
+  }
+
   return (
     <div className="basic-setup">
       <div className="grid grid-cols-2 gap-4">
@@ -992,7 +1001,7 @@ const ItemDetails = () => {
               }}
             >
               <button
-                onClick={() => goBack()}
+                onClick={handleBackButtonClick}
                 className="btn text-dark mb-3"
                 style={{ display: 'flex', marginTop: '-10px' }}
               >
@@ -1031,11 +1040,9 @@ const ItemDetails = () => {
               opacity: 0.1,
             }}
           />
-          {/* <Tabs activeTab={activeTab} handleTabChange={handleTabChange} disabled={loading} /> */}
         </div>
         {activeTab === 0 && (
           <div className="d-flex justify-content-end mt-2 gap-2 px-2">
-
             <Snackbar
               open={notification.open}
               autoHideDuration={2000}
@@ -1046,16 +1053,6 @@ const ItemDetails = () => {
                 {notification.message}
               </Alert>
             </Snackbar>
-            {/* <div ref={dropdownDownloadRef}>
-              <DownloadButton
-                reportId={report_id}
-                metadata={reportMetadata}
-                content={reportContent}
-                isOpen={downloadDropdownOpen}
-                setIsOpen={() => setDownloadDropdownOpen(!downloadDropdownOpen)}
-                disabled={loading}
-              />
-            </div> */}
           </div>
         )}
       </div>
@@ -1084,6 +1081,7 @@ const ItemDetails = () => {
                     score={Object.keys(reportContent || {})
                       .map((name) => (reportContent[name] || []).length)
                       .reduce((prev, curr) => prev + curr, 0)}
+                    setActiveTab={setActiveTab}
                   />
                 </div>
               </div>
@@ -1126,7 +1124,7 @@ const ItemDetails = () => {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            height: 'calc(100vh - 100px)' // Adjust based on header height
+            height: 'calc(100vh - 100px)'
           }}>
             <Lottie
               animationData={loadingAnimation}
