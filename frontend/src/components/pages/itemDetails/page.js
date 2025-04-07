@@ -13,7 +13,6 @@ import {
 import ConcernVisualizer, { BaseFontSize, getFontSize } from '../../ConcernVisualization.js';
 import Graph from '../../common/graph/graph.js';
 import Tabs from '../../common/tools/Tabs.js';
-import DownloadButton from '../../common/tools/button/downloadButton.js';
 import { reportService } from '../../../api/reports.js';
 import styled from 'styled-components';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -29,6 +28,8 @@ import '../../../styles/components/_primaryButton.scss';
 import '../../../styles/components/_authorInfoCard.scss';
 import AuthorInfoCard from '../authorInstituteSearch/AuthorInfoCard.js';
 import ScoreCard from './ScoreCard.js';
+import Lottie from 'lottie-react';
+import loadingAnimation from '../../../assets/animations/Loader.json';
 
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
@@ -147,7 +148,11 @@ const ItemDetails = () => {
     }
     await handleSubmit(files);
   };
-
+  const verifyWithDisclosure = {
+    "fileInputRef": fileInputRef,
+    "handleFileUploadClick": handleFileUploadClick,
+    "handleFileSelect": handleFileSelect,
+  }
   const handleSubmit = async (files) => {
     if (!files || files.length === 0) {
       setNotification({
@@ -963,16 +968,21 @@ const ItemDetails = () => {
     setYearDropdownOpen(false);
   });
 
-  const dropdownDownloadRef = useOutsideClick(() => {
-    setDownloadDropdownOpen(false);
-  });
+
+
+  const downloadProps = {
+    reportId: report_id,
+    metadata: reportMetadata,
+    content: reportContent,
+    disabled: loading,
+  }
 
   return (
     <div className="basic-setup">
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-row">
           <div className="detail-header">
-            {/* Left section - Back button */}
+
             <div
               style={{
                 flex: '1',
@@ -1018,33 +1028,14 @@ const ItemDetails = () => {
               backgroundColor: 'black',
               height: '1px',
               width: '100%',
-              // opacity: 0.1,
+              opacity: 0.1,
             }}
           />
           {/* <Tabs activeTab={activeTab} handleTabChange={handleTabChange} disabled={loading} /> */}
         </div>
-        {/* {activeTab === 0 && (
+        {activeTab === 0 && (
           <div className="d-flex justify-content-end mt-2 gap-2 px-2">
-            <Tooltip title={loading ? 'Please wait while the report is being generated.' : ''}>
-              <button
-                className="button"
-                onClick={handleFileUploadClick}
-                disabled={loading}
-                style={{
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                }}
-              >
-                Verify with Disclosures
-              </button>
-            </Tooltip>
-            <input
-              type="file"
-              ref={fileInputRef}
-              style={{ display: 'none' }}
-              multiple
-              accept=".txt,.pdf"
-              onChange={handleFileSelect}
-            />
+
             <Snackbar
               open={notification.open}
               autoHideDuration={2000}
@@ -1055,7 +1046,7 @@ const ItemDetails = () => {
                 {notification.message}
               </Alert>
             </Snackbar>
-            <div ref={dropdownDownloadRef}>
+            {/* <div ref={dropdownDownloadRef}>
               <DownloadButton
                 reportId={report_id}
                 metadata={reportMetadata}
@@ -1064,78 +1055,87 @@ const ItemDetails = () => {
                 setIsOpen={() => setDownloadDropdownOpen(!downloadDropdownOpen)}
                 disabled={loading}
               />
-            </div>
+            </div> */}
           </div>
-        )} */}
+        )}
       </div>
-      {activeTab === 0 && (
+      {activeTab === 0 &&
         <>
-          {/* {loading && (
-              <div class="d-flex justify-content-start">
-                <div class="spinner-border text-secondary ms-5 mb-3" role="status" />
-              </div>
-            )} */}
-          {authorInfo && (
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <div
-                className="author-item"
-                style={{
-                  marginTop: '20px',
-                  marginBottom: '20px',
-                  marginLeft: '3%',
-                  width: '45%',
-                  height: '0%',
-                }}
-              >
-                <AuthorInfoCard result={authorInfo} />
-              </div>
-              <div
-                className="author-item"
-                style={{ marginTop: '20px', marginBottom: '20px', marginRight: '3%', width: '45%' }}
-              >
-                <ScoreCard
-                  score={Object.keys(reportContent || {})
-                    .map((name) => (reportContent[name] || []).length)
-                    .reduce((prev, curr) => prev + curr, 0)}
-                />
-              </div>
-            </div>
-          )}
-
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              marginTop: '40px',
-              marginInline: '3%',
-            }}
-          >
-            {FLAG_ORDER.map((flag, index) => {
-              const flagCount = reportContent[flag] ? reportContent[flag].length : 0;
-              const isSelected = review === flag;
-              return (
+          {authorInfo ? (
+            <>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <div
+                  className="author-item"
                   style={{
-                    border: '1px solid rgb(230, 230, 230)',
-                    borderRadius: '8px',
-                    padding: '0px',
+                    marginTop: '20px',
+                    marginBottom: '20px',
+                    marginLeft: '3%',
+                    width: '45%',
+                    height: '0%',
                   }}
                 >
-                  <ConcernVisualizer
-                    title={TitlesAndDescriptions[flag].title}
-                    hoverText={TitlesAndDescriptions[flag].desc}
-                    value={flagCount}
-                    speedometerHoverText={`${flagCount} Issues`}
-                    onReview={() => setReview(flag)}
-                    key={index}
-                    selected={isSelected}
-                    valueFontSize={valueFontSize}
+                  <AuthorInfoCard result={authorInfo} verifyWithDisclosure={verifyWithDisclosure} downloadProps={downloadProps} />
+                </div>
+                <div
+                  className="author-item"
+                  style={{ marginTop: '20px', marginBottom: '20px', marginRight: '3%', width: '45%' }}
+                >
+                  <ScoreCard
+                    score={Object.keys(reportContent || {})
+                      .map((name) => (reportContent[name] || []).length)
+                      .reduce((prev, curr) => prev + curr, 0)}
                   />
                 </div>
-              );
-            })}
-          </div>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  marginTop: '40px',
+                  marginInline: '3%',
+                }}
+              >
+                {FLAG_ORDER.map((flag, index) => {
+                  const flagCount = reportContent[flag] ? reportContent[flag].length : 0;
+                  const isSelected = review === flag;
+                  return (
+                    <div
+                      style={{
+                        border: '1px solid rgb(230, 230, 230)',
+                        borderRadius: '8px',
+                        padding: '0px',
+                      }}
+                    >
+                      <ConcernVisualizer
+                        title={TitlesAndDescriptions[flag].title}
+                        hoverText={TitlesAndDescriptions[flag].desc}
+                        value={flagCount}
+                        speedometerHoverText={`${flagCount} Issues`}
+                        onReview={() => setReview(flag)}
+                        key={index}
+                        selected={isSelected}
+                        valueFontSize={valueFontSize}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          ) : (<div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: 'calc(100vh - 100px)' // Adjust based on header height
+          }}>
+            <Lottie
+              animationData={loadingAnimation}
+              loop={true}
+              autoplay={true}
+              style={{ width: 2000 }}
+            />
+          </div>)}
+
           {review && (
             <div style={{ width: '100%', textAlign: 'center', marginTop: '50px' }}>
               {(() => {
@@ -1324,7 +1324,7 @@ const ItemDetails = () => {
             </div>
           )}
         </>
-      )}
+      }
 
       {activeTab === 1 && <Graph authorName={authorName} reportContent={reportContent} />}
     </div>
