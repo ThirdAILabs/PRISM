@@ -476,8 +476,8 @@ const FlagPanel = ({
         <div className='flag-sub-container'>
           <strong>Concering entity</strong>
           <div className="concerned-tags">
-            <span key={key} className="concerned-tag-item">
-              {item}
+            <span className="concerned-tag-item">
+              {flag.University}
             </span>
           </div>
         </div>
