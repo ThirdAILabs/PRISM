@@ -180,7 +180,7 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 		return nil, CodedError(errors.New("AuthorId must be specified"), http.StatusUnprocessableEntity)
 	}
 
-	if params.AuthorId == "" {
+	if params.AuthorName == "" {
 		return nil, CodedError(errors.New("AuthorName must be specified"), http.StatusUnprocessableEntity)
 	}
 
