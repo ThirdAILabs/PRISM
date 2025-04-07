@@ -196,7 +196,7 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 		return nil, CodedError(err, licensingErrorStatus(err))
 	}
 
-	id, err := s.manager.CreateAuthorReport(userId, params.AuthorId, params.AuthorName, params.Source)
+	id, err := s.manager.CreateAuthorReport(userId, params.AuthorId, params.AuthorName, params.Source, strings.Join(params.Affiliations, ", "), strings.Join(params.ResearchInterests, ", "))
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
