@@ -309,6 +309,10 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 	return flags, nil
 }
 
+func (flagger *AuthorIsFacultyAtEOCFlagger) IsDisabled() bool {
+	return false
+}
+
 type LinkMetadata struct {
 	Title    string
 	Url      string
@@ -739,4 +743,8 @@ func (flagger *AuthorNewsArticlesFlagger) Flag(logger *slog.Logger, authorName s
 	}
 
 	return flags, nil
+}
+
+func (flagger *AuthorNewsArticlesFlagger) IsDisabled() bool {
+	return true
 }

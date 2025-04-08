@@ -85,6 +85,11 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 
 			logger := logger.With("flagger", flagger.Name())
 
+			if flagger.IsDisabled() {
+				logger.Info(fmt.Sprintf("skipping disabled flagger %s", flagger.Name()))
+				return
+			}
+
 			flags, err := flagger.Flag(logger, authorName)
 			if err != nil {
 				logger.Error("flagger error", "error", err)

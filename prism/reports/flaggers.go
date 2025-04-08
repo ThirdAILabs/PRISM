@@ -18,4 +18,6 @@ type AuthorFlagger interface {
 	Flag(logger *slog.Logger, authorName string) ([]api.Flag, error)
 
 	Name() string
+
+	IsDisabled() bool
 }
