@@ -19,6 +19,7 @@ import { IoMdClose } from 'react-icons/io';
 import { IoIosArrowDown } from 'react-icons/io';
 import { IoIosArrowUp } from 'react-icons/io';
 import FlagContainer from './flagContainer.js';
+import { createHighlights, applyHighlighting, hasValidTriangulationData } from './ack_utils.js';
 
 const FlagPanel = ({
   reportContent,
@@ -154,6 +155,41 @@ const FlagPanel = ({
     );
   }
 
+  function acknowledgementSection (flag, authorName, index) {
+    // Quick validation of required data
+    if (!Array.isArray(flag.RawAcknowledgements) || flag.RawAcknowledgements.length === 0) {
+      return null;
+    }
+  
+    // Check for triangulation data
+    const hasTriangulationData = hasValidTriangulationData(flag.FundCodeTriangulation);
+    
+    // Create highlights configuration once
+    const highlights = hasTriangulationData 
+      ? createHighlights(flag.FundCodeTriangulation, authorName)
+      : [];
+  
+    return (
+      <div className="flag-sub-container">
+        <strong>Acknowledgements Text</strong>
+        
+        <ul className="bulleted-list">
+          {flag.RawAcknowledgements.map((item, itemIndex) => {
+            const key = `ack-${index}-${itemIndex}`;
+            
+            return (
+              <li key={key}>
+                {hasTriangulationData ? applyHighlighting(item, highlights) : item}
+              </li>
+            );
+          })}
+        </ul>
+        
+        {hasTriangulationData && triangulationLegend()}
+      </div>
+    );
+  };
+
   function acknowledgementFlag(flag, index) {
     return (
       <div>
@@ -184,61 +220,7 @@ const FlagPanel = ({
               );
             })}
           </ul>
-          <strong>Acknowledgement Text</strong>
-          <br />
-          {flag.FundCodeTriangulation &&
-          typeof flag.FundCodeTriangulation === 'object' &&
-          Object.keys(flag.FundCodeTriangulation).length > 0 ? (
-            <>
-              {flag.RawAcknowledgements?.map((item, index2) => {
-                const key = `ack-${index} ${index2}`;
-
-                const highlights = Object.entries(flag.FundCodeTriangulation || {}).flatMap(
-                  ([funderName, funderMap]) =>
-                    Object.entries(funderMap).flatMap(([grantCode, isRecipient]) => {
-                      if (typeof isRecipient === 'boolean') {
-                        return [
-                          {
-                            regex: new RegExp(grantCode, 'i'),
-                            color: isRecipient ? 'red' : 'green',
-                            tooltip: `${authorName} is ${isRecipient ? 'likely' : 'likely NOT'} a primary recipient of this fund.`,
-                          },
-                        ];
-                      }
-                      return [];
-                    })
-                );
-
-                let parts = [item];
-
-                highlights.forEach(({ regex, color, tooltip }) => {
-                  parts = parts.flatMap((text, i) =>
-                    typeof text === 'string'
-                      ? text.split(regex).flatMap((part, j, arr) =>
-                          j < arr.length - 1
-                            ? [
-                                part,
-                                <span key={`${i}-${j}`} style={{ color }} title={tooltip}>
-                                  <strong>{text.match(regex)[0]}</strong>
-                                </span>,
-                              ]
-                            : part
-                        )
-                      : text
-                  );
-                });
-
-                return <p key={index2}>{parts}</p>;
-              })}
-              {triangulationLegend()}
-            </>
-          ) : (
-            <>
-              {flag.RawAcknowledgements?.map((item, index3) => {
-                return <p key={index3}>{item}</p>;
-              })}
-            </>
-          )}
+          {acknowledgementSection(flag, authorName, index)}
         </p>
       </div>
     );
@@ -286,67 +268,7 @@ const FlagPanel = ({
                 );
               })}
           </ul>
-          {Array.isArray(flag.RawAcknowledgements) && flag.RawAcknowledgements?.length > 0 && (
-            <>
-              <strong>Acknowledgements Text</strong>
-              {flag.FundCodeTriangulation &&
-              typeof flag.FundCodeTriangulation === 'object' &&
-              Object.keys(flag.FundCodeTriangulation).length > 0 ? (
-                <>
-                  <ul className="bulleted-list">
-                    {flag.RawAcknowledgements?.map((item, index2) => {
-                      const key = `ack-${index} ${index2}`;
-
-                      const highlights = Object.entries(flag.FundCodeTriangulation || {}).flatMap(
-                        ([funderName, funderMap]) =>
-                          Object.entries(funderMap).flatMap(([grantCode, isRecipient]) => {
-                            if (typeof isRecipient === 'boolean') {
-                              return [
-                                {
-                                  regex: new RegExp(grantCode, 'i'),
-                                  color: isRecipient ? 'red' : 'green',
-                                  tooltip: `${authorName} is ${isRecipient ? 'likely' : 'likely NOT'} a primary recipient of this fund.`,
-                                },
-                              ];
-                            }
-                            return [];
-                          })
-                      );
-
-                      let parts = [item];
-
-                      highlights.forEach(({ regex, color, tooltip }) => {
-                        parts = parts.flatMap((text, i) =>
-                          typeof text === 'string'
-                            ? text.split(regex).flatMap((part, j, arr) =>
-                                j < arr.length - 1
-                                  ? [
-                                      part,
-                                      <span key={`${i}-${j}`} style={{ color }} title={tooltip}>
-                                        <strong>{text.match(regex)[0]}</strong>
-                                      </span>,
-                                    ]
-                                  : part
-                              )
-                            : text
-                        );
-                      });
-
-                      return <li key={key}>{parts}</li>;
-                    })}
-                  </ul>
-                  {triangulationLegend()}
-                </>
-              ) : (
-                <ul className="bulleted-list">
-                  {flag.RawAcknowledgements?.map((item, index2) => {
-                    const key = `ack-${index} ${index2}`;
-                    return <li key={key}>{item}</li>;
-                  })}
-                </ul>
-              )}
-            </>
-          )}
+          {acknowledgementSection(flag, authorName, index)}
         </p>
       </div>
     );
@@ -407,10 +329,8 @@ const FlagPanel = ({
           <h5 className="fw-bold mt-">Co-authors are affiliated with Entities of Concern</h5>,
           flag
         )}
-        <p>
-          Some authors of {get_paper_url(flag)} are affiliated with entities of concern:
-        </p>
-        <div className='flag-sub-container'>
+        <p>Some authors of {get_paper_url(flag)} are affiliated with entities of concern:</p>
+        <div className="flag-sub-container">
           <strong>Concerning entity</strong>
           <div className="concerned-tags">
             {flag.Affiliations.map((item, index2) => {
@@ -423,7 +343,7 @@ const FlagPanel = ({
             })}
           </div>
         </div>
-        <div className='flag-sub-container'>
+        <div className="flag-sub-container">
           <strong>Affiliated author(s)</strong>
           <div className="concerned-tags">
             {flag.Coauthors.map((item, index2) => {
@@ -449,7 +369,7 @@ const FlagPanel = ({
         )}
         <div>
           {authorName} is affiliated with an entity of concern in {get_paper_url(flag)}.<p></p>
-          <div className='flag-sub-container'>
+          <div className="flag-sub-container">
             <strong>Detected Affiliations</strong>
             <div className="concerned-tags">
               {flag.Affiliations.map((item, index2) => {
@@ -473,15 +393,13 @@ const FlagPanel = ({
         <h5 className="fw-bold mt-3">
           The author may potentially be linked with an Entity of Concern
         </h5>
-        <div className='flag-sub-container'>
+        <div className="flag-sub-container">
           <strong>Concering entity</strong>
           <div className="concerned-tags">
-            <span className="concerned-tag-item">
-              {flag.University}
-            </span>
+            <span className="concerned-tag-item">{flag.University}</span>
           </div>
         </div>
-        <div className='flag-sub-container'>
+        <div className="flag-sub-container">
           <strong>Relevant Webpage</strong>
           <a href={flag.UniversityUrl} target="_blank" rel="noopener noreferrer">
             {flag.UniversityUrl}
@@ -493,8 +411,8 @@ const FlagPanel = ({
 
   function PRFlag(flag, index) {
     const connections = flag.Connections || [];
-    
-    function pressRelease(){
+
+    function pressRelease() {
       return (
         <>
           <strong>Press Release</strong>
@@ -506,10 +424,10 @@ const FlagPanel = ({
             </li>
           </ul>
         </>
-      )
+      );
     }
-    
-    function relevantDocuments(){
+
+    function relevantDocuments() {
       return (
         <>
           <strong>Relevant Document(s)</strong>
@@ -526,40 +444,32 @@ const FlagPanel = ({
             })}
           </ul>
         </>
-      )
+      );
     }
     return (
       <div>
         <h5 className="flag-header">
-          {
-            connections.length == 0 ? 'The author or an associate may be mentioned in a Press Release' :
-            connections.length == 1 ? 'The author\'s associate may be mentioned in a Press Release' :
-            connections.length == 2 ? 'The author may potentially be connected to an entity/individual mentioned in a Press Release' :''
-          }
+          {connections.length == 0
+            ? 'The author or an associate may be mentioned in a Press Release'
+            : connections.length == 1
+              ? "The author's associate may be mentioned in a Press Release"
+              : connections.length == 2
+                ? 'The author may potentially be connected to an entity/individual mentioned in a Press Release'
+                : ''}
         </h5>
-        <p>
-          {flag.Message}
-        </p>
+        <p>{flag.Message}</p>
         {connections.length == 1 && (
-          <div className='flag-sub-container'>
+          <div className="flag-sub-container">
             {flag.FrequentCoauthor ? (
-              <>
-                Frequent Coauthor: {flag.FrequentCoauthor}
-              </>
+              <>Frequent Coauthor: {flag.FrequentCoauthor}</>
             ) : (
               relevantDocuments()
             )}
           </div>
         )}
-        {connections.length == 2 && (
-          <div className='flag-sub-container'>
-            {relevantDocuments()}
-          </div>
-        )}
-        <div className='flag-sub-container'>
-          {pressRelease()}
-        </div>
-        <div className='flag-sub-container'>
+        {connections.length == 2 && <div className="flag-sub-container">{relevantDocuments()}</div>}
+        <div className="flag-sub-container">{pressRelease()}</div>
+        <div className="flag-sub-container">
           <strong>Entity/individual mentioned</strong>
           <div className="concerned-tags">
             {[flag.EntityMentioned].map((item, index2) => {
@@ -573,7 +483,7 @@ const FlagPanel = ({
           </div>
         </div>
         {flag.DocEntities && flag.DocEntities.length > 0 && (
-          <div className='flag-sub-container'>
+          <div className="flag-sub-container">
             <strong>Potential affiliate(s)</strong>
             <div className="concerned-tags">
               {flag.DocEntities.map((item, index2) => {
@@ -625,16 +535,16 @@ const FlagPanel = ({
               {reportContent[review] ? reportContent[review].length : 0}
             </span>
           </div>
-          
-            <div className="tab-group">
-              <button className="tab-button active">All</button>
-              {isDisclosureChecked && (
-                <>
-                  <button className="tab-button">Disclosed</button>
-                  <button className="tab-button">Undisclosed</button>
-                </>
-              )}
-            </div>
+
+          <div className="tab-group">
+            <button className="tab-button active">All</button>
+            {isDisclosureChecked && (
+              <>
+                <button className="tab-button">Disclosed</button>
+                <button className="tab-button">Undisclosed</button>
+              </>
+            )}
+          </div>
 
           {sortByComponent()}
         </div>

@@ -161,8 +161,8 @@ $color-grey-500: rgb(100, 100, 100);
 .bulleted-list {
   list-style-type: none;
   padding-left: 10px;
-  
-  & a{
+
+  & a {
     color: $color-primary-700;
   }
 }
@@ -177,7 +177,7 @@ $color-grey-500: rgb(100, 100, 100);
 .concerned-tag-item {
   @include paragraph-4;
   display: inline-block;
-  background-color: #fce8e6;  /* Light red/pink background */
+  background-color: #fce8e6; /* Light red/pink background */
   color: $color-error-700;
   padding: 6px 12px;
   border-radius: 16px;
