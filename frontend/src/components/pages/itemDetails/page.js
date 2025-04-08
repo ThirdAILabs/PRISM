@@ -1119,6 +1119,7 @@ const ItemDetails = () => {
                   );
                 })}
               </div>
+
             </>
           ) : (<div style={{
             display: 'flex',
