@@ -180,7 +180,7 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 		return nil, CodedError(errors.New("AuthorId must be specified"), http.StatusUnprocessableEntity)
 	}
 
-	if params.AuthorId == "" {
+	if params.AuthorName == "" {
 		return nil, CodedError(errors.New("AuthorName must be specified"), http.StatusUnprocessableEntity)
 	}
 
@@ -196,7 +196,7 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 		return nil, CodedError(err, licensingErrorStatus(err))
 	}
 
-	id, err := s.manager.CreateAuthorReport(userId, params.AuthorId, params.AuthorName, params.Source)
+	id, err := s.manager.CreateAuthorReport(userId, params.AuthorId, params.AuthorName, params.Source, strings.Join(params.Affiliations, ", "), strings.Join(params.ResearchInterests, ", "))
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}

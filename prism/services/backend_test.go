@@ -144,6 +144,8 @@ func compareReport(t *testing.T, report api.Report, expected string) {
 	if report.AuthorId != expected+"-id" ||
 		report.AuthorName != expected+"-name" ||
 		report.Source != api.OpenAlexSource ||
+		report.Affiliations != expected+"-affiliation1, "+expected+"-affiliation2" ||
+		report.ResearchInterests != expected+"-interest1, "+expected+"-interest2" ||
 		report.Status != "queued" {
 		t.Fatal("invalid reports returned")
 	}
@@ -177,9 +179,11 @@ func getAuthorReport(backend http.Handler, user string, id uuid.UUID) (api.Repor
 
 func createAuthorReport(backend http.Handler, user, name string) (api.CreateReportResponse, error) {
 	req := api.CreateAuthorReportRequest{
-		AuthorId:   name + "-id",
-		AuthorName: name + "-name",
-		Source:     api.OpenAlexSource,
+		AuthorId:          name + "-id",
+		AuthorName:        name + "-name",
+		Affiliations:      []string{name + "-affiliation1", name + "-affiliation2"},
+		ResearchInterests: []string{name + "-interest1", name + "-interest2"},
+		Source:            api.OpenAlexSource,
 	}
 
 	var res api.CreateReportResponse
