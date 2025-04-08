@@ -27,14 +27,10 @@ const FlagPanel = ({
   setReview,
   authorName,
   isDisclosureChecked,
-  disclosedItems,
-  showDisclosed,
-  setShowDisclosed,
-  undisclosedItems,
-  showUndisclosed,
-  setShowUndisclosed,
 }) => {
   const [isRendered, setIsRendered] = useState(false);
+  const [showDisclosed, setShowDisclosed] = useState(true);
+  const [showUndisclosed, setShowUndisclosed] = useState(false);
 
   useEffect(() => {
     if (review) {
@@ -549,113 +545,8 @@ const FlagPanel = ({
           {sortByComponent()}
         </div>
       </div>
-
-      {isDisclosureChecked ? (
-        <>
+      { showUndisclosed && (
           <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: '20px',
-              margin: '10px auto',
-              width: 'fit-content',
-            }}
-          >
-            {/* Disclosed Button */}
-            {disclosedItems.length > 0 ? (
-              <button
-                onClick={() => {
-                  setShowDisclosed(!showDisclosed);
-                  if (!showDisclosed) setShowUndisclosed(false);
-                }}
-                style={{
-                  backgroundColor: 'transparent',
-                  color: 'green',
-                  boxShadow: showDisclosed ? '0 0px 10px rgb(0, 183, 46)' : 'none',
-                  borderRadius: '20px',
-                  border: '2px solid green',
-                  padding: '10px 10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '200px',
-                  fontSize: '16px',
-                  transition: 'background-color 0.3s, color 0.3s',
-                }}
-              >
-                <strong>Disclosed ({disclosedItems.length})</strong>
-                {showDisclosed ? (
-                  <ArrowDropDownIcon style={{ verticalAlign: 'middle', marginLeft: '8px' }} />
-                ) : (
-                  <ArrowRightIcon style={{ verticalAlign: 'middle', marginLeft: '8px' }} />
-                )}
-              </button>
-            ) : (
-              <div
-                style={{
-                  color: 'green',
-                  textAlign: 'center',
-                  padding: '10px 20px',
-                  border: '2px solid green',
-                  borderRadius: '20px',
-                  width: '200px',
-                }}
-              >
-                <strong>Disclosed (0)</strong>
-              </div>
-            )}
-
-            {/* Undisclosed Button */}
-            {undisclosedItems.length > 0 ? (
-              <button
-                onClick={() => {
-                  setShowUndisclosed(!showUndisclosed);
-                  if (!showUndisclosed) setShowDisclosed(false);
-                }}
-                style={{
-                  backgroundColor: 'transparent',
-                  color: 'red',
-                  boxShadow: showUndisclosed ? '0 0px 10px rgb(255, 0, 0)' : 'none',
-                  borderRadius: '20px',
-                  border: '2px solid red',
-                  padding: '10px 10px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '200px',
-                  fontSize: '16px',
-                  transition: 'background-color 0.3s, color 0.3s',
-                }}
-              >
-                <strong>Undisclosed ({undisclosedItems.length})</strong>
-                {showUndisclosed ? (
-                  <ArrowDropDownIcon style={{ verticalAlign: 'middle', marginLeft: '8px' }} />
-                ) : (
-                  <ArrowRightIcon style={{ verticalAlign: 'middle', marginLeft: '8px' }} />
-                )}
-              </button>
-            ) : (
-              <div
-                style={{
-                  color: 'red',
-                  textAlign: 'center',
-                  padding: '10px 20px',
-                  border: '2px solid red',
-                  borderRadius: '20px',
-                  width: '200px',
-                }}
-              >
-                <strong>Undisclosed (0)</strong>
-              </div>
-            )}
-          </div>
-
-          {/* Content areas for disclosed and undisclosed items */}
-          {/* Display flags below buttons */}
-          <div style={{ width: '100%', marginTop: '20px' }}>
-            {showDisclosed && (
-              <div
                 style={{
                   width: '100%',
                   maxWidth: '1200px',
@@ -665,12 +556,12 @@ const FlagPanel = ({
                   alignItems: 'center',
                 }}
               >
-                {renderFlags(disclosedItems)}
+                {renderFlags((reportContent[review] || []).filter((item) => !item.Disclosed))}
               </div>
-            )}
-
-            {showUndisclosed && (
-              <div
+        )
+      }
+      {showDisclosed && (
+          <div
                 style={{
                   width: '100%',
                   maxWidth: '1200px',
@@ -680,25 +571,10 @@ const FlagPanel = ({
                   alignItems: 'center',
                 }}
               >
-                {renderFlags(undisclosedItems)}
+                {renderFlags(reportContent[review] || []).filter((item) => item.Disclosed)}
               </div>
-            )}
-          </div>
-        </>
-      ) : (
-        <div
-          style={{
-            width: '100%',
-            maxWidth: '1200px',
-            margin: '0 auto',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          {renderFlags(reportContent[review])}
-        </div>
-      )}
+        )
+      }
     </div>
   );
 };

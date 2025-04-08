@@ -270,15 +270,6 @@ const ItemDetails = () => {
 
   const [review, setReview] = useState();
 
-  const [showDisclosed, setShowDisclosed] = useState(false);
-  const [showUndisclosed, setShowUndisclosed] = useState(false);
-  const disclosedItems = (reportContent[review] || []).filter((item) => item.Disclosed);
-  const undisclosedItems = (reportContent[review] || []).filter((item) => !item.Disclosed);
-
-  const items = review ? reportContent[review] || [] : [];
-  const hasDates = items.some(
-    (item) => item?.Work?.PublicationDate && !isNaN(new Date(item.Work.PublicationDate).getTime())
-  );
   const goBack = useGoBack('/');
 
   const dropdownFilterRef = useOutsideClick(() => {
@@ -564,12 +555,6 @@ const ItemDetails = () => {
               setReview={setReview}
               authorName={authorName}
               isDisclosureChecked={isDisclosureChecked}
-              disclosedItems={disclosedItems}
-              showDisclosed={showDisclosed}
-              setShowDisclosed={setShowDisclosed}
-              undisclosedItems={undisclosedItems}
-              showUndisclosed={showUndisclosed}
-              setShowUndisclosed={setShowUndisclosed}
             />
           )}
         </>
