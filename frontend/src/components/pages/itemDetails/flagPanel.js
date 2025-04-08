@@ -9,8 +9,6 @@ import {
   COAUTHOR_AFFILIATIONS,
   TitlesAndDescriptions,
 } from '../../../constants/constants.js';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { getRawTextFromXML } from '../../../utils/helper.js';
 import useOutsideClick from '../../../hooks/useOutsideClick.js';
 import '../../../styles/components/_flagPanel.scss';
@@ -21,16 +19,9 @@ import { IoIosArrowUp } from 'react-icons/io';
 import FlagContainer from './flagContainer.js';
 import { createHighlights, applyHighlighting, hasValidTriangulationData } from './ack_utils.js';
 
-const FlagPanel = ({
-  reportContent,
-  review,
-  setReview,
-  authorName,
-  isDisclosureChecked,
-}) => {
+const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureChecked }) => {
   const [isRendered, setIsRendered] = useState(false);
-  const [showDisclosed, setShowDisclosed] = useState(true);
-  const [showUndisclosed, setShowUndisclosed] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
 
   useEffect(() => {
     if (review) {
@@ -123,7 +114,7 @@ const FlagPanel = ({
       return (
         <FlagContainer
           key={index}
-          showDisclosure={isDisclosureChecked}
+          isDisclosureChecked={isDisclosureChecked}
           isDisclosed={flag.Disclosed}
         >
           {flagContent}
@@ -533,11 +524,32 @@ const FlagPanel = ({
           </div>
 
           <div className="tab-group">
-            <button className="tab-button active">All</button>
+            <button
+              className={`tab-button ${activeTab === 'all' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('all');
+              }}
+            >
+              All
+            </button>
             {isDisclosureChecked && (
               <>
-                <button className="tab-button">Disclosed</button>
-                <button className="tab-button">Undisclosed</button>
+                <button
+                  className={`tab-button ${activeTab === 'disclosed' ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveTab('disclosed');
+                  }}
+                >
+                  Disclosed
+                </button>
+                <button
+                  className={`tab-button ${activeTab === 'undisclosed' ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveTab('undisclosed');
+                  }}
+                >
+                  Undisclosed
+                </button>
               </>
             )}
           </div>
@@ -545,36 +557,31 @@ const FlagPanel = ({
           {sortByComponent()}
         </div>
       </div>
-      { showUndisclosed && (
+      {(() => {
+        let itemsToRender = reportContent[review];
+
+        if (activeTab === 'disclosed') {
+          itemsToRender = itemsToRender.filter((item) => item.Disclosed);
+        } else if (activeTab === 'undisclosed') {
+          itemsToRender = itemsToRender.filter((item) => !item.Disclosed);
+        }
+
+        // Render container and filtered items
+        return (
           <div
-                style={{
-                  width: '100%',
-                  maxWidth: '1200px',
-                  margin: '10px auto',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                }}
-              >
-                {renderFlags((reportContent[review] || []).filter((item) => !item.Disclosed))}
-              </div>
-        )
-      }
-      {showDisclosed && (
-          <div
-                style={{
-                  width: '100%',
-                  maxWidth: '1200px',
-                  margin: '10px auto',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                }}
-              >
-                {renderFlags(reportContent[review] || []).filter((item) => item.Disclosed)}
-              </div>
-        )
-      }
+            style={{
+              width: '100%',
+              maxWidth: '1200px',
+              margin: '10px auto',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
+            {renderFlags(itemsToRender)}
+          </div>
+        );
+      })()}
     </div>
   );
 };

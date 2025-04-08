@@ -2,18 +2,25 @@ import React from 'react';
 import { Check } from 'lucide-react';
 import '../../../styles/components/_flagContainer.scss';
 
-export default function FlagContainer({ showDisclosure, isDisclosed = false, children }) {
+export default function FlagContainer({ isDisclosureChecked, isDisclosed, children }) {
   return (
     <div className="flag-container">
       <div className="flag-container-box">{children}</div>
-
-      <div className={`flag-container-badge ${isDisclosed ? 'disclosed' : 'undisclosed'}`}>
+      {[
+        console.log('isDisclosureChecked:', isDisclosureChecked),
+        console.log('isDisclosed:', isDisclosed),
+      ]}
+      <div
+        className={`flag-container-badge ${!isDisclosureChecked ? 'disclosed' : isDisclosed ? 'disclosed' : 'undisclosed'}`}
+      >
         <span className="flag-container-badge-text">
           {isDisclosed ? 'Disclosed' : 'Undisclosed'}
         </span>
-        <div className="flag-container-badge-check-circle">
-          <Check color="white" strokeWidth={3} />
-        </div>
+        {isDisclosureChecked && isDisclosed ? (
+          <span className="flag-container-badge-check-circle">
+            <Check color="white" strokeWidth={3} />
+          </span>
+        ) : null}
       </div>
     </div>
   );

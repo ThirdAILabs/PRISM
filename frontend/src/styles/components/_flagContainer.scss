@@ -22,18 +22,17 @@
     transform: translate(-50%, -50%);
     background-color: $color-text-100;
     padding: 4px 12px;
-    border-radius: 20px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     gap: 8px;
-    z-index: 1;
 
     &.disclosed {
-      border: 2px solid $color-primary-700;
+      border: 1px solid $color-primary-700;
     }
 
     &.undisclosed {
-      border: 2px solid $color-error-700;
+      border: 1px solid $color-error-700;
     }
 
     &-text {
