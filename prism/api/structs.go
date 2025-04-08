@@ -58,11 +58,9 @@ func (r *Report) UnmarshalJSON(data []byte) error {
 }
 
 type CreateAuthorReportRequest struct {
-	AuthorId          string
-	AuthorName        string
-	Source            string
-	Affiliations      []string
-	ResearchInterests []string
+	AuthorId   string
+	AuthorName string
+	Source     string
 }
 
 type CreateUniversityReportRequest struct {

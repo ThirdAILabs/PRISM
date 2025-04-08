@@ -65,6 +65,47 @@ func (m *MockTokenVerifier) VerifyToken(token string) (uuid.UUID, error) {
 	return id, nil
 }
 
+type mockOpenAlex struct{}
+
+func (m *mockOpenAlex) AutocompleteAuthor(query string) ([]api.Autocompletion, error) {
+	return nil, nil
+}
+
+func (m *mockOpenAlex) AutocompleteInstitution(query string) ([]api.Autocompletion, error) {
+	return nil, nil
+}
+
+func (m *mockOpenAlex) AutocompletePaper(query string) ([]api.Autocompletion, error) {
+	return nil, nil
+}
+
+func (m *mockOpenAlex) FindAuthors(authorName, institutionId string) ([]openalex.Author, error) {
+	return nil, nil
+}
+
+func (m *mockOpenAlex) FindAuthorByOrcidId(orcidId string) (openalex.Author, error) {
+	return openalex.Author{}, nil
+}
+
+func (m *mockOpenAlex) StreamWorks(authorId string, startDate, endDate time.Time) chan openalex.WorkBatch {
+	return nil
+}
+
+func (m *mockOpenAlex) FindWorksByTitle(titles []string, startDate, endDate time.Time) ([]openalex.Work, error) {
+	return nil, nil
+}
+
+func (m *mockOpenAlex) GetAuthor(authorId string) (openalex.Author, error) {
+	return openalex.Author{
+		Institutions: []openalex.Institution{{InstitutionName: authorId + "-affiliation1"}, {InstitutionName: authorId + "-affiliation2"}},
+		Concepts:     []string{authorId + "-interest1", authorId + "-interest2"},
+	}, nil
+}
+
+func (m *mockOpenAlex) GetInstitutionAuthors(institutionId string, startDate, endDate time.Time) ([]openalex.InstitutionAuthor, error) {
+	return nil, nil
+}
+
 func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 	db := schema.SetupTestDB(t)
 
@@ -78,7 +119,7 @@ func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 	oa := openalex.NewRemoteKnowledgeBase()
 
 	backend := services.NewBackend(
-		services.NewReportService(reports.NewManager(db), licensing, "./resources"),
+		services.NewReportService(reports.NewManager(db), licensing, &mockOpenAlex{}, "./resources"),
 		services.NewSearchService(oa, entities),
 		services.NewAutoCompleteService(oa),
 		services.NewHookService(db, map[string]services.Hook{}),
@@ -144,8 +185,8 @@ func compareReport(t *testing.T, report api.Report, expected string) {
 	if report.AuthorId != expected+"-id" ||
 		report.AuthorName != expected+"-name" ||
 		report.Source != api.OpenAlexSource ||
-		report.Affiliations != expected+"-affiliation1, "+expected+"-affiliation2" ||
-		report.ResearchInterests != expected+"-interest1, "+expected+"-interest2" ||
+		report.Affiliations != expected+"-id-affiliation1, "+expected+"-id-affiliation2" ||
+		report.ResearchInterests != expected+"-id-interest1, "+expected+"-id-interest2" ||
 		report.Status != "queued" {
 		t.Fatal("invalid reports returned")
 	}
@@ -179,11 +220,9 @@ func getAuthorReport(backend http.Handler, user string, id uuid.UUID) (api.Repor
 
 func createAuthorReport(backend http.Handler, user, name string) (api.CreateReportResponse, error) {
 	req := api.CreateAuthorReportRequest{
-		AuthorId:          name + "-id",
-		AuthorName:        name + "-name",
-		Affiliations:      []string{name + "-affiliation1", name + "-affiliation2"},
-		ResearchInterests: []string{name + "-interest1", name + "-interest2"},
-		Source:            api.OpenAlexSource,
+		AuthorId:   name + "-id",
+		AuthorName: name + "-name",
+		Source:     api.OpenAlexSource,
 	}
 
 	var res api.CreateReportResponse
@@ -847,7 +886,7 @@ func TestHooks(t *testing.T) {
 	hookService := services.NewHookService(db, map[string]services.Hook{"test": mockHook})
 
 	backend := services.NewBackend(
-		services.NewReportService(manager, licensing, "./resources"),
+		services.NewReportService(manager, licensing, &mockOpenAlex{}, "./resources"),
 		services.NewSearchService(oa, nil),
 		services.NewAutoCompleteService(oa),
 		hookService,
