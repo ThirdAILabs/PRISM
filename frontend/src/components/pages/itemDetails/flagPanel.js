@@ -155,40 +155,38 @@ const FlagPanel = ({
     );
   }
 
-  function acknowledgementSection (flag, authorName, index) {
+  function acknowledgementSection(flag, authorName, index) {
     // Quick validation of required data
     if (!Array.isArray(flag.RawAcknowledgements) || flag.RawAcknowledgements.length === 0) {
       return null;
     }
-  
+
     // Check for triangulation data
     const hasTriangulationData = hasValidTriangulationData(flag.FundCodeTriangulation);
-    
+
     // Create highlights configuration once
-    const highlights = hasTriangulationData 
+    const highlights = hasTriangulationData
       ? createHighlights(flag.FundCodeTriangulation, authorName)
       : [];
-  
+
     return (
       <div className="flag-sub-container">
         <strong>Acknowledgements Text</strong>
-        
+
         <ul className="bulleted-list">
           {flag.RawAcknowledgements.map((item, itemIndex) => {
             const key = `ack-${index}-${itemIndex}`;
-            
+
             return (
-              <li key={key}>
-                {hasTriangulationData ? applyHighlighting(item, highlights) : item}
-              </li>
+              <li key={key}>{hasTriangulationData ? applyHighlighting(item, highlights) : item}</li>
             );
           })}
         </ul>
-        
+
         {hasTriangulationData && triangulationLegend()}
       </div>
     );
-  };
+  }
 
   function acknowledgementFlag(flag, index) {
     return (
@@ -254,22 +252,24 @@ const FlagPanel = ({
           <h5 className="fw-bold mt-3">Funder is an Entity of Concern</h5>,
           flag
         )}
-        <p>
-          {get_paper_url(flag)} is funded by the following entities of concern:
-          <ul className="bulleted-list">
-            {Array.isArray(flag.Funders) &&
-              flag.Funders.length > 0 &&
-              flag.Funders.map((item, index2) => {
+        <p>{get_paper_url(flag)} is funded by the entities of concern</p>
+
+        {Array.isArray(flag.Funders) && flag.Funders.length > 0 && (
+          <div className="flag-sub-container">
+            <strong>Concerned entities</strong>
+            <div className="concerned-tags">
+              {flag.Funders.map((item, index2) => {
                 const key = `${index} ${index2}`;
                 return (
-                  <li key={key}>
-                    <a>{item}</a>
-                  </li>
+                  <span key={key} className="concerned-tag-item">
+                    {item}
+                  </span>
                 );
               })}
-          </ul>
-          {acknowledgementSection(flag, authorName, index)}
-        </p>
+            </div>
+          </div>
+        )}
+        {acknowledgementSection(flag, authorName, index)}
       </div>
     );
   }

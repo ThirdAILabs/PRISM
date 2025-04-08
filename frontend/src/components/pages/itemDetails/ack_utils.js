@@ -6,12 +6,11 @@ export const createHighlights = (fundCodeTriangulation, authorName) => {
   }
 
   return Object.entries(fundCodeTriangulation).flatMap(([funderName, funderMap]) =>
-    Object.entries(funderMap)
-      .map(([grantCode, isRecipient]) => ({
-        regex: new RegExp(grantCode, 'i'),
-        color: isRecipient ? 'red' : 'green',
-        tooltip: `${authorName} is ${isRecipient ? 'likely' : 'likely NOT'} a primary recipient of this fund.`,
-      }))
+    Object.entries(funderMap).map(([grantCode, isRecipient]) => ({
+      regex: new RegExp(grantCode, 'i'),
+      color: isRecipient ? 'red' : 'green',
+      tooltip: `${authorName} is ${isRecipient ? 'likely' : 'likely NOT'} a primary recipient of this fund.`,
+    }))
   );
 };
 
