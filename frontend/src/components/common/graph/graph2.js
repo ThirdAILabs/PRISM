@@ -384,6 +384,8 @@ const MyComponent = ({ authorName, reportContent }) => {
         defaultLineShape: 2,
         defaultJunctionPoint: 'tb',
         lineUseTextPath: true,
+        defaultLineWidth: 1,
+        defaultLineColor: '#09abff',
         layouts: [
             {
                 layoutName: 'tree',
