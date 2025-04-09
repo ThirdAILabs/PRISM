@@ -57,5 +57,35 @@
     word-wrap: break-word;
     display: block;
     width: 100%;
+
+    .spinner-border {
+      display: inline-block;
+      margin-left: 8px;
+      vertical-align: middle;
+      animation: spin 1s linear infinite;
+      border: 0.2em solid $color-primary-500;
+      border-right-color: transparent;
+      border-radius: 50%;
+
+      &.text-primary {
+        border-color: $color-primary-500;
+        border-right-color: transparent;
+      }
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .progress-text {
+      color: $color-primary-500;
+      font-weight: bold;
+    }
   }
 }

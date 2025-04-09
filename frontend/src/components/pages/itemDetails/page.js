@@ -1082,6 +1082,7 @@ const ItemDetails = () => {
                       .map((name) => (reportContent[name] || []).length)
                       .reduce((prev, curr) => prev + curr, 0)}
                     setActiveTab={setActiveTab}
+                    loading={loading}
                   />
                 </div>
               </div>
