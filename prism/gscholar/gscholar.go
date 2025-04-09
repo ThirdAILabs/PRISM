@@ -107,7 +107,7 @@ func nextGScholarPageV1(query string, nextPageToken *string) ([]api.Author, *str
 	return authors, results.Pagination.NextPageToken, nil
 }
 
-func getAuthorDetails(authorId string) (api.Author, error) {
+func GetAuthorDetails(authorId string) (api.Author, error) {
 	type authorDetailsResult struct {
 		Author gscholarProfile `json:"author"`
 	}
@@ -230,7 +230,7 @@ func nextGScholarPageV2(query string, nextIdx *int, seen map[string]bool) ([]api
 	for _, id := range authorIds {
 		go func(authorId string) {
 			defer wg.Done()
-			details, err := getAuthorDetails(authorId)
+			details, err := GetAuthorDetails(authorId)
 			if err != nil {
 				slog.Error("google scholar search: error getting author details", "author_id", authorId, "error", err)
 			} else {

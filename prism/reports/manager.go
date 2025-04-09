@@ -122,7 +122,7 @@ func (r *ReportManager) ListAuthorReports(userId uuid.UUID) ([]api.Report, error
 	return results, nil
 }
 
-func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string, forUniversityReport bool) (schema.AuthorReport, error) {
+func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source, affiliations, researchInterests string, forUniversityReport bool) (schema.AuthorReport, error) {
 	var report schema.AuthorReport
 	result := txn.Clauses(clause.Locking{Strength: "UPDATE"}).
 		Limit(1).
@@ -139,6 +139,8 @@ func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string, 
 			AuthorId:            authorId,
 			AuthorName:          authorName,
 			Source:              source,
+			Affiliations:        affiliations,
+			ResearchInterests:   researchInterests,
 			Status:              schema.ReportQueued,
 			StatusUpdatedAt:     time.Now().UTC(),
 			ForUniversityReport: forUniversityReport,
@@ -165,13 +167,13 @@ func createOrGetAuthorReport(txn *gorm.DB, authorId, authorName, source string, 
 	return report, nil
 }
 
-func (r *ReportManager) CreateAuthorReport(userId uuid.UUID, authorId, authorName, source string) (uuid.UUID, error) {
+func (r *ReportManager) CreateAuthorReport(userId uuid.UUID, authorId, authorName, source, affiliations, researchInterests string) (uuid.UUID, error) {
 	var userReport schema.UserAuthorReport
 	var userReportId uuid.UUID
 	now := time.Now().UTC()
 
 	err := r.db.Transaction(func(txn *gorm.DB) error {
-		report, err := createOrGetAuthorReport(txn, authorId, authorName, source, false /*forUniversityReport*/)
+		report, err := createOrGetAuthorReport(txn, authorId, authorName, source, affiliations, researchInterests, false /*forUniversityReport*/)
 		if err != nil {
 			return err
 		}
@@ -463,13 +465,15 @@ func ConvertReport(report schema.UserAuthorReport) (api.Report, error) {
 	}
 
 	return api.Report{
-		Id:             report.Id,
-		LastAccessedAt: report.LastAccessedAt,
-		AuthorId:       report.Report.AuthorId,
-		AuthorName:     report.Report.AuthorName,
-		Source:         report.Report.Source,
-		Status:         report.Report.Status,
-		Content:        content,
+		Id:                report.Id,
+		LastAccessedAt:    report.LastAccessedAt,
+		AuthorId:          report.Report.AuthorId,
+		AuthorName:        report.Report.AuthorName,
+		Source:            report.Report.Source,
+		Affiliations:      report.Report.Affiliations,
+		ResearchInterests: report.Report.ResearchInterests,
+		Status:            report.Report.Status,
+		Content:           content,
 	}, nil
 }
 
@@ -782,7 +786,7 @@ func (r *ReportManager) UpdateUniversityReport(id uuid.UUID, status string, upda
 			var authorReports []schema.AuthorReport
 
 			for _, author := range authors {
-				report, err := createOrGetAuthorReport(txn, author.AuthorId, author.AuthorName, author.Source, true /*forUniversityReport*/)
+				report, err := createOrGetAuthorReport(txn, author.AuthorId, author.AuthorName, author.Source, "", "", true /*forUniversityReport*/)
 				if err != nil {
 					slog.Error("error getting author report to add to university report", "author_id", author.AuthorId, "university_report_id", id, "error", err)
 					return err

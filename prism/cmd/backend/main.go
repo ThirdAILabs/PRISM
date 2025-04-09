@@ -179,7 +179,7 @@ func main() {
 	defer hooks.Stop()
 
 	backend := services.NewBackend(
-		services.NewReportService(reportManager, licensing, config.ResourceFolder),
+		services.NewReportService(reportManager, licensing, openalex, config.ResourceFolder),
 		services.NewSearchService(openalex, loadSearchableEntities(config.SearchableEntitiesData)),
 		services.NewAutoCompleteService(openalex),
 		hooks,

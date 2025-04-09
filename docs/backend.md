@@ -32,6 +32,8 @@ Note: that the field `Status` will be one of `queued`, `in-progress`, `failed`, 
         "AuthorId": "author id",
         "AuthorName": "author name",
         "Source": "openalex",
+        "Affiliations": "ABC University, XYZ Institute",
+        "ResearchInterests": "Computer Science, Machine Learning",
         "Status": "queued"
     },
     {
@@ -40,6 +42,8 @@ Note: that the field `Status` will be one of `queued`, `in-progress`, `failed`, 
         "AuthorId": "author id",
         "AuthorName": "author name",
         "Source": "openalex",
+        "Affiliations": "ABC University, XYZ Institute",
+        "ResearchInterests": "Computer Science, Machine Learning",
         "Status": "in-progress"
     }
 ]
@@ -58,7 +62,7 @@ __Example Request__:
 {
     "AuthorId": "author name",
     "AuthorName": "author id",
-    "Source": "openalex"
+    "Source": "openalex",
 }
 ```
 __Example Response__:
@@ -91,6 +95,8 @@ Note: See the `report_format.md` for a description of the format of the report c
     "AuthorId": "author id",
     "AuthorName": "author name",
     "Source": "openalex",
+    "Affiliations": "ABC University, XYZ Institute",
+    "ResearchInterests": "Computer Science, Machine Learning",
     "Status": "in-progress",
     "Content": {
 
