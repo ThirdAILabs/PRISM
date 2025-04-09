@@ -11,8 +11,8 @@ import {
   COAUTHOR_AFFILIATIONS,
 } from '../../../constants/constants.js';
 import ConcernVisualizer, { BaseFontSize, getFontSize } from '../../ConcernVisualization.js';
-import Graph from '../../common/graph/graph.js';
-import Tabs from '../../common/tools/Tabs.js';
+// import Graph from '../../common/graph/graph.js';
+import Graph from '../../common/graph/graph2.js';
 import { reportService } from '../../../api/reports.js';
 import styled from 'styled-components';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -1325,7 +1325,10 @@ const ItemDetails = () => {
         </>
       }
 
-      {activeTab === 1 && <Graph authorName={authorName} reportContent={reportContent} />}
+      {activeTab === 1 && <>
+        {/* <Graph authorName={authorName} reportContent={reportContent} /> */}
+        <Graph authorName={authorName} reportContent={reportContent} />
+      </>}
     </div>
   );
 };
