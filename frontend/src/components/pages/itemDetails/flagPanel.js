@@ -21,7 +21,7 @@ import { createHighlights, applyHighlighting, hasValidTriangulationData } from '
 const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureChecked }) => {
   const [isRendered, setIsRendered] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
-  const [isOpen, setIsOpen] = useState(false);
+  const [isSortByDropdownOpen, setIsSortByDropdownOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState('Latest To Oldest');
 
   useEffect(() => {
@@ -41,12 +41,12 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
   });
 
   const toggleDropdown = () => {
-    setIsOpen(!isOpen);
+    setIsSortByDropdownOpen(!isSortByDropdownOpen);
   };
 
   const selectOption = (option) => {
     setSortOrder(option);
-    setIsOpen(false);
+    setIsSortByDropdownOpen(false);
   };
 
   const get_paper_url = (flag) => {
@@ -81,7 +81,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
         a.Work && a.Work.PublicationDate ? new Date(a.Work.PublicationDate).getTime() : 0;
       const dateB =
         b.Work && b.Work.PublicationDate ? new Date(b.Work.PublicationDate).getTime() : 0;
-      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+      return sortOrder === 'Latest To Oldest' ? dateA - dateB : dateB - dateA;
     });
 
     return sortedItems.map((flag, index) => {
@@ -221,6 +221,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
       </div>
     );
   }
+
 
   function funderFlag(flag, index) {
     return (
@@ -485,31 +486,30 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
     );
     if (!hasDates) return null;
 
-    return (
-      <div className="sort-dropdown">
-        <div className="sort-dropdown__toggle" onClick={toggleDropdown}>
-          <span className="sort-dropdown__label">Sort By:</span>
-          <ChevronDown className="sort-dropdown__icon" />
+    return (<div className="sort-dropdown">
+    <div className="sort-dropdown__toggle" onClick={toggleDropdown}>
+      <span className="sort-dropdown__label">Sort By</span>
+      <ChevronDown className="sort-dropdown__icon" />
+    </div>
+    
+    {isSortByDropdownOpen && (
+      <div className="sort-dropdown__menu">
+        <div 
+          className="sort-dropdown__option"
+          onClick={() => selectOption('Latest To Oldest')}
+        >
+          Latest To Oldest
         </div>
-        
-        {isOpen && (
-          <div className="sort-dropdown__menu">
-            <div 
-              className="sort-dropdown__option"
-              onClick={() => selectOption('Latest To Oldest')}
-            >
-              Latest To Oldest
-            </div>
-            <div 
-              className="sort-dropdown__option"
-              onClick={() => selectOption('Oldest To Latest')}
-            >
-              Oldest To Latest
-            </div>
-          </div>
-        )}
+        <div 
+          className="sort-dropdown__option"
+          onClick={() => selectOption('Oldest To Latest')}
+        >
+          Oldest To Latest
+        </div>
       </div>
-    );
+    )}
+  </div>
+);
   }
 
   return (

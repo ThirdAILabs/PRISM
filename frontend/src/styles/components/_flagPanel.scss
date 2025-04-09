@@ -124,12 +124,13 @@ $color-grey-500: rgb(100, 100, 100);
   }
 }
 
-
 .sort-dropdown {
   margin-left: auto;
   display: flex;
+  align-items: center;
   padding-right: 20px;
-
+  position: relative; // Add this
+  
   &__toggle {
     display: flex;
     align-items: center;
@@ -155,11 +156,10 @@ $color-grey-500: rgb(100, 100, 100);
   
   &__menu {
     position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 10;
+    top: calc(100% + 4px); // Adjust positioning
+    right: 20px; // Align with right padding
+    z-index: 1000; // Increase z-index
     width: 180px;
-    margin-top: 4px;
     background-color: white;
     border: 1px solid #e0e0e0;
     border-radius: 4px;
