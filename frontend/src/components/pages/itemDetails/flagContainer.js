@@ -6,19 +6,15 @@ export default function FlagContainer({ isDisclosureChecked, isDisclosed, childr
   return (
     <div className="flag-container">
       <div className="flag-container-box">{children}</div>
-      {[
-        console.log('isDisclosureChecked:', isDisclosureChecked),
-        console.log('isDisclosed:', isDisclosed),
-      ]}
       {
         isDisclosureChecked && 
         <div
-          className={`flag-container-badge ${!isDisclosureChecked ? 'disclosed' : isDisclosed ? 'disclosed' : 'undisclosed'}`}
+          className={`flag-container-badge ${isDisclosed ? 'disclosed' : 'undisclosed'}`}
         >
           <span className="flag-container-badge-text">
             {isDisclosed ? 'Disclosed' : 'Undisclosed'}
           </span>
-          {isDisclosureChecked && isDisclosed ? (
+          {isDisclosed ? (
             <span className="flag-container-badge-check-circle">
               <Check color="white" strokeWidth={3} />
             </span>

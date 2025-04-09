@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   TALENT_CONTRACTS,
   ASSOCIATIONS_WITH_DENIED_ENTITIES,
@@ -26,14 +26,15 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
 
   useEffect(() => {
     if (review) {
-      // Small delay to ensure DOM is ready
-      requestAnimationFrame(() => {
-        setIsRendered(true);
-      });
+      setIsRendered(true);
     } else {
       setIsRendered(false);
     }
   }, [review]);
+
+  const dropdownRef = useOutsideClick(() => {
+    setIsSortByDropdownOpen(false);
+  });
 
   const sidepanelRef = useOutsideClick(() => {
     setIsRendered(false);
@@ -113,13 +114,15 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
       }
 
       return (
-        <FlagContainer
+          
+          <FlagContainer
           key={index}
           isDisclosureChecked={isDisclosureChecked}
           isDisclosed={flag.Disclosed}
         >
           {flagContent}
         </FlagContainer>
+        
       );
     });
   }
@@ -486,30 +489,30 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
     );
     if (!hasDates) return null;
 
-    return (<div className="sort-dropdown">
-    <div className="sort-dropdown__toggle" onClick={toggleDropdown}>
-      <span className="sort-dropdown__label">Sort By</span>
-      <ChevronDown className="sort-dropdown__icon" />
-    </div>
-    
-    {isSortByDropdownOpen && (
-      <div className="sort-dropdown__menu">
-        <div 
-          className="sort-dropdown__option"
-          onClick={() => selectOption('Latest To Oldest')}
-        >
-          Latest To Oldest
+    return (
+      <div className="sort-dropdown" ref={dropdownRef}>
+        <div className="sort-dropdown__toggle" onClick={toggleDropdown}>
+          <span className="sort-dropdown__label">Sort by</span>
+          <ChevronDown className="sort-dropdown__icon" />
         </div>
-        <div 
-          className="sort-dropdown__option"
-          onClick={() => selectOption('Oldest To Latest')}
-        >
-          Oldest To Latest
-        </div>
+        
+        {isSortByDropdownOpen && (
+          <div className="sort-dropdown__menu">
+            {['Latest To Oldest', 'Oldest To Latest'].map((option) => (
+              <div 
+                key={option}
+                className={`sort-dropdown__option ${
+                  option === sortOrder ? 'sort-dropdown__option--selected' : ''
+                }`}
+                onClick={() => selectOption(option)}
+              >
+                {option}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-    )}
-  </div>
-);
+    );
   }
 
   return (
@@ -576,9 +579,8 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
         return (
           <div
             style={{
-              width: '100%',
-              maxWidth: '1200px',
-              margin: '10px auto',
+              width: '92%',
+              margin: '0 auto',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',

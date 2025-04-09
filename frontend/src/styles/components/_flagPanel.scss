@@ -135,9 +135,8 @@ $color-grey-500: rgb(100, 100, 100);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 120px;
+    width: 100px;
     padding: 8px 12px;
-    border-radius: 4px;
     cursor: pointer;
     user-select: none;
   }
@@ -145,6 +144,7 @@ $color-grey-500: rgb(100, 100, 100);
   &__label {
     font-size: 14px;
     font-weight: 500;
+    color: $color-text-900;
   }
   
   &__icon {
@@ -154,13 +154,13 @@ $color-grey-500: rgb(100, 100, 100);
   
   &__menu {
     position: absolute;
-    top: calc(100% + 4px); // Adjust positioning
+    top: calc(100% - 5px); // Adjust positioning
     right: 20px; // Align with right padding
-    z-index: 1000; // Increase z-index
+    z-index: 1000;
     width: 180px;
     background-color: white;
     border: 1px solid #e0e0e0;
-    border-radius: 4px;
+    border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
   
@@ -181,6 +181,12 @@ $color-grey-500: rgb(100, 100, 100);
     &:last-child {
       border-bottom-left-radius: 4px;
       border-bottom-right-radius: 4px;
+    }
+
+    &--selected {
+      background-color: #f0f7ff;
+      color: $color-primary-700;
+      font-weight: 500;
     }
   }
 }

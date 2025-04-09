@@ -4,14 +4,14 @@
 .flag-container {
   display: flex;
   flex-direction: column;
-  width: 90%;
+  width: 100%;
   position: relative;
-  margin: 25px auto;
+  margin: 10px auto;
 
   &-box {
     border: 1px solid $color-text-300;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 20px;
+    padding: 0 10px;
     border-radius: 5px;
   }
 
