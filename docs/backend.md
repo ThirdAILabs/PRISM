@@ -63,8 +63,6 @@ __Example Request__:
     "AuthorId": "author name",
     "AuthorName": "author id",
     "Source": "openalex",
-    "Affiliations": ["ABC University", "XYZ Institute"],
-    "ResearchInterests": ["Computer Science", "Machine Learning"],
 }
 ```
 __Example Response__:
