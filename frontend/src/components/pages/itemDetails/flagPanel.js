@@ -14,14 +14,15 @@ import useOutsideClick from '../../../hooks/useOutsideClick.js';
 import '../../../styles/components/_flagPanel.scss';
 import { Divider } from '@mui/material';
 import { IoMdClose } from 'react-icons/io';
-import { IoIosArrowDown } from 'react-icons/io';
-import { IoIosArrowUp } from 'react-icons/io';
+import { ChevronDown } from 'lucide-react';
 import FlagContainer from './flagContainer.js';
 import { createHighlights, applyHighlighting, hasValidTriangulationData } from './ack_utils.js';
 
 const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureChecked }) => {
   const [isRendered, setIsRendered] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
+  const [isOpen, setIsOpen] = useState(false);
+  const [sortOrder, setSortOrder] = useState('Latest To Oldest');
 
   useEffect(() => {
     if (review) {
@@ -39,13 +40,13 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
     setTimeout(() => setReview(''), 300);
   });
 
-  // box shadow for disclosed/undisclosed buttons
-  const greenBoxShadow = '0 0px 10px rgb(0, 183, 46)';
-  const redBoxShadow = '0 0px 10px rgb(255, 0, 0)';
-  const [sortOrder, setSortOrder] = useState('desc');
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
+  };
 
-  const toggleSortOrder = () => {
-    setSortOrder((prevOrder) => (prevOrder === 'asc' ? 'desc' : 'asc'));
+  const selectOption = (option) => {
+    setSortOrder(option);
+    setIsOpen(false);
   };
 
   const get_paper_url = (flag) => {
@@ -149,7 +150,10 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
     }
 
     // Check for triangulation data
-    const hasTriangulationData = hasValidTriangulationData(flag.FundCodeTriangulation);
+    const triangulationResult = hasValidTriangulationData(flag.FundCodeTriangulation);
+    const notContainPR = triangulationResult.notContainPR;
+    const containPR = triangulationResult.containPR;
+    const hasTriangulationData = notContainPR || containPR;
 
     // Create highlights configuration once
     const highlights = hasTriangulationData
@@ -158,19 +162,26 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
 
     return (
       <div className="flag-sub-container">
-        <strong>Acknowledgements Text</strong>
+        <div className="acknowledgement-header">
+          <strong>Acknowledgements Text</strong>
+          {hasTriangulationData && (
+            <div className="triangulation-indicators">
+              {notContainPR && <span className="triangulation-tag success">Not primary recipient</span>}
+              {containPR && <span className="triangulation-tag danger">Primary recipient</span>}
+            </div>
+          )}
+        </div>
 
         <ul className="bulleted-list">
           {flag.RawAcknowledgements.map((item, itemIndex) => {
             const key = `ack-${index}-${itemIndex}`;
-
             return (
-              <li key={key}>{hasTriangulationData ? applyHighlighting(item, highlights) : item}</li>
+              <li key={key}>
+                {hasTriangulationData ? applyHighlighting(item, highlights) : item}
+              </li>
             );
           })}
         </ul>
-
-        {hasTriangulationData && triangulationLegend()}
       </div>
     );
   }
@@ -207,27 +218,6 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
           </ul>
           {acknowledgementSection(flag, authorName, index)}
         </p>
-      </div>
-    );
-  }
-
-  function triangulationLegend() {
-    return (
-      <div className="mt-4 d-flex flex-column small">
-        <span className="me-3">
-          <span
-            className="rounded-circle d-inline-block me-2"
-            style={{ width: '8px', height: '8px', backgroundColor: 'green' }}
-          ></span>
-          The author likely <b>is not</b> a primary recipient of these high-risk grants.
-        </span>
-        <span>
-          <span
-            className="rounded-circle d-inline-block me-2"
-            style={{ width: '8px', height: '8px', backgroundColor: 'red' }}
-          ></span>
-          The author likely <b>is</b> a primary recipient of these high-risk grants.
-        </span>
       </div>
     );
   }
@@ -496,11 +486,28 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
     if (!hasDates) return null;
 
     return (
-      <div className="sort-by-container">
-        <span className="sort-label">Sort by Date</span>
-        <div onClick={toggleSortOrder} className="sort-icon">
-          {sortOrder === 'asc' ? <IoIosArrowUp /> : <IoIosArrowDown />}
+      <div className="sort-dropdown">
+        <div className="sort-dropdown__toggle" onClick={toggleDropdown}>
+          <span className="sort-dropdown__label">Sort By:</span>
+          <ChevronDown className="sort-dropdown__icon" />
         </div>
+        
+        {isOpen && (
+          <div className="sort-dropdown__menu">
+            <div 
+              className="sort-dropdown__option"
+              onClick={() => selectOption('Latest To Oldest')}
+            >
+              Latest To Oldest
+            </div>
+            <div 
+              className="sort-dropdown__option"
+              onClick={() => selectOption('Oldest To Latest')}
+            >
+              Oldest To Latest
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -566,7 +573,6 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
           itemsToRender = itemsToRender.filter((item) => !item.Disclosed);
         }
 
-        // Render container and filtered items
         return (
           <div
             style={{

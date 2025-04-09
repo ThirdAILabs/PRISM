@@ -46,9 +46,35 @@ export const applyHighlighting = (text, highlights) => {
 };
 
 export const hasValidTriangulationData = (triangulationData) => {
-  return (
-    triangulationData &&
-    typeof triangulationData === 'object' &&
-    Object.keys(triangulationData).length > 0
-  );
-};
+  if (!triangulationData || typeof triangulationData !== 'object' || Object.keys(triangulationData).length === 0) {
+    return { notContainPR: false, containPR: false };
+  }
+
+  let notContainPR = false;
+  let containPR = false;
+  
+  const categories = Object.keys(triangulationData);
+  for (const category of categories) {
+    const funds = triangulationData[category];
+    if (funds && typeof funds === 'object') {
+      const fundNumbers = Object.keys(funds);
+      for (const fundNumber of fundNumbers) {
+        if (funds[fundNumber] === false) {
+          notContainPR = true;
+        }
+        if (funds[fundNumber] === true) {
+          containPR = true;
+        }
+        
+        if (notContainPR && containPR) {
+          break;
+        }
+      }
+      if (notContainPR && containPR) {
+        break;
+      }
+    }
+  }
+  
+  return { notContainPR, containPR };
+}

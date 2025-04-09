@@ -41,7 +41,6 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 const todayStr = new Date().toISOString().split('T')[0];
 
 const ItemDetails = () => {
-  const navigate = useNavigate();
   const { report_id } = useParams();
 
   const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
