@@ -88,7 +88,7 @@ func TestCreateGetAuthorReports(t *testing.T) {
 
 	checkNoNextAuthorReport(t, manager)
 
-	reportId1, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource)
+	reportId1, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource, "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,12 +112,12 @@ func TestCreateGetAuthorReports(t *testing.T) {
 
 	time.Sleep(500 * time.Millisecond) // This is so that we can wait 1 sec and only the first report is timed out.
 
-	reportId2, err := manager.CreateAuthorReport(user2, "2", "author2", api.GoogleScholarSource)
+	reportId2, err := manager.CreateAuthorReport(user2, "2", "author2", api.GoogleScholarSource, "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	reportId3, err := manager.CreateAuthorReport(user1, "3", "author3", api.OpenAlexSource)
+	reportId3, err := manager.CreateAuthorReport(user1, "3", "author3", api.OpenAlexSource, "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -159,7 +159,7 @@ func TestCreateGetAuthorReports(t *testing.T) {
 	checkNoNextAuthorReport(t, manager)
 
 	// Check that reports are reused
-	reportId4, err := manager.CreateAuthorReport(user2, "1", "author1", api.OpenAlexSource)
+	reportId4, err := manager.CreateAuthorReport(user2, "1", "author1", api.OpenAlexSource, "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -206,7 +206,7 @@ func TestAuthorReportAccessErrors(t *testing.T) {
 
 	user1, user2 := uuid.New(), uuid.New()
 
-	reportId, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource)
+	reportId, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource, "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -229,7 +229,7 @@ func TestListAuthorReports(t *testing.T) {
 
 	user1, user2 := uuid.New(), uuid.New()
 
-	report1, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource)
+	report1, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource, "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -242,12 +242,12 @@ func TestListAuthorReports(t *testing.T) {
 		t.Fatal("should be no reports for user2")
 	}
 
-	report2, err := manager.CreateAuthorReport(user2, "2", "author2", api.OpenAlexSource)
+	report2, err := manager.CreateAuthorReport(user2, "2", "author2", api.OpenAlexSource, "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	report3, err := manager.CreateAuthorReport(user1, "3", "author3", api.GoogleScholarSource)
+	report3, err := manager.CreateAuthorReport(user1, "3", "author3", api.GoogleScholarSource, "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -397,7 +397,7 @@ func TestUserAuthorReportsAreNotUsedInUniversityReports(t *testing.T) {
 
 	user1 := uuid.New()
 
-	_, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource)
+	_, err := manager.CreateAuthorReport(user1, "1", "author1", api.OpenAlexSource, "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -766,7 +766,7 @@ func TestUserQueuedReportsArePrioritizedOverUniversityReports(t *testing.T) {
 
 	user := uuid.New()
 
-	if _, err := manager.CreateAuthorReport(user, "1", "author1", api.OpenAlexSource); err != nil {
+	if _, err := manager.CreateAuthorReport(user, "1", "author1", api.OpenAlexSource, "", ""); err != nil {
 		t.Fatal(err)
 	}
 
@@ -785,7 +785,7 @@ func TestUserQueuedReportsArePrioritizedOverUniversityReports(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := manager.CreateAuthorReport(user, "3", "author3", api.OpenAlexSource); err != nil {
+	if _, err := manager.CreateAuthorReport(user, "3", "author3", api.OpenAlexSource, "", ""); err != nil {
 		t.Fatal(err)
 	}
 
@@ -821,11 +821,11 @@ func TestAuthorReportRetry(t *testing.T) {
 	manager := setup(t).SetAuthorReportUpdateInterval(reports.AuthorReportUpdateInterval).SetAuthorReportTimeout(time.Second)
 
 	user := uuid.New()
-	if _, err := manager.CreateAuthorReport(user, "1", "author1", api.OpenAlexSource); err != nil {
+	if _, err := manager.CreateAuthorReport(user, "1", "author1", api.OpenAlexSource, "", ""); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := manager.CreateAuthorReport(user, "2", "author2", api.OpenAlexSource); err != nil {
+	if _, err := manager.CreateAuthorReport(user, "2", "author2", api.OpenAlexSource, "", ""); err != nil {
 		t.Fatal(err)
 	}
 

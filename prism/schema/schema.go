@@ -19,9 +19,11 @@ type AuthorReport struct {
 
 	LastUpdatedAt time.Time
 
-	AuthorId   string `gorm:"index"`
-	AuthorName string
-	Source     string
+	AuthorId          string `gorm:"index"`
+	AuthorName        string
+	Source            string
+	Affiliations      string
+	ResearchInterests string
 
 	StatusUpdatedAt     time.Time
 	Status              string `gorm:"size:20;not null"`

@@ -438,22 +438,7 @@ func (oa *RemoteKnowledgeBase) GetAuthor(authorId string) (Author, error) {
 		return Author{}, fmt.Errorf("no authors returned in get author")
 	}
 
-	institutions := make([]Institution, 0, len(results.Results[0].Affiliations))
-	for _, institution := range results.Results[0].Affiliations {
-		institutions = append(institutions, Institution{
-			InstitutionName: institution.Institution.DisplayName,
-			InstitutionId:   institution.Institution.Id,
-			Location:        institution.Institution.CountryCode,
-		})
-	}
-
-	return Author{
-		AuthorId:                results.Results[0].Id,
-		DisplayName:             results.Results[0].DisplayName,
-		DisplayNameAlternatives: results.Results[0].DisplayNameAlternatives,
-		RawAuthorName:           nil,
-		Institutions:            institutions,
-	}, nil
+	return convertOpenalexAuthor(results.Results[0]), nil
 }
 
 func (oa *RemoteKnowledgeBase) GetInstitutionAuthors(institutionId string, startDate, endDate time.Time) ([]InstitutionAuthor, error) {
