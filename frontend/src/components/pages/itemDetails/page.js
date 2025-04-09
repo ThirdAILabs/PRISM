@@ -1091,6 +1091,7 @@ const ItemDetails = () => {
                         border: '1px solid rgb(230, 230, 230)',
                         borderRadius: '8px',
                         padding: '0px',
+                        width: '13.5%'
                       }}
                     >
                       <ConcernVisualizer

@@ -58,7 +58,7 @@ export default function ConcernVisualizer({
   return (
     <div
       style={{
-        width: '180px',
+        width: '100%',
         height: '320px',
         position: 'relative',
         display: 'flex',
@@ -82,7 +82,7 @@ export default function ConcernVisualizer({
           marginBottom: '48px',
           marginTop: '-16px',
           textAlign: 'center',
-          width: '100%',
+          width: '96%',
           fontSize: '14px',
           lineHeight: '20px',
           letterSpacing: '0.1px',
