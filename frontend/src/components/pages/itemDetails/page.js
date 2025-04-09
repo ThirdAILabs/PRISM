@@ -217,21 +217,8 @@ const ItemDetails = () => {
         setAuthorInfo({
           AuthorId: report.AuthorId,
           AuthorName: report.AuthorName,
-          Institutions: [
-            'Texas A&M University',
-            'College Station Medical Center',
-            'Colorado State University',
-            'Houston Methodist',
-            'Mitchell Institute',
-            'Purdue University West Lafayette',
-            'State Street (United States)',
-          ],
-          Interests: [
-            'Artificial Intelligence',
-            'Machine Learning',
-            'Computer Vision',
-            'Natural Language Processing',
-          ],
+          Institutions: report.Affiliations.split(','),
+          Interests: report.ResearchInterests.split(','),
           Source: report.Source,
         });
         if (!isMounted) return;
