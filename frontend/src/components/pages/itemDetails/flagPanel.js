@@ -81,7 +81,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
         a.Work && a.Work.PublicationDate ? new Date(a.Work.PublicationDate).getTime() : 0;
       const dateB =
         b.Work && b.Work.PublicationDate ? new Date(b.Work.PublicationDate).getTime() : 0;
-      return sortOrder === 'Latest To Oldest' ? dateA - dateB : dateB - dateA;
+      return sortOrder === 'Latest To Oldest' ? dateB - dateA : dateA - dateB;
     });
 
     return sortedItems.map((flag, index) => {
