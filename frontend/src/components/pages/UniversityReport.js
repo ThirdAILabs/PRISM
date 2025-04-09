@@ -16,7 +16,7 @@ import { universityReportService } from '../../api/universityReports.js';
 import AuthorCard from '../common/cards/AuthorCard.js';
 
 import styled from 'styled-components';
-import Loader from './university/Loader.js';
+import '../../styles/pages/_universityReport.scss';
 
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
@@ -133,50 +133,7 @@ const UniversityReport = () => {
   const goBack = useGoBack('/university');
 
   return (
-    <div className="basic-setup" style={{ minHeight: '100vh', paddingBottom: '50px' }}>
-      {/* <div
-        className="detail-header"
-        style={{
-          // display: 'flex',
-          width: '100%',
-        }}
-      >
-        <button
-          onClick={() => goBack()}
-          className="btn text-dark mb-3"
-          style={{
-            minWidth: '80px',
-            left: '10px',
-          }}
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            style={{ marginRight: '8px' }}
-          >
-            <path
-              d="M10 19L3 12L10 5"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M3 12H21"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          Back
-        </button>
-        <h5 style={{ margin: '0 auto' }}>{instituteName}</h5>
-      </div> */}
-
+    <div className="basic-setup" style={{ minHeight: '100vh', paddingBottom: '50px', position: 'relative', overflow: 'hidden' }}>
       <div
         className="detail-header"
         style={{
@@ -235,8 +192,8 @@ const UniversityReport = () => {
 
       <>
         {loading && (
-          <div class="d-flex justify-content-start">
-            <div class="spinner-border text-secondary ms-5 mt-3 mb-3" role="status" />
+          <div className="d-flex justify-content-start">
+            <div className="spinner-border text-secondary ms-5 mt-3 mb-3" role="status" />
           </div>
         )}
         {
@@ -293,18 +250,24 @@ const UniversityReport = () => {
         </div>
 
         {showModal && (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              width: '100%',
-            }}
-          >
-            <div
-              style={{
-                marginTop: '100px',
-              }}
-            >
+          <div className={`university-flag-panel ${showModal ? 'open' : ''}`}>
+            <div className="university-flag-panel-header">
+              <h4>{TitlesAndDescriptions[selectedFlag]?.title}</h4>
+              <button className="close-button" onClick={() => setShowModal(false)}>×</button>
+            </div>
+            <div className="selection-container">
+              <div className="score-box-container">
+                <div className="score-pill">
+                  <span className="score-label">Score:</span>
+                  <span className="score-value">
+                    {selectedFlagData?.length || 0}
+                  </span>
+                </div>
+              </div>
+              <input type="text" placeholder="Search..." className="search-input" />
+            </div>
+            
+            <div className="university-flag-panel-content">
               <AuthorCard authors={selectedFlagData} />
             </div>
           </div>
@@ -313,66 +276,5 @@ const UniversityReport = () => {
     </div>
   );
 };
-
-const popoverStyles = {
-  position: 'absolute',
-  top: '30px',
-  left: '50%',
-  transform: 'translateX(-50%)',
-  zIndex: 1,
-  backgroundColor: '#fff',
-  border: '1px solid rgba(0, 0, 0, 0.2)',
-  boxShadow: '0 0.5rem 1rem rgba(0, 0, 0, 0.15)',
-  borderRadius: '0.3rem',
-  padding: '0.5rem',
-  width: '200px',
-};
-
-const buttonStyles = {
-  marginLeft: '5px',
-  width: '14px',
-  height: '14px',
-  padding: '1px 0',
-  borderRadius: '7.5px',
-  textAlign: 'center',
-  fontSize: '8px',
-  lineHeight: '1.42857',
-  border: '1px solid grey',
-  borderWidth: '1px',
-  backgroundColor: 'transparent',
-  color: 'grey',
-  position: 'relative',
-  boxShadow: 'none',
-};
-
-const StyledWrapper = styled.div`
-  position: relative;
-
-  .cssbuttons-io-button {
-    position: relative;
-    transition: all 0.3s ease-in-out;
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
-    padding-block: 0.5rem;
-    padding-inline: 0.75rem;
-    background-color: rgb(0 107 179);
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: #ffff;
-    gap: 10px;
-    font-weight: bold;
-    border: 3px solid #ffffff4d;
-    outline: none;
-    overflow: hidden;
-    font-size: 15px;
-  }
-
-  .cssbuttons-io-button:hover {
-    transform: scale(1.009);
-    border-color: #fff9;
-  }
-`;
 
 export default UniversityReport;
