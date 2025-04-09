@@ -30,7 +30,7 @@ const FLAG_ORDER = [
 
 const todayStr = new Date().toISOString().split('T')[0];
 
-const TitlesAndDescriptions = {
+const FlagInformation = {
   [TALENT_CONTRACTS]: {
     title: 'Talent Contracts',
     desc: 'Researchers in this list appear in papers funded by Talent Contracts.',
@@ -265,8 +265,8 @@ const UniversityReport = () => {
 
                 return (
                   <ConcernVisualizer
-                    title={TitlesAndDescriptions[flag].title}
-                    hoverText={TitlesAndDescriptions[flag].desc}
+                    title={FlagInformation[flag].title}
+                    hoverText={FlagInformation[flag].desc}
                     value={flagData.length || 0}
                     speedometerHoverText={`${flagData.length} Authors`}
                     onReview={() => handleReview(flag)}
@@ -279,8 +279,8 @@ const UniversityReport = () => {
             : FLAG_ORDER.map((flag, index) => {
                 return (
                   <ConcernVisualizer
-                    title={TitlesAndDescriptions[flag].title}
-                    hoverText={TitlesAndDescriptions[flag].desc}
+                    title={FlagInformation[flag].title}
+                    hoverText={FlagInformation[flag].desc}
                     value={0}
                     speedometerHoverText={`0 Authors`}
                     onReview={() => handleReview(flag)}

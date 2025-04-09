@@ -2,13 +2,13 @@
 @import '../base/typography';
 
 $sidebar-width: 70%;
-$sidebar-padding: 20px;
 $sidebar-border-color: #060606;
 $sidebar-icon-size: 24px;
 $sidebar-transition: right 0.3s ease;
 $sidebar-box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
 
 // Additional Colors
+$color-grey-200: #e5e7eb;
 $color-grey-500: rgb(100, 100, 100);
 
 //side panel from right side
@@ -21,9 +21,6 @@ $color-grey-500: rgb(100, 100, 100);
   background: $color-text-100;
   box-shadow: $sidebar-box-shadow;
   transition: $sidebar-transition;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
   overflow-y: auto;
   text-align: left;
 
@@ -36,14 +33,11 @@ $color-grey-500: rgb(100, 100, 100);
   &-header {
     display: flex;
     justify-content: space-between;
-    padding: $sidebar-padding;
-    align-items: center;
-    width: 100%;
-    margin: 10px 0;
+    margin: 12px 20px;
   }
 
   &-title {
-    @include heading-6;
+    @include label-3;
     margin: 0;
   }
 
@@ -81,11 +75,11 @@ $color-grey-500: rgb(100, 100, 100);
     flex: 1;
 
     .score-pill {
+      @include label-4;
       background-color: $color-text-100;
       border-radius: 0 20px 20px 0;
       padding: 8px 16px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-      @include sub-heading-4;
       .score-label {
         color: $color-error-700;
         margin-right: 7px;
@@ -102,23 +96,21 @@ $color-grey-500: rgb(100, 100, 100);
     padding-left: 15px;
 
     .tab-button {
+      @include label-4;
       padding: 8px 24px;
       border-radius: 7px;
-      background-color: #f3f4f6; // gray-100 equivalent
-      font-size: 14px;
       transition: all 0.2s ease;
       border-color: transparent;
       margin-left: 12px;
 
       &.active {
-        background-color: white;
+        background-color: $color-text-100;
         border: 1px solid $color-primary-700;
-        color: $color-primary-900; // blue-500 equivalent
-        // @include sub-heading-5;
+        color: $color-primary-900;
       }
 
       &:hover:not(.active) {
-        background-color: #e5e7eb; // gray-200 equivalent
+        background-color: $color-grey-200;
       }
     }
   }
@@ -130,7 +122,7 @@ $color-grey-500: rgb(100, 100, 100);
   align-items: center;
   padding-right: 20px;
   position: relative; // Add this
-  
+
   &__toggle {
     display: flex;
     align-items: center;
@@ -140,18 +132,18 @@ $color-grey-500: rgb(100, 100, 100);
     cursor: pointer;
     user-select: none;
   }
-  
+
   &__label {
     font-size: 14px;
     font-weight: 500;
     color: $color-text-900;
   }
-  
+
   &__icon {
     width: 16px;
     height: 16px;
   }
-  
+
   &__menu {
     position: absolute;
     top: calc(100% - 5px); // Adjust positioning
@@ -163,21 +155,21 @@ $color-grey-500: rgb(100, 100, 100);
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
-  
+
   &__option {
     padding: 8px 12px;
     font-size: 14px;
     cursor: pointer;
-    
+
     &:hover {
       background-color: #f5f5f5;
     }
-    
+
     &:first-child {
       border-top-left-radius: 4px;
       border-top-right-radius: 4px;
     }
-    
+
     &:last-child {
       border-bottom-left-radius: 4px;
       border-bottom-right-radius: 4px;
@@ -191,17 +183,38 @@ $color-grey-500: rgb(100, 100, 100);
   }
 }
 
-.flag-header {
-  @include heading-3;
+.flag-container-header {
+  @include sub-heading-3;
+  justify-content: space-between;
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.flag-container-date {
+  @include paragraph-4;
+  color: $color-text-500;
+}
+
+.flag-container-description {
+  @include sub-heading-5;
+  color: $color-text-500;
+  margin-bottom: 15px;
 }
 
 .flag-sub-container {
   width: 100%;
   border: 1px solid $color-text-300;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
-  margin-bottom: 8px;
   padding: 10px;
+
+  &-header {
+    @include sub-heading-5;
+  }
+}
+
+.ack-text {
+  @include paragraph-5;
+  color: $color-text-700;
 }
 
 .bulleted-list {
@@ -221,13 +234,11 @@ $color-grey-500: rgb(100, 100, 100);
 }
 
 .concerned-tag-item {
-  @include paragraph-4;
-  display: inline-block;
+  @include paragraph-5;
   background-color: #fce8e6; /* Light red/pink background */
   color: $color-error-700;
   padding: 6px 12px;
   border-radius: 16px;
-  font-size: 14px;
 }
 
 .acknowledgement-header {
@@ -242,10 +253,9 @@ $color-grey-500: rgb(100, 100, 100);
   }
 
   .triangulation-tag {
-    font-size: 12px;
+    @include paragraph-6;
     padding: 4px 8px;
     border-radius: 15px;
-    font-weight: 500;
 
     &.success {
       color: #0a5c36;

@@ -9,7 +9,7 @@ import {
   POTENTIAL_AUTHOR_AFFILIATIONS,
   MISC_HIGH_RISK_AFFILIATIONS,
   COAUTHOR_AFFILIATIONS,
-  TitlesAndDescriptions,
+  FlagInformation,
 } from '../../../constants/constants.js';
 import ConcernVisualizer, { BaseFontSize, getFontSize } from '../../ConcernVisualization.js';
 import Graph from '../../common/graph/graph.js';
@@ -535,8 +535,8 @@ const ItemDetails = () => {
               const isSelected = review === flag;
               return (
                 <ConcernVisualizer
-                  title={TitlesAndDescriptions[flag].title}
-                  hoverText={TitlesAndDescriptions[flag].desc}
+                  title={FlagInformation[flag].title}
+                  hoverText={FlagInformation[flag].desc}
                   value={flagCount}
                   speedometerHoverText={`${flagCount} Issues`}
                   onReview={() => setReview(flag)}

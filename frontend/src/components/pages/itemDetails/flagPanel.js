@@ -7,7 +7,7 @@ import {
   POTENTIAL_AUTHOR_AFFILIATIONS,
   MISC_HIGH_RISK_AFFILIATIONS,
   COAUTHOR_AFFILIATIONS,
-  TitlesAndDescriptions,
+  FlagInformation,
 } from '../../../constants/constants.js';
 import { getRawTextFromXML } from '../../../utils/helper.js';
 import useOutsideClick from '../../../hooks/useOutsideClick.js';
@@ -41,7 +41,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
     setTimeout(() => setReview(''), 300);
   });
 
-  const toggleDropdown = () => {
+  const toggleSortByDropdownView = () => {
     setIsSortByDropdownOpen(!isSortByDropdownOpen);
   };
 
@@ -114,20 +114,18 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
       }
 
       return (
-          
-          <FlagContainer
+        <FlagContainer
           key={index}
           isDisclosureChecked={isDisclosureChecked}
           isDisclosed={flag.Disclosed}
         >
           {flagContent}
         </FlagContainer>
-        
       );
     });
   }
 
-  function withPublicationDate(header, flag) {
+  function withPublicationDate(headerText, flag) {
     const publicationDateStr = flag?.Work?.PublicationDate;
     let formattedDate = 'N/A';
     if (publicationDateStr) {
@@ -139,9 +137,9 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
       });
     }
     return (
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        {header}
-        <span className="fw-bold mt-3">{formattedDate}</span>
+      <div className="flag-container-header">
+        {headerText}
+        <span className="flag-container-date">{formattedDate}</span>
       </div>
     );
   }
@@ -166,10 +164,12 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
     return (
       <div className="flag-sub-container">
         <div className="acknowledgement-header">
-          <strong>Acknowledgements Text</strong>
+          <strong className="flag-sub-container-header">Acknowledgement(s)</strong>
           {hasTriangulationData && (
             <div className="triangulation-indicators">
-              {notContainPR && <span className="triangulation-tag success">Not primary recipient</span>}
+              {notContainPR && (
+                <span className="triangulation-tag success">Not primary recipient</span>
+              )}
               {containPR && <span className="triangulation-tag danger">Primary recipient</span>}
             </div>
           )}
@@ -179,7 +179,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
           {flag.RawAcknowledgements.map((item, itemIndex) => {
             const key = `ack-${index}-${itemIndex}`;
             return (
-              <li key={key}>
+              <li key={key} className="ack-text">
                 {hasTriangulationData ? applyHighlighting(item, highlights) : item}
               </li>
             );
@@ -192,52 +192,48 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
   function acknowledgementFlag(flag, index) {
     return (
       <div>
-        {withPublicationDate(
-          <h5 className="fw-bold mt-3">Acknowledgements possibly contain Talent Contracts</h5>,
-          flag
-        )}
-        <p>
+        {withPublicationDate(FlagInformation[review].headerText, flag)}
+        <div className="flag-container-description">
           {flag.Entities > 0 ? (
             <>{get_paper_url(flag)} acknowledges the following entities of concern:</>
           ) : (
             <>Some acknowledged entities in {get_paper_url(flag)} may be foreign entities.</>
           )}
-          <ul className="bulleted-list">
-            {flag.Entities.map((item, index2) => {
-              const key = `${index} ${index2}`;
-              return (
-                <li key={key}>
-                  <a>
-                    "{item.Entity}"{' was detected in '}
-                    <text style={{ fontWeight: 'bold', textDecoration: 'underline' }}>
-                      {item.Sources.join(', ')}
-                    </text>
-                    {' as '}
-                    {item.Aliases.map((element) => `"${element}"`).join(', ')}
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-          {acknowledgementSection(flag, authorName, index)}
-        </p>
+        </div>
+
+        <ul className="bulleted-list">
+          {flag.Entities.map((item, index2) => {
+            const key = `${index} ${index2}`;
+            return (
+              <li key={key}>
+                <a>
+                  "{item.Entity}"{' was detected in '}
+                  <text style={{ fontWeight: 'bold', textDecoration: 'underline' }}>
+                    {item.Sources.join(', ')}
+                  </text>
+                  {' as '}
+                  {item.Aliases.map((element) => `"${element}"`).join(', ')}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+        {acknowledgementSection(flag, authorName, index)}
       </div>
     );
   }
 
-
   function funderFlag(flag, index) {
     return (
       <div>
-        {withPublicationDate(
-          <h5 className="fw-bold mt-3">Funder is an Entity of Concern</h5>,
-          flag
-        )}
-        <p>{get_paper_url(flag)} is funded by the entities of concern</p>
+        {withPublicationDate(FlagInformation[review].headerText, flag)}
+        <div className="flag-container-description">
+          {get_paper_url(flag)} is funded by the entities of concern
+        </div>
 
         {Array.isArray(flag.Funders) && flag.Funders.length > 0 && (
           <div className="flag-sub-container">
-            <strong>Concerned entities</strong>
+            <div className="flag-sub-container-header">Concerned entities</div>
             <div className="concerned-tags">
               {flag.Funders.map((item, index2) => {
                 const key = `${index} ${index2}`;
@@ -344,24 +340,21 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
   function authorAffiliationFlag(flag, index) {
     return (
       <div>
-        {withPublicationDate(
-          <h5 className="fw-bold mt-3">Author is affiliated with an Entity of Concern</h5>,
-          flag
-        )}
-        <div>
+        {withPublicationDate(FlagInformation[review].headerText, flag)}
+        <div className="flag-container-description">
           {authorName} is affiliated with an entity of concern in {get_paper_url(flag)}.<p></p>
-          <div className="flag-sub-container">
-            <strong>Detected Affiliations</strong>
-            <div className="concerned-tags">
-              {flag.Affiliations.map((item, index2) => {
-                const key = `${index} ${index2}`;
-                return (
-                  <span key={key} className="concerned-tag-item">
-                    {item}
-                  </span>
-                );
-              })}
-            </div>
+        </div>
+        <div className="flag-sub-container">
+          <div className="flag-sub-container-header">Detected Affiliations</div>
+          <div className="concerned-tags">
+            {flag.Affiliations.map((item, index2) => {
+              const key = `${index} ${index2}`;
+              return (
+                <span key={key} className="concerned-tag-item">
+                  {item}
+                </span>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -491,15 +484,15 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
 
     return (
       <div className="sort-dropdown" ref={dropdownRef}>
-        <div className="sort-dropdown__toggle" onClick={toggleDropdown}>
+        <div className="sort-dropdown__toggle" onClick={toggleSortByDropdownView}>
           <span className="sort-dropdown__label">Sort by</span>
           <ChevronDown className="sort-dropdown__icon" />
         </div>
-        
+
         {isSortByDropdownOpen && (
           <div className="sort-dropdown__menu">
             {['Latest To Oldest', 'Oldest To Latest'].map((option) => (
-              <div 
+              <div
                 key={option}
                 className={`sort-dropdown__option ${
                   option === sortOrder ? 'sort-dropdown__option--selected' : ''
@@ -518,7 +511,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
   return (
     <div ref={sidepanelRef} className={`flag-panel ${isRendered ? 'open' : ''}`}>
       <div className="flag-panel-header">
-        <h4 className="flag-panel-title">{TitlesAndDescriptions[review].title}</h4>
+        <h4 className="flag-panel-title">{FlagInformation[review].title}</h4>
         <button className="flag-panel-close-button">
           <IoMdClose />
         </button>
