@@ -146,8 +146,8 @@ func (p *PerplexityAI) Generate(userPrompt, systemPrompt string, opt *Perplexity
 		"stream":   false,
 	}
 
-	updateOpts := p.createOptionsPayload(opt)
-	for k, v := range updateOpts {
+	updatedOpts := p.createOptionsPayload(opt)
+	for k, v := range updatedOpts {
 		payload[k] = v
 	}
 
