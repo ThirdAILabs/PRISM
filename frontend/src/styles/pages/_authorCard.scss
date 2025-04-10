@@ -75,6 +75,8 @@
   }
 }
 
+$table-padding: 15px 0px 12px 12px;
+
 .author-card {
   background: $color-text-100;
   padding: 20px 0px 20px 20px;
@@ -90,7 +92,7 @@
     th {
       @include label-5;
       color: $color-text-700;
-      padding: 12px;
+      padding: $table-padding;
       border-bottom: 1px solid $color-text-100;
       text-align: left;
     }
@@ -104,7 +106,7 @@
 
       td {
         text-align: left;
-        padding: 15px 0px 12px 12px;
+        padding: $table-padding;
         font-size: 14px;
         border-bottom: 1px solid $color-text-300;
 
