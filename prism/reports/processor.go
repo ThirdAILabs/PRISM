@@ -28,6 +28,10 @@ func NewProcessor(workFlaggers []WorkFlagger, authorFlaggers []AuthorFlagger, ma
 	}
 }
 
+func (processor *ReportProcessor) AddAuthorFlagger(flagger AuthorFlagger) {
+	processor.authorFlaggers = append(processor.authorFlaggers, flagger)
+}
+
 func (processor *ReportProcessor) getWorkStream(report ReportUpdateTask) (chan openalex.WorkBatch, error) {
 	switch report.Source {
 	case api.OpenAlexSource:
@@ -43,7 +47,7 @@ func (processor *ReportProcessor) getWorkStream(report ReportUpdateTask) (chan o
 	}
 }
 
-func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName string, workStream chan openalex.WorkBatch, flagsCh chan []api.Flag, forUniversityReport bool) {
+func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName, affiliations string, workStream chan openalex.WorkBatch, flagsCh chan []api.Flag, forUniversityReport bool) {
 	wg := sync.WaitGroup{}
 
 	batch := -1
@@ -85,7 +89,7 @@ func (processor *ReportProcessor) processWorks(logger *slog.Logger, authorName s
 
 			logger := logger.With("flagger", flagger.Name())
 
-			flags, err := flagger.Flag(logger, authorName)
+			flags, err := flagger.Flag(logger, authorName, affiliations)
 			if err != nil {
 				logger.Error("flagger error", "error", err)
 				monitoring.FlaggerErrors.WithLabelValues(flagger.Name()).Inc()
@@ -118,7 +122,7 @@ func (processor *ReportProcessor) ProcessAuthorReport(report ReportUpdateTask) {
 
 	flagsCh := make(chan []api.Flag, 100)
 
-	go processor.processWorks(logger, report.AuthorName, workStream, flagsCh, report.ForUniversityReport)
+	go processor.processWorks(logger, report.AuthorName, report.affiliations, workStream, flagsCh, report.ForUniversityReport)
 
 	seen := make(map[[sha256.Size]byte]struct{})
 	flagCounts := make(map[string]int)

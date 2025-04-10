@@ -2,10 +2,13 @@ package llms
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/openai/openai-go"
 )
 
@@ -69,4 +72,110 @@ func (o *OpenAI) Generate(prompt string, opts *Options) (string, error) {
 	}
 
 	return res.Choices[0].Message.Content, nil
+}
+
+type PerplexityAI struct {
+	client *resty.Client
+}
+
+func NewPerplexityAI(apiKey string) *PerplexityAI {
+	return &PerplexityAI{
+		client: resty.New().
+			SetBaseURL("https://api.perplexity.ai").
+			SetHeader("Authorization", "Bearer "+apiKey).
+			SetHeader("Content-Type", "application/json").
+			SetTimeout(120 * time.Second),
+	}
+}
+
+type PerplexityOptions struct {
+	Temperature      float32                `json:"temperature,omitempty"`
+	ResponseFormat   map[string]interface{} `json:"response_format,omitempty"`
+	WebSearchOptions map[string]interface{} `json:"web_search_options,omitempty"`
+	Model            string                 `json:"model,omitempty"`
+}
+
+type GenerateResponse struct {
+	Choices []struct {
+		Message struct {
+			Content string `json:"content"`
+			Role    string `json:"role"`
+		} `json:"message"`
+	} `json:"choices"`
+	Citations []string `json:"citations"`
+}
+
+func (p *PerplexityAI) createOptionsPayload(opt *PerplexityOptions) map[string]interface{} {
+	payload := make(map[string]interface{})
+	if opt != nil {
+		if opt.Temperature != 0 {
+			payload["temperature"] = opt.Temperature
+		}
+		if opt.Model != "" {
+			payload["model"] = opt.Model
+		}
+		if opt.ResponseFormat != nil {
+			payload["response_format"] = opt.ResponseFormat
+		}
+		if opt.WebSearchOptions != nil {
+			payload["web_search_options"] = opt.WebSearchOptions
+		}
+	}
+	if _, ok := payload["model"]; !ok {
+		payload["model"] = "sonar-pro"
+	}
+	return payload
+}
+
+func (p *PerplexityAI) Generate(userPrompt, systemPrompt string, opt *PerplexityOptions) (string, []string, error) {
+	messages := []map[string]string{}
+	if systemPrompt != "" {
+		messages = append(messages, map[string]string{
+			"role":    "system",
+			"content": systemPrompt,
+		})
+	}
+
+	messages = append(messages, map[string]string{
+		"role":    "user",
+		"content": userPrompt,
+	})
+
+	payload := map[string]interface{}{
+		"messages": messages,
+		"stream":   false,
+	}
+
+	defaultOpts := p.createOptionsPayload(opt)
+	for k, v := range defaultOpts {
+		payload[k] = v
+	}
+
+	resp, err := p.client.R().
+		SetBody(payload).
+		Post("/chat/completions")
+
+	if err != nil {
+		return "", make([]string, 0), fmt.Errorf("failed to send request: %w", err)
+	}
+
+	if resp.IsError() {
+		return "", make([]string, 0), fmt.Errorf("request failed with status %s: %s", resp.Status(), resp.Body())
+	}
+
+	var result GenerateResponse
+	if err := json.Unmarshal(resp.Body(), &result); err != nil {
+		return "", make([]string, 0), fmt.Errorf("failed to unmarshal response: %w", err)
+	}
+
+	if len(result.Choices) == 0 {
+		return "", make([]string, 0), fmt.Errorf("no choices in response")
+	}
+
+	content := result.Choices[0].Message.Content
+	if content == "" {
+		return "", make([]string, 0), fmt.Errorf("empty content in message")
+	}
+
+	return content, result.Citations, nil
 }

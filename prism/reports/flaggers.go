@@ -15,7 +15,7 @@ type WorkFlagger interface {
 }
 
 type AuthorFlagger interface {
-	Flag(logger *slog.Logger, authorName string) ([]api.Flag, error)
+	Flag(logger *slog.Logger, authorName, affiliations string) ([]api.Flag, error)
 
 	Name() string
 }

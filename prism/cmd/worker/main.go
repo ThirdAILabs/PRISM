@@ -43,6 +43,8 @@ type Config struct {
 	MaxGrobidThreads   int `env:"MAX_GROBID_THREADS" envDefault:"10"`
 
 	S3Bucket string `env:"S3_BUCKET" envDefault:"thirdai-prism"`
+
+	PpxApiKey string `env:"PPX_API_KEY" envDefault:""`
 }
 
 func (c *Config) logfile() string {
@@ -138,10 +140,13 @@ func main() {
 			flaggers.NewAuthorIsFacultyAtEOCFlagger(
 				flaggers.BuildUniversityNDB(config.UniversityData, filepath.Join(ndbDir, "university.ndb")),
 			),
-			flaggers.NewAuthorNewsArticlesFlagger(),
 		},
 		reportManager,
 	)
+
+	if config.PpxApiKey != "" {
+		processor.AddAuthorFlagger(flaggers.NewAuthorNewsArticlesFlagger(config.PpxApiKey))
+	}
 
 	lastLicenseCheck := time.Now()
 	for {
