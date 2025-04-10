@@ -16,8 +16,8 @@
       background-color: $color-text-100;
       border-radius: 0 20px 20px 0;
       padding: 8px 16px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-      @include sub-heading-4;
+      box-shadow: 0 1px 3px rgba($color-text-900, 0.15);
+      @include label-4;
 
       .score-label {
         color: $color-error-700;
@@ -32,7 +32,6 @@
 
   .search-container {
     position: relative;
-    width: 200px;
 
     .search-icon {
       position: absolute;
@@ -44,7 +43,7 @@
     .search-input {
       padding: 8px 0px 8px 36px;
       border: 1px solid $color-text-300;
-      border-radius: 6px;
+      border-radius: 10px;
       outline: none;
 
       &:focus {
@@ -86,13 +85,13 @@
   table-layout: fixed;
 
   thead {
-    background: #f5f5f5;
+    background: rgba($color-text-300, 0.25);
 
     th {
-      @include label-4;
+      @include label-5;
       color: $color-text-700;
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
+      padding: 12px;
+      border-bottom: 1px solid $color-text-100;
       text-align: left;
     }
   }
@@ -105,9 +104,9 @@
 
       td {
         text-align: left;
-        padding: 10px;
+        padding: 15px 0px 12px 12px;
         font-size: 14px;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid $color-text-300;
 
         .view-report-button {
           cursor: pointer;
