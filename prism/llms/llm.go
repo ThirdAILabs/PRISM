@@ -95,7 +95,7 @@ type PerplexityOptions struct {
 	Model            string                 `json:"model,omitempty"`
 }
 
-type GenerateResponse struct {
+type PerplexityResponse struct {
 	Choices []struct {
 		Message struct {
 			Content string `json:"content"`
@@ -146,8 +146,8 @@ func (p *PerplexityAI) Generate(userPrompt, systemPrompt string, opt *Perplexity
 		"stream":   false,
 	}
 
-	defaultOpts := p.createOptionsPayload(opt)
-	for k, v := range defaultOpts {
+	updateOpts := p.createOptionsPayload(opt)
+	for k, v := range updateOpts {
 		payload[k] = v
 	}
 
@@ -163,7 +163,7 @@ func (p *PerplexityAI) Generate(userPrompt, systemPrompt string, opt *Perplexity
 		return "", make([]string, 0), fmt.Errorf("request failed with status %s: %s", resp.Status(), resp.Body())
 	}
 
-	var result GenerateResponse
+	var result PerplexityResponse
 	if err := json.Unmarshal(resp.Body(), &result); err != nil {
 		return "", make([]string, 0), fmt.Errorf("failed to unmarshal response: %w", err)
 	}
