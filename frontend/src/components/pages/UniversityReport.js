@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import useGoBack from '../../hooks/useGoBack.js';
+import { IoIosClose } from 'react-icons/io';
 import {
   TALENT_CONTRACTS,
   ASSOCIATIONS_WITH_DENIED_ENTITIES,
@@ -16,6 +17,7 @@ import { universityReportService } from '../../api/universityReports.js';
 import AuthorCard from '../common/cards/AuthorCard.js';
 import useOutsideClick from '../../hooks/useOutsideClick.js';
 import '../../styles/pages/_universityReport.scss';
+import { Divider } from '@mui/material';
 
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
@@ -72,14 +74,19 @@ const UniversityReport = () => {
   const [selectedFlagData, setSelectedFlagData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [valueFontSize, setValueFontSize] = useState(`${BaseFontSize}px`);
+  const [isPanelVisible, setIsPanelVisible] = useState(false);
 
   const universityFlagPanelRef = useOutsideClick(() => {
-    setSelectedFlag(null);
+    setIsPanelVisible(false);
+    setTimeout(() => setSelectedFlag(null), 300);
   });
 
   const handleReview = (flag) => {
     setSelectedFlag(flag);
     setSelectedFlagData(reportContent?.Flags[flag] || []);
+    requestAnimationFrame(() => {
+      setIsPanelVisible(true);
+    });
   };
 
   useEffect(() => {
@@ -143,6 +150,8 @@ const UniversityReport = () => {
         overflow: 'hidden',
       }}
     >
+      <div className={`panel-overlay ${isPanelVisible ? 'visible' : ''}`} />
+
       <div
         className="detail-header"
         style={{
@@ -259,14 +268,24 @@ const UniversityReport = () => {
         </div>
 
         {selectedFlag && (
-          <div className={`university-flag-panel ${selectedFlag ? 'open' : ''}`}>
+          <div
+            className={`university-flag-panel ${isPanelVisible ? 'open' : ''}`}
+            ref={universityFlagPanelRef}
+          >
             <div className="university-flag-panel-header">
-              <h4>{TitlesAndDescriptions[selectedFlag]?.title}</h4>
-              <button className="close-button" onClick={() => setSelectedFlag(null)}>
-                ×
+              <span>{TitlesAndDescriptions[selectedFlag]?.title}</span>
+              <button
+                className="close-button"
+                onClick={() => {
+                  setIsPanelVisible(false);
+                  setTimeout(() => setSelectedFlag(null), 300);
+                }}
+              >
+                <IoIosClose />
               </button>
             </div>
-            <div className="university-flag-panel-content" ref={universityFlagPanelRef}>
+            <Divider className="university-flag-panel-divider" />
+            <div className="university-flag-panel-content">
               <AuthorCard score={selectedFlagData.length} authors={selectedFlagData} />
             </div>
           </div>

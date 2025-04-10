@@ -2,6 +2,8 @@ import React from 'react';
 import { TbReportSearch } from 'react-icons/tb';
 import { reportService } from '../../../api/reports';
 import '../../../styles/pages/_authorCard.scss';
+import { CiSearch } from 'react-icons/ci';
+import { IoFilter } from 'react-icons/io5';
 
 const AuthorCard = ({ score, authors }) => {
   const handleClick = async (authorId, authorName, Source) => {
@@ -26,29 +28,16 @@ const AuthorCard = ({ score, authors }) => {
         </div>
         <div className="search-container">
           <div className="search-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path
-                fillRule="evenodd"
-                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <CiSearch />
           </div>
           <input type="text" placeholder="Search..." className="search-input" />
         </div>
-
-        <div className="controls-container">
+        {/* <div className="controls-container">
           <button className="filters-button">
             Filters
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path
-                fillRule="evenodd"
-                d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <IoFilter />
           </button>
-        </div>
+        </div> */}
       </div>
       <div className="author-card">
         <table className="author-table">
@@ -56,7 +45,7 @@ const AuthorCard = ({ score, authors }) => {
             <tr>
               <th>Author Name</th>
               <th>Flag Count</th>
-              <th>Actions</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -66,11 +55,10 @@ const AuthorCard = ({ score, authors }) => {
                 <td>{author.FlagCount}</td>
                 <td>
                   <button
-                    className="view-report-button"
+                    class="button button-3d view-report-button"
                     onClick={() => handleClick(author.AuthorId, author.AuthorName, author.Source)}
                   >
-                    <TbReportSearch />
-                    <span>View Report</span>
+                    View Report
                   </button>
                 </td>
               </tr>

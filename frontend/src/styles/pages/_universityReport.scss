@@ -5,29 +5,52 @@ $sidebar-width: 50%;
 $sidebar-padding: 20px;
 $sidebar-border-color: #060606;
 $sidebar-icon-size: 24px;
-$sidebar-transition: right 0.3s ease;
+$sidebar-transition: all 0.3s ease-in-out;
 $sidebar-box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
 
 // Additional Colors
 $color-grey-500: rgb(100, 100, 100);
 
+// Overlay styles
+.panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  // transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 999;
+
+  &.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
 //side panel from right side
 .university-flag-panel {
   position: fixed;
-  right: -$sidebar-width;
   top: 0;
+  right: -100%;
   width: $sidebar-width;
-  max-width: 700px;
+  max-width: 600px;
   height: 100vh;
   background: white;
   box-shadow: $sidebar-box-shadow;
-  transition: all 0.3s ease-in-out;
+  transition: $sidebar-transition;
   z-index: 1000;
   display: flex;
   flex-direction: column;
+  visibility: hidden;
+  opacity: 0;
 
   &.open {
     right: 0;
+    visibility: visible;
+    opacity: 1;
   }
 
   &-header {
@@ -35,18 +58,13 @@ $color-grey-500: rgb(100, 100, 100);
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    border-bottom: 1px solid #eee;
-
-    h4 {
-      margin: 0;
-    }
+    @include label-3;
 
     .close-button {
       background: none;
       border: none;
       font-size: 24px;
       cursor: pointer;
-      padding: 0 8px;
 
       &:hover {
         opacity: 0.7;
@@ -60,94 +78,9 @@ $color-grey-500: rgb(100, 100, 100);
   }
 }
 
-// .divider {
-//   height: 1px;
-//   background-color: $color-grey-500;
-// }
-
-//   .tab-group {
-//     display: flex;
-//     padding-left: 15px;
-
-//     .tab-button {
-//       padding: 8px 24px;
-//       border-radius: 7px;
-//       background-color: #f3f4f6; // gray-100 equivalent
-//       font-size: 14px;
-//       transition: all 0.2s ease;
-//       border-color: transparent;
-//       margin-left: 12px;
-
-//       &.active {
-//         background-color: white;
-//         border: 1px solid $color-primary-700;
-//         color: $color-primary-900; // blue-500 equivalent
-//         @include sub-heading-5;
-//       }
-
-//       &:hover:not(.active) {
-//         background-color: #e5e7eb; // gray-200 equivalent
-//       }
-//     }
-//   }
-// }
-// .sort-by-container {
-//   margin-left: auto;
-//   display: flex;
-//   align-items: center;
-//   gap: 10px;
-//   padding-right: 20px;
-
-//   .sort-label {
-//     @include sub-heading-4;
-//   }
-
-//   .sort-icon {
-//     cursor: pointer;
-//     display: flex;
-//     align-items: center;
-
-//     svg {
-//       color: $color-text-900;
-//     }
-//   }
-// }
-
-// .flag-header {
-//   @include heading-3;
-// }
-
-// .flag-sub-container {
-//   width: 100%;
-//   border: 1px solid $color-text-300;
-//   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-//   border-radius: 5px;
-//   margin-bottom: 8px;
-//   padding: 10px;
-// }
-
-// .bulleted-list {
-//   list-style-type: none;
-//   padding-left: 10px;
-
-//   & a {
-//     color: $color-primary-700;
-//   }
-// }
-
-// .concerned-tags {
-//   display: flex;
-//   flex-wrap: wrap;
-//   gap: 8px;
-//   margin-top: 8px;
-// }
-
-// .concerned-tag-item {
-//   @include paragraph-4;
-//   display: inline-block;
-//   background-color: #fce8e6; /* Light red/pink background */
-//   color: $color-error-700;
-//   padding: 6px 12px;
-//   border-radius: 16px;
-//   font-size: 14px;
-// }
+.university-flag-panel-divider {
+  background-color: $color-text-900;
+  height: 1px;
+  width: 97.5%;
+  opacity: 0.1;
+}
