@@ -195,8 +195,6 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 	})
 }
 
-// get PpxApiKey from env
-
 func TestAuthorNewsArticleFlagger(t *testing.T) {
 	apiKey := os.Getenv("PPX_API_KEY")
 	if apiKey == "" {
