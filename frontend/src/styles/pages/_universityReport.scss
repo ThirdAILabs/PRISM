@@ -1,7 +1,7 @@
 @import '../base/varialbes';
 @import '../base/typography';
 
-$sidebar-width: 70%;
+$sidebar-width: 50%;
 $sidebar-padding: 20px;
 $sidebar-border-color: #060606;
 $sidebar-icon-size: 24px;
@@ -17,6 +17,7 @@ $color-grey-500: rgb(100, 100, 100);
   right: -$sidebar-width;
   top: 0;
   width: $sidebar-width;
+  max-width: 700px;
   height: 100vh;
   background: white;
   box-shadow: $sidebar-box-shadow;
@@ -24,7 +25,6 @@ $color-grey-500: rgb(100, 100, 100);
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
 
   &.open {
     right: 0;
@@ -56,7 +56,6 @@ $color-grey-500: rgb(100, 100, 100);
 
   &-content {
     flex: 1;
-    padding: 20px;
     overflow-y: auto;
   }
 }
@@ -65,31 +64,6 @@ $color-grey-500: rgb(100, 100, 100);
 //   height: 1px;
 //   background-color: $color-grey-500;
 // }
-
-.score-box-container {
-    display: flex;
-    align-items: center;
-    margin: 10px 0;
-    flex: 1;
-    width: 100;
-    justify-content: space-between;
-
-    .score-pill {
-        background-color: $color-text-100;
-        border-radius: 0 20px 20px 0;
-        padding: 8px 16px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-        @include sub-heading-4;
-        .score-label {
-        color: $color-error-700;
-        margin-right: 7px;
-        }
-
-        .score-value {
-        color: $color-error-700;
-        }
-    }
-}
 
 //   .tab-group {
 //     display: flex;

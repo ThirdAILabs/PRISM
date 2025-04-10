@@ -14,8 +14,7 @@ import ConcernVisualizer, { BaseFontSize, getFontSize } from '../ConcernVisualiz
 
 import { universityReportService } from '../../api/universityReports.js';
 import AuthorCard from '../common/cards/AuthorCard.js';
-
-import styled from 'styled-components';
+import useOutsideClick from '../../hooks/useOutsideClick.js';
 import '../../styles/pages/_universityReport.scss';
 
 const FLAG_ORDER = [
@@ -71,14 +70,16 @@ const UniversityReport = () => {
   const [researchersAssessed, setResearchersAssessed] = useState(0);
   const [selectedFlag, setSelectedFlag] = useState(null);
   const [selectedFlagData, setSelectedFlagData] = useState(null);
-  const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [valueFontSize, setValueFontSize] = useState(`${BaseFontSize}px`);
+
+  const universityFlagPanelRef = useOutsideClick(() => {
+    setSelectedFlag(null);
+  });
 
   const handleReview = (flag) => {
     setSelectedFlag(flag);
     setSelectedFlagData(reportContent?.Flags[flag] || []);
-    setShowModal(true);
   };
 
   useEffect(() => {
@@ -133,7 +134,15 @@ const UniversityReport = () => {
   const goBack = useGoBack('/university');
 
   return (
-    <div className="basic-setup" style={{ minHeight: '100vh', paddingBottom: '50px', position: 'relative', overflow: 'hidden' }}>
+    <div
+      className="basic-setup"
+      style={{
+        minHeight: '100vh',
+        paddingBottom: '50px',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
       <div
         className="detail-header"
         style={{
@@ -249,26 +258,16 @@ const UniversityReport = () => {
               })}
         </div>
 
-        {showModal && (
-          <div className={`university-flag-panel ${showModal ? 'open' : ''}`}>
+        {selectedFlag && (
+          <div className={`university-flag-panel ${selectedFlag ? 'open' : ''}`}>
             <div className="university-flag-panel-header">
               <h4>{TitlesAndDescriptions[selectedFlag]?.title}</h4>
-              <button className="close-button" onClick={() => setShowModal(false)}>×</button>
+              <button className="close-button" onClick={() => setSelectedFlag(null)}>
+                ×
+              </button>
             </div>
-            <div className="selection-container">
-              <div className="score-box-container">
-                <div className="score-pill">
-                  <span className="score-label">Score:</span>
-                  <span className="score-value">
-                    {selectedFlagData?.length || 0}
-                  </span>
-                </div>
-              </div>
-              <input type="text" placeholder="Search..." className="search-input" />
-            </div>
-            
-            <div className="university-flag-panel-content">
-              <AuthorCard authors={selectedFlagData} />
+            <div className="university-flag-panel-content" ref={universityFlagPanelRef}>
+              <AuthorCard score={selectedFlagData.length} authors={selectedFlagData} />
             </div>
           </div>
         )}
