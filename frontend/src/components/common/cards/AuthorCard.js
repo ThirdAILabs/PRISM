@@ -81,6 +81,10 @@ const AuthorCard = ({ authors }) => {
           //   // Filter button
           //   display: 'inline-flex',
           // },
+          // '& .MuiButton-root:nth-of-type(3)': {
+          //   // Filter button
+          //   display: 'inline-flex',
+          // },
         }}
       />
     );
