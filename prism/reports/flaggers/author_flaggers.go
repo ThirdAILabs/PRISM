@@ -664,7 +664,7 @@ func (flagger *AuthorNewsArticlesFlagger) responseFormat() map[string]interface{
 							},
 							"date": map[string]interface{}{
 								"type":        "string",
-								"description": "Date of the source in DD-MM-YYYY format",
+								"description": "Date of the source",
 								"format":      "date",
 							},
 						},
@@ -707,15 +707,19 @@ func (flagger *AuthorNewsArticlesFlagger) Flag(logger *slog.Logger, authorName, 
 	}
 
 	sort.Slice(parsedResponse.News, func(i, j int) bool {
-		dateI, err := time.Parse("2006-01-02", parsedResponse.News[i].Date) // Assuming the date format is YYYY-MM-DD
-		if err != nil {
+		dateI, errI := time.Parse("2006-01-02", parsedResponse.News[i].Date) // Date format is YYYY-MM-DD
+		dateJ, errJ := time.Parse("2006-01-02", parsedResponse.News[j].Date)
+
+		if errI == nil && errJ == nil {
+			return dateI.After(dateJ)
+		} else if errI == nil && errJ != nil {
+			return true
+		} else if errI != nil && errJ == nil {
 			return false
+		} else {
+			// maintain original order
+			return i < j
 		}
-		dateJ, err := time.Parse("2006-01-02", parsedResponse.News[j].Date)
-		if err != nil {
-			return false
-		}
-		return dateI.After(dateJ)
 	})
 
 	parsedResponse.News = parsedResponse.News[:min(5, len(parsedResponse.News))]
