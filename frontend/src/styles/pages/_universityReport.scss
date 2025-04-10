@@ -2,11 +2,7 @@
 @import '../base/typography';
 
 $sidebar-width: 50%;
-$sidebar-padding: 20px;
-$sidebar-border-color: #060606;
-$sidebar-icon-size: 24px;
 $sidebar-transition: all 0.3s ease-in-out;
-$sidebar-box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
 
 // Additional Colors
 $color-grey-500: rgb(100, 100, 100);
@@ -21,6 +17,7 @@ $color-grey-500: rgb(100, 100, 100);
   background-color: rgba(0, 0, 0, 0.5);
   opacity: 0;
   visibility: hidden;
+  // transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 999;
 
   &.visible {
@@ -38,7 +35,6 @@ $color-grey-500: rgb(100, 100, 100);
   max-width: 600px;
   height: 100vh;
   background: white;
-  box-shadow: $sidebar-box-shadow;
   transition: $sidebar-transition;
   z-index: 1000;
   display: flex;
