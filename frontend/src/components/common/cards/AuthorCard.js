@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TbReportSearch } from 'react-icons/tb';
 import { reportService } from '../../../api/reports';
 import '../../../styles/pages/_authorCard.scss';
@@ -6,6 +6,11 @@ import { CiSearch } from 'react-icons/ci';
 import { IoFilter } from 'react-icons/io5';
 
 const AuthorCard = ({ score, authors }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const filteredAuthors = authors.filter(author => 
+    author.AuthorName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const handleClick = async (authorId, authorName, Source) => {
     const report = await reportService.createReport({
       AuthorId: authorId,
@@ -30,14 +35,14 @@ const AuthorCard = ({ score, authors }) => {
           <div className="search-icon">
             <CiSearch />
           </div>
-          <input type="text" placeholder="Search..." className="search-input" />
+          <input 
+            type="text" 
+            placeholder="Search..." 
+            className="search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-        {/* <div className="controls-container">
-          <button className="filters-button">
-            Filters
-            <IoFilter />
-          </button>
-        </div> */}
       </div>
       <div className="author-card">
         <table className="author-table">
@@ -49,7 +54,7 @@ const AuthorCard = ({ score, authors }) => {
             </tr>
           </thead>
           <tbody>
-            {authors.map((author, index) => (
+            {filteredAuthors.map((author, index) => (
               <tr key={index}>
                 <td>{author.AuthorName}</td>
                 <td>{author.FlagCount}</td>
