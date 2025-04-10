@@ -7,7 +7,7 @@ import { IoFilter } from 'react-icons/io5';
 
 const AuthorCard = ({ score, authors }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const filteredAuthors = authors.filter(author => 
+  const filteredAuthors = authors.filter((author) =>
     author.AuthorName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -35,9 +35,9 @@ const AuthorCard = ({ score, authors }) => {
           <div className="search-icon">
             <CiSearch />
           </div>
-          <input 
-            type="text" 
-            placeholder="Search..." 
+          <input
+            type="text"
+            placeholder="Search..."
             className="search-input"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
