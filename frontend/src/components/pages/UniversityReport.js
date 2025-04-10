@@ -76,11 +76,6 @@ const UniversityReport = () => {
   const [valueFontSize, setValueFontSize] = useState(`${BaseFontSize}px`);
   const [isPanelVisible, setIsPanelVisible] = useState(false);
 
-  const universityFlagPanelRef = useOutsideClick(() => {
-    setIsPanelVisible(false);
-    setTimeout(() => setSelectedFlag(null), 300);
-  });
-
   const handleReview = (flag) => {
     setSelectedFlag(flag);
     setSelectedFlagData(reportContent?.Flags[flag] || []);
@@ -88,6 +83,17 @@ const UniversityReport = () => {
       setIsPanelVisible(true);
     });
   };
+
+  const handleClosePanel = () => {
+    setIsPanelVisible(false);
+    // Wait for transition to complete before clearing selection
+    setTimeout(() => {
+      setSelectedFlag(null);
+      setSelectedFlagData(null);
+    }, 300);
+  };
+
+  const universityFlagPanelRef = useOutsideClick(handleClosePanel);
 
   useEffect(() => {
     let isMounted = true;
@@ -274,13 +280,7 @@ const UniversityReport = () => {
           >
             <div className="university-flag-panel-header">
               <span>{TitlesAndDescriptions[selectedFlag]?.title}</span>
-              <button
-                className="close-button"
-                onClick={() => {
-                  setIsPanelVisible(false);
-                  setTimeout(() => setSelectedFlag(null), 300);
-                }}
-              >
+              <button className="close-button" onClick={handleClosePanel}>
                 <IoIosClose />
               </button>
             </div>

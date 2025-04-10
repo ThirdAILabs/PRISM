@@ -2,7 +2,6 @@
 @import '../base/typography';
 
 $sidebar-width: 50%;
-$sidebar-transition: all 0.3s ease-in-out;
 
 // Additional Colors
 $color-grey-500: rgb(100, 100, 100);
@@ -17,7 +16,6 @@ $color-grey-500: rgb(100, 100, 100);
   background-color: rgba(0, 0, 0, 0.5);
   opacity: 0;
   visibility: hidden;
-  // transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 999;
 
   &.visible {
@@ -30,22 +28,19 @@ $color-grey-500: rgb(100, 100, 100);
 .university-flag-panel {
   position: fixed;
   top: 0;
-  right: -100%;
+  right: 0;
   width: $sidebar-width;
   max-width: 600px;
   height: 100vh;
   background: white;
-  transition: $sidebar-transition;
+  transform: translateX(100%);
+  transition: transform 0.2s ease-out;
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  visibility: hidden;
-  opacity: 0;
 
   &.open {
-    right: 0;
-    visibility: visible;
-    opacity: 1;
+    transform: translateX(0);
   }
 
   &-header {
