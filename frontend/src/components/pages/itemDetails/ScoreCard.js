@@ -33,7 +33,7 @@ const ScoreCard = ({ score = 0, setActiveTab, loading }) => {
             disabled={loading || !score}
             onClick={() => setActiveTab(1)}
           >
-            Visualise
+            Visualize
           </button>
         </div>
       </div>
