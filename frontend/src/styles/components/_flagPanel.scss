@@ -1,7 +1,7 @@
 @import '../base/varialbes';
 @import '../base/typography';
 
-$sidebar-width: 70%;
+$sidebar-width: 50%;
 $sidebar-border-color: #060606;
 $sidebar-icon-size: 24px;
 $sidebar-transition: right 0.3s ease;
@@ -17,6 +17,7 @@ $color-grey-500: rgb(100, 100, 100);
   right: -$sidebar-width;
   top: 0;
   width: $sidebar-width;
+  max-width: 800px;
   height: 100vh;
   background: $color-text-100;
   box-shadow: $sidebar-box-shadow;
@@ -206,6 +207,7 @@ $color-grey-500: rgb(100, 100, 100);
   border: 1px solid $color-text-300;
   border-radius: 5px;
   padding: 10px;
+  margin-bottom: 12px;
 
   &-header {
     @include sub-heading-5;
@@ -218,12 +220,9 @@ $color-grey-500: rgb(100, 100, 100);
 }
 
 .bulleted-list {
-  list-style-type: none;
   padding-left: 10px;
-
-  & a {
-    color: $color-primary-700;
-  }
+  @include paragraph-5;
+  color: $color-text-700;
 }
 
 .concerned-tags {
