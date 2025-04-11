@@ -726,8 +726,8 @@ func (flagger *AuthorNewsArticlesFlagger) Flag(logger *slog.Logger, authorName, 
 	for _, result := range parsedResponse.News {
 		docUrl := ""
 		if len(citations) >= result.Citation {
-			// citation is 1-indexed and result.Citation index is not out-of-bound
-			docUrl = citations[result.Citation]
+			// result.Citation is 1-based indexing on perplexity's citation-list
+			docUrl = citations[result.Citation-1]
 		}
 
 		flags = append(flags, &api.MiscHighRiskAssociationFlag{
