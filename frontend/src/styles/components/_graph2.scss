@@ -53,6 +53,7 @@ $connection-line-color: #09abff;
 
     .my-card-body {
       color: $level-1-color;
+      margin: 5px 2px;
     }
   }
 
@@ -73,10 +74,12 @@ $connection-line-color: #09abff;
 
     .my-card-header {
       background-color: $level-2-color;
+      height: 10px;
     }
 
     .my-card-body {
       color: $level-2-color;
+      margin: 10px 2px;
     }
   }
 
@@ -97,10 +100,12 @@ $connection-line-color: #09abff;
 
     .my-card-header {
       background-color: $level-3-color;
+      height: 10px;
     }
 
     .my-card-body {
       color: $level-3-color;
+      margin: 10px 2px;
     }
   }
 
