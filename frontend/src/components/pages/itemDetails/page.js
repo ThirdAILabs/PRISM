@@ -446,8 +446,8 @@ const ItemDetails = () => {
                       }}
                     >
                       <ConcernVisualizer
-                        title={TitlesAndDescriptions[flag].title}
-                        hoverText={TitlesAndDescriptions[flag].desc}
+                        title={FlagInformation[flag].title}
+                        hoverText={FlagInformation[flag].desc}
                         value={flagCount}
                         speedometerHoverText={`${flagCount} Issues`}
                         onReview={() => setReview(flag)}
