@@ -76,7 +76,6 @@ const TitlesAndDescriptions = {
 };
 
 const get_paper_url = (flag) => {
-
   return (
     <>
       <a href={flag.Work.WorkUrl} target="_blank" rel="noopener noreferrer">
@@ -144,10 +143,10 @@ const ItemDetails = () => {
     await handleSubmit(files);
   };
   const verifyWithDisclosure = {
-    "fileInputRef": fileInputRef,
-    "handleFileUploadClick": handleFileUploadClick,
-    "handleFileSelect": handleFileSelect,
-  }
+    fileInputRef: fileInputRef,
+    handleFileUploadClick: handleFileUploadClick,
+    handleFileSelect: handleFileSelect,
+  };
   const handleSubmit = async (files) => {
     if (!files || files.length === 0) {
       setNotification({
@@ -311,17 +310,17 @@ const ItemDetails = () => {
 
     const displayStart = startDate
       ? parseLocalDate(startDate).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
       : 'earliest';
     const displayEnd = endDate
       ? parseLocalDate(endDate).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
       : 'today';
 
     setFilterMessage(`${displayStart} - ${displayEnd}`);
@@ -347,14 +346,14 @@ const ItemDetails = () => {
     });
   };
   const filterProps = {
-    "startDate": startDate,
-    "endDate": endDate,
-    "todayStr": todayStr,
-    "handleStartDateChange": handleStartDateChange,
-    "handleEndDateChange": handleEndDateChange,
-    "handleDateFilter": handleDateFilter,
-    "handleClearFilter": handleClearFilter,
-  }
+    startDate: startDate,
+    endDate: endDate,
+    todayStr: todayStr,
+    handleStartDateChange: handleStartDateChange,
+    handleEndDateChange: handleEndDateChange,
+    handleDateFilter: handleDateFilter,
+    handleClearFilter: handleClearFilter,
+  };
 
   const [review, setReview] = useState();
 
@@ -460,8 +459,8 @@ const ItemDetails = () => {
             <>
               <strong>Acknowledgements Text</strong>
               {flag.FundCodeTriangulation &&
-                typeof flag.FundCodeTriangulation === 'object' &&
-                Object.keys(flag.FundCodeTriangulation).length > 0 ? (
+              typeof flag.FundCodeTriangulation === 'object' &&
+              Object.keys(flag.FundCodeTriangulation).length > 0 ? (
                 <>
                   <ul className="bulleted-list">
                     {flag.RawAcknowledgements?.map((item, index2) => {
@@ -489,15 +488,15 @@ const ItemDetails = () => {
                         parts = parts.flatMap((text, i) =>
                           typeof text === 'string'
                             ? text.split(regex).flatMap((part, j, arr) =>
-                              j < arr.length - 1
-                                ? [
-                                  part,
-                                  <span key={`${i}-${j}`} style={{ color }} title={tooltip}>
-                                    <strong>{text.match(regex)[0]}</strong>
-                                  </span>,
-                                ]
-                                : part
-                            )
+                                j < arr.length - 1
+                                  ? [
+                                      part,
+                                      <span key={`${i}-${j}`} style={{ color }} title={tooltip}>
+                                        <strong>{text.match(regex)[0]}</strong>
+                                      </span>,
+                                    ]
+                                  : part
+                              )
                             : text
                         );
                       });
@@ -693,8 +692,8 @@ const ItemDetails = () => {
           <strong>Acknowledgement Text</strong>
           <br />
           {flag.FundCodeTriangulation &&
-            typeof flag.FundCodeTriangulation === 'object' &&
-            Object.keys(flag.FundCodeTriangulation).length > 0 ? (
+          typeof flag.FundCodeTriangulation === 'object' &&
+          Object.keys(flag.FundCodeTriangulation).length > 0 ? (
             <>
               {flag.RawAcknowledgements?.map((item, index2) => {
                 const key = `ack-${index} ${index2}`;
@@ -721,15 +720,15 @@ const ItemDetails = () => {
                   parts = parts.flatMap((text, i) =>
                     typeof text === 'string'
                       ? text.split(regex).flatMap((part, j, arr) =>
-                        j < arr.length - 1
-                          ? [
-                            part,
-                            <span key={`${i}-${j}`} style={{ color }} title={tooltip}>
-                              <strong>{text.match(regex)[0]}</strong>
-                            </span>,
-                          ]
-                          : part
-                      )
+                          j < arr.length - 1
+                            ? [
+                                part,
+                                <span key={`${i}-${j}`} style={{ color }} title={tooltip}>
+                                  <strong>{text.match(regex)[0]}</strong>
+                                </span>,
+                              ]
+                            : part
+                        )
                       : text
                   );
                 });
@@ -960,30 +959,26 @@ const ItemDetails = () => {
   );
   const goBack = useGoBack('/');
 
-
-
   const downloadProps = {
     reportId: report_id,
     metadata: reportMetadata,
     content: reportContent,
     disabled: loading,
-  }
+  };
 
   const handleBackButtonClick = () => {
     if (activeTab === 1) {
       setActiveTab(0);
-    }
-    else {
+    } else {
       goBack();
     }
-  }
+  };
 
   return (
     <div className="basic-setup">
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-row">
           <div className="detail-header">
-
             <div
               style={{
                 flex: '1',
@@ -1048,7 +1043,7 @@ const ItemDetails = () => {
           </div>
         )}
       </div>
-      {activeTab === 0 &&
+      {activeTab === 0 && (
         <>
           {authorInfo ? (
             <>
@@ -1072,7 +1067,12 @@ const ItemDetails = () => {
                 </div>
                 <div
                   className="author-item"
-                  style={{ marginTop: '20px', marginBottom: '20px', marginRight: '3%', width: '45%' }}
+                  style={{
+                    marginTop: '20px',
+                    marginBottom: '20px',
+                    marginRight: '3%',
+                    width: '45%',
+                  }}
                 >
                   <ScoreCard
                     score={Object.keys(reportContent || {})
@@ -1101,7 +1101,7 @@ const ItemDetails = () => {
                         border: '1px solid rgb(230, 230, 230)',
                         borderRadius: '8px',
                         padding: '0px',
-                        width: '13.5%'
+                        width: '13.5%',
                       }}
                     >
                       <ConcernVisualizer
@@ -1118,21 +1118,24 @@ const ItemDetails = () => {
                   );
                 })}
               </div>
-
             </>
-          ) : (<div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: 'calc(100vh - 100px)'
-          }}>
-            <Lottie
-              animationData={loadingAnimation}
-              loop={true}
-              autoplay={true}
-              style={{ width: 2000 }}
-            />
-          </div>)}
+          ) : (
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: 'calc(100vh - 100px)',
+              }}
+            >
+              <Lottie
+                animationData={loadingAnimation}
+                loop={true}
+                autoplay={true}
+                style={{ width: 2000 }}
+              />
+            </div>
+          )}
 
           {review && (
             <div style={{ width: '100%', textAlign: 'center', marginTop: '50px' }}>
@@ -1322,12 +1325,14 @@ const ItemDetails = () => {
             </div>
           )}
         </>
-      }
+      )}
 
-      {activeTab === 1 && <>
-        {/* <Graph authorName={authorName} reportContent={reportContent} /> */}
-        <Graph authorName={authorName} reportContent={reportContent} />
-      </>}
+      {activeTab === 1 && (
+        <>
+          {/* <Graph authorName={authorName} reportContent={reportContent} /> */}
+          <Graph authorName={authorName} reportContent={reportContent} />
+        </>
+      )}
     </div>
   );
 };
