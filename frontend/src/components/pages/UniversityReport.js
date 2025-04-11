@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import useGoBack from '../../hooks/useGoBack.js';
+import { IoIosClose } from 'react-icons/io';
 import {
   TALENT_CONTRACTS,
   ASSOCIATIONS_WITH_DENIED_ENTITIES,
@@ -14,9 +15,16 @@ import ConcernVisualizer, { BaseFontSize, getFontSize } from '../ConcernVisualiz
 
 import { universityReportService } from '../../api/universityReports.js';
 import AuthorCard from '../common/cards/AuthorCard.js';
+import useOutsideClick from '../../hooks/useOutsideClick.js';
+import '../../styles/pages/_universityReport.scss';
+import { Divider } from '@mui/material';
 
-import styled from 'styled-components';
-import Loader from './university/Loader.js';
+import '../../styles/components/_primaryButton.scss';
+import '../../styles/components/_authorInfoCard.scss';
+import UniversityInfoCard from './university/UniversityInfoCard.js';
+import ScoreCard from './university/UniversityScoreCard.js';
+import Lottie from 'lottie-react';
+import loadingAnimation from '../../assets/animations/Loader.json';
 
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
@@ -71,15 +79,29 @@ const UniversityReport = () => {
   const [researchersAssessed, setResearchersAssessed] = useState(0);
   const [selectedFlag, setSelectedFlag] = useState(null);
   const [selectedFlagData, setSelectedFlagData] = useState(null);
-  const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [valueFontSize, setValueFontSize] = useState(`${BaseFontSize}px`);
+  const [isPanelVisible, setIsPanelVisible] = useState(false);
+  const [universityInfo, setUniversityInfo] = useState(null);
 
   const handleReview = (flag) => {
     setSelectedFlag(flag);
     setSelectedFlagData(reportContent?.Flags[flag] || []);
-    setShowModal(true);
+    requestAnimationFrame(() => {
+      setIsPanelVisible(true);
+    });
   };
+
+  const handleClosePanel = () => {
+    setIsPanelVisible(false);
+    // Wait for transition to complete before clearing selection
+    setTimeout(() => {
+      setSelectedFlag(null);
+      setSelectedFlagData(null);
+    }, 300);
+  };
+
+  const universityFlagPanelRef = useOutsideClick(handleClosePanel);
 
   useEffect(() => {
     let isMounted = true;
@@ -91,7 +113,10 @@ const UniversityReport = () => {
         setInstituteName(report.UniversityName);
         setTotalResearchers(report.Content.TotalAuthors);
         setResearchersAssessed(report.Content.AuthorsReviewed);
-
+        setUniversityInfo({
+          name: report.UniversityName,
+          address: report?.UniversityAddress,
+        });
         if (!isMounted) {
           return;
         }
@@ -106,6 +131,10 @@ const UniversityReport = () => {
         setReportContent(report.Content);
         setTotalResearchers(report.Content.TotalAuthors);
         setResearchersAssessed(report.Content.AuthorsReviewed);
+        setUniversityInfo({
+          name: report.UniversityName,
+          address: report?.UniversityAddress,
+        });
 
         // Set font size based on the maximum number of flag count
         const newFontSize = `${getFontSize(
@@ -134,178 +163,165 @@ const UniversityReport = () => {
 
   return (
     <div className="basic-setup" style={{ minHeight: '100vh', paddingBottom: '50px' }}>
-      {/* <div
-        className="detail-header"
-        style={{
-          // display: 'flex',
-          width: '100%',
-        }}
-      >
-        <button
-          onClick={() => goBack()}
-          className="btn text-dark mb-3"
-          style={{
-            minWidth: '80px',
-            left: '10px',
-          }}
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            style={{ marginRight: '8px' }}
-          >
-            <path
-              d="M10 19L3 12L10 5"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M3 12H21"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          Back
-        </button>
-        <h5 style={{ margin: '0 auto' }}>{instituteName}</h5>
-      </div> */}
-
-      <div
-        className="detail-header"
-        style={{
-          width: '100%',
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          height: '75px',
-        }}
-      >
-        <button
-          onClick={() => goBack()}
-          className="btn text-dark mb-3"
-          style={{
-            minWidth: '80px',
-            position: 'absolute',
-            left: '10px',
-            top: '20px',
-          }}
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            style={{ marginRight: '8px' }}
-          >
-            <path
-              d="M10 19L3 12L10 5"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M3 12H21"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          Back
-        </button>
-        <h5
-          style={{
-            margin: '0 auto',
-            width: '100%',
-            textAlign: 'center',
-          }}
-        >
-          {instituteName}
-        </h5>
-      </div>
-
-      <>
-        {loading && (
-          <div class="d-flex justify-content-start">
-            <div class="spinner-border text-secondary ms-5 mt-3 mb-3" role="status" />
-          </div>
-        )}
-        {
-          <div
-            className="d-flex w-100 flex-column align-items-center"
-            style={{ color: 'rgb(78, 78, 78)', marginTop: '20px' }}
-          >
-            <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Researchers</div>
-            <div style={{ fontSize: '60px', fontWeight: 'bold' }}>{toatlResearchers}</div>
-            <div style={{ fontSize: 'medium', fontWeight: 'bold' }}>Researchers Assessed</div>
-            <div style={{ fontSize: '50px', fontWeight: 'bold' }}>{researchersAssessed}</div>
-          </div>
-        }
-
+      <div className={`panel-overlay ${isPanelVisible ? 'visible' : ''}`} />
+      <div className="detail-header">
         <div
           style={{
+            flex: '1',
             display: 'flex',
-            justifyContent: 'space-around',
-            flexWrap: 'wrap',
-            marginTop: '20px',
+            justifyContent: 'flex-start',
+            marginBottom: '-15px',
           }}
         >
-          {reportContent?.Flags
-            ? FLAG_ORDER.map((flag, index) => {
-                const flagData = reportContent.Flags[flag] || [];
-
-                return (
-                  <ConcernVisualizer
-                    title={TitlesAndDescriptions[flag].title}
-                    hoverText={TitlesAndDescriptions[flag].desc}
-                    value={flagData.length || 0}
-                    speedometerHoverText={`${flagData.length} Authors`}
-                    onReview={() => handleReview(flag)}
-                    selected={flag === selectedFlag}
-                    key={index}
-                    valueFontSize={valueFontSize}
-                  />
-                );
-              })
-            : FLAG_ORDER.map((flag, index) => {
-                return (
-                  <ConcernVisualizer
-                    title={TitlesAndDescriptions[flag].title}
-                    hoverText={TitlesAndDescriptions[flag].desc}
-                    value={0}
-                    speedometerHoverText={`0 Authors`}
-                    onReview={() => handleReview(flag)}
-                    selected={flag === selectedFlag}
-                    key={index}
-                    valueFontSize={valueFontSize}
-                  />
-                );
-              })}
+          <button
+            onClick={() => goBack()}
+            className="btn text-dark mb-3"
+            style={{ display: 'flex', marginTop: '-10px' }}
+          >
+            <svg
+              width="24"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ marginRight: '8px' }}
+            >
+              <path
+                d="M10 19L3 12L10 5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M3 12H21"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+          <h5>University Assessment Result</h5>
         </div>
+      </div>
+      <Divider
+        sx={{
+          backgroundColor: 'black',
+          height: '1px',
+          width: '100%',
+          opacity: 0.1,
+        }}
+      />
+      <>
+        {universityInfo ? (
+          <>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div
+                className="author-item"
+                style={{
+                  marginTop: '20px',
+                  marginBottom: '20px',
+                  marginLeft: '3%',
+                  width: '45%',
+                  height: '0%',
+                }}
+              >
+                {universityInfo && <UniversityInfoCard result={universityInfo} />}
+              </div>
+              <div
+                className="author-item"
+                style={{ marginTop: '20px', marginBottom: '20px', marginRight: '3%', width: '45%' }}
+              >
+                <ScoreCard
+                  reserachersAccessed={researchersAssessed}
+                  totalResearcher={toatlResearchers}
+                  loading={loading}
+                />
+              </div>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                marginTop: '40px',
+                marginInline: '3%',
+              }}
+            >
+              {reportContent?.Flags
+                ? FLAG_ORDER.map((flag, index) => {
+                    const flagData = reportContent.Flags[flag] || [];
 
-        {showModal && (
+                    return (
+                      <div
+                        style={{
+                          border: '1px solid rgb(230, 230, 230)',
+                          borderRadius: '8px',
+                          padding: '0px',
+                          width: '13.5%',
+                        }}
+                      >
+                        <ConcernVisualizer
+                          title={TitlesAndDescriptions[flag].title}
+                          hoverText={TitlesAndDescriptions[flag].desc}
+                          value={flagData.length || 0}
+                          speedometerHoverText={`${flagData.length} Authors`}
+                          onReview={() => handleReview(flag)}
+                          selected={flag === selectedFlag}
+                          key={index}
+                          valueFontSize={valueFontSize}
+                        />
+                      </div>
+                    );
+                  })
+                : FLAG_ORDER.map((flag, index) => {
+                    return (
+                      <ConcernVisualizer
+                        title={TitlesAndDescriptions[flag].title}
+                        hoverText={TitlesAndDescriptions[flag].desc}
+                        value={0}
+                        speedometerHoverText={`0 Authors`}
+                        onReview={() => handleReview(flag)}
+                        selected={flag === selectedFlag}
+                        key={index}
+                        valueFontSize={valueFontSize}
+                      />
+                    );
+                  })}
+            </div>
+          </>
+        ) : (
           <div
             style={{
               display: 'flex',
               justifyContent: 'center',
-              width: '100%',
+              alignItems: 'center',
             }}
           >
-            <div
-              style={{
-                marginTop: '100px',
-              }}
-            >
-              <AuthorCard authors={selectedFlagData} />
+            <Lottie
+              animationData={loadingAnimation}
+              loop={true}
+              autoplay={true}
+              style={{ width: '64%' }}
+            />
+          </div>
+        )}
+
+        {selectedFlag && (
+          <div
+            className={`university-flag-panel ${isPanelVisible ? 'open' : ''}`}
+            ref={universityFlagPanelRef}
+          >
+            <div className="university-flag-panel-header">
+              <span>{TitlesAndDescriptions[selectedFlag]?.title}</span>
+              <button className="close-button" onClick={handleClosePanel}>
+                <IoIosClose />
+              </button>
+            </div>
+            <Divider className="university-flag-panel-divider" />
+            <div className="university-flag-panel-content">
+              <AuthorCard score={selectedFlagData.length} authors={selectedFlagData} />
             </div>
           </div>
         )}
@@ -313,66 +329,5 @@ const UniversityReport = () => {
     </div>
   );
 };
-
-const popoverStyles = {
-  position: 'absolute',
-  top: '30px',
-  left: '50%',
-  transform: 'translateX(-50%)',
-  zIndex: 1,
-  backgroundColor: '#fff',
-  border: '1px solid rgba(0, 0, 0, 0.2)',
-  boxShadow: '0 0.5rem 1rem rgba(0, 0, 0, 0.15)',
-  borderRadius: '0.3rem',
-  padding: '0.5rem',
-  width: '200px',
-};
-
-const buttonStyles = {
-  marginLeft: '5px',
-  width: '14px',
-  height: '14px',
-  padding: '1px 0',
-  borderRadius: '7.5px',
-  textAlign: 'center',
-  fontSize: '8px',
-  lineHeight: '1.42857',
-  border: '1px solid grey',
-  borderWidth: '1px',
-  backgroundColor: 'transparent',
-  color: 'grey',
-  position: 'relative',
-  boxShadow: 'none',
-};
-
-const StyledWrapper = styled.div`
-  position: relative;
-
-  .cssbuttons-io-button {
-    position: relative;
-    transition: all 0.3s ease-in-out;
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
-    padding-block: 0.5rem;
-    padding-inline: 0.75rem;
-    background-color: rgb(0 107 179);
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: #ffff;
-    gap: 10px;
-    font-weight: bold;
-    border: 3px solid #ffffff4d;
-    outline: none;
-    overflow: hidden;
-    font-size: 15px;
-  }
-
-  .cssbuttons-io-button:hover {
-    transform: scale(1.009);
-    border-color: #fff9;
-  }
-`;
 
 export default UniversityReport;

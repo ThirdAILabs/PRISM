@@ -43,7 +43,7 @@ function EntityLookup() {
     setHasSearched(true);
     try {
       const entities = await searchService.matchEntities(query);
-      console.log(entities);
+
       setResults(entities);
     } catch (error) {
       console.error('Error fetching data:', error);

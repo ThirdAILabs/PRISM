@@ -1,0 +1,112 @@
+@import '../base/_typography';
+
+$level-0-color: #6774ac;
+$level-1-color: #007fcc;
+$level-2-color: #5cbaff;
+$level-3-color: #8f5583;
+$level-4-color: #b04064;
+$connection-line-color: #09abff;
+
+.my-industy-node {
+  width: 140px;
+  border-radius: 5px;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.my-industy-node-level-0 {
+  @include label-3;
+
+  .my-industy-node {
+    width: 180px;
+    border: $level-0-color solid 1px;
+
+    .my-card-header {
+      background-color: $level-0-color;
+    }
+
+    .my-card-body {
+      color: $level-0-color;
+      line-height: 50px;
+      height: 50px;
+    }
+  }
+
+  .c-btn-open-close {
+    & span {
+      background-color: $level-0-color !important;
+    }
+  }
+}
+
+.my-industy-node-level-1 {
+  min-width: 200px;
+  height: 100px;
+  @include sub-heading-4;
+
+  .my-industy-node {
+    border: $level-1-color solid 1px;
+
+    .my-card-header {
+      background-color: $level-1-color;
+    }
+
+    .my-card-body {
+      color: $level-1-color;
+    }
+  }
+
+  .c-btn-open-close {
+    & span {
+      background-color: $level-1-color !important;
+    }
+  }
+}
+
+.my-industy-node-level-2 {
+  min-width: 128px;
+  height: 100px;
+  @include sub-heading-5;
+
+  .my-industy-node {
+    border: $level-2-color solid 1px;
+
+    .my-card-header {
+      background-color: $level-2-color;
+    }
+
+    .my-card-body {
+      color: $level-2-color;
+    }
+  }
+
+  .c-btn-open-close {
+    & span {
+      background-color: $level-2-color !important;
+    }
+  }
+}
+
+.my-industy-node-level-3 {
+  @include paragraph-5;
+  min-width: 128px;
+  height: 100px;
+
+  .my-industy-node {
+    border: $level-3-color solid 1px;
+
+    .my-card-header {
+      background-color: $level-3-color;
+    }
+
+    .my-card-body {
+      color: $level-3-color;
+    }
+  }
+
+  .c-btn-open-close {
+    & span {
+      background-color: $level-3-color !important;
+    }
+  }
+}

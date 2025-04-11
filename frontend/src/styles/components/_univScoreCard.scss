@@ -1,0 +1,76 @@
+@import '../base/varialbes';
+@import '../base/typography';
+
+@keyframes flowAnimation {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: 0% 0;
+  }
+}
+
+.univ-score-card {
+  width: 100%;
+  height: 100px;
+  background-size: cover;
+  background-position: top;
+  background-repeat: no-repeat;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden; // Add this to contain progress bar
+
+  .progress-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 7px;
+    background-color: $color-primary-700;
+    border-radius: 8px 0 0 0;
+    transition: width 1s ease-in-out; // Smooth transition
+    z-index: 1;
+
+    &.flowing {
+      background: linear-gradient(
+        90deg,
+        $color-primary-500 0%,
+        $color-primary-500 45%,
+        rgba(255, 255, 255, 0.7) 50%,
+        $color-primary-500 55%,
+        $color-primary-500 100%
+      );
+      background-size: 200% 100%;
+      animation: flowAnimation 3s linear infinite;
+    }
+  }
+
+  &-content {
+    display: flex;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  &-title {
+    @include label-4;
+    color: $color-text-700;
+    word-wrap: break-word;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 2%;
+
+    &-score {
+      @include heading-1;
+      color: $color-primary-700;
+      padding-top: 15px;
+
+      &-accessed {
+        @include heading-1;
+        color: $color-warning-700;
+        padding-top: 15px;
+      }
+    }
+  }
+}

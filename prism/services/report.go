@@ -9,7 +9,9 @@ import (
 	"net/http"
 	"path/filepath"
 	"prism/prism/api"
+	"prism/prism/gscholar"
 	"prism/prism/licensing"
+	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/schema"
 	"prism/prism/services/auth"
@@ -23,13 +25,15 @@ import (
 type ReportService struct {
 	manager        *reports.ReportManager
 	licensing      *licensing.LicenseVerifier
+	openalex       openalex.KnowledgeBase
 	resourceFolder string
 }
 
-func NewReportService(manager *reports.ReportManager, licensing *licensing.LicenseVerifier, resourceFolder string) ReportService {
+func NewReportService(manager *reports.ReportManager, licensing *licensing.LicenseVerifier, openalex openalex.KnowledgeBase, resourceFolder string) ReportService {
 	return ReportService{
 		manager:        manager,
 		licensing:      licensing,
+		openalex:       openalex,
 		resourceFolder: resourceFolder,
 	}
 }
@@ -165,6 +169,27 @@ func (s *ReportService) List(r *http.Request) (any, error) {
 	return reports, nil
 }
 
+func (s *ReportService) getAuthorAffiliationsAndInterests(source, authorId string) ([]string, []string, error) {
+	switch source {
+	case api.OpenAlexSource:
+		details, err := s.openalex.GetAuthor(authorId)
+		if err != nil {
+			slog.Error("error getting author details", "source", source, "author_id", authorId, "error", err)
+			return nil, nil, CodedError(errors.New("unable to get author details"), http.StatusInternalServerError)
+		}
+		return details.InstitutionNames(), details.Concepts, nil
+	case api.GoogleScholarSource:
+		details, err := gscholar.GetAuthorDetails(authorId)
+		if err != nil {
+			slog.Error("error getting author details", "source", source, "author_id", authorId, "error", err)
+			return nil, nil, CodedError(errors.New("unable to get author details"), http.StatusInternalServerError)
+		}
+		return details.Institutions, details.Interests, nil
+	default:
+		return nil, nil, CodedError(errors.New("invalid Source"), http.StatusUnprocessableEntity)
+	}
+}
+
 func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 	userId, err := auth.GetUserId(r)
 	if err != nil {
@@ -180,7 +205,7 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 		return nil, CodedError(errors.New("AuthorId must be specified"), http.StatusUnprocessableEntity)
 	}
 
-	if params.AuthorId == "" {
+	if params.AuthorName == "" {
 		return nil, CodedError(errors.New("AuthorName must be specified"), http.StatusUnprocessableEntity)
 	}
 
@@ -196,7 +221,12 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 		return nil, CodedError(err, licensingErrorStatus(err))
 	}
 
-	id, err := s.manager.CreateAuthorReport(userId, params.AuthorId, params.AuthorName, params.Source)
+	affiliations, researchInterests, err := s.getAuthorAffiliationsAndInterests(params.Source, params.AuthorId)
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := s.manager.CreateAuthorReport(userId, params.AuthorId, params.AuthorName, params.Source, strings.Join(affiliations, ", "), strings.Join(researchInterests, ", "))
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}

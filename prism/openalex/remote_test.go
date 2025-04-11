@@ -306,7 +306,7 @@ func TestGetAuthor(t *testing.T) {
 	}
 
 	if author.AuthorId != authorId || author.DisplayName != "Anshumali Shrivastava" ||
-		len(author.DisplayNameAlternatives) == 0 || len(author.Institutions) == 0 {
+		len(author.DisplayNameAlternatives) == 0 || len(author.Institutions) == 0 || len(author.Concepts) == 0 {
 		t.Fatal("incorrect author")
 	}
 }

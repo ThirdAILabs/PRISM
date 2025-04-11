@@ -1,0 +1,118 @@
+@import '../base/varialbes';
+@import '../base/typography';
+
+.selection-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin: 10px 0;
+  width: 100%;
+
+  .score-box-container {
+    display: flex;
+    align-items: center;
+
+    .score-pill {
+      background-color: $color-text-100;
+      border-radius: 0 20px 20px 0;
+      padding: 8px 16px;
+      box-shadow: 0 1px 3px rgba($color-text-900, 0.15);
+      @include label-4;
+
+      .score-label {
+        color: $color-error-700;
+        margin-right: 7px;
+      }
+
+      .score-value {
+        color: $color-error-700;
+      }
+    }
+  }
+
+  .search-container {
+    position: relative;
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .search-input {
+      padding: 8px 0px 8px 36px;
+      border: 1px solid $color-text-300;
+      border-radius: 8px;
+      outline: none;
+      width: 300px;
+
+      &:focus {
+        border-color: $color-primary-500;
+      }
+
+      &::placeholder {
+        color: $color-text-500;
+      }
+    }
+  }
+
+  .controls-container {
+    margin-left: auto;
+    margin-right: 20px;
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+
+    .filters-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: $color-text-100;
+      border: none;
+      border-radius: 6px;
+      @include sub-heading-4;
+    }
+  }
+}
+
+$table-padding: 15px 0px 12px 12px;
+
+.author-card {
+  background: $color-text-100;
+  padding: 20px 0px 20px 20px;
+}
+
+.author-table {
+  width: 96%;
+  table-layout: fixed;
+
+  thead {
+    background: rgba($color-text-300, 0.25);
+
+    th {
+      @include label-5;
+      color: $color-text-700;
+      padding: $table-padding;
+      border-bottom: 1px solid $color-text-100;
+      text-align: left;
+    }
+  }
+
+  tbody {
+    tr {
+      td {
+        text-align: left;
+        padding: $table-padding;
+        font-size: 14px;
+        border-bottom: 1px solid $color-text-300;
+
+        .view-report-button {
+          cursor: pointer;
+          background-color: $color-primary-500;
+          padding: 8px 16px;
+        }
+      }
+    }
+  }
+}

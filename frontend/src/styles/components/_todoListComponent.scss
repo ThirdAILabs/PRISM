@@ -22,10 +22,6 @@
       align-items: flex-start;
       margin-bottom: 8px;
 
-      &:last-child {
-        margin-bottom: 0;
-      }
-
       .title {
         @include paragraph-3;
         font-weight: 501;

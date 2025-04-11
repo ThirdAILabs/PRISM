@@ -47,8 +47,6 @@ export function useVisualizationData(
   });
 
   function addAffiliations(workAffiliations) {
-    // console.log(`workAffiliations -> ${workAffiliations}`);
-    // If keys exist in prev, keep value from prev.
     setAffiliations((prev) => {
       const newAffils = { ...prev };
       for (const affil of workAffiliations) {
@@ -148,22 +146,15 @@ export function useVisualizationData(
     if (key === UNIVERSITY_FACULTY_APPOINTMENTS || key === DOJ_PRESS_RELEASES) {
       flags = flagByType[key];
     } else {
-      flags =
-        // flagByType[key]
-        // // Filter by year
-        // .filter((flag) => !flag.year || (((startYear || -Infinity) <= flag.year) && (flag.year <= (endYear || Infinity))))
-        // // Filter by affiliation
-        // .filter((flag) => (flag.affiliations || []).map(affil => showAffiliations[affil]).reduce((prev, curr) => prev || curr, false))
-        flagByType[key].filter(
-          (flag) =>
-            !flag.affiliations?.length ||
-            (flag.affiliations || [])
-              .map((affil) => showAffiliations[affil])
-              .reduce((prev, curr) => prev || curr, false)
-        );
+      flags = flagByType[key].filter(
+        (flag) =>
+          !flag.affiliations?.length ||
+          (flag.affiliations || [])
+            .map((affil) => showAffiliations[affil])
+            .reduce((prev, curr) => prev || curr, false)
+      );
     }
 
-    // flags.forEach(item => console.log(item));
     return {
       display_name: name,
       desc: desc,

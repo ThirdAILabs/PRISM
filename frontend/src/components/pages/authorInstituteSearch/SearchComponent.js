@@ -28,9 +28,8 @@ const SearchComponent = () => {
   };
 
   useEffect(() => {
-    const newType = params.get('type') || 'author';
-    setSelectedSearchType(newType);
-  }, []);
+    setSelectedSearchType(defaultType);
+  }, [defaultType]);
 
   useEffect(() => {
     setRadioButtonProps([

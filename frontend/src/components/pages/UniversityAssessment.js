@@ -50,7 +50,7 @@ function UniversityAssessment() {
       UniversityName: institution.Name,
     };
     const reportId = await universityReportService.createReport(reportData);
-    console.log('University report id: ', reportId);
+
     navigate(`report/${reportId.Id}`, {
       state: {
         canGoBack: true,

@@ -12,9 +12,11 @@ type Report struct {
 
 	LastAccessedAt time.Time
 
-	AuthorId   string
-	AuthorName string
-	Source     string
+	AuthorId          string
+	AuthorName        string
+	Source            string
+	Affiliations      string
+	ResearchInterests string
 
 	Status string
 

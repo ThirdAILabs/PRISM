@@ -12,10 +12,7 @@ export function useConclusions(author, flags, threshold) {
   const [formalRelations, setFormalRelations] = useState([]);
   const [numWaiting, setNumWaiting] = useState(0);
 
-  console.log(author, flags);
-
   const institutionFrequencies = useMemo(() => {
-    console.log('Calculating institution freqs');
     let frequencies = {};
     const flagsWithAffils = [
       ...(flags[AUTHOR_AFFIL_EOC] || []),
@@ -33,7 +30,6 @@ export function useConclusions(author, flags, threshold) {
   const foreignFundingFrequency = useMemo(() => (flags[ACK_EOC] || []).length, [flags]);
 
   const funderFrequencies = useMemo(() => {
-    console.log('Calculating funder freqs');
     let frequencies = {};
     for (const flag of flags[ACK_EOC] || []) {
       for (const entity of flag.Entities) {
@@ -55,7 +51,6 @@ export function useConclusions(author, flags, threshold) {
   }
 
   const summary = useMemo(() => {
-    console.log('Calculating summary');
     const messages = [];
     const numUniqueInstitutions = Object.keys(institutionFrequencies).length;
     if (numUniqueInstitutions) {
