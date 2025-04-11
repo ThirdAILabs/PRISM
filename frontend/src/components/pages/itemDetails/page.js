@@ -1060,10 +1060,15 @@ const ItemDetails = () => {
                     marginBottom: '20px',
                     marginLeft: '3%',
                     width: '45%',
-                    height: '0%',
                   }}
                 >
-                  <AuthorInfoCard result={authorInfo} verifyWithDisclosure={verifyWithDisclosure} downloadProps={downloadProps} filterProps={filterProps} />
+                  <AuthorInfoCard
+                    result={authorInfo}
+                    verifyWithDisclosure={verifyWithDisclosure}
+                    downloadProps={downloadProps}
+                    filterProps={filterProps}
+                    loading={loading}
+                  />
                 </div>
                 <div
                   className="author-item"

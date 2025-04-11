@@ -42,7 +42,14 @@
 
         &-research {
           @include label-5;
+
+          &-placeholder {
+            color: $color-text-500;
+            font-style: italic;
+          }
         }
+
+
       }
 
       .title-container {
@@ -120,5 +127,19 @@
         color: $color-primary-500;
       }
     }
+  }
+}
+
+.card-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .card-top {
+    flex-grow: 1;
+  }
+
+  .card-footer {
+    flex-shrink: 0;
   }
 }
