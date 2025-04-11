@@ -1125,14 +1125,13 @@ const ItemDetails = () => {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                height: 'calc(100vh - 100px)',
               }}
             >
               <Lottie
                 animationData={loadingAnimation}
                 loop={true}
                 autoplay={true}
-                style={{ width: 2000 }}
+                style={{ width: '64%' }}
               />
             </div>
           )}
