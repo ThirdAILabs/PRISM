@@ -15,7 +15,10 @@ const UniversityInfoCard = ({ result }) => {
 
       <div className="info-row" style={{ marginTop: '10px' }}>
         <img src={University} alt="Affiliation" className="icon" />
-        <span className="content">6100 Main St, Houston, TX 77005, USA</span>
+        <span className="content">
+          {result?.address ||
+            "Oops! The university's address isn't available right now. We're working to update this information."}
+        </span>
       </div>
     </div>
   );

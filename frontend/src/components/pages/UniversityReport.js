@@ -101,8 +101,7 @@ const UniversityReport = () => {
         setResearchersAssessed(report.Content.AuthorsReviewed);
         setUniversityInfo({
           name: report.UniversityName,
-          // address: report.UniversityAddress,
-          address: '6100 Main St, Houston, TX 77005, USA',
+          address: report?.UniversityAddress,
         });
         if (!isMounted) {
           return;
@@ -120,8 +119,7 @@ const UniversityReport = () => {
         setResearchersAssessed(report.Content.AuthorsReviewed);
         setUniversityInfo({
           name: report.UniversityName,
-          // address: report.UniversityAddress,
-          address: '6100 Main St, Houston, TX 77005, USA',
+          address: report?.UniversityAddress,
         });
 
         // Set font size based on the maximum number of flag count
