@@ -11,7 +11,7 @@ const ScoreCard = ({ score = 0, setActiveTab, loading }) => {
       <div className="score-card-content">
         <div className="score-card-content-left">
           <span className="score-card-title">
-            {'Your Assessment Insights '}
+            {'Your Assessment '}
             {loading && 'is in '}
             <span className={loading ? 'progress-text' : ''}>
               {loading ? 'Progress...' : 'in One View'}
