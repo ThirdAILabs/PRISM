@@ -65,7 +65,6 @@ export function makeVariations(authorName) {
 }
 
 export const levenshteinDistance = (str1, str2) => {
-  console.log(str1, str2);
   const track = Array(str2.length + 1)
     .fill(null)
     .map(() => Array(str1.length + 1).fill(null));

@@ -50,7 +50,7 @@ const PaperTitleSearchComponent = () => {
 
     try {
       const result = await searchService.searchByPaperTitle(title);
-      console.log('Paper title search result:', result);
+
       setSearchState((prev) => ({
         ...prev,
         paperResults: result,

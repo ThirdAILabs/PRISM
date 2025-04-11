@@ -9,8 +9,8 @@ export function GradientValueGauge() {
     <svg width="200" height="200">
       <defs>
         <linearGradient id="gauge-gradient" x1={x1} x2={x2} gradientUnits="userSpaceOnUse">
-          <stop offset="0%" style={{ stopColor: 'blue', stopOpacity: 1 }} />
-          <stop offset="100%" style={{ stopColor: 'red', stopOpacity: 1 }} />
+          <stop offset="0%" style={{ stopColor: '#f56545', stopOpacity: 1 }} />
+          <stop offset="100%" style={{ stopColor: '#99201c', stopOpacity: 1 }} />
         </linearGradient>
       </defs>
       <GaugeValueArc style={{ fill: 'url(#gauge-gradient)' }} />
@@ -18,7 +18,8 @@ export function GradientValueGauge() {
   );
 }
 
-export function Ticks({ scale }) {
+export function Ticks({ scale, showNumbers = false }) {
+  // Added showNumbers prop
   const { innerRadius, cx, cy, startAngle, endAngle } = useGaugeState();
   const radius = innerRadius * 0.8;
   function angleAtStep(step) {
@@ -26,24 +27,26 @@ export function Ticks({ scale }) {
   }
   return (
     <g>
-      {scale.map((val, step) => {
-        const tickCx = cx + radius * Math.cos(angleAtStep(step));
-        const tickCy = cy + radius * Math.sin(angleAtStep(step));
-        return (
-          <text
-            key={step}
-            x={tickCx}
-            y={tickCy}
-            style={{ fill: 'black' }}
-            fontSize={0.2 * radius}
-            textAnchor="middle"
-            dominantBaseline="middle"
-          >
-            {val}
-            {step === scale.length - 1 ? '+' : ''}
-          </text>
-        );
-      })}
+      {showNumbers &&
+        scale.map((val, step) => {
+          // Added conditional rendering
+          const tickCx = cx + radius * Math.cos(angleAtStep(step));
+          const tickCy = cy + radius * Math.sin(angleAtStep(step));
+          return (
+            <text
+              key={step}
+              x={tickCx}
+              y={tickCy}
+              style={{ fill: 'black' }}
+              fontSize={0.2 * radius}
+              textAnchor="middle"
+              dominantBaseline="middle"
+            >
+              {val}
+              {step === scale.length - 1 ? '+' : ''}
+            </text>
+          );
+        })}
     </g>
   );
 }
@@ -54,9 +57,9 @@ export function Value({ value, speedometerHoverText, valueFontSize }) {
     <g>
       <text
         x={cx}
-        y={cy * 1.1}
+        y={cy - innerRadius / 4} // Position text above center
         style={{
-          fill: 'grey',
+          fill: value !== 0 ? '#b71d18' : '#6a798f', // Changed color to black
           fontSize: valueFontSize ? valueFontSize : innerRadius * 0.8,
           fontWeight: 'bold',
           textAnchor: 'middle',
@@ -89,18 +92,18 @@ export function Speedometer({ scale, value, speedometerHoverText, valueFontSize 
       <Gauge
         value={transformValue(value)}
         text={''}
-        startAngle={-120}
-        endAngle={120}
+        startAngle={-140}
+        endAngle={140}
         cornerRadius="50%"
-        innerRadius="80%"
-        outerRadius="100%"
+        innerRadius="72%"
+        outerRadius="80%"
         sx={(theme) => ({
           [`& .${gaugeClasses.referenceArc}`]: {
-            fill: 'rgb(245, 240, 240)',
+            fill: 'rgb(245, 245, 245)',
           },
         })}
       >
-        <Ticks fill={'white'} scale={scale} />
+        <Ticks fill={'white'} scale={scale} showNumbers={false} />
         <GradientValueGauge />
         <Value
           value={value}

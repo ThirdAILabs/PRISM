@@ -4,14 +4,10 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log/slog"
-	"net/http"
 	"prism/prism/api"
-	"prism/prism/gscholar"
 	"prism/prism/llms"
 	"prism/prism/openalex"
-	"prism/prism/reports/utils"
 	"prism/prism/search"
 	"regexp"
 	"slices"
@@ -273,7 +269,7 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Name() string {
 	return "PotentialFacultyAtEOC"
 }
 
-func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName string) ([]api.Flag, error) {
+func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName, affiliations string) ([]api.Flag, error) {
 	results, err := flagger.universityNDB.Query(authorName, numUniversityDocumentsToRetrieve, nil)
 	if err != nil {
 		logger.Error("error querying ndb", "error", err)
@@ -598,141 +594,146 @@ func (flagger *AuthorIsAssociatedWithEOCFlagger) Flag(logger *slog.Logger, works
 }
 
 type AuthorNewsArticlesFlagger struct {
-	llm llms.LLM
+	llm *llms.PerplexityAI
 }
 
-func NewAuthorNewsArticlesFlagger() *AuthorNewsArticlesFlagger {
-	return &AuthorNewsArticlesFlagger{llm: llms.New()}
+func NewAuthorNewsArticlesFlagger(ppxApiKey string) *AuthorNewsArticlesFlagger {
+	return &AuthorNewsArticlesFlagger{llm: llms.NewPerplexityAI(ppxApiKey)}
 }
 
 func (flagger *AuthorNewsArticlesFlagger) Name() string {
 	return "NewsArticles"
 }
 
-func fetchArticleWebpage(link string) (string, error) {
-	req, err := http.NewRequest("GET", link, nil)
-	if err != nil {
-		return "", err
+func (flagger *AuthorNewsArticlesFlagger) authorPrompts(authorName, affiliation string) (string, string) {
+	systemPrompt := `You are a research assistant specializing in investigative analysis.
+Your job is to assist with background checks on academic or professional authors by gathering and summarizing news articles that indicate misconduct by the author.`
+
+	userPrompt := fmt.Sprintf("Search for news articles about the author %s", authorName)
+	if affiliation != "" {
+		userPrompt += fmt.Sprintf(" who is/was affiliated with %s.", affiliation)
 	}
+	userPrompt += fmt.Sprintf(`Focus specifically on:
+1. Any articles that mention misconduct, ethical violations, or professional controversies
+2. The specific role %s played in these incidents
 
-	headers := map[string]string{
-		"User-Agent":                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-		"Accept-Language":           "en-US,en;q=0.9",
-		"Connection":                "keep-alive",
-		"Accept":                    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-		"Referer":                   "https://www.google.com/",
-		"Upgrade-Insecure-Requests": "1",
-	}
+For each relevant article:
+- Provide a concise one-sentence summary of the alleged misconduct
 
-	for k, v := range headers {
-		req.Header.Add(k, v)
-	}
+Limit your response to the 5 most significant sources. If no articles mentioning misconduct are found, return an empty response format.`, authorName)
 
-	client := http.Client{Timeout: 10 * time.Second}
-	res, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("request returned status: %d", res.StatusCode)
-	}
-
-	const maxBytes = 300000
-
-	text := make([]byte, maxBytes) // TODO(question): this seems like a lot?
-	n, err := io.ReadFull(res.Body, text)
-	if err != nil && err != io.ErrUnexpectedEOF { // UnexpectedEOF is returned if < N bytes are read
-		return "", err
-	}
-
-	return string(text[:n]), nil
+	return systemPrompt, userPrompt
 }
 
-const articleCheckTemplate = `I will give you an author name, the title of a news article, and part of the html webpage for the article. 
-If the article is about the author, and indicates misconduct of some kind you must reply with a short sentence explaining the misconduct indicated by the article and the role of the author in it.
-If the article is not about the author, or does not indicate misconduct, you must reply with just the word "none".
-
-Author Name: %s
-Title: %s
-Html Content: %s
-`
-
-type checkArticleTask struct {
-	article    gscholar.NewsArticle
-	authorName string
+type NewsFormat struct {
+	Citation int    `json:"citation"`
+	Title    string `json:"title"`
+	Summary  string `json:"summary"`
+	Date     string `json:"date"`
 }
 
-type checkArticleResult struct {
-	article gscholar.NewsArticle
-	msg     string
-	flagged bool
+// ResponseFormat represents the overall response structure
+type ResponseFormat struct {
+	News []NewsFormat `json:"news"`
 }
 
-func (flagger *AuthorNewsArticlesFlagger) checkArticle(task checkArticleTask) (checkArticleResult, error) {
-	html, err := fetchArticleWebpage(task.article.Link)
-	if err != nil {
-		return checkArticleResult{article: task.article, flagged: false}, err
+func (flagger *AuthorNewsArticlesFlagger) responseFormatJsonSchema() map[string]interface{} {
+	jsonSchema := map[string]interface{}{
+		"schema": map[string]interface{}{
+			"type": "object",
+			"properties": map[string]interface{}{
+				"news": map[string]interface{}{
+					"type":        "array",
+					"description": "List of news items",
+					"items": map[string]interface{}{
+						"type": "object",
+						"properties": map[string]interface{}{
+							"citation": map[string]interface{}{
+								"type":        "integer",
+								"description": "Corresponding citation number of the source in the citation list",
+							},
+							"title": map[string]interface{}{
+								"type":        "string",
+								"description": "Title of the source",
+							},
+							"summary": map[string]interface{}{
+								"type":        "string",
+								"description": "Summary of the source",
+							},
+							"date": map[string]interface{}{
+								"type":        "string",
+								"description": "Date of the source",
+								"format":      "date",
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 
-	response, err := flagger.llm.Generate(fmt.Sprintf(articleCheckTemplate, task.authorName, task.article.Title, html), nil)
-	if err != nil {
-		return checkArticleResult{article: task.article, flagged: false}, err
+	return map[string]interface{}{
+		"type":        "json_schema",
+		"json_schema": jsonSchema,
 	}
-
-	if strings.Contains(strings.ToLower(response), "none") {
-		return checkArticleResult{article: task.article, flagged: false}, nil
-	}
-
-	return checkArticleResult{article: task.article, msg: response, flagged: true}, nil
 }
+func (flagger *AuthorNewsArticlesFlagger) Flag(logger *slog.Logger, authorName, affiliations string) ([]api.Flag, error) {
+	systemPrompt, userPrompt := flagger.authorPrompts(authorName, strings.Split(affiliations, ",")[0])
 
-const maxArticles = 20
+	responseFormatSchema := flagger.responseFormatJsonSchema()
+	response, citations, err := flagger.llm.Generate(
+		userPrompt, systemPrompt, &llms.PerplexityOptions{
+			Model: "sonar-pro",
+			WebSearchOptions: map[string]interface{}{
+				"search_context_size": "high",
+			},
+			ResponseFormat: responseFormatSchema,
+		},
+	)
 
-func (flagger *AuthorNewsArticlesFlagger) Flag(logger *slog.Logger, authorName string) ([]api.Flag, error) {
-	articles, err := gscholar.GetNewsArticles(authorName)
 	if err != nil {
-		logger.Error("error getting news articles for author", "author_name", authorName, "error", err)
+		logger.Error("error generating response", "error", err)
 		return nil, err
 	}
 
-	articles = articles[:min(maxArticles, len(articles))]
-
-	queue := make(chan checkArticleTask, len(articles))
-
-	for _, article := range articles {
-		queue <- checkArticleTask{article: article, authorName: authorName}
+	// parsing response
+	var parsedResponse ResponseFormat
+	err = json.Unmarshal([]byte(response), &parsedResponse)
+	if err != nil {
+		logger.Error("error parsing response", "error", err)
+		return nil, err
 	}
-	close(queue)
 
-	completed := make(chan utils.CompletedTask[checkArticleResult], len(articles))
+	sort.Slice(parsedResponse.News, func(i, j int) bool {
+		dateI, errI := time.Parse("2006-01-02", parsedResponse.News[i].Date) // Date format is YYYY-MM-DD
+		dateJ, errJ := time.Parse("2006-01-02", parsedResponse.News[j].Date)
 
-	utils.RunInPool(flagger.checkArticle, queue, completed, 5, nil)
-
-	flaggedArticles := make([]checkArticleResult, 0)
-	for result := range completed {
-		if result.Error != nil {
-			logger.Error("error checking article", "error", err)
+		if errI == nil && errJ == nil {
+			return dateI.After(dateJ)
+		} else if errI == nil && errJ != nil {
+			return true
+		} else if errI != nil && errJ == nil {
+			return false
 		} else {
-			if result.Result.flagged {
-				flaggedArticles = append(flaggedArticles, result.Result)
-			}
+			// maintain original order
+			return i < j
 		}
-	}
-
-	sort.Slice(flaggedArticles, func(i, j int) bool {
-		return flaggedArticles[i].article.Date.After(flaggedArticles[j].article.Date)
 	})
 
-	flaggedArticles = flaggedArticles[:min(5, len(flaggedArticles))]
+	parsedResponse.News = parsedResponse.News[:min(5, len(parsedResponse.News))]
 
-	flags := make([]api.Flag, 0, len(flaggedArticles))
-	for _, result := range flaggedArticles {
+	flags := make([]api.Flag, 0, len(parsedResponse.News))
+	for _, result := range parsedResponse.News {
+		docUrl := ""
+		if len(citations) >= result.Citation {
+			// result.Citation is 1-based indexing on perplexity's citation-list
+			docUrl = citations[result.Citation-1]
+		}
+
 		flags = append(flags, &api.MiscHighRiskAssociationFlag{
-			Message:  result.msg,
-			DocTitle: result.article.Title,
-			DocUrl:   result.article.Link,
+			Message:  result.Summary,
+			DocTitle: result.Title,
+			DocUrl:   docUrl,
 			// TODO: add date support in this flag and use article.Date
 			EntityMentioned: authorName,
 		})
