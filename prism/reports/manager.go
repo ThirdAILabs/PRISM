@@ -298,6 +298,7 @@ type ReportUpdateTask struct {
 	StartDate           time.Time
 	EndDate             time.Time
 	ForUniversityReport bool
+	Affiliations        string
 }
 
 func (r *ReportManager) findNextAuthorReport(txn *gorm.DB) (*schema.AuthorReport, error) {
@@ -354,6 +355,7 @@ func (r *ReportManager) GetNextAuthorReport() (*ReportUpdateTask, error) {
 			StartDate:           report.LastUpdatedAt,
 			EndDate:             time.Now().UTC(),
 			ForUniversityReport: report.ForUniversityReport,
+			Affiliations:        report.Affiliations,
 		}, nil
 	}
 
