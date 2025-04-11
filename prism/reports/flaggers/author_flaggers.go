@@ -607,9 +607,7 @@ func (flagger *AuthorNewsArticlesFlagger) Name() string {
 
 func (flagger *AuthorNewsArticlesFlagger) authorPrompts(authorName, affiliation string) (string, string) {
 	systemPrompt := `You are a research assistant specializing in investigative analysis.
-Your job is to assist with background checks on academic or professional authors by gathering and summarizing news articles
-in a short sentence involving misconduct of some kind indicated by the article.
-These indictments may or may not be connected to their institutional affiliation.`
+Your job is to assist with background checks on academic or professional authors by gathering and summarizing news articles that indicate misconduct by the author.`
 
 	userPrompt := fmt.Sprintf("Search for news articles about the author %s", authorName)
 	if affiliation != "" {
