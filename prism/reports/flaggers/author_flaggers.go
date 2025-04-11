@@ -639,7 +639,7 @@ type ResponseFormat struct {
 	News []NewsFormat `json:"news"`
 }
 
-func (flagger *AuthorNewsArticlesFlagger) responseFormat() map[string]interface{} {
+func (flagger *AuthorNewsArticlesFlagger) responseFormatJsonSchema() map[string]interface{} {
 	jsonSchema := map[string]interface{}{
 		"schema": map[string]interface{}{
 			"type": "object",
@@ -652,7 +652,7 @@ func (flagger *AuthorNewsArticlesFlagger) responseFormat() map[string]interface{
 						"properties": map[string]interface{}{
 							"citation": map[string]interface{}{
 								"type":        "integer",
-								"description": "Corresponding citation number of the source",
+								"description": "Corresponding citation number of the source in the citation list",
 							},
 							"title": map[string]interface{}{
 								"type":        "string",
@@ -682,7 +682,7 @@ func (flagger *AuthorNewsArticlesFlagger) responseFormat() map[string]interface{
 func (flagger *AuthorNewsArticlesFlagger) Flag(logger *slog.Logger, authorName, affiliations string) ([]api.Flag, error) {
 	systemPrompt, userPrompt := flagger.authorPrompts(authorName, strings.Split(affiliations, ",")[0])
 
-	responseFormatSchema := flagger.responseFormat()
+	responseFormatSchema := flagger.responseFormatJsonSchema()
 	response, citations, err := flagger.llm.Generate(
 		userPrompt, systemPrompt, &llms.PerplexityOptions{
 			Model: "sonar-pro",

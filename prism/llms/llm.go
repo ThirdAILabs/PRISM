@@ -90,7 +90,7 @@ func NewPerplexityAI(apiKey string) *PerplexityAI {
 
 type PerplexityOptions struct {
 	Temperature      float32                `json:"temperature,omitempty"`
-	ResponseFormat   map[string]interface{} `json:"response_format,omitempty"`
+	ResponseFormat   interface{}            `json:"response_format,omitempty"`
 	WebSearchOptions map[string]interface{} `json:"web_search_options,omitempty"`
 	Model            string                 `json:"model,omitempty"`
 }
@@ -105,50 +105,55 @@ type PerplexityResponse struct {
 	Citations []string `json:"citations"`
 }
 
-func (p *PerplexityAI) createOptionsPayload(opt *PerplexityOptions) map[string]interface{} {
-	payload := make(map[string]interface{})
-	if opt != nil {
-		if opt.Temperature != 0 {
-			payload["temperature"] = opt.Temperature
-		}
-		if opt.Model != "" {
-			payload["model"] = opt.Model
-		}
-		if opt.ResponseFormat != nil {
-			payload["response_format"] = opt.ResponseFormat
-		}
-		if opt.WebSearchOptions != nil {
-			payload["web_search_options"] = opt.WebSearchOptions
-		}
-	}
-	if _, ok := payload["model"]; !ok {
-		payload["model"] = "sonar-pro"
-	}
-	return payload
+type Message struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type PerplexityPayload struct {
+	Messages         []Message              `json:"messages"`
+	Stream           bool                   `json:"stream"`
+	Model            string                 `json:"model,omitempty"`
+	Temperature      float32                `json:"temperature,omitempty"`
+	ResponseFormat   interface{}            `json:"response_format,omitempty"`
+	WebSearchOptions map[string]interface{} `json:"web_search_options,omitempty"`
 }
 
 func (p *PerplexityAI) Generate(userPrompt, systemPrompt string, opt *PerplexityOptions) (string, []string, error) {
-	messages := []map[string]string{}
+	messages := []Message{}
 	if systemPrompt != "" {
-		messages = append(messages, map[string]string{
-			"role":    "system",
-			"content": systemPrompt,
+		messages = append(messages, Message{
+			Role:    "system",
+			Content: systemPrompt,
 		})
 	}
 
-	messages = append(messages, map[string]string{
-		"role":    "user",
-		"content": userPrompt,
+	messages = append(messages, Message{
+		Role:    "user",
+		Content: userPrompt,
 	})
 
-	payload := map[string]interface{}{
-		"messages": messages,
-		"stream":   false,
+	payload := PerplexityPayload{
+		Messages: messages,
+		Stream:   false,
 	}
 
-	updatedOpts := p.createOptionsPayload(opt)
-	for k, v := range updatedOpts {
-		payload[k] = v
+	if opt != nil {
+		if opt.Temperature != 0 {
+			payload.Temperature = opt.Temperature
+		}
+		if opt.Model != "" {
+			payload.Model = opt.Model
+		}
+		if opt.ResponseFormat != nil {
+			payload.ResponseFormat = opt.ResponseFormat
+		}
+		if opt.WebSearchOptions != nil {
+			payload.WebSearchOptions = opt.WebSearchOptions
+		}
+	}
+	if payload.Model == "" {
+		payload.Model = "sonar-pro"
 	}
 
 	resp, err := p.client.R().
@@ -156,24 +161,29 @@ func (p *PerplexityAI) Generate(userPrompt, systemPrompt string, opt *Perplexity
 		Post("/chat/completions")
 
 	if err != nil {
+		slog.Error("perplexity error: chat completions failed", "error", err)
 		return "", make([]string, 0), fmt.Errorf("failed to send request: %w", err)
 	}
 
 	if resp.IsError() {
+		slog.Error("perplexity error: request failed", "status", resp.Status(), "body", string(resp.Body()))
 		return "", make([]string, 0), fmt.Errorf("request failed with status %s: %s", resp.Status(), resp.Body())
 	}
 
 	var result PerplexityResponse
 	if err := json.Unmarshal(resp.Body(), &result); err != nil {
+		slog.Error("perplexity error: failed to unmarshal response", "error", err)
 		return "", make([]string, 0), fmt.Errorf("failed to unmarshal response: %w", err)
 	}
 
 	if len(result.Choices) == 0 {
+		slog.Error("perplexity error: no choices in response")
 		return "", make([]string, 0), fmt.Errorf("no choices in response")
 	}
 
 	content := result.Choices[0].Message.Content
 	if content == "" {
+		slog.Error("perplexity error: empty content in message")
 		return "", make([]string, 0), fmt.Errorf("empty content in message")
 	}
 

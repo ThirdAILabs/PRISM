@@ -107,6 +107,15 @@ func main() {
 	concerningFunders := eoc.LoadFunderEOC()
 	concerningInstitutions := eoc.LoadInstitutionEOC()
 
+	authorFlaggers := []reports.AuthorFlagger{
+		flaggers.NewAuthorIsFacultyAtEOCFlagger(
+			flaggers.BuildUniversityNDB(config.UniversityData, filepath.Join(ndbDir, "university.ndb")),
+		),
+	}
+	if config.PpxApiKey != "" {
+		authorFlaggers = append(authorFlaggers, flaggers.NewAuthorNewsArticlesFlagger(config.PpxApiKey))
+	}
+
 	processor := reports.NewProcessor(
 		[]reports.WorkFlagger{
 			flaggers.NewOpenAlexFunderIsEOC(
@@ -136,17 +145,9 @@ func main() {
 				flaggers.BuildAuxIndex(config.AuxData),
 			),
 		},
-		[]reports.AuthorFlagger{
-			flaggers.NewAuthorIsFacultyAtEOCFlagger(
-				flaggers.BuildUniversityNDB(config.UniversityData, filepath.Join(ndbDir, "university.ndb")),
-			),
-		},
+		authorFlaggers,
 		reportManager,
 	)
-
-	if config.PpxApiKey != "" {
-		processor.AddAuthorFlagger(flaggers.NewAuthorNewsArticlesFlagger(config.PpxApiKey))
-	}
 
 	lastLicenseCheck := time.Now()
 	for {
