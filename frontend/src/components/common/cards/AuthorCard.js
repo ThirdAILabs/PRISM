@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { TbReportSearch } from 'react-icons/tb';
 import { reportService } from '../../../api/reports';
 import '../../../styles/pages/_authorCard.scss';
 import { CiSearch } from 'react-icons/ci';
-import { IoFilter } from 'react-icons/io5';
 
 const AuthorCard = ({ score, authors }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,7 +35,7 @@ const AuthorCard = ({ score, authors }) => {
           </div>
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="Search by author..."
             className="search-input"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

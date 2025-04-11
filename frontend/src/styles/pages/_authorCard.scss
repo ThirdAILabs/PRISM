@@ -43,8 +43,9 @@
     .search-input {
       padding: 8px 0px 8px 36px;
       border: 1px solid $color-text-300;
-      border-radius: 10px;
+      border-radius: 8px;
       outline: none;
+      width: 300px;
 
       &:focus {
         border-color: $color-primary-500;
@@ -100,10 +101,6 @@ $table-padding: 15px 0px 12px 12px;
 
   tbody {
     tr {
-      &:hover {
-        background: #f9f9f9;
-      }
-
       td {
         text-align: left;
         padding: $table-padding;
