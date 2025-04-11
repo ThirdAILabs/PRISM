@@ -27,7 +27,7 @@ const OrcidSearchComponent = () => {
 
     try {
       const result = await searchService.searchByOrcid(orcidId);
-      console.log('ORCID search result:', result);
+
       setSearchState((prev) => ({
         ...prev,
         orcidResults: result,

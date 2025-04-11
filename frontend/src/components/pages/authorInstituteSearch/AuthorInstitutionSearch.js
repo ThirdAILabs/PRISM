@@ -35,7 +35,7 @@ const AuthorInstitutionSearchComponent = () => {
       institution.Id,
       institution.Name
     );
-    console.log('result in openAlex', result);
+
     setSearchState((prev) => ({
       ...prev,
       openAlexResults: result,
