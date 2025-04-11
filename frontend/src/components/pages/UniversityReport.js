@@ -163,6 +163,7 @@ const UniversityReport = () => {
 
   return (
     <div className="basic-setup" style={{ minHeight: '100vh', paddingBottom: '50px' }}>
+      <div className={`panel-overlay ${isPanelVisible ? 'visible' : ''}`} />
       <div className="detail-header">
         <div
           style={{
@@ -250,44 +251,44 @@ const UniversityReport = () => {
             >
               {reportContent?.Flags
                 ? FLAG_ORDER.map((flag, index) => {
-                  const flagData = reportContent.Flags[flag] || [];
+                    const flagData = reportContent.Flags[flag] || [];
 
-                  return (
-                    <div
-                      style={{
-                        border: '1px solid rgb(230, 230, 230)',
-                        borderRadius: '8px',
-                        padding: '0px',
-                        width: '13.5%',
-                      }}
-                    >
+                    return (
+                      <div
+                        style={{
+                          border: '1px solid rgb(230, 230, 230)',
+                          borderRadius: '8px',
+                          padding: '0px',
+                          width: '13.5%',
+                        }}
+                      >
+                        <ConcernVisualizer
+                          title={TitlesAndDescriptions[flag].title}
+                          hoverText={TitlesAndDescriptions[flag].desc}
+                          value={flagData.length || 0}
+                          speedometerHoverText={`${flagData.length} Authors`}
+                          onReview={() => handleReview(flag)}
+                          selected={flag === selectedFlag}
+                          key={index}
+                          valueFontSize={valueFontSize}
+                        />
+                      </div>
+                    );
+                  })
+                : FLAG_ORDER.map((flag, index) => {
+                    return (
                       <ConcernVisualizer
                         title={TitlesAndDescriptions[flag].title}
                         hoverText={TitlesAndDescriptions[flag].desc}
-                        value={flagData.length || 0}
-                        speedometerHoverText={`${flagData.length} Authors`}
+                        value={0}
+                        speedometerHoverText={`0 Authors`}
                         onReview={() => handleReview(flag)}
                         selected={flag === selectedFlag}
                         key={index}
                         valueFontSize={valueFontSize}
                       />
-                    </div>
-                  );
-                })
-                : FLAG_ORDER.map((flag, index) => {
-                  return (
-                    <ConcernVisualizer
-                      title={TitlesAndDescriptions[flag].title}
-                      hoverText={TitlesAndDescriptions[flag].desc}
-                      value={0}
-                      speedometerHoverText={`0 Authors`}
-                      onReview={() => handleReview(flag)}
-                      selected={flag === selectedFlag}
-                      key={index}
-                      valueFontSize={valueFontSize}
-                    />
-                  );
-                })}
+                    );
+                  })}
             </div>
           </>
         ) : (
