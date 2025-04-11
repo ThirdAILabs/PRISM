@@ -1,6 +1,5 @@
-// src/ItemDetails.js
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   TALENT_CONTRACTS,
   ASSOCIATIONS_WITH_DENIED_ENTITIES,
@@ -11,21 +10,23 @@ import {
   COAUTHOR_AFFILIATIONS,
 } from '../../../constants/constants.js';
 import ConcernVisualizer, { BaseFontSize, getFontSize } from '../../ConcernVisualization.js';
-import Graph from '../../common/graph/graph.js';
-import Tabs from '../../common/tools/Tabs.js';
-import DownloadButton from '../../common/tools/button/downloadButton.js';
+// import Graph from '../../common/graph/graph.js';
+import Graph from '../../common/graph/graph2.js';
 import { reportService } from '../../../api/reports.js';
-import styled from 'styled-components';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import MuiAlert from '@mui/material/Alert';
-import { Snackbar, Tooltip } from '@mui/material';
+import { Snackbar, Divider } from '@mui/material';
 import useGoBack from '../../../hooks/useGoBack.js';
-import useOutsideClick from '../../../hooks/useOutsideClick.js';
 import { getRawTextFromXML, getTrailingWhiteSpace } from '../../../utils/helper.js';
 import '../../../styles/components/_primaryButton.scss';
+import '../../../styles/components/_authorInfoCard.scss';
+import AuthorInfoCard from '../authorInstituteSearch/AuthorInfoCard.js';
+import ScoreCard from './ScoreCard.js';
+import Lottie from 'lottie-react';
+import loadingAnimation from '../../../assets/animations/Loader.json';
 
 const FLAG_ORDER = [
   TALENT_CONTRACTS,
@@ -75,7 +76,6 @@ const TitlesAndDescriptions = {
 };
 
 const get_paper_url = (flag) => {
-  // getRawTextFromXML(flag.Work.DisplayName);
   return (
     <>
       <a href={flag.Work.WorkUrl} target="_blank" rel="noopener noreferrer">
@@ -96,14 +96,12 @@ const get_paper_url = (flag) => {
 };
 
 const ItemDetails = () => {
-  const navigate = useNavigate();
   const { report_id } = useParams();
 
-  const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
-  const [downloadDropdownOpen, setDownloadDropdownOpen] = useState(false);
   const [reportContent, setReportContent] = useState({});
+  const [authorInfo, setAuthorInfo] = useState(null);
   const [authorName, setAuthorName] = useState('');
-  const [institutions, setInstitutions] = useState([]);
+
   const [initialReportContent, setInitialReportContent] = useState({});
   const [isDisclosureChecked, setDisclosureChecked] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -144,7 +142,11 @@ const ItemDetails = () => {
     }
     await handleSubmit(files);
   };
-
+  const verifyWithDisclosure = {
+    fileInputRef: fileInputRef,
+    handleFileUploadClick: handleFileUploadClick,
+    handleFileSelect: handleFileSelect,
+  };
   const handleSubmit = async (files) => {
     if (!files || files.length === 0) {
       setNotification({
@@ -206,6 +208,13 @@ const ItemDetails = () => {
         const report = await reportService.getReport(report_id);
         const { Content, ...metadata } = report;
 
+        setAuthorInfo({
+          AuthorId: report.AuthorId,
+          AuthorName: report.AuthorName,
+          Institutions: report.Affiliations.split(','),
+          Interests: report.ResearchInterests.split(','),
+          Source: report.Source,
+        });
         if (!isMounted) return;
 
         setAuthorName(report.AuthorName);
@@ -248,7 +257,7 @@ const ItemDetails = () => {
   const [filterMessage, setFilterMessage] = useState(
     getTrailingWhiteSpace(12) + 'Filter by Timeline'
   );
-  const handleTabChange = (event, newValue) => {
+  const handleTabChange = (newValue) => {
     setActiveTab(newValue);
   };
   const handleStartDateChange = (e) => setStartDate(e.target.value);
@@ -260,7 +269,6 @@ const ItemDetails = () => {
   }
 
   const handleDateFilter = () => {
-    setYearDropdownOpen(false);
     if (!startDate && !endDate) {
       setReportContent(initialReportContent);
       setFilterMessage('');
@@ -317,9 +325,6 @@ const ItemDetails = () => {
 
     setFilterMessage(`${displayStart} - ${displayEnd}`);
 
-    setStartDate('');
-    setEndDate('');
-
     setReportContent(filteredContent);
     setReportMetadata({
       ...reportMetadata,
@@ -330,6 +335,24 @@ const ItemDetails = () => {
     const newFontSize = `${getFontSize(maxLength)}px`;
 
     setValueFontSize(newFontSize);
+  };
+  const handleClearFilter = () => {
+    setStartDate('');
+    setEndDate('');
+    setReportContent(initialReportContent);
+    setReportMetadata({
+      ...reportMetadata,
+      TimeRange: '',
+    });
+  };
+  const filterProps = {
+    startDate: startDate,
+    endDate: endDate,
+    todayStr: todayStr,
+    handleStartDateChange: handleStartDateChange,
+    handleEndDateChange: handleEndDateChange,
+    handleDateFilter: handleDateFilter,
+    handleClearFilter: handleClearFilter,
   };
 
   const [review, setReview] = useState();
@@ -929,31 +952,6 @@ const ItemDetails = () => {
       </div>
     );
   }
-  // function formalRelationFlag(flag, index) {
-  //   return (
-  //     <li key={index} className='p-3 px-5 w-75 detail-item'>
-  //       {withPublicationDate(<h5 className='fw-bold mt-3'>{flag.title}</h5>, flag)}
-  //       <p>{wrapLinks(flag.message)}</p>
-  //     </li>
-  //   )
-  // }
-
-  const [showPopover, setShowPopover] = useState(false);
-
-  function wrapLinks(origtext) {
-    const linkStart = Math.max(origtext.indexOf('https://'), origtext.indexOf('http://'));
-    if (linkStart === -1) {
-      return [origtext];
-    }
-    const message = origtext.slice(0, linkStart);
-    const link = origtext.slice(linkStart);
-    return [
-      message,
-      <a href={link} target="_blank" rel="noopener noreferrer">
-        {link}
-      </a>,
-    ];
-  }
 
   const items = review ? reportContent[review] || [] : [];
   const hasDates = items.some(
@@ -961,39 +959,42 @@ const ItemDetails = () => {
   );
   const goBack = useGoBack('/');
 
-  const dropdownFilterRef = useOutsideClick(() => {
-    setYearDropdownOpen(false);
-  });
+  const downloadProps = {
+    reportId: report_id,
+    metadata: reportMetadata,
+    content: reportContent,
+    disabled: loading,
+  };
 
-  const dropdownDownloadRef = useOutsideClick(() => {
-    setDownloadDropdownOpen(false);
-  });
+  const handleBackButtonClick = () => {
+    if (activeTab === 1) {
+      setActiveTab(0);
+    } else {
+      goBack();
+    }
+  };
 
   return (
     <div className="basic-setup">
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-row">
-          <div
-            className="detail-header"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              margin: '0 auto',
-              padding: '10px 0',
-              height: '75px',
-            }}
-          >
-            {/* Left section - Back button */}
-            <div style={{ flex: '1', display: 'flex', justifyContent: 'flex-start' }}>
+          <div className="detail-header">
+            <div
+              style={{
+                flex: '1',
+                display: 'flex',
+                justifyContent: 'flex-start',
+                marginBottom: '-15px',
+              }}
+            >
               <button
-                onClick={() => goBack()}
+                onClick={handleBackButtonClick}
                 className="btn text-dark mb-3"
-                style={{ minWidth: '80px', display: 'flex', alignItems: 'center' }}
+                style={{ display: 'flex', marginTop: '-10px' }}
               >
                 <svg
-                  width="16"
-                  height="16"
+                  width="24"
+                  height="32"
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -1014,165 +1015,21 @@ const ItemDetails = () => {
                     strokeLinejoin="round"
                   />
                 </svg>
-                Back
               </button>
-            </div>
-
-            {/* Center section - Author information */}
-            <div style={{ flex: '1', textAlign: 'center' }}>
-              <h5 className="m-0">{authorName}</h5>
-              <b className="m-0 p-0" style={{ fontSize: 'small' }}>
-                {institutions.join(', ')}
-              </b>
-            </div>
-
-            {/* Right section - Filter dropdown */}
-            <div style={{ flex: '1', display: 'flex', justifyContent: 'flex-end' }}>
-              <div className="dropdown" ref={dropdownFilterRef}>
-                <style>
-                  {`
-                    .form-control::placeholder {
-                      color: #888;
-                    }
-                  `}
-                </style>
-                <Tooltip title={loading ? 'Please wait while the report is being generated.' : ''}>
-                  <span
-                    style={{
-                      cursor: loading ? 'not-allowed' : 'pointer',
-                    }}
-                  >
-                    <button
-                      className="btn dropdown-toggle"
-                      onClick={() => setYearDropdownOpen(!yearDropdownOpen)}
-                      style={{
-                        backgroundColor: 'rgb(160, 160, 160)',
-                        border: 'none',
-                        marginRight: '10px',
-                        color: 'white',
-                        width: '225px',
-                        fontWeight: 'bold',
-                        fontSize: '14px',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        cursor: loading ? 'not-allowed' : 'pointer',
-                      }}
-                      disabled={loading}
-                    >
-                      {filterMessage}
-                    </button>
-                  </span>
-                </Tooltip>
-                {yearDropdownOpen && (
-                  <div
-                    className="dropdown-menu show p-2"
-                    style={{
-                      width: '225px',
-                      backgroundColor: 'rgb(160, 160, 160)',
-                      border: 'none',
-                      // right: 0,
-                      marginTop: '5px',
-                      marginRight: '10px',
-                      color: 'white',
-                      fontWeight: 'bold',
-                      fontSize: '14px',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      display: 'flex',
-                      flexDirection: 'column',
-                    }}
-                  >
-                    <div
-                      className="form-group"
-                      style={{ marginBottom: '10px', width: '100%', padding: '7px' }}
-                    >
-                      <label>Start Date</label>
-                      <input
-                        type="date"
-                        className="form-control"
-                        value={startDate}
-                        max={todayStr}
-                        onChange={handleStartDateChange}
-                        style={{
-                          backgroundColor: 'rgb(220, 220, 220)',
-                          border: 'none',
-                          outline: 'none',
-                          color: 'black',
-                          marginTop: '5px',
-                          width: '100%',
-                        }}
-                      />
-                    </div>
-                    <div
-                      className="form-group"
-                      style={{ marginBottom: '10px', width: '100%', padding: '0 7px' }}
-                    >
-                      <label>End Date</label>
-                      <input
-                        type="date"
-                        value={endDate}
-                        max={todayStr}
-                        onChange={handleEndDateChange}
-                        className="form-control"
-                        style={{
-                          backgroundColor: 'rgb(220, 220, 220)',
-                          border: 'none',
-                          outline: 'none',
-                          color: 'black',
-                          marginTop: '5px',
-                          width: '100%',
-                        }}
-                      />
-                    </div>
-                    <button
-                      className="form-control"
-                      type="submit"
-                      onClick={handleDateFilter}
-                      disabled={!(startDate || endDate)}
-                      style={{
-                        backgroundColor: 'rgb(200, 200, 200)',
-                        border: 'none',
-                        color: 'white',
-                        width: '100px',
-                        fontWeight: 'bold',
-                        fontSize: '14px',
-                        cursor: startDate || endDate ? 'pointer' : 'not-allowed',
-                        transition: 'background-color 0.3s',
-                        marginTop: '10px',
-                      }}
-                    >
-                      Submit
-                    </button>
-                  </div>
-                )}
-              </div>
+              <h5>Individual Assessment Result</h5>
             </div>
           </div>
-          <Tabs activeTab={activeTab} handleTabChange={handleTabChange} disabled={loading} />
+          <Divider
+            sx={{
+              backgroundColor: 'black',
+              height: '1px',
+              width: '100%',
+              opacity: 0.1,
+            }}
+          />
         </div>
         {activeTab === 0 && (
           <div className="d-flex justify-content-end mt-2 gap-2 px-2">
-            <Tooltip title={loading ? 'Please wait while the report is being generated.' : ''}>
-              <button
-                className="button"
-                onClick={handleFileUploadClick}
-                disabled={loading}
-                style={{
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                }}
-              >
-                Verify with Disclosures
-              </button>
-            </Tooltip>
-            <input
-              type="file"
-              ref={fileInputRef}
-              style={{ display: 'none' }}
-              multiple
-              accept=".txt,.pdf"
-              onChange={handleFileSelect}
-            />
             <Snackbar
               open={notification.open}
               autoHideDuration={2000}
@@ -1183,63 +1040,102 @@ const ItemDetails = () => {
                 {notification.message}
               </Alert>
             </Snackbar>
-            <div ref={dropdownDownloadRef}>
-              <DownloadButton
-                reportId={report_id}
-                metadata={reportMetadata}
-                content={reportContent}
-                isOpen={downloadDropdownOpen}
-                setIsOpen={() => setDownloadDropdownOpen(!downloadDropdownOpen)}
-                disabled={loading}
-              />
-            </div>
           </div>
         )}
       </div>
       {activeTab === 0 && (
         <>
-          {loading && (
-            <div class="d-flex justify-content-start">
-              <div class="spinner-border text-secondary ms-5 mb-3" role="status" />
+          {authorInfo ? (
+            <>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div
+                  className="author-item"
+                  style={{
+                    marginTop: '20px',
+                    marginBottom: '20px',
+                    marginLeft: '3%',
+                    width: '45%',
+                  }}
+                >
+                  <AuthorInfoCard
+                    result={authorInfo}
+                    verifyWithDisclosure={verifyWithDisclosure}
+                    downloadProps={downloadProps}
+                    filterProps={filterProps}
+                    loading={loading}
+                  />
+                </div>
+                <div
+                  className="author-item"
+                  style={{
+                    marginTop: '20px',
+                    marginBottom: '20px',
+                    marginRight: '3%',
+                    width: '45%',
+                  }}
+                >
+                  <ScoreCard
+                    score={Object.keys(reportContent || {})
+                      .map((name) => (reportContent[name] || []).length)
+                      .reduce((prev, curr) => prev + curr, 0)}
+                    setActiveTab={setActiveTab}
+                    loading={loading}
+                  />
+                </div>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  marginTop: '20px',
+                  marginInline: '3%',
+                }}
+              >
+                {FLAG_ORDER.map((flag, index) => {
+                  const flagCount = reportContent[flag] ? reportContent[flag].length : 0;
+                  const isSelected = review === flag;
+                  return (
+                    <div
+                      style={{
+                        border: '1px solid rgb(230, 230, 230)',
+                        borderRadius: '8px',
+                        padding: '0px',
+                        width: '13.5%',
+                      }}
+                    >
+                      <ConcernVisualizer
+                        title={TitlesAndDescriptions[flag].title}
+                        hoverText={TitlesAndDescriptions[flag].desc}
+                        value={flagCount}
+                        speedometerHoverText={`${flagCount} Issues`}
+                        onReview={() => setReview(flag)}
+                        key={index}
+                        selected={isSelected}
+                        valueFontSize={valueFontSize}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Lottie
+                animationData={loadingAnimation}
+                loop={true}
+                autoplay={true}
+                style={{ width: '64%' }}
+              />
             </div>
           )}
-          <div
-            className="d-flex w-100 flex-column align-items-center"
-            style={{ color: 'rgb(78, 78, 78)', marginTop: '0px' }}
-          >
-            <div style={{ fontSize: 'large', fontWeight: 'bold' }}>Total Score</div>
-            <div style={{ fontSize: '60px', fontWeight: 'bold' }}>
-              {Object.keys(reportContent || {})
-                .map((name) => (reportContent[name] || []).length)
-                .reduce((prev, curr) => prev + curr, 0)}
-            </div>
-          </div>
 
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-around',
-              flexWrap: 'wrap',
-              marginTop: '20px',
-            }}
-          >
-            {FLAG_ORDER.map((flag, index) => {
-              const flagCount = reportContent[flag] ? reportContent[flag].length : 0;
-              const isSelected = review === flag;
-              return (
-                <ConcernVisualizer
-                  title={TitlesAndDescriptions[flag].title}
-                  hoverText={TitlesAndDescriptions[flag].desc}
-                  value={flagCount}
-                  speedometerHoverText={`${flagCount} Issues`}
-                  onReview={() => setReview(flag)}
-                  key={index}
-                  selected={isSelected}
-                  valueFontSize={valueFontSize}
-                />
-              );
-            })}
-          </div>
           {review && (
             <div style={{ width: '100%', textAlign: 'center', marginTop: '50px' }}>
               {(() => {
@@ -1430,40 +1326,14 @@ const ItemDetails = () => {
         </>
       )}
 
-      {activeTab === 1 && <Graph authorName={authorName} reportContent={reportContent} />}
+      {activeTab === 1 && (
+        <>
+          {/* <Graph authorName={authorName} reportContent={reportContent} /> */}
+          <Graph authorName={authorName} reportContent={reportContent} />
+        </>
+      )}
     </div>
   );
-};
-
-const popoverStyles = {
-  position: 'absolute',
-  top: '30px',
-  left: '50%',
-  transform: 'translateX(-50%)',
-  zIndex: 1,
-  backgroundColor: '#fff',
-  border: '1px solid rgba(0, 0, 0, 0.2)',
-  boxShadow: '0 0.5rem 1rem rgba(0, 0, 0, 0.15)',
-  borderRadius: '0.3rem',
-  padding: '0.5rem',
-  width: '200px',
-};
-
-const buttonStyles = {
-  marginLeft: '5px',
-  width: '14px',
-  height: '14px',
-  padding: '1px 0',
-  borderRadius: '7.5px',
-  textAlign: 'center',
-  fontSize: '8px',
-  lineHeight: '1.42857',
-  border: '1px solid grey',
-  borderWidth: '1px',
-  backgroundColor: 'transparent',
-  color: 'grey',
-  position: 'relative',
-  boxShadow: 'none',
 };
 
 export default ItemDetails;
