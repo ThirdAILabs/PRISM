@@ -2,6 +2,7 @@ package flaggers_test
 
 import (
 	"log/slog"
+	"os"
 	"prism/prism/api"
 	"prism/prism/openalex"
 	"prism/prism/reports/flaggers"
@@ -35,7 +36,7 @@ func TestAuthorIsFacultyAtEOC(t *testing.T) {
 
 	flagger := flaggers.NewAuthorIsFacultyAtEOCFlagger(ndb)
 
-	flags, err := flagger.Flag(slog.Default(), "7 9")
+	flags, err := flagger.Flag(slog.Default(), "7 9", "xyz")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,7 +50,7 @@ func TestAuthorIsFacultyAtEOC(t *testing.T) {
 		t.Fatal("incorrect flag")
 	}
 
-	noflags, err := flagger.Flag(slog.Default(), "some random name")
+	noflags, err := flagger.Flag(slog.Default(), "some random name", "some random affiliation")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -195,9 +196,14 @@ func TestAuthorAssociationIsEOC(t *testing.T) {
 }
 
 func TestAuthorNewsArticleFlagger(t *testing.T) {
-	flagger := flaggers.NewAuthorNewsArticlesFlagger()
+	apiKey := os.Getenv("PPX_API_KEY")
+	if apiKey == "" {
+		t.Fatal("PPX_API_KEY not set")
+	}
 
-	flags, err := flagger.Flag(slog.Default(), "charles lieber")
+	flagger := flaggers.NewAuthorNewsArticlesFlagger(apiKey)
+
+	flags, err := flagger.Flag(slog.Default(), "charles lieber", "harvard university")
 	if err != nil {
 		t.Fatal(err)
 	}

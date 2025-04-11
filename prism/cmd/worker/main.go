@@ -43,6 +43,8 @@ type Config struct {
 	MaxGrobidThreads   int `env:"MAX_GROBID_THREADS" envDefault:"10"`
 
 	S3Bucket string `env:"S3_BUCKET" envDefault:"thirdai-prism"`
+
+	PpxApiKey string `env:"PPX_API_KEY" envDefault:""`
 }
 
 func (c *Config) logfile() string {
@@ -105,6 +107,15 @@ func main() {
 	concerningFunders := eoc.LoadFunderEOC()
 	concerningInstitutions := eoc.LoadInstitutionEOC()
 
+	authorFlaggers := []reports.AuthorFlagger{
+		flaggers.NewAuthorIsFacultyAtEOCFlagger(
+			flaggers.BuildUniversityNDB(config.UniversityData, filepath.Join(ndbDir, "university.ndb")),
+		),
+	}
+	if config.PpxApiKey != "" {
+		authorFlaggers = append(authorFlaggers, flaggers.NewAuthorNewsArticlesFlagger(config.PpxApiKey))
+	}
+
 	processor := reports.NewProcessor(
 		[]reports.WorkFlagger{
 			flaggers.NewOpenAlexFunderIsEOC(
@@ -134,12 +145,7 @@ func main() {
 				flaggers.BuildAuxIndex(config.AuxData),
 			),
 		},
-		[]reports.AuthorFlagger{
-			flaggers.NewAuthorIsFacultyAtEOCFlagger(
-				flaggers.BuildUniversityNDB(config.UniversityData, filepath.Join(ndbDir, "university.ndb")),
-			),
-			flaggers.NewAuthorNewsArticlesFlagger(),
-		},
+		authorFlaggers,
 		reportManager,
 	)
 
