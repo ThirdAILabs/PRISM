@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import useGoBack from '../../hooks/useGoBack.js';
+import { IoIosClose } from 'react-icons/io';
 import {
   TALENT_CONTRACTS,
   ASSOCIATIONS_WITH_DENIED_ENTITIES,
@@ -14,9 +15,9 @@ import ConcernVisualizer, { BaseFontSize, getFontSize } from '../ConcernVisualiz
 
 import { universityReportService } from '../../api/universityReports.js';
 import AuthorCard from '../common/cards/AuthorCard.js';
-
-import styled from 'styled-components';
-import Divider from '@mui/material/Divider';
+import useOutsideClick from '../../hooks/useOutsideClick.js';
+import '../../styles/pages/_universityReport.scss';
+import { Divider } from '@mui/material';
 
 import '../../styles/components/_primaryButton.scss';
 import '../../styles/components/_authorInfoCard.scss';
@@ -78,16 +79,29 @@ const UniversityReport = () => {
   const [researchersAssessed, setResearchersAssessed] = useState(0);
   const [selectedFlag, setSelectedFlag] = useState(null);
   const [selectedFlagData, setSelectedFlagData] = useState(null);
-  const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [valueFontSize, setValueFontSize] = useState(`${BaseFontSize}px`);
+  const [isPanelVisible, setIsPanelVisible] = useState(false);
   const [universityInfo, setUniversityInfo] = useState(null);
 
   const handleReview = (flag) => {
     setSelectedFlag(flag);
     setSelectedFlagData(reportContent?.Flags[flag] || []);
-    setShowModal(true);
+    requestAnimationFrame(() => {
+      setIsPanelVisible(true);
+    });
   };
+
+  const handleClosePanel = () => {
+    setIsPanelVisible(false);
+    // Wait for transition to complete before clearing selection
+    setTimeout(() => {
+      setSelectedFlag(null);
+      setSelectedFlagData(null);
+    }, 300);
+  };
+
+  const universityFlagPanelRef = useOutsideClick(handleClosePanel);
 
   useEffect(() => {
     let isMounted = true;
@@ -149,6 +163,7 @@ const UniversityReport = () => {
 
   return (
     <div className="basic-setup" style={{ minHeight: '100vh', paddingBottom: '50px' }}>
+      <div className={`panel-overlay ${isPanelVisible ? 'visible' : ''}`} />
       <div className="detail-header">
         <div
           style={{
@@ -293,20 +308,20 @@ const UniversityReport = () => {
           </div>
         )}
 
-        {showModal && (
+        {selectedFlag && (
           <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              width: '100%',
-            }}
+            className={`university-flag-panel ${isPanelVisible ? 'open' : ''}`}
+            ref={universityFlagPanelRef}
           >
-            <div
-              style={{
-                marginTop: '100px',
-              }}
-            >
-              <AuthorCard authors={selectedFlagData} />
+            <div className="university-flag-panel-header">
+              <span>{TitlesAndDescriptions[selectedFlag]?.title}</span>
+              <button className="close-button" onClick={handleClosePanel}>
+                <IoIosClose />
+              </button>
+            </div>
+            <Divider className="university-flag-panel-divider" />
+            <div className="university-flag-panel-content">
+              <AuthorCard score={selectedFlagData.length} authors={selectedFlagData} />
             </div>
           </div>
         )}
@@ -314,66 +329,5 @@ const UniversityReport = () => {
     </div>
   );
 };
-
-const popoverStyles = {
-  position: 'absolute',
-  top: '30px',
-  left: '50%',
-  transform: 'translateX(-50%)',
-  zIndex: 1,
-  backgroundColor: '#fff',
-  border: '1px solid rgba(0, 0, 0, 0.2)',
-  boxShadow: '0 0.5rem 1rem rgba(0, 0, 0, 0.15)',
-  borderRadius: '0.3rem',
-  padding: '0.5rem',
-  width: '200px',
-};
-
-const buttonStyles = {
-  marginLeft: '5px',
-  width: '14px',
-  height: '14px',
-  padding: '1px 0',
-  borderRadius: '7.5px',
-  textAlign: 'center',
-  fontSize: '8px',
-  lineHeight: '1.42857',
-  border: '1px solid grey',
-  borderWidth: '1px',
-  backgroundColor: 'transparent',
-  color: 'grey',
-  position: 'relative',
-  boxShadow: 'none',
-};
-
-const StyledWrapper = styled.div`
-  position: relative;
-
-  .cssbuttons-io-button {
-    position: relative;
-    transition: all 0.3s ease-in-out;
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
-    padding-block: 0.5rem;
-    padding-inline: 0.75rem;
-    background-color: rgb(0 107 179);
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: #ffff;
-    gap: 10px;
-    font-weight: bold;
-    border: 3px solid #ffffff4d;
-    outline: none;
-    overflow: hidden;
-    font-size: 15px;
-  }
-
-  .cssbuttons-io-button:hover {
-    transform: scale(1.009);
-    border-color: #fff9;
-  }
-`;
 
 export default UniversityReport;

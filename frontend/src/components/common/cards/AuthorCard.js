@@ -1,9 +1,14 @@
-import React from 'react';
-import { DataGrid, GridToolbar } from '@mui/x-data-grid';
-import { TbReportSearch } from 'react-icons/tb';
+import React, { useState } from 'react';
 import { reportService } from '../../../api/reports';
+import '../../../styles/pages/_authorCard.scss';
+import { CiSearch } from 'react-icons/ci';
 
-const AuthorCard = ({ authors }) => {
+const AuthorCard = ({ score, authors }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const filteredAuthors = authors.filter((author) =>
+    author.AuthorName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const handleClick = async (authorId, authorName, Source) => {
     const report = await reportService.createReport({
       AuthorId: authorId,
@@ -15,124 +20,56 @@ const AuthorCard = ({ authors }) => {
     window.open('/report/' + report.Id, '_blank');
   };
 
-  const columns = [
-    {
-      field: 'authorName',
-      headerName: 'Author Name',
-      width: 450,
-    },
-    {
-      field: 'flagCount',
-      headerName: 'Flag Count',
-      width: 230,
-    },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 230,
-      renderCell: (params) => (
-        <span
-          onClick={() => {
-            handleClick(params.row.authorId, params.row.authorName, params.row.source);
-          }}
-          style={{
-            color: 'inherit',
-            textDecoration: 'none',
-            cursor: 'pointer',
-          }}
-        >
-          <TbReportSearch />
-          <span style={{ marginLeft: '10px' }}>View Report</span>
-        </span>
-      ),
-    },
-  ];
-
-  const rows = authors.map((author, index) => ({
-    id: index,
-    authorName: author.AuthorName,
-    flagCount: author.FlagCount,
-    authorId: author.AuthorId,
-    source: author.Source,
-  }));
-
-  const handlePaginationList = () => {
-    const pageSizeOptionsList = [5];
-    if (authors.length > 5) {
-      pageSizeOptionsList.push(10);
-    }
-    if (authors.length > 10) {
-      pageSizeOptionsList.push(25);
-    }
-    return pageSizeOptionsList;
-  };
-
-  const CustomToolbar = () => {
-    return (
-      <GridToolbar
-        showQuickFilter={true}
-        quickFilterProps={{ debounceMs: 500 }}
-        sx={{
-          '& .MuiButton-root': {
-            display: 'none',
-          },
-        }}
-      />
-    );
-  };
-
   return (
-    <DataGrid
-      rows={rows}
-      columns={columns}
-      slots={{ toolbar: CustomToolbar }}
-      density="comfortable"
-      initialState={{
-        pagination: {
-          paginationModel: { pageSize: 10 },
-        },
-      }}
-      pageSizeOptions={handlePaginationList()}
-      disableRowSelectionOnClick
-      sx={{
-        '& .MuiDataGrid-footerContainer': {
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0px',
-          minHeight: '52px',
-        },
-        '& .MuiTablePagination-toolbar': {
-          display: 'flex',
-          alignItems: 'center',
-          padding: 0,
-          minHeight: 'auto',
-          marginTop: 0,
-          marginBottom: 0,
-        },
-        '& .MuiTablePagination-actions': {
-          display: 'flex',
-          alignItems: 'center',
-          margin: 0,
-          padding: 0,
-          height: 'auto',
-          position: 'relative',
-          top: '-0px',
-        },
-        '& .MuiTablePagination-displayedRows': {
-          margin: 0,
-          padding: 0,
-        },
-        '& .MuiTablePagination-selectLabel': {
-          margin: 0,
-          padding: 0,
-        },
-        '& .MuiIconButton-root': {
-          padding: '4px',
-          margin: 0,
-        },
-      }}
-    />
+    <>
+      <div className="selection-container">
+        <div className="score-box-container">
+          <div className="score-pill">
+            <span className="score-label">Score:</span>
+            <span className="score-value">{score}</span>
+          </div>
+        </div>
+        <div className="search-container">
+          <div className="search-icon">
+            <CiSearch />
+          </div>
+          <input
+            type="text"
+            placeholder="Search by author..."
+            className="search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="author-card">
+        <table className="author-table">
+          <thead>
+            <tr>
+              <th>Author Name</th>
+              <th>Flag Count</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredAuthors.map((author, index) => (
+              <tr key={index}>
+                <td>{author.AuthorName}</td>
+                <td>{author.FlagCount}</td>
+                <td>
+                  <button
+                    class="button button-3d view-report-button"
+                    onClick={() => handleClick(author.AuthorId, author.AuthorName, author.Source)}
+                  >
+                    View Report
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 };
 
