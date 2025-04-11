@@ -1,4 +1,3 @@
-// src/ItemDetails.js
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
@@ -14,15 +13,13 @@ import ConcernVisualizer, { BaseFontSize, getFontSize } from '../../ConcernVisua
 // import Graph from '../../common/graph/graph.js';
 import Graph from '../../common/graph/graph2.js';
 import { reportService } from '../../../api/reports.js';
-import styled from 'styled-components';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import MuiAlert from '@mui/material/Alert';
-import { Snackbar, Tooltip, Divider } from '@mui/material';
+import { Snackbar, Divider } from '@mui/material';
 import useGoBack from '../../../hooks/useGoBack.js';
-import useOutsideClick from '../../../hooks/useOutsideClick.js';
 import { getRawTextFromXML, getTrailingWhiteSpace } from '../../../utils/helper.js';
 import '../../../styles/components/_primaryButton.scss';
 import '../../../styles/components/_authorInfoCard.scss';
@@ -79,7 +76,7 @@ const TitlesAndDescriptions = {
 };
 
 const get_paper_url = (flag) => {
-  // getRawTextFromXML(flag.Work.DisplayName);
+
   return (
     <>
       <a href={flag.Work.WorkUrl} target="_blank" rel="noopener noreferrer">
@@ -102,12 +99,10 @@ const get_paper_url = (flag) => {
 const ItemDetails = () => {
   const { report_id } = useParams();
 
-  const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
-  const [downloadDropdownOpen, setDownloadDropdownOpen] = useState(false);
   const [reportContent, setReportContent] = useState({});
   const [authorInfo, setAuthorInfo] = useState(null);
   const [authorName, setAuthorName] = useState('');
-  const [institutions, setInstitutions] = useState([]);
+
   const [initialReportContent, setInitialReportContent] = useState({});
   const [isDisclosureChecked, setDisclosureChecked] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -275,7 +270,6 @@ const ItemDetails = () => {
   }
 
   const handleDateFilter = () => {
-    setYearDropdownOpen(false);
     if (!startDate && !endDate) {
       setReportContent(initialReportContent);
       setFilterMessage('');
@@ -332,9 +326,6 @@ const ItemDetails = () => {
 
     setFilterMessage(`${displayStart} - ${displayEnd}`);
 
-    setStartDate('');
-    setEndDate('');
-
     setReportContent(filteredContent);
     setReportMetadata({
       ...reportMetadata,
@@ -346,6 +337,24 @@ const ItemDetails = () => {
 
     setValueFontSize(newFontSize);
   };
+  const handleClearFilter = () => {
+    setStartDate('');
+    setEndDate('');
+    setReportContent(initialReportContent);
+    setReportMetadata({
+      ...reportMetadata,
+      TimeRange: '',
+    });
+  };
+  const filterProps = {
+    "startDate": startDate,
+    "endDate": endDate,
+    "todayStr": todayStr,
+    "handleStartDateChange": handleStartDateChange,
+    "handleEndDateChange": handleEndDateChange,
+    "handleDateFilter": handleDateFilter,
+    "handleClearFilter": handleClearFilter,
+  }
 
   const [review, setReview] = useState();
 
@@ -951,10 +960,6 @@ const ItemDetails = () => {
   );
   const goBack = useGoBack('/');
 
-  const dropdownFilterRef = useOutsideClick(() => {
-    setYearDropdownOpen(false);
-  });
-
 
 
   const downloadProps = {
@@ -1058,7 +1063,7 @@ const ItemDetails = () => {
                     height: '0%',
                   }}
                 >
-                  <AuthorInfoCard result={authorInfo} verifyWithDisclosure={verifyWithDisclosure} downloadProps={downloadProps} />
+                  <AuthorInfoCard result={authorInfo} verifyWithDisclosure={verifyWithDisclosure} downloadProps={downloadProps} filterProps={filterProps} />
                 </div>
                 <div
                   className="author-item"
@@ -1078,7 +1083,7 @@ const ItemDetails = () => {
                   display: 'flex',
                   justifyContent: 'space-between',
                   flexWrap: 'wrap',
-                  marginTop: '40px',
+                  marginTop: '20px',
                   marginInline: '3%',
                 }}
               >

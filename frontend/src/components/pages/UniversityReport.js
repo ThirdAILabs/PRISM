@@ -20,7 +20,7 @@ import Divider from '@mui/material/Divider';
 
 import '../../styles/components/_primaryButton.scss';
 import '../../styles/components/_authorInfoCard.scss';
-import AuthorInfoCard from './authorInstituteSearch/AuthorInfoCard.js';
+import UniversityInfoCard from './university/UniversityInfoCard.js';
 import ScoreCard from './university/UniversityScoreCard.js';
 import Lottie from 'lottie-react';
 import loadingAnimation from '../../assets/animations/Loader.json';
@@ -81,6 +81,7 @@ const UniversityReport = () => {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [valueFontSize, setValueFontSize] = useState(`${BaseFontSize}px`);
+  const [universityInfo, setUniversityInfo] = useState(null);
 
   const handleReview = (flag) => {
     setSelectedFlag(flag);
@@ -98,7 +99,11 @@ const UniversityReport = () => {
         setInstituteName(report.UniversityName);
         setTotalResearchers(report.Content.TotalAuthors);
         setResearchersAssessed(report.Content.AuthorsReviewed);
-
+        setUniversityInfo({
+          name: report.UniversityName,
+          // address: report.UniversityAddress,
+          address: '6100 Main St, Houston, TX 77005, USA',
+        });
         if (!isMounted) {
           return;
         }
@@ -113,6 +118,11 @@ const UniversityReport = () => {
         setReportContent(report.Content);
         setTotalResearchers(report.Content.TotalAuthors);
         setResearchersAssessed(report.Content.AuthorsReviewed);
+        setUniversityInfo({
+          name: report.UniversityName,
+          // address: report.UniversityAddress,
+          address: '6100 Main St, Houston, TX 77005, USA',
+        });
 
         // Set font size based on the maximum number of flag count
         const newFontSize = `${getFontSize(
@@ -193,82 +203,97 @@ const UniversityReport = () => {
         }}
       />
       <>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div
-            className="author-item"
-            style={{
-              marginTop: '20px',
-              marginBottom: '20px',
-              marginLeft: '3%',
-              width: '45%',
-              height: '0%',
-            }}
-          >
-            {/* <AuthorInfoCard /> */}
-          </div>
-          <div
-            className="author-item"
-            style={{ marginTop: '20px', marginBottom: '20px', marginRight: '3%', width: '45%' }}
-          >
-            <ScoreCard
-              reserachersAccessed={researchersAssessed}
-              totalResearcher={toatlResearchers}
-              loading={loading}
-            />
-          </div>
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            marginTop: '40px',
-            marginInline: '3%',
-          }}
-        >
-          {reportContent?.Flags
-            ? FLAG_ORDER.map((flag, index) => {
-              const flagData = reportContent.Flags[flag] || [];
-
-              return (
-                <div
-                  style={{
-                    border: '1px solid rgb(230, 230, 230)',
-                    borderRadius: '8px',
-                    padding: '0px',
-                    width: '13.5%'
-                  }}
-                >
-                  <ConcernVisualizer
-                    title={TitlesAndDescriptions[flag].title}
-                    hoverText={TitlesAndDescriptions[flag].desc}
-                    value={flagData.length || 0}
-                    speedometerHoverText={`${flagData.length} Authors`}
-                    onReview={() => handleReview(flag)}
-                    selected={flag === selectedFlag}
-                    key={index}
-                    valueFontSize={valueFontSize}
-                  />
-                </div>
-              );
-            })
-            : FLAG_ORDER.map((flag, index) => {
-              return (
-                <ConcernVisualizer
-                  title={TitlesAndDescriptions[flag].title}
-                  hoverText={TitlesAndDescriptions[flag].desc}
-                  value={0}
-                  speedometerHoverText={`0 Authors`}
-                  onReview={() => handleReview(flag)}
-                  selected={flag === selectedFlag}
-                  key={index}
-                  valueFontSize={valueFontSize}
+        {universityInfo ?
+          (<>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div
+                className="author-item"
+                style={{
+                  marginTop: '20px',
+                  marginBottom: '20px',
+                  marginLeft: '3%',
+                  width: '45%',
+                  height: '0%',
+                }}
+              >
+                {universityInfo && <UniversityInfoCard result={universityInfo} />}
+              </div>
+              <div
+                className="author-item"
+                style={{ marginTop: '20px', marginBottom: '20px', marginRight: '3%', width: '45%' }}
+              >
+                <ScoreCard
+                  reserachersAccessed={researchersAssessed}
+                  totalResearcher={toatlResearchers}
+                  loading={loading}
                 />
-              );
-            })}
-        </div>
+              </div>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                marginTop: '40px',
+                marginInline: '3%',
+              }}
+            >
+              {reportContent?.Flags
+                ? FLAG_ORDER.map((flag, index) => {
+                  const flagData = reportContent.Flags[flag] || [];
 
+                  return (
+                    <div
+                      style={{
+                        border: '1px solid rgb(230, 230, 230)',
+                        borderRadius: '8px',
+                        padding: '0px',
+                        width: '13.5%'
+                      }}
+                    >
+                      <ConcernVisualizer
+                        title={TitlesAndDescriptions[flag].title}
+                        hoverText={TitlesAndDescriptions[flag].desc}
+                        value={flagData.length || 0}
+                        speedometerHoverText={`${flagData.length} Authors`}
+                        onReview={() => handleReview(flag)}
+                        selected={flag === selectedFlag}
+                        key={index}
+                        valueFontSize={valueFontSize}
+                      />
+                    </div>
+                  );
+                })
+                : FLAG_ORDER.map((flag, index) => {
+                  return (
+                    <ConcernVisualizer
+                      title={TitlesAndDescriptions[flag].title}
+                      hoverText={TitlesAndDescriptions[flag].desc}
+                      value={0}
+                      speedometerHoverText={`0 Authors`}
+                      onReview={() => handleReview(flag)}
+                      selected={flag === selectedFlag}
+                      key={index}
+                      valueFontSize={valueFontSize}
+                    />
+                  );
+                })}
+            </div>
+          </>) : (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: 'calc(100vh - 100px)'
+            }}>
+              <Lottie
+                animationData={loadingAnimation}
+                loop={true}
+                autoplay={true}
+                style={{ width: 2000 }}
+              />
+            </div>
+          )}
 
 
         {showModal && (

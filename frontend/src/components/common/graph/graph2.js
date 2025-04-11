@@ -235,7 +235,7 @@ function generateGraphData(data, parentId = null, level = 0) {
     }
 
     if (parentId) {
-        lines.push({ from: parentId, to: currentNodeId });
+        lines.push({ id: `${parentId}-${currentNodeId}`, from: parentId, to: currentNodeId });
     }
 
     let levelNodePairs = [[level, currentNodeId]];
@@ -370,6 +370,7 @@ const MyComponent = ({ authorName, reportContent }) => {
             </div>
         );
     }
+
     const graphOptions = {
         debug: true,
         backgrounImageNoRepeat: true,
@@ -390,21 +391,25 @@ const MyComponent = ({ authorName, reportContent }) => {
             {
                 layoutName: 'tree',
                 from: 'top',
-                min_per_width: 160,
-                levelDistance: '250,250,250,250'
+                levelDistance: '250,250,250,250',
+                min_per_width: 205,
             }
         ]
     }
+    console.log("nodes lot", nodes[0]?.lot?.level);
     return (
         <div>
             <div style={{
-                height: '100vh',
-                width: '90%',
-                marginLeft: '5%',
+                height: '700px',
+                width: '96%',
+                marginLeft: '2%',
                 overflow: 'hidden',
                 position: 'relative',
+                border: '1px solid rgb(230,230,230)',
+                borderRadius: '8px',
+                marginTop: '20px',
             }}>
-                <RelationGraph ref={graphRef} options={graphOptions} nodeSlot={MyNodeSlot} onNodeClick={onNodeClick}>
+                <RelationGraph ref={graphRef} options={graphOptions} nodeSlot={MyNodeSlot} onNodeClick={onNodeClick} onLineClick={onLineClick}>
                 </RelationGraph>
                 <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm">
                     <DialogTitle sx={{ bgcolor: '#2A2A2A', color: 'white' }}>

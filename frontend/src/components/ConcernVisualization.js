@@ -55,6 +55,7 @@ export default function ConcernVisualizer({
   speedometerHoverText,
   valueFontSize,
 }) {
+  console.log('value', value);
   return (
     <div
       style={{
@@ -106,7 +107,7 @@ export default function ConcernVisualizer({
             className="button button-3d"
             style={{
               padding: '8px 48px',
-              backgroundColor: value && '#64b6f7',
+              backgroundColor: (value !== 0) && '#64b6f7',
             }}
             disabled={!value}
             onClick={onReview}

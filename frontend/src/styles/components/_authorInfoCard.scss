@@ -44,6 +44,47 @@
           @include label-5;
         }
       }
+
+      .title-container {
+        display: flex;
+        align-items: flex-start;
+        flex: 1;
+      }
+
+      .filter-container {
+        padding: 2px 12px 2px 16px;
+        cursor: pointer;
+        user-select: none;
+        border: 1px solid rgb(230, 230, 230);
+
+        &.active {
+          border: 2px solid $color-primary-500;
+        }
+
+        border-radius: 8px;
+
+        &-content {
+          color: $color-text-900;
+          @include paragraph-6;
+        }
+
+        &-buttonGroup {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 4px;
+          padding: ' 0px 4px 0px 4px';
+        }
+
+        .filter-icon {
+          color: $color-text-700;
+          transition: color 0.3s ease;
+
+          &.active {
+            color: $color-primary-500;
+          }
+        }
+      }
     }
 
     .button-group {
@@ -54,7 +95,6 @@
       position: relative;
       user-select: none;
 
-      // background-color: $color-text-300;
       @include label-5;
 
       span {
