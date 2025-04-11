@@ -2,8 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import './loadedPapers.css';
 
 function LoadedPapers({ titles }) {
-  console.log(titles);
-  // const scrollableAreaEndRef = useScrollToBottom();
   return (
     <div className="LoadedPapers-card">
       <div className="LoadedPapers-message-container">Loaded {titles.length} papers</div>

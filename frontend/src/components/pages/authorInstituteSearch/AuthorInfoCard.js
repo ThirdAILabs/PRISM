@@ -40,7 +40,6 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
     filterProps.handleClearFilter();
   };
 
-  console.log('result', result);
   return (
     <div className="text-start card-container" style={{ width: '100%' }}>
       <div className="card-top" style={{ padding: '20px 20px 4px 30px', flexGrow: 1 }}>

@@ -288,7 +288,6 @@ const MyComponent = ({ authorName, reportContent }) => {
   };
 
   const onNodeClick = (nodeObject, $event) => {
-    console.log('onNodeClick:', nodeObject);
     setSelectedNode({
       ...nodeObject,
       data: {
@@ -321,11 +320,7 @@ const MyComponent = ({ authorName, reportContent }) => {
       });
 
       graphInstance.getNodes().forEach((node) => {
-        // Determine the level of the node (root node is 0)
         if (Math.abs(node.lot?.level || 0) >= level) {
-          console.log('collapseNode:', level, node.text, node.lot.level);
-          // Collapse node
-
           node.expanded = false;
         }
       });
@@ -393,7 +388,7 @@ const MyComponent = ({ authorName, reportContent }) => {
       },
     ],
   };
-  console.log('nodes lot', nodes[0]?.lot?.level);
+
   return (
     <div>
       <div

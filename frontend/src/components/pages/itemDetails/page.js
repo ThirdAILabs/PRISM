@@ -207,7 +207,7 @@ const ItemDetails = () => {
       try {
         const report = await reportService.getReport(report_id);
         const { Content, ...metadata } = report;
-        console.log('All report data', report);
+
         setAuthorInfo({
           AuthorId: report.AuthorId,
           AuthorName: report.AuthorName,

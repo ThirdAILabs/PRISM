@@ -73,7 +73,7 @@ const DownloadDropdown = ({ reportId, metadata, content, isOpen, setIsOpen }) =>
     reportService.downloadReport(reportId, format, metadata, content);
     setIsOpen(false);
   };
-  console.log('isOpen', isOpen);
+
   return (
     <StyledWrapper>
       {isOpen && (

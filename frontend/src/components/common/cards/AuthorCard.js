@@ -55,7 +55,6 @@ const AuthorCard = ({ authors }) => {
     authorId: author.AuthorId,
     source: author.Source,
   }));
-  console.log('Rows in AuthorCard', rows, authors);
 
   const handlePaginationList = () => {
     const pageSizeOptionsList = [5];
@@ -77,14 +76,6 @@ const AuthorCard = ({ authors }) => {
           '& .MuiButton-root': {
             display: 'none',
           },
-          // '& .MuiButton-root:nth-of-type(2)': {
-          //   // Filter button
-          //   display: 'inline-flex',
-          // },
-          // '& .MuiButton-root:nth-of-type(3)': {
-          //   // Filter button
-          //   display: 'inline-flex',
-          // },
         }}
       />
     );

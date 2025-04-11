@@ -55,7 +55,6 @@ export default function ConcernVisualizer({
   speedometerHoverText,
   valueFontSize,
 }) {
-  console.log('value', value);
   return (
     <div
       style={{
