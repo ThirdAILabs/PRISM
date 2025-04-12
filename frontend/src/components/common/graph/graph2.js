@@ -348,16 +348,21 @@ const MyComponent = ({ authorName, reportContent }) => {
         {node.lot && node.lot.level === 2 && (
           <div className="my-industy-node my-industy-node-level-2">
             {/* level 2 nodes */}
-            <div className="my-card-header">Subsection Link</div>
+            <div className="my-card-header" style={{ color: 'rgba(0, 0, 0, 0)' }}>
+              .
+            </div>
             <div className="my-card-body">{node.text}</div>
           </div>
         )}
-        {node.lot.level >= 3 && (
-          <div className="my-industy-node my-industy-node-level-3">
-            <div className="my-card-header">Product Type</div>
-            <div className="my-card-body">{node.text}</div>
-          </div>
-        )}
+        {!node.lot ||
+          (node.lot.level >= 3 && (
+            <div className="my-industy-node my-industy-node-level-3">
+              <div className="my-card-header" style={{ color: 'rgba(0, 0, 0, 0)' }}>
+                .
+              </div>
+              <div className="my-card-body">{node.text}</div>
+            </div>
+          ))}
       </div>
     );
   };
