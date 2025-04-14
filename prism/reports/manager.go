@@ -504,7 +504,7 @@ func (r *ReportManager) ListUniversityReports(userId uuid.UUID) ([]api.Universit
 	return results, nil
 }
 
-func (r *ReportManager) CreateUniversityReport(userId uuid.UUID, universityId, universityName string) (uuid.UUID, error) {
+func (r *ReportManager) CreateUniversityReport(userId uuid.UUID, universityId, universityName, universityLocation string) (uuid.UUID, error) {
 	var userReport schema.UserUniversityReport
 	var userReportId uuid.UUID
 	now := time.Now().UTC()
@@ -520,12 +520,13 @@ func (r *ReportManager) CreateUniversityReport(userId uuid.UUID, universityId, u
 		if result.RowsAffected == 0 {
 			reportId := uuid.New()
 			report = schema.UniversityReport{
-				Id:              reportId,
-				LastUpdatedAt:   EarliestReportDate,
-				UniversityId:    universityId,
-				UniversityName:  universityName,
-				StatusUpdatedAt: time.Now().UTC(),
-				Status:          schema.ReportQueued,
+				Id:                 reportId,
+				LastUpdatedAt:      EarliestReportDate,
+				UniversityId:       universityId,
+				UniversityName:     universityName,
+				UniversityLocation: universityLocation,
+				StatusUpdatedAt:    time.Now().UTC(),
+				Status:             schema.ReportQueued,
 			}
 
 			if err := txn.Create(&report).Error; err != nil {
@@ -709,10 +710,11 @@ func (r *ReportManager) DeleteUniversityReport(userId, reportId uuid.UUID) error
 }
 
 type UniversityReportUpdateTask struct {
-	Id             uuid.UUID
-	UniversityId   string
-	UniversityName string
-	UpdateDate     time.Time
+	Id                 uuid.UUID
+	UniversityId       string
+	UniversityName     string
+	UniversityLocation string
+	UpdateDate         time.Time
 }
 
 func (r *ReportManager) GetNextUniversityReport() (*UniversityReportUpdateTask, error) {
@@ -751,10 +753,11 @@ func (r *ReportManager) GetNextUniversityReport() (*UniversityReportUpdateTask, 
 
 	if found {
 		return &UniversityReportUpdateTask{
-			Id:             report.Id,
-			UniversityId:   report.UniversityId,
-			UniversityName: report.UniversityName,
-			UpdateDate:     time.Now().UTC(),
+			Id:                 report.Id,
+			UniversityId:       report.UniversityId,
+			UniversityName:     report.UniversityName,
+			UniversityLocation: report.UniversityLocation,
+			UpdateDate:         time.Now().UTC(),
 		}, nil
 	}
 
@@ -814,11 +817,12 @@ func (r *ReportManager) UpdateUniversityReport(id uuid.UUID, status string, upda
 
 func convertUniversityReport(report schema.UserUniversityReport, content api.UniversityReportContent) api.UniversityReport {
 	return api.UniversityReport{
-		Id:             report.Id,
-		LastAccessedAt: report.LastAccessedAt,
-		UniversityId:   report.Report.UniversityId,
-		UniversityName: report.Report.UniversityName,
-		Status:         report.Report.Status,
-		Content:        content,
+		Id:                 report.Id,
+		LastAccessedAt:     report.LastAccessedAt,
+		UniversityId:       report.Report.UniversityId,
+		UniversityName:     report.Report.UniversityName,
+		UniversityLocation: report.Report.UniversityLocation,
+		Status:             report.Report.Status,
+		Content:            content,
 	}
 }

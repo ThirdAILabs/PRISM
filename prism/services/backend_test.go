@@ -252,6 +252,7 @@ func checkListUniversityReports(t *testing.T, backend http.Handler, user string,
 	for i := range expected {
 		if reports[i].UniversityId != expected[i]+"-id" ||
 			reports[i].UniversityName != expected[i]+"-name" ||
+			reports[i].UniversityLocation != expected[i]+"-location" ||
 			reports[i].Status != "complete" {
 			t.Fatalf("invalid reports returned: %+v, %s", reports[i], expected[i])
 		}
@@ -266,8 +267,9 @@ func getUniversityReport(backend http.Handler, user string, id uuid.UUID) (api.U
 
 func createUniversityReport(backend http.Handler, user, name string) (api.CreateReportResponse, error) {
 	req := api.CreateUniversityReportRequest{
-		UniversityId:   name + "-id",
-		UniversityName: name + "-name",
+		UniversityId:       name + "-id",
+		UniversityName:     name + "-name",
+		UniversityLocation: name + "-location",
 	}
 
 	var res api.CreateReportResponse
@@ -610,7 +612,7 @@ func TestUniversityReportEndpoints(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if uniReport.UniversityId != "uni-report1-id" || uniReport.UniversityName != "uni-report1-name" || uniReport.Status != "complete" || len(uniReport.Content.Flags[api.HighRiskFunderType]) != 1 {
+	if uniReport.UniversityId != "uni-report1-id" || uniReport.UniversityName != "uni-report1-name" || uniReport.UniversityLocation != "uni-report1-location" || uniReport.Status != "complete" || len(uniReport.Content.Flags[api.HighRiskFunderType]) != 1 {
 		t.Fatal("invalid university report returned")
 	}
 

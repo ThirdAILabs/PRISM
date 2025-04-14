@@ -340,17 +340,18 @@ func TestListAuthorReports(t *testing.T) {
 
 }
 
-func checkNextUniversityReport(t *testing.T, next *reports.UniversityReportUpdateTask, universityId, universityName string, updateDate time.Time) {
+func checkNextUniversityReport(t *testing.T, next *reports.UniversityReportUpdateTask, universityId, universityName, universityLocation string, updateDate time.Time) {
 	if next == nil ||
 		next.UniversityId != universityId ||
 		next.UniversityName != universityName ||
+		next.UniversityLocation != universityLocation ||
 		next.UpdateDate.Sub(updateDate).Abs() > 100*time.Millisecond {
 		_, file, line, _ := runtime.Caller(1)
 		t.Fatalf("%s:%d: incorrect next report: %v", file, line, next)
 	}
 }
 
-func checkUniversityReport(t *testing.T, manager *reports.ReportManager, userId, reportId uuid.UUID, universityId, universityName, status string, nauthorsFlagged, nflags, authorsReviewed, totalAuthors int) {
+func checkUniversityReport(t *testing.T, manager *reports.ReportManager, userId, reportId uuid.UUID, universityId, universityName, universityLocation, status string, nauthorsFlagged, nflags, authorsReviewed, totalAuthors int) {
 	report, err := manager.GetUniversityReport(userId, reportId)
 	if err != nil {
 		t.Fatal(err)
@@ -359,6 +360,7 @@ func checkUniversityReport(t *testing.T, manager *reports.ReportManager, userId,
 	if report.Id != reportId ||
 		report.UniversityId != universityId ||
 		report.UniversityName != universityName ||
+		report.UniversityLocation != universityLocation ||
 		report.Status != status ||
 		report.Content.AuthorsReviewed != authorsReviewed ||
 		report.Content.TotalAuthors != totalAuthors ||
@@ -413,7 +415,7 @@ func TestUserAuthorReportsAreNotUsedInUniversityReports(t *testing.T) {
 
 	checkNoNextAuthorReport(t, manager)
 
-	if _, err := manager.CreateUniversityReport(user1, "1", "university1"); err != nil {
+	if _, err := manager.CreateUniversityReport(user1, "1", "university1", "location1"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -421,7 +423,7 @@ func TestUserAuthorReportsAreNotUsedInUniversityReports(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	checkNextUniversityReport(t, nextUni1, "1", "university1", time.Now())
+	checkNextUniversityReport(t, nextUni1, "1", "university1", "location1", time.Now())
 	if err := manager.UpdateUniversityReport(nextUni1.Id, "complete", nextUni1.UpdateDate, []reports.UniversityAuthorReport{
 		{AuthorId: "1", AuthorName: "author1", Source: api.OpenAlexSource},
 	}); err != nil {
@@ -446,7 +448,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 
 	user1 := uuid.New()
 
-	uniId1, err := manager.CreateUniversityReport(user1, "1", "university1")
+	uniId1, err := manager.CreateUniversityReport(user1, "1", "university1", "location1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -457,7 +459,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	checkNextUniversityReport(t, nextUni1, "1", "university1", time.Now())
+	checkNextUniversityReport(t, nextUni1, "1", "university1", "location1", time.Now())
 	if err := manager.UpdateUniversityReport(nextUni1.Id, "complete", nextUni1.UpdateDate, []reports.UniversityAuthorReport{
 		{AuthorId: "1", AuthorName: "author1", Source: api.OpenAlexSource},
 		{AuthorId: "2", AuthorName: "author2", Source: api.OpenAlexSource},
@@ -465,7 +467,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 0, 0, 0, 2)
+	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "location1", "complete", 0, 0, 0, 2)
 
 	nextAuthor1Univ, err := manager.GetNextAuthorReport()
 	if err != nil {
@@ -478,7 +480,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	}
 
 	// Now First Author flags should appear in the Univeristy report
-	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 1, 1, 1, 2)
+	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "location1", "complete", 1, 1, 1, 2)
 
 	nextAuthor2, err := manager.GetNextAuthorReport()
 	if err != nil {
@@ -494,14 +496,14 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	}
 
 	// University report should be updated to have flags from second author
-	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 2, 2, 2, 2)
+	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "location1", "complete", 2, 2, 2, 2)
 
 	// No other author reports should be queued
 	checkNoNextAuthorReport(t, manager)
 	checkNoNextUniversityReport(t, manager)
 
 	// Create another university report
-	uniId2, err := manager.CreateUniversityReport(user1, "2", "university2")
+	uniId2, err := manager.CreateUniversityReport(user1, "2", "university2", "location2")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -510,7 +512,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	checkNextUniversityReport(t, nextUni2, "2", "university2", time.Now())
+	checkNextUniversityReport(t, nextUni2, "2", "university2", "location2", time.Now())
 	if err := manager.UpdateUniversityReport(nextUni2.Id, "complete", nextUni2.UpdateDate, []reports.UniversityAuthorReport{
 		{AuthorId: "1", AuthorName: "author1", Source: api.OpenAlexSource},
 		{AuthorId: "3", AuthorName: "author3", Source: api.OpenAlexSource},
@@ -519,7 +521,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	}
 
 	// Author 2 is cached from the first university report so only author 3 needs to be completed
-	checkUniversityReport(t, manager, user1, uniId2, "2", "university2", "complete", 1, 1, 1, 2)
+	checkUniversityReport(t, manager, user1, uniId2, "2", "university2", "location2", "complete", 1, 1, 1, 2)
 
 	nextAuthor3, err := manager.GetNextAuthorReport()
 	if err != nil {
@@ -535,16 +537,16 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	checkNoNextAuthorReport(t, manager)
 	checkNoNextUniversityReport(t, manager)
 
-	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 2, 2, 2, 2)
-	checkUniversityReport(t, manager, user1, uniId2, "2", "university2", "complete", 2, 2, 2, 2)
+	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "location1", "complete", 2, 2, 2, 2)
+	checkUniversityReport(t, manager, user1, uniId2, "2", "university2", "location2", "complete", 2, 2, 2, 2)
 
 	// Check that reports are reused
-	uniId3, err := manager.CreateUniversityReport(user1, "1", "university1")
+	uniId3, err := manager.CreateUniversityReport(user1, "1", "university1", "location1")
 	if err != nil {
 		t.Fatal(err)
 	}
 	// Content should be reused so report is immediately available
-	checkUniversityReport(t, manager, user1, uniId3, "1", "university1", "complete", 2, 2, 2, 2)
+	checkUniversityReport(t, manager, user1, uniId3, "1", "university1", "location1", "complete", 2, 2, 2, 2)
 	// Check that no report update is queued
 	checkNoNextAuthorReport(t, manager)
 	checkNoNextUniversityReport(t, manager)
@@ -563,7 +565,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	checkNextUniversityReport(t, nextUni3, "1", "university1", time.Now())
+	checkNextUniversityReport(t, nextUni3, "1", "university1", "location1", time.Now())
 
 	if err := manager.UpdateUniversityReport(nextUni3.Id, "complete", nextUni3.UpdateDate, []reports.UniversityAuthorReport{
 		{AuthorId: "1", AuthorName: "author1", Source: api.OpenAlexSource},
@@ -572,7 +574,7 @@ func TestCreateGetUniversityReports(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 1, 1, 1, 2)
+	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "location1", "complete", 1, 1, 1, 2)
 
 	// Author report should be queued too since it's stale
 	nextAuthor4, err := manager.GetNextAuthorReport()
@@ -585,14 +587,14 @@ func TestCreateGetUniversityReports(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 1, 1, 2, 2)
+	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "location1", "complete", 1, 1, 2, 2)
 
 	if err := manager.CheckForStaleAuthorReports(); err != nil {
 		t.Fatal(err)
 	}
 
-	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 1, 1, 1, 2)
-	checkUniversityReport(t, manager, user1, uniId2, "2", "university2", "queued", 2, 2, 0, 2)
+	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "location1", "complete", 1, 1, 1, 2)
+	checkUniversityReport(t, manager, user1, uniId2, "2", "university2", "location2", "queued", 2, 2, 0, 2)
 
 	// Stale author reports in the university report should now be queued
 	nextAuthor5, err := manager.GetNextAuthorReport()
@@ -605,8 +607,8 @@ func TestCreateGetUniversityReports(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "complete", 1, 2, 2, 2)
-	checkUniversityReport(t, manager, user1, uniId2, "2", "university2", "queued", 2, 3, 1, 2)
+	checkUniversityReport(t, manager, user1, uniId1, "1", "university1", "location1", "complete", 1, 2, 2, 2)
+	checkUniversityReport(t, manager, user1, uniId2, "2", "university2", "location2", "queued", 2, 3, 1, 2)
 }
 
 func TestListUniversityReport(t *testing.T) {
@@ -614,7 +616,7 @@ func TestListUniversityReport(t *testing.T) {
 
 	user1, user2 := uuid.New(), uuid.New()
 
-	uniId1, err := manager.CreateUniversityReport(user1, "1", "university1")
+	uniId1, err := manager.CreateUniversityReport(user1, "1", "university1", "location1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -627,12 +629,12 @@ func TestListUniversityReport(t *testing.T) {
 		t.Fatal("should be no reports for user2")
 	}
 
-	uniId2, err := manager.CreateUniversityReport(user2, "2", "university2")
+	uniId2, err := manager.CreateUniversityReport(user2, "2", "university2", "location2")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	uniId3, err := manager.CreateUniversityReport(user1, "3", "university3")
+	uniId3, err := manager.CreateUniversityReport(user1, "3", "university3", "location3")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -648,6 +650,7 @@ func TestListUniversityReport(t *testing.T) {
 	if reports1[0].Id != uniId3 || reports1[1].Id != uniId1 ||
 		reports1[0].UniversityId != "3" || reports1[1].UniversityId != "1" ||
 		reports1[0].UniversityName != "university3" || reports1[1].UniversityName != "university1" ||
+		reports1[0].UniversityLocation != "location3" || reports1[1].UniversityLocation != "location1" ||
 		reports1[0].Status != "queued" || reports1[1].Status != "queued" {
 		t.Fatalf("incorrect reports: %+v", reports1)
 	}
@@ -663,6 +666,7 @@ func TestListUniversityReport(t *testing.T) {
 	if reports2[0].Id != uniId2 ||
 		reports2[0].UniversityId != "2" ||
 		reports2[0].UniversityName != "university2" ||
+		reports2[0].UniversityLocation != "location2" ||
 		reports2[0].Status != "queued" {
 		t.Fatal("incorrect report")
 	}
@@ -682,6 +686,7 @@ func TestListUniversityReport(t *testing.T) {
 	if reportsAfterInvalidDelete[0].Id != uniId3 || reportsAfterInvalidDelete[1].Id != uniId1 ||
 		reportsAfterInvalidDelete[0].UniversityId != "3" || reportsAfterInvalidDelete[1].UniversityId != "1" ||
 		reportsAfterInvalidDelete[0].UniversityName != "university3" || reportsAfterInvalidDelete[1].UniversityName != "university1" ||
+		reportsAfterInvalidDelete[0].UniversityLocation != "location3" || reportsAfterInvalidDelete[1].UniversityLocation != "location1" ||
 		reportsAfterInvalidDelete[0].Status != "queued" || reportsAfterInvalidDelete[1].Status != "queued" {
 		t.Fatalf("incorrect reports: %+v", reports1)
 	}
@@ -701,6 +706,7 @@ func TestListUniversityReport(t *testing.T) {
 	if reportsAfterDelete[0].Id != uniId1 ||
 		reportsAfterDelete[0].UniversityId != "1" ||
 		reportsAfterDelete[0].UniversityName != "university1" ||
+		reportsAfterDelete[0].UniversityLocation != "location1" ||
 		reportsAfterDelete[0].Status != "queued" {
 		t.Fatal("incorrect reports")
 	}
@@ -711,7 +717,7 @@ func TestUniversityReportsFilterFlagsByDate(t *testing.T) {
 
 	user := uuid.New()
 
-	uniId, err := manager.CreateUniversityReport(user, "1", "university1")
+	uniId, err := manager.CreateUniversityReport(user, "1", "university1", "location1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -770,7 +776,7 @@ func TestUserQueuedReportsArePrioritizedOverUniversityReports(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := manager.CreateUniversityReport(user, "1", "university1"); err != nil {
+	if _, err := manager.CreateUniversityReport(user, "1", "university1", "location1"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -862,11 +868,11 @@ func TestUniversityReportRetry(t *testing.T) {
 	manager := setup(t).SetUniversityReportTimeout(time.Second).SetUniversityReportUpdateInterval(reports.UniversityReportUpdateInterval)
 
 	user := uuid.New()
-	if _, err := manager.CreateUniversityReport(user, "1", "university1"); err != nil {
+	if _, err := manager.CreateUniversityReport(user, "1", "university1", "location1"); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := manager.CreateUniversityReport(user, "2", "university2"); err != nil {
+	if _, err := manager.CreateUniversityReport(user, "2", "university2", "location2"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -874,13 +880,13 @@ func TestUniversityReportRetry(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	checkNextUniversityReport(t, next1, "1", "university1", time.Now())
+	checkNextUniversityReport(t, next1, "1", "university1", "location1", time.Now())
 
 	next2, err := manager.GetNextUniversityReport()
 	if err != nil {
 		t.Fatal(err)
 	}
-	checkNextUniversityReport(t, next2, "2", "university2", time.Now())
+	checkNextUniversityReport(t, next2, "2", "university2", "location2", time.Now())
 
 	checkNoNextUniversityReport(t, manager)
 
@@ -896,5 +902,5 @@ func TestUniversityReportRetry(t *testing.T) {
 	}
 
 	// University report 1 should be retried because the timeout is expired and its status is left as in-progress.
-	checkNextUniversityReport(t, next3, "1", "university1", time.Now())
+	checkNextUniversityReport(t, next3, "1", "university1", "location1", time.Now())
 }

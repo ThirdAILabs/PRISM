@@ -11,6 +11,7 @@ export const universityReportService = {
     const response = await axiosInstance.post(API_ROUTES.UNIVERSITY_REPORTS.CREATE, {
       UniversityId: reportData.UniversityId,
       UniversityName: reportData.UniversityName,
+      UniversityLocation: reportData.UniversityLocation,
     });
     return response.data;
   },

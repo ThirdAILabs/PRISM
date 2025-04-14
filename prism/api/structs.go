@@ -64,8 +64,9 @@ type CreateAuthorReportRequest struct {
 }
 
 type CreateUniversityReportRequest struct {
-	UniversityId   string
-	UniversityName string
+	UniversityId       string
+	UniversityName     string
+	UniversityLocation string
 }
 
 type CreateReportResponse struct {
@@ -102,8 +103,9 @@ type UniversityReport struct {
 
 	LastAccessedAt time.Time
 
-	UniversityId   string
-	UniversityName string
+	UniversityId       string
+	UniversityName     string
+	UniversityLocation string
 
 	Status string
 

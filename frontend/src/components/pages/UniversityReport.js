@@ -115,7 +115,7 @@ const UniversityReport = () => {
         setResearchersAssessed(report.Content.AuthorsReviewed);
         setUniversityInfo({
           name: report.UniversityName,
-          address: report?.UniversityAddress,
+          address: report?.UniversityLocation,
         });
         if (!isMounted) {
           return;
@@ -133,7 +133,7 @@ const UniversityReport = () => {
         setResearchersAssessed(report.Content.AuthorsReviewed);
         setUniversityInfo({
           name: report.UniversityName,
-          address: report?.UniversityAddress,
+          address: report?.UniversityLocation,
         });
 
         // Set font size based on the maximum number of flag count
