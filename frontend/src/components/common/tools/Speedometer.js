@@ -57,7 +57,7 @@ export function Value({ value, speedometerHoverText, valueFontSize }) {
     <g>
       <text
         x={cx}
-        y={cy - innerRadius / 4} // Position text above center
+        y={cy}
         style={{
           fill: value !== 0 ? '#b71d18' : '#6a798f', // Changed color to black
           fontSize: valueFontSize ? valueFontSize : innerRadius * 0.8,
