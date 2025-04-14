@@ -17,7 +17,7 @@ $color-grey-500: rgb(100, 100, 100);
   right: -$sidebar-width;
   top: 0;
   width: $sidebar-width;
-  max-width: 990px;
+  max-width: 1200px;
   height: 100vh;
   background: $color-text-100;
   box-shadow: $sidebar-box-shadow;
@@ -28,9 +28,11 @@ $color-grey-500: rgb(100, 100, 100);
   &.open {
     right: 0;
   }
+
   &.close {
     right: -$sidebar-width;
   }
+
   &-header {
     display: flex;
     justify-content: space-between;
@@ -81,6 +83,7 @@ $color-grey-500: rgb(100, 100, 100);
       border-radius: 0 20px 20px 0;
       padding: 8px 16px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+
       .score-label {
         color: $color-error-700;
         margin-right: 7px;
@@ -101,7 +104,8 @@ $color-grey-500: rgb(100, 100, 100);
       padding: 8px 24px;
       border-radius: 7px;
       transition: all 0.2s ease;
-      border-color: transparent;
+      border: 1px solid transparent;
+      // border-color: transparent;
       margin-left: 12px;
 
       &.active {
@@ -185,14 +189,14 @@ $color-grey-500: rgb(100, 100, 100);
 }
 
 .flag-container-header {
-  @include sub-heading-3;
+  @include sub-heading-4;
   justify-content: space-between;
   display: flex;
   margin-bottom: 10px;
 }
 
 .flag-container-date {
-  @include paragraph-4;
+  @include label-5;
   color: $color-text-500;
 }
 
@@ -204,8 +208,9 @@ $color-grey-500: rgb(100, 100, 100);
 
 .flag-sub-container {
   width: 100%;
-  border: 1px solid $color-text-300;
-  border-radius: 5px;
+  border: 1px solid rgb(230, 230, 230);
+  // background-color: rgb(250, 250, 250);
+  border-radius: 8px;
   padding: 10px;
   margin-bottom: 12px;
 
@@ -234,7 +239,8 @@ $color-grey-500: rgb(100, 100, 100);
 
 .concerned-tag-item {
   @include paragraph-5;
-  background-color: #fce8e6; /* Light red/pink background */
+  background-color: #fce8e6;
+  /* Light red/pink background */
   color: $color-error-700;
   padding: 6px 12px;
   border-radius: 16px;

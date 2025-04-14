@@ -25,6 +25,7 @@ import { getTrailingWhiteSpace } from '../../../utils/helper.js';
 import '../../../styles/components/_primaryButton.scss';
 import '../../../styles/components/_authorInfoCard.scss';
 import AuthorInfoCard from '../authorInstituteSearch/AuthorInfoCard.js';
+import '../../../styles/pages/_authorReport.scss';
 import ScoreCard from './ScoreCard.js';
 import Lottie from 'lottie-react';
 import loadingAnimation from '../../../assets/animations/Loader.json';
@@ -478,13 +479,19 @@ const ItemDetails = () => {
           )}
 
           {review && (
-            <FlagPanel
-              reportContent={reportContent}
-              review={review}
-              setReview={setReview}
-              authorName={authorName}
-              isDisclosureChecked={isDisclosureChecked}
-            />
+            <>
+              <div className="overlay">
+                <div className="flag-panel-container">
+                  <FlagPanel
+                    reportContent={reportContent}
+                    review={review}
+                    setReview={setReview}
+                    authorName={authorName}
+                    isDisclosureChecked={isDisclosureChecked}
+                  />
+                </div>
+              </div>
+            </>
           )}
         </>
       )}

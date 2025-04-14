@@ -222,7 +222,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
           </ul>
         </div>
 
-        
+
         {acknowledgementSection(flag, authorName, index)}
       </div>
     );
@@ -499,9 +499,8 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
             {['Latest To Oldest', 'Oldest To Latest'].map((option) => (
               <div
                 key={option}
-                className={`sort-dropdown__option ${
-                  option === sortOrder ? 'sort-dropdown__option--selected' : ''
-                }`}
+                className={`sort-dropdown__option ${option === sortOrder ? 'sort-dropdown__option--selected' : ''
+                  }`}
                 onClick={() => selectOption(option)}
               >
                 {option}
@@ -517,7 +516,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
     <div ref={sidepanelRef} className={`flag-panel ${isRendered ? 'open' : ''}`}>
       <div className="flag-panel-header">
         <h4 className="flag-panel-title">{FlagInformation[review].title}</h4>
-        <button className="flag-panel-close-button">
+        <button className="flag-panel-close-button" onClick={() => setReview('')}>
           <IoMdClose />
         </button>
       </div>
