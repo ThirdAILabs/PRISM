@@ -199,7 +199,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
             <>Some acknowledged entities in {get_paper_url(flag)} may be foreign entities.</>
           )}
         </div>
-        {flag?.Entities?.length ?
+        {flag?.Entities?.length ? (
           <div className="flag-sub-container">
             <div className="acknowledgement-header">
               <span className="flag-sub-container-header">Foreign Entities</span>
@@ -221,9 +221,8 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
                 );
               })}
             </ul>
-          </div> : null
-        }
-
+          </div>
+        ) : null}
 
         {acknowledgementSection(flag, authorName, index)}
       </div>
@@ -310,12 +309,16 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
     return (
       <div>
         {withPublicationDate(
-          <span className="flag-container-header">Co-authors are affiliated with Entities of Concern</span>,
+          <span className="flag-container-header">
+            Co-authors are affiliated with Entities of Concern
+          </span>,
           flag
         )}
-        <p className='flag-container-description'>Some authors of {get_paper_url(flag)} are affiliated with entities of concern:</p>
+        <p className="flag-container-description">
+          Some authors of {get_paper_url(flag)} are affiliated with entities of concern:
+        </p>
         <div className="flag-sub-container">
-          <span className='flag-sub-container-header'>Concerning entity</span>
+          <span className="flag-sub-container-header">Concerning entity</span>
           <div className="concerned-tags">
             {flag.Affiliations.map((item, index2) => {
               const key = `${index} ${index2}`;
@@ -328,7 +331,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
           </div>
         </div>
         <div className="flag-sub-container">
-          <span className='flag-sub-container-header'>Affiliated author(s)</span>
+          <span className="flag-sub-container-header">Affiliated author(s)</span>
           <div className="concerned-tags">
             {flag.Coauthors.map((item, index2) => {
               const key = `${index} ${index2}`;
@@ -375,13 +378,13 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
           The author may potentially be linked with an Entity of Concern
         </h5>
         <div className="flag-sub-container">
-          <span className='flag-sub-container-header'>Concering entity</span>
+          <span className="flag-sub-container-header">Concering entity</span>
           <div className="concerned-tags">
             <span className="concerned-tag-item">{flag.University}</span>
           </div>
         </div>
         <div className="flag-sub-container">
-          <span className='flag-sub-container-header'>Relevant Webpage</span>
+          <span className="flag-sub-container-header">Relevant Webpage</span>
           <a href={flag.UniversityUrl} target="_blank" rel="noopener noreferrer">
             {flag.UniversityUrl}
           </a>
@@ -396,7 +399,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
     function pressRelease() {
       return (
         <>
-          <span className='flag-sub-container-header'>Press Release</span>
+          <span className="flag-sub-container-header">Press Release</span>
           <ul className="bulleted-list">
             <li>
               <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">
@@ -411,7 +414,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
     function relevantDocuments() {
       return (
         <>
-          <span className='flag-sub-container-header'>Relevant Document(s)</span>
+          <span className="flag-sub-container-header">Relevant Document(s)</span>
           <ul className="bulleted-list">
             {connections.map((item, index2) => {
               const key = `${index} ${index2}`;
@@ -451,7 +454,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
         {connections.length == 2 && <div className="flag-sub-container">{relevantDocuments()}</div>}
         <div className="flag-sub-container">{pressRelease()}</div>
         <div className="flag-sub-container">
-          <span className='flag-sub-container-header'>Entity/individual mentioned</span>
+          <span className="flag-sub-container-header">Entity/individual mentioned</span>
           <div className="concerned-tags">
             {[flag.EntityMentioned].map((item, index2) => {
               const key = `${index} ${index2}`;
@@ -465,7 +468,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
         </div>
         {flag.DocEntities && flag.DocEntities.length > 0 && (
           <div className="flag-sub-container">
-            <span className='flag-sub-container-header'>Potential affiliate(s)</span>
+            <span className="flag-sub-container-header">Potential affiliate(s)</span>
             <div className="concerned-tags">
               {flag.DocEntities.map((item, index2) => {
                 const key = `${index} ${index2}`;
@@ -501,8 +504,9 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
             {['Latest To Oldest', 'Oldest To Latest'].map((option) => (
               <div
                 key={option}
-                className={`sort-dropdown__option ${option === sortOrder ? 'sort-dropdown__option--selected' : ''
-                  }`}
+                className={`sort-dropdown__option ${
+                  option === sortOrder ? 'sort-dropdown__option--selected' : ''
+                }`}
                 onClick={() => selectOption(option)}
               >
                 {option}

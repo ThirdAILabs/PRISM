@@ -10,7 +10,7 @@ import {
   POTENTIAL_AUTHOR_AFFILIATIONS,
   MISC_HIGH_RISK_AFFILIATIONS,
   COAUTHOR_AFFILIATIONS,
-  FlagInformation
+  FlagInformation,
 } from '../../constants/constants.js';
 import ConcernVisualizer, { BaseFontSize, getFontSize } from '../ConcernVisualization.js';
 
@@ -219,44 +219,44 @@ const UniversityReport = () => {
             >
               {reportContent?.Flags
                 ? FLAG_ORDER.map((flag, index) => {
-                  const flagData = reportContent.Flags[flag] || [];
+                    const flagData = reportContent.Flags[flag] || [];
 
-                  return (
-                    <div
-                      style={{
-                        border: '1px solid rgb(230, 230, 230)',
-                        borderRadius: '8px',
-                        padding: '0px',
-                        width: '13.5%',
-                      }}
-                    >
+                    return (
+                      <div
+                        style={{
+                          border: '1px solid rgb(230, 230, 230)',
+                          borderRadius: '8px',
+                          padding: '0px',
+                          width: '13.5%',
+                        }}
+                      >
+                        <ConcernVisualizer
+                          title={FlagInformation[flag].title}
+                          hoverText={FlagInformation[flag].desc}
+                          value={flagData.length || 0}
+                          speedometerHoverText={`${flagData.length} Authors`}
+                          onReview={() => handleReview(flag)}
+                          selected={flag === selectedFlag}
+                          key={index}
+                          valueFontSize={valueFontSize}
+                        />
+                      </div>
+                    );
+                  })
+                : FLAG_ORDER.map((flag, index) => {
+                    return (
                       <ConcernVisualizer
                         title={FlagInformation[flag].title}
                         hoverText={FlagInformation[flag].desc}
-                        value={flagData.length || 0}
-                        speedometerHoverText={`${flagData.length} Authors`}
+                        value={0}
+                        speedometerHoverText={`0 Authors`}
                         onReview={() => handleReview(flag)}
                         selected={flag === selectedFlag}
                         key={index}
                         valueFontSize={valueFontSize}
                       />
-                    </div>
-                  );
-                })
-                : FLAG_ORDER.map((flag, index) => {
-                  return (
-                    <ConcernVisualizer
-                      title={FlagInformation[flag].title}
-                      hoverText={FlagInformation[flag].desc}
-                      value={0}
-                      speedometerHoverText={`0 Authors`}
-                      onReview={() => handleReview(flag)}
-                      selected={flag === selectedFlag}
-                      key={index}
-                      valueFontSize={valueFontSize}
-                    />
-                  );
-                })}
+                    );
+                  })}
             </div>
           </>
         ) : (

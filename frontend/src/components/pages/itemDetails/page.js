@@ -252,17 +252,17 @@ const ItemDetails = () => {
 
     const displayStart = startDate
       ? parseLocalDate(startDate).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
       : 'earliest';
     const displayEnd = endDate
       ? parseLocalDate(endDate).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
       : 'today';
 
     setFilterMessage(`${displayStart} - ${displayEnd}`);
@@ -359,8 +359,8 @@ const ItemDetails = () => {
                 </svg>
               </button>
               <h5>Individual Assessment Result</h5>
-            </div >
-          </div >
+            </div>
+          </div>
           <Divider
             sx={{
               backgroundColor: 'black',
@@ -369,7 +369,7 @@ const ItemDetails = () => {
               opacity: 0.1,
             }}
           />
-        </div >
+        </div>
         {activeTab === 0 && (
           <div className="d-flex justify-content-end mt-2 gap-2 px-2">
             <Snackbar
@@ -384,7 +384,7 @@ const ItemDetails = () => {
             </Snackbar>
           </div>
         )}
-      </div >
+      </div>
       {activeTab === 0 && (
         <>
           {authorInfo ? (
@@ -496,15 +496,13 @@ const ItemDetails = () => {
         </>
       )}
 
-      {
-        activeTab === 1 && (
-          <>
-            {/* <Graph authorName={authorName} reportContent={reportContent} /> */}
-            <Graph authorName={authorName} reportContent={reportContent} />
-          </>
-        )
-      }
-    </div >
+      {activeTab === 1 && (
+        <>
+          {/* <Graph authorName={authorName} reportContent={reportContent} /> */}
+          <Graph authorName={authorName} reportContent={reportContent} />
+        </>
+      )}
+    </div>
   );
 };
 
