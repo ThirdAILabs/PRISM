@@ -2,39 +2,7 @@ import * as React from 'react';
 import { Speedometer } from './common/tools/Speedometer';
 import '../App.css';
 import '../styles/components/_primaryButton.scss';
-const Hover = ({ text }) => {
-  return (
-    <div className="popover-container">
-      <button
-        type="button"
-        className="btn btn-info btn-circle ml-2"
-        style={{
-          marginLeft: '5px',
-          width: '14px',
-          height: '14px',
-          padding: '1px 0',
-          borderRadius: '7.5px',
-          textAlign: 'center',
-          fontSize: '8px',
-          lineHeight: '1.42857',
-          border: '1px solid grey',
-          borderWidth: '1px',
-          backgroundColor: 'transparent',
-          color: 'grey',
-          position: 'relative',
-          boxShadow: 'none',
-        }}
-      >
-        ?
-      </button>
-      <div className="popover">
-        <div className="popover-body" style={{ whiteSpace: 'pre-wrap' }}>
-          {text}
-        </div>
-      </div>
-    </div>
-  );
-};
+import Tooltip from './common/tools/Tooltip';
 
 export const BaseFontSize = 48;
 export function getFontSize(value) {
@@ -91,7 +59,7 @@ export default function ConcernVisualizer({
           paddingInline: '16px',
         }}
       >
-        {title}
+        {title} <Tooltip text={hoverText} />
       </div>
 
       {onReview && (

@@ -19,7 +19,7 @@ import { AUTHOR_AFFILIATIONS } from '../../../constants/constants.js';
 import { getRawTextFromXML } from '../../../utils/helper.js';
 
 function getNodeTitle(flagType, flag) {
-  if (flagType == AUTHOR_AFFILIATIONS) {
+  if (flagType === AUTHOR_AFFILIATIONS) {
     return flag.Affiliations[0];
   } else if (flag.Work) {
     return flag.Work.DisplayName;
