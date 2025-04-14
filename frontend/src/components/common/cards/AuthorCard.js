@@ -22,7 +22,7 @@ const AuthorCard = ({ score, authors }) => {
 
   return (
     <>
-      <div className="selection-container">
+      <div className="univ-selection-container">
         <div className="score-box-container">
           <div className="score-pill">
             <span className="score-label">Score:</span>

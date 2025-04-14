@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import useGoBack from '../../hooks/useGoBack.js';
-import { IoIosClose } from 'react-icons/io';
+import { IoMdClose } from 'react-icons/io';
 import {
   TALENT_CONTRACTS,
   ASSOCIATIONS_WITH_DENIED_ENTITIES,
@@ -10,6 +10,7 @@ import {
   POTENTIAL_AUTHOR_AFFILIATIONS,
   MISC_HIGH_RISK_AFFILIATIONS,
   COAUTHOR_AFFILIATIONS,
+  FlagInformation,
 } from '../../constants/constants.js';
 import ConcernVisualizer, { BaseFontSize, getFontSize } from '../ConcernVisualization.js';
 
@@ -35,39 +36,6 @@ const FLAG_ORDER = [
   MISC_HIGH_RISK_AFFILIATIONS,
   COAUTHOR_AFFILIATIONS,
 ];
-
-const todayStr = new Date().toISOString().split('T')[0];
-
-const TitlesAndDescriptions = {
-  [TALENT_CONTRACTS]: {
-    title: 'Talent Contracts',
-    desc: 'Researchers in this list appear in papers funded by Talent Contracts.',
-  },
-  [ASSOCIATIONS_WITH_DENIED_ENTITIES]: {
-    title: 'Funding from Denied Entities',
-    desc: 'Researchers in this list appear in papers funded by Denied Entities.',
-  },
-  [HIGH_RISK_FUNDERS]: {
-    title: 'High Risk Funding Sources',
-    desc: 'Researchers in this list appear in papers funded by High Risk Funding Sources.',
-  },
-  [AUTHOR_AFFILIATIONS]: {
-    title: 'Affiliations with High Risk Foreign Institutes',
-    desc: 'Researchers in this list have affiliations with High Risk Foreign Institutes.',
-  },
-  [POTENTIAL_AUTHOR_AFFILIATIONS]: {
-    title: 'Appointments at High Risk Foreign Institutes*',
-    desc: 'Researchers in this list have appointments with High Risk Foreign Institutes.\n\n*Collated information from the web, might contain false positives.',
-  },
-  [MISC_HIGH_RISK_AFFILIATIONS]: {
-    title: 'Miscellaneous High Risk Connections*',
-    desc: 'Researchers in this list or their associates appear in press releases.\n\n*Collated information from the web, might contain false positives.',
-  },
-  [COAUTHOR_AFFILIATIONS]: {
-    title: "Co-authors' affiliations with High Risk Foreign Institutes",
-    desc: 'Researchers in this list have co-authors who are affiliated with High Risk Foreign Institutes.',
-  },
-};
 
 const UniversityReport = () => {
   const navigate = useNavigate();
@@ -263,8 +231,8 @@ const UniversityReport = () => {
                         }}
                       >
                         <ConcernVisualizer
-                          title={TitlesAndDescriptions[flag].title}
-                          hoverText={TitlesAndDescriptions[flag].desc}
+                          title={FlagInformation[flag].title}
+                          hoverText={FlagInformation[flag].desc}
                           value={flagData.length || 0}
                           speedometerHoverText={`${flagData.length} Authors`}
                           onReview={() => handleReview(flag)}
@@ -278,8 +246,8 @@ const UniversityReport = () => {
                 : FLAG_ORDER.map((flag, index) => {
                     return (
                       <ConcernVisualizer
-                        title={TitlesAndDescriptions[flag].title}
-                        hoverText={TitlesAndDescriptions[flag].desc}
+                        title={FlagInformation[flag].title}
+                        hoverText={FlagInformation[flag].desc}
                         value={0}
                         speedometerHoverText={`0 Authors`}
                         onReview={() => handleReview(flag)}
@@ -314,9 +282,9 @@ const UniversityReport = () => {
             ref={universityFlagPanelRef}
           >
             <div className="university-flag-panel-header">
-              <span>{TitlesAndDescriptions[selectedFlag]?.title}</span>
+              <span>{FlagInformation[selectedFlag]?.title}</span>
               <button className="close-button" onClick={handleClosePanel}>
-                <IoIosClose />
+                <IoMdClose />
               </button>
             </div>
             <Divider className="university-flag-panel-divider" />
