@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import useGoBack from '../../hooks/useGoBack.js';
-import { IoIosClose } from 'react-icons/io';
+import { IoMdClose } from 'react-icons/io';
 import {
   TALENT_CONTRACTS,
   ASSOCIATIONS_WITH_DENIED_ENTITIES,
@@ -284,7 +284,7 @@ const UniversityReport = () => {
             <div className="university-flag-panel-header">
               <span>{FlagInformation[selectedFlag]?.title}</span>
               <button className="close-button" onClick={handleClosePanel}>
-                <IoIosClose />
+                <IoMdClose />
               </button>
             </div>
             <Divider className="university-flag-panel-divider" />
