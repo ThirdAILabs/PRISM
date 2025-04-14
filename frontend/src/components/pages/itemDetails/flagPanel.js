@@ -17,6 +17,7 @@ import { IoMdClose } from 'react-icons/io';
 import { ChevronDown } from 'lucide-react';
 import FlagContainer from './flagContainer.js';
 import { createHighlights, applyHighlighting, hasValidTriangulationData } from './ack_utils.js';
+import Tooltip from '../../common/tools/Tooltip.js';
 
 const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureChecked }) => {
   const [isRendered, setIsRendered] = useState(false);
@@ -164,14 +165,6 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
       <div className="flag-sub-container">
         <div className="acknowledgement-header">
           <span className="flag-sub-container-header">Acknowledgement(s)</span>
-          {hasTriangulationData && (
-            <div className="triangulation-indicators">
-              {notContainPR && (
-                <span className="triangulation-tag success">Not primary recipient</span>
-              )}
-              {containPR && <span className="triangulation-tag danger">Primary recipient</span>}
-            </div>
-          )}
         </div>
 
         <ul className="bulleted-list">
@@ -385,6 +378,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
         </div>
         <div className="flag-sub-container">
           <span className="flag-sub-container-header">Relevant Webpage</span>
+          <p />
           <a href={flag.UniversityUrl} target="_blank" rel="noopener noreferrer">
             {flag.UniversityUrl}
           </a>
@@ -521,7 +515,9 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
   return (
     <div ref={sidepanelRef} className={`flag-panel ${isRendered ? 'open' : ''}`}>
       <div className="flag-panel-header">
-        <h4 className="flag-panel-title">{FlagInformation[review].title}</h4>
+        <h4 className="flag-panel-title">
+          {FlagInformation[review].title} <Tooltip text={FlagInformation[review].desc} />
+        </h4>
         <button className="flag-panel-close-button" onClick={() => setReview('')}>
           <IoMdClose />
         </button>
@@ -537,16 +533,16 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
           </div>
 
           <div className="tab-group">
-            <button
-              className={`tab-button ${activeTab === 'all' ? 'active' : ''}`}
-              onClick={() => {
-                setActiveTab('all');
-              }}
-            >
-              All
-            </button>
             {isDisclosureChecked && (
               <>
+                <button
+                  className={`tab-button ${activeTab === 'all' ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveTab('all');
+                  }}
+                >
+                  All
+                </button>
                 <button
                   className={`tab-button ${activeTab === 'disclosed' ? 'active' : ''}`}
                   onClick={() => {

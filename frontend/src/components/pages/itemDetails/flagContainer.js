@@ -6,7 +6,8 @@ export default function FlagContainer({ isDisclosureChecked, isDisclosed, childr
   return (
     <div className="flag-container">
       <div className="flag-container-box">{children}</div>
-      {isDisclosureChecked && (
+      {/* This tag looks to be redudant. We can probably revisit this at a later time, so I'll leave the code here. -Ashutosh */}
+      {/* {isDisclosureChecked && (
         <div className={`flag-container-badge ${isDisclosed ? 'disclosed' : 'undisclosed'}`}>
           <span className="flag-container-badge-text">
             {isDisclosed ? 'Disclosed' : 'Undisclosed'}
@@ -17,7 +18,7 @@ export default function FlagContainer({ isDisclosureChecked, isDisclosed, childr
             </span>
           ) : null}
         </div>
-      )}
+      )} */}
     </div>
   );
 }
