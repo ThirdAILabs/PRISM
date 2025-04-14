@@ -70,8 +70,9 @@ type UniversityReport struct {
 
 	LastUpdatedAt time.Time
 
-	UniversityId   string `gorm:"index"`
-	UniversityName string
+	UniversityId       string `gorm:"index"`
+	UniversityName     string
+	UniversityLocation string
 
 	StatusUpdatedAt time.Time
 	Status          string `gorm:"size:20;not null"`

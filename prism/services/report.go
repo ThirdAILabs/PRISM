@@ -456,12 +456,16 @@ func (s *ReportService) CreateUniversityReport(r *http.Request) (any, error) {
 		return nil, CodedError(errors.New("UniversityName must be specified"), http.StatusUnprocessableEntity)
 	}
 
+	if params.UniversityLocation == "" {
+		return nil, CodedError(errors.New("UniversityLocation must be specified"), http.StatusUnprocessableEntity)
+	}
+
 	if err := s.licensing.VerifyLicense(); err != nil {
 		slog.Error("cannot create new report, unable to verify license", "error", err)
 		return nil, CodedError(err, licensingErrorStatus(err))
 	}
 
-	id, err := s.manager.CreateUniversityReport(userId, params.UniversityId, params.UniversityName)
+	id, err := s.manager.CreateUniversityReport(userId, params.UniversityId, params.UniversityName, params.UniversityLocation)
 	if err != nil {
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
