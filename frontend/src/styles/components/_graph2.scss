@@ -115,3 +115,29 @@ $connection-line-color: #09abff;
     }
   }
 }
+
+.my-industy-node-level-3 {
+  @include paragraph-5;
+  min-width: 128px;
+  height: 100px;
+
+  .my-industy-node {
+    border: $level-4-color solid 1px;
+
+    .my-card-header {
+      background-color: $level-4-color;
+      height: 10px;
+    }
+
+    .my-card-body {
+      color: $level-4-color;
+      margin: 10px 2px;
+    }
+  }
+
+  .c-btn-open-close {
+    & span {
+      background-color: $level-4-color !important;
+    }
+  }
+}
