@@ -199,28 +199,30 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
             <>Some acknowledged entities in {get_paper_url(flag)} may be foreign entities.</>
           )}
         </div>
-        <div className="flag-sub-container">
-          <div className="acknowledgement-header">
-            <span className="flag-sub-container-header">Foreign Entities</span>
-          </div>
-          <ul className="bulleted-list">
-            {flag.Entities.map((item, index2) => {
-              const key = `${index} ${index2}`;
-              return (
-                <li key={key}>
-                  <a>
-                    "{item.Entity}"{' was detected in '}
-                    <text style={{ fontWeight: 'bold', textDecoration: 'underline' }}>
-                      {item.Sources.join(', ')}
-                    </text>
-                    {' as '}
-                    {item.Aliases.map((element) => `"${element}"`).join(', ')}
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+        {flag?.Entities?.length ?
+          <div className="flag-sub-container">
+            <div className="acknowledgement-header">
+              <span className="flag-sub-container-header">Foreign Entities</span>
+            </div>
+            <ul className="bulleted-list">
+              {flag.Entities.map((item, index2) => {
+                const key = `${index} ${index2}`;
+                return (
+                  <li key={key}>
+                    <a>
+                      "{item.Entity}"{' was detected in '}
+                      <text style={{ fontWeight: 'bold', textDecoration: 'underline' }}>
+                        {item.Sources.join(', ')}
+                      </text>
+                      {' as '}
+                      {item.Aliases.map((element) => `"${element}"`).join(', ')}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </div> : null
+        }
 
 
         {acknowledgementSection(flag, authorName, index)}
