@@ -126,6 +126,27 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
     });
   }
 
+  function triangulationLegend() {
+    return (
+      <div className="mt-4 d-flex flex-column small">
+        <span className="me-3">
+          <span
+            className="rounded-circle d-inline-block me-2"
+            style={{ width: '8px', height: '8px', backgroundColor: 'green' }}
+          ></span>
+          The author likely <b>is not</b> a primary recipient of these high-risk grants.
+        </span>
+        <span>
+          <span
+            className="rounded-circle d-inline-block me-2"
+            style={{ width: '8px', height: '8px', backgroundColor: 'red' }}
+          ></span>
+          The author likely <b>is</b> a primary recipient of these high-risk grants.
+        </span>
+      </div>
+    );
+  }
+
   function withPublicationDate(headerText, flag) {
     const publicationDateStr = flag?.Work?.PublicationDate;
     let formattedDate = 'N/A';
@@ -177,6 +198,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
             );
           })}
         </ul>
+        {hasTriangulationData ? triangulationLegend() : null}
       </div>
     );
   }
