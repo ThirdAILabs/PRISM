@@ -1,0 +1,88 @@
+// Variables
+$container-width: 80%;
+$primary-text: #2d3748;
+$secondary-text: #718096;
+$border-color: rgb(230, 230, 230);
+$background-white: rgb(255, 255, 255);
+
+@import '../base/typography';
+@import '../base/varialbes';
+
+.entity-lookup {
+  &-results {
+    width: 75.5%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin-top: 40px;
+  }
+
+  &-search-bar-container {
+    width: $container-width;
+    margin-left: 2.5%;
+    margin-top: -2%;
+  }
+
+  &-items {
+    width: $container-width;
+    background-color: $background-white;
+    color: black;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: start;
+    border: 1px solid $border-color;
+
+    b {
+      @include label-5;
+      display: block;
+      margin-top: 1rem;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+
+    p {
+      @include paragraph-5;
+      margin: 0.5rem 0;
+      color: $color-text-500;
+    }
+
+    ul.bulleted-list {
+      @include paragraph-5;
+      margin: 0.5rem 0;
+      padding-left: 1.5rem;
+      color: $color-text-700;
+    }
+  }
+}
+
+.no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  margin: 2rem auto;
+
+  &-icon {
+    font-size: $font-size-40;
+    margin-bottom: 0.5rem;
+    opacity: 0.8;
+  }
+
+  h3 {
+    @include heading-5;
+    color: $primary-text;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    @include paragraph-5;
+    color: $secondary-text;
+    max-width: 280px;
+    margin: 0;
+  }
+}

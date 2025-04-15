@@ -394,7 +394,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
       return (
         <>
           <span className="flag-sub-container-header">Press Release</span>
-          <ul className="bulleted-list">
+          <ul className="non-bulleted-list">
             <li>
               <a href={flag.DocUrl} target="_blank" rel="noopener noreferrer">
                 {flag.DocTitle}
@@ -409,7 +409,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
       return (
         <>
           <span className="flag-sub-container-header">Relevant Document(s)</span>
-          <ul className="bulleted-list">
+          <ul className="non-bulleted-list">
             {connections.map((item, index2) => {
               const key = `${index} ${index2}`;
               return (
@@ -426,16 +426,20 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
     }
     return (
       <div>
-        <h5 className="flag-header">
-          {connections.length == 0
-            ? 'The author or an associate may be mentioned in a Press Release'
-            : connections.length == 1
-              ? "The author's associate may be mentioned in a Press Release"
-              : connections.length == 2
-                ? 'The author may potentially be connected to an entity/individual mentioned in a Press Release'
-                : ''}
-        </h5>
-        <p>{flag.Message}</p>
+        {flag.Message ? (
+          <span className="flag-header">{flag.Message}</span>
+        ) : (
+          <span className="flag-header">
+            {connections.length == 0
+              ? 'The author or an associate may be mentioned in a Press Release'
+              : connections.length == 1
+                ? "The author's associate may be mentioned in a Press Release"
+                : connections.length == 2
+                  ? 'The author may potentially be connected to an entity/individual mentioned in a Press Release'
+                  : ''}
+          </span>
+        )}
+
         {connections.length == 1 && (
           <div className="flag-sub-container">
             {flag.FrequentCoauthor ? (
@@ -533,16 +537,16 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
           </div>
 
           <div className="tab-group">
+            <button
+              className={`tab-button ${activeTab === 'all' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('all');
+              }}
+            >
+              All
+            </button>
             {isDisclosureChecked && (
               <>
-                <button
-                  className={`tab-button ${activeTab === 'all' ? 'active' : ''}`}
-                  onClick={() => {
-                    setActiveTab('all');
-                  }}
-                >
-                  All
-                </button>
                 <button
                   className={`tab-button ${activeTab === 'disclosed' ? 'active' : ''}`}
                   onClick={() => {
