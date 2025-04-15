@@ -50,7 +50,7 @@ func extractTextFromPDF(fileBytes []byte) (string, error) {
 
 	var textBuilder strings.Builder
 	numPages := doc.NumPage()
-	for i := 1; i <= numPages; i++ {
+	for i := 0; i < numPages; i++ {
 		text, err := doc.Text(i)
 		if err != nil {
 			return "", err
