@@ -181,3 +181,7 @@ model/
 *.xlsx
 *.cache
 *.ndb
+
+
+# Denormalized benchmark files
+benchmarks/multi_hop/*_denormalized.json
