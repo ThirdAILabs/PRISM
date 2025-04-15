@@ -192,15 +192,13 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
           {flag.RawAcknowledgements.map((item, itemIndex) => {
             const key = `ack-${index}-${itemIndex}`;
             return (
-              <>
-                <li key={key} className="ack-text">
-                  {hasTriangulationData ? applyHighlighting(item, highlights) : item}
-                </li>
-                {hasTriangulationData ? triangulationLegend() : null}
-              </>
+              <li key={key} className="ack-text">
+                {hasTriangulationData ? applyHighlighting(item, highlights) : item}
+              </li>
             );
           })}
         </ul>
+        {hasTriangulationData ? triangulationLegend() : null}
       </div>
     );
   }
