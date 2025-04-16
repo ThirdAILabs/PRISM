@@ -159,9 +159,11 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
       });
     }
     return (
-      <div className="flag-container-header">
+      <div
+        className={`flag-container-header ${isDisclosureChecked && headerText.length >= 45 ? 'disclosureChecked' : ''}`}
+      >
         {headerText}
-        <span className="flag-container-date">{formattedDate}</span>
+        {formattedDate != 'N/A' && <span className="flag-container-date">{formattedDate}</span>}
       </div>
     );
   }
@@ -323,12 +325,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
   function coauthorAffiliationFlag(flag, index) {
     return (
       <div>
-        {withPublicationDate(
-          <span className="flag-container-header">
-            Co-authors are affiliated with Entities of Concern
-          </span>,
-          flag
-        )}
+        {withPublicationDate(FlagInformation[review].headerText, flag)}
         <p className="flag-container-description">
           Some authors of {get_paper_url(flag)} are affiliated with entities of concern:
         </p>
@@ -389,9 +386,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
   function universityFacultyFlag(flag, index) {
     return (
       <div>
-        <h5 className="fw-bold mt-3">
-          The author may potentially be linked with an Entity of Concern
-        </h5>
+        {withPublicationDate(FlagInformation[review].headerText, flag)}
         <div className="flag-sub-container">
           <span className="flag-sub-container-header">Concering entity</span>
           <div className="concerned-tags">
@@ -448,18 +443,18 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
     }
     return (
       <div>
-        {flag.Message ? (
-          <span className="flag-header">{flag.Message}</span>
-        ) : (
-          <span className="flag-header">
-            {connections.length == 0
+        {withPublicationDate(
+          flag.Message
+            ? flag.Message
+            : connections.length == 0
               ? 'The author or an associate may be mentioned in a Press Release'
               : connections.length == 1
                 ? "The author's associate may be mentioned in a Press Release"
                 : connections.length == 2
                   ? 'The author may potentially be connected to an entity/individual mentioned in a Press Release'
-                  : ''}
-          </span>
+                  : FlagInformation[review].headerText,
+
+          flag
         )}
 
         {connections.length == 1 && (

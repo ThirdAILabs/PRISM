@@ -1,6 +1,6 @@
 import React from 'react';
-import { Check } from 'lucide-react';
 import '../../../styles/components/_flagContainer.scss';
+import { FaRegCheckCircle } from 'react-icons/fa';
 
 export default function FlagContainer({ isDisclosureChecked, isDisclosed, children }) {
   return (
@@ -13,7 +13,7 @@ export default function FlagContainer({ isDisclosureChecked, isDisclosed, childr
           </span>
           {isDisclosed ? (
             <span className="flag-container-badge-check-circle">
-              <Check color="white" strokeWidth={3} />
+              <FaRegCheckCircle />
             </span>
           ) : null}
         </div>

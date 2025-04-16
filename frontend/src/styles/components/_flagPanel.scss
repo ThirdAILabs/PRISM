@@ -189,10 +189,14 @@ $color-grey-500: rgb(100, 100, 100);
 }
 
 .flag-container-header {
-  @include sub-heading-4;
+  @include sub-heading-3;
   justify-content: space-between;
   display: flex;
   margin-bottom: 10px;
+
+  &.disclosureChecked {
+    margin-top: 10px;
+  }
 }
 
 .flag-container-date {
