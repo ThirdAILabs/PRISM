@@ -42,16 +42,16 @@ export const FlagInformation = {
   [POTENTIAL_AUTHOR_AFFILIATIONS]: {
     title: 'Appointments at High Risk Foreign Institutes*',
     desc: 'The author may have an appointment at a high-risk foreign institute.\n\n*Collated information from the web, might contain false positives.',
-    headerText: 'Acknowledgements possibly contain Talent Contracts',
+    headerText: 'The author may potentially be linked with an Entity of Concern',
   },
   [MISC_HIGH_RISK_AFFILIATIONS]: {
     title: 'Miscellaneous High Risk Connections*',
     desc: 'The author or an associate may be mentioned in a press release.\n\n*Collated information from the web, might contain false positives.',
-    headerText: 'Acknowledgements possibly contain Talent Contracts',
+    headerText: 'The author or an associate may be mentioned in a Press Release',
   },
   [COAUTHOR_AFFILIATIONS]: {
     title: "Co-authors' affiliations with High Risk Foreign Institutes",
     desc: 'Co-authors in these papers are affiliated with high-risk foreign institutes.',
-    headerText: 'Acknowledgements possibly contain Talent Contracts',
+    headerText: 'Co-authors are affiliated with Entities of Concern',
   },
 };

@@ -192,7 +192,11 @@ $color-grey-500: rgb(100, 100, 100);
   @include sub-heading-4;
   justify-content: space-between;
   display: flex;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+
+  &.disclosureChecked {
+    margin-top: 8px;
+  }
 }
 
 .flag-container-date {
@@ -226,6 +230,12 @@ $color-grey-500: rgb(100, 100, 100);
 }
 
 .bulleted-list {
+  padding-left: 10px;
+  @include paragraph-5;
+  color: $color-text-700;
+}
+
+.non-bulleted-list {
   padding-left: 10px;
   @include paragraph-5;
   color: $color-text-700;

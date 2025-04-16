@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import '../../common/searchBar/SearchBar.css';
 import '../../../styles/components/_primaryButton.scss';
 
-import './entityLookup.css';
+import '../../../styles/pages/_entityLookup.scss';
 import Logo from '../../../assets/images/prism-logo.png';
 import { searchService } from '../../../api/search';
 import NoResultsFound from '../../common/tools/NoResultsFound';

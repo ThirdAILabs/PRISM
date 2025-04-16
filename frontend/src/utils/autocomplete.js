@@ -18,6 +18,7 @@ function AutocompleteSearchBar({
     const newValue = e.target.value;
     setQuery(newValue);
     autocomplete(newValue).then(setSuggestions);
+    onSelect(null);
   }
 
   function handleSelectSuggestion(suggestion) {
