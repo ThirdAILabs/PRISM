@@ -1,5 +1,9 @@
 import React from 'react';
 
+const escapeRegExp = (string) => {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
 export const createHighlights = (fundCodeTriangulation, authorName) => {
   if (!fundCodeTriangulation || typeof fundCodeTriangulation !== 'object') {
     return [];
@@ -7,7 +11,7 @@ export const createHighlights = (fundCodeTriangulation, authorName) => {
 
   return Object.entries(fundCodeTriangulation).flatMap(([funderName, funderMap]) =>
     Object.entries(funderMap).map(([grantCode, isRecipient]) => ({
-      regex: new RegExp(grantCode, 'i'),
+      regex: new RegExp(escapeRegExp(grantCode), 'i'),
       color: isRecipient ? 'red' : 'green',
       tooltip: `${authorName} is ${isRecipient ? 'likely' : 'likely NOT'} a primary recipient of this fund.`,
     }))
