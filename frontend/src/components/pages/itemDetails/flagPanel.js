@@ -540,7 +540,13 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
         <h4 className="flag-panel-title">
           {FlagInformation[review].title} <Tooltip text={FlagInformation[review].desc} />
         </h4>
-        <button className="flag-panel-close-button" onClick={() => setReview('')}>
+        <button
+          className="flag-panel-close-button"
+          onClick={() => {
+            setIsRendered(false);
+            setTimeout(() => setReview(''), 300);
+          }}
+        >
           <IoMdClose />
         </button>
       </div>
