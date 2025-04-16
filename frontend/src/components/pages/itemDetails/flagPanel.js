@@ -159,6 +159,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
       });
     }
     return (
+      // when the disclosure is checked, a badge appears on the flag which appears to be very close to the header if the flag header text is large (len >= 45), so in time we will add a margin to the header.
       <div
         className={`flag-container-header ${isDisclosureChecked && headerText.length >= 45 ? 'disclosureChecked' : ''}`}
       >
