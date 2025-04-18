@@ -18,8 +18,16 @@ import { ChevronDown } from 'lucide-react';
 import FlagContainer from './flagContainer.js';
 import { createHighlights, applyHighlighting, hasValidTriangulationData } from './ack_utils.js';
 import Tooltip from '../../common/tools/Tooltip.js';
+import { Link } from '@mui/material';
 
-const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureChecked }) => {
+const FlagPanel = ({
+  reportContent,
+  review,
+  setReview,
+  authorName,
+  isDisclosureChecked,
+  graphNodeInfo,
+}) => {
   const [isRendered, setIsRendered] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
   const [isSortByDropdownOpen, setIsSortByDropdownOpen] = useState(false);
@@ -74,7 +82,7 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
 
   function renderFlags(items) {
     if (!items) {
-      setReview(false);
+      setReview(null);
       return null;
     }
 
@@ -533,8 +541,32 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
     );
   }
 
-  return (
-    <div ref={sidepanelRef} className={`flag-panel ${isRendered ? 'open' : ''}`}>
+  function renderNode() {
+    if (!graphNodeInfo) {
+      setReview(null);
+      return null;
+    }
+    return (
+      <FlagContainer isDisclosureChecked={false} isDisclosed={false}>
+        <div className="flag-container-header">
+          {graphNodeInfo.text}
+          <span className="flag-container-date">{graphNodeInfo.date}</span>
+        </div>
+        <div className="flag-container-description">
+          <Link
+            href={graphNodeInfo.url}
+            target="_blank"
+            sx={{ mt: 1, display: 'block', color: 'orange' }}
+          >
+            {graphNodeInfo.url}
+          </Link>
+        </div>
+      </FlagContainer>
+    );
+  }
+
+  return review !== 'NodeData' ? (
+    <div className={`flag-panel ${isRendered ? 'open' : ''}`} style={{ width: '40%' }}>
       <div className="flag-panel-header">
         <h4 className="flag-panel-title">
           {FlagInformation[review].title} <Tooltip text={FlagInformation[review].desc} />
@@ -616,6 +648,34 @@ const FlagPanel = ({ reportContent, review, setReview, authorName, isDisclosureC
           </div>
         );
       })()}
+    </div>
+  ) : (
+    <div className={`flag-panel ${isRendered ? 'open' : ''}`} style={{ width: '40%' }}>
+      <div className="flag-panel-header">
+        <h4 className="flag-panel-title">{graphNodeInfo.title}</h4>
+        <button
+          className="flag-panel-close-button"
+          onClick={() => {
+            setIsRendered(false);
+            setTimeout(() => setReview(''), 300);
+          }}
+        >
+          <IoMdClose />
+        </button>
+      </div>
+      <Divider className="divider" />
+
+      <div
+        style={{
+          width: '92%',
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        {renderNode()}
+      </div>
     </div>
   );
 };

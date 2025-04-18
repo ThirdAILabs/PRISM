@@ -1,22 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import RelationGraph from 'relation-graph-react';
 import '../../../styles/components/_graph2.scss';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Divider,
-  Card,
-  CardContent,
-  Typography,
-  Collapse,
-  IconButton,
-  Link,
-} from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { AUTHOR_AFFILIATIONS } from '../../../constants/constants.js';
-import { getRawTextFromXML } from '../../../utils/helper.js';
+import MyToolbarToolbar from './toolbar.tsx';
+import { Tooltip } from 'react-tooltip';
 
 function getNodeTitle(flagType, flag) {
   if (flagType === AUTHOR_AFFILIATIONS) {
@@ -120,6 +107,7 @@ function convertDataToGraphFormat(authorName, reportContent) {
     });
 
     graphData.connections.push({
+      flagType: flagType,
       title: flagTypeToTitle[flagType],
       count: works.length,
       connections: works,
@@ -142,7 +130,7 @@ function levelZeroNode(nodeId, name, riskScore, url) {
   };
 }
 
-function levelOneNode(nodeId, title, url, count, connections) {
+function levelOneNode(nodeId, title, url, count, connections, flagType) {
   const textLength = Math.min(title.length, 40);
   let dotString = '';
   if (textLength < title.length) dotString += '...';
@@ -153,6 +141,7 @@ function levelOneNode(nodeId, title, url, count, connections) {
       url: url,
       text: title,
       allConnections: connections,
+      flagType: flagType,
     },
   };
 }
@@ -220,7 +209,9 @@ function generateGraphData(data, parentId = null, level = 0) {
   } else if (level === 1) {
     // Second level node
     currentNodeId = `g${Math.random().toString(36).substring(7)}`;
-    nodes.push(levelOneNode(currentNodeId, data.title, data.url, data.count, data.connections));
+    nodes.push(
+      levelOneNode(currentNodeId, data.title, data.url, data.count, data.connections, data.flagType)
+    );
   } else if (level === 2) {
     // Third level node
     currentNodeId = `e${Math.random().toString(36).substring(7)}`;
@@ -257,7 +248,7 @@ function generateGraphData(data, parentId = null, level = 0) {
   return { nodes, lines, rootId: 'a', levelNodePairs };
 }
 
-const MyComponent = ({ authorName, reportContent }) => {
+const MyComponent = ({ authorName, reportContent, review, setReview, setGraphNodeInfo }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
   const [expandedChildren, setExpandedChildren] = useState(false);
@@ -288,6 +279,18 @@ const MyComponent = ({ authorName, reportContent }) => {
   };
 
   const onNodeClick = (nodeObject, $event) => {
+    const selectedFlag = nodeObject?.data?.flagType;
+    if (selectedFlag) setReview(nodeObject?.data?.flagType);
+    else {
+      setReview('NodeData');
+      setGraphNodeInfo({
+        title: 'Detailed Information',
+        text: nodeObject?.data?.text,
+        url: nodeObject?.data?.url,
+        allConnections: nodeObject?.data?.allConnections,
+      });
+    }
+    console.log('nodedataclick', nodeObject?.data.flagType);
     setSelectedNode({
       ...nodeObject,
       data: {
@@ -295,7 +298,7 @@ const MyComponent = ({ authorName, reportContent }) => {
         allConnections: nodeObject.data.allConnections,
       },
     });
-    setDialogOpen(true);
+    // setDialogOpen(true);
     setExpandedChildren(false);
   };
 
@@ -392,13 +395,31 @@ const MyComponent = ({ authorName, reportContent }) => {
       },
     ],
   };
+  const [width, setWidht] = useState('96%');
 
+  const onSizeOptionChanged = () => {
+    setTimeout(() => {
+      const graphInstance = graphRef.current?.getInstance();
+      graphInstance?.onGraphResize();
+    });
+  };
+  useEffect(() => {
+    async function handleWidth() {
+      if (review && review !== '') {
+        setWidht('56%');
+      } else {
+        setWidht('96%');
+      }
+    }
+    handleWidth();
+    onSizeOptionChanged();
+  }, [review]);
   return (
     <div>
       <div
         style={{
-          height: '700px',
-          width: '96%',
+          height: '716px',
+          width: width,
           marginLeft: '2%',
           overflow: 'hidden',
           position: 'relative',
@@ -413,93 +434,13 @@ const MyComponent = ({ authorName, reportContent }) => {
           nodeSlot={MyNodeSlot}
           onNodeClick={onNodeClick}
           onLineClick={onLineClick}
+          toolBarSlot={() => <MyToolbarToolbar />}
+          graphPlugSlot={
+            <div>
+              <Tooltip id="my-tooltip" />
+            </div>
+          }
         ></RelationGraph>
-        <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm">
-          <DialogTitle sx={{ bgcolor: '#2A2A2A', color: 'white' }}>
-            {'Detailed Information'}
-          </DialogTitle>
-          <Divider
-            sx={{
-              borderBottomWidth: 2,
-              borderColor: 'text.primary',
-            }}
-          />
-          <DialogContent sx={{ bgcolor: '#2A2A2A' }}>
-            <Card variant="outlined" sx={{ mb: 2, bgcolor: '#6e6e6e' }}>
-              <CardContent>
-                <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600 }}>
-                  {selectedNode?.data.text}
-                </Typography>
-                {selectedNode?.data?.url && (
-                  <>
-                    <Divider
-                      sx={{
-                        borderBottomWidth: 1,
-                        borderColor: 'white',
-                        marginTop: 1,
-                      }}
-                    />
-                    <Link
-                      href={selectedNode.data.url}
-                      target="_blank"
-                      sx={{ mt: 1, display: 'block', color: 'orange' }}
-                    >
-                      {selectedNode.data.url}
-                    </Link>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-
-            {selectedNode?.data?.allConnections?.length > 0 && (
-              <>
-                <div
-                  onClick={() => setExpandedChildren(!expandedChildren)}
-                  style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                >
-                  <Typography variant="subtitle1" sx={{ color: 'white' }}>
-                    Relevant Documents / Webpages ({selectedNode.data.allConnections.length})
-                  </Typography>
-                  <IconButton size="small" sx={{ color: 'white' }}>
-                    {expandedChildren ? (
-                      <ExpandLessIcon color="inherit" />
-                    ) : (
-                      <ExpandMoreIcon color="inherit" />
-                    )}
-                  </IconButton>
-                </div>
-
-                <Collapse in={expandedChildren}>
-                  <Card variant="outlined" sx={{ mt: 1, bgcolor: '#6e6e6e' }}>
-                    <CardContent>
-                      {selectedNode.data.allConnections.map((child, index) => (
-                        <Typography key={index} variant="body1" sx={{ mb: 1, color: 'black' }}>
-                          <Link
-                            href={child.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ textDecoration: 'none', color: 'inherit' }}
-                            onMouseEnter={(e) => (e.target.style.textDecoration = 'underline')}
-                            onMouseLeave={(e) => (e.target.style.textDecoration = 'none')}
-                          >
-                            {getRawTextFromXML(child.title)}
-                          </Link>
-                          <Divider
-                            sx={{
-                              borderBottomWidth: 1,
-                              borderColor: 'white',
-                              marginTop: 1,
-                            }}
-                          />
-                        </Typography>
-                      ))}
-                    </CardContent>
-                  </Card>
-                </Collapse>
-              </>
-            )}
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );
