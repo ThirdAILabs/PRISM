@@ -29,6 +29,7 @@
     "react-icons": "^5.5.0",
     "react-router-dom": "^6.23.1",
     "react-scripts": "5.0.1",
+    "react-tooltip": "^5.28.1",
     "reactflow": "^11.11.4",
     "relation-graph": "^2.2.10",
     "relation-graph-react": "^2.2.10",

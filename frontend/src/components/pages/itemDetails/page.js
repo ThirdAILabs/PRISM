@@ -21,6 +21,8 @@ import useGoBack from '../../../hooks/useGoBack.js';
 
 import '../../../styles/components/_primaryButton.scss';
 import FlagPanel from './flagPanel.js';
+import NodePanel from './nodePanel.js';
+
 import { getTrailingWhiteSpace } from '../../../utils/helper.js';
 import '../../../styles/components/_primaryButton.scss';
 import '../../../styles/components/_authorInfoCard.scss';
@@ -311,10 +313,13 @@ const ItemDetails = () => {
   const handleBackButtonClick = () => {
     if (activeTab === 1) {
       setActiveTab(0);
+      setReview(null);
     } else {
       goBack();
     }
   };
+  console.log('nodedataclickReview', review);
+  const [graphNodeInfo, setGraphNodeInfo] = useState(null);
 
   return (
     <div className="basic-setup">
@@ -498,8 +503,23 @@ const ItemDetails = () => {
 
       {activeTab === 1 && (
         <>
-          {/* <Graph authorName={authorName} reportContent={reportContent} /> */}
-          <Graph authorName={authorName} reportContent={reportContent} />
+          <Graph
+            authorName={authorName}
+            reportContent={reportContent}
+            review={review}
+            setReview={setReview}
+            setGraphNodeInfo={setGraphNodeInfo}
+          />
+          {review && (
+            <NodePanel
+              reportContent={reportContent}
+              review={review}
+              setReview={setReview}
+              authorName={authorName}
+              isDisclosureChecked={isDisclosureChecked}
+              graphNodeInfo={graphNodeInfo}
+            />
+          )}
         </>
       )}
     </div>
