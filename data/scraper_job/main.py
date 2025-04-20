@@ -93,6 +93,11 @@ def main():
     config = load_config()
     process_paths(config)
 
+    config["openai_api_key"] = os.getenv("OPENAI_API_KEY")
+
+    if config["openai_api_key"] is None:
+        raise ValueError("OPENAI_API_KEY environment variable not set.")
+
     jobs = config.get("jobs", [])
 
     for key, val in config.get("global", {}).items():
