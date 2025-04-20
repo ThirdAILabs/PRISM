@@ -34,7 +34,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           cd $GITHUB_WORKSPACE
-          pip install -r data/scrapper_job/requirements.txt
+          pip install -r data/scraper_job/requirements.txt
           playwright install --with-deps
 
       - name: Set Variables
@@ -44,7 +44,7 @@ jobs:
 
       - name: Run data update script
         run: |
-          cd data/scrapper_job
+          cd data/scraper_job
           python3 -u -m main
 
       - name: Create Pull Request

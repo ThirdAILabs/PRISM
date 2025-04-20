@@ -182,4 +182,4 @@ model/
 *.cache
 *.ndb
 
-data/scrapper_job/data.tmp/
+data/scraper_job/data.tmp/

@@ -13,7 +13,7 @@ def process_paths(config):
     base_dir = os.path.dirname(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     )
-    base_dir = base_dir.replace("data/scrapper_job/", "")
+    base_dir = base_dir.replace("data/scraper_job/", "")
 
     def process_dict(d):
         for key, value in d.items():

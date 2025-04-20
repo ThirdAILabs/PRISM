@@ -1,0 +1,29 @@
+{
+  "jobs": [
+    {
+      "name": "doj_pr",
+      "module": "jobs.doj",
+      "fetcher": "fetch_articles",
+      "processor": "process_articles",
+      "updater": "update_articles",
+      "config": {
+        "start_date": "2025-01-01",
+        "output_file_path": "data.tmp/doj_pr/doj_articles_with_content_and_entities.json",
+        "country_keywords": [
+          { "china": "china" },
+          { "chinese": "china" },
+          { "russia": "russia" },
+          { "russian": "russia" },
+          { "iran": "iran" },
+          { "iranian": "iran" }
+        ],
+        "academic_keywords": ["professor", "university", "college"]
+      }
+    }
+  ],
+  "global": {
+    "openai_api_key": "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",
+    "email": "pratik@thirdai.com",
+    "data_folder": "/Users/pratikqpranav/ThirdAI/PRISM/data/scraper_job/data"
+  }
+}
