@@ -298,6 +298,7 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 				Message:       fmt.Sprintf("The author %s may be associated with this concerning entity: %s\n", authorName, university),
 				University:    university,
 				UniversityUrl: url,
+				LastUpdatedAt: time.Now(),
 			})
 		}
 	}

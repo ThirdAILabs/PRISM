@@ -21,6 +21,8 @@ type Hook interface {
 	Validate(data []byte, interval int) error
 
 	Run(report api.Report, data []byte, lastRanAt time.Time) error
+
+	Type() string
 }
 
 type HookService struct {

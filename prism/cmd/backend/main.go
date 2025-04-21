@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/cmd"
+	"prism/prism/hooks"
 	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/reports"
@@ -52,6 +53,8 @@ type Config struct {
 	OpenaiKey string `env:"OPENAI_API_KEY,notEmpty,required"`
 
 	ResourceFolder string `env:"RESOURCE_FOLDER,notEmpty,required"`
+
+	sendgridKey string `env:"SENDGRID_KEY,envDefault:""`
 }
 
 func (c *Config) logfile() string {
@@ -173,7 +176,13 @@ func main() {
 	reportManager.StartReportUpdateCheck()
 	defer reportManager.StopReportUpdateCheck()
 
-	hooks := services.NewHookService(db, map[string]services.Hook{})
+	hookServices := make(map[string]services.Hook)
+	if config.sendgridKey != "" {
+		hookServices["FlagTracker"] = hooks.NewFlagTrackerHook(
+			services.NewEmailNotifier(config.sendgridKey),
+		)
+	}
+	hooks := services.NewHookService(db, hookServices)
 
 	hooks.RunHooks(30 * time.Minute)
 	defer hooks.Stop()

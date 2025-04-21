@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"time"
 
 	"prism/prism/api"
 	"prism/prism/llms"
@@ -89,9 +90,10 @@ func (flagger *OpenAlexFunderIsEOC) Flag(logger *slog.Logger, works []openalex.W
 
 		if len(concerningFunders) > 0 {
 			flags = append(flags, &api.HighRiskFunderFlag{
-				Message: fmt.Sprintf("The following funders of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningFunders, "\n")),
-				Work:    getWorkSummary(work),
-				Funders: concerningFunders,
+				Message:       fmt.Sprintf("The following funders of work '%s' are entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningFunders, "\n")),
+				Work:          getWorkSummary(work),
+				Funders:       concerningFunders,
+				LastUpdatedAt: time.Now(),
 			})
 		}
 	}
@@ -229,9 +231,10 @@ func (flagger *OpenAlexAuthorAffiliationIsEOC) Flag(logger *slog.Logger, works [
 		if len(concerningAffiliations) > 0 {
 			concerningAffiliations := getKeys(concerningAffiliations)
 			flags = append(flags, &api.AuthorAffiliationFlag{
-				Message:      fmt.Sprintf("In '%s', this author is affiliated with entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningAffiliations, "\n")),
-				Work:         getWorkSummary(work),
-				Affiliations: concerningAffiliations,
+				Message:       fmt.Sprintf("In '%s', this author is affiliated with entities of concern:\n%s", work.GetDisplayName(), strings.Join(concerningAffiliations, "\n")),
+				Work:          getWorkSummary(work),
+				Affiliations:  concerningAffiliations,
+				LastUpdatedAt: time.Now(),
 			})
 		}
 	}
@@ -583,6 +586,7 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			Entities:              entities,
 			RawAcknowledgements:   rawAcks,
 			FundCodeTriangulation: triangulationResults,
+			LastUpdatedAt:         time.Now(),
 		}
 	} else if containsSource(entities, deniedEntities) {
 		return &api.AssociationWithDeniedEntityFlag{
@@ -590,6 +594,7 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			Work:                getWorkSummary(work),
 			Entities:            entities,
 			RawAcknowledgements: rawAcks,
+			LastUpdatedAt:       time.Now(),
 		}
 	} else {
 		entityNames := make([]string, 0, len(entities))
@@ -602,6 +607,7 @@ func createAcknowledgementFlag(work openalex.Work, message string, entities []ap
 			Funders:               entityNames,
 			RawAcknowledgements:   rawAcks,
 			FundCodeTriangulation: triangulationResults,
+			LastUpdatedAt:         time.Now(),
 		}
 	}
 }

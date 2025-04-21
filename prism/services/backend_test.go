@@ -54,15 +54,15 @@ type MockTokenVerifier struct {
 	prefix string
 }
 
-func (m *MockTokenVerifier) VerifyToken(token string) (uuid.UUID, error) {
+func (m *MockTokenVerifier) VerifyToken(token string) (uuid.UUID, string, error) {
 	if !strings.HasPrefix(token, m.prefix) {
-		return uuid.Nil, fmt.Errorf("invalid token")
+		return uuid.Nil, "", fmt.Errorf("invalid token")
 	}
 	id, err := uuid.Parse(strings.TrimPrefix(token, m.prefix))
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, "", err
 	}
-	return id, nil
+	return id, id.String() + "@mock.com", nil
 }
 
 type mockOpenAlex struct{}
@@ -863,6 +863,10 @@ func (t *testHook) Validate(data []byte, interval int) error {
 func (t *testHook) Run(report api.Report, data []byte, lastRanAt time.Time) error {
 	t.invoked = &hookInvocation{reportId: report.Id, data: data, lastRanAt: lastRanAt}
 	return nil
+}
+
+func (t *testHook) Type() string {
+	return "MockHook"
 }
 
 func createReportHook(backend http.Handler, reportId uuid.UUID, user string, payload string, interval int) error {
