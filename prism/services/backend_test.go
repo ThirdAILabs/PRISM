@@ -866,7 +866,11 @@ func (t *testHook) Run(report api.Report, data []byte, lastRanAt time.Time) erro
 }
 
 func (t *testHook) Type() string {
-	return "MockHook"
+	return "test"
+}
+
+func (t *testHook) CreateHookData(r *http.Request, params api.CreateHookRequest) (hookData []byte, err error) {
+	return params.Data, nil
 }
 
 func createReportHook(backend http.Handler, reportId uuid.UUID, user string, payload string, interval int) error {

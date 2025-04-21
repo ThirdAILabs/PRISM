@@ -3,8 +3,10 @@ package hooks
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"prism/prism/api"
 	"prism/prism/services"
+	"prism/prism/services/auth"
 	"time"
 )
 
@@ -61,6 +63,22 @@ func (h *FlagTracker) Run(report api.Report, data []byte, lastRanAt time.Time) e
 
 func (h *FlagTracker) Type() string {
 	return "FlagTracker"
+}
+
+func (h *FlagTracker) CreateHookData(r *http.Request, params api.CreateHookRequest) (hookData []byte, err error) {
+	email_id, err := auth.GetEmailId(r)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get email id: %w", err)
+	}
+	obj := FlagTrackerData{
+		EmailID: email_id,
+	}
+
+	hookData, err = json.Marshal(obj)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal hook data: %w", err)
+	}
+	return hookData, nil
 }
 
 func (h *FlagTracker) notify(flags []api.Flag) error {

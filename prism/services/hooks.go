@@ -22,6 +22,8 @@ type Hook interface {
 
 	Run(report api.Report, data []byte, lastRanAt time.Time) error
 
+	CreateHookData(r *http.Request, params api.CreateHookRequest) (hookData []byte, err error)
+
 	Type() string
 }
 
@@ -86,11 +88,17 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 			return CodedError(reports.ErrUserCannotAccessReport, http.StatusForbidden)
 		}
 
+		hookData, err := hook.CreateHookData(r, params)
+		if err != nil {
+			slog.Error("error creating hook data", "error", err)
+			return CodedError(err, http.StatusInternalServerError)
+		}
+
 		hook := schema.AuthorReportHook{
 			Id:           uuid.New(),
 			UserReportId: reportId,
 			Action:       params.Action,
-			Data:         params.Data,
+			Data:         hookData,
 			LastRanAt:    reports.EarliestReportDate,
 			Interval:     params.Interval,
 		}

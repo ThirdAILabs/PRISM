@@ -54,7 +54,7 @@ type Config struct {
 
 	ResourceFolder string `env:"RESOURCE_FOLDER,notEmpty,required"`
 
-	sendgridKey string `env:"SENDGRID_KEY,envDefault:""`
+	SendGridKey string `env:"SENDGRID_KEY,envDefault:""`
 }
 
 func (c *Config) logfile() string {
@@ -177,9 +177,9 @@ func main() {
 	defer reportManager.StopReportUpdateCheck()
 
 	hookServices := make(map[string]services.Hook)
-	if config.sendgridKey != "" {
+	if config.SendGridKey != "" {
 		hookServices["FlagTracker"] = hooks.NewFlagTrackerHook(
-			services.NewEmailNotifier(config.sendgridKey),
+			services.NewEmailNotifier(config.SendGridKey),
 		)
 	}
 	hooks := services.NewHookService(db, hookServices)
