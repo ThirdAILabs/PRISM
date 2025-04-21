@@ -4,9 +4,6 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "0 12 * * 1" # Run every Monday at 12:00 UTC
-  push:
-    branches:
-      - automate-download
 
 jobs:
   update-data:
@@ -39,9 +36,7 @@ jobs:
 
       - name: Set Variables
         run: |
-          BRANCH="update-data-$(date +%Y%m%d%H%M%S)"
-          echo "BRANCH_NAME=$BRANCH" >> $GITHUB_ENV
-          echo "OPENAI_API_KEY=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" >> $GITHUB_ENV
+          echo "OPENAI_API_KEY=$OPENAI_API_KEY_DATA_UPDATE" >> $GITHUB_ENV
 
       - name: Run data update script
         run: |
