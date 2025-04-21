@@ -29,10 +29,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          cd $GITHUB_WORKSPACE
-          pip install -r data/scraper_job/requirements.txt
-          playwright install --with-deps
+          # python -m pip install --upgrade pip
+          # cd $GITHUB_WORKSPACE
+          # pip install -r data/scraper_job/requirements.txt
+          # playwright install --with-deps
+          touch data/scraper_job/requirements.txt
+          echo "openai" >> data/scraper_job/requirements.txt
 
       - name: Set Variables
         run: |
