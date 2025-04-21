@@ -4,4 +4,4 @@ openai
 beautifulsoup4
 tqdm
 scrapy
-scrapy-playwright
+scrapy-playwrightopenai
