@@ -1,0 +1,7 @@
+pandas
+requests
+openai
+beautifulsoup4
+tqdm
+scrapy
+scrapy-playwright
