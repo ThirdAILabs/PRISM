@@ -29,7 +29,6 @@ type PDFDownloader struct {
 	s3Client       *s3.Client
 	pw             *playwright.Playwright
 	browser        playwright.Browser
-	context        playwright.BrowserContext
 }
 
 var headers = map[string]string{
@@ -62,43 +61,23 @@ func NewPDFDownloader(s3CacheBucket string) *PDFDownloader {
 	}
 	downloader.s3Client = s3.NewFromConfig(cfg)
 
-	pw, err := playwright.Run(&playwright.RunOptions{Browsers: []string{"firefox"}})
+	pw, err := playwright.Run(&playwright.RunOptions{Browsers: []string{"chromium"}})
 	if err != nil {
 		log.Fatalf("error starting playwright: %v", err)
 	}
 	downloader.pw = pw
 
-	browser, err := pw.Firefox.Launch(playwright.BrowserTypeLaunchOptions{Headless: playwright.Bool(true)})
+	browser, err := pw.Chromium.Launch(playwright.BrowserTypeLaunchOptions{Headless: playwright.Bool(true)})
 	if err != nil {
 		log.Fatalf("error launching browser: %v", err)
 	}
 	downloader.browser = browser
-
-	context, err := downloader.browser.NewContext(playwright.BrowserNewContextOptions{
-		AcceptDownloads:   playwright.Bool(true),
-		IgnoreHttpsErrors: playwright.Bool(true),
-	})
-	if err != nil {
-		log.Fatalf("error creating playwright context: %v", err)
-	}
-
-	// When pdfs fail to download it is often just because they reach the timeout,
-	// which slows down processing. Decreasing the timeout will hopefully speed this up.
-	context.SetDefaultTimeout(15000)
-
-	downloader.context = context
 
 	return downloader
 }
 
 func (downloader *PDFDownloader) Close() error {
 	var errs []error
-
-	if downloader.context != nil {
-		if err := downloader.context.Close(); err != nil {
-			errs = append(errs, fmt.Errorf("error closing browser context: %w", err))
-		}
-	}
 
 	if downloader.browser != nil {
 		if err := downloader.browser.Close(); err != nil {
@@ -117,7 +96,18 @@ func (downloader *PDFDownloader) Close() error {
 
 func (downloader *PDFDownloader) downloadWithPlaywright(url string) (string, error) {
 
-	page, err := downloader.context.NewPage()
+	playwrightContext, err := downloader.browser.NewContext(playwright.BrowserNewContextOptions{
+		AcceptDownloads:   playwright.Bool(true),
+		IgnoreHttpsErrors: playwright.Bool(true),
+	})
+	if err != nil {
+		log.Fatalf("error creating playwright context: %v", err)
+	}
+
+	playwrightContext.SetDefaultTimeout(15000)
+	defer playwrightContext.Close()
+
+	page, err := playwrightContext.NewPage()
 	if err != nil {
 		return "", fmt.Errorf("error opening browser page: %w", err)
 	}
