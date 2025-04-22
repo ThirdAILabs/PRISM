@@ -24,6 +24,7 @@ import { GoSidebarExpand } from 'react-icons/go';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.js';
 import './App.css';
+import AdminPage from './components/pages/adminPage/page.js';
 
 function App() {
   return (
@@ -85,6 +86,8 @@ function AppContent() {
             <Route path="/university/report/:report_id" element={<UniversityReport />} />
           </Route>
           <Route path="/error" element={<Error />} />
+          <Route path='/admin-page' element={<AdminPage />} />
+          <Route path="*" element={<Error />} />
         </Routes>
       </div>
     </div>

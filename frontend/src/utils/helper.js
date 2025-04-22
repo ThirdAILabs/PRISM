@@ -1,5 +1,6 @@
 import { useLocation } from 'react-router-dom';
 import { XMLValidator } from 'fast-xml-parser';
+
 export function GetShowMenuIcon() {
   const location = useLocation();
   let showMenuIcon = true;
@@ -7,6 +8,9 @@ export function GetShowMenuIcon() {
   if (path.includes('report')) {
     showMenuIcon = false;
   } else if (path.includes('error')) {
+    showMenuIcon = false;
+  }
+  else if (path.includes('admin-page')) {
     showMenuIcon = false;
   }
   return showMenuIcon;
