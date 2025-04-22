@@ -82,9 +82,6 @@ func (h *AuthorReportUpdateNotifier) CreateHookData(r *http.Request, payload []b
 }
 
 func (h *AuthorReportUpdateNotifier) notify(flags []api.Flag) error {
-	if h.notifier == nil {
-		return fmt.Errorf("notifier is not set")
-	}
 	// create the html content with the flags and send the email
 	return nil
 }
