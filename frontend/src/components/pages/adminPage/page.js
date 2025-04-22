@@ -5,11 +5,10 @@ import UserService from '../../../services/userService';
 import { FiLogOut } from 'react-icons/fi';
 import RandomAvatar from '../../../assets/images/RandomAvatar.jpg'
 import '../../../styles/pages/_adminPage.scss';
-import Switch, { SwitchProps } from '@mui/material/Switch';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import { Switch, Divider } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from "react-router-dom";
+import KeyIcon from '@mui/icons-material/Key';
 
 const AntSwitch = styled(Switch)(({ theme }) => ({
     width: 42,
@@ -177,6 +176,43 @@ const AdminPage = () => {
                         </svg>
                     </button>
                     <span>My Profile</span>
+                </div>
+            </div>
+            <div className="admin-card">
+                <div className="admin-card-content">
+                    <div style={{
+                        display: "flex",
+                        flexDirection: 'row',
+                        gap: '20px'
+                    }}>
+                        <img src={users[0]?.avatar} alt="User" className="admin-card-content__avatar" />
+
+                        <div className="admin-card-content__info">
+
+                            <span className="admin-card-content__name">{users[0]?.username}
+                                <span className={`admin-card-content__status`}>
+                                    Admin
+                                </span>
+                            </span>
+                            <span className="admin-card-content__email">{users[0]?.email}</span>
+                        </div>
+                    </div>
+                    <button
+                        className="button score-card-button generate-key-button"
+                    >
+                        Generate Key <KeyIcon />
+                    </button>
+                </div>
+                {/* <Divider
+                    sx={{
+                        backgroundColor: 'black',
+                        height: '1px',
+                        width: '100%',
+                        opacity: 0.1,
+                    }}
+                /> */}
+                <div className="admin-card-">
+
                 </div>
             </div>
             <span className="user-header">
