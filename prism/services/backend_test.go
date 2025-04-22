@@ -869,8 +869,8 @@ func (t *testHook) Type() string {
 	return "test"
 }
 
-func (t *testHook) CreateHookData(r *http.Request, params api.CreateHookRequest) (hookData []byte, err error) {
-	return params.Data, nil
+func (t *testHook) CreateHookData(r *http.Request, payload []byte, interval int) (hookData []byte, err error) {
+	return payload, nil
 }
 
 func createReportHook(backend http.Handler, reportId uuid.UUID, user string, payload string, interval int) error {

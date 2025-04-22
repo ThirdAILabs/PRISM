@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/cmd"
-	"prism/prism/hooks"
 	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/reports"
@@ -19,6 +18,7 @@ import (
 	"prism/prism/search"
 	"prism/prism/services"
 	"prism/prism/services/auth"
+	hooks "prism/prism/services/hooks"
 	"time"
 
 	"github.com/caarlos0/env/v11"
@@ -54,7 +54,7 @@ type Config struct {
 
 	ResourceFolder string `env:"RESOURCE_FOLDER,notEmpty,required"`
 
-	SendGridKey string `env:"SENDGRID_KEY,envDefault:""`
+	SendGridKey string `env:"SENDGRID_KEY"`
 }
 
 func (c *Config) logfile() string {
@@ -176,10 +176,15 @@ func main() {
 	reportManager.StartReportUpdateCheck()
 	defer reportManager.StopReportUpdateCheck()
 
+	var notifier *services.EmailMessenger = nil
+	if config.SendGridKey != "" {
+		notifier = services.NewEmailMessenger(config.SendGridKey)
+	}
+
 	hookServices := make(map[string]services.Hook)
 	if config.SendGridKey != "" {
-		hookServices["FlagTracker"] = hooks.NewFlagTrackerHook(
-			services.NewEmailNotifier(config.SendGridKey),
+		hookServices["FlagTracker"] = hooks.NewAuthorReportUpdateNotifier(
+			notifier,
 		)
 	}
 	hooks := services.NewHookService(db, hookServices)

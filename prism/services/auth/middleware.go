@@ -56,7 +56,7 @@ func GetUserId(r *http.Request) (uuid.UUID, error) {
 	return userId, nil
 }
 
-func GetEmailId(r *http.Request) (string, error) {
+func GetUserEmail(r *http.Request) (string, error) {
 	emailUntyped := r.Context().Value(emailContextKey)
 	if emailUntyped == nil {
 		return "", fmt.Errorf("email_id field not found in request context")

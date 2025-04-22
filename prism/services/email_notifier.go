@@ -5,17 +5,17 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
-type EmailNotifier struct {
+type EmailMessenger struct {
 	client *sendgrid.Client
 }
 
-func NewEmailNotifier(apiKey string) *EmailNotifier {
-	return &EmailNotifier{
+func NewEmailMessenger(apiKey string) *EmailMessenger {
+	return &EmailMessenger{
 		client: sendgrid.NewSendClient(apiKey),
 	}
 }
 
-func (e *EmailNotifier) Notify(sender, recipient, subject, plainTextContext, htmlContext string) error {
+func (e *EmailMessenger) Notify(sender, recipient, subject, plainTextContext, htmlContext string) error {
 	from := mail.NewEmail("ThirdAI", sender)
 	to := mail.NewEmail("", recipient)
 

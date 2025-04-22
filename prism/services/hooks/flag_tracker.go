@@ -1,4 +1,4 @@
-package hooks
+package services
 
 import (
 	"encoding/json"
@@ -12,21 +12,21 @@ import (
 
 var minUpdateInterval = 7 * 24 * 60 * 60 // 7 days in seconds
 
-type FlagTrackerData struct {
+type AuthorReportUpdateNotifierData struct {
 	EmailID string `json:"email_id"`
 }
 
-type FlagTracker struct {
-	notifier *services.EmailNotifier
+type AuthorReportUpdateNotifier struct {
+	notifier *services.EmailMessenger
 }
 
-func NewFlagTrackerHook(notifier *services.EmailNotifier) *FlagTracker {
-	return &FlagTracker{
+func NewAuthorReportUpdateNotifier(notifier *services.EmailMessenger) *AuthorReportUpdateNotifier {
+	return &AuthorReportUpdateNotifier{
 		notifier: notifier,
 	}
 }
 
-func (h *FlagTracker) Validate(data []byte, interval int) error {
+func (h *AuthorReportUpdateNotifier) Validate(data []byte, interval int) error {
 	if interval < 0 {
 		return fmt.Errorf("interval must be greater than or equal to 0")
 	}
@@ -35,7 +35,7 @@ func (h *FlagTracker) Validate(data []byte, interval int) error {
 		return fmt.Errorf("interval must be less than or equal to %d seconds", minUpdateInterval)
 	}
 
-	var hookData FlagTrackerData
+	var hookData AuthorReportUpdateNotifierData
 	if err := json.Unmarshal(data, &hookData); err != nil {
 		return fmt.Errorf("failed to unmarshal hook data: %w", err)
 	}
@@ -43,8 +43,8 @@ func (h *FlagTracker) Validate(data []byte, interval int) error {
 	return nil
 }
 
-func (h *FlagTracker) Run(report api.Report, data []byte, lastRanAt time.Time) error {
-	var hookData FlagTrackerData
+func (h *AuthorReportUpdateNotifier) Run(report api.Report, data []byte, lastRanAt time.Time) error {
+	var hookData AuthorReportUpdateNotifierData
 	if err := json.Unmarshal(data, &hookData); err != nil {
 		return fmt.Errorf("failed to unmarshal hook data: %w", err)
 	}
@@ -61,16 +61,16 @@ func (h *FlagTracker) Run(report api.Report, data []byte, lastRanAt time.Time) e
 	return h.notify(updatedFlags)
 }
 
-func (h *FlagTracker) Type() string {
-	return "FlagTracker"
+func (h *AuthorReportUpdateNotifier) Type() string {
+	return "AuthorReportUpdateNotifier"
 }
 
-func (h *FlagTracker) CreateHookData(r *http.Request, params api.CreateHookRequest) (hookData []byte, err error) {
-	email_id, err := auth.GetEmailId(r)
+func (h *AuthorReportUpdateNotifier) CreateHookData(r *http.Request, payload []byte, interval int) (hookData []byte, err error) {
+	email_id, err := auth.GetUserEmail(r)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get email id: %w", err)
 	}
-	obj := FlagTrackerData{
+	obj := AuthorReportUpdateNotifierData{
 		EmailID: email_id,
 	}
 
@@ -81,7 +81,10 @@ func (h *FlagTracker) CreateHookData(r *http.Request, params api.CreateHookReque
 	return hookData, nil
 }
 
-func (h *FlagTracker) notify(flags []api.Flag) error {
+func (h *AuthorReportUpdateNotifier) notify(flags []api.Flag) error {
+	if h.notifier == nil {
+		return fmt.Errorf("notifier is not set")
+	}
 	// create the html content with the flags and send the email
 	return nil
 }
