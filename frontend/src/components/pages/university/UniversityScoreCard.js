@@ -7,7 +7,9 @@ const ScoreCard = ({ reserachersAccessed, totalResearcher, loading }) => {
   const backgroundImage = VisualEmpty;
   const [progress, setProgress] = useState(0);
   useEffect(() => {
-    const targetProgress = (reserachersAccessed / totalResearcher) * 100;
+    let targetProgress = 1;
+    if (totalResearcher !== 0)
+      Math.max(targetProgress, (reserachersAccessed / totalResearcher) * 100);
 
     setProgress(0);
     const timer = setTimeout(() => {
