@@ -55,6 +55,8 @@ type Config struct {
 	ResourceFolder string `env:"RESOURCE_FOLDER,notEmpty,required"`
 
 	SendGridKey string `env:"SENDGRID_KEY"`
+
+	BackendUrl string `env:"BACKEND_URL" envDefault=http://localhost"`
 }
 
 func (c *Config) logfile() string {
@@ -184,6 +186,7 @@ func main() {
 	hookServices := make(map[string]services.Hook)
 	if config.SendGridKey != "" {
 		hookServices["FlagTracker"] = hooks.NewAuthorReportUpdateNotifier(
+			config.BackendUrl,
 			notifier,
 		)
 	}

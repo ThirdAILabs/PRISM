@@ -51,8 +51,6 @@ type Flag interface {
 	GetDetailsFieldsForReport(useDisclosure bool) []KeyValueURL
 
 	IsDisclosed() bool
-
-	GetLastUpdatedAt() time.Time
 }
 
 const (
@@ -179,7 +177,6 @@ type TalentContractFlag struct {
 	Entities              []AcknowledgementEntity
 	RawAcknowledgements   []string
 	FundCodeTriangulation map[string]map[string]bool
-	LastUpdatedAt         time.Time
 }
 
 func (flag *TalentContractFlag) Type() string {
@@ -231,17 +228,12 @@ func (flag *TalentContractFlag) GetDetailsFieldsForReport(useDisclosure bool) []
 	return fields
 }
 
-func (flag *TalentContractFlag) GetLastUpdatedAt() time.Time {
-	return flag.LastUpdatedAt
-}
-
 type AssociationWithDeniedEntityFlag struct {
 	DisclosableFlag
 	Message             string
 	Work                WorkSummary
 	Entities            []AcknowledgementEntity
 	RawAcknowledgements []string
-	LastUpdatedAt       time.Time
 }
 
 func (flag *AssociationWithDeniedEntityFlag) Type() string {
@@ -293,10 +285,6 @@ func (flag *AssociationWithDeniedEntityFlag) GetDetailsFieldsForReport(useDisclo
 	return fields
 }
 
-func (flag *AssociationWithDeniedEntityFlag) GetLastUpdatedAt() time.Time {
-	return flag.LastUpdatedAt
-}
-
 type HighRiskFunderFlag struct {
 	DisclosableFlag
 	Message               string
@@ -304,7 +292,6 @@ type HighRiskFunderFlag struct {
 	Funders               []string
 	RawAcknowledgements   []string
 	FundCodeTriangulation map[string]map[string]bool
-	LastUpdatedAt         time.Time
 }
 
 func (flag *HighRiskFunderFlag) Type() string {
@@ -352,16 +339,11 @@ func (flag *HighRiskFunderFlag) GetDetailsFieldsForReport(useDisclosure bool) []
 	return fields
 }
 
-func (flag *HighRiskFunderFlag) GetLastUpdatedAt() time.Time {
-	return flag.LastUpdatedAt
-}
-
 type AuthorAffiliationFlag struct {
 	DisclosableFlag
-	Message       string
-	Work          WorkSummary
-	Affiliations  []string
-	LastUpdatedAt time.Time
+	Message      string
+	Work         WorkSummary
+	Affiliations []string
 }
 
 func (flag *AuthorAffiliationFlag) Type() string {
@@ -409,16 +391,11 @@ func (flag *AuthorAffiliationFlag) GetDetailsFieldsForReport(useDisclosure bool)
 	return fields
 }
 
-func (flag *AuthorAffiliationFlag) GetLastUpdatedAt() time.Time {
-	return flag.LastUpdatedAt
-}
-
 type PotentialAuthorAffiliationFlag struct {
 	DisclosableFlag
 	Message       string
 	University    string
 	UniversityUrl string
-	LastUpdatedAt time.Time
 }
 
 func (flag *PotentialAuthorAffiliationFlag) Type() string {
@@ -462,10 +439,6 @@ func (flag *PotentialAuthorAffiliationFlag) GetDetailsFieldsForReport(useDisclos
 	return fields
 }
 
-func (flag *PotentialAuthorAffiliationFlag) GetLastUpdatedAt() time.Time {
-	return flag.LastUpdatedAt
-}
-
 type Connection struct {
 	DocTitle string
 	DocUrl   string
@@ -480,7 +453,6 @@ type MiscHighRiskAssociationFlag struct {
 	EntityMentioned  string
 	Connections      []Connection
 	FrequentCoauthor *string
-	LastUpdatedAt    time.Time
 }
 
 func (flag *MiscHighRiskAssociationFlag) Type() string {
@@ -556,17 +528,12 @@ func (flag *MiscHighRiskAssociationFlag) GetDetailsFieldsForReport(useDisclosure
 	return fields
 }
 
-func (flag *MiscHighRiskAssociationFlag) GetLastUpdatedAt() time.Time {
-	return flag.LastUpdatedAt
-}
-
 type CoauthorAffiliationFlag struct {
 	DisclosableFlag
-	Message       string
-	Work          WorkSummary
-	Coauthors     []string
-	Affiliations  []string
-	LastUpdatedAt time.Time
+	Message      string
+	Work         WorkSummary
+	Coauthors    []string
+	Affiliations []string
 }
 
 func (flag *CoauthorAffiliationFlag) Type() string {
@@ -616,19 +583,14 @@ func (flag *CoauthorAffiliationFlag) GetDetailsFieldsForReport(useDisclosure boo
 	return fields
 }
 
-func (flag *CoauthorAffiliationFlag) GetLastUpdatedAt() time.Time {
-	return flag.LastUpdatedAt
-}
-
 //The following flags are unused by the frontend, but they are kept in case we
 // want to have them in the future.
 
 type MultipleAffiliationFlag struct {
 	DisclosableFlag
-	Message       string
-	Work          WorkSummary
-	Affiliations  []string
-	LastUpdatedAt time.Time
+	Message      string
+	Work         WorkSummary
+	Affiliations []string
 }
 
 func (flag *MultipleAffiliationFlag) Type() string {
@@ -676,16 +638,11 @@ func (flag *MultipleAffiliationFlag) GetDetailsFieldsForReport(useDisclosure boo
 	return fields
 }
 
-func (flag *MultipleAffiliationFlag) GetLastUpdatedAt() time.Time {
-	return flag.LastUpdatedAt
-}
-
 type HighRiskPublisherFlag struct {
 	DisclosableFlag
-	Message       string
-	Work          WorkSummary
-	Publishers    []string
-	LastUpdatedAt time.Time
+	Message    string
+	Work       WorkSummary
+	Publishers []string
 }
 
 func (flag *HighRiskPublisherFlag) Type() string {
@@ -733,16 +690,11 @@ func (flag *HighRiskPublisherFlag) GetDetailsFieldsForReport(useDisclosure bool)
 	return fields
 }
 
-func (flag *HighRiskPublisherFlag) GetLastUpdatedAt() time.Time {
-	return flag.LastUpdatedAt
-}
-
 type HighRiskCoauthorFlag struct {
 	DisclosableFlag
-	Message       string
-	Work          WorkSummary
-	Coauthors     []string
-	LastUpdatedAt time.Time
+	Message   string
+	Work      WorkSummary
+	Coauthors []string
 }
 
 func (flag *HighRiskCoauthorFlag) Type() string {
@@ -788,8 +740,4 @@ func (flag *HighRiskCoauthorFlag) GetDetailsFieldsForReport(useDisclosure bool) 
 		}, fields...)
 	}
 	return fields
-}
-
-func (flag *HighRiskCoauthorFlag) GetLastUpdatedAt() time.Time {
-	return flag.LastUpdatedAt
 }

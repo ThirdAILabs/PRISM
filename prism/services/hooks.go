@@ -76,9 +76,7 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 
 	if err := s.db.Transaction(func(txn *gorm.DB) error {
 		var userReport schema.UserAuthorReport
-		if err := txn.Preload("Report").
-			Joins("JOIN author_reports ON author_reports.id = user_author_reports.report_id").
-			First(&userReport, "id = ?", reportId).Error; err != nil {
+		if err := txn.First(&userReport, "id = ?", reportId).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return CodedError(reports.ErrReportNotFound, http.StatusNotFound)
 			}
@@ -88,10 +86,6 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 
 		if userReport.UserId != userId {
 			return CodedError(reports.ErrUserCannotAccessReport, http.StatusForbidden)
-		}
-
-		if userReport.Report.Status != schema.ReportCompleted {
-			return CodedError(reports.ErrReportNotCompleted, http.StatusUnprocessableEntity)
 		}
 
 		hookData, err := hook.CreateHookData(r, params.Data, params.Interval)

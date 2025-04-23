@@ -15,7 +15,7 @@ func NewEmailMessenger(apiKey string) *EmailMessenger {
 	}
 }
 
-func (e *EmailMessenger) Notify(sender, recipient, subject, plainTextContext, htmlContext string) error {
+func (e *EmailMessenger) SendEmail(sender, recipient, subject, plainTextContext, htmlContext string) error {
 	from := mail.NewEmail("ThirdAI", sender)
 	to := mail.NewEmail("", recipient)
 
