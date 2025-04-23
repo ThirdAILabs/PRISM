@@ -56,7 +56,7 @@ type Config struct {
 
 	SendGridKey string `env:"SENDGRID_KEY"`
 
-	BackendUrl string `env:"BACKEND_URL" envDefault=http://localhost"`
+	BackendUrl string `env:"BACKEND_URL" envDefault:"http://localhost"`
 }
 
 func (c *Config) logfile() string {
