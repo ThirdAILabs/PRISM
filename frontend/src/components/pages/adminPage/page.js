@@ -1,14 +1,13 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { useUser } from "../../../store/userContext";
-import UserService from '../../../services/userService';
-import { FiLogOut } from 'react-icons/fi';
 import RandomAvatar from '../../../assets/images/RandomAvatar.jpg'
 import '../../../styles/pages/_adminPage.scss';
 import { Switch, Divider } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from "react-router-dom";
 import KeyIcon from '@mui/icons-material/Key';
+import SearchIcon from '@mui/icons-material/Search';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 
 const AntSwitch = styled(Switch)(({ theme }) => ({
     width: 42,
@@ -58,9 +57,8 @@ const AntSwitch = styled(Switch)(({ theme }) => ({
 }));
 
 const AdminPage = () => {
-    const { userInfo } = useUser();
-    console.log("User info.....", userInfo);
     const [users, setUsers] = useState([]);
+    const [initialUsers, setInitialUsers] = useState([]);
     useEffect(() => {
         //Assuming some backend calls here, till the time feeding it with dummy data.
         setUsers([
@@ -121,7 +119,66 @@ const AdminPage = () => {
                 state: false
             },
         ])
+        setInitialUsers([
+            {
+                avatar: RandomAvatar,
+                name: "Anand Kumar",
+                email: "anand@thirdai.com",
+                username: "SineAnand",
+                state: true
+            },
+            {
+                avatar: RandomAvatar,
+                name: "Anand Kumar",
+                email: "anand@thirdai.com",
+                username: "SineAnand",
+                state: false
+            },
+            {
+                avatar: RandomAvatar,
+                name: "Anand Kumar",
+                email: "anand@thirdai.com",
+                username: "SineAnand",
+                state: true
+            },
+            {
+                avatar: RandomAvatar,
+                name: "Anand Kumar",
+                email: "anand@thirdai.com",
+                username: "SineAnand",
+                state: false
+            },
+            {
+                avatar: RandomAvatar,
+                name: "Anand Kumar",
+                email: "anand@thirdai.com",
+                username: "SineAnand",
+                state: true
+            },
+            {
+                avatar: RandomAvatar,
+                name: "Anand Kumar",
+                email: "anand@thirdai.com",
+                username: "SineAnand",
+                state: false
+            },
+            {
+                avatar: RandomAvatar,
+                name: "Anand Kumar",
+                email: "anand@thirdai.com",
+                username: "SineAnand",
+                state: true
+            },
+            {
+                avatar: RandomAvatar,
+                name: "Anand Kumar",
+                email: "anand@thirdai.com",
+                username: "SineAnand",
+                state: false
+            },
+        ])
     }, [])
+
     const handleUserState = (selectedIndex) => {
         const tempUserList = [];
         for (let index = 0; index < users.length; index++) {
@@ -134,6 +191,21 @@ const AdminPage = () => {
         setUsers(tempUserList);
     }
     const navigate = useNavigate();
+    const [selectedUserTab, setSelectedUserTab] = useState("All");
+    const handleTabClick = (tabName) => {
+        setSelectedUserTab(tabName);
+    }
+
+    const isShowUserCard = (status) => {
+        if (selectedUserTab === "All")
+            return true;
+        if (status && selectedUserTab === "Active")
+            return true;
+        if (!status && selectedUserTab === "Inactive")
+            return true;
+        return false;
+    }
+
     return (
 
         <div className="user-container">
@@ -198,47 +270,170 @@ const AdminPage = () => {
                         </div>
                     </div>
                     <button
-                        className="button score-card-button generate-key-button"
+                        className="button button-3d generate-key-button"
                     >
                         Generate Key <KeyIcon />
                     </button>
                 </div>
-                {/* <Divider
+                <Divider
                     sx={{
                         backgroundColor: 'black',
                         height: '1px',
                         width: '100%',
                         opacity: 0.1,
                     }}
-                /> */}
-                <div className="admin-card-">
+                />
+                <div className="stats">
+                    <div className="stats-card-1">
+                        <div style={{
+                            display: "flex",
+                            flexDirection: 'row',
+                            gap: '36px'
+                        }}>
+                            <div className="stats__avatar">
+                                <SearchIcon fontSize="large" color="info" />
+                            </div>
+                            <div className="stats__info">
 
+                                <span className="stats__name">
+                                    {"Total Searches"}
+                                </span>
+                                <span className="stats__email">{"30,000"}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="stats-card-2">
+                        <div style={{
+                            display: "flex",
+                            flexDirection: 'row',
+                            gap: '36px'
+                        }}>
+                            <div className="stats__avatar">
+                                <SearchIcon fontSize="large" color="info" />
+                            </div>
+                            <div className="stats__info">
+
+                                <span className="stats__name">
+                                    {"Plan Search Left"}
+                                </span>
+                                <span className="stats__email">{"14,000"}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="stats-card-3">
+                        <div style={{
+                            display: "flex",
+                            flexDirection: 'row',
+                            gap: '36px'
+                        }}>
+                            <div className="stats__avatar">
+                                <SearchIcon fontSize="large" color="info" />
+                            </div>
+                            <div className="stats__info">
+
+                                <span className="stats__name">
+                                    {"Total Searches Left"}
+                                </span>
+                                <span className="stats__email">{"18,000"}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="stats">
+                    <div className="stats-card-1">
+                        <div style={{
+                            display: "flex",
+                            flexDirection: 'row',
+                            gap: '36px'
+                        }}>
+                            <div className="stats__avatar">
+                                <SearchIcon fontSize="large" color="info" />
+                            </div>
+                            <div className="stats__info">
+
+                                <span className="stats__name">
+                                    {"Total Searches"}
+                                </span>
+                                <span className="stats__email">{"30,000"}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="stats-card-2">
+                        <div style={{
+                            display: "flex",
+                            flexDirection: 'row',
+                            gap: '36px'
+                        }}>
+                            <div className="stats__avatar">
+                                <SearchIcon fontSize="large" color="info" />
+                            </div>
+                            <div className="stats__info">
+
+                                <span className="stats__name">
+                                    {"Plan Search Left"}
+                                </span>
+                                <span className="stats__email">{"14,000"}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="stats-card-3">
+                        <div style={{
+                            display: "flex",
+                            flexDirection: 'row',
+                            gap: '36px'
+                        }}>
+                            <div className="stats__avatar">
+                                <MonetizationOnIcon fontSize="large" color="info" />
+                            </div>
+                            <div className="stats__info">
+
+                                <span className="stats__name">
+                                    {"Total Searches Left"}
+                                </span>
+                                <span className="stats__email">{"18,000"}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <span className="user-header">
-                All Users
-            </span>
+            <div className="user-header">
+                <span className={`user-header-tabs ${selectedUserTab === "All" ? 'active' : ''}`} onClick={() => {
+                    handleTabClick("All")
+                }}>
+                    All Users
+                </span>
+                <span className={`user-header-tabs ${selectedUserTab === "Active" ? 'active' : ''}`} onClick={() => {
+                    handleTabClick("Active")
+                }}>
+                    Active Users
+                </span>
+                <span className={`user-header-tabs ${selectedUserTab === "Inactive" ? 'active' : ''}`} onClick={() => {
+                    handleTabClick("Inactive")
+                }}>
+                    Inactive Users
+                </span>
+            </div>
             <div className="user-list">
 
                 {users.map((user, index) => {
-                    console.log("This user", index, user.username);
-                    return (<div className="users-card">
-                        <img src={user.avatar} alt="User" className="users-card__avatar" />
-                        <div className="users-card__info">
+                    return (
+                        isShowUserCard(user.state) && <div className="users-card">
+                            <img src={user.avatar} alt="User" className="users-card__avatar" />
+                            <div className="users-card__info">
 
-                            <span className="users-card__name">{user.username}
-                                <span className={`users-card__status ${!user.state ? 'users-card__status--inactive' : ''}`}>
-                                    {user.state ? "Active" : "Inactive"}
+                                <span className="users-card__name">{user.username}
+                                    <span className={`users-card__status ${!user.state ? 'users-card__status--inactive' : ''}`}>
+                                        {user.state ? "Active" : "Inactive"}
+                                    </span>
                                 </span>
-                            </span>
-                            <span className="users-card__email">{user.email}</span>
+                                <span className="users-card__email">{user.email}</span>
+                            </div>
+                            <div className="users-card__toggle">
+                                <AntSwitch checked={user.state} onClick={() => {
+                                    handleUserState(index)
+                                }} />
+                            </div>
                         </div>
-                        <div className="users-card__toggle">
-                            <AntSwitch checked={user.state} onClick={() => {
-                                handleUserState(index)
-                            }} />
-                        </div>
-                    </div>
                     )
                 })}
             </div>
