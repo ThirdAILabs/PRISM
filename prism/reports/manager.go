@@ -34,7 +34,6 @@ var (
 	ErrReportCreationFailed   = errors.New("report creation failed")
 	ErrReportNotFound         = errors.New("report not found")
 	ErrUserCannotAccessReport = errors.New("user cannot access report")
-	ErrReportNotCompleted     = errors.New("report not completed")
 )
 
 type ReportManager struct {

@@ -40,11 +40,6 @@ func (h *AuthorReportUpdateNotifier) Validate(data []byte, interval int) error {
 		return fmt.Errorf("interval must be less than or equal to %d seconds", minUpdateInterval)
 	}
 
-	var hookData AuthorReportUpdateNotifierData
-	if err := json.Unmarshal(data, &hookData); err != nil {
-		return fmt.Errorf("failed to unmarshal hook data: %w", err)
-	}
-
 	return nil
 }
 
@@ -209,7 +204,6 @@ func (h *AuthorReportUpdateNotifier) renderReportUpdateTemplate(authorName strin
 }
 
 func (h *AuthorReportUpdateNotifier) notify(receipientEmail, authorName, authorReportEndpoint string, flags []api.Flag) error {
-	// create the html content with the flags and send the email
 	flagInfo := map[string]string{
 		api.TalentContractType:               "Talent Contracts",
 		api.AssociationsWithDeniedEntityType: "Funding from Denied Entities",
