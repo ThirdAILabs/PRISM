@@ -165,7 +165,7 @@ func (h *AuthorReportUpdateNotifier) renderReportUpdateTemplate(authorName strin
 		<a href="{{.AuthorReportEndpoint}}" class="button">View Full Report</a>
 		
 		<p>Thank you for choosing Prism. We're excited to be part of your journey</p>
-		<p>Best regards,<br>The ThirdAI Team</p>
+		<p>Best regards,<br>ThirdAI Team</p>
 	</div>
 	<div class="footer">
 		<p>If you have any questions, please email us at <a href="mailto:support@thirdai.com">support@thirdai.com</a></p>
