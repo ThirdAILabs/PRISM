@@ -1,13 +1,18 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import RandomAvatar from '../../../assets/images/RandomAvatar.jpg'
+import OpenAI from '../../../assets/images/OpenAI.png'
+import Google from '../../../assets/images/Google.png'
+
 import '../../../styles/pages/_adminPage.scss';
-import { Switch, Divider } from '@mui/material';
+import { Switch } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from "react-router-dom";
 import KeyIcon from '@mui/icons-material/Key';
 import SearchIcon from '@mui/icons-material/Search';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import { CiSearch } from 'react-icons/ci';
+// import '../../../styles/pages/_authorCard.scss';
 
 const AntSwitch = styled(Switch)(({ theme }) => ({
     width: 42,
@@ -73,49 +78,49 @@ const AdminPage = () => {
                 avatar: RandomAvatar,
                 name: "Anand Kumar",
                 email: "anand@thirdai.com",
-                username: "SineAnand",
+                username: "gautam",
                 state: false
             },
             {
                 avatar: RandomAvatar,
                 name: "Anand Kumar",
                 email: "anand@thirdai.com",
-                username: "SineAnand",
+                username: "pratik",
                 state: true
             },
             {
                 avatar: RandomAvatar,
                 name: "Anand Kumar",
                 email: "anand@thirdai.com",
-                username: "SineAnand",
+                username: "siddharth",
                 state: false
             },
             {
                 avatar: RandomAvatar,
                 name: "Anand Kumar",
                 email: "anand@thirdai.com",
-                username: "SineAnand",
+                username: "Tharun",
                 state: true
             },
             {
                 avatar: RandomAvatar,
                 name: "Anand Kumar",
                 email: "anand@thirdai.com",
-                username: "SineAnand",
+                username: "Nicholas",
                 state: false
             },
             {
                 avatar: RandomAvatar,
                 name: "Anand Kumar",
                 email: "anand@thirdai.com",
-                username: "SineAnand",
+                username: "Benito",
                 state: true
             },
             {
                 avatar: RandomAvatar,
                 name: "Anand Kumar",
                 email: "anand@thirdai.com",
-                username: "SineAnand",
+                username: "Shubh",
                 state: false
             },
         ])
@@ -131,49 +136,49 @@ const AdminPage = () => {
                 avatar: RandomAvatar,
                 name: "Anand Kumar",
                 email: "anand@thirdai.com",
-                username: "SineAnand",
+                username: "gautam",
                 state: false
             },
             {
                 avatar: RandomAvatar,
                 name: "Anand Kumar",
                 email: "anand@thirdai.com",
-                username: "SineAnand",
+                username: "pratik",
                 state: true
             },
             {
                 avatar: RandomAvatar,
                 name: "Anand Kumar",
                 email: "anand@thirdai.com",
-                username: "SineAnand",
+                username: "siddharth",
                 state: false
             },
             {
                 avatar: RandomAvatar,
                 name: "Anand Kumar",
                 email: "anand@thirdai.com",
-                username: "SineAnand",
+                username: "Tharun",
                 state: true
             },
             {
                 avatar: RandomAvatar,
                 name: "Anand Kumar",
                 email: "anand@thirdai.com",
-                username: "SineAnand",
+                username: "Nicholas",
                 state: false
             },
             {
                 avatar: RandomAvatar,
                 name: "Anand Kumar",
                 email: "anand@thirdai.com",
-                username: "SineAnand",
+                username: "Benito",
                 state: true
             },
             {
                 avatar: RandomAvatar,
                 name: "Anand Kumar",
                 email: "anand@thirdai.com",
-                username: "SineAnand",
+                username: "Shubh",
                 state: false
             },
         ])
@@ -205,6 +210,18 @@ const AdminPage = () => {
             return true;
         return false;
     }
+
+    const [searchTerm, setSearchTerm] = useState('');
+    useEffect(() => {
+        if (searchTerm === '') {
+            setUsers(initialUsers);
+        }
+        setUsers(initialUsers.filter((user) => {
+            if (user.username.toLocaleLowerCase().includes(searchTerm.toLocaleLowerCase()))
+                return true;
+            return false;
+        }))
+    }, [searchTerm, initialUsers])
 
     return (
 
@@ -275,14 +292,7 @@ const AdminPage = () => {
                         Generate Key <KeyIcon />
                     </button>
                 </div>
-                <Divider
-                    sx={{
-                        backgroundColor: 'black',
-                        height: '1px',
-                        width: '100%',
-                        opacity: 0.1,
-                    }}
-                />
+
                 <div className="stats">
                     <div className="stats-card-1">
                         <div style={{
@@ -291,7 +301,8 @@ const AdminPage = () => {
                             gap: '36px'
                         }}>
                             <div className="stats__avatar">
-                                <SearchIcon fontSize="large" color="info" />
+                                <img src={Google} alt="OpenAI" className="users-card__avatar" />
+
                             </div>
                             <div className="stats__info">
 
@@ -347,12 +358,14 @@ const AdminPage = () => {
                             gap: '36px'
                         }}>
                             <div className="stats__avatar">
-                                <SearchIcon fontSize="large" color="info" />
+                                {/* <SearchIcon fontSize="large" color="info" />
+                                 */}
+                                <img src={OpenAI} alt="OpenAI" className="users-card__avatar" />
                             </div>
                             <div className="stats__info">
 
                                 <span className="stats__name">
-                                    {"Total Searches"}
+                                    {"Total Cost"}
                                 </span>
                                 <span className="stats__email">{"30,000"}</span>
                             </div>
@@ -370,7 +383,7 @@ const AdminPage = () => {
                             <div className="stats__info">
 
                                 <span className="stats__name">
-                                    {"Plan Search Left"}
+                                    {"Input Token"}
                                 </span>
                                 <span className="stats__email">{"14,000"}</span>
                             </div>
@@ -388,7 +401,7 @@ const AdminPage = () => {
                             <div className="stats__info">
 
                                 <span className="stats__name">
-                                    {"Total Searches Left"}
+                                    {"Output Token"}
                                 </span>
                                 <span className="stats__email">{"18,000"}</span>
                             </div>
@@ -397,21 +410,35 @@ const AdminPage = () => {
                 </div>
             </div>
             <div className="user-header">
-                <span className={`user-header-tabs ${selectedUserTab === "All" ? 'active' : ''}`} onClick={() => {
-                    handleTabClick("All")
-                }}>
-                    All Users
-                </span>
-                <span className={`user-header-tabs ${selectedUserTab === "Active" ? 'active' : ''}`} onClick={() => {
-                    handleTabClick("Active")
-                }}>
-                    Active Users
-                </span>
-                <span className={`user-header-tabs ${selectedUserTab === "Inactive" ? 'active' : ''}`} onClick={() => {
-                    handleTabClick("Inactive")
-                }}>
-                    Inactive Users
-                </span>
+                <div className="user-header-tab">
+                    <span className={`user-header-tabs ${selectedUserTab === "All" ? 'active' : ''}`} onClick={() => {
+                        handleTabClick("All")
+                    }}>
+                        All Users
+                    </span>
+                    <span className={`user-header-tabs ${selectedUserTab === "Active" ? 'active' : ''}`} onClick={() => {
+                        handleTabClick("Active")
+                    }}>
+                        Active Users
+                    </span>
+                    <span className={`user-header-tabs ${selectedUserTab === "Inactive" ? 'active' : ''}`} onClick={() => {
+                        handleTabClick("Inactive")
+                    }}>
+                        Inactive Users
+                    </span>
+                </div>
+                <div className="search-container">
+                    <div className="search-icon">
+                        <CiSearch />
+                    </div>
+                    <input
+                        type="text"
+                        placeholder="Search by name..."
+                        className="search-input"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
             </div>
             <div className="user-list">
 

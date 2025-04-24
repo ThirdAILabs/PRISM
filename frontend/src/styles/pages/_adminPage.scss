@@ -75,19 +75,27 @@
     margin-top: 48px;
     margin-bottom: 24px;
     display: flex;
+    justify-content: space-between;
     gap: 36px;
+    margin-right: calc(9% - 48px);
+
+    &-tab {
+        display: flex;
+        gap: 16px;
+    }
 
     &-tabs {
+        // border: 1px solid $color-text-300;
         border: 2px solid rgb(245, 245, 245);
         border-radius: 8px;
-        padding: 12px 16px;
+        padding: 8px 16px;
         cursor: pointer;
         @include label-4;
 
         &.active {
             background-color: $color-text-100;
-            border: 2px solid $color-primary-700;
-            color: $color-primary-900;
+            border: 2px solid $color-primary-500;
+            color: $color-primary-700;
         }
 
     }
@@ -130,6 +138,9 @@
         color: $color-text-900;
         text-align: left;
         margin: 0;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+
     }
 
     &__status {
@@ -223,5 +234,33 @@
         color: $color-text-700;
         text-align: left;
         margin-top: 4px;
+    }
+}
+
+.search-container {
+    position: relative;
+
+    .search-icon {
+        position: absolute;
+        left: 10px;
+        // top: 50%;
+        transform: translateY(36%);
+    }
+
+    .search-input {
+        padding: 8px 0px 8px 36px;
+        // border: 1px solid $color-text-300;
+        border: 2px solid rgb(245, 245, 245);
+        border-radius: 8px;
+        outline: none;
+        width: 300px;
+
+        &:focus {
+            border-color: $color-primary-500;
+        }
+
+        &::placeholder {
+            color: $color-text-500;
+        }
     }
 }
