@@ -1384,6 +1384,17 @@
         "score": 1.0
     },
     {
+        "name": "Beijing Institute of Technology",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [],
+        "match": {
+            "id": "https://openalex.org/I125839683",
+            "name": "Beijing Institute of Technology",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
         "name": "MOSCOW AVIATION INSTITUTE",
         "source": "Specially Designated Nationals (SDN) - Treasury Department",
         "aliases": [

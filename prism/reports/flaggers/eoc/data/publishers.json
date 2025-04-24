@@ -215,6 +215,17 @@
         "score": 1.0
     },
     {
+        "name": "Beijing Institute of Technology",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [],
+        "match": {
+            "id": "https://openalex.org/P4320800723",
+            "name": "Beijing Institute of Technology",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
         "name": "FORTUNA",
         "source": "Specially Designated Nationals (SDN) - Treasury Department",
         "aliases": [
