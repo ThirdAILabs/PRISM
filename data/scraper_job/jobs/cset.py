@@ -5,48 +5,20 @@ import os
 import re
 import requests
 
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin
-
 
 def contains_chinese(text):
     return bool(re.search(r"[\u4e00-\u9fff]", text))
 
 
-def get_pdf_url_from_page(config):
-    page_url = config["cset_url"]
-    try:
-        response = requests.get(page_url)
-        response.raise_for_status()
-    except requests.RequestException as e:
-        print(f"Error fetching the page: {e}")
-        return None
-
-    soup = BeautifulSoup(response.text, "html.parser")
-    link_tags = soup.find_all("a", href=True)
-
-    for tag in link_tags:
-        href = tag["href"]
-        if href.endswith(".pdf"):
-            print(
-                f"[update_entities_with_cset] Found pdf with url: {urljoin(page_url, href)}"
-            )
-            return urljoin(page_url, href)
-
-    print(f"[update_entities_with_cset] No PDF link found on the page {page_url}")
-    return None
-
-
 def fetch_source(config):
-    pdf_url = get_pdf_url_from_page(config)
-    response = requests.get(pdf_url)
+    response = requests.get(config["pdf_url"])
     response.raise_for_status()
 
     return fitz.open(stream=response.content, filetype="pdf")
 
 
 def get_talent_contracts_from_pdf(pdf_data, config):
-    talent_contracts = ""    
+    talent_contracts = ""
 
     for page_num, page in enumerate(pdf_data):
         blocks = page.get_text("dict")["blocks"]
@@ -119,7 +91,3 @@ def update_json_file(talent_contracts, config):
     print(
         f"[update_entities_with_cset] Appended {len(unique_new_data)} unique entries to {output_file_path}. Total entries now: {len(existing_data)}"
     )
-
-
-# if __name__ == "__main__":
-#     get_pdf_url_from_page("https://chinatalenttracker.cset.tech")
