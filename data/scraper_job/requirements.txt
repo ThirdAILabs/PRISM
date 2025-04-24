@@ -2,6 +2,7 @@ pandas
 requests
 openai
 beautifulsoup4
+fitz
 tqdm
 scrapy
 scrapy-playwright
