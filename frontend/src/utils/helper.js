@@ -9,8 +9,7 @@ export function GetShowMenuIcon() {
     showMenuIcon = false;
   } else if (path.includes('error')) {
     showMenuIcon = false;
-  }
-  else if (path.includes('admin-page')) {
+  } else if (path.includes('admin-page')) {
     showMenuIcon = false;
   }
   return showMenuIcon;

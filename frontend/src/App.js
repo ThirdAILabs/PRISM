@@ -86,7 +86,7 @@ function AppContent() {
             <Route path="/university/report/:report_id" element={<UniversityReport />} />
           </Route>
           <Route path="/error" element={<Error />} />
-          <Route path='/admin-page' element={<AdminPage />} />
+          <Route path="/admin-page" element={<AdminPage />} />
           <Route path="*" element={<Error />} />
         </Routes>
       </div>
