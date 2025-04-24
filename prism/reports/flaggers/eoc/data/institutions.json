@@ -1215,5 +1215,271 @@
             "type": "institutions"
         },
         "score": 0.9272727272727272
+    },
+    {
+        "name": "Nuclear Research Center ",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [],
+        "match": {
+            "id": "https://openalex.org/I4387154235",
+            "name": "Soreq Nuclear Research Center",
+            "type": "entity_type"
+        },
+        "score": 0.8679245283018868
+    },
+    {
+        "name": "Nuclear Research Center ",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [],
+        "match": {
+            "id": "https://openalex.org/I4210132454",
+            "name": "National Nuclear Research Center",
+            "type": "entity_type"
+        },
+        "score": 0.8214285714285714
+    },
+    {
+        "name": "Institute of Cell Biophysics",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Federalnoe Gosudarstvennoe Byudzhetnoe Uchrezhdenie Nauki Institut Molekulyarnoi I Kletochnoi Biologii Sibirskogo Otdeleniya Rossiskoi Akademii Nauk",
+            "Institute of Cell Biophysics of the Russian Academy of Sciences",
+            "Institute of Cell Biophysics",
+            "Institute of Molecular and Cellular Biology SB RAS",
+            "IMCB SB RAS",
+            "IMCB SO RAN"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210155801",
+            "name": "Institute of Cell Biophysics",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Zhangjiang Laboratory",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Zhangjiang Lab",
+            "Zhangjiang National Lab",
+            "ZJLab"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4407990162",
+            "name": "Zhangjiang Laboratory",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Zhangjiang Laboratory",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Zhangjiang Lab",
+            "Zhangjiang National Lab",
+            "ZJLab"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210114190",
+            "name": "Shanghai Zhangjiang Laboratory",
+            "type": "entity_type"
+        },
+        "score": 0.8235294117647058
+    },
+    {
+        "name": "Ji Hua Laboratory",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Guangdong Provincial Laboratory of Advanced Manufacturing Science and Technology",
+            "Guangdong Provincial Lab of Chemicals and Fine Chemicals",
+            "Ji Hua Lab",
+            "Yan Chang Ji Hua Lab"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210089285",
+            "name": "Ji Hua Laboratory",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Peng Cheng Laboratory",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Pengcheng Laboratory",
+            "Peng Cheng Lab",
+            "Pengcheng Lab",
+            "Shenzhen Provincial Laboratory of Cyberspace Science and Technology",
+            "PCL"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210136793",
+            "name": "Peng Cheng Laboratory",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Shanghai Institute of Optics and Fine Mechanics",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "SIOM",
+            "CAS SIOM",
+            "Hangzhou Spectrometer Laser PH",
+            "Lab of Information Optics",
+            "Shanghai Institute of Optics",
+            "Shanghai Institute of Optics & Fine Mechanics",
+            "SIOM Chinese Academy of Sciences"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210135349",
+            "name": "Shanghai Institute of Optics and Fine Mechanics",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Air Force Engineering University",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "China People\u00e2\u0080\u0099s Liberation Army Air Force Engineering University",
+            "AFEU"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210104252",
+            "name": "Air Force Engineering University",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Beijing Graphene Institute",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Beijing Graphene Research Institute",
+            "Beijing Graphene Institute",
+            "BGI"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210100575",
+            "name": "Beijing Graphene Institute",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Beijing Academy of Artificial Intelligence",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "BAAI",
+            "Zhiyuan Research Institute",
+            "Beijing Zhiyuan Artificial Intelligence Research Institute",
+            "Zhiyuan"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210100255",
+            "name": "Beijing Academy of Artificial Intelligence",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Beijing Institute of Technology",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [],
+        "match": {
+            "id": "https://openalex.org/I125839683",
+            "name": "Beijing Institute of Technology",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "MOSCOW AVIATION INSTITUTE",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "FEDERALNOE GOSUDARSTVENNOE BYUDZHETNOE OBRAZOVATELNOE UCHREZHDENIE VYSSHEGO OBRAZOVANIYA MOSKOVSKII AVIATSIONNYI INSTITUT NATSIONALNYI ISSLEDOVATELSKII UNIVERSITET",
+            "MAI"
+        ],
+        "match": {
+            "id": "https://openalex.org/I45571689",
+            "name": "Moscow Aviation Institute",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "EAR",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "EAR"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210161837",
+            "name": "EARN",
+            "type": "entity_type"
+        },
+        "score": 0.8571428571428571
+    },
+    {
+        "name": "SIRIUS",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [],
+        "match": {
+            "id": "https://openalex.org/I4400009037",
+            "name": "Sirius",
+            "type": "entity_type"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "PREMIER",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [],
+        "match": {
+            "id": "https://openalex.org/I4210095966",
+            "name": "Premiere",
+            "type": "entity_type"
+        },
+        "score": 0.9333333333333333
+    },
+    {
+        "name": "SAGITTA",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [],
+        "match": {
+            "id": "https://openalex.org/I4210163618",
+            "name": "Sagittaria",
+            "type": "entity_type"
+        },
+        "score": 0.8235294117647058
+    },
+    {
+        "name": "CENTRAL RESEARCH INSTITUTE FOR SPECIAL MACHINERY",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "CRISM JSC",
+            "AKTSIONERNOE OBSHCHESTVO TSENTRALNYI NAUCHNO ISSLEDOVATELSKII INSTITUT SPETSIALNOGO MASHINOSTROENIIA",
+            "AO TSNIISM",
+            "AKTSIONERNOE OBSHCHESTVO TSENTRALNYJ NAUCHNO LSSLEDOVATELSKIJ LNSTITUT SPETSIALNOGO MASH",
+            "JOINT STOCK COMPANY CENTRAL SCIENTIFIC RESEARCH INSTITUTE FOR SPECIAL MACHINE BUILDING"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210163571",
+            "name": "Central Research Institute for Special Machinery (Russia)",
+            "type": "entity_type"
+        },
+        "score": 0.9142857142857143
+    },
+    {
+        "name": "VIRGO",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [],
+        "match": {
+            "id": "https://openalex.org/I4210118130",
+            "name": "Virgo",
+            "type": "entity_type"
+        },
+        "score": 1.0
     }
 ]
