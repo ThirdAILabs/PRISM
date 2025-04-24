@@ -32,9 +32,6 @@
       "fetcher": "fetch_source",
       "processor": "get_talent_contracts_from_pdf",
       "updater": "update_json_file",
-      "depends_on": [
-        "csl_data"
-      ],
       "config": {
         "pdf_url": "https://chinatalenttracker.cset.tech/static/cset_chinese_talent_program_tracker.pdf",
         "input_pdf_path": "data/scraper_job/data.tmp/cset_data/",

@@ -14,14 +14,13 @@ def fetch_source(config):
     response = requests.get(config["pdf_url"])
     response.raise_for_status()
 
-    return io.BytesIO(response.content)
+    return fitz.open(stream=response.content, filetype="pdf")
 
 
 def get_talent_contracts_from_pdf(pdf_data, config):
-    doc = fitz.open(stream=pdf_data, filetype="pdf")    
     talent_contracts = ""    
 
-    for page_num, page in enumerate(doc):
+    for page_num, page in enumerate(pdf_data):
         blocks = page.get_text("dict")["blocks"]
         
         for block in blocks:
