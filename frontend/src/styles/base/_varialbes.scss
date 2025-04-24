@@ -28,7 +28,9 @@ $color-success-300: #84e3b4;
 $color-success-200: rgb(222, 244, 234);
 
 $color-warning-700: #ffab00;
-$color-warning-300: #c9cfd6;
+$color-warning-600: lighten($color-warning-700, 10%);
+$color-warning-500: lighten($color-warning-700, 20%);
+$color-warning-300: lighten($color-warning-700, 40%);
 
 $color-info-700: #2196f3;
 $color-info-300: #c9cfd6;

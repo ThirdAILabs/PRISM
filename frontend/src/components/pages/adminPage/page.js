@@ -61,6 +61,32 @@ const AntSwitch = styled(Switch)(({ theme }) => ({
     },
 }));
 
+
+const CircleProgress = ({ percentage, variant = 'primary' }) => {
+    const radius = 21;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (percentage / 100) * circumference;
+
+    return (
+        <svg className={`circle-progress circle-progress--${variant}`} viewBox="0 0 48 48">
+            <circle
+                className="circle-progress__circle circle-progress__circle--bg"
+                cx="24"
+                cy="24"
+                r={radius}
+            />
+            <circle
+                className="circle-progress__circle circle-progress__circle--progress"
+                cx="24"
+                cy="24"
+                r={radius}
+                strokeDasharray={circumference}
+                strokeDashoffset={offset}
+            />
+        </svg>
+    );
+};
+
 const AdminPage = () => {
     const [users, setUsers] = useState([]);
     const [initialUsers, setInitialUsers] = useState([]);
@@ -320,7 +346,7 @@ const AdminPage = () => {
                             gap: '36px'
                         }}>
                             <div className="stats__avatar">
-                                <SearchIcon fontSize="large" color="info" />
+                                <CircleProgress percentage={70} />
                             </div>
                             <div className="stats__info">
 
@@ -338,7 +364,7 @@ const AdminPage = () => {
                             gap: '36px'
                         }}>
                             <div className="stats__avatar">
-                                <SearchIcon fontSize="large" color="info" />
+                                <CircleProgress percentage={50} />
                             </div>
                             <div className="stats__info">
 
@@ -358,8 +384,6 @@ const AdminPage = () => {
                             gap: '36px'
                         }}>
                             <div className="stats__avatar">
-                                {/* <SearchIcon fontSize="large" color="info" />
-                                 */}
                                 <img src={OpenAI} alt="OpenAI" className="users-card__avatar" />
                             </div>
                             <div className="stats__info">
@@ -378,7 +402,7 @@ const AdminPage = () => {
                             gap: '36px'
                         }}>
                             <div className="stats__avatar">
-                                <SearchIcon fontSize="large" color="info" />
+                                <CircleProgress percentage={42} variant="warning" />
                             </div>
                             <div className="stats__info">
 
@@ -396,7 +420,7 @@ const AdminPage = () => {
                             gap: '36px'
                         }}>
                             <div className="stats__avatar">
-                                <MonetizationOnIcon fontSize="large" color="info" />
+                                <CircleProgress percentage={42} variant="warning" />
                             </div>
                             <div className="stats__info">
 
