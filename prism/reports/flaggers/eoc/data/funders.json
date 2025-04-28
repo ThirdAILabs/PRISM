@@ -472,5 +472,16 @@
             "type": "entity_type"
         },
         "score": 0.9230769230769231
+    },
+    {
+        "name": "Beijing Institute of Technology",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [],
+        "match": {
+            "id": "https://openalex.org/F4320323110",
+            "name": "Beijing Institute of Technology",
+            "type": "entity_type"
+        },
+        "score": 1.0
     }
 ]
