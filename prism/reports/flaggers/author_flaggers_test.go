@@ -66,9 +66,9 @@ var (
 		{"qrs"},
 	}
 
-	mockPressReleaseMetadata = []flaggers.LinkMetadata{
-		{Title: "indicted", Url: "indicted.com", Entities: []string{"abc", "xyz"}, Text: "abc and xyz are indicted"},
-		{Title: "leaked docs", Url: "leakeddocs.com", Entities: []string{"qrs"}, Text: "qrs is implicated by leaked docs"},
+	mockPressReleaseMetadata = []flaggers.DojArticleRecord{
+		{Title: "indicted", Url: "indicted.com", Individuals: []flaggers.IndividualEOC{{EntityOfConcern: flaggers.EntityOfConcern{Name: "abc", Country: "USA", FieldOfWork: "physics"}, Affiliations: []string{"abc"}}, {EntityOfConcern: flaggers.EntityOfConcern{Name: "xyz", Country: "USA", FieldOfWork: "physics"}, Affiliations: []string{"xyz"}}}, Text: "abc and xyz are indicted"},
+		{Title: "leaked docs", Url: "leakeddocs.com", Individuals: []flaggers.IndividualEOC{{EntityOfConcern: flaggers.EntityOfConcern{Name: "qrs", Country: "USA", FieldOfWork: "physics"}, Affiliations: []string{"qrs"}}}, Text: "qrs is implicated by leaked docs"},
 	}
 
 	mockAuxDocEntities = [][]string{
@@ -77,10 +77,10 @@ var (
 		{"456", "789"},
 	}
 
-	mockAuxDocMetadata = []flaggers.LinkMetadata{
-		{Title: "new company", Url: "newcompany.com", Entities: []string{"xyz", "123"}, Text: "xyz and 123 found company"},
-		{Title: "graduate students", Url: "graduatestudents.com", Entities: []string{"456", "qrs"}, Text: "456 and qrs are graduate students together"},
-		{Title: "best friends", Url: "bestfriends.com", Entities: []string{"456", "789"}, Text: "456 and 789 are best friends"},
+	mockAuxDocMetadata = []flaggers.ReleveantWebpageRecord{
+		{Title: "new company", Url: "newcompany.com", Individuals: []flaggers.IndividualEOC{{EntityOfConcern: flaggers.EntityOfConcern{Name: "xyz"}, Affiliations: []string{"xyz"}}, {EntityOfConcern: flaggers.EntityOfConcern{Name: "123"}, Affiliations: []string{"123"}}}, Text: "xyz and 123 found company"},
+		{Title: "graduate students", Url: "graduatestudents.com", Individuals: []flaggers.IndividualEOC{{EntityOfConcern: flaggers.EntityOfConcern{Name: "456"}, Affiliations: []string{"456"}}, {EntityOfConcern: flaggers.EntityOfConcern{Name: "qrs"}, Affiliations: []string{"qrs"}}}, Text: "456 and qrs are graduate students together"},
+		{Title: "best friends", Url: "bestfriends.com", Individuals: []flaggers.IndividualEOC{{EntityOfConcern: flaggers.EntityOfConcern{Name: "456"}, Affiliations: []string{"456"}}, {EntityOfConcern: flaggers.EntityOfConcern{Name: "789"}, Affiliations: []string{"789"}}}, Text: "456 and 789 are best friends"},
 	}
 )
 
