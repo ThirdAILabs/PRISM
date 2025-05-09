@@ -133,80 +133,227 @@ func generateCSV(report api.Report) ([]byte, error) {
 
 func generateExcel(report api.Report) ([]byte, error) {
 	f := excelize.NewFile()
-
-	summarySheet := "Summary"
-	if err := f.SetSheetName("Sheet1", summarySheet); err != nil {
+	sheetName := "All Flags"
+	if err := f.SetSheetName("Sheet1", sheetName); err != nil {
 		return nil, err
 	}
 
-	summaryData := [][]interface{}{
-		{"Report ID", report.Id.String()},
-		{"Downloaded At", time.Now().Format(time.RFC3339)},
-		{"Author Name", report.AuthorName},
+	headers := []string{
+		"Flag Title",
+		"Paper Title",
+		"URL",
+		"Publication Date",
+		"Co-authors",
+		"Affiliations",
+		"Acknowledgements",
+		"Funders",
+		"Disclosed",
 	}
 
-	for i, row := range summaryData {
-		rowIndex := i + 1
-		if err := f.SetCellValue(summarySheet, fmt.Sprintf("A%d", rowIndex), row[0]); err != nil {
-			return nil, err
-		}
-		if err := f.SetCellValue(summarySheet, fmt.Sprintf("B%d", rowIndex), row[1]); err != nil {
-			return nil, err
-		}
+	// Step 2: Write headers in first row
+	for i, header := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		_ = f.SetCellValue(sheetName, cell, header)
 	}
 
+	// Step 3: Flatten all flag rows with full header set
+	rowIndex := 2
 	for _, flags := range report.Content {
 		if len(flags) == 0 {
 			continue
 		}
-		groupName := flags[0].GetHeading()
-		sheetName := sanitizeSheetName(groupName)
-		if _, err := f.NewSheet(sheetName); err != nil {
-			return nil, err
-		}
 
-		details := flags[0].GetDetailFields()
-		headers := make([]string, len(details))
-		for i, kv := range details {
-			headers[i] = kv.Key
-		}
-
-		for i, header := range headers {
-			cell, err := excelize.CoordinatesToCellName(i+1, 1)
-			if err != nil {
-				return nil, err
+		flagTitle := flags[0].GetHeading()
+		for _, flag := range flags {
+			data := map[string]string{
+				"Flag Title": flagTitle,
 			}
-			if err := f.SetCellValue(sheetName, cell, header); err != nil {
-				return nil, err
+			for _, kv := range flag.GetDetailFields() {
+				data[kv.Key] = kv.Value
 			}
-		}
-
-		for j, flag := range flags {
-			rowData := flag.GetDetailFields()
-			for i, kv := range rowData {
-				cell, err := excelize.CoordinatesToCellName(i+1, j+2)
-				if err != nil {
-					return nil, err
+			// Fill in missing headers with "N/A"
+			for i, header := range headers {
+				val := "N/A"
+				if v, ok := data[header]; ok && v != "" {
+					val = v
 				}
-				if err := f.SetCellValue(sheetName, cell, kv.Value); err != nil {
-					return nil, err
-				}
+				cell, _ := excelize.CoordinatesToCellName(i+1, rowIndex)
+				_ = f.SetCellValue(sheetName, cell, val)
 			}
+			rowIndex++
 		}
 	}
 
-	index, err := f.GetSheetIndex(summarySheet)
-	if err != nil {
-		return nil, err
-	}
-	f.SetActiveSheet(index)
+	f.SetActiveSheet(0)
 
 	var buf bytes.Buffer
 	if err := f.Write(&buf); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
+
+	// f := excelize.NewFile()
+
+	// summarySheet := "Summary"
+	// if err := f.SetSheetName("Sheet1", summarySheet); err != nil {
+	// 	return nil, err
+	// }
+
+	// currentRow := 1
+
+	// // Append all flags data into the same sheet
+	// for _, flags := range report.Content {
+	// 	if len(flags) == 0 {
+	// 		continue
+	// 	}
+
+	// 	groupName := flags[0].GetHeading()
+	// 	// Write section heading
+	// 	if err := f.SetCellValue(summarySheet, fmt.Sprintf("A%d", currentRow), groupName); err != nil {
+	// 		return nil, err
+	// 	}
+	// 	currentRow++
+
+	// 	// Write headers
+	// 	details := flags[0].GetDetailFields()
+	// 	for i, kv := range details {
+	// 		cell, err := excelize.CoordinatesToCellName(i+1, currentRow)
+	// 		if err != nil {
+	// 			return nil, err
+	// 		}
+	// 		if err := f.SetCellValue(summarySheet, cell, kv.Key); err != nil {
+	// 			return nil, err
+	// 		}
+	// 	}
+	// 	currentRow++
+
+	// 	// Write rows
+	// 	for _, flag := range flags {
+	// 		rowData := flag.GetDetailFields()
+	// 		for i, kv := range rowData {
+	// 			cell, err := excelize.CoordinatesToCellName(i+1, currentRow)
+	// 			if err != nil {
+	// 				return nil, err
+	// 			}
+	// 			if err := f.SetCellValue(summarySheet, cell, kv.Value); err != nil {
+	// 				return nil, err
+	// 			}
+	// 		}
+	// 		currentRow++
+	// 	}
+
+	// 	currentRow++ // Add a blank line between groups
+	// }
+
+	// // // Write summary section
+	// // summaryData := [][]interface{}{
+	// // 	{"Report ID", report.Id.String()},
+	// // 	{"Downloaded At", time.Now().Format(time.RFC3339)},
+	// // 	{"Author Name", report.AuthorName},
+	// // }
+
+	// // for _, row := range summaryData {
+	// // 	if err := f.SetCellValue(summarySheet, fmt.Sprintf("A%d", currentRow), row[0]); err != nil {
+	// // 		return nil, err
+	// // 	}
+	// // 	if err := f.SetCellValue(summarySheet, fmt.Sprintf("B%d", currentRow), row[1]); err != nil {
+	// // 		return nil, err
+	// // 	}
+	// // 	currentRow++
+	// // }
+
+	// // Set active sheet to summary
+	// index, err := f.GetSheetIndex(summarySheet)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// f.SetActiveSheet(index)
+
+	// // Write to buffer
+	// var buf bytes.Buffer
+	// if err := f.Write(&buf); err != nil {
+	// 	return nil, err
+	// }
+	// return buf.Bytes(), nil
+
 }
+
+// func generateExcel(report api.Report) ([]byte, error) {
+// 	f := excelize.NewFile()
+
+// 	summarySheet := "Summary"
+// 	if err := f.SetSheetName("Sheet1", summarySheet); err != nil {
+// 		return nil, err
+// 	}
+
+// 	summaryData := [][]interface{}{
+// 		{"Report ID", report.Id.String()},
+// 		{"Downloaded At", time.Now().Format(time.RFC3339)},
+// 		{"Author Name", report.AuthorName},
+// 	}
+
+// 	for i, row := range summaryData {
+// 		rowIndex := i + 1
+// 		if err := f.SetCellValue(summarySheet, fmt.Sprintf("A%d", rowIndex), row[0]); err != nil {
+// 			return nil, err
+// 		}
+// 		if err := f.SetCellValue(summarySheet, fmt.Sprintf("B%d", rowIndex), row[1]); err != nil {
+// 			return nil, err
+// 		}
+// 	}
+
+// 	for _, flags := range report.Content {
+// 		if len(flags) == 0 {
+// 			continue
+// 		}
+// 		groupName := flags[0].GetHeading()
+// 		sheetName := sanitizeSheetName(groupName)
+// 		if _, err := f.NewSheet(sheetName); err != nil {
+// 			return nil, err
+// 		}
+
+// 		details := flags[0].GetDetailFields()
+// 		headers := make([]string, len(details))
+// 		for i, kv := range details {
+// 			headers[i] = kv.Key
+// 		}
+
+// 		for i, header := range headers {
+// 			cell, err := excelize.CoordinatesToCellName(i+1, 1)
+// 			if err != nil {
+// 				return nil, err
+// 			}
+// 			if err := f.SetCellValue(sheetName, cell, header); err != nil {
+// 				return nil, err
+// 			}
+// 		}
+
+// 		for j, flag := range flags {
+// 			rowData := flag.GetDetailFields()
+// 			for i, kv := range rowData {
+// 				cell, err := excelize.CoordinatesToCellName(i+1, j+2)
+// 				if err != nil {
+// 					return nil, err
+// 				}
+// 				if err := f.SetCellValue(sheetName, cell, kv.Value); err != nil {
+// 					return nil, err
+// 				}
+// 			}
+// 		}
+// 	}
+
+// 	index, err := f.GetSheetIndex(summarySheet)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	f.SetActiveSheet(index)
+
+// 	var buf bytes.Buffer
+// 	if err := f.Write(&buf); err != nil {
+// 		return nil, err
+// 	}
+// 	return buf.Bytes(), nil
+// }
 
 func sanitizeSheetName(name string) string {
 	invalidChars := []string{":", "\\", "/", "?", "*", "[", "]"}
