@@ -201,27 +201,6 @@ func generateExcel(report api.Report) ([]byte, error) {
 		}
 	}
 
-	// --- Create All Flags Sheet ---
-	allFlagsSheet := "All Flags"
-	f.NewSheet(allFlagsSheet)
-	writeHeaders(f, allFlagsSheet, headerOrder)
-
-	rowIndex := 2
-	for _, flags := range report.Content {
-		if len(flags) == 0 {
-			continue
-		}
-		flagTitle := flags[0].GetHeading()
-		for _, flag := range flags {
-			data := map[string]string{"Flag Title": flagTitle}
-			for _, kv := range flag.GetDetailFields() {
-				data[kv.Key] = kv.Value
-			}
-			writeRow(f, allFlagsSheet, headerOrder, rowIndex, data)
-			rowIndex++
-		}
-	}
-
 	// --- Create per-group Sheets ---
 	for _, flags := range report.Content {
 		if len(flags) == 0 {
