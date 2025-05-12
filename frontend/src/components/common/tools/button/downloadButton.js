@@ -82,10 +82,6 @@ const DownloadDropdown = ({ reportId, metadata, content, isOpen, setIsOpen }) =>
             <FaFilePdf color="#ff0000" />
             PDF
           </div>
-          <div className="dropdown-item" onClick={() => handleDownload('csv')}>
-            <FaFileCsv color="#217346" />
-            CSV
-          </div>
           <div className="dropdown-item" onClick={() => handleDownload('xlsx')}>
             <FaFileExcel color="#217346" />
             Excel

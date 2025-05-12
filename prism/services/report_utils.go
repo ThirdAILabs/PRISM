@@ -130,82 +130,162 @@ func generateCSV(report api.Report) ([]byte, error) {
 	}
 	return buf.Bytes(), nil
 }
-
 func generateExcel(report api.Report) ([]byte, error) {
 	f := excelize.NewFile()
 
+	// --- Create Summary Sheet ---
 	summarySheet := "Summary"
 	if err := f.SetSheetName("Sheet1", summarySheet); err != nil {
 		return nil, err
 	}
 
+	startRow := 1
 	summaryData := [][]interface{}{
 		{"Report ID", report.Id.String()},
-		{"Downloaded At", time.Now().Format(time.RFC3339)},
+		{"Downloaded At", time.Now().Format("02 Jan 2006 15:04")},
 		{"Author Name", report.AuthorName},
+		{},
+		{"Flag Summary"},
 	}
 
-	for i, row := range summaryData {
-		rowIndex := i + 1
-		if err := f.SetCellValue(summarySheet, fmt.Sprintf("A%d", rowIndex), row[0]); err != nil {
+	for _, row := range summaryData {
+		if len(row) > 0 {
+			if err := f.SetCellValue(summarySheet, fmt.Sprintf("A%d", startRow), row[0]); err != nil {
+				return nil, err
+			}
+			if len(row) > 1 {
+				if err := f.SetCellValue(summarySheet, fmt.Sprintf("B%d", startRow), row[1]); err != nil {
+					return nil, err
+				}
+			}
+		}
+		startRow++
+	}
+
+	// Apply bold style to column A and author name
+	boldStyle, err := f.NewStyle(&excelize.Style{
+		Font: &excelize.Font{Bold: true},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for row := 1; row < startRow; row++ {
+		cell, err := excelize.CoordinatesToCellName(1, row)
+		if err != nil {
 			return nil, err
 		}
-		if err := f.SetCellValue(summarySheet, fmt.Sprintf("B%d", rowIndex), row[1]); err != nil {
+		if err := f.SetCellStyle(summarySheet, cell, cell, boldStyle); err != nil {
 			return nil, err
 		}
 	}
 
+	authorCell := "B3"
+	if err := f.SetCellStyle(summarySheet, authorCell, authorCell, boldStyle); err != nil {
+		return nil, err
+	}
+
+	// Add flag counts
 	for _, flags := range report.Content {
 		if len(flags) == 0 {
 			continue
 		}
 		groupName := flags[0].GetHeading()
-		sheetName := sanitizeSheetName(groupName)
-		if _, err := f.NewSheet(sheetName); err != nil {
+		if err := f.SetCellValue(summarySheet, fmt.Sprintf("A%d", startRow), groupName); err != nil {
+			return nil, err
+		}
+		if err := f.SetCellValue(summarySheet, fmt.Sprintf("B%d", startRow), len(flags)); err != nil {
+			return nil, err
+		}
+		startRow++
+	}
+
+	// --- Create per-group Sheets ---
+	for _, flags := range report.Content {
+		if len(flags) == 0 {
+			continue
+		}
+		groupName := sanitizeSheetName(flags[0].GetHeading())
+		if _, err := f.NewSheet(groupName); err != nil {
+			return nil, err
+		}
+		headers := []string{}
+		if len(flags[0].GetDetailFields()) > 0 {
+			for _, kv := range flags[0].GetDetailFields() {
+				headers = append(headers, kv.Key)
+			}
+		}
+		if err := writeHeaders(f, groupName, headers); err != nil {
 			return nil, err
 		}
 
-		details := flags[0].GetDetailFields()
-		headers := make([]string, len(details))
-		for i, kv := range details {
-			headers[i] = kv.Key
-		}
-
-		for i, header := range headers {
-			cell, err := excelize.CoordinatesToCellName(i+1, 1)
-			if err != nil {
-				return nil, err
-			}
-			if err := f.SetCellValue(sheetName, cell, header); err != nil {
-				return nil, err
-			}
-		}
-
 		for j, flag := range flags {
-			rowData := flag.GetDetailFields()
-			for i, kv := range rowData {
-				cell, err := excelize.CoordinatesToCellName(i+1, j+2)
-				if err != nil {
-					return nil, err
-				}
-				if err := f.SetCellValue(sheetName, cell, kv.Value); err != nil {
-					return nil, err
-				}
+			data := map[string]string{}
+			for _, kv := range flag.GetDetailFields() {
+				data[kv.Key] = kv.Value
+			}
+			if err := writeRow(f, groupName, headers, j+2, data); err != nil {
+				return nil, err
 			}
 		}
 	}
 
-	index, err := f.GetSheetIndex(summarySheet)
-	if err != nil {
-		return nil, err
+	// Set active sheet to Summary
+	if idx, err := f.GetSheetIndex(summarySheet); err == nil {
+		f.SetActiveSheet(idx)
 	}
-	f.SetActiveSheet(index)
 
 	var buf bytes.Buffer
 	if err := f.Write(&buf); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+// writeHeaders writes a single row of headers and styles them bold.
+func writeHeaders(f *excelize.File, sheet string, headers []string) error {
+	for i, header := range headers {
+		cell, err := excelize.CoordinatesToCellName(i+1, 1)
+		if err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheet, cell, header); err != nil {
+			return err
+		}
+	}
+
+	style, err := f.NewStyle(&excelize.Style{Font: &excelize.Font{Bold: true}})
+	if err != nil {
+		return err
+	}
+
+	startCell, err := excelize.CoordinatesToCellName(1, 1)
+	if err != nil {
+		return err
+	}
+	endCell, err := excelize.CoordinatesToCellName(len(headers), 1)
+	if err != nil {
+		return err
+	}
+	return f.SetCellStyle(sheet, startCell, endCell, style)
+}
+
+// writeRow writes a map of values into a row given the headers for column order.
+func writeRow(f *excelize.File, sheet string, headers []string, rowIndex int, data map[string]string) error {
+	for i, header := range headers {
+		val := "-"
+		if v, ok := data[header]; ok && v != "" {
+			val = v
+		}
+		cell, err := excelize.CoordinatesToCellName(i+1, rowIndex)
+		if err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheet, cell, val); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func sanitizeSheetName(name string) string {
