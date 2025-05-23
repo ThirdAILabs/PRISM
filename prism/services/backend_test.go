@@ -122,7 +122,7 @@ func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 		services.NewReportService(reports.NewManager(db), licensing, &mockOpenAlex{}, "./resources"),
 		services.NewSearchService(oa, entities),
 		services.NewAutoCompleteService(oa),
-		services.NewHookService(db, map[string]services.Hook{}),
+		services.NewHookService(db, map[string]services.Hook{}, time.Second*1),
 		&MockTokenVerifier{prefix: userPrefix},
 	)
 
@@ -893,7 +893,7 @@ func TestHooks(t *testing.T) {
 
 	manager := reports.NewManager(db).SetAuthorReportUpdateInterval(2 * time.Second)
 
-	hookService := services.NewHookService(db, map[string]services.Hook{"test": mockHook})
+	hookService := services.NewHookService(db, map[string]services.Hook{"test": mockHook}, time.Second*1)
 
 	backend := services.NewBackend(
 		services.NewReportService(manager, licensing, &mockOpenAlex{}, "./resources"),

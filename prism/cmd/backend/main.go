@@ -190,7 +190,7 @@ func main() {
 			notifier,
 		)
 	}
-	hooks := services.NewHookService(db, hookServices)
+	hooks := services.NewHookService(db, hookServices, reports.AuthorReportUpdateInterval)
 
 	hooks.RunHooks(30 * time.Minute)
 	defer hooks.Stop()

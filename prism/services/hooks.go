@@ -28,16 +28,18 @@ type Hook interface {
 }
 
 type HookService struct {
-	db    *gorm.DB
-	hooks map[string]Hook
+	db              *gorm.DB
+	hooks           map[string]Hook
+	minHookInterval time.Duration
 
 	stop chan struct{}
 }
 
-func NewHookService(db *gorm.DB, hooks map[string]Hook) HookService {
+func NewHookService(db *gorm.DB, hooks map[string]Hook, interval time.Duration) HookService {
 	return HookService{
-		db:    db,
-		hooks: hooks,
+		db:              db,
+		hooks:           hooks,
+		minHookInterval: interval,
 	}
 }
 
@@ -72,6 +74,11 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 	if !ok {
 		slog.Error("invalid hook action", "action", params.Action)
 		return nil, CodedError(errors.New("invalid hook action"), http.StatusUnprocessableEntity)
+	}
+
+	if params.Interval < int(s.minHookInterval.Seconds()) {
+		slog.Error("interval must be at least %d days", "interval", int(s.minHookInterval.Hours()/24))
+		return nil, CodedError(fmt.Errorf("interval must be at least %d days", int(s.minHookInterval.Hours()/24)), http.StatusUnprocessableEntity)
 	}
 
 	if err := hook.Validate(params.Data, params.Interval); err != nil {

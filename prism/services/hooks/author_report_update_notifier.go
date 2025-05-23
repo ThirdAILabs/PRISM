@@ -13,7 +13,6 @@ import (
 	"time"
 )
 
-// AuthorReport Updates every 14 days so no point in running it before that as the hook won't get triggered
 var minUpdateInterval = 15 * 24 * 60 * 60 // 15 days in seconds.
 
 type AuthorReportUpdateNotifierData struct {
