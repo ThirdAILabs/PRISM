@@ -13,7 +13,8 @@ import (
 	"time"
 )
 
-var minUpdateInterval = 7 * 24 * 60 * 60 // 7 days in seconds
+// AuthorReport Updates every 14 days so no point in running it before that as the hook won't get triggered
+var minUpdateInterval = 15 * 24 * 60 * 60 // 15 days in seconds.
 
 type AuthorReportUpdateNotifierData struct {
 	EmailID string `json:"email_id"`
@@ -33,7 +34,7 @@ func NewAuthorReportUpdateNotifier(BaseUrl string, notifier *services.EmailMesse
 
 func (h *AuthorReportUpdateNotifier) Validate(data []byte, interval int) error {
 	if interval < minUpdateInterval {
-		return fmt.Errorf("interval must be greater than or equal to 7 days")
+		return fmt.Errorf("interval must be greater than or equal to %d days", minUpdateInterval/(24*60*60))
 	}
 
 	return nil
