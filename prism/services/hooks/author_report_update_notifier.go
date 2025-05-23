@@ -54,6 +54,11 @@ func (h *AuthorReportUpdateNotifier) Run(report api.Report, data []byte, lastRan
 			}
 		}
 	}
+
+	if len(newFlags) == 0 {
+		// No new flags since the last run
+		return nil
+	}
 	authorReportEndpoint, err := url.JoinPath(h.BaseURL, "report", report.Id.String())
 	if err != nil {
 		return fmt.Errorf("failed to join URL path: %w", err)
@@ -156,6 +161,15 @@ func (h *AuthorReportUpdateNotifier) renderReportUpdateTemplate(authorName strin
 			text-align: right;
 			white-space: nowrap;
 		}
+		.table-header {
+			background-color: #f8f9fa;
+			font-weight: bold;
+			color: #333333;
+			border-bottom: 2px solid #e0e0e0;
+		}
+		.table-header td {
+			padding: 10px 0;
+		}
 	</style>
 </head>
 <body>
@@ -165,9 +179,13 @@ func (h *AuthorReportUpdateNotifier) renderReportUpdateTemplate(authorName strin
 		</div>
 		<div class="content">
 			<h1>Author Report Update</h1>
-			<p>We've identified new potential flags in our recent monitoring regarding {{.AuthorName}}.</p>
+			<p>We've identified new potential flags in our recent monitoring of author <b>{{.AuthorName}}</b>.</p>
 			
 			<table class="flags-list">
+				<tr class="table-header">
+					<td class="flag-title">Flag Category</td>
+					<td class="flag-count">Newly Founded</td>
+				</tr>
 				{{range .Flags}}
 					<tr class="flag-row">
 						<td class="flag-title">{{.Title}}</td>

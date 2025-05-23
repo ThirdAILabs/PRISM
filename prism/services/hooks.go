@@ -52,25 +52,31 @@ func (s *HookService) Routes() chi.Router {
 func (s *HookService) CreateHook(r *http.Request) (any, error) {
 	userId, err := auth.GetUserId(r)
 	if err != nil {
+		slog.Error("error getting user id", "error", err)
 		return nil, CodedError(err, http.StatusInternalServerError)
 	}
 
 	reportId, err := URLParamUUID(r, "report_id")
 	if err != nil {
+		slog.Error("error parsing report id", "error", err)
 		return nil, CodedError(err, http.StatusBadRequest)
 	}
 
 	params, err := ParseRequestBody[api.CreateHookRequest](r)
 	if err != nil {
+		slog.Error("error parsing request body", "error", err)
 		return nil, CodedError(err, http.StatusBadRequest)
 	}
 
 	hook, ok := s.hooks[params.Action]
+	fmt.Printf("params.Action: %v\n", params.Action)
 	if !ok {
+		slog.Error("invalid hook action", "action", params.Action)
 		return nil, CodedError(errors.New("invalid hook action"), http.StatusUnprocessableEntity)
 	}
 
 	if err := hook.Validate(params.Data, params.Interval); err != nil {
+		slog.Error("error validating hook data", "error", err)
 		return nil, CodedError(err, http.StatusUnprocessableEntity)
 	}
 
@@ -127,11 +133,12 @@ func (s *HookService) RunNextHook() {
 			Preload("Hooks").
 			Joins("JOIN author_reports ON author_reports.id = user_author_reports.report_id").
 			Joins("JOIN author_report_hooks ON author_report_hooks.user_report_id = user_author_reports.id").
-			Where("author_reports.status = ?", schema.ReportCompleted).
-			Where(`author_reports.last_updated_at > author_report_hooks.last_ran_at + (author_report_hooks.interval || ' seconds')::interval`).
+			Where(`author_reports.last_updated_at < author_report_hooks.last_ran_at + (author_report_hooks.interval || ' seconds')::interval`).
 			Find(&userReports).Error; err != nil {
 			return fmt.Errorf("error retrieving reports with hooks to run: %w", err)
 		}
+
+		fmt.Printf("Found %d reports with hooks to run\n", len(userReports))
 
 		for _, report := range userReports {
 			content, err := reports.ConvertReport(report)
