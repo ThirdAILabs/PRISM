@@ -51,7 +51,7 @@ func GetMigrator(db *gorm.DB) *gormigrate.Gormigrate {
 
 		return db.AutoMigrate(
 			&schema.AuthorReport{}, &schema.AuthorFlag{}, &schema.UserAuthorReport{},
-			&schema.UniversityReport{}, &schema.UserUniversityReport{}, &schema.AuthorReportHook{},
+			&schema.AuthorReportHook{}, &schema.UniversityReport{}, &schema.UserUniversityReport{},
 		)
 	})
 
