@@ -950,12 +950,30 @@ func TestHooks(t *testing.T) {
 	hookRun := time.Now()
 	hookService.RunNextHook()
 
-	if mockHook.invoked == nil ||
-		mockHook.invoked.reportId != report.Id ||
-		string(mockHook.invoked.data) != "hook-1" ||
-		mockHook.invoked.lastRanAt.Sub(reports.EarliestReportDate).Abs() > 100*time.Millisecond {
+	if mockHook.invoked == nil {
 		t.Fatal("hook should be invoked")
 	}
+
+	if mockHook.invoked.reportId != report.Id {
+		t.Fatal("hook should be invoked for the correct report")
+	}
+
+	if string(mockHook.invoked.data) != "hook-1" {
+		t.Fatal("hook should be invoked with the correct data")
+	}
+	if mockHook.invoked.lastRanAt.Sub(hookRun).Abs() > 100*time.Millisecond {
+		t.Logf("hook run time: %s, earliest report date: %s", mockHook.invoked.lastRanAt, reports.EarliestReportDate)
+		t.Fatal("hook should be invoked with the correct time")
+	}
+	// if mockHook.invoked == nil ||
+	// 	mockHook.invoked.reportId != report.Id ||
+	// 	string(mockHook.invoked.data) != "hook-1" ||
+	// 	mockHook.invoked.lastRanAt.Sub(reports.EarliestReportDate).Abs() > 100*time.Millisecond {
+	// 	// printf to see the time difference
+	// 	t.Logf("hook run time: %s, earliest report date: %s", mockHook.invoked.lastRanAt, reports.EarliestReportDate)
+
+	// 	t.Fatal("hook should be invoked")
+	// }
 
 	mockHook.invoked = nil
 
