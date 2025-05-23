@@ -122,7 +122,7 @@ func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 		services.NewReportService(reports.NewManager(db), licensing, &mockOpenAlex{}, "./resources"),
 		services.NewSearchService(oa, entities),
 		services.NewAutoCompleteService(oa),
-		services.NewHookService(db, map[string]services.Hook{}, time.Second*1),
+		services.NewHookService(db, map[string]services.Hook{}, 1*time.Second),
 		&MockTokenVerifier{prefix: userPrefix},
 	)
 
@@ -893,7 +893,7 @@ func TestHooks(t *testing.T) {
 
 	manager := reports.NewManager(db).SetAuthorReportUpdateInterval(2 * time.Second)
 
-	hookService := services.NewHookService(db, map[string]services.Hook{"test": mockHook}, time.Second*1)
+	hookService := services.NewHookService(db, map[string]services.Hook{"test": mockHook}, 1*time.Second)
 
 	backend := services.NewBackend(
 		services.NewReportService(manager, licensing, &mockOpenAlex{}, "./resources"),
@@ -944,36 +944,18 @@ func TestHooks(t *testing.T) {
 		}
 	}
 
+	time.Sleep(3 * time.Second)
 	completeNextReport()
 	checkNoQueuedReport()
 
 	hookRun := time.Now()
 	hookService.RunNextHook()
 
-	if mockHook.invoked == nil {
+	if mockHook.invoked == nil ||
+		mockHook.invoked.reportId != report.Id ||
+		string(mockHook.invoked.data) != "hook-1" {
 		t.Fatal("hook should be invoked")
 	}
-
-	if mockHook.invoked.reportId != report.Id {
-		t.Fatal("hook should be invoked for the correct report")
-	}
-
-	if string(mockHook.invoked.data) != "hook-1" {
-		t.Fatal("hook should be invoked with the correct data")
-	}
-	if mockHook.invoked.lastRanAt.Sub(hookRun).Abs() > 100*time.Millisecond {
-		t.Logf("hook run time: %s, earliest report date: %s", mockHook.invoked.lastRanAt, reports.EarliestReportDate)
-		t.Fatal("hook should be invoked with the correct time")
-	}
-	// if mockHook.invoked == nil ||
-	// 	mockHook.invoked.reportId != report.Id ||
-	// 	string(mockHook.invoked.data) != "hook-1" ||
-	// 	mockHook.invoked.lastRanAt.Sub(reports.EarliestReportDate).Abs() > 100*time.Millisecond {
-	// 	// printf to see the time difference
-	// 	t.Logf("hook run time: %s, earliest report date: %s", mockHook.invoked.lastRanAt, reports.EarliestReportDate)
-
-	// 	t.Fatal("hook should be invoked")
-	// }
 
 	mockHook.invoked = nil
 

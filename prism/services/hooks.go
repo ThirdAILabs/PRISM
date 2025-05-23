@@ -77,7 +77,7 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 	}
 
 	if params.Interval < int(s.minHookInterval.Seconds()) {
-		// Hooks will get triggered only if the author report is updated, so don't allow users to set an interval less than the author report update interval
+		// Hooks will get triggered only if the author report is updated, so don't allow users to set an interval less than the AuthorReportUpdateInterval
 		slog.Error("interval must be at least %d days", "interval", int(s.minHookInterval.Hours()/24))
 		return nil, CodedError(fmt.Errorf("interval must be at least %d days", int(s.minHookInterval.Hours()/24)), http.StatusUnprocessableEntity)
 	}
@@ -146,6 +146,25 @@ func (s *HookService) RunNextHook() {
 		}
 
 		fmt.Printf("Found %d reports with hooks to run\n", len(userReports))
+
+		//print all the hooks
+		var hooks []schema.AuthorReportHook
+		if err := txn.Preload("UserReport").Find(&hooks).Error; err != nil {
+			return fmt.Errorf("error retrieving hooks: %w", err)
+		}
+		for _, hook := range hooks {
+			fmt.Printf("Hook: %s, LastRanAt: %s, Interval: %d\n", hook.Action, hook.LastRanAt, hook.Interval)
+		}
+
+		//print all the author reports
+		var authorReports []schema.AuthorReport
+		if err := txn.Find(&authorReports).Error; err != nil {
+			return fmt.Errorf("error retrieving author reports: %w", err)
+		}
+		for _, report := range authorReports {
+			fmt.Printf("Report: %s, LastUpdatedAt: %s\n", report.Id, report.LastUpdatedAt)
+		}
+
 		for _, report := range userReports {
 			content, err := reports.ConvertReport(report)
 			if err != nil {
