@@ -133,12 +133,10 @@ func (s *HookService) RunNextHook() {
 			Preload("Hooks").
 			Joins("JOIN author_reports ON author_reports.id = user_author_reports.report_id").
 			Joins("JOIN author_report_hooks ON author_report_hooks.user_report_id = user_author_reports.id").
-			Where(`author_reports.last_updated_at < author_report_hooks.last_ran_at + (author_report_hooks.interval || ' seconds')::interval`).
+			Where(`NOW() > author_report_hooks.last_ran_at + (author_report_hooks.interval || ' seconds')::interval`).
 			Find(&userReports).Error; err != nil {
 			return fmt.Errorf("error retrieving reports with hooks to run: %w", err)
 		}
-
-		fmt.Printf("Found %d reports with hooks to run\n", len(userReports))
 
 		for _, report := range userReports {
 			content, err := reports.ConvertReport(report)
