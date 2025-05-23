@@ -73,10 +73,6 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 		slog.Error("invalid hook action", "action", params.Action)
 		return nil, CodedError(errors.New("invalid hook action"), http.StatusUnprocessableEntity)
 	}
-	if params.Interval < int(reports.AuthorReportUpdateInterval) {
-		slog.Error("invalid hook interval", "interval", params.Interval)
-		return nil, CodedError(fmt.Errorf("interval must be at least %d days", int(reports.AuthorReportUpdateInterval)/(24*60*60)), http.StatusUnprocessableEntity)
-	}
 
 	if err := hook.Validate(params.Data, params.Interval); err != nil {
 		slog.Error("error validating hook data", "error", err)
