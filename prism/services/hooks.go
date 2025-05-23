@@ -145,26 +145,6 @@ func (s *HookService) RunNextHook() {
 			return fmt.Errorf("error retrieving reports with hooks to run: %w", err)
 		}
 
-		fmt.Printf("Found %d reports with hooks to run\n", len(userReports))
-
-		//print all the hooks
-		var hooks []schema.AuthorReportHook
-		if err := txn.Preload("UserReport").Find(&hooks).Error; err != nil {
-			return fmt.Errorf("error retrieving hooks: %w", err)
-		}
-		for _, hook := range hooks {
-			fmt.Printf("Hook: %s, LastRanAt: %s, Interval: %d\n", hook.Action, hook.LastRanAt, hook.Interval)
-		}
-
-		//print all the author reports
-		var authorReports []schema.AuthorReport
-		if err := txn.Find(&authorReports).Error; err != nil {
-			return fmt.Errorf("error retrieving author reports: %w", err)
-		}
-		for _, report := range authorReports {
-			fmt.Printf("Report: %s, LastUpdatedAt: %s\n", report.Id, report.LastUpdatedAt)
-		}
-
 		for _, report := range userReports {
 			content, err := reports.ConvertReport(report)
 			if err != nil {
