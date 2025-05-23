@@ -91,8 +91,9 @@ const SidePanel = ({ isOpen, onClose }) => {
     });
   };
   const maximumAllowedStringLength = 25;
-  const truncateString = (str, maxStrLength) => {
-    if (str.length > maxStrLength) return str.substring(0, maxStrLength) + '...';
+  const truncateString = (str) => {
+    if (str.length > maximumAllowedStringLength)
+      return str.substring(0, maximumAllowedStringLength) + '...';
     return str;
   };
 
@@ -177,14 +178,10 @@ const SidePanel = ({ isOpen, onClose }) => {
                               },
                             }}
                           >
-                            <span className="text-start">
-                              {truncateString(report.AuthorName, maximumAllowedStringLength)}
-                            </span>
+                            <span className="text-start">{truncateString(report.AuthorName)}</span>
                           </Tooltip>
                         ) : (
-                          <span className="text-start">
-                            {truncateString(report.AuthorName, maximumAllowedStringLength)}
-                          </span>
+                          <span className="text-start">{truncateString(report.AuthorName)}</span>
                         )}
                         <span className={`status ${report.Status}`}>{status[report.Status]}</span>
                       </div>
@@ -234,18 +231,12 @@ const SidePanel = ({ isOpen, onClose }) => {
                             }}
                           >
                             <span className="text-start">
-                              {truncateString(
-                                universityReport.UniversityName,
-                                maximumAllowedStringLength
-                              )}
+                              {truncateString(universityReport.UniversityName)}
                             </span>
                           </Tooltip>
                         ) : (
                           <span className="text-start">
-                            {truncateString(
-                              universityReport.UniversityName,
-                              maximumAllowedStringLength
-                            )}
+                            {truncateString(universityReport.UniversityName)}
                           </span>
                         )}
                         <span className={`status ${universityReport.Status}`}>
@@ -270,29 +261,7 @@ const SidePanel = ({ isOpen, onClose }) => {
             <img src={user.avatar} alt="User" className="user-card__avatar" />
             <div className="user-card__info">
               <h5 className="user-card__name">{user.username}</h5>
-              {user.email?.length > 18 ? (
-                <Tooltip
-                  title={user.email}
-                  placement="right"
-                  arrow
-                  componentsProps={{
-                    tooltip: {
-                      sx: {
-                        bgcolor: 'rgba(60,60,60, 0.87)',
-                        '& .MuiTooltip-arrow': {
-                          color: 'rgba(60, 60, 60, 0.87)',
-                        },
-                        padding: '8px 12px',
-                        fontSize: '14px',
-                      },
-                    },
-                  }}
-                >
-                  <span className="user-card__email">{truncateString(user.email, 18)}</span>
-                </Tooltip>
-              ) : (
-                <span className="user-card__email">{truncateString(user.email, 18)}</span>
-              )}
+              <span className="user-card__email">{user.email}</span>
             </div>
           </div>
           <hr className="user-card__divider" />
