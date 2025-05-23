@@ -238,28 +238,28 @@ func getToken(r *http.Request) (string, error) {
 	return "", fmt.Errorf("missing or invalid authorization header")
 }
 
-func (auth *KeycloakAuth) VerifyToken(token string) (uuid.UUID, error) {
+func (auth *KeycloakAuth) VerifyToken(token string) (uuid.UUID, string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	userInfo, err := auth.keycloak.GetUserInfo(ctx, token, auth.realm)
 	if err != nil {
 		auth.logger.Error("unable to verify token with keycloak", "error", err)
-		return uuid.Nil, fmt.Errorf("unable to verify access token: %w", err)
+		return uuid.Nil, "", fmt.Errorf("unable to verify access token: %w", err)
 	}
 
 	if userInfo.Sub == nil {
 		auth.logger.Error("missing user identifier in keycloak response")
-		return uuid.Nil, fmt.Errorf("missing user identifier in keycloak response")
+		return uuid.Nil, "", fmt.Errorf("missing user identifier in keycloak response")
 	}
 
 	userId, err := uuid.Parse(*userInfo.Sub)
 	if err != nil {
 		auth.logger.Error("unable to parse user id from keycloak", "id", *userInfo.Sub, "error", err)
-		return uuid.Nil, fmt.Errorf("invalid uuid '%v' returned from keycloak: %v", *userInfo.Sub, err)
+		return uuid.Nil, "", fmt.Errorf("invalid uuid '%v' returned from keycloak: %v", *userInfo.Sub, err)
 	}
 
-	return userId, nil
+	return userId, *userInfo.Email, nil
 }
 
 // This is just for the purpose of integration tests. It is used to create users

@@ -18,6 +18,7 @@ import (
 	"prism/prism/search"
 	"prism/prism/services"
 	"prism/prism/services/auth"
+	hooks "prism/prism/services/hooks"
 	"time"
 
 	"github.com/caarlos0/env/v11"
@@ -52,6 +53,10 @@ type Config struct {
 	OpenaiKey string `env:"OPENAI_API_KEY,notEmpty,required"`
 
 	ResourceFolder string `env:"RESOURCE_FOLDER,notEmpty,required"`
+
+	SendGridKey string `env:"SENDGRID_KEY"`
+
+	BackendUrl string `env:"BACKEND_URL" envDefault:"http://localhost"`
 }
 
 func (c *Config) logfile() string {
@@ -173,7 +178,19 @@ func main() {
 	reportManager.StartReportUpdateCheck()
 	defer reportManager.StopReportUpdateCheck()
 
-	hooks := services.NewHookService(db, map[string]services.Hook{})
+	var notifier *services.EmailMessenger = nil
+	if config.SendGridKey != "" {
+		notifier = services.NewEmailMessenger(config.SendGridKey)
+	}
+
+	hookServices := make(map[string]services.Hook)
+	if config.SendGridKey != "" {
+		hookServices["AuthorReportTracker"] = hooks.NewAuthorReportUpdateNotifier(
+			config.BackendUrl,
+			notifier,
+		)
+	}
+	hooks := services.NewHookService(db, hookServices, reports.AuthorReportUpdateInterval)
 
 	hooks.RunHooks(30 * time.Minute)
 	defer hooks.Stop()

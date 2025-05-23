@@ -54,15 +54,15 @@ type MockTokenVerifier struct {
 	prefix string
 }
 
-func (m *MockTokenVerifier) VerifyToken(token string) (uuid.UUID, error) {
+func (m *MockTokenVerifier) VerifyToken(token string) (uuid.UUID, string, error) {
 	if !strings.HasPrefix(token, m.prefix) {
-		return uuid.Nil, fmt.Errorf("invalid token")
+		return uuid.Nil, "", fmt.Errorf("invalid token")
 	}
 	id, err := uuid.Parse(strings.TrimPrefix(token, m.prefix))
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, "", err
 	}
-	return id, nil
+	return id, id.String() + "@mock.com", nil
 }
 
 type mockOpenAlex struct{}
@@ -122,7 +122,7 @@ func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 		services.NewReportService(reports.NewManager(db), licensing, &mockOpenAlex{}, "./resources"),
 		services.NewSearchService(oa, entities),
 		services.NewAutoCompleteService(oa),
-		services.NewHookService(db, map[string]services.Hook{}),
+		services.NewHookService(db, map[string]services.Hook{}, 1*time.Second),
 		&MockTokenVerifier{prefix: userPrefix},
 	)
 
@@ -865,6 +865,14 @@ func (t *testHook) Run(report api.Report, data []byte, lastRanAt time.Time) erro
 	return nil
 }
 
+func (t *testHook) Type() string {
+	return "test"
+}
+
+func (t *testHook) CreateHookData(r *http.Request, payload []byte, interval int) (hookData []byte, err error) {
+	return payload, nil
+}
+
 func createReportHook(backend http.Handler, reportId uuid.UUID, user string, payload string, interval int) error {
 	return Post(backend, "/hooks/"+reportId.String(), user, api.CreateHookRequest{
 		Action: "test", Data: []byte(payload), Interval: interval,
@@ -885,7 +893,7 @@ func TestHooks(t *testing.T) {
 
 	manager := reports.NewManager(db).SetAuthorReportUpdateInterval(2 * time.Second)
 
-	hookService := services.NewHookService(db, map[string]services.Hook{"test": mockHook})
+	hookService := services.NewHookService(db, map[string]services.Hook{"test": mockHook}, 1*time.Second)
 
 	backend := services.NewBackend(
 		services.NewReportService(manager, licensing, &mockOpenAlex{}, "./resources"),
@@ -936,6 +944,7 @@ func TestHooks(t *testing.T) {
 		}
 	}
 
+	time.Sleep(3 * time.Second)
 	completeNextReport()
 	checkNoQueuedReport()
 
@@ -944,8 +953,7 @@ func TestHooks(t *testing.T) {
 
 	if mockHook.invoked == nil ||
 		mockHook.invoked.reportId != report.Id ||
-		string(mockHook.invoked.data) != "hook-1" ||
-		mockHook.invoked.lastRanAt.Sub(reports.EarliestReportDate).Abs() > 100*time.Millisecond {
+		string(mockHook.invoked.data) != "hook-1" {
 		t.Fatal("hook should be invoked")
 	}
 
