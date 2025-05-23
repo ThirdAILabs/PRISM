@@ -184,7 +184,7 @@ func (h *AuthorReportUpdateNotifier) renderReportUpdateTemplate(authorName strin
 			<table class="flags-list">
 				<tr class="table-header">
 					<td class="flag-title">Flag Category</td>
-					<td class="flag-count">Newly Founded</td>
+					<td class="flag-count">Count</td>
 				</tr>
 				{{range .Flags}}
 					<tr class="flag-row">
@@ -196,7 +196,7 @@ func (h *AuthorReportUpdateNotifier) renderReportUpdateTemplate(authorName strin
 			
 			<a href="{{.AuthorReportEndpoint}}" class="button">View Full Report</a>
 			
-			<p>Thank you for choosing Prism. We're excited to be part of your journey</p>
+			<p>Thank you for choosing Prism. We're excited to be part of your journey.</p>
 			<p>Best regards,<br>ThirdAI Team</p>
 		</div>
 		<div class="footer">

@@ -145,6 +145,7 @@ func (s *HookService) RunNextHook() {
 			return fmt.Errorf("error retrieving reports with hooks to run: %w", err)
 		}
 
+		fmt.Printf("Found %d reports with hooks to run\n", len(userReports))
 		for _, report := range userReports {
 			content, err := reports.ConvertReport(report)
 			if err != nil {
