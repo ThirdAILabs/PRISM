@@ -32,12 +32,8 @@ func NewAuthorReportUpdateNotifier(BaseUrl string, notifier *services.EmailMesse
 }
 
 func (h *AuthorReportUpdateNotifier) Validate(data []byte, interval int) error {
-	if interval < 0 {
-		return fmt.Errorf("interval must be greater than or equal to 0")
-	}
-
-	if interval > minUpdateInterval {
-		return fmt.Errorf("interval must be less than or equal to %d seconds", minUpdateInterval)
+	if interval < minUpdateInterval {
+		return fmt.Errorf("interval must be greater than or equal to 7 days")
 	}
 
 	return nil
@@ -97,27 +93,34 @@ func (h *AuthorReportUpdateNotifier) renderReportUpdateTemplate(authorName strin
 			font-family: Arial, sans-serif;
 			line-height: 1.6;
 			color: #333333;
+			margin: 0;
+			padding: 0;
+			background-color: #f4f4f4;
+		}
+		.email-container {
 			max-width: 600px;
 			margin: 0 auto;
+			background-color: #ffffff;
 		}
 		.header {
-			padding: 0px 20px 0px 20px;
+			padding: 20px;
+			text-align: center;
 		}
 		.header img {
 			max-width: 180px;
 		}
 		.content {
-			padding: 0px 20px 20px 20px;
-			margin-top: -70px;
+			padding: 20px;
 			background-color: #ffffff;
 		}
 		h1 {
 			color: #64b6f7;
+			margin-top: 0;
 		}
 		.button {
 			display: inline-block;
 			background-color: #2196f3;
-			color: white;
+			color: white !important;
 			padding: 12px 20px;
 			text-decoration: none;
 			border-radius: 4px;
@@ -130,45 +133,57 @@ func (h *AuthorReportUpdateNotifier) renderReportUpdateTemplate(authorName strin
 			font-size: 12px;
 			color: #666666;
 		}
-		ul {
-			padding-left: 0;
-			list-style-type: none;
+		.footer a {
+			color: #2196f3;
 		}
-		li {
-			margin-bottom: 8px;
-			padding: 4px 0;
-			display: flex;
-			justify-content: space-between;
+		/* Email-compatible list styling */
+		.flags-list {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 20px 0;
+		}
+		.flag-row {
 			border-bottom: 1px dotted #e0e0e0;
+		}
+		.flag-title {
+			padding: 8px 0;
+			text-align: left;
 		}
 		.flag-count {
 			font-weight: bold;
 			color: #2196f3;
-			padding-left: 8px;
+			padding: 8px 0;
+			text-align: right;
+			white-space: nowrap;
 		}
 	</style>
 </head>
 <body>
-	<div class="header">
-		<img src="https://i.ibb.co/T97f2vP/prism-logo.png" alt="Prism Logo">
-	</div>
-	<div class="content">
-		<h1>Author Report Update</h1>
-		<p>We've identified new potential flags in our recent monitoring regarding {{.AuthorName}}.</p>
-		
-		<ul>
-			{{range .Flags}}
-				<li>{{.Title}} <span class="flag-count">{{.Count}}</span></li>
-			{{end}}
-		</ul>
-		
-		<a href="{{.AuthorReportEndpoint}}" class="button">View Full Report</a>
-		
-		<p>Thank you for choosing Prism. We're excited to be part of your journey</p>
-		<p>Best regards,<br>ThirdAI Team</p>
-	</div>
-	<div class="footer">
-		<p>If you have any questions, please email us at <a href="mailto:support@thirdai.com">support@thirdai.com</a></p>
+	<div class="email-container">
+		<div class="header">
+			<img src="https://i.ibb.co/T97f2vP/prism-logo.png" alt="Prism Logo">
+		</div>
+		<div class="content">
+			<h1>Author Report Update</h1>
+			<p>We've identified new potential flags in our recent monitoring regarding {{.AuthorName}}.</p>
+			
+			<table class="flags-list">
+				{{range .Flags}}
+					<tr class="flag-row">
+						<td class="flag-title">{{.Title}}</td>
+						<td class="flag-count">{{.Count}}</td>
+					</tr>
+				{{end}}
+			</table>
+			
+			<a href="{{.AuthorReportEndpoint}}" class="button">View Full Report</a>
+			
+			<p>Thank you for choosing Prism. We're excited to be part of your journey</p>
+			<p>Best regards,<br>ThirdAI Team</p>
+		</div>
+		<div class="footer">
+			<p>If you have any questions, please email us at <a href="mailto:support@thirdai.com">support@thirdai.com</a></p>
+		</div>
 	</div>
 </body>
 </html>`
