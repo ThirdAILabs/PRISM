@@ -77,6 +77,7 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 	}
 
 	if params.Interval < int(s.minHookInterval.Seconds()) {
+		// Hooks will get triggered only if the author report is updated, so don't allow users to set an interval less than the author report update interval
 		slog.Error("interval must be at least %d days", "interval", int(s.minHookInterval.Hours()/24))
 		return nil, CodedError(fmt.Errorf("interval must be at least %d days", int(s.minHookInterval.Hours()/24)), http.StatusUnprocessableEntity)
 	}
