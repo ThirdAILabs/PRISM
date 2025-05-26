@@ -10,11 +10,31 @@ import DownloadDropdown from '../../common/tools/button/downloadButton';
 import { useState } from 'react';
 import useOutsideClick from '../../../hooks/useOutsideClick';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
+
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from '@mui/material';
+
 
 const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterProps, loading }) => {
   const [downloadDropdownOpen, setDownloadDropdownOpen] = useState(false);
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const [isFilterActive, setIsFilterActive] = useState(false);
+  const [emailUpdateDiaLogBox, setEmailUpdateDiaLogBox] = useState(false);
+  const [emailFrequency, setEmailFrequency] = useState('weekly');
+
+  const emeialUpdateDialogBoxRef = useOutsideClick(() => {
+    setEmailUpdateDiaLogBox(false);
+  });
 
   const dropdownDownloadRef = useOutsideClick(() => {
     setDownloadDropdownOpen(false);
@@ -40,6 +60,24 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
     filterProps.handleClearFilter();
   };
 
+  const handleEmailDialogOpen = () => {
+    setEmailUpdateDiaLogBox(true);
+  };
+
+  const handleEmailDialogClose = () => {
+    setEmailUpdateDiaLogBox(false);
+  };
+
+  const handleFrequencyChange = (event) => {
+    setEmailFrequency(event.target.value);
+  };
+
+  const handleEmailUpdateSubmit = () => {
+    // Handle the email update subscription here
+    console.log('Email frequency:', emailFrequency);
+    setEmailUpdateDiaLogBox(false);
+  };
+
   return (
     <div className="text-start card-container" style={{ width: '100%' }}>
       <div className="card-top" style={{ padding: '20px 20px 4px 30px', flexGrow: 1 }}>
@@ -47,7 +85,16 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
           <div className="title-container">
             <img src={Scholar} alt="Scholar" className="icon scholar" />
             <h5 className="title">{result.AuthorName}</h5>
+            <button
+              className="email-updates-button"
+              onClick={handleEmailDialogOpen}
+              disabled={loading}
+              title="Subscribe to Email Updates"
+            >
+              <EmailRoundedIcon />
+            </button>
           </div>
+
           <div className={`filter-container ${isFilterActive ? 'active' : ''}`} ref={filterRef}>
             <div onClick={handleFilterClick}>
               {isFilterActive ? (
@@ -270,6 +317,39 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
           </span>
         </div>
       </div>
+
+      <Dialog 
+        open={emailUpdateDiaLogBox} 
+        onClose={handleEmailDialogClose}
+        maxWidth="sm"
+        fullWidth
+        className='email-dialog'
+      >
+        <DialogTitle className="email-dialog-title">
+          <EmailRoundedIcon className="dialog-icon" />
+          Set Up Email Updates
+        </DialogTitle>
+        <DialogContent className="email-dialog-content">
+          <FormControl fullWidth className="email-frequency-select">
+            <InputLabel>Email Frequency</InputLabel>
+            <Select
+              value={emailFrequency}
+              label="Email Frequency"
+              onChange={handleFrequencyChange}
+            >
+              <MenuItem value="daily">Daily</MenuItem>
+              <MenuItem value="weekly">Weekly</MenuItem>
+              <MenuItem value="monthly">Monthly</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleEmailDialogClose}>Cancel</Button>
+          <Button onClick={handleEmailUpdateSubmit} variant="contained">
+            Subscribe
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
