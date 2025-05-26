@@ -46,6 +46,7 @@ func NewHookService(db *gorm.DB, hooks map[string]Hook, interval time.Duration) 
 func (s *HookService) Routes() chi.Router {
 	r := chi.NewRouter()
 
+	r.Get("/{report_id}", WrapRestHandler(s.ListHooks))
 	r.Post("/{report_id}", WrapRestHandler(s.CreateHook))
 
 	return r
@@ -189,6 +190,50 @@ func (s *HookService) RunHooks(checkInterval time.Duration) {
 			}
 		}
 	}()
+}
+
+func (s *HookService) ListHooks(r *http.Request) (any, error) {
+	userId, err := auth.GetUserId(r)
+	if err != nil {
+		slog.Error("error getting user id", "error", err)
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	reportId, err := URLParamUUID(r, "report_id")
+	if err != nil {
+		slog.Error("error parsing report id", "error", err)
+		return nil, CodedError(err, http.StatusBadRequest)
+	}
+
+	var userReport schema.UserAuthorReport
+	if err := s.db.First(&userReport, "id = ?", reportId).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, CodedError(reports.ErrReportNotFound, http.StatusNotFound)
+		}
+		slog.Error("error retrieving user author report", "error", err)
+		return nil, CodedError(reports.ErrReportAccessFailed, http.StatusInternalServerError)
+	}
+
+	if userReport.UserId != userId {
+		return nil, CodedError(reports.ErrUserCannotAccessReport, http.StatusForbidden)
+	}
+
+	var hooks []schema.AuthorReportHook
+	if err := s.db.Where("user_report_id = ?", reportId).Find(&hooks).Error; err != nil {
+		slog.Error("error retrieving hooks for user report", "error", err)
+		return nil, CodedError(reports.ErrReportAccessFailed, http.StatusInternalServerError)
+	}
+
+	hookResponses := make([]api.HookResponse, len(hooks))
+	for i, hook := range hooks {
+		hookResponses[i] = api.HookResponse{
+			Id:       hook.Id,
+			Action:   hook.Action,
+			Interval: hook.Interval,
+		}
+	}
+
+	return hookResponses, nil
 }
 
 func (s *HookService) Stop() {
