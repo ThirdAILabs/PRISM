@@ -11,6 +11,8 @@ import { useState } from 'react';
 import useOutsideClick from '../../../hooks/useOutsideClick';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
+import MailOutlineRoundedIcon from '@mui/icons-material/MailOutlineRounded';
+import { TextField } from '@mui/material';
 
 import {
   Dialog,
@@ -30,7 +32,10 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [emailUpdateDiaLogBox, setEmailUpdateDiaLogBox] = useState(false);
-  const [emailFrequency, setEmailFrequency] = useState('weekly');
+  const [emailFrequency, setEmailFrequency] = useState(0);
+  const [customDays, setCustomDays] = useState('');
+  const [customDaysError, setCustomDaysError] = useState('');
+  const [isCustom, setIsCustom] = useState(false);
 
   const emeialUpdateDialogBoxRef = useOutsideClick(() => {
     setEmailUpdateDiaLogBox(false);
@@ -68,8 +73,25 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
     setEmailUpdateDiaLogBox(false);
   };
 
+  const handleCustomDaysChange = (event) => {
+    const value = event.target.value;
+    setCustomDays(value);
+    
+    if (value && (isNaN(value) || parseInt(value) < 15 || parseInt(value) > 365)) {
+      setCustomDaysError('Must be a number between 15 and 365');
+    } else {
+      setCustomDaysError('');
+    }
+  };
+
   const handleFrequencyChange = (event) => {
-    setEmailFrequency(event.target.value);
+    const value = event.target.value;
+    setEmailFrequency(value);
+    setIsCustom(value === 'custom');
+    if (value !== 'custom') {
+      setCustomDays('');
+      setCustomDaysError('');
+    }
   };
 
   const handleEmailUpdateSubmit = () => {
@@ -326,8 +348,12 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
         className='email-dialog'
       >
         <DialogTitle className="email-dialog-title">
-          <EmailRoundedIcon className="dialog-icon" />
-          Set Up Email Updates
+          <span className="email-dialog-icon">
+            <MailOutlineRoundedIcon />
+          </span>
+          <span className="email-dialog-title-text">
+            Set Up Email Updates
+          </span>
         </DialogTitle>
         <DialogContent className="email-dialog-content">
           <FormControl fullWidth className="email-frequency-select">
@@ -337,16 +363,40 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
               label="Email Frequency"
               onChange={handleFrequencyChange}
             >
-              <MenuItem value="daily">Daily</MenuItem>
-              <MenuItem value="weekly">Weekly</MenuItem>
-              <MenuItem value="monthly">Monthly</MenuItem>
+              <MenuItem value={15}>Bi-weekly</MenuItem>
+              <MenuItem value={30}>Monthly</MenuItem>
+              <MenuItem value = {90}>Quarterly</MenuItem>
+              <MenuItem value="custom">Custom</MenuItem>
             </Select>
+            {isCustom && (
+              <TextField
+                className="custom-days-input"
+                label="Number of days"
+                type="number"
+                value={customDays}
+                onChange={handleCustomDaysChange}
+                error={!!customDaysError}
+                helperText={customDaysError}
+              />
+            )}
+            <div className="helper-text">
+              Select how often you'd like to receive assessment updates via email
+            </div>
           </FormControl>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleEmailDialogClose}>Cancel</Button>
-          <Button onClick={handleEmailUpdateSubmit} variant="contained">
-            Subscribe
+        <DialogActions className="email-dialog-actions">
+          <Button 
+            onClick={handleEmailDialogClose}
+            className="cancel-button"
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleEmailUpdateSubmit} 
+            className="submit-button"
+            disabled={isCustom && (!!customDaysError || !customDays)}
+          >
+            Set Up Updates
           </Button>
         </DialogActions>
       </Dialog>
