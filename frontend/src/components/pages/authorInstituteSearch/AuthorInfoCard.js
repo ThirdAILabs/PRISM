@@ -12,7 +12,7 @@ import useOutsideClick from '../../../hooks/useOutsideClick';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 import MailOutlineRoundedIcon from '@mui/icons-material/MailOutlineRounded';
-import { TextField } from '@mui/material';
+import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
 
 import {
   Dialog,
@@ -24,11 +24,19 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  TextField,
 } from '@mui/material';
 
 import { reportService } from '../../../api/reports';
 
-const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterProps, loading, reportId }) => {
+const AuthorInfoCard = ({
+  result,
+  verifyWithDisclosure,
+  downloadProps,
+  filterProps,
+  loading,
+  reportId,
+}) => {
   const [downloadDropdownOpen, setDownloadDropdownOpen] = useState(false);
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const [isFilterActive, setIsFilterActive] = useState(false);
@@ -44,7 +52,9 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
     // fetch all the hooks
     const fetchHooks = async () => {
       const hooks = await reportService.getHooks(reportId);
-      const authorReportEmailUpdateHook = hooks.find(hook => hook.Action === 'AuthorReportTracker');
+      const authorReportEmailUpdateHook = hooks.find(
+        (hook) => hook.Action === 'AuthorReportTracker'
+      );
       if (authorReportEmailUpdateHook) {
         setHasExistingSubscription(true);
         setEmailFrequency((authorReportEmailUpdateHook.Interval / (24 * 60 * 60)).toString());
@@ -81,7 +91,7 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
   const handleCustomDaysChange = (event) => {
     const value = event.target.value;
     setCustomDays(value);
-    
+
     if (value && (isNaN(value) || parseInt(value) < 15 || parseInt(value) > 365)) {
       setCustomDaysError('Must be a number between 15 and 365');
     } else {
@@ -365,16 +375,17 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
         </div>
       </div>
 
-      <Dialog 
-        open={emailUpdateDiaLogBox} 
+      <Dialog
+        open={emailUpdateDiaLogBox}
         onClose={() => setEmailUpdateDiaLogBox(false)}
         maxWidth="sm"
         fullWidth
-        className='email-dialog'
+        className="email-dialog"
       >
         <DialogTitle className="email-dialog-title">
           <span className="email-dialog-icon">
-            <MailOutlineRoundedIcon />
+            {hasExistingSubscription ? <MarkEmailReadIcon /> : <MailOutlineRoundedIcon />}
+            {/* <MailOutlineRoundedIcon /> */}
           </span>
           <span className="email-dialog-title-text">
             {hasExistingSubscription ? 'Email Updates Active' : 'Set Up Email Updates'}
@@ -384,12 +395,14 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
           {hasExistingSubscription ? (
             <div className="subscription-enabled-message">
               <span className="check-icon">✓</span>
-              You are currently receiving email updates {
-                emailFrequency === "15" ? 'bi-weekly' :
-                emailFrequency === "30" ? 'monthly' :
-                emailFrequency === "90" ? 'quarterly' :
-                `every ${emailFrequency} days`
-              }
+              You are currently receiving email updates{' '}
+              {emailFrequency === '15'
+                ? 'bi-weekly'
+                : emailFrequency === '30'
+                  ? 'monthly'
+                  : emailFrequency === '90'
+                    ? 'quarterly'
+                    : `every ${emailFrequency} days`}
             </div>
           ) : (
             <FormControl fullWidth className="email-frequency-select">
@@ -401,7 +414,7 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
               >
                 <MenuItem value="15">Bi-weekly</MenuItem>
                 <MenuItem value="30">Monthly</MenuItem>
-                <MenuItem value ="90">Quarterly</MenuItem>
+                <MenuItem value="90">Quarterly</MenuItem>
                 <MenuItem value="custom">Custom</MenuItem>
               </Select>
               {isCustom && (
@@ -423,22 +436,16 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
         </DialogContent>
         <DialogActions className="email-dialog-actions">
           {hasExistingSubscription ? (
-            <Button 
-              onClick={handleUnsubscribe}
-              className="unsubscribe-button"
-            >
+            <Button onClick={handleUnsubscribe} className="unsubscribe-button">
               Unsubscribe
             </Button>
           ) : (
             <>
-              <Button 
-                onClick={() => setEmailUpdateDiaLogBox(false)}
-                className="cancel-button"
-              >
+              <Button onClick={() => setEmailUpdateDiaLogBox(false)} className="cancel-button">
                 Cancel
               </Button>
-              <Button 
-                onClick={handleEmailUpdateSubmit} 
+              <Button
+                onClick={handleEmailUpdateSubmit}
                 className="submit-button"
                 disabled={isCustom && (!!customDaysError || !customDays)}
               >

@@ -36,5 +36,5 @@ export const API_ROUTES = {
     GET: (id) => `/api/v1/hooks/${id}`,
     CREATE: (id) => `/api/v1/hooks/${id}`,
     DELETE: (id, hookId) => `/api/v1/hooks/${id}/${hookId}`,
-  }
+  },
 };
