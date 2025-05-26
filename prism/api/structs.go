@@ -86,6 +86,10 @@ type CreateHookRequest struct {
 	Interval int
 }
 
+type CreateHookResponse struct {
+	Id uuid.UUID
+}
+
 type UniversityAuthorFlag struct {
 	AuthorId   string
 	AuthorName string

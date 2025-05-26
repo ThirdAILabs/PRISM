@@ -89,6 +89,8 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 		return nil, CodedError(err, http.StatusUnprocessableEntity)
 	}
 
+	var hookEntry schema.AuthorReportHook
+
 	if err := s.db.Transaction(func(txn *gorm.DB) error {
 		var userReport schema.UserAuthorReport
 		if err := txn.First(&userReport, "id = ?", reportId).Error; err != nil {
@@ -109,7 +111,7 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 			return CodedError(err, http.StatusInternalServerError)
 		}
 
-		hook := schema.AuthorReportHook{
+		hookEntry = schema.AuthorReportHook{
 			Id:           uuid.New(),
 			UserReportId: reportId,
 			Action:       params.Action,
@@ -118,7 +120,7 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 			Interval:     params.Interval,
 		}
 
-		if err := txn.Create(&hook).Error; err != nil {
+		if err := txn.Create(&hookEntry).Error; err != nil {
 			slog.Error("error creating author report hook", "error", err)
 			return CodedError(reports.ErrReportAccessFailed, http.StatusInternalServerError)
 		}
@@ -128,7 +130,9 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 		return nil, err
 	}
 
-	return nil, nil
+	return api.CreateHookResponse{
+		Id: hookEntry.Id,
+	}, nil
 }
 
 func (s *HookService) RunNextHook() {

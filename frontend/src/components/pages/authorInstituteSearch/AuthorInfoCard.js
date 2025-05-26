@@ -33,6 +33,7 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [emailUpdateDiaLogBox, setEmailUpdateDiaLogBox] = useState(false);
+  const [emailUpdateHookId, setEmailUpdateHookId] = useState('');
   const [emailFrequency, setEmailFrequency] = useState('');
   const [customDays, setCustomDays] = useState('');
   const [customDaysError, setCustomDaysError] = useState('');
@@ -47,6 +48,7 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
       if (authorReportEmailUpdateHook) {
         setHasExistingSubscription(true);
         setEmailFrequency((authorReportEmailUpdateHook.Interval / (24 * 60 * 60)).toString());
+        setEmailUpdateHookId(authorReportEmailUpdateHook.Id);
       }
     };
     fetchHooks();
@@ -107,9 +109,20 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
         });
         setHasExistingSubscription(true);
         setEmailUpdateDiaLogBox(false);
+        setEmailUpdateHookId(res.Id);
       }
     } catch (error) {
       console.error('Error creating email hook:', error);
+    }
+  };
+
+  const handleUnsubscribe = async () => {
+    try {
+      await reportService.deleteHook(reportId, emailUpdateHookId);
+      setHasExistingSubscription(false);
+      setEmailUpdateDiaLogBox(false);
+    } catch (error) {
+      console.error('Error deleting email hook:', error);
     }
   };
 
@@ -409,20 +422,29 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
           )}
         </DialogContent>
         <DialogActions className="email-dialog-actions">
-          <Button 
-            onClick={() => setEmailUpdateDiaLogBox(false)}
-            className="cancel-button"
-          >
-            {hasExistingSubscription ? 'Close' : 'Cancel'}
-          </Button>
-          {!hasExistingSubscription && (
+          {hasExistingSubscription ? (
             <Button 
-              onClick={handleEmailUpdateSubmit} 
-              className="submit-button"
-              disabled={isCustom && (!!customDaysError || !customDays)}
+              onClick={handleUnsubscribe}
+              className="unsubscribe-button"
             >
-              Subscribe
+              Unsubscribe
             </Button>
+          ) : (
+            <>
+              <Button 
+                onClick={() => setEmailUpdateDiaLogBox(false)}
+                className="cancel-button"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleEmailUpdateSubmit} 
+                className="submit-button"
+                disabled={isCustom && (!!customDaysError || !customDays)}
+              >
+                Subscribe
+              </Button>
+            </>
           )}
         </DialogActions>
       </Dialog>
