@@ -48,6 +48,7 @@ func (s *HookService) Routes() chi.Router {
 
 	r.Get("/{report_id}", WrapRestHandler(s.ListHooks))
 	r.Post("/{report_id}", WrapRestHandler(s.CreateHook))
+	r.Delete("/{report_id}/{hook_id}", WrapRestHandler(s.DeleteHook))
 
 	return r
 }
@@ -240,4 +241,59 @@ func (s *HookService) Stop() {
 	if s.stop != nil {
 		close(s.stop)
 	}
+}
+
+func (s *HookService) DeleteHook(r *http.Request) (any, error) {
+	userId, err := auth.GetUserId(r)
+	if err != nil {
+		slog.Error("error getting user id", "error", err)
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	reportId, err := URLParamUUID(r, "report_id")
+	if err != nil {
+		slog.Error("error parsing report id", "error", err)
+		return nil, CodedError(err, http.StatusBadRequest)
+	}
+
+	hookId, err := URLParamUUID(r, "hook_id")
+	if err != nil {
+		slog.Error("error parsing hook id", "error", err)
+		return nil, CodedError(err, http.StatusBadRequest)
+	}
+
+	if err := s.db.Transaction(func(txn *gorm.DB) error {
+		var userReport schema.UserAuthorReport
+		if err := txn.First(&userReport, "id = ?", reportId).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return CodedError(reports.ErrReportNotFound, http.StatusNotFound)
+			}
+			slog.Error("error retrieving user author report", "error", err)
+			return CodedError(reports.ErrReportAccessFailed, http.StatusInternalServerError)
+		}
+
+		if userReport.UserId != userId {
+			return CodedError(reports.ErrUserCannotAccessReport, http.StatusForbidden)
+		}
+
+		var hook schema.AuthorReportHook
+		if err := txn.First(&hook, "id = ? AND user_report_id = ?", hookId, reportId).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return CodedError(fmt.Errorf("hook not found"), http.StatusNotFound)
+			}
+			slog.Error("error retrieving author report hook", "error", err)
+			return CodedError(reports.ErrReportAccessFailed, http.StatusInternalServerError)
+		}
+
+		if err := txn.Delete(&hook).Error; err != nil {
+			slog.Error("error deleting author report hook", "error", err)
+			return CodedError(reports.ErrReportAccessFailed, http.StatusInternalServerError)
+		}
+
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return nil, nil
 }

@@ -32,4 +32,9 @@ export const API_ROUTES = {
     AUTHOR_ADVANCED: '/api/v1/search/authors-advanced',
     MATCH_ENTITIES: '/api/v1/search/match-entities',
   },
+  HOOKS: {
+    GET: (id) => `/api/v1/hooks/${id}`,
+    CREATE: (id) => `/api/v1/hooks/${id}`,
+    DELETE: (id, hookId) => `/api/v1/hooks/${id}/${hookId}`,
+  }
 };

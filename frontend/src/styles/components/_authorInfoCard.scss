@@ -179,7 +179,7 @@
     align-items: center;
     justify-content: center;
     margin-right: 12px;
-
+    cursor: pointer;
     svg {
       color: $color-primary-900;
       font-size: 24px;
@@ -203,6 +203,21 @@
         color: $color-text-500;
         @include paragraph-6;
         margin-top: 8px;
+      }
+    }
+
+    .subscription-enabled-message {
+      margin-top: 16px;
+      padding: 16px;
+      background-color: $color-primary-100;
+      border-radius: 8px;
+      color: $color-text-700;
+      @include paragraph-5;
+
+      .check-icon {
+        color: $color-primary-700;
+        margin-right: 8px;
+        vertical-align: middle;
       }
     }
   }
