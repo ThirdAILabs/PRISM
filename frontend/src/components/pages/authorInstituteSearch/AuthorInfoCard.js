@@ -103,7 +103,7 @@ const AuthorInfoCard = ({
     const value = event.target.value;
     setEmailFrequency(value);
     setIsCustom(value === 'custom');
-    if (value !== 'custom') {
+    if (!isCustom) {
       setCustomDays('');
       setCustomDaysError('');
     }
@@ -117,6 +117,8 @@ const AuthorInfoCard = ({
           action: 'AuthorReportTracker',
           interval: interval * 24 * 60 * 60, // Convert days to seconds
         });
+        setEmailFrequency(interval.toString());
+        setCustomDays('');
         setHasExistingSubscription(true);
         setEmailUpdateDiaLogBox(false);
         setEmailUpdateHookId(res.Id);
@@ -385,7 +387,6 @@ const AuthorInfoCard = ({
         <DialogTitle className="email-dialog-title">
           <span className="email-dialog-icon">
             {hasExistingSubscription ? <MarkEmailReadIcon /> : <MailOutlineRoundedIcon />}
-            {/* <MailOutlineRoundedIcon /> */}
           </span>
           <span className="email-dialog-title-text">
             {hasExistingSubscription ? 'Email Updates Active' : 'Set Up Email Updates'}
