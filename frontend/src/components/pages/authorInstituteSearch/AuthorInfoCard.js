@@ -33,7 +33,7 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [emailUpdateDiaLogBox, setEmailUpdateDiaLogBox] = useState(false);
-  const [emailFrequency, setEmailFrequency] = useState(0);
+  const [emailFrequency, setEmailFrequency] = useState('');
   const [customDays, setCustomDays] = useState('');
   const [customDaysError, setCustomDaysError] = useState('');
   const [isCustom, setIsCustom] = useState(false);
@@ -46,7 +46,7 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
       const authorReportEmailUpdateHook = hooks.find(hook => hook.Action === 'AuthorReportTracker');
       if (authorReportEmailUpdateHook) {
         setHasExistingSubscription(true);
-        setEmailFrequency(authorReportEmailUpdateHook.Interval);
+        setEmailFrequency((authorReportEmailUpdateHook.Interval / (24 * 60 * 60)).toString());
       }
     };
     fetchHooks();
@@ -97,17 +97,20 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
     }
   };
 
-  const handleEmailUpdateSubmit = () => {
-    async function temp() {
-      if (isCustom && customDaysError) {
+  const handleEmailUpdateSubmit = async () => {
+    try {
+      const interval = parseInt(isCustom ? customDays : emailFrequency);
+      if (!customDaysError) {
         const res = await reportService.createHook(reportId, {
           action: 'AuthorReportTracker',
-          Interval: emailFrequency,
+          interval: interval * 24 * 60 * 60, // Convert days to seconds
         });
+        setHasExistingSubscription(true);
+        setEmailUpdateDiaLogBox(false);
       }
+    } catch (error) {
+      console.error('Error creating email hook:', error);
     }
-    temp();
-    setEmailUpdateDiaLogBox(false);
   };
 
   return (
@@ -369,9 +372,9 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
             <div className="subscription-enabled-message">
               <span className="check-icon">✓</span>
               You are currently receiving email updates {
-                emailFrequency === 15 ? 'bi-weekly' :
-                emailFrequency === 30 ? 'monthly' :
-                emailFrequency === 90 ? 'quarterly' :
+                emailFrequency === "15" ? 'bi-weekly' :
+                emailFrequency === "30" ? 'monthly' :
+                emailFrequency === "90" ? 'quarterly' :
                 `every ${emailFrequency} days`
               }
             </div>
@@ -383,9 +386,9 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
                 label="Email Frequency"
                 onChange={handleFrequencyChange}
               >
-                <MenuItem value={15}>Bi-weekly</MenuItem>
-                <MenuItem value={30}>Monthly</MenuItem>
-                <MenuItem value = {90}>Quarterly</MenuItem>
+                <MenuItem value="15">Bi-weekly</MenuItem>
+                <MenuItem value="30">Monthly</MenuItem>
+                <MenuItem value ="90">Quarterly</MenuItem>
                 <MenuItem value="custom">Custom</MenuItem>
               </Select>
               {isCustom && (
