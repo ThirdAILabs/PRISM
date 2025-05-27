@@ -280,7 +280,7 @@ func (s *HookService) DeleteHook(r *http.Request) (any, error) {
 
 	if err := s.db.Transaction(func(txn *gorm.DB) error {
 		var userReport schema.UserAuthorReport
-		if err := txn.First(&userReport, "id = ?", reportId).Error; err != nil {
+		if err := txn.Preload("Hooks").First(&userReport, "id = ?", reportId).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return CodedError(reports.ErrReportNotFound, http.StatusNotFound)
 			}
@@ -290,8 +290,20 @@ func (s *HookService) DeleteHook(r *http.Request) (any, error) {
 		if userReport.UserId != userId {
 			return CodedError(reports.ErrUserCannotAccessReport, http.StatusForbidden)
 		}
+		// filter the userReport hooks to find the one to delete
+		var txnHook *schema.AuthorReportHook
+		for _, hook := range userReport.Hooks {
+			if hook.Id == hookId {
+				txnHook = &hook
+				break
+			}
+		}
+		if txnHook == nil {
+			slog.Error("hook not found for deletion", "hook_id", hookId)
+			return CodedError(fmt.Errorf("hook not found"), http.StatusNotFound)
+		}
 
-		result := txn.Delete(&schema.AuthorReportHook{Id: hookId, UserReportId: reportId})
+		result := txn.Delete(txnHook)
 		if result.Error != nil {
 			slog.Error("error deleting author report hook", "error", result.Error)
 			return CodedError(reports.ErrReportAccessFailed, http.StatusInternalServerError)
