@@ -8,9 +8,13 @@ import (
 	"net/http"
 	"net/url"
 	"prism/prism/api"
+	"prism/prism/schema"
 	"prism/prism/services"
 	"prism/prism/services/auth"
 	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 var minUpdateInterval = 15 * 24 * 60 * 60 // 15 days in seconds.
@@ -20,20 +24,31 @@ type AuthorReportUpdateNotifierData struct {
 }
 
 type AuthorReportUpdateNotifier struct {
+	Db       *gorm.DB
 	BaseURL  string
 	notifier *services.EmailMessenger
 }
 
-func NewAuthorReportUpdateNotifier(BaseUrl string, notifier *services.EmailMessenger) *AuthorReportUpdateNotifier {
+func NewAuthorReportUpdateNotifier(Db *gorm.DB, BaseUrl string, notifier *services.EmailMessenger) *AuthorReportUpdateNotifier {
 	return &AuthorReportUpdateNotifier{
+		Db:       Db,
 		BaseURL:  BaseUrl,
 		notifier: notifier,
 	}
 }
 
-func (h *AuthorReportUpdateNotifier) Validate(data []byte, interval int) error {
+func (h *AuthorReportUpdateNotifier) Validate(data []byte, reportId uuid.UUID, interval int) error {
 	if interval < minUpdateInterval {
 		return fmt.Errorf("interval must be greater than or equal to %d days", minUpdateInterval/(24*60*60))
+	}
+
+	var count int64
+	if err := h.Db.Model(&schema.AuthorReportHook{}).Where("user_report_id = ? AND action = ?", reportId, h.Type()).Count(&count).Error; err != nil {
+		return fmt.Errorf("error checking for existing hook: %w", err)
+	}
+
+	if count > 0 {
+		return fmt.Errorf("hook already exists for report %s", reportId)
 	}
 
 	return nil

@@ -18,7 +18,7 @@ import (
 )
 
 type Hook interface {
-	Validate(data []byte, interval int) error
+	Validate(data []byte, reportId uuid.UUID, interval int) error
 
 	Run(report api.Report, data []byte, lastRanAt time.Time) error
 
@@ -96,7 +96,7 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 		return nil, CodedError(fmt.Errorf("interval must be at least %d days", int(s.minHookInterval.Hours()/24)), http.StatusUnprocessableEntity)
 	}
 
-	if err := hook.Validate(params.Data, params.Interval); err != nil {
+	if err := hook.Validate(params.Data, reportId, params.Interval); err != nil {
 		slog.Error("error validating hook data", "error", err)
 		return nil, CodedError(err, http.StatusUnprocessableEntity)
 	}
@@ -287,23 +287,18 @@ func (s *HookService) DeleteHook(r *http.Request) (any, error) {
 			slog.Error("error retrieving user author report", "error", err)
 			return CodedError(reports.ErrReportAccessFailed, http.StatusInternalServerError)
 		}
-
 		if userReport.UserId != userId {
 			return CodedError(reports.ErrUserCannotAccessReport, http.StatusForbidden)
 		}
 
-		var hook schema.AuthorReportHook
-		if err := txn.First(&hook, "id = ? AND user_report_id = ?", hookId, reportId).Error; err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return CodedError(fmt.Errorf("hook not found"), http.StatusNotFound)
-			}
-			slog.Error("error retrieving author report hook", "error", err)
+		result := txn.Delete(&schema.AuthorReportHook{Id: hookId, UserReportId: reportId})
+		if result.Error != nil {
+			slog.Error("error deleting author report hook", "error", result.Error)
 			return CodedError(reports.ErrReportAccessFailed, http.StatusInternalServerError)
 		}
 
-		if err := txn.Delete(&hook).Error; err != nil {
-			slog.Error("error deleting author report hook", "error", err)
-			return CodedError(reports.ErrReportAccessFailed, http.StatusInternalServerError)
+		if result.RowsAffected < 1 {
+			return CodedError(fmt.Errorf("hook not found"), http.StatusNotFound)
 		}
 
 		return nil
