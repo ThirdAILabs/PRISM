@@ -223,7 +223,7 @@ func (s *HookService) ListHooks(r *http.Request) (any, error) {
 	}
 
 	var userReport schema.UserAuthorReport
-	if err := s.db.First(&userReport, "id = ?", reportId).Error; err != nil {
+	if err := s.db.Preload("Hooks").First(&userReport, "id = ?", reportId).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, CodedError(reports.ErrReportNotFound, http.StatusNotFound)
 		}
@@ -235,14 +235,8 @@ func (s *HookService) ListHooks(r *http.Request) (any, error) {
 		return nil, CodedError(reports.ErrUserCannotAccessReport, http.StatusForbidden)
 	}
 
-	var hooks []schema.AuthorReportHook
-	if err := s.db.Where("user_report_id = ?", reportId).Find(&hooks).Error; err != nil {
-		slog.Error("error retrieving hooks for user report", "error", err)
-		return nil, CodedError(reports.ErrReportAccessFailed, http.StatusInternalServerError)
-	}
-
-	hookResponses := make([]api.HookResponse, len(hooks))
-	for i, hook := range hooks {
+	hookResponses := make([]api.HookResponse, len(userReport.Hooks))
+	for i, hook := range userReport.Hooks {
 		hookResponses[i] = api.HookResponse{
 			Id:       hook.Id,
 			Action:   hook.Action,
@@ -290,6 +284,7 @@ func (s *HookService) DeleteHook(r *http.Request) (any, error) {
 		if userReport.UserId != userId {
 			return CodedError(reports.ErrUserCannotAccessReport, http.StatusForbidden)
 		}
+
 		// filter the userReport hooks to find the one to delete
 		var txnHook *schema.AuthorReportHook
 		for _, hook := range userReport.Hooks {
