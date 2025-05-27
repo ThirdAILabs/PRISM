@@ -66,6 +66,10 @@
           align-items: center;
           justify-content: center;
           height: 32px;
+
+          &.disabled {
+            color: $color-text-300;
+          }
         }
       }
 
@@ -179,10 +183,13 @@
     align-items: center;
     justify-content: center;
     margin-right: 12px;
-    cursor: pointer;
     svg {
       color: $color-primary-900;
       font-size: 24px;
+    }
+
+    .disabled {
+      color: $color-text-300;
     }
   }
 
@@ -219,6 +226,15 @@
         margin-right: 8px;
         vertical-align: middle;
       }
+    }
+
+    .disabled-message {
+      margin-top: 16px;
+      padding: 16px;
+      background-color: $color-text-300;
+      border-radius: 8px;
+      color: $color-text-700;
+      @include paragraph-5;
     }
   }
 

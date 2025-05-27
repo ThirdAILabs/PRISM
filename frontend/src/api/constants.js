@@ -33,6 +33,7 @@ export const API_ROUTES = {
     MATCH_ENTITIES: '/api/v1/search/match-entities',
   },
   HOOKS: {
+    LIST: `/api/v1/hooks`,
     GET: (id) => `/api/v1/hooks/${id}`,
     CREATE: (id) => `/api/v1/hooks/${id}`,
     DELETE: (id, hookId) => `/api/v1/hooks/${id}/${hookId}`,

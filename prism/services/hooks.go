@@ -46,11 +46,23 @@ func NewHookService(db *gorm.DB, hooks map[string]Hook, interval time.Duration) 
 func (s *HookService) Routes() chi.Router {
 	r := chi.NewRouter()
 
+	r.Get("/", WrapRestHandler(s.ListAvailableHooks))
 	r.Get("/{report_id}", WrapRestHandler(s.ListHooks))
 	r.Post("/{report_id}", WrapRestHandler(s.CreateHook))
 	r.Delete("/{report_id}/{hook_id}", WrapRestHandler(s.DeleteHook))
 
 	return r
+}
+
+func (s *HookService) ListAvailableHooks(r *http.Request) (any, error) {
+	availableHooks := make([]api.AvailableHookResponse, 0, len(s.hooks))
+	for _, hook := range s.hooks {
+		availableHooks = append(availableHooks, api.AvailableHookResponse{
+			Type: hook.Type(),
+		})
+	}
+
+	return availableHooks, nil
 }
 
 func (s *HookService) CreateHook(r *http.Request) (any, error) {

@@ -10,8 +10,7 @@ import DownloadDropdown from '../../common/tools/button/downloadButton';
 import { useEffect, useState } from 'react';
 import useOutsideClick from '../../../hooks/useOutsideClick';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
-import MailOutlineRoundedIcon from '@mui/icons-material/MailOutlineRounded';
+import EmailIcon from '@mui/icons-material/Email';
 import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
 
 import {
@@ -47,21 +46,43 @@ const AuthorInfoCard = ({
   const [customDaysError, setCustomDaysError] = useState('');
   const [isCustom, setIsCustom] = useState(false);
   const [hasExistingSubscription, setHasExistingSubscription] = useState(false);
+  const [emailUpdateHookDisabled, setEmailUpdateHookDisabled] = useState(false);
 
   useEffect(() => {
-    // fetch all the hooks
-    const fetchHooks = async () => {
-      const hooks = await reportService.getHooks(reportId);
-      const authorReportEmailUpdateHook = hooks.find(
-        (hook) => hook.Action === 'AuthorReportTracker'
-      );
-      if (authorReportEmailUpdateHook) {
-        setHasExistingSubscription(true);
-        setEmailFrequency((authorReportEmailUpdateHook.Interval / (24 * 60 * 60)).toString());
-        setEmailUpdateHookId(authorReportEmailUpdateHook.Id);
+    // check if the email update hook is disabled
+    const checkEmailUpdateHookDisabled = async () => {
+      try {
+        const hooks = await reportService.listHooks();
+        if (hooks.some((hook) => hook.Type === 'AuthorReportUpdateNotifier')) {
+          setEmailUpdateHookDisabled(false);
+          setHasExistingSubscription(false);
+        }
+        else{
+          setEmailUpdateHookDisabled(true);
+        }
+      } catch (error) {
+        console.error('Error checking email update hook:', error);
+        setEmailUpdateHookDisabled(true);
+        setHasExistingSubscription(false);
       }
     };
-    fetchHooks();
+    checkEmailUpdateHookDisabled();
+
+    if (!emailUpdateHookDisabled) {
+      // fetch the email update hooks for the report
+      const fetchHooks = async () => {
+        const hooks = await reportService.getHooks(reportId);
+        const authorReportEmailUpdateHook = hooks.find(
+          (hook) => hook.Action === 'AuthorReportUpdateNotifier'
+        );
+        if (authorReportEmailUpdateHook) {
+          setHasExistingSubscription(true);
+          setEmailFrequency((authorReportEmailUpdateHook.Interval / (24 * 60 * 60)).toString());
+          setEmailUpdateHookId(authorReportEmailUpdateHook.Id);
+        }
+      };
+      fetchHooks();
+    }
   }, []);
 
   const dropdownDownloadRef = useOutsideClick(() => {
@@ -114,7 +135,7 @@ const AuthorInfoCard = ({
       const interval = parseInt(isCustom ? customDays : emailFrequency);
       if (!customDaysError) {
         const res = await reportService.createHook(reportId, {
-          action: 'AuthorReportTracker',
+          action: 'AuthorReportUpdateNotifier',
           interval: interval * 24 * 60 * 60, // Convert days to seconds
         });
         setEmailFrequency(interval.toString());
@@ -146,11 +167,15 @@ const AuthorInfoCard = ({
             <img src={Scholar} alt="Scholar" className="icon scholar" />
             <h5 className="title">{result.AuthorName}</h5>
             <button
-              className="email-updates-button"
+              className={`email-updates-button ${emailUpdateHookDisabled ? 'disabled' : ''}`}
               onClick={() => setEmailUpdateDiaLogBox(true)}
-              title="Subscribe to Email Updates"
+              title={emailUpdateHookDisabled ? "Email Updates Disabled" : "Subscribe to Email Updates"}
             >
-              <EmailRoundedIcon />
+              {hasExistingSubscription ? (
+                <MarkEmailReadIcon />
+              ) : (
+                <EmailIcon />
+              )}
             </button>
           </div>
 
@@ -380,20 +405,28 @@ const AuthorInfoCard = ({
       <Dialog
         open={emailUpdateDiaLogBox}
         onClose={() => setEmailUpdateDiaLogBox(false)}
-        maxWidth="sm"
-        fullWidth
         className="email-dialog"
       >
         <DialogTitle className="email-dialog-title">
           <span className="email-dialog-icon">
-            {hasExistingSubscription ? <MarkEmailReadIcon /> : <MailOutlineRoundedIcon />}
+            {emailUpdateHookDisabled ? (
+              <EmailIcon className="disabled" />
+            ) : hasExistingSubscription ? (
+              <MarkEmailReadIcon />
+            ) : (
+              <EmailIcon />
+            )}
           </span>
           <span className="email-dialog-title-text">
-            {hasExistingSubscription ? 'Email Updates Active' : 'Set Up Email Updates'}
+            {emailUpdateHookDisabled ? 'Email Updates Disabled' : hasExistingSubscription ? 'Email Updates Active' : 'Set Up Email Updates'}
           </span>
         </DialogTitle>
         <DialogContent className="email-dialog-content">
-          {hasExistingSubscription ? (
+          {emailUpdateHookDisabled ? (
+            <div className="disabled-message">
+              Email updates are currently disabled. Please contact your administrator to enable this feature.
+            </div>
+          ) : hasExistingSubscription ? (
             <div className="subscription-enabled-message">
               <span className="check-icon">✓</span>
               You are currently receiving email updates{' '}
@@ -436,7 +469,11 @@ const AuthorInfoCard = ({
           )}
         </DialogContent>
         <DialogActions className="email-dialog-actions">
-          {hasExistingSubscription ? (
+          {emailUpdateHookDisabled ? (
+            <Button onClick={() => setEmailUpdateDiaLogBox(false)} className="cancel-button">
+              Close
+            </Button>
+          ) : hasExistingSubscription ? (
             <Button onClick={handleUnsubscribe} className="unsubscribe-button">
               Unsubscribe
             </Button>
@@ -448,7 +485,7 @@ const AuthorInfoCard = ({
               <Button
                 onClick={handleEmailUpdateSubmit}
                 className="submit-button"
-                disabled={isCustom && (!!customDaysError || !customDays)}
+                disabled={!emailFrequency || (isCustom && (!!customDaysError || !customDays))}
               >
                 Subscribe
               </Button>

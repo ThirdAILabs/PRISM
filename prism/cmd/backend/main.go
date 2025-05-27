@@ -185,7 +185,7 @@ func main() {
 
 	hookServices := make(map[string]services.Hook)
 	if config.SendGridKey != "" {
-		hookServices["AuthorReportTracker"] = hooks.NewAuthorReportUpdateNotifier(
+		hookServices["AuthorReportUpdateNotifier"] = hooks.NewAuthorReportUpdateNotifier(
 			config.BackendUrl,
 			notifier,
 		)

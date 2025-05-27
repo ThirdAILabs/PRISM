@@ -90,6 +90,10 @@ type CreateHookResponse struct {
 	Id uuid.UUID
 }
 
+type AvailableHookResponse struct {
+	Type string
+}
+
 type UniversityAuthorFlag struct {
 	AuthorId   string
 	AuthorName string
