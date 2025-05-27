@@ -56,8 +56,7 @@ const AuthorInfoCard = ({
         if (hooks.some((hook) => hook.Type === 'AuthorReportUpdateNotifier')) {
           setEmailUpdateHookDisabled(false);
           setHasExistingSubscription(false);
-        }
-        else{
+        } else {
           setEmailUpdateHookDisabled(true);
         }
       } catch (error) {
@@ -169,13 +168,11 @@ const AuthorInfoCard = ({
             <button
               className={`email-updates-button ${emailUpdateHookDisabled ? 'disabled' : ''}`}
               onClick={() => setEmailUpdateDiaLogBox(true)}
-              title={emailUpdateHookDisabled ? "Email Updates Disabled" : "Subscribe to Email Updates"}
+              title={
+                emailUpdateHookDisabled ? 'Email Updates Disabled' : 'Subscribe to Email Updates'
+              }
             >
-              {hasExistingSubscription ? (
-                <MarkEmailReadIcon />
-              ) : (
-                <EmailIcon />
-              )}
+              {hasExistingSubscription ? <MarkEmailReadIcon /> : <EmailIcon />}
             </button>
           </div>
 
@@ -418,13 +415,18 @@ const AuthorInfoCard = ({
             )}
           </span>
           <span className="email-dialog-title-text">
-            {emailUpdateHookDisabled ? 'Email Updates Disabled' : hasExistingSubscription ? 'Email Updates Active' : 'Set Up Email Updates'}
+            {emailUpdateHookDisabled
+              ? 'Email Updates Disabled'
+              : hasExistingSubscription
+                ? 'Email Updates Active'
+                : 'Set Up Email Updates'}
           </span>
         </DialogTitle>
         <DialogContent className="email-dialog-content">
           {emailUpdateHookDisabled ? (
             <div className="disabled-message">
-              Email updates are currently disabled. Please contact your administrator to enable this feature.
+              Email updates are currently disabled. Please contact your administrator to enable this
+              feature.
             </div>
           ) : hasExistingSubscription ? (
             <div className="subscription-enabled-message">
