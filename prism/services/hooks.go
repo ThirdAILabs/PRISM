@@ -9,6 +9,7 @@ import (
 	"prism/prism/reports"
 	"prism/prism/schema"
 	"prism/prism/services/auth"
+	"slices"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -285,15 +286,13 @@ func (s *HookService) DeleteHook(r *http.Request) (any, error) {
 			return CodedError(reports.ErrUserCannotAccessReport, http.StatusForbidden)
 		}
 
-		// filter the userReport hooks to find the one to delete
+		// find the userReport hooks to find the one to delete
 		var txnHook *schema.AuthorReportHook
-		for _, hook := range userReport.Hooks {
-			if hook.Id == hookId {
-				txnHook = &hook
-				break
-			}
-		}
-		if txnHook == nil {
+		if idx := slices.IndexFunc(userReport.Hooks, func(hook schema.AuthorReportHook) bool {
+			return hook.Id == hookId
+		}); idx >= 0 {
+			txnHook = &userReport.Hooks[idx]
+		} else {
 			slog.Error("hook not found for deletion", "hook_id", hookId)
 			return CodedError(fmt.Errorf("hook not found"), http.StatusNotFound)
 		}
