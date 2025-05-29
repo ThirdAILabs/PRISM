@@ -169,7 +169,7 @@ const AuthorInfoCard = ({
               className={`email-updates-button ${emailUpdateHookDisabled ? 'disabled' : ''}`}
               onClick={() => setEmailUpdateDiaLogBox(true)}
               title={
-                emailUpdateHookDisabled ? 'Email Updates Disabled' : 'Subscribe to Email Updates'
+                emailUpdateHookDisabled ? 'Email Updates Unavailable' : 'Subscribe to Email Updates'
               }
             >
               {hasExistingSubscription ? <MarkEmailReadIcon /> : <EmailIcon />}
@@ -416,7 +416,7 @@ const AuthorInfoCard = ({
           </span>
           <span className="email-dialog-title-text">
             {emailUpdateHookDisabled
-              ? 'Email Updates Disabled'
+              ? 'Email Updates Unavailable'
               : hasExistingSubscription
                 ? 'Email Updates Active'
                 : 'Set Up Email Updates'}
@@ -425,8 +425,7 @@ const AuthorInfoCard = ({
         <DialogContent className="email-dialog-content">
           {emailUpdateHookDisabled ? (
             <div className="disabled-message">
-              Email updates are currently disabled. Please contact your administrator to enable this
-              feature.
+              Please contact your administrator to enable this feature.
             </div>
           ) : hasExistingSubscription ? (
             <div className="subscription-enabled-message">
