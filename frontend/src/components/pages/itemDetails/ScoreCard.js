@@ -30,7 +30,7 @@ const ScoreCard = ({ score = 0, setActiveTab, loading }) => {
           <button
             className="button button-3d score-card-button"
             style={{ padding: '8px 48px' }}
-            disabled={loading || !score}
+            disabled={!score}
             onClick={() => setActiveTab(1)}
           >
             Visualize

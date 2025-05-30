@@ -176,7 +176,7 @@ const ItemDetails = () => {
         const inProgress = report.Status === 'queued' || report.Status === 'in-progress';
 
         if (inProgress) {
-          timeoutId = setTimeout(poll, 2000);
+          timeoutId = setTimeout(poll, 10000);
         } else {
           setLoading(false);
         }
