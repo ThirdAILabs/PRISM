@@ -249,15 +249,12 @@ function generateGraphData(data, parentId = null, level = 0) {
 }
 
 const MyComponent = ({ authorName, reportContent, review, setReview, setGraphNodeInfo }) => {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedNode, setSelectedNode] = useState(null);
-  const [expandedChildren, setExpandedChildren] = useState(false);
-
   const graphRef = useRef(null);
 
   useEffect(() => {
     showGraph();
   }, []);
+
   const graphData = generateGraphData(convertDataToGraphFormat(authorName, reportContent));
   const { nodes, lines, rootId } = graphData;
   const showGraph = async () => {
