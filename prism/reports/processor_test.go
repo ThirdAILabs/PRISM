@@ -142,7 +142,7 @@ func TestProcessorCoauthorAffiliation(t *testing.T) {
 			"Yu Huang",
 			"Tiantian Chen",
 			"Fu Lv",
-			"Wei Li",
+			"W. Li",
 			"Xin Li",
 			"Qian Li",
 		}
