@@ -251,7 +251,7 @@ function generateGraphData(data, parentId = null, level = 0) {
 const MyComponent = ({ authorName, reportContent, review, setReview, setGraphNodeInfo }) => {
   const [selectedNode, setSelectedNode] = useState(null);
   const [expandedChildren, setExpandedChildren] = useState(false);
-  
+
   const graphRef = useRef(null);
 
   useEffect(() => {
