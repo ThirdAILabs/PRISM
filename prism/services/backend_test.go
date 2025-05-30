@@ -856,7 +856,7 @@ type testHook struct {
 	invoked *hookInvocation
 }
 
-func (t *testHook) Validate(data []byte, interval int) error {
+func (t *testHook) Validate(data []byte, reportId uuid.UUID, interval int) error {
 	return nil
 }
 

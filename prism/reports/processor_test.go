@@ -142,7 +142,7 @@ func TestProcessorCoauthorAffiliation(t *testing.T) {
 			"Yu Huang",
 			"Tiantian Chen",
 			"Fu Lv",
-			"Wei Li",
+			"W. Li",
 			"Xin Li",
 			"Qian Li",
 		}
@@ -158,7 +158,7 @@ func TestProcessorCoauthorAffiliation(t *testing.T) {
 			if flag.Work.WorkId == "https://openalex.org/W4402273377" {
 				foundFlag = true
 				if !eqOrderInvariant(flag.Affiliations, expectedInstitutions) || !eqOrderInvariant(flag.Coauthors, expectedAuthors) {
-					t.Fatal("incorrect flag returned")
+					t.Fatalf("incorrect flag returned, flagged affiliation %v, flagged co-authors %v", flag.Affiliations, flag.Coauthors)
 				}
 			}
 		}

@@ -86,6 +86,14 @@ type CreateHookRequest struct {
 	Interval int
 }
 
+type CreateHookResponse struct {
+	Id uuid.UUID
+}
+
+type AvailableHookResponse struct {
+	Type string
+}
+
 type UniversityAuthorFlag struct {
 	AuthorId   string
 	AuthorName string
@@ -174,4 +182,10 @@ type License struct {
 	Name        string
 	Expiration  time.Time
 	Deactivated bool
+}
+
+type HookResponse struct {
+	Id       uuid.UUID
+	Action   string
+	Interval int
 }

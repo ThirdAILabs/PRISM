@@ -74,4 +74,21 @@ export const reportService = {
       throw error;
     }
   },
+
+  listHooks: async () => {
+    const response = await axiosInstance.get(API_ROUTES.HOOKS.LIST);
+    return response.data;
+  },
+  getHooks: async (reportId) => {
+    const response = await axiosInstance.get(API_ROUTES.HOOKS.GET(reportId));
+    return response.data;
+  },
+  createHook: async (reportId, hookData) => {
+    const response = await axiosInstance.post(API_ROUTES.HOOKS.CREATE(reportId), hookData);
+    return response.data;
+  },
+  deleteHook: async (reportId, hookId) => {
+    const response = await axiosInstance.delete(API_ROUTES.HOOKS.DELETE(reportId, hookId));
+    return response;
+  },
 };

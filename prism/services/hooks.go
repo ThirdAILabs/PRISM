@@ -9,6 +9,7 @@ import (
 	"prism/prism/reports"
 	"prism/prism/schema"
 	"prism/prism/services/auth"
+	"slices"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -18,7 +19,7 @@ import (
 )
 
 type Hook interface {
-	Validate(data []byte, interval int) error
+	Validate(data []byte, reportId uuid.UUID, interval int) error
 
 	Run(report api.Report, data []byte, lastRanAt time.Time) error
 
@@ -46,9 +47,23 @@ func NewHookService(db *gorm.DB, hooks map[string]Hook, interval time.Duration) 
 func (s *HookService) Routes() chi.Router {
 	r := chi.NewRouter()
 
+	r.Get("/", WrapRestHandler(s.ListAvailableHooks))
+	r.Get("/{report_id}", WrapRestHandler(s.ListHooks))
 	r.Post("/{report_id}", WrapRestHandler(s.CreateHook))
+	r.Delete("/{report_id}/{hook_id}", WrapRestHandler(s.DeleteHook))
 
 	return r
+}
+
+func (s *HookService) ListAvailableHooks(r *http.Request) (any, error) {
+	availableHooks := make([]api.AvailableHookResponse, 0, len(s.hooks))
+	for _, hook := range s.hooks {
+		availableHooks = append(availableHooks, api.AvailableHookResponse{
+			Type: hook.Type(),
+		})
+	}
+
+	return availableHooks, nil
 }
 
 func (s *HookService) CreateHook(r *http.Request) (any, error) {
@@ -82,10 +97,12 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 		return nil, CodedError(fmt.Errorf("interval must be at least %d days", int(s.minHookInterval.Hours()/24)), http.StatusUnprocessableEntity)
 	}
 
-	if err := hook.Validate(params.Data, params.Interval); err != nil {
+	if err := hook.Validate(params.Data, reportId, params.Interval); err != nil {
 		slog.Error("error validating hook data", "error", err)
 		return nil, CodedError(err, http.StatusUnprocessableEntity)
 	}
+
+	var hookEntry schema.AuthorReportHook
 
 	if err := s.db.Transaction(func(txn *gorm.DB) error {
 		var userReport schema.UserAuthorReport
@@ -107,7 +124,7 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 			return CodedError(err, http.StatusInternalServerError)
 		}
 
-		hook := schema.AuthorReportHook{
+		hookEntry = schema.AuthorReportHook{
 			Id:           uuid.New(),
 			UserReportId: reportId,
 			Action:       params.Action,
@@ -116,7 +133,7 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 			Interval:     params.Interval,
 		}
 
-		if err := txn.Create(&hook).Error; err != nil {
+		if err := txn.Create(&hookEntry).Error; err != nil {
 			slog.Error("error creating author report hook", "error", err)
 			return CodedError(reports.ErrReportAccessFailed, http.StatusInternalServerError)
 		}
@@ -126,7 +143,9 @@ func (s *HookService) CreateHook(r *http.Request) (any, error) {
 		return nil, err
 	}
 
-	return nil, nil
+	return api.CreateHookResponse{
+		Id: hookEntry.Id,
+	}, nil
 }
 
 func (s *HookService) RunNextHook() {
@@ -191,8 +210,107 @@ func (s *HookService) RunHooks(checkInterval time.Duration) {
 	}()
 }
 
+func (s *HookService) ListHooks(r *http.Request) (any, error) {
+	userId, err := auth.GetUserId(r)
+	if err != nil {
+		slog.Error("error getting user id", "error", err)
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	reportId, err := URLParamUUID(r, "report_id")
+	if err != nil {
+		slog.Error("error parsing report id", "error", err)
+		return nil, CodedError(err, http.StatusBadRequest)
+	}
+
+	var userReport schema.UserAuthorReport
+	if err := s.db.Preload("Hooks").First(&userReport, "id = ?", reportId).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, CodedError(reports.ErrReportNotFound, http.StatusNotFound)
+		}
+		slog.Error("error retrieving user author report", "error", err)
+		return nil, CodedError(reports.ErrReportAccessFailed, http.StatusInternalServerError)
+	}
+
+	if userReport.UserId != userId {
+		return nil, CodedError(reports.ErrUserCannotAccessReport, http.StatusForbidden)
+	}
+
+	hookResponses := make([]api.HookResponse, len(userReport.Hooks))
+	for i, hook := range userReport.Hooks {
+		hookResponses[i] = api.HookResponse{
+			Id:       hook.Id,
+			Action:   hook.Action,
+			Interval: hook.Interval,
+		}
+	}
+
+	return hookResponses, nil
+}
+
 func (s *HookService) Stop() {
 	if s.stop != nil {
 		close(s.stop)
 	}
+}
+
+func (s *HookService) DeleteHook(r *http.Request) (any, error) {
+	userId, err := auth.GetUserId(r)
+	if err != nil {
+		slog.Error("error getting user id", "error", err)
+		return nil, CodedError(err, http.StatusInternalServerError)
+	}
+
+	reportId, err := URLParamUUID(r, "report_id")
+	if err != nil {
+		slog.Error("error parsing report id", "error", err)
+		return nil, CodedError(err, http.StatusBadRequest)
+	}
+
+	hookId, err := URLParamUUID(r, "hook_id")
+	if err != nil {
+		slog.Error("error parsing hook id", "error", err)
+		return nil, CodedError(err, http.StatusBadRequest)
+	}
+
+	if err := s.db.Transaction(func(txn *gorm.DB) error {
+		var userReport schema.UserAuthorReport
+		if err := txn.Preload("Hooks").First(&userReport, "id = ?", reportId).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return CodedError(reports.ErrReportNotFound, http.StatusNotFound)
+			}
+			slog.Error("error retrieving user author report", "error", err)
+			return CodedError(reports.ErrReportAccessFailed, http.StatusInternalServerError)
+		}
+		if userReport.UserId != userId {
+			return CodedError(reports.ErrUserCannotAccessReport, http.StatusForbidden)
+		}
+
+		// find the userReport hooks to find the one to delete
+		var txnHook *schema.AuthorReportHook
+		if idx := slices.IndexFunc(userReport.Hooks, func(hook schema.AuthorReportHook) bool {
+			return hook.Id == hookId
+		}); idx >= 0 {
+			txnHook = &userReport.Hooks[idx]
+		} else {
+			slog.Error("hook not found for deletion", "hook_id", hookId)
+			return CodedError(fmt.Errorf("hook not found"), http.StatusNotFound)
+		}
+
+		result := txn.Delete(txnHook)
+		if result.Error != nil {
+			slog.Error("error deleting author report hook", "error", result.Error)
+			return CodedError(reports.ErrReportAccessFailed, http.StatusInternalServerError)
+		}
+
+		if result.RowsAffected < 1 {
+			return CodedError(fmt.Errorf("hook not found"), http.StatusNotFound)
+		}
+
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return nil, nil
 }

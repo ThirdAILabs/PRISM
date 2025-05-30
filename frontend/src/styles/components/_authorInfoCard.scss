@@ -54,6 +54,23 @@
         display: flex;
         align-items: flex-start;
         flex: 1;
+
+        .email-updates-button {
+          margin-top: -2px;
+          margin-left: 10px;
+          background-color: $color-text-100;
+          color: $color-primary-500;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 32px;
+
+          &.disabled {
+            color: $color-text-300;
+          }
+        }
       }
 
       .filter-container {
@@ -139,5 +156,127 @@
 
   .card-footer {
     flex-shrink: 0;
+  }
+}
+
+.email-dialog {
+  .MuiPaper-root {
+    border-radius: 10px !important;
+    padding: 0px 5px 10px 0px !important;
+  }
+
+  &-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 24px;
+    font-weight: 700;
+    color: $color-text-900;
+  }
+
+  &-icon {
+    background: $color-primary-100;
+    border-radius: 12px;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    svg {
+      color: $color-primary-900;
+      font-size: 24px;
+    }
+
+    .disabled {
+      color: $color-text-300;
+    }
+  }
+
+  &-title-text {
+    @include heading-5;
+    color: $color-text-900;
+  }
+
+  &-content {
+    .email-frequency-select {
+      margin-top: 16px;
+
+      .custom-days-input {
+        margin-top: 16px;
+      }
+
+      .helper-text {
+        color: $color-text-500;
+        @include paragraph-6;
+        margin-top: 8px;
+      }
+    }
+
+    .subscription-enabled-message {
+      margin-top: 16px;
+      padding: 16px;
+      background-color: $color-primary-100;
+      border-radius: 8px;
+      color: $color-text-700;
+      @include paragraph-5;
+
+      .check-icon {
+        color: $color-primary-700;
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+    }
+
+    .disabled-message {
+      margin-top: 16px;
+      padding: 16px;
+      background-color: $color-text-300;
+      border-radius: 8px;
+      color: $color-text-700;
+      @include paragraph-5;
+    }
+  }
+
+  &-actions {
+    padding: 16px 24px !important;
+    gap: 12px;
+
+    .MuiButton-root {
+      text-transform: none;
+      font-weight: 500;
+      padding: 8px 24px;
+      border-radius: 8px;
+
+      &.cancel-button {
+        cursor: pointer;
+        color: $color-text-700;
+        background-color: transparent;
+        border: 1px solid $color-text-300;
+
+        &:hover {
+          background-color: rgba($color-text-500, 0.1);
+        }
+      }
+
+      &.submit-button {
+        cursor: pointer;
+        color: white;
+        background-color: $color-primary-700;
+
+        &:hover {
+          background-color: $color-primary-900;
+        }
+      }
+    }
+
+    .unsubscribe-button {
+      background-color: #dc3545;
+      color: white;
+
+      &:hover {
+        background-color: #c82333;
+      }
+    }
   }
 }

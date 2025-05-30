@@ -7,14 +7,82 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import { getTrailingWhiteSpace } from '../../../utils/helper';
 import DownloadDropdown from '../../common/tools/button/downloadButton';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import useOutsideClick from '../../../hooks/useOutsideClick';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import EmailIcon from '@mui/icons-material/Email';
+import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
 
-const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterProps, loading }) => {
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  TextField,
+} from '@mui/material';
+
+import { reportService } from '../../../api/reports';
+
+const AuthorInfoCard = ({
+  result,
+  verifyWithDisclosure,
+  downloadProps,
+  filterProps,
+  loading,
+  reportId,
+}) => {
   const [downloadDropdownOpen, setDownloadDropdownOpen] = useState(false);
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const [isFilterActive, setIsFilterActive] = useState(false);
+  const [emailUpdateDiaLogBox, setEmailUpdateDiaLogBox] = useState(false);
+  const [emailUpdateHookId, setEmailUpdateHookId] = useState('');
+  const [emailFrequency, setEmailFrequency] = useState('');
+  const [customDays, setCustomDays] = useState('');
+  const [customDaysError, setCustomDaysError] = useState('');
+  const [isCustom, setIsCustom] = useState(false);
+  const [hasExistingSubscription, setHasExistingSubscription] = useState(false);
+  const [emailUpdateHookDisabled, setEmailUpdateHookDisabled] = useState(false);
+
+  useEffect(() => {
+    // check if the email update hook is disabled
+    const checkEmailUpdateHookDisabled = async () => {
+      try {
+        const hooks = await reportService.listHooks();
+        if (hooks.some((hook) => hook.Type === 'AuthorReportUpdateNotifier')) {
+          setEmailUpdateHookDisabled(false);
+          setHasExistingSubscription(false);
+        } else {
+          setEmailUpdateHookDisabled(true);
+        }
+      } catch (error) {
+        console.error('Error checking email update hook:', error);
+        setEmailUpdateHookDisabled(true);
+        setHasExistingSubscription(false);
+      }
+    };
+    checkEmailUpdateHookDisabled();
+
+    if (!emailUpdateHookDisabled) {
+      // fetch the email update hooks for the report
+      const fetchHooks = async () => {
+        const hooks = await reportService.getHooks(reportId);
+        const authorReportEmailUpdateHook = hooks.find(
+          (hook) => hook.Action === 'AuthorReportUpdateNotifier'
+        );
+        if (authorReportEmailUpdateHook) {
+          setHasExistingSubscription(true);
+          setEmailFrequency((authorReportEmailUpdateHook.Interval / (24 * 60 * 60)).toString());
+          setEmailUpdateHookId(authorReportEmailUpdateHook.Id);
+        }
+      };
+      fetchHooks();
+    }
+  }, []);
 
   const dropdownDownloadRef = useOutsideClick(() => {
     setDownloadDropdownOpen(false);
@@ -40,6 +108,56 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
     filterProps.handleClearFilter();
   };
 
+  const handleCustomDaysChange = (event) => {
+    const value = event.target.value;
+    setCustomDays(value);
+
+    if (value && (isNaN(value) || parseInt(value) < 15 || parseInt(value) > 365)) {
+      setCustomDaysError('Must be a number between 15 and 365');
+    } else {
+      setCustomDaysError('');
+    }
+  };
+
+  const handleFrequencyChange = (event) => {
+    const value = event.target.value;
+    setEmailFrequency(value);
+    setIsCustom(value === 'custom');
+    if (!isCustom) {
+      setCustomDays('');
+      setCustomDaysError('');
+    }
+  };
+
+  const handleEmailUpdateSubmit = async () => {
+    try {
+      const interval = parseInt(isCustom ? customDays : emailFrequency);
+      if (!customDaysError) {
+        const res = await reportService.createHook(reportId, {
+          action: 'AuthorReportUpdateNotifier',
+          interval: interval * 24 * 60 * 60, // Convert days to seconds
+        });
+        setEmailFrequency(interval.toString());
+        setCustomDays('');
+        setHasExistingSubscription(true);
+        setEmailUpdateDiaLogBox(false);
+        setEmailUpdateHookId(res.Id);
+      }
+    } catch (error) {
+      console.error('Error creating email hook:', error);
+    }
+  };
+
+  const handleUnsubscribe = async () => {
+    try {
+      await reportService.deleteHook(reportId, emailUpdateHookId);
+      setHasExistingSubscription(false);
+      setEmailUpdateDiaLogBox(false);
+    } catch (error) {
+      console.error('Error deleting email hook:', error);
+    }
+  };
+
   return (
     <div className="text-start card-container" style={{ width: '100%' }}>
       <div className="card-top" style={{ padding: '20px 20px 4px 30px', flexGrow: 1 }}>
@@ -47,7 +165,17 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
           <div className="title-container">
             <img src={Scholar} alt="Scholar" className="icon scholar" />
             <h5 className="title">{result.AuthorName}</h5>
+            <button
+              className={`email-updates-button ${emailUpdateHookDisabled ? 'disabled' : ''}`}
+              onClick={() => setEmailUpdateDiaLogBox(true)}
+              title={
+                emailUpdateHookDisabled ? 'Email Updates Unavailable' : 'Subscribe to Email Updates'
+              }
+            >
+              {hasExistingSubscription ? <MarkEmailReadIcon /> : <EmailIcon />}
+            </button>
           </div>
+
           <div className={`filter-container ${isFilterActive ? 'active' : ''}`} ref={filterRef}>
             <div onClick={handleFilterClick}>
               {isFilterActive ? (
@@ -270,6 +398,102 @@ const AuthorInfoCard = ({ result, verifyWithDisclosure, downloadProps, filterPro
           </span>
         </div>
       </div>
+
+      <Dialog
+        open={emailUpdateDiaLogBox}
+        onClose={() => setEmailUpdateDiaLogBox(false)}
+        className="email-dialog"
+      >
+        <DialogTitle className="email-dialog-title">
+          <span className="email-dialog-icon">
+            {emailUpdateHookDisabled ? (
+              <EmailIcon className="disabled" />
+            ) : hasExistingSubscription ? (
+              <MarkEmailReadIcon />
+            ) : (
+              <EmailIcon />
+            )}
+          </span>
+          <span className="email-dialog-title-text">
+            {emailUpdateHookDisabled
+              ? 'Email Updates Unavailable'
+              : hasExistingSubscription
+                ? 'Email Updates Active'
+                : 'Set Up Email Updates'}
+          </span>
+        </DialogTitle>
+        <DialogContent className="email-dialog-content">
+          {emailUpdateHookDisabled ? (
+            <div className="disabled-message">
+              Please contact your administrator to enable this feature.
+            </div>
+          ) : hasExistingSubscription ? (
+            <div className="subscription-enabled-message">
+              <span className="check-icon">✓</span>
+              You are currently receiving email updates{' '}
+              {emailFrequency === '15'
+                ? 'bi-weekly'
+                : emailFrequency === '30'
+                  ? 'monthly'
+                  : emailFrequency === '90'
+                    ? 'quarterly'
+                    : `every ${emailFrequency} days`}
+            </div>
+          ) : (
+            <FormControl fullWidth className="email-frequency-select">
+              <InputLabel>Email Frequency</InputLabel>
+              <Select
+                value={emailFrequency}
+                label="Email Frequency"
+                onChange={handleFrequencyChange}
+              >
+                <MenuItem value="15">Bi-weekly</MenuItem>
+                <MenuItem value="30">Monthly</MenuItem>
+                <MenuItem value="90">Quarterly</MenuItem>
+                <MenuItem value="custom">Custom</MenuItem>
+              </Select>
+              {isCustom && (
+                <TextField
+                  className="custom-days-input"
+                  label="Number of days"
+                  type="number"
+                  value={customDays}
+                  onChange={handleCustomDaysChange}
+                  error={!!customDaysError}
+                  helperText={customDaysError}
+                />
+              )}
+              <div className="helper-text">
+                Select how often you'd like to receive assessment updates via email
+              </div>
+            </FormControl>
+          )}
+        </DialogContent>
+        <DialogActions className="email-dialog-actions">
+          {emailUpdateHookDisabled ? (
+            <Button onClick={() => setEmailUpdateDiaLogBox(false)} className="cancel-button">
+              Close
+            </Button>
+          ) : hasExistingSubscription ? (
+            <Button onClick={handleUnsubscribe} className="unsubscribe-button">
+              Unsubscribe
+            </Button>
+          ) : (
+            <>
+              <Button onClick={() => setEmailUpdateDiaLogBox(false)} className="cancel-button">
+                Cancel
+              </Button>
+              <Button
+                onClick={handleEmailUpdateSubmit}
+                className="submit-button"
+                disabled={!emailFrequency || (isCustom && (!!customDaysError || !customDays))}
+              >
+                Subscribe
+              </Button>
+            </>
+          )}
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

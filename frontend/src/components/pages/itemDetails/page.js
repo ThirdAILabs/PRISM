@@ -410,6 +410,7 @@ const ItemDetails = () => {
                     downloadProps={downloadProps}
                     filterProps={filterProps}
                     loading={loading}
+                    reportId={report_id}
                   />
                 </div>
                 <div
