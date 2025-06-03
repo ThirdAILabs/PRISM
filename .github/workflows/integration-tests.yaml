@@ -79,7 +79,7 @@ jobs:
       - name: install dependencies
         run: |
           go mod download
-          go run github.com/playwright-community/playwright-go/cmd/playwright install --with-deps firefox
+          go run github.com/playwright-community/playwright-go/cmd/playwright install --with-deps chromium
     
       - name: wait for grobid to be ready
         run: |

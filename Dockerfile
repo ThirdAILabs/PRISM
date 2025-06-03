@@ -27,7 +27,7 @@ COPY --from=build-stage /go/bin/playwright /usr/local/bin/
 
 # Install Playwright dependencies
 RUN apt-get update && apt-get install -y ca-certificates tzdata \
-    && /usr/local/bin/playwright install --with-deps firefox \
+    && /usr/local/bin/playwright install --with-deps chromium \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy application data
