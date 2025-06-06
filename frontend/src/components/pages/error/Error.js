@@ -6,7 +6,7 @@ import './Error.css';
 export default function Error() {
   const [searchParams] = useSearchParams();
   const message = searchParams.get('message');
-  const status = searchParams.get('status');
+  let status = searchParams.get('status') || 500;
   const navigate = useNavigate();
 
   const errorMessages = {
@@ -19,6 +19,10 @@ export default function Error() {
     500: ['Internal Server Error', 'Something went wrong on our side.'],
     503: ['Service Unavailable', 'The server is currently unable to handle the request.'],
   };
+
+  if (!errorMessages[status]) {
+    status = 500;
+  }
 
   return (
     <div class="error-page d-flex align-items-center justify-content-center">
