@@ -54,4 +54,8 @@ jobs:
           base: main
           title: "Automated data update"
           body: "This PR includes updated data generated automatically."
-          reviewers: pratkpranav
+          reviewers: |
+            pratkpranav
+            ashutoshTAI
+            
+            
