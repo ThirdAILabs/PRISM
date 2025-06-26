@@ -44,6 +44,11 @@ function EntityLookup() {
     try {
       const entities = await searchService.matchEntities(query);
 
+      entities.sort((a, b) => {
+        if (!a.Resource) return 1;
+        if (!b.Resource) return -1;
+        return a.Resource.localeCompare(b.Resource, undefined, { sensitivity: 'base' });
+      });
       setResults(entities);
     } catch (error) {
       console.error('Error fetching data:', error);
