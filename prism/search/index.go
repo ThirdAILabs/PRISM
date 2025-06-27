@@ -148,6 +148,9 @@ func (index *EntityIndex[T]) Query(query string, k int) []Record[T] {
 	}
 
 	sort.Slice(pairs, func(i, j int) bool {
+		if pairs[i].score == pairs[j].score {
+			return pairs[i].recordId < pairs[j].recordId
+		}
 		return pairs[i].score > pairs[j].score
 	})
 
