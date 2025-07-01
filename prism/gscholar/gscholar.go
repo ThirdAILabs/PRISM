@@ -66,47 +66,6 @@ func profileToAuthor(profile gscholarProfile) api.Author {
 	}
 }
 
-func nextGScholarPageV1(query string, nextPageToken *string) ([]api.Author, *string, error) {
-	type gscholarResults struct {
-		Profiles   []gscholarProfile `json:"profiles"`
-		Pagination struct {
-			NextPageToken *string `json:"next_page_token"`
-		} `json:"pagination"`
-	}
-
-	params := map[string]string{
-		"engine":   "google_scholar_profiles",
-		"mauthors": query,
-	}
-	if nextPageToken != nil {
-		params["after_author"] = *nextPageToken
-	}
-
-	res, err := client.R().
-		SetResult(&gscholarResults{}).
-		SetQueryParams(params).
-		Get("/search.json")
-
-	if err != nil {
-		slog.Error("google scholar profile search: search failed", "query", query, "error", err)
-		return nil, nil, ErrGoogleScholarSearchFailed
-	}
-
-	if !res.IsSuccess() {
-		slog.Error("google scholar profile search returned error", "status_code", res.StatusCode(), "body", res.String())
-		return nil, nil, ErrGoogleScholarSearchFailed
-	}
-
-	results := res.Result().(*gscholarResults)
-
-	authors := make([]api.Author, 0, len(results.Profiles))
-	for _, profile := range results.Profiles {
-		authors = append(authors, profileToAuthor(profile))
-	}
-
-	return authors, results.Pagination.NextPageToken, nil
-}
-
 func GetAuthorDetails(authorId string) (api.Author, error) {
 	type authorDetailsResult struct {
 		Author gscholarProfile `json:"author"`
@@ -259,9 +218,8 @@ func nextGScholarPageV2(query string, nextIdx *int, seen map[string]bool) ([]api
 }
 
 type cursorPayload struct {
-	V1Cursor *string
-	V2Cursor *int
-	Seen     []string
+	Cursor *int
+	Seen   []string
 }
 
 func parseCursor(token string) (cursorPayload, error) {
@@ -304,49 +262,21 @@ func NextGScholarPage(query, cursorToken string) ([]api.Author, string, error) {
 		seen[x] = true
 	}
 
-	var v1Results, v2Results []api.Author
-	var v1Cursor *string
-	var v2Cursor *int
-	var v1Err, v2Err error
+	var authorResults []api.Author
+	var authorCursor *int
 
-	wg := sync.WaitGroup{}
-
-	if len(seen) == 0 || cursor.V1Cursor != nil {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			v1Results, v1Cursor, v1Err = nextGScholarPageV1(query, cursor.V1Cursor)
-		}()
+	if len(seen) == 0 || cursor.Cursor != nil {
+		authorResults, authorCursor, err = nextGScholarPageV2(query, cursor.Cursor, seen)
+		if err != nil {
+			slog.Error("google scholar search: error getting author results", "error", err)
+			return nil, "", err
+		}
 	}
 
-	if len(seen) == 0 || cursor.V2Cursor != nil {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			v2Results, v2Cursor, v2Err = nextGScholarPageV2(query, cursor.V2Cursor, seen)
-		}()
-	}
+	newCursor := cursorPayload{Cursor: authorCursor, Seen: cursor.Seen}
 
-	wg.Wait()
-
-	if v1Err != nil {
-		slog.Error("v1 gscholar search failed", "error", v1Err)
-	}
-
-	if v2Err != nil {
-		slog.Error("v2 gscholar search failed", "error", v2Err)
-	}
-
-	if v1Err != nil && v2Err != nil {
-		err := errors.Join(v1Err, v2Err)
-		slog.Error("both v1 and v2 next page failed", "error", err)
-		return nil, "", err
-	}
-
-	newCursor := cursorPayload{V1Cursor: v1Cursor, V2Cursor: v2Cursor, Seen: cursor.Seen}
-
-	results := make([]api.Author, 0, len(v1Results)+len(v2Results))
-	for _, res := range slices.Concat(v1Results, v2Results) {
+	results := make([]api.Author, 0, len(authorResults))
+	for _, res := range authorResults {
 		if !seen[res.AuthorId] {
 			results = append(results, res)
 			seen[res.AuthorId] = true
