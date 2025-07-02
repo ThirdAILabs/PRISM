@@ -392,7 +392,7 @@ func (oa *RemoteKnowledgeBase) FindWorksByTitle(titles []string, startDate, endD
 	for _, title := range titles {
 		res, err := oa.client.R().
 			SetResult(&oaResults[oaWork]{}).
-			SetQueryParam("filter", fmt.Sprintf("title.search:%s%s", title, yearFilter)).
+			SetQueryParam("filter", fmt.Sprintf("display_name.search:%s%s", title, yearFilter)).
 			SetQueryParam("per-page", "1").
 			Get("/works")
 
@@ -402,7 +402,8 @@ func (oa *RemoteKnowledgeBase) FindWorksByTitle(titles []string, startDate, endD
 		}
 
 		if !res.IsSuccess() {
-			return nil, fmt.Errorf("openalex work search failed: openalex returned status_code=%d body=%s", res.StatusCode(), res.String())
+			slog.Error("openalex work search failed", "title", title, "status_code", res.StatusCode(), "body", res.String())
+			continue
 		}
 
 		results := res.Result().(*oaResults[oaWork])
