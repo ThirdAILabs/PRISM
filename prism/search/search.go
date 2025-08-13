@@ -473,31 +473,3 @@ func (flash *Flash) Predict(query string, topk int) ([]string, error) {
 
 	return output, nil
 }
-
-func SetLicenseKey(key string) error {
-	keyCStr := C.CString(key)
-	defer C.free(unsafe.Pointer(keyCStr))
-
-	var err *C.char
-	C.set_license_key(keyCStr, &err)
-	if err != nil {
-		defer C.free(unsafe.Pointer(err))
-		return errors.New(C.GoString(err))
-	}
-
-	return nil
-}
-
-func SetLicensePath(path string) error {
-	pathCStr := C.CString(path)
-	defer C.free(unsafe.Pointer(pathCStr))
-
-	var err *C.char
-	C.set_license_path(pathCStr, &err)
-	if err != nil {
-		defer C.free(unsafe.Pointer(err))
-		return errors.New(C.GoString(err))
-	}
-
-	return nil
-}

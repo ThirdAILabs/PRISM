@@ -9,13 +9,6 @@ import (
 	"testing"
 )
 
-func init() {
-	const licensePath = "../../.test_license/thirdai.license"
-	if err := search.SetLicensePath(licensePath); err != nil {
-		panic(err)
-	}
-}
-
 func checkQuery(t *testing.T, ndb search.NeuralDB, query string, constraints search.Constraints, expectedIds []uint64) {
 	results, err := ndb.Query(query, len(expectedIds), constraints)
 	if err != nil {

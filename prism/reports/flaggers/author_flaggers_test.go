@@ -11,13 +11,6 @@ import (
 	"testing"
 )
 
-func init() {
-	const licensePath = "../../../.test_license/thirdai.license"
-	if err := search.SetLicensePath(licensePath); err != nil {
-		panic(err)
-	}
-}
-
 func TestAuthorIsFacultyAtEOC(t *testing.T) {
 	ndb, err := search.NewNeuralDB(t.TempDir())
 	if err != nil {

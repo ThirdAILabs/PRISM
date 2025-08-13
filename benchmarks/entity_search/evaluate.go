@@ -4,7 +4,6 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"prism/benchmarks/entity_search/utils"
 	"prism/prism/search"
@@ -46,10 +45,6 @@ func evaluateEntitySearch(queries []utils.Sample) {
 }
 
 func evaluateNDB(queries []utils.Sample) {
-	if err := search.SetLicensePath("../../.test_license/thirdai.license"); err != nil {
-		log.Fatalf("error setting license key: %v", err)
-	}
-
 	entities := make([]string, 0, len(queries))
 	for _, query := range queries {
 		entities = append(entities, query.Entity)
@@ -123,10 +118,6 @@ func createCsv(aliases []string) (string, error) {
 }
 
 func evaluateFlash(queries []utils.Sample) {
-	if err := search.SetLicensePath("../../.test_license/thirdai.license"); err != nil {
-		log.Fatalf("error setting license key: %v", err)
-	}
-
 	entities := make([]string, 0, len(queries))
 	for _, query := range queries {
 		entities = append(entities, query.Entity)
