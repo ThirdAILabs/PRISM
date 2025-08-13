@@ -11,11 +11,9 @@ import (
 	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/cmd"
-	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/schema/migrations"
-	"prism/prism/search"
 	"prism/prism/services"
 	"prism/prism/services/auth"
 	hooks "prism/prism/services/hooks"
@@ -27,9 +25,8 @@ import (
 )
 
 type Config struct {
-	PostgresUri  string `env:"DB_URI,notEmpty,required"`
-	Logfile      string `env:"LOGFILE,notEmpty" envDefault:"prism_backend.log"`
-	PrismLicense string `env:"PRISM_LICENSE,notEmpty,required"`
+	PostgresUri string `env:"DB_URI,notEmpty,required"`
+	Logfile     string `env:"LOGFILE,notEmpty" envDefault:"prism_backend.log"`
 
 	Port int `env:"PORT" envDefault:"8000"`
 
@@ -144,15 +141,6 @@ func main() {
 
 	openalex := openalex.NewRemoteKnowledgeBase()
 
-	licensing, err := licensing.NewLicenseVerifier(config.PrismLicense)
-	if err != nil {
-		log.Fatalf("error initializing licensing: %v", err)
-	}
-
-	if err := search.SetLicenseKey(config.PrismLicense); err != nil {
-		log.Fatalf("error activating license key: %v", err)
-	}
-
 	db := cmd.OpenDB(config.PostgresUri)
 	migrations.RunMigrations(db)
 
@@ -197,7 +185,7 @@ func main() {
 	defer hooks.Stop()
 
 	backend := services.NewBackend(
-		services.NewReportService(reportManager, licensing, openalex, config.ResourceFolder),
+		services.NewReportService(reportManager, openalex, config.ResourceFolder),
 		services.NewSearchService(openalex, loadSearchableEntities(config.SearchableEntitiesData)),
 		services.NewAutoCompleteService(openalex),
 		hooks,

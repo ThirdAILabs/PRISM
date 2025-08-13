@@ -9,13 +9,6 @@ import (
 	"testing"
 )
 
-func init() {
-	const licensePath = "../../.test_license/thirdai.license"
-	if err := search.SetLicensePath(licensePath); err != nil {
-		panic(err)
-	}
-}
-
 func TestFlash(t *testing.T) {
 	flash, err := search.NewFlash()
 	if err != nil {

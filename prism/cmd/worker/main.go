@@ -3,18 +3,15 @@ package main
 import (
 	"errors"
 	"log"
-	"log/slog"
 	"os"
 	"path/filepath"
 
 	"prism/prism/cmd"
-	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers"
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/reports/utils"
-	"prism/prism/search"
 	"prism/prism/triangulation"
 	"time"
 
@@ -25,7 +22,6 @@ type Config struct {
 	PostgresUri              string `env:"DB_URI,notEmpty,required"`
 	FundcodeTriangulationUri string `env:"FUNDCODE_TRIANGULATION_DB_URI,notEmpty,required"`
 	Logfile                  string `env:"LOGFILE,notEmpty" envDefault:"prism_worker.log"`
-	PrismLicense             string `env:"PRISM_LICENSE,notEmpty,required"`
 
 	WorkDir string `env:"WORK_DIR,notEmpty" envDefault:"./work"`
 
@@ -69,15 +65,6 @@ func main() {
 	defer logFile.Close()
 
 	cmd.InitLogging(logFile)
-
-	licensing, err := licensing.NewLicenseVerifier(config.PrismLicense)
-	if err != nil {
-		log.Fatalf("error initializing licensing: %v", err)
-	}
-
-	if err := search.SetLicenseKey(config.PrismLicense); err != nil {
-		log.Fatalf("error activating license key: %v", err)
-	}
 
 	ndbDir := filepath.Join(config.WorkDir, "ndbs")
 	if err := os.RemoveAll(ndbDir); err != nil && !errors.Is(err, os.ErrNotExist) {
@@ -149,17 +136,7 @@ func main() {
 		reportManager,
 	)
 
-	lastLicenseCheck := time.Now()
 	for {
-		if time.Since(lastLicenseCheck) > 10*time.Minute {
-			if err := licensing.VerifyLicense(); err != nil {
-				slog.Error("error verifying license", "error", err)
-				time.Sleep(5 * time.Minute)
-				continue
-			}
-			lastLicenseCheck = time.Now()
-		}
-
 		foundAuthorReport := processor.ProcessNextAuthorReport()
 		foundUniversityReport := processor.ProcessNextUniversityReport()
 
