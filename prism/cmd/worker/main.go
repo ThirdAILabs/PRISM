@@ -2,10 +2,12 @@ package main
 
 import (
 	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 
 	"prism/prism/cmd"
+	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/reports/flaggers"
@@ -21,6 +23,7 @@ type Config struct {
 	PostgresUri              string `env:"DB_URI,notEmpty,required"`
 	FundcodeTriangulationUri string `env:"FUNDCODE_TRIANGULATION_DB_URI,notEmpty,required"`
 	Logfile                  string `env:"LOGFILE,notEmpty" envDefault:"prism_worker.log"`
+	License                  string `env:"LICENSE,notEmpty,required"`
 
 	WorkDir string `env:"WORK_DIR,notEmpty" envDefault:"./work"`
 
@@ -64,6 +67,8 @@ func main() {
 	defer logFile.Close()
 
 	cmd.InitLogging(logFile)
+
+	licensing := licensing.NewOnPremLicenseVerifier([]byte(licensing.OnPremLicensePublicKey), config.License)
 
 	entityStore := flaggers.BuildWatchlistEntityIndex(eoc.LoadSourceToAlias())
 
@@ -126,7 +131,17 @@ func main() {
 		reportManager,
 	)
 
+	lastLicenseCheck := time.Now()
 	for {
+		if time.Since(lastLicenseCheck) > 10*time.Minute {
+			if err := licensing.VerifyLicense(); err != nil {
+				slog.Error("error verifying license", "error", err)
+				time.Sleep(5 * time.Minute)
+				continue
+			}
+			lastLicenseCheck = time.Now()
+		}
+
 		foundAuthorReport := processor.ProcessNextAuthorReport()
 		foundUniversityReport := processor.ProcessNextUniversityReport()
 

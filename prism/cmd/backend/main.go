@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"prism/prism/api"
 	"prism/prism/cmd"
+	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/schema/migrations"
@@ -26,6 +27,7 @@ import (
 type Config struct {
 	PostgresUri string `env:"DB_URI,notEmpty,required"`
 	Logfile     string `env:"LOGFILE,notEmpty" envDefault:"prism_backend.log"`
+	License     string `env:"LICENSE,notEmpty,required"`
 
 	Port int `env:"PORT" envDefault:"8000"`
 
@@ -133,6 +135,8 @@ func main() {
 
 	cmd.InitLogging(logFile)
 
+	licensing := licensing.NewOnPremLicenseVerifier([]byte(licensing.OnPremLicensePublicKey), config.License)
+
 	openalex := openalex.NewRemoteKnowledgeBase()
 
 	db := cmd.OpenDB(config.PostgresUri)
@@ -179,7 +183,7 @@ func main() {
 	defer hooks.Stop()
 
 	backend := services.NewBackend(
-		services.NewReportService(reportManager, openalex, config.ResourceFolder),
+		services.NewReportService(reportManager, openalex, licensing, config.ResourceFolder),
 		services.NewSearchService(openalex, loadSearchableEntities(config.SearchableEntitiesData)),
 		services.NewAutoCompleteService(openalex),
 		hooks,
