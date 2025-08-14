@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"log/slog"
@@ -71,11 +70,6 @@ func (c *Config) port() int {
 }
 
 func loadSearchableEntities(entityPath string) []api.MatchedEntity {
-	const entityNdbPath = "searchable_entities.ndb"
-	if err := os.RemoveAll(entityNdbPath); err != nil && !errors.Is(err, os.ErrNotExist) {
-		log.Fatalf("error deleting existing ndb: %v", err)
-	}
-
 	time.Sleep(2 * time.Second)
 
 	file, err := os.Open(entityPath)

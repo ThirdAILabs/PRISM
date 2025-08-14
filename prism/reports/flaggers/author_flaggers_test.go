@@ -12,22 +12,31 @@ import (
 )
 
 func TestAuthorIsFacultyAtEOC(t *testing.T) {
-	ndb, err := search.NewNeuralDB(t.TempDir())
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer ndb.Free()
+	index := search.NewIndex([]search.Record[flaggers.UniversityInfo]{
+		{
+			Entity: "prof 123 456",
+			Metadata: flaggers.UniversityInfo{
+				University: "abc",
+				Url:        "abc.com",
+			},
+		},
+		{
+			Entity: "7 8 9",
+			Metadata: flaggers.UniversityInfo{
+				University: "xyz",
+				Url:        "xyz.com",
+			},
+		},
+		{
+			Entity: "Dr. 10 11",
+			Metadata: flaggers.UniversityInfo{
+				University: "qrs",
+				Url:        "qrs.com",
+			},
+		},
+	})
 
-	if err := ndb.Insert(
-		"doc", "id",
-		[]string{"prof 123 456", "7 8 9", "Dr. 10 11"},
-		[]map[string]any{{"university": "abc", "url": "abc.com"}, {"university": "xyz", "url": "xyz.com"}, {"university": "qrs", "url": "qrs.com"}},
-		nil,
-	); err != nil {
-		t.Fatal(err)
-	}
-
-	flagger := flaggers.NewAuthorIsFacultyAtEOCFlagger(ndb)
+	flagger := flaggers.NewAuthorIsFacultyAtEOCFlagger(index)
 
 	flags, err := flagger.Flag(slog.Default(), "7 9", "xyz")
 	if err != nil {
