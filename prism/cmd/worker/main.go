@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"log"
 	"os"
 	"path/filepath"
@@ -66,15 +65,6 @@ func main() {
 
 	cmd.InitLogging(logFile)
 
-	ndbDir := filepath.Join(config.WorkDir, "ndbs")
-	if err := os.RemoveAll(ndbDir); err != nil && !errors.Is(err, os.ErrNotExist) {
-		log.Fatalf("error deleting existing ndb dir '%s': %v", ndbDir, err)
-	}
-
-	if err := os.MkdirAll(ndbDir, 0777); err != nil {
-		log.Fatalf("error creating work dir: %v", err)
-	}
-
 	entityStore := flaggers.BuildWatchlistEntityIndex(eoc.LoadSourceToAlias())
 
 	authorCache, err := utils.NewCache[openalex.Author]("authors", filepath.Join(config.WorkDir, "authors.cache"))
@@ -96,7 +86,7 @@ func main() {
 
 	authorFlaggers := []reports.AuthorFlagger{
 		flaggers.NewAuthorIsFacultyAtEOCFlagger(
-			flaggers.BuildUniversityNDB(config.UniversityData, filepath.Join(ndbDir, "university.ndb")),
+			flaggers.BuildUniversityIndex(config.UniversityData),
 		),
 	}
 	if config.PpxApiKey != "" {

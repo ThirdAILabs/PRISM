@@ -31,44 +31,34 @@ type universityDataRecord struct {
 	Content string `json:"content"`
 }
 
-func BuildUniversityNDB(dataPath string, ndbPath string) search.NeuralDB {
-	log.Printf("creating university ndb %s from data %s", ndbPath, dataPath)
+func BuildUniversityIndex(dataPath string) *search.EntityIndex[UniversityInfo] {
+	log.Printf("creating university index from data %s", dataPath)
 
 	var records []universityDataRecord
 	parseJsonData(dataPath, &records)
 
 	log.Printf("loaded %d records", len(records))
 
-	ndb, err := search.NewNeuralDB(ndbPath)
-	if err != nil {
-		log.Fatalf("error creating ndb: %v", err)
-	}
-
 	s := time.Now()
 
-	for start := 0; start < len(records); start += insertionBatchSize {
-		end := min(start+insertionBatchSize, len(records))
-		recordsBatch := records[start:end]
-
-		chunks := make([]string, 0, len(recordsBatch))
-		metadata := make([]map[string]any, 0, len(recordsBatch))
-		for _, record := range recordsBatch {
-			chunks = append(chunks, record.Content)
-			metadata = append(metadata, map[string]any{"university": record.Entity, "url": record.Url})
-		}
-
-		if err := ndb.Insert("university_data", "0", chunks, metadata, nil); err != nil {
-			log.Fatalf("error inserting into ndb: %v", err)
-		}
-
-		log.Printf("processed %d/%d %.2f%% complete", end, len(records), 100*float64(end)/float64(len(records)))
+	entities := make([]search.Record[UniversityInfo], 0, len(records))
+	for _, record := range records {
+		entities = append(entities, search.Record[UniversityInfo]{
+			Entity: record.Entity,
+			Metadata: UniversityInfo{
+				University: record.Entity,
+				Url:        record.Url,
+			},
+		})
 	}
+
+	index := search.NewIndex(entities)
 
 	e := time.Now()
 
-	log.Printf("ndb created successfully time %.3f s", e.Sub(s).Seconds())
+	log.Printf("index created successfully time %.3f s", e.Sub(s).Seconds())
 
-	return ndb
+	return index
 }
 
 type dojArticleRecord struct {

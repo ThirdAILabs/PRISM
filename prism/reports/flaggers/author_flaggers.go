@@ -16,12 +16,17 @@ import (
 	"time"
 )
 
-type AuthorIsFacultyAtEOCFlagger struct {
-	universityNDB search.NeuralDB
+type UniversityInfo struct {
+	University string
+	Url        string
 }
 
-func NewAuthorIsFacultyAtEOCFlagger(universityNDB search.NeuralDB) *AuthorIsFacultyAtEOCFlagger {
-	return &AuthorIsFacultyAtEOCFlagger{universityNDB: universityNDB}
+type AuthorIsFacultyAtEOCFlagger struct {
+	universityIndex*search.EntityIndex[UniversityInfo]
+}
+
+func NewAuthorIsFacultyAtEOCFlagger(universityIndex *search.EntityIndex[UniversityInfo]) *AuthorIsFacultyAtEOCFlagger {
+	return &AuthorIsFacultyAtEOCFlagger{universityIndex: universityIndex}
 }
 
 type nameMatcher struct {
@@ -270,11 +275,7 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Name() string {
 }
 
 func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName, affiliations string) ([]api.Flag, error) {
-	results, err := flagger.universityNDB.Query(authorName, numUniversityDocumentsToRetrieve, nil)
-	if err != nil {
-		logger.Error("error querying ndb", "error", err)
-		return nil, fmt.Errorf("error querying ndb: %w", err)
-	}
+	results := flagger.universityIndex.Query(authorName, numUniversityDocumentsToRetrieve)
 
 	matcher, validName := newNameMatcher(authorName)
 	if !validName {
@@ -285,14 +286,9 @@ func (flagger *AuthorIsFacultyAtEOCFlagger) Flag(logger *slog.Logger, authorName
 	flags := make([]api.Flag, 0)
 
 	for _, result := range results {
-		if matcher.matchesText(result.Text) {
-			university, _ := result.Metadata["university"].(string)
-			if university == "" {
-				logger.Error("missing university metadata", "result", result)
-				continue
-			}
-
-			url, _ := result.Metadata["url"].(string)
+		if matcher.matchesText(result.Entity) {
+			university := result.Metadata.University
+			url := result.Metadata.Url
 
 			flags = append(flags, &api.PotentialAuthorAffiliationFlag{
 				Message:       fmt.Sprintf("The author %s may be associated with this concerning entity: %s\n", authorName, university),
