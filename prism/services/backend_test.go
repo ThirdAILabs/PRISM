@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"os"
 	"prism/prism/api"
+	"prism/prism/licensing"
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/schema"
@@ -23,6 +24,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
 	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
 )
@@ -97,7 +99,21 @@ func (m *mockOpenAlex) GetInstitutionAuthors(institutionId string, startDate, en
 	return nil, nil
 }
 
+func setupLicensing(t *testing.T) *licensing.OnPremLicenseVerifier {
+	privateKey, publicKey, err := licensing.GenerateKeys()
+	require.NoError(t, err)
+
+	license, err := licensing.CreateLicense(privateKey, time.Now().Add(20*time.Minute))
+	require.NoError(t, err)
+
+	licensing := licensing.NewOnPremLicenseVerifier(publicKey, license)
+
+	return licensing
+}
+
 func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
+	t.Helper()
+
 	db := schema.SetupTestDB(t)
 
 	entities := []api.MatchedEntity{{Names: "abc university"}, {Names: "institute of xyz"}, {Names: "123 org"}}
@@ -105,7 +121,7 @@ func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
 	oa := openalex.NewRemoteKnowledgeBase()
 
 	backend := services.NewBackend(
-		services.NewReportService(reports.NewManager(db), &mockOpenAlex{}, "./resources"),
+		services.NewReportService(reports.NewManager(db), &mockOpenAlex{}, setupLicensing(t), "./resources"),
 		services.NewSearchService(oa, entities),
 		services.NewAutoCompleteService(oa),
 		services.NewHookService(db, map[string]services.Hook{}, 1*time.Second),
@@ -877,7 +893,7 @@ func TestHooks(t *testing.T) {
 	hookService := services.NewHookService(db, map[string]services.Hook{"test": mockHook}, 1*time.Second)
 
 	backend := services.NewBackend(
-		services.NewReportService(manager, &mockOpenAlex{}, "./resources"),
+		services.NewReportService(manager, &mockOpenAlex{}, setupLicensing(t), "./resources"),
 		services.NewSearchService(oa, nil),
 		services.NewAutoCompleteService(oa),
 		hookService,

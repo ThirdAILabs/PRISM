@@ -9,10 +9,6 @@ import (
 	"time"
 )
 
-const (
-	insertionBatchSize = 10000
-)
-
 func parseJsonData(filename string, dest any) {
 	file, err := os.Open(filename)
 	if err != nil {
