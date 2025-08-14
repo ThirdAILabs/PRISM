@@ -58,40 +58,6 @@
 </details>
 <br>
 <details>
-  <summary><h2 style="display: inline;">Building ThirdAI Libraries (Optional: Should not be needed for M1 mac os 15)</h2></summary>
-  <br>
-
-  The following is for building the thirdai libraries needed for the neural db and flash bindings. This is an optional step, the repo has libraries built for `m1 mac os 15` already in it.
-
-  1. Clone Universe:
-  ```bash
-  git clone https://github.com/ThirdAILabs/Universe --recursive
-  ```
-
-  2. Navigate into universe:
-  ```bash
-  cd Universe
-  ```
-
-  3. Build the library:
-
-    Note: you can just use `bin/build.py` without the license options if running locally, however this library will not have licensing so be very careful distributing these libraries.
-
-  ```
-  bin/build.py -f THIRDAI_BUILD_LICENSE THIRDAI_CHECK_LICENSE
-  ```
-
-  4. Copy the libraries below to `PRISM/prism/search/lib/linux_x64` if building on linux or `PRISM/prism/search/lib/macos_arm64` if running on M1 mac (or other mac os as well but this is not tested yet). After this you should have a 4 `.a` libraries in the directory. See the current `search/lib/macos_arm64` as an example of what it should look like.
-
-    Note: if you build Universe without the licensing flags you will not have the `libcryptopp.a` library. You can skip this. In `PRISM/prism/search/search.go` on lines 3 & 4 you may have to delete the part that says `-lssl -lcrypto` on linux and `-L/opt/homebrew/Cellar/openssl@3/3.4.0/lib/ -lssl -lcrypto` for macos.
-
-    - `Universe/build/libthirdai.a`
-    - `Universe/build/deps/rocksdb/librocksdb.a`
-    - `Universe/build/deps/utf8proc/libutf8proc.a`
-    - `Universe/build/deps/cryptopp-cmake/cryptopp/libcryptopp.a`
-</details>
-<br>
-<details>
   <summary><h2 style="display: inline;">Start the Backend</h2></summary>
   <br>
 
@@ -211,10 +177,10 @@ FUNDCODE_TRIANGULATION_DB_URI="postgresql://<username>:<password>@<host | localh
 # License for PRISM, this should be a keygen license with the Full Access and Prism entitlements.
 PRISM_LICENSE="prism license key"
 
-# Work dir for worker, will store ndbs and caches etc.
+# Work dir for worker, will store caches and intermediate files etc.
 WORK_DIR="any empty directory"
 
-# Path to load data to construct ndbs for author flaggers(update the following path from prism/data)
+# Path to load data to construct search indexes for author flaggers(update the following path from prism/data)
 UNIVERSITY_DATA="<path to PRISM/data/university_webpages.json>"
 DOC_DATA="<path to PRISM/data/doc_and_press_releases.json>"
 AUX_DATA="<path to PRISM/data/auxiliary_webpages.json>"
