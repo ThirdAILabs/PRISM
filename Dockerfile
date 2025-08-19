@@ -31,7 +31,6 @@ COPY --from=build-stage /app/bin/* ./
 COPY --from=build-stage /go/bin/playwright /usr/local/bin/
 COPY --from=build-stage /app/third_party_licenses ./third_party_licenses
 COPY --from=build-stage /app/COPYING .
-COPY --from=build-stage /app/prism/search/lib/THIRD_PARTY_NOTICES.txt .
 
 # Install Playwright dependencies
 RUN apt-get update && apt-get install -y ca-certificates tzdata \
