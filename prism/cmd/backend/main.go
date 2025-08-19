@@ -27,7 +27,7 @@ import (
 type Config struct {
 	PostgresUri string `env:"DB_URI,notEmpty,required"`
 	Logfile     string `env:"LOGFILE,notEmpty" envDefault:"prism_backend.log"`
-	License     string `env:"LICENSE,notEmpty,required"`
+	License     string `env:"PRISM_LICENSE,notEmpty,required"`
 
 	Port int `env:"PORT" envDefault:"8000"`
 
