@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"log"
 	"log/slog"
 	"os"
@@ -14,7 +13,6 @@ import (
 	"prism/prism/reports/flaggers"
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/reports/utils"
-	"prism/prism/search"
 	"prism/prism/triangulation"
 	"time"
 
@@ -25,7 +23,7 @@ type Config struct {
 	PostgresUri              string `env:"DB_URI,notEmpty,required"`
 	FundcodeTriangulationUri string `env:"FUNDCODE_TRIANGULATION_DB_URI,notEmpty,required"`
 	Logfile                  string `env:"LOGFILE,notEmpty" envDefault:"prism_worker.log"`
-	PrismLicense             string `env:"PRISM_LICENSE,notEmpty,required"`
+	License                  string `env:"LICENSE,notEmpty,required"`
 
 	WorkDir string `env:"WORK_DIR,notEmpty" envDefault:"./work"`
 
@@ -70,23 +68,7 @@ func main() {
 
 	cmd.InitLogging(logFile)
 
-	licensing, err := licensing.NewLicenseVerifier(config.PrismLicense)
-	if err != nil {
-		log.Fatalf("error initializing licensing: %v", err)
-	}
-
-	if err := search.SetLicenseKey(config.PrismLicense); err != nil {
-		log.Fatalf("error activating license key: %v", err)
-	}
-
-	ndbDir := filepath.Join(config.WorkDir, "ndbs")
-	if err := os.RemoveAll(ndbDir); err != nil && !errors.Is(err, os.ErrNotExist) {
-		log.Fatalf("error deleting existing ndb dir '%s': %v", ndbDir, err)
-	}
-
-	if err := os.MkdirAll(ndbDir, 0777); err != nil {
-		log.Fatalf("error creating work dir: %v", err)
-	}
+	licensing := licensing.NewOnPremLicenseVerifier([]byte(licensing.OnPremLicensePublicKey), config.License)
 
 	entityStore := flaggers.BuildWatchlistEntityIndex(eoc.LoadSourceToAlias())
 
@@ -109,7 +91,7 @@ func main() {
 
 	authorFlaggers := []reports.AuthorFlagger{
 		flaggers.NewAuthorIsFacultyAtEOCFlagger(
-			flaggers.BuildUniversityNDB(config.UniversityData, filepath.Join(ndbDir, "university.ndb")),
+			flaggers.BuildUniversityIndex(config.UniversityData),
 		),
 	}
 	if config.PpxApiKey != "" {

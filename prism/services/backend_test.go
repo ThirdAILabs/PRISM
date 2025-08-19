@@ -17,7 +17,6 @@ import (
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/schema"
-	"prism/prism/search"
 	"prism/prism/services"
 	"slices"
 	"strings"
@@ -25,16 +24,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
 	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
 )
-
-func init() {
-	const licensePath = "../../.test_license/thirdai.license"
-	if err := search.SetLicensePath(licensePath); err != nil {
-		panic(err)
-	}
-}
 
 func shouldSkip(t *testing.T) {
 	if os.Getenv("SKIP_SERP_TESTS") != "" {
@@ -106,20 +99,29 @@ func (m *mockOpenAlex) GetInstitutionAuthors(institutionId string, startDate, en
 	return nil, nil
 }
 
+func setupLicensing(t *testing.T) *licensing.OnPremLicenseVerifier {
+	privateKey, publicKey, err := licensing.GenerateKeys()
+	require.NoError(t, err)
+
+	license, err := licensing.CreateLicense(privateKey, time.Now().Add(20*time.Minute))
+	require.NoError(t, err)
+
+	licensing := licensing.NewOnPremLicenseVerifier(publicKey, license)
+
+	return licensing
+}
+
 func createBackend(t *testing.T) (http.Handler, *gorm.DB) {
+	t.Helper()
+
 	db := schema.SetupTestDB(t)
 
 	entities := []api.MatchedEntity{{Names: "abc university"}, {Names: "institute of xyz"}, {Names: "123 org"}}
 
-	licensing, err := licensing.NewLicenseVerifier("AC013F-FD0B48-00B160-64836E-76E88D-V3")
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	oa := openalex.NewRemoteKnowledgeBase()
 
 	backend := services.NewBackend(
-		services.NewReportService(reports.NewManager(db), licensing, &mockOpenAlex{}, "./resources"),
+		services.NewReportService(reports.NewManager(db), &mockOpenAlex{}, setupLicensing(t), "./resources"),
 		services.NewSearchService(oa, entities),
 		services.NewAutoCompleteService(oa),
 		services.NewHookService(db, map[string]services.Hook{}, 1*time.Second),
@@ -882,11 +884,6 @@ func createReportHook(backend http.Handler, reportId uuid.UUID, user string, pay
 func TestHooks(t *testing.T) {
 	db := schema.SetupTestDB(t)
 
-	licensing, err := licensing.NewLicenseVerifier("AC013F-FD0B48-00B160-64836E-76E88D-V3")
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	oa := openalex.NewRemoteKnowledgeBase()
 
 	mockHook := &testHook{invoked: nil}
@@ -896,7 +893,7 @@ func TestHooks(t *testing.T) {
 	hookService := services.NewHookService(db, map[string]services.Hook{"test": mockHook}, 1*time.Second)
 
 	backend := services.NewBackend(
-		services.NewReportService(manager, licensing, &mockOpenAlex{}, "./resources"),
+		services.NewReportService(manager, &mockOpenAlex{}, setupLicensing(t), "./resources"),
 		services.NewSearchService(oa, nil),
 		services.NewAutoCompleteService(oa),
 		hookService,

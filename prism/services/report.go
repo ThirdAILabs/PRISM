@@ -24,16 +24,16 @@ import (
 
 type ReportService struct {
 	manager        *reports.ReportManager
-	licensing      *licensing.LicenseVerifier
 	openalex       openalex.KnowledgeBase
+	licensing      *licensing.OnPremLicenseVerifier
 	resourceFolder string
 }
 
-func NewReportService(manager *reports.ReportManager, licensing *licensing.LicenseVerifier, openalex openalex.KnowledgeBase, resourceFolder string) ReportService {
+func NewReportService(manager *reports.ReportManager, openalex openalex.KnowledgeBase, licensing *licensing.OnPremLicenseVerifier, resourceFolder string) ReportService {
 	return ReportService{
 		manager:        manager,
-		licensing:      licensing,
 		openalex:       openalex,
+		licensing:      licensing,
 		resourceFolder: resourceFolder,
 	}
 }
@@ -218,7 +218,7 @@ func (s *ReportService) CreateReport(r *http.Request) (any, error) {
 
 	if err := s.licensing.VerifyLicense(); err != nil {
 		slog.Error("cannot create new report, unable to verify license", "error", err)
-		return nil, CodedError(err, licensingErrorStatus(err))
+		return nil, CodedError(err, http.StatusForbidden)
 	}
 
 	affiliations, researchInterests, err := s.getAuthorAffiliationsAndInterests(params.Source, params.AuthorId)
@@ -462,7 +462,7 @@ func (s *ReportService) CreateUniversityReport(r *http.Request) (any, error) {
 
 	if err := s.licensing.VerifyLicense(); err != nil {
 		slog.Error("cannot create new report, unable to verify license", "error", err)
-		return nil, CodedError(err, licensingErrorStatus(err))
+		return nil, CodedError(err, http.StatusForbidden)
 	}
 
 	id, err := s.manager.CreateUniversityReport(userId, params.UniversityId, params.UniversityName, params.UniversityLocation)

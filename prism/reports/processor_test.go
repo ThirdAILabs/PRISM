@@ -10,7 +10,6 @@ import (
 	"prism/prism/reports/flaggers/eoc"
 	"prism/prism/reports/utils"
 	"prism/prism/schema"
-	"prism/prism/search"
 	"prism/prism/triangulation"
 	"slices"
 	"strings"
@@ -21,13 +20,6 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
-
-func init() {
-	const licensePath = "../../.test_license/thirdai.license"
-	if err := search.SetLicensePath(licensePath); err != nil {
-		panic(err)
-	}
-}
 
 func setupReportManager(t *testing.T) *reports.ReportManager {
 	db := schema.SetupTestDB(t)
@@ -250,15 +242,14 @@ func TestProcessorAuthorAffiliation(t *testing.T) {
 }
 
 func TestProcessorUniversityFacultySeach(t *testing.T) {
-	universityNDB := flaggers.BuildUniversityNDB("../../data/university_webpages.json", t.TempDir())
-	defer universityNDB.Free()
+	universityIndex := flaggers.BuildUniversityIndex("../../data/university_webpages.json")
 
 	manager := setupReportManager(t)
 
 	processor := reports.NewProcessor(
 		nil,
 		[]reports.AuthorFlagger{
-			flaggers.NewAuthorIsFacultyAtEOCFlagger(universityNDB),
+			flaggers.NewAuthorIsFacultyAtEOCFlagger(universityIndex),
 		},
 		manager,
 	)

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"log/slog"
@@ -15,7 +14,6 @@ import (
 	"prism/prism/openalex"
 	"prism/prism/reports"
 	"prism/prism/schema/migrations"
-	"prism/prism/search"
 	"prism/prism/services"
 	"prism/prism/services/auth"
 	hooks "prism/prism/services/hooks"
@@ -27,9 +25,9 @@ import (
 )
 
 type Config struct {
-	PostgresUri  string `env:"DB_URI,notEmpty,required"`
-	Logfile      string `env:"LOGFILE,notEmpty" envDefault:"prism_backend.log"`
-	PrismLicense string `env:"PRISM_LICENSE,notEmpty,required"`
+	PostgresUri string `env:"DB_URI,notEmpty,required"`
+	Logfile     string `env:"LOGFILE,notEmpty" envDefault:"prism_backend.log"`
+	License     string `env:"LICENSE,notEmpty,required"`
 
 	Port int `env:"PORT" envDefault:"8000"`
 
@@ -74,11 +72,6 @@ func (c *Config) port() int {
 }
 
 func loadSearchableEntities(entityPath string) []api.MatchedEntity {
-	const entityNdbPath = "searchable_entities.ndb"
-	if err := os.RemoveAll(entityNdbPath); err != nil && !errors.Is(err, os.ErrNotExist) {
-		log.Fatalf("error deleting existing ndb: %v", err)
-	}
-
 	time.Sleep(2 * time.Second)
 
 	file, err := os.Open(entityPath)
@@ -142,16 +135,9 @@ func main() {
 
 	cmd.InitLogging(logFile)
 
+	licensing := licensing.NewOnPremLicenseVerifier([]byte(licensing.OnPremLicensePublicKey), config.License)
+
 	openalex := openalex.NewRemoteKnowledgeBase()
-
-	licensing, err := licensing.NewLicenseVerifier(config.PrismLicense)
-	if err != nil {
-		log.Fatalf("error initializing licensing: %v", err)
-	}
-
-	if err := search.SetLicenseKey(config.PrismLicense); err != nil {
-		log.Fatalf("error activating license key: %v", err)
-	}
 
 	db := cmd.OpenDB(config.PostgresUri)
 	migrations.RunMigrations(db)
@@ -197,7 +183,7 @@ func main() {
 	defer hooks.Stop()
 
 	backend := services.NewBackend(
-		services.NewReportService(reportManager, licensing, openalex, config.ResourceFolder),
+		services.NewReportService(reportManager, openalex, licensing, config.ResourceFolder),
 		services.NewSearchService(openalex, loadSearchableEntities(config.SearchableEntitiesData)),
 		services.NewAutoCompleteService(openalex),
 		hooks,
