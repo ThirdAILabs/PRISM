@@ -23,7 +23,7 @@ type Config struct {
 	PostgresUri              string `env:"DB_URI,notEmpty,required"`
 	FundcodeTriangulationUri string `env:"FUNDCODE_TRIANGULATION_DB_URI,notEmpty,required"`
 	Logfile                  string `env:"LOGFILE,notEmpty" envDefault:"prism_worker.log"`
-	License                  string `env:"LICENSE,notEmpty,required"`
+	License                  string `env:"PRISM_LICENSE,notEmpty,required"`
 
 	WorkDir string `env:"WORK_DIR,notEmpty" envDefault:"./work"`
 
@@ -58,6 +58,10 @@ func main() {
 	var config Config
 	if err := env.Parse(&config); err != nil {
 		log.Fatalf("error parsing config: %v", err)
+	}
+
+	if err := os.MkdirAll(config.WorkDir, 0o755); err != nil {
+		log.Fatalf("error creating work directory: %v", err)
 	}
 
 	logFile, err := os.OpenFile(config.logfile(), os.O_CREATE|os.O_APPEND|os.O_RDWR, 0o666)
