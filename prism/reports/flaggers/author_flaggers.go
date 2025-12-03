@@ -22,7 +22,7 @@ type UniversityInfo struct {
 }
 
 type AuthorIsFacultyAtEOCFlagger struct {
-	universityIndex*search.EntityIndex[UniversityInfo]
+	universityIndex *search.EntityIndex[UniversityInfo]
 }
 
 func NewAuthorIsFacultyAtEOCFlagger(universityIndex *search.EntityIndex[UniversityInfo]) *AuthorIsFacultyAtEOCFlagger {
@@ -35,9 +35,9 @@ type nameMatcher struct {
 }
 
 const (
-	numUniversityDocumentsToRetrieve = 5
-	numAuxillaryDocumentsToRetrieve  = 5
-	numDOJDocumentsToRetrieve        = 5
+	numUniversityDocumentsToRetrieve = 10
+	numAuxillaryDocumentsToRetrieve  = 10
+	numDOJDocumentsToRetrieve        = 10
 	useLLMVerification               = true
 )
 
@@ -53,7 +53,7 @@ func newNameMatcher(name string) (nameMatcher, bool) {
 
 	firstname, lastname := regexp.QuoteMeta(fields[0]), regexp.QuoteMeta(fields[len(fields)-1])
 
-	maxChars := max(len(name)-(len(firstname)+len(lastname)), 10)
+	maxChars := max(len(name)-(len(firstname)+len(lastname)), 12)
 	namepattern := regexp.QuoteMeta(strings.Join(fields, `\s+`))
 
 	text_regex, err := regexp.Compile(fmt.Sprintf(`(\b%s[\w\s\.\-]{0,%d}%s\b)|(\b%s[\w\s\.\-\,]{0,%d}%s\b)|(\b%s\b)`, firstname, maxChars, lastname, lastname, maxChars, firstname, namepattern))
