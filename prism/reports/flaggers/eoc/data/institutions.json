@@ -1481,5 +1481,203 @@
             "type": "entity_type"
         },
         "score": 1.0
+    },
+    {
+        "name": "UNIVERSITY LABORATORIES",
+        "source": "Denied Persons List (DPL) - Bureau of Industry and Security",
+        "aliases": [],
+        "match": {
+            "id": "https://openalex.org/I4210116821",
+            "name": "DMC University Laboratories",
+            "type": "institutions"
+        },
+        "score": 0.92
+    },
+    {
+        "name": "Beihang University",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Beihang University",
+            "Beihang University Dongying Research Institute",
+            "Beihang University Hangzhou Innovation Institute",
+            "Beihang University Hefei Innovation Institute",
+            "Beihang University Jiangxi Research Institute",
+            "Beihang University Ningbo Innovation Institute;Beihang University Qingdao Research Institute",
+            "Beihang University Shenzhen Research Institute",
+            "Beihang University Suzhou",
+            " Beihang University Taizhou Research Institute",
+            "Beihang University Yunnan Innovation Institute."
+        ],
+        "match": {
+            "id": "https://openalex.org/I82880672",
+            "name": "Beihang University",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Beijing Institute of Radio Metrology and Measurement",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Beijing Radio Measurement and Testing Institute",
+            "Beijing Institute of Radio Metrology and Measurement"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4387153688",
+            "name": "Beijing Institute of Radio Metrology and Measurement",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Beijing Institute of Radio Measurement",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Beijing Institute of Radio Measurement",
+            "BIRM"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4387153688",
+            "name": "Beijing Institute of Radio Metrology and Measurement",
+            "type": "institutions"
+        },
+        "score": 0.8444444444444444
+    },
+    {
+        "name": "Beijing Microelectronics Technology Institute",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "772 Research Institute",
+            "Beijing Institute of Microelectronics Technology",
+            "Beijing Microelectronics Technology Institute",
+            "BMTI"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210089056",
+            "name": "Beijing Microelectronics Technology Institute",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Harbin Institute of Technology",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Harbin Institute of Technology, Anshan Industrial & Technology Research Institute",
+            "Harbin Institute of Technology, Chongqing Research Institute",
+            "Harbin Institute of Technology, Huizhou Institute of International Innovation",
+            "Harbin Institute of Technology, Shenzhen Research Institute",
+            "Harbin Institute of Technology, Weihai Institute of Industrial Technology",
+            "Harbin Institute of Technology, Wuhu Robot Industry & Technology Research Institute",
+            "Harbin Institute of Technology, Wuxi Institute of New Materials",
+            "Harbin Institute of Technology, Yibi Industrial Technology Research Institute",
+            "Harbin Institute of Technology, Yixing Environmental Protection Research Institute"
+        ],
+        "match": {
+            "id": "https://openalex.org/I204983213",
+            "name": "Harbin Institute of Technology",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Northwestern Polytechnical University",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Northwest Polytechnic University",
+            "Northwest Polytechnical University",
+            "Northwestern Polytechnic University",
+            "Northwestern Polytechnical University, Beijing Research Institute",
+            "Northwestern Polytechnical University, Chongqing Innovation Center",
+            "Northwestern Polytechnical University, Collaborative Innovation Center",
+            "Northwestern Polytechnical University, Ningbo Research Institute",
+            "Northwestern Polytechnical University, Qingdao Research Institute",
+            "Northwestern Polytechnical University, Shenzhen Research Institute",
+            "Northwestern Polytechnical University, Yangtze River Delta Research Institute"
+        ],
+        "match": {
+            "id": "https://openalex.org/I17145004",
+            "name": "Northwestern Polytechnical University",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Northwestern Polytechnic University",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Northwest Polytechnic University",
+            "Northwest Polytechnical University",
+            "Northwestern Polytechnic University",
+            "Northwestern Polytechnical University, Beijing Research Institute",
+            "Northwestern Polytechnical University, Chongqing Innovation Center",
+            "Northwestern Polytechnical University, Collaborative Innovation Center",
+            "Northwestern Polytechnical University, Ningbo Research Institute",
+            "Northwestern Polytechnical University, Qingdao Research Institute",
+            "Northwestern Polytechnical University, Shenzhen Research Institute",
+            "Northwestern Polytechnical University, Yangtze River Delta Research Institute"
+        ],
+        "match": {
+            "id": "https://openalex.org/I99418890",
+            "name": "Northwestern Polytechnic University",
+            "type": "institutions"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Institute of Aeronautics and Astronautics",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "AIRI",
+            "Institute of Aeronautics and Astronautics",
+            "Academy of Aerospace Sciences",
+            "The Institute of Electronics, Chinese Academy of Sciences",
+            "IECAS",
+            "The Institute of Remote Sensing and Digital Earth, Chinese Academy of Sciences",
+            "RADI",
+            "Academy of Optoelectronics, Chinese Academy of Sciences",
+            "AOE",
+            "AIRCAS",
+            "The Center for Earth Observation and Digital Earth, Chinese Academy of Sciences",
+            "CEODE",
+            "The Remote Sensing Satellite Ground Station, Chinese Academy of Sciences",
+            "The Center for Airborne Remote Sensing, Chinese Academy of Sciences",
+            "The Laboratory of Digital Earth Sciences, Chinese Academy of Sciences",
+            "CAS Institute of Aerospace Information Innovation"
+        ],
+        "match": {
+            "id": "https://openalex.org/I46020346",
+            "name": "American Institute of Aeronautics and Astronautics",
+            "type": "institutions"
+        },
+        "score": 0.9010989010989011
+    },
+    {
+        "name": "CAS",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "NTSC",
+            "NTS",
+            "CAS",
+            "CAS NTSC",
+            "Shaanxi Astronomical Observatory of the Chinese Academy of Sciences"
+        ],
+        "match": {
+            "id": "https://openalex.org/I4210116184",
+            "name": "CASA",
+            "type": "institutions"
+        },
+        "score": 0.8571428571428571
+    },
+    {
+        "name": "STAR",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [],
+        "match": {
+            "id": "https://openalex.org/I4210155176",
+            "name": "Start",
+            "type": "institutions"
+        },
+        "score": 0.8888888888888888
     }
 ]
