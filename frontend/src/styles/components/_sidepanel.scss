@@ -223,6 +223,7 @@ $z-index-sidebar-header: 1000;
     color: $color-text-700;
     text-align: left;
     margin-top: 2px;
+    overflow-wrap: anywhere;
   }
 
   &__divider {

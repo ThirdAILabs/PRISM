@@ -8,6 +8,7 @@ import (
 	"prism/prism/api"
 	"prism/prism/monitoring"
 	"strconv"
+	"sync/atomic"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -19,29 +20,103 @@ var (
 )
 
 type RemoteKnowledgeBase struct {
-	client *resty.Client
+	client        *resty.Client
+	nextAllowedAt atomic.Int64
 }
 
 func NewRemoteKnowledgeBase() KnowledgeBase {
-	return &RemoteKnowledgeBase{
-		client: resty.New().
-			SetBaseURL("https://api.openalex.org").
-			AddRetryCondition(func(response *resty.Response, err error) bool {
-				if err != nil {
-					return true // The err can be non nil for some network errors.
-				}
-				// There's no reason to retry other 400 requests since the outcome should not change
-				return response != nil && (response.StatusCode() > 499 || response.StatusCode() == http.StatusTooManyRequests)
-			}).
-			SetRetryCount(2).
-			// Providing the contact moves requests to a new pool that can have better response times:
-			// https://docs.openalex.org/how-to-use-the-api/rate-limits-and-authentication#the-polite-pool
-			SetQueryParam("mailto", "contact@thirdai.com").
-			OnAfterResponse(func(client *resty.Client, response *resty.Response) error {
-				monitoring.OpenalexCalls.WithLabelValues(strconv.Itoa(response.StatusCode())).Inc()
-				return nil
-			}),
+	oa := &RemoteKnowledgeBase{}
+
+	const (
+		retryCount      = 4
+		initialWait     = 800 * time.Millisecond
+		maxWait         = 10 * time.Second
+		constantBackoff = 2 * time.Second
+	)
+
+	client := resty.New().
+		SetBaseURL("https://api.openalex.org").
+		SetTimeout(15*time.Second).
+		SetRetryCount(retryCount).
+		SetRetryWaitTime(initialWait).
+		SetRetryMaxWaitTime(maxWait).
+		SetQueryParam("mailto", "contact@thirdai.com").
+		AddRetryCondition(func(response *resty.Response, err error) bool {
+			if err != nil {
+				return true
+			}
+			return response != nil && (response.StatusCode() > 499 || response.StatusCode() == http.StatusTooManyRequests)
+
+		})
+
+	client.OnBeforeRequest(func(_ *resty.Client, _ *resty.Request) error {
+		next := time.Unix(0, oa.nextAllowedAt.Load())
+		if next.IsZero() {
+			return nil
+		}
+		now := time.Now()
+		if now.Before(next) {
+			time.Sleep(next.Sub(now))
+		}
+		return nil
+	})
+
+	client.OnAfterResponse(func(_ *resty.Client, response *resty.Response) error {
+		monitoring.OpenalexCalls.WithLabelValues(strconv.Itoa(response.StatusCode())).Inc()
+
+		// 429 Too Many Requests → respect Retry-After or constant backoff.
+		if response.StatusCode() == http.StatusTooManyRequests {
+			sleep := parseRetryAfter(response.Header().Get("Retry-After"))
+			if sleep <= 0 {
+				sleep = constantBackoff
+			}
+			setCooldown(&oa.nextAllowedAt, sleep)
+			return nil
+		}
+
+		// 5xx → short jittered pause to avoid hammering during server errors.
+		if response.StatusCode() >= 500 {
+			sleep := 200*time.Millisecond + time.Duration(randIntN(400))*time.Millisecond
+			setCooldown(&oa.nextAllowedAt, sleep)
+			return nil
+		}
+
+		return nil
+	})
+
+	oa.client = client
+	return oa
+}
+
+func setCooldown(nextAllowedAt *atomic.Int64, d time.Duration) {
+	until := time.Now().Add(d).UnixNano()
+	prev := nextAllowedAt.Load()
+	if until > prev {
+		nextAllowedAt.Store(until)
 	}
+}
+
+func parseRetryAfter(h string) time.Duration {
+	if h == "" {
+		return 0
+	}
+	if secs, err := strconv.Atoi(h); err == nil && secs >= 0 {
+		return time.Duration(secs) * time.Second
+	}
+	if t, err := http.ParseTime(h); err == nil {
+		d := time.Until(t)
+		if d > 0 {
+			return d
+		}
+	}
+	return 0
+}
+
+func randIntN(n int64) int64 {
+	if n <= 0 {
+		return 0
+	}
+	return time.Now().UnixNano() % n
 }
 
 type oaResults[T any] struct {

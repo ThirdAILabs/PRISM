@@ -40,7 +40,7 @@ func BuildUniversityIndex(dataPath string) *search.EntityIndex[UniversityInfo] {
 	entities := make([]search.Record[UniversityInfo], 0, len(records))
 	for _, record := range records {
 		entities = append(entities, search.Record[UniversityInfo]{
-			Entity: record.Entity,
+			Entity: record.Content,
 			Metadata: UniversityInfo{
 				University: record.Entity,
 				Url:        record.Url,
