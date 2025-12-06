@@ -279,5 +279,76 @@
             "type": "entity_type"
         },
         "score": 1.0
+    },
+    {
+        "name": "Beijing University of Aeronautics and Astronautics (BUAA)",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Beihang University",
+            "Beihang University Dongying Research Institute",
+            "Beihang University Hangzhou Innovation Institute",
+            "Beihang University Hefei Innovation Institute",
+            "Beihang University Jiangxi Research Institute",
+            "Beihang University Ningbo Innovation Institute;Beihang University Qingdao Research Institute",
+            "Beihang University Shenzhen Research Institute",
+            "Beihang University Suzhou",
+            " Beihang University Taizhou Research Institute",
+            "Beihang University Yunnan Innovation Institute."
+        ],
+        "match": {
+            "id": "https://openalex.org/P4322696464",
+            "name": "Beijing University of Aeronautics and Astronautics (BUAA)",
+            "type": "publishers"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Harbin Institute of Technology",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Harbin Institute of Technology, Anshan Industrial & Technology Research Institute",
+            "Harbin Institute of Technology, Chongqing Research Institute",
+            "Harbin Institute of Technology, Huizhou Institute of International Innovation",
+            "Harbin Institute of Technology, Shenzhen Research Institute",
+            "Harbin Institute of Technology, Weihai Institute of Industrial Technology",
+            "Harbin Institute of Technology, Wuhu Robot Industry & Technology Research Institute",
+            "Harbin Institute of Technology, Wuxi Institute of New Materials",
+            "Harbin Institute of Technology, Yibi Industrial Technology Research Institute",
+            "Harbin Institute of Technology, Yixing Environmental Protection Research Institute"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4320800617",
+            "name": "Harbin Institute of Technology",
+            "type": "publishers"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Institute of Aeronautics and Astronautics",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "AIRI",
+            "Institute of Aeronautics and Astronautics",
+            "Academy of Aerospace Sciences",
+            "The Institute of Electronics, Chinese Academy of Sciences",
+            "IECAS",
+            "The Institute of Remote Sensing and Digital Earth, Chinese Academy of Sciences",
+            "RADI",
+            "Academy of Optoelectronics, Chinese Academy of Sciences",
+            "AOE",
+            "AIRCAS",
+            "The Center for Earth Observation and Digital Earth, Chinese Academy of Sciences",
+            "CEODE",
+            "The Remote Sensing Satellite Ground Station, Chinese Academy of Sciences",
+            "The Center for Airborne Remote Sensing, Chinese Academy of Sciences",
+            "The Laboratory of Digital Earth Sciences, Chinese Academy of Sciences",
+            "CAS Institute of Aerospace Information Innovation"
+        ],
+        "match": {
+            "id": "https://openalex.org/P4310315709",
+            "name": "American Institute of Aeronautics and Astronautics",
+            "type": "publishers"
+        },
+        "score": 0.9010989010989011
     }
 ]

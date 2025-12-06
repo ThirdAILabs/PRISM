@@ -483,5 +483,111 @@
             "type": "entity_type"
         },
         "score": 1.0
+    },
+    {
+        "name": "Beihang University",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Beihang University",
+            "Beihang University Dongying Research Institute",
+            "Beihang University Hangzhou Innovation Institute",
+            "Beihang University Hefei Innovation Institute",
+            "Beihang University Jiangxi Research Institute",
+            "Beihang University Ningbo Innovation Institute;Beihang University Qingdao Research Institute",
+            "Beihang University Shenzhen Research Institute",
+            "Beihang University Suzhou",
+            " Beihang University Taizhou Research Institute",
+            "Beihang University Yunnan Innovation Institute."
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320321125",
+            "name": "Beihang University",
+            "type": "funders"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Harbin Institute of Technology",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Harbin Institute of Technology, Anshan Industrial & Technology Research Institute",
+            "Harbin Institute of Technology, Chongqing Research Institute",
+            "Harbin Institute of Technology, Huizhou Institute of International Innovation",
+            "Harbin Institute of Technology, Shenzhen Research Institute",
+            "Harbin Institute of Technology, Weihai Institute of Industrial Technology",
+            "Harbin Institute of Technology, Wuhu Robot Industry & Technology Research Institute",
+            "Harbin Institute of Technology, Wuxi Institute of New Materials",
+            "Harbin Institute of Technology, Yibi Industrial Technology Research Institute",
+            "Harbin Institute of Technology, Yixing Environmental Protection Research Institute"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320321940",
+            "name": "Harbin Institute of Technology",
+            "type": "funders"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "Delta Electronic",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Digital Electronics Engineering Group",
+            "Delta Electronic",
+            "Keyhan Electronic"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320318804",
+            "name": "Delta Electronics",
+            "type": "funders"
+        },
+        "score": 0.9696969696969697
+    },
+    {
+        "name": "Northwestern Polytechnical University",
+        "source": "Entity List (EL) - Bureau of Industry and Security",
+        "aliases": [
+            "Northwest Polytechnic University",
+            "Northwest Polytechnical University",
+            "Northwestern Polytechnic University",
+            "Northwestern Polytechnical University, Beijing Research Institute",
+            "Northwestern Polytechnical University, Chongqing Innovation Center",
+            "Northwestern Polytechnical University, Collaborative Innovation Center",
+            "Northwestern Polytechnical University, Ningbo Research Institute",
+            "Northwestern Polytechnical University, Qingdao Research Institute",
+            "Northwestern Polytechnical University, Shenzhen Research Institute",
+            "Northwestern Polytechnical University, Yangtze River Delta Research Institute"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320321392",
+            "name": "Northwestern Polytechnical University",
+            "type": "funders"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "GIANT",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "MACHO QUEEN"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320308244",
+            "name": "Giant",
+            "type": "funders"
+        },
+        "score": 1.0
+    },
+    {
+        "name": "ELKE",
+        "source": "Specially Designated Nationals (SDN) - Treasury Department",
+        "aliases": [
+            "FABINO GAS"
+        ],
+        "match": {
+            "id": "https://openalex.org/F4320326192",
+            "name": "Elkem",
+            "type": "funders"
+        },
+        "score": 0.8888888888888888
     }
 ]
