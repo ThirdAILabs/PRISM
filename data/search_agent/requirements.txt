@@ -1,0 +1,5 @@
+rich
+openai-agents
+pydantic
+requests
+urllib3
